@@ -2,5 +2,5 @@ test/
 .ccls-cache/
 .clang-format
 compile_commands.json
-brn
+brn2
 tags

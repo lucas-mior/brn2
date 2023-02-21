@@ -4,14 +4,14 @@ PREFIX ?= /usr/local
 
 .PHONY: all clean install
 
-all: brn
+all: brn2
 
 %: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 brn $(DESTDIR)$(PREFIX)/bin/brn
+	install -m 0755 brn2 $(DESTDIR)$(PREFIX)/bin/brn2
 
 clean:
-	rm -rf ./brn
+	rm -rf ./brn2
