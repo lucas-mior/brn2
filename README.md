@@ -1,6 +1,6 @@
 # bulk rename files
 
-brn is a command line tool similar to [vimv](https://github.com/thameera/vimv/).
+brn2 is a command line tool similar to [vimv](https://github.com/thameera/vimv/).
 It can be used to easily mass-rename files in your preferred text editor (i.e.
 vim).
 
@@ -13,22 +13,12 @@ By default it uses `$EDITOR` and if that is not set then `$VISUAL`.
 
 ## Install
 
-### Arch Linux Users
-
-You can use the `brn-git` aur package
-
-```
-paru -S brn-git
-```
-
-### Everyone else
-
 Clone the repo and
 ```
 sudo make install
 ```
 
-## Why use brn over something like vimv?
+## Why use brn2 over something like vimv?
 
 * It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
   atomically swap the names of two files which means no temporary files are made
@@ -42,18 +32,9 @@ sudo make install
 
 * It is free.
 
-## Screencast
-
-![example gif](brn-example.gif "renaming files with brn")
-
-## TODO
-
-- [x] Make an AUR package.
-
-- [x] Version sort directory listing so initial buffer is similar to output of
-`ls -Av`.
-
-- [x] Add an example GIF 
-
 ## License
-brn is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+
+## Changes over original brn
+- Option to rename files listed in file given as first argument.
+- Print renamed files.
