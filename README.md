@@ -38,3 +38,4 @@ brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 ## Changes over original brn
 - Option to rename files listed in file given as first argument.
 - Print renamed files.
+- Faster algorithm to check for duplicated filenames.
