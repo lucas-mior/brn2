@@ -167,6 +167,7 @@ typedef struct args {
 
 bool insert(SameHash *sh, ulong index, char *newkey) {
     SameHash *it = &sh[index];
+    printf("inserting %s...\n", newkey);
 
     do {
         if (it->key == NULL)
@@ -188,12 +189,14 @@ bool verify(FileList old, FileList new) {
         fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", old.len, new.len);
         return false;
     }
+
     SameHash *strings = calloc(new.len, sizeof(SameHash));
     bool rep = false;
     for (size_t i = 0; i < new.len; i += 1) {
         char *name = new.files[i].name;
+        printf("i = %lu\n", i);
         ulong h = hash(name, new.len);
-        rep = rep || insert(strings, h, name);
+        rep = insert(strings, h, name);
     }
 
     return !rep;
