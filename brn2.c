@@ -176,7 +176,7 @@ typedef struct args {
     size_t end;
 } args;
 
-bool insert(SameHash *sh, ulong index, char *newkey) {
+bool check_insert(SameHash *sh, ulong index, char *newkey) {
     SameHash *it = &sh[index];
 
     do {
@@ -194,29 +194,30 @@ bool insert(SameHash *sh, ulong index, char *newkey) {
     return false;
 }
 
-bool verify(FileList old, FileList new) {
-    if (old.len != new.len) {
-        fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", old.len, new.len);
+bool verify(FileList *old, FileList *new) {
+    if (old->len != new->len) {
+        fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", 
+                        old->len, new->len);
         return false;
     }
 
     bool rep = false;
-    if (new.len > 100) {
-        SameHash *strings = ecalloc(new.len, sizeof(SameHash));
-        for (size_t i = 0; i < new.len; i += 1) {
-            char *name = new.files[i].name;
-            ulong h = hash(name, new.len);
-            rep = insert(strings, h, name) || rep;
+    if (new->len > 100) {
+        SameHash *strings = ecalloc(new->len, sizeof(SameHash));
+        for (size_t i = 0; i < new->len; i += 1) {
+            char *name = new->files[i].name;
+            ulong h = hash(name, new->len);
+            rep = check_insert(strings, h, name) || rep;
         }
     } else {
         /* for short lists of filenames, use naive approach */
-        for (size_t i = 0; i < new.len; i += 1) {
-            char *name = new.files[i].name;
-            size_t len = new.files[i].len;
-            for (size_t j = i+1; j < new.len; j += 1) {
-                if (len != new.files[j].len)
+        for (size_t i = 0; i < new->len; i += 1) {
+            char *name = new->files[i].name;
+            size_t len = new->files[i].len;
+            for (size_t j = i+1; j < new->len; j += 1) {
+                if (len != new->files[j].len)
                     continue;
-                if (!strcmp(name, new.files[j].name)) {
+                if (!strcmp(name, new->files[j].name)) {
                     fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
                     rep = true;
                 }
@@ -227,10 +228,10 @@ bool verify(FileList old, FileList new) {
     return !rep;
 }
 
-size_t get_num_renames(FileList old, FileList new) {
+size_t get_num_renames(FileList *old, FileList *new) {
     size_t num = 0;
-    for (size_t i = 0; i < old.len; i += 1) {
-        if (strcmp(old.files[i].name, new.files[i].name))
+    for (size_t i = 0; i < old->len; i += 1) {
+        if (strcmp(old->files[i].name, new->files[i].name))
             num += 1;
     }
     return num;
@@ -331,8 +332,8 @@ int main(int argc, char *argv[]) {
 
     bool status;
 
-    if ((status = verify(old, new))) {
-        size_t n_renames = get_num_renames(old, new);
+    if ((status = verify(&old, &new))) {
+        size_t n_renames = get_num_renames(&old, &new);
         fprintf(stdout, "%zu files renamed\n", n_renames);
         if (n_renames)
             execute(&old, &new);
