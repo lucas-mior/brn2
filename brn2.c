@@ -56,22 +56,20 @@ typedef struct SameHash {
 
 void *ealloc(void *old, size_t size) {
     void *p;
-    if ((p = realloc(old, size))) {
-        return p;
-    } else {
+    if ((p = realloc(old, size)) == NULL) {
         fprintf(stderr, "Failed to allocate memory.\n");
         exit(1);
     }
+    return p;
 }
 
 void *ecalloc(size_t nmemb, size_t size) {
     void *p;
-    if ((p = calloc(nmemb, size))) {
-        return p;
-    } else {
+    if ((p = calloc(nmemb, size)) == NULL) {
         fprintf(stderr, "Failed to allocate memory.\n");
         exit(1);
     }
+    return p;
 }
 
 ulong hash(char *str, ulong max) {
