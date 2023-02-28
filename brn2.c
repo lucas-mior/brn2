@@ -168,14 +168,8 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-typedef struct args {
-    FileList *flist;
-    size_t begin;
-    size_t end;
-} args;
-
-bool check_insert(SameHash *sh, ulong index, char *newkey) {
-    SameHash *it = &sh[index];
+bool check_insert(SameHash *sh, ulong h, char *newkey) {
+    SameHash *it = &sh[h];
 
     do {
         if (it->key == NULL)
