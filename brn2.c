@@ -174,10 +174,9 @@ bool check_insert(SameHash *sh, ulong h, char *newkey) {
     do {
         if (it->key == NULL)
             break;
-        if (!strcmp(it->key, newkey)) {
-            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", newkey);
+        if (!strcmp(it->key, newkey))
             return true;
-        }
+
         it = it->next;
     } while (it->next);
     it->next = ecalloc(1, sizeof (SameHash));
@@ -192,7 +191,10 @@ bool dup_check_hash(FileList *new) {
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         ulong h = hash(name, new->len);
-        rep = check_insert(strings, h, name) || rep;
+        if (check_insert(strings, h, name)) {
+            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+            rep = true;
+        }
     }
     return rep;
 }
