@@ -201,7 +201,10 @@ bool verify(FileList old, FileList new) {
     } else {
         for (size_t i = 0; i < new.len; i += 1) {
             char *name = new.files[i].name;
+            size_t len = new.files[i].len;
             for (size_t j = i+1; j < new.len; j += 1) {
+                if (len != new.files[j].len)
+                    continue;
                 if (!strcmp(name, new.files[j].name)) {
                     fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
                     rep = true;
