@@ -166,20 +166,21 @@ typedef struct args {
 } args;
 
 bool insert(SameHash *sh, ulong index, char *newkey) {
-    bool rep = false;
     SameHash *it = &sh[index];
+
     do {
         if (it->key == NULL)
             break;
         if (!strcmp(it->key, newkey)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", newkey);
-            rep = true;
+            return true;
         }
         it = it->next;
     } while (it->next);
     it->next = calloc(1, sizeof (SameHash));
     it->key = newkey;
-    return rep;
+
+    return false;
 }
 
 bool verify(FileList old, FileList new) {
