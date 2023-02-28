@@ -37,9 +37,12 @@
 #define ANSI_GREEN "\x1b[32m"
 #define ANSI_RESET "\x1b[0m"
 
+typedef unsigned long ulong;
+
 typedef struct FileName {
     char *name;
     size_t len;
+    ulong hash;
 } FileName;
 
 typedef struct FileList {
@@ -55,6 +58,15 @@ void *ealloc(void *old, size_t size) {
         fprintf(stderr, "Failed to allocate memory.\n");
         exit(1);
     }
+}
+
+unsigned long hash(char *str) {
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c;
+
+    return hash;
 }
 
 void cmd(char **argv) {
@@ -98,6 +110,7 @@ FileList flist_from_dir(char *dir) {
 
         flist.files[len].name = strdup(name);
         flist.files[len].len = strlen(name);
+        flist.files[len].hash = hash(name);
         free(namelist[i]);
         len += 1;
     }
@@ -135,6 +148,7 @@ FileList flist_from_lines(char *filename, size_t cap) {
         buffer[strcspn(buffer, "\n")] = '\0';
         flist.files[len].name = strdup(buffer);
         flist.files[len].len = strlen(buffer);
+        flist.files[len].hash = hash(buffer);
         len += 1;
     }
     fclose(file);
@@ -148,15 +162,6 @@ typedef struct args {
     size_t begin;
     size_t end;
 } args;
-
-unsigned long hash(char *str) {
-    unsigned long hash = 5381;
-    int c;
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c;
-
-    return hash;
-}
 
 bool equal_others(FileList *flist) {
     bool equal = false;
