@@ -56,22 +56,20 @@ typedef struct SameHash {
 
 void *ealloc(void *old, size_t size) {
     void *p;
-    if ((p = realloc(old, size))) {
-        return p;
-    } else {
+    if ((p = realloc(old, size)) == NULL) {
         fprintf(stderr, "Failed to allocate memory.\n");
         exit(1);
     }
+    return p;
 }
 
 void *ecalloc(size_t nmemb, size_t size) {
     void *p;
-    if ((p = calloc(nmemb, size))) {
-        return p;
-    } else {
+    if ((p = calloc(nmemb, size)) == NULL) {
         fprintf(stderr, "Failed to allocate memory.\n");
         exit(1);
     }
+    return p;
 }
 
 ulong hash(char *str, ulong max) {
@@ -170,28 +168,52 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-typedef struct args {
-    FileList *flist;
-    size_t begin;
-    size_t end;
-} args;
-
-bool check_insert(SameHash *sh, ulong index, char *newkey) {
-    SameHash *it = &sh[index];
+bool check_insert(SameHash *sh, ulong h, char *newkey) {
+    SameHash *it = &sh[h];
 
     do {
         if (it->key == NULL)
             break;
-        if (!strcmp(it->key, newkey)) {
-            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", newkey);
+        if (!strcmp(it->key, newkey))
             return true;
-        }
+
         it = it->next;
     } while (it->next);
     it->next = ecalloc(1, sizeof (SameHash));
     it->key = newkey;
 
     return false;
+}
+
+bool dup_check_hash(FileList *new) {
+    bool rep = false;
+    SameHash *strings = ecalloc(new->len, sizeof(SameHash));
+    for (size_t i = 0; i < new->len; i += 1) {
+        char *name = new->files[i].name;
+        ulong h = hash(name, new->len);
+        if (check_insert(strings, h, name)) {
+            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+            rep = true;
+        }
+    }
+    return rep;
+}
+
+bool dup_check_naive(FileList *new) {
+    bool rep = false;
+    for (size_t i = 0; i < new->len; i += 1) {
+        char *name = new->files[i].name;
+        size_t len = new->files[i].len;
+        for (size_t j = i+1; j < new->len; j += 1) {
+            if (len != new->files[j].len)
+                continue;
+            if (!strcmp(name, new->files[j].name)) {
+                fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+                rep = true;
+            }
+        }
+    }
+    return rep;
 }
 
 bool verify(FileList *old, FileList *new) {
@@ -202,28 +224,10 @@ bool verify(FileList *old, FileList *new) {
     }
 
     bool rep = false;
-    if (new->len > 100) {
-        SameHash *strings = ecalloc(new->len, sizeof(SameHash));
-        for (size_t i = 0; i < new->len; i += 1) {
-            char *name = new->files[i].name;
-            ulong h = hash(name, new->len);
-            rep = check_insert(strings, h, name) || rep;
-        }
-    } else {
-        /* for short lists of filenames, use naive approach */
-        for (size_t i = 0; i < new->len; i += 1) {
-            char *name = new->files[i].name;
-            size_t len = new->files[i].len;
-            for (size_t j = i+1; j < new->len; j += 1) {
-                if (len != new->files[j].len)
-                    continue;
-                if (!strcmp(name, new->files[j].name)) {
-                    fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
-                    rep = true;
-                }
-            }
-        }
-    }
+    if (new->len > 100)
+        rep = dup_check_hash(new);
+    else
+        rep = dup_check_naive(new);
 
     return !rep;
 }
