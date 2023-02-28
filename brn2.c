@@ -166,16 +166,17 @@ typedef struct args {
 } args;
 
 bool insert(SameHash *sh, ulong index, char *newkey) {
-    printf("bool insert(SameHash *sh, ulong index, char *newkey)\n");
     bool rep = false;
     SameHash *it = &sh[index];
-    while (it->key && it->next) {
+    do {
+        if (it->key == NULL)
+            break;
         if (!strcmp(it->key, newkey)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", newkey);
             rep = true;
         }
         it = it->next;
-    }
+    } while (it->next);
     it->next = calloc(1, sizeof (SameHash));
     it->key = newkey;
     return rep;
@@ -191,11 +192,10 @@ bool verify(FileList old, FileList new) {
     for (size_t i = 0; i < new.len; i += 1) {
         char *name = new.files[i].name;
         ulong h = hash(name, new.len);
-        printf("h = %lu\n", h);
         rep = rep || insert(strings, h, name);
     }
 
-    return rep;
+    return !rep;
 }
 
 size_t get_num_renames(FileList old, FileList new) {
