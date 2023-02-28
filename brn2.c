@@ -194,6 +194,34 @@ bool check_insert(SameHash *sh, ulong index, char *newkey) {
     return false;
 }
 
+bool dup_check_hash(FileList *new) {
+    bool rep = false;
+    SameHash *strings = ecalloc(new->len, sizeof(SameHash));
+    for (size_t i = 0; i < new->len; i += 1) {
+        char *name = new->files[i].name;
+        ulong h = hash(name, new->len);
+        rep = check_insert(strings, h, name) || rep;
+    }
+    return rep;
+}
+
+bool dup_check_naive(FileList *new) {
+    bool rep = false;
+    for (size_t i = 0; i < new->len; i += 1) {
+        char *name = new->files[i].name;
+        size_t len = new->files[i].len;
+        for (size_t j = i+1; j < new->len; j += 1) {
+            if (len != new->files[j].len)
+                continue;
+            if (!strcmp(name, new->files[j].name)) {
+                fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+                rep = true;
+            }
+        }
+    }
+    return rep;
+}
+
 bool verify(FileList *old, FileList *new) {
     if (old->len != new->len) {
         fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", 
@@ -202,28 +230,10 @@ bool verify(FileList *old, FileList *new) {
     }
 
     bool rep = false;
-    if (new->len > 100) {
-        SameHash *strings = ecalloc(new->len, sizeof(SameHash));
-        for (size_t i = 0; i < new->len; i += 1) {
-            char *name = new->files[i].name;
-            ulong h = hash(name, new->len);
-            rep = check_insert(strings, h, name) || rep;
-        }
-    } else {
-        /* for short lists of filenames, use naive approach */
-        for (size_t i = 0; i < new->len; i += 1) {
-            char *name = new->files[i].name;
-            size_t len = new->files[i].len;
-            for (size_t j = i+1; j < new->len; j += 1) {
-                if (len != new->files[j].len)
-                    continue;
-                if (!strcmp(name, new->files[j].name)) {
-                    fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
-                    rep = true;
-                }
-            }
-        }
-    }
+    if (new->len > 100)
+        rep = dup_check_hash(new);
+    else
+        rep = dup_check_naive(new);
 
     return !rep;
 }
