@@ -42,13 +42,17 @@ typedef unsigned long ulong;
 typedef struct FileName {
     char *name;
     size_t len;
-    ulong hash;
 } FileName;
 
 typedef struct FileList {
     FileName *files;
     size_t len;
 } FileList;
+
+typedef struct SameHash {
+    char *key;
+    struct SameHash *next;
+} SameHash;
 
 void *ealloc(void *old, size_t size) {
     void *p;
@@ -60,13 +64,13 @@ void *ealloc(void *old, size_t size) {
     }
 }
 
-unsigned long hash(char *str) {
-    unsigned long hash = 5381;
+ulong hash(char *str, ulong max) {
+    ulong hash = 5381;
     int c;
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c;
 
-    return hash;
+    return hash % max;
 }
 
 void cmd(char **argv) {
@@ -99,6 +103,8 @@ FileList flist_from_dir(char *dir) {
 
     FileList flist;
     flist.files = ealloc(NULL, n * sizeof (FileName));
+    if (!strings)
+        strings = ealloc(NULL, n * sizeof (SameHash));
 
     int len = 0;
     for (int i = 0; i < n; i += 1) {
@@ -110,7 +116,6 @@ FileList flist_from_dir(char *dir) {
 
         flist.files[len].name = strdup(name);
         flist.files[len].len = strlen(name);
-        flist.files[len].hash = hash(name);
         free(namelist[i]);
         len += 1;
     }
@@ -148,7 +153,6 @@ FileList flist_from_lines(char *filename, size_t cap) {
         buffer[strcspn(buffer, "\n")] = '\0';
         flist.files[len].name = strdup(buffer);
         flist.files[len].len = strlen(buffer);
-        flist.files[len].hash = hash(buffer);
         len += 1;
     }
     fclose(file);
