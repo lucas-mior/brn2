@@ -190,12 +190,24 @@ bool verify(FileList old, FileList new) {
         return false;
     }
 
-    SameHash *strings = calloc(new.len, sizeof(SameHash));
     bool rep = false;
-    for (size_t i = 0; i < new.len; i += 1) {
-        char *name = new.files[i].name;
-        ulong h = hash(name, new.len);
-        rep = insert(strings, h, name) || rep;
+    if (new.len > 100) {
+        SameHash *strings = calloc(new.len, sizeof(SameHash));
+        for (size_t i = 0; i < new.len; i += 1) {
+            char *name = new.files[i].name;
+            ulong h = hash(name, new.len);
+            rep = insert(strings, h, name) || rep;
+        }
+    } else {
+        for (size_t i = 0; i < new.len; i += 1) {
+            char *name = new.files[i].name;
+            for (size_t j = i+1; j < new.len; j += 1) {
+                if (!strcmp(name, new.files[j].name)) {
+                    fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+                    rep = true;
+                }
+            }
+        }
     }
 
     return !rep;
