@@ -64,6 +64,16 @@ void *ealloc(void *old, size_t size) {
     }
 }
 
+void *ecalloc(size_t nmemb, size_t size) {
+    void *p;
+    if ((p = calloc(nmemb, size))) {
+        return p;
+    } else {
+        fprintf(stderr, "Failed to allocate memory.\n");
+        exit(1);
+    }
+}
+
 ulong hash(char *str, ulong max) {
     /* djb2 hash function */
     ulong hash = 5381;
@@ -178,7 +188,7 @@ bool insert(SameHash *sh, ulong index, char *newkey) {
         }
         it = it->next;
     } while (it->next);
-    it->next = calloc(1, sizeof (SameHash));
+    it->next = ecalloc(1, sizeof (SameHash));
     it->key = newkey;
 
     return false;
@@ -192,16 +202,20 @@ bool verify(FileList old, FileList new) {
 
     bool rep = false;
     if (new.len > 100) {
-        SameHash *strings = calloc(new.len, sizeof(SameHash));
+        SameHash *strings = ecalloc(new.len, sizeof(SameHash));
         for (size_t i = 0; i < new.len; i += 1) {
             char *name = new.files[i].name;
             ulong h = hash(name, new.len);
             rep = insert(strings, h, name) || rep;
         }
     } else {
+        /* for short lists of filenames, use naive approach */
         for (size_t i = 0; i < new.len; i += 1) {
             char *name = new.files[i].name;
+            size_t len = new.files[i].len;
             for (size_t j = i+1; j < new.len; j += 1) {
+                if (len != new.files[j].len)
+                    continue;
                 if (!strcmp(name, new.files[j].name)) {
                     fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
                     rep = true;
