@@ -149,6 +149,15 @@ typedef struct args {
     size_t end;
 } args;
 
+unsigned long hash(char *str) {
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c;
+
+    return hash;
+}
+
 bool equal_others(FileList *flist) {
     bool equal = false;
     for (size_t i = 0; i < flist->len; i += 1) {
