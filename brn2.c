@@ -65,6 +65,7 @@ void *ealloc(void *old, size_t size) {
 }
 
 ulong hash(char *str, ulong max) {
+    /* djb2 hash function */
     ulong hash = 5381;
     int c;
     while ((c = *str++))
