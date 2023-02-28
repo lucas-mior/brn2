@@ -232,10 +232,10 @@ bool verify(FileList *old, FileList *new) {
     return !rep;
 }
 
-size_t get_num_renames(FileList old, FileList new) {
+size_t get_num_renames(FileList *old, FileList *new) {
     size_t num = 0;
-    for (size_t i = 0; i < old.len; i += 1) {
-        if (strcmp(old.files[i].name, new.files[i].name))
+    for (size_t i = 0; i < old->len; i += 1) {
+        if (strcmp(old->files[i].name, new->files[i].name))
             num += 1;
     }
     return num;
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
     bool status;
 
     if ((status = verify(&old, &new))) {
-        size_t n_renames = get_num_renames(old, new);
+        size_t n_renames = get_num_renames(&old, &new);
         fprintf(stdout, "%zu files renamed\n", n_renames);
         if (n_renames)
             execute(&old, &new);
