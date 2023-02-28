@@ -37,6 +37,8 @@
 #define ANSI_GREEN "\x1b[32m"
 #define ANSI_RESET "\x1b[0m"
 
+typedef unsigned long ulong;
+
 typedef struct FileName {
     char *name;
     size_t len;
@@ -47,6 +49,11 @@ typedef struct FileList {
     size_t len;
 } FileList;
 
+typedef struct SameHash {
+    char *key;
+    struct SameHash *next;
+} SameHash;
+
 void *ealloc(void *old, size_t size) {
     void *p;
     if ((p = realloc(old, size))) {
@@ -55,6 +62,15 @@ void *ealloc(void *old, size_t size) {
         fprintf(stderr, "Failed to allocate memory.\n");
         exit(1);
     }
+}
+
+ulong hash(char *str, ulong max) {
+    ulong hash = 5381;
+    int c;
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c;
+
+    return hash % max;
 }
 
 void cmd(char **argv) {
@@ -149,28 +165,21 @@ typedef struct args {
     size_t end;
 } args;
 
-bool equal_others(FileList *flist) {
-    bool equal = false;
-    for (size_t i = 0; i < flist->len; i += 1) {
-        char *name = flist->files[i].name;
-        size_t len = flist->files[i].len;
-        for (size_t j = i + 1; j < flist->len; j += 1) {
-            if (flist->files[j].len != len) {
-                break;
-            }
-            if (strcmp(name, flist->files[j].name) == 0) {
-                fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
-                equal = true;
-            }
+bool insert(SameHash *sh, ulong index, char *newkey) {
+    bool rep = false;
+    SameHash *it = &sh[index];
+    do {
+        if (it->key == NULL)
+            break;
+        if (!strcmp(it->key, newkey)) {
+            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", newkey);
+            rep = true;
         }
-    }
-    return equal;
-}
-
-int sortfiles(const void *a, const void *b) {
-    FileName *aa = (FileName *) a;
-    FileName *bb = (FileName *) b;
-    return aa->len - bb->len;
+        it = it->next;
+    } while (it->next);
+    it->next = calloc(1, sizeof (SameHash));
+    it->key = newkey;
+    return rep;
 }
 
 bool verify(FileList old, FileList new) {
@@ -178,18 +187,15 @@ bool verify(FileList old, FileList new) {
         fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", old.len, new.len);
         return false;
     }
-    FileList newcpy;
-    newcpy.len = new.len;
-    newcpy.files = ealloc(NULL, new.len * sizeof(FileName));
-    for (size_t i = 0; i < newcpy.len; i += 1) {
-        newcpy.files[i].name = strdup(new.files[i].name);
-        newcpy.files[i].len = new.files[i].len;
+    SameHash *strings = calloc(new.len, sizeof(SameHash));
+    bool rep = false;
+    for (size_t i = 0; i < new.len; i += 1) {
+        char *name = new.files[i].name;
+        ulong h = hash(name, new.len);
+        rep = rep || insert(strings, h, name);
     }
-    qsort(newcpy.files, newcpy.len, sizeof(FileName), sortfiles);
-    if (equal_others(&newcpy))
-        return false;
 
-    return true;
+    return !rep;
 }
 
 size_t get_num_renames(FileList old, FileList new) {
