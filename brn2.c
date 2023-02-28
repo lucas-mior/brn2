@@ -103,8 +103,6 @@ FileList flist_from_dir(char *dir) {
 
     FileList flist;
     flist.files = ealloc(NULL, n * sizeof (FileName));
-    if (!strings)
-        strings = ealloc(NULL, n * sizeof (SameHash));
 
     int len = 0;
     for (int i = 0; i < n; i += 1) {
@@ -167,28 +165,20 @@ typedef struct args {
     size_t end;
 } args;
 
-bool equal_others(FileList *flist) {
-    bool equal = false;
-    for (size_t i = 0; i < flist->len; i += 1) {
-        char *name = flist->files[i].name;
-        size_t len = flist->files[i].len;
-        for (size_t j = i + 1; j < flist->len; j += 1) {
-            if (flist->files[j].len != len) {
-                break;
-            }
-            if (strcmp(name, flist->files[j].name) == 0) {
-                fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
-                equal = true;
-            }
+bool insert(SameHash *sh, ulong index, char *newkey) {
+    printf("bool insert(SameHash *sh, ulong index, char *newkey)\n");
+    bool rep = false;
+    SameHash *it = &sh[index];
+    while (it->key && it->next) {
+        if (!strcmp(it->key, newkey)) {
+            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", newkey);
+            rep = true;
         }
+        it = it->next;
     }
-    return equal;
-}
-
-int sortfiles(const void *a, const void *b) {
-    FileName *aa = (FileName *) a;
-    FileName *bb = (FileName *) b;
-    return aa->len - bb->len;
+    it->next = calloc(1, sizeof (SameHash));
+    it->key = newkey;
+    return rep;
 }
 
 bool verify(FileList old, FileList new) {
@@ -196,18 +186,16 @@ bool verify(FileList old, FileList new) {
         fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", old.len, new.len);
         return false;
     }
-    FileList newcpy;
-    newcpy.len = new.len;
-    newcpy.files = ealloc(NULL, new.len * sizeof(FileName));
-    for (size_t i = 0; i < newcpy.len; i += 1) {
-        newcpy.files[i].name = strdup(new.files[i].name);
-        newcpy.files[i].len = new.files[i].len;
+    SameHash *strings = calloc(new.len, sizeof(SameHash));
+    bool rep = false;
+    for (size_t i = 0; i < new.len; i += 1) {
+        char *name = new.files[i].name;
+        ulong h = hash(name, new.len);
+        printf("h = %lu\n", h);
+        rep = rep || insert(strings, h, name);
     }
-    qsort(newcpy.files, newcpy.len, sizeof(FileName), sortfiles);
-    if (equal_others(&newcpy))
-        return false;
 
-    return true;
+    return rep;
 }
 
 size_t get_num_renames(FileList old, FileList new) {
