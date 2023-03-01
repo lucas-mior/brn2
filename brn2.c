@@ -177,9 +177,9 @@ bool check_insert(SameHash *sh, ulong h, char *newkey) {
     }
 
     do {
-        if (!strcmp(it->key, newkey)) {
+        if (!strcmp(it->key, newkey))
             return true;
-        }
+
         if (it->next)
             it = it->next;
         else
@@ -275,9 +275,9 @@ void execute(FileList *old, FileList *new) {
         } 
         if (r < 0) {
             printf("Error renaming "
-                    ANSI_RED"%s"ANSI_RESET" to "ANSI_RED"%s"ANSI_RESET".\n", 
+                    ANSI_RED"%s"ANSI_RESET" to "ANSI_RED"%s"ANSI_RESET":\n", 
                     oldname, newname);
-            printf("%s", strerror(errno));
+            printf("%s\n", strerror(errno));
         } else {
             printf("%s -> "ANSI_GREEN"%s"ANSI_RESET"\n", oldname, newname);
         }
@@ -314,7 +314,6 @@ int main(int argc, char *argv[]) {
         tempdir = "/tmp";
 
     char tempfile[PATH_MAX];
-    /* not using on user provided strings so should be fine */
     strcpy(tempfile, tempdir);
     strcat(tempfile, "/brn2.XXXXXX");
 
