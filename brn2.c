@@ -171,16 +171,23 @@ FileList flist_from_lines(char *filename, size_t cap) {
 bool check_insert(SameHash *sh, ulong h, char *newkey) {
     SameHash *it = &sh[h];
 
-    do {
-        if (it->key == NULL)
-            break;
-        if (!strcmp(it->key, newkey))
-            return true;
+    if (it->key == NULL) {
+        it->key = newkey;
+        return false;
+    }
 
-        it = it->next;
-    } while (it->next);
+    do {
+        if (!strcmp(it->key, newkey)) {
+            return true;
+        }
+        if (it->next)
+            it = it->next;
+        else
+            break;
+    } while (true);
+
     it->next = ecalloc(1, sizeof (SameHash));
-    it->key = newkey;
+    it->next->key = newkey;
 
     return false;
 }
@@ -196,6 +203,16 @@ bool dup_check_hash(FileList *new) {
             rep = true;
         }
     }
+    for (size_t i = 0; i < new->len; i += 1) {
+        SameHash *it = &strings[i];
+        it = it->next;
+        while (it) {
+            void *aux = it;
+            it = it->next;
+            free(aux);
+        }
+    }
+    free(strings);
     return rep;
 }
 
