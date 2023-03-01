@@ -37,8 +37,6 @@
 #define ANSI_GREEN "\x1b[32m"
 #define ANSI_RESET "\x1b[0m"
 
-typedef unsigned long ulong;
-
 typedef struct FileName {
     char *name;
     size_t len;
@@ -72,9 +70,9 @@ void *ecalloc(size_t nmemb, size_t size) {
     return p;
 }
 
-ulong hash(char *str, ulong max) {
+size_t hash(char *str, size_t max) {
     /* djb2 hash function */
-    ulong hash = 5381;
+    size_t hash = 5381;
     int c;
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c;
@@ -168,7 +166,7 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-bool check_insert(SameHash *sh, ulong h, char *newkey) {
+bool check_insert(SameHash *sh, size_t h, char *newkey) {
     SameHash *it = &sh[h];
 
     if (it->key == NULL) {
@@ -177,9 +175,9 @@ bool check_insert(SameHash *sh, ulong h, char *newkey) {
     }
 
     do {
-        if (!strcmp(it->key, newkey)) {
+        if (!strcmp(it->key, newkey))
             return true;
-        }
+
         if (it->next)
             it = it->next;
         else
@@ -197,7 +195,7 @@ bool dup_check_hash(FileList *new) {
     SameHash *strings = ecalloc(new->len, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
-        ulong h = hash(name, new->len);
+        size_t h = hash(name, new->len);
         if (check_insert(strings, h, name)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
             rep = true;
@@ -265,7 +263,7 @@ void execute(FileList *old, FileList *new) {
         char *oldname = old->files[i].name;
         char *newname = new->files[i].name;
 
-        if (strcmp(oldname, newname) == 0)
+        if (!strcmp(oldname, newname))
             continue;
 
         int r;
@@ -275,17 +273,16 @@ void execute(FileList *old, FileList *new) {
         } 
         if (r < 0) {
             printf("Error renaming "
-                    ANSI_RED"%s"ANSI_RESET" to "ANSI_RED"%s"ANSI_RESET".\n", 
+                    ANSI_RED"%s"ANSI_RESET" to "ANSI_RED"%s"ANSI_RESET":\n", 
                     oldname, newname);
-            printf("%s", strerror(errno));
+            printf("%s\n", strerror(errno));
         } else {
             printf("%s -> "ANSI_GREEN"%s"ANSI_RESET"\n", oldname, newname);
         }
 
         for (size_t j = i + 1; j < old->len; j += 1) {
-            if (strcmp(old->files[j].name, newname) == 0) {
+            if (!strcmp(old->files[j].name, newname))
                 strcpy(old->files[j].name, oldname);
-            }
         }
     }
 }
@@ -314,7 +311,6 @@ int main(int argc, char *argv[]) {
         tempdir = "/tmp";
 
     char tempfile[PATH_MAX];
-    /* not using on user provided strings so should be fine */
     strcpy(tempfile, tempdir);
     strcat(tempfile, "/brn2.XXXXXX");
 
