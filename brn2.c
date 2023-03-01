@@ -196,6 +196,7 @@ bool dup_check_hash(FileList *new) {
             rep = true;
         }
     }
+    free(strings);
     return rep;
 }
 
