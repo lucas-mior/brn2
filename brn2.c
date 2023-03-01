@@ -37,8 +37,6 @@
 #define ANSI_GREEN "\x1b[32m"
 #define ANSI_RESET "\x1b[0m"
 
-typedef unsigned long ulong;
-
 typedef struct FileName {
     char *name;
     size_t len;
@@ -72,9 +70,9 @@ void *ecalloc(size_t nmemb, size_t size) {
     return p;
 }
 
-ulong hash(char *str, ulong max) {
+size_t hash(char *str, size_t max) {
     /* djb2 hash function */
-    ulong hash = 5381;
+    size_t hash = 5381;
     int c;
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c;
@@ -168,7 +166,7 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-bool check_insert(SameHash *sh, ulong h, char *newkey) {
+bool check_insert(SameHash *sh, size_t h, char *newkey) {
     SameHash *it = &sh[h];
 
     if (it->key == NULL) {
@@ -197,7 +195,7 @@ bool dup_check_hash(FileList *new) {
     SameHash *strings = ecalloc(new->len, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
-        ulong h = hash(name, new->len);
+        size_t h = hash(name, new->len);
         if (check_insert(strings, h, name)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
             rep = true;
