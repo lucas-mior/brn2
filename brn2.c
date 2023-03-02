@@ -329,6 +329,9 @@ int main(int argc, char *argv[]) {
     case 1:
         old = flist_from_dir(".");
         break;
+    default:
+        usage(stderr);
+        break;
     }
 
     FILE *file = fopen(tempfile, "r+");
