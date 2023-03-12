@@ -209,7 +209,6 @@ bool dup_check_hash(FileList *new) {
     bool rep = false;
     SameHash *strings = ecalloc(new->len, sizeof(SameHash));
     size_t hmax = next_power_of2(new->len);
-    hmax = hmax > ((size_t) 1 << 32) ? (size_t) 1 << 32 : hmax;
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash(name);
