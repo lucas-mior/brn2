@@ -49,6 +49,7 @@ typedef struct FileList {
 
 typedef struct SameHash {
     char *key;
+    size_t keynum;
     struct SameHash *next;
 } SameHash;
 
@@ -70,14 +71,14 @@ void *ecalloc(size_t nmemb, size_t size) {
     return p;
 }
 
-size_t hash(char *str, size_t max) {
+size_t hash(char *str) {
     /* djb2 hash function */
     size_t hash = 5381;
     int c;
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c;
 
-    return hash % max;
+    return hash;
 }
 
 void cmd(char **argv) {
@@ -166,17 +167,20 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-bool check_insert(SameHash *sh, size_t h, char *newkey) {
-    SameHash *it = &sh[h];
+bool check_insert(SameHash *sh, size_t index, size_t h, char *newkey) {
+    SameHash *it = &sh[index];
 
     if (it->key == NULL) {
         it->key = newkey;
+        it->keynum = h;
         return false;
     }
 
     do {
-        if (!strcmp(it->key, newkey))
-            return true;
+        if (it->keynum == h) {
+            if (!strcmp(it->key, newkey))
+                return true;
+        }
 
         if (it->next)
             it = it->next;
@@ -186,6 +190,7 @@ bool check_insert(SameHash *sh, size_t h, char *newkey) {
 
     it->next = ecalloc(1, sizeof (SameHash));
     it->next->key = newkey;
+    it->next->keynum = h;
 
     return false;
 }
@@ -195,8 +200,8 @@ bool dup_check_hash(FileList *new) {
     SameHash *strings = ecalloc(new->len, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
-        size_t h = hash(name, new->len);
-        if (check_insert(strings, h, name)) {
+        size_t h = hash(name);
+        if (check_insert(strings, h % new->len, h, name)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
             rep = true;
         }
@@ -344,6 +349,8 @@ int main(int argc, char *argv[]) {
         fprintf(file, "%s\n", old.files[i].name);
     }
     fclose(file);
+    verify(&old, &old);
+    exit(0);
 
     char *args[] = { editor_cmd, tempfile, NULL };
     cmd(args);
