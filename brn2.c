@@ -239,7 +239,7 @@ bool verify(FileList *old, FileList *new) {
     }
 
     bool rep = false;
-    if (new->len > 100)
+    if (new->len > 1000)
         rep = dup_check_hash(new);
     else
         rep = dup_check_naive(new);
