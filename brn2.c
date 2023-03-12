@@ -70,14 +70,14 @@ void *ecalloc(size_t nmemb, size_t size) {
     return p;
 }
 
-size_t hash(char *str, size_t max) {
+size_t hash(char *str) {
     /* djb2 hash function */
     size_t hash = 5381;
     int c;
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c;
 
-    return hash % max;
+    return hash;
 }
 
 void cmd(char **argv) {
@@ -195,8 +195,8 @@ bool dup_check_hash(FileList *new) {
     SameHash *strings = ecalloc(new->len, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
-        size_t h = hash(name, new->len);
-        if (check_insert(strings, h, name)) {
+        size_t h = hash(name);
+        if (check_insert(strings, h % new->len, name)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
             rep = true;
         }
@@ -344,6 +344,8 @@ int main(int argc, char *argv[]) {
         fprintf(file, "%s\n", old.files[i].name);
     }
     fclose(file);
+    verify(&old, &old);
+    exit(0);
 
     char *args[] = { editor_cmd, tempfile, NULL };
     cmd(args);
