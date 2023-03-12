@@ -49,7 +49,6 @@ typedef struct FileList {
 
 typedef struct SameHash {
     char *key;
-    size_t keynum;
     struct SameHash *next;
 } SameHash;
 
@@ -167,20 +166,17 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-bool check_insert(SameHash *sh, size_t index, size_t h, char *newkey) {
-    SameHash *it = &sh[index];
+bool check_insert(SameHash *sh, size_t h, char *newkey) {
+    SameHash *it = &sh[h];
 
     if (it->key == NULL) {
         it->key = newkey;
-        it->keynum = h;
         return false;
     }
 
     do {
-        if (it->keynum == h) {
-            if (!strcmp(it->key, newkey))
-                return true;
-        }
+        if (!strcmp(it->key, newkey))
+            return true;
 
         if (it->next)
             it = it->next;
@@ -190,7 +186,6 @@ bool check_insert(SameHash *sh, size_t index, size_t h, char *newkey) {
 
     it->next = ecalloc(1, sizeof (SameHash));
     it->next->key = newkey;
-    it->next->keynum = h;
 
     return false;
 }
@@ -201,7 +196,7 @@ bool dup_check_hash(FileList *new) {
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash(name);
-        if (check_insert(strings, h % new->len, h, name)) {
+        if (check_insert(strings, h % new->len, name)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
             rep = true;
         }
