@@ -190,29 +190,13 @@ bool check_insert(SameHash *sh, size_t h, char *newkey) {
     return false;
 }
 
-size_t next_power_of2(size_t x) {
-    size_t y = x;
-
-    y--;
-    y |= y >> 1;
-    y |= y >> 2;
-    y |= y >> 4;
-    y |= y >> 8;
-    y |= y >> 16;
-    y |= y >> 32;
-    y++;
-
-    return y;
-}
-
 bool dup_check_hash(FileList *new) {
     bool rep = false;
     SameHash *strings = ecalloc(new->len, sizeof(SameHash));
-    size_t hmax = next_power_of2(new->len);
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash(name);
-        if (check_insert(strings, h % hmax, name)) {
+        if (check_insert(strings, h % new->len, name)) {
             fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
             rep = true;
         }
