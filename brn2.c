@@ -344,8 +344,6 @@ int main(int argc, char *argv[]) {
         fprintf(file, "%s\n", old.files[i].name);
     }
     fclose(file);
-    verify(&old, &old);
-    exit(0);
 
     char *args[] = { editor_cmd, tempfile, NULL };
     cmd(args);
