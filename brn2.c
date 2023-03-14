@@ -281,6 +281,8 @@ void execute(FileList *old, FileList *new) {
         }
 
         for (size_t j = i + 1; j < old->len; j += 1) {
+            if (old->files[j].len != new->files[i].len)
+                continue;
             if (!strcmp(old->files[j].name, newname))
                 strcpy(old->files[j].name, oldname);
         }
