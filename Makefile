@@ -1,12 +1,12 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -ggdb
+CFLAGS = -Wall -Wextra -pedantic -O2
 PREFIX ?= /usr/local
 
 .PHONY: all clean install
 
 all: brn2
 
-%: %.c
+%: %.c Makefile
 	$(CC) $(CFLAGS) $< -o $@
 
 install: all
