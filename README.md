@@ -5,9 +5,13 @@ It can be used to easily mass-rename files in your preferred text editor (i.e.
 vim).
  
 ## Usage
-When called from inside a directory, it opens a buffer in your default text
-editor with the list of filenames. You can then edit the filenames in the
-buffer and the changes will take place when you save and exit.
+```
+brn2 [files.txt]
+```
+Without arguments, it opens a buffer in your default text editor with the list
+of filenames in the current directory.  If given 1 argument, it is interpreted
+as the text filename with a list of filenames to rename.  You can then edit the
+filenames in the buffer and the changes will take place when you save and exit.
  
 By default it uses `$EDITOR` and if that is not set then `$VISUAL`.
  
