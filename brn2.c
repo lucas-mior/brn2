@@ -155,9 +155,10 @@ FileList flist_from_lines(char *filename, size_t cap) {
         if (!strcmp(buffer, ".") || !strcmp(buffer, ".."))
             continue;
 
-        buffer[strcspn(buffer, "\n")] = '\0';
+        size_t len = strcspn(buffer, "\n");
+        buffer[len] = '\0';
         flist.files[len].name = strdup(buffer);
-        flist.files[len].len = strlen(buffer);
+        flist.files[len].len = len;
         len += 1;
     }
     fclose(file);
