@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
         if (n_changes)
             n_renames = execute(&old, &new);
         if (n_changes != n_renames) {
-            fprintf(stdout, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
+            fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
                             n_changes, n_changes != 1, "s",
                             n_renames, n_renames != 1, "s");
         } else {
