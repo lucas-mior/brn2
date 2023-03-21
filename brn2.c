@@ -55,7 +55,7 @@ typedef struct SameHash {
 void *ealloc(void *old, size_t size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
         exit(1);
     }
     return p;
@@ -64,7 +64,7 @@ void *ealloc(void *old, size_t size) {
 void *ecalloc(size_t nmemb, size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n", nmemb, size);
         exit(1);
     }
     return p;
@@ -104,7 +104,7 @@ FileList flist_from_dir(char *dir) {
     struct dirent **namelist;
     int n = scandir(dir, &namelist, NULL, versionsort);
     if (n < 0) {
-        fprintf(stderr, "Could not scan directory %s\n", dir);
+        fprintf(stderr, "Error scanning %s: %s\n", dir, strerror(errno));
         exit(1);
     }
 
@@ -123,6 +123,10 @@ FileList flist_from_dir(char *dir) {
         flist.files[len].len = strlen(name);
         free(namelist[i]);
         len += 1;
+    }
+    if (len == 0) {
+        fprintf(stderr, "Empty directory. Exiting.\n");
+        exit(1);
     }
     free(namelist);
     flist.len = len;
@@ -160,6 +164,10 @@ FileList flist_from_lines(char *filename, size_t cap) {
         flist.files[len].name = strdup(buffer);
         flist.files[len].len = last;
         len += 1;
+    }
+    if (len == 0) {
+        fprintf(stderr, "Empty filelist. Exiting.\n");
+        exit(1);
     }
     fclose(file);
     flist.files = ealloc(flist.files, len * sizeof (FileName));
@@ -234,8 +242,9 @@ bool dup_check_naive(FileList *new) {
 
 bool verify(FileList *old, FileList *new) {
     if (old->len != new->len) {
-        fprintf(stderr, "You are renaming %zu files but buffer contains %zu file names\n", 
-                        old->len, new->len);
+        fprintf(stderr, "You are renaming %zu file%.*s but buffer contains %zu file name%.*s\n", 
+                        old->len, old->len > 1, "s",
+                        new->len, new->len > 1, "s");
         return false;
     }
 
