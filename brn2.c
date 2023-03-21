@@ -243,8 +243,8 @@ bool dup_check_naive(FileList *new) {
 bool verify(FileList *old, FileList *new) {
     if (old->len != new->len) {
         fprintf(stderr, "You are renaming %zu file%.*s but buffer contains %zu file name%.*s\n", 
-                        old->len, old->len > 1, "s",
-                        new->len, new->len > 1, "s");
+                        old->len, old->len != 1, "s",
+                        new->len, new->len != 1, "s");
         return false;
     }
 
@@ -266,9 +266,10 @@ size_t get_num_renames(FileList *old, FileList *new) {
     return num;
 }
 
-void execute(FileList *old, FileList *new) {
+size_t execute(FileList *old, FileList *new) {
     size_t len = old->len;
 
+    size_t n_renames = 0;
     for (size_t i = 0; i < len; i += 1) {
         char *oldname = old->files[i].name;
         char *newname = new->files[i].name;
@@ -288,6 +289,7 @@ void execute(FileList *old, FileList *new) {
             printf("%s\n", strerror(errno));
         } else {
             printf("%s -> "ANSI_GREEN"%s"ANSI_RESET"\n", oldname, newname);
+            n_renames += 1;
         }
 
         for (size_t j = i + 1; j < old->len; j += 1) {
@@ -297,6 +299,7 @@ void execute(FileList *old, FileList *new) {
                 strcpy(old->files[j].name, oldname);
         }
     }
+    return n_renames;
 }
 
 void usage(FILE *stream) {
@@ -348,7 +351,7 @@ int main(int argc, char *argv[]) {
 
     FILE *file = fopen(tempfile, "r+");
     if (!file) {
-        fprintf(stderr, "Could not open file %s\n", tempfile);
+        fprintf(stderr, "Error opening %s: %s\n", tempfile, strerror(errno));
         exit(1);
     }
 
@@ -365,10 +368,17 @@ int main(int argc, char *argv[]) {
     bool status;
 
     if ((status = verify(&old, &new))) {
-        size_t n_renames = get_num_renames(&old, &new);
-        fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames > 1, "s");
-        if (n_renames)
-            execute(&old, &new);
+        size_t n_changes = get_num_renames(&old, &new);
+        size_t n_renames = 0;
+        if (n_changes)
+            n_renames = execute(&old, &new);
+        if (n_changes != n_renames) {
+            fprintf(stdout, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
+                            n_changes, n_changes != 1, "s",
+                            n_renames, n_renames != 1, "s");
+        } else {
+            fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames != 1, "s");
+        }
     }
     for (size_t i = 0; i < old.len; i += 1)
         free(old.files[i].name);
