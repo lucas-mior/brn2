@@ -84,16 +84,16 @@ void cmd(char **argv) {
     switch (fork()) {
     case 0:
         execvp(argv[0], argv);
-        fprintf(stderr, "Could not execute the child: %s\n", strerror(errno));
+        fprintf(stderr, "Error running `%s`: %s\n", argv[0], strerror(errno));
         exit(1);
         break;
     case -1:
-        fprintf(stderr, "Could not fork a child: %s\n", strerror(errno));
+        fprintf(stderr, "Error forking: %s\n", strerror(errno));
         exit(1);
         break;
     default:
         if (wait(NULL) < 0) {
-            fprintf(stderr, "Could not wait for the forked child: %s\n", strerror(errno));
+            fprintf(stderr, "Error waiting for the forked child: %s\n", strerror(errno));
             exit(1);
         }
         break;
@@ -132,7 +132,7 @@ FileList flist_from_dir(char *dir) {
 FileList flist_from_lines(char *filename, size_t cap) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        fprintf(stderr, "Could not open file %s\n", filename);
+        fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
         exit(1);
     }
 
@@ -198,7 +198,7 @@ bool dup_check_hash(FileList *new) {
         char *name = new->files[i].name;
         size_t h = hash(name);
         if (check_insert(strings, h % new->len, name)) {
-            fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+            fprintf(stderr, ANSI_RED"\"%s\""ANSI_RESET " appears more than once in the buffer\n", name);
             rep = true;
         }
     }
@@ -224,7 +224,7 @@ bool dup_check_naive(FileList *new) {
             if (len != new->files[j].len)
                 continue;
             if (!strcmp(name, new->files[j].name)) {
-                fprintf(stderr, "\"%s\" appears more than once in the buffer\n", name);
+                fprintf(stderr, ANSI_RED"\"%s\""ANSI_RESET " appears more than once in the buffer\n", name);
                 rep = true;
             }
         }
@@ -357,7 +357,7 @@ int main(int argc, char *argv[]) {
 
     if ((status = verify(&old, &new))) {
         size_t n_renames = get_num_renames(&old, &new);
-        fprintf(stdout, "%zu files renamed\n", n_renames);
+        fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames > 1, "s");
         if (n_renames)
             execute(&old, &new);
     }
