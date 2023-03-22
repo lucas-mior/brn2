@@ -33,9 +33,9 @@
 #include <fcntl.h>
 #include <sys/syscall.h>
 
-#define ANSI_RED "\x1b[31m"
-#define ANSI_GREEN "\x1b[32m"
-#define ANSI_RESET "\x1b[0m"
+#define RED "\x1b[31m"
+#define GREEN "\x1b[32m"
+#define RESET "\x1b[0m"
 
 typedef struct FileName {
     char *name;
@@ -64,7 +64,8 @@ void *ealloc(void *old, size_t size) {
 void *ecalloc(size_t nmemb, size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n", nmemb, size);
+        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n", 
+                        nmemb, size);
         exit(1);
     }
     return p;
@@ -93,7 +94,8 @@ void cmd(char **argv) {
         break;
     default:
         if (wait(NULL) < 0) {
-            fprintf(stderr, "Error waiting for the forked child: %s\n", strerror(errno));
+            fprintf(stderr, "Error waiting for the forked child: %s\n", 
+                            strerror(errno));
             exit(1);
         }
         break;
@@ -206,7 +208,8 @@ bool dup_check_hash(FileList *new) {
         char *name = new->files[i].name;
         size_t h = hash(name);
         if (check_insert(strings, h % new->len, name)) {
-            fprintf(stderr, ANSI_RED"\"%s\""ANSI_RESET " appears more than once in the buffer\n", name);
+            fprintf(stderr, RED"\"%s\""RESET
+                            " appears more than once in the buffer\n", name);
             rep = true;
         }
     }
@@ -232,7 +235,8 @@ bool dup_check_naive(FileList *new) {
             if (len != new->files[j].len)
                 continue;
             if (!strcmp(name, new->files[j].name)) {
-                fprintf(stderr, ANSI_RED"\"%s\""ANSI_RESET " appears more than once in the buffer\n", name);
+                fprintf(stderr, RED"\"%s\""RESET 
+                                " appears more than once in the buffer\n", name);
                 rep = true;
             }
         }
@@ -242,7 +246,8 @@ bool dup_check_naive(FileList *new) {
 
 bool verify(FileList *old, FileList *new) {
     if (old->len != new->len) {
-        fprintf(stderr, "You are renaming %zu file%.*s but buffer contains %zu file name%.*s\n", 
+        fprintf(stderr, "You are renaming %zu file%.*s "
+                        "but buffer contains %zu file name%.*s\n", 
                         old->len, old->len != 1, "s",
                         new->len, new->len != 1, "s");
         return false;
@@ -278,17 +283,18 @@ size_t execute(FileList *old, FileList *new) {
             continue;
 
         int r;
-        r = renameat2(AT_FDCWD, oldname, AT_FDCWD, newname, RENAME_EXCHANGE);
-        if (r < 0) {
+        r = renameat2(AT_FDCWD, oldname, 
+                      AT_FDCWD, newname, RENAME_EXCHANGE);
+        if (r < 0)
             r = rename(oldname, newname);
-        } 
+
         if (r < 0) {
             printf("Error renaming "
-                    ANSI_RED"%s"ANSI_RESET" to "ANSI_RED"%s"ANSI_RESET":\n", 
+                    RED"%s"RESET" to "RED"%s"RESET":\n", 
                     oldname, newname);
             printf("%s\n", strerror(errno));
         } else {
-            printf("%s -> "ANSI_GREEN"%s"ANSI_RESET"\n", oldname, newname);
+            printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
             n_renames += 1;
         }
 
@@ -376,6 +382,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
                             n_changes, n_changes != 1, "s",
                             n_renames, n_renames != 1, "s");
+            status = false;
         } else {
             fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames != 1, "s");
         }
