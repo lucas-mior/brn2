@@ -203,17 +203,18 @@ bool check_insert(SameHash *sh, size_t h, char *newkey) {
 
 bool dup_check_hash(FileList *new) {
     bool rep = false;
-    SameHash *strings = ecalloc(new->len, sizeof(SameHash));
+    size_t bsize = new->len > 256 ? new->len : 256;
+    SameHash *strings = ecalloc(bsize, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash(name);
-        if (check_insert(strings, h % new->len, name)) {
+        if (check_insert(strings, h % bsize, name)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
             rep = true;
         }
     }
-    for (size_t i = 0; i < new->len; i += 1) {
+    for (size_t i = 0; i < bsize; i += 1) {
         SameHash *it = &strings[i];
         it = it->next;
         while (it) {
@@ -254,7 +255,7 @@ bool verify(FileList *old, FileList *new) {
     }
 
     bool rep = false;
-    if (new->len > 1000)
+    if (new->len > 100)
         rep = dup_check_hash(new);
     else
         rep = dup_check_naive(new);
