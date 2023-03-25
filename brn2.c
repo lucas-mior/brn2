@@ -294,6 +294,7 @@ size_t execute(FileList *old, FileList *new) {
                     RED"%s"RESET" to "RED"%s"RESET":\n", 
                     oldname, newname);
             printf("%s\n", strerror(errno));
+            continue;
         } else {
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
             n_renames += 1;
