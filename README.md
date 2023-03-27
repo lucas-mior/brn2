@@ -1,6 +1,7 @@
 # bulk rename files
  
-brn2 is a command line tool similar to [vimv](https://github.com/thameera/vimv/).
+brn2 is a fork of brn,
+a command line tool similar to [vimv](https://github.com/thameera/vimv/).
 It can be used to easily mass-rename files in your preferred text editor (i.e.
 vim).
  
