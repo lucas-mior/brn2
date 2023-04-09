@@ -288,6 +288,8 @@ size_t execute(FileList *old, FileList *new) {
                       AT_FDCWD, newname, RENAME_EXCHANGE);
         if (r < 0)
             r = rename(oldname, newname);
+        else
+            n_renames += 1;
 
         if (r < 0) {
             printf("Error renaming "
