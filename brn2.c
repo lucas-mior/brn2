@@ -322,6 +322,13 @@ void usage(FILE *stream) {
     return;
 }
 
+void free_flist(FileList *f) {
+    for (size_t i = 0; i < f->len; i += 1)
+        free(f->files[i].name);
+    free(f->files);
+    return;
+}
+
 int main(int argc, char *argv[]) {
     char *editor_cmd;
     if (!(editor_cmd = getenv("EDITOR")))
@@ -371,32 +378,37 @@ int main(int argc, char *argv[]) {
     fclose(file);
 
     char *args[] = { editor_cmd, tempfile, NULL };
-    cmd(args);
 
-    FileList new = flist_from_lines(tempfile, old.len);
-
-    bool status;
-
-    if ((status = verify(&old, &new))) {
-        size_t n_changes = get_num_renames(&old, &new);
-        size_t n_renames = 0;
-        if (n_changes)
-            n_renames = execute(&old, &new);
-        if (n_changes != n_renames) {
-            fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
-                            n_changes, n_changes != 1, "s",
-                            n_renames, n_renames != 1, "s");
-            status = false;
+    bool status = 0;
+    FileList new;
+    while (!status) {
+        cmd(args);
+        new = flist_from_lines(tempfile, old.len);
+        if ((status = verify(&old, &new))) {
+            break;
         } else {
-            fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames != 1, "s");
+            free_flist(&new);
+            printf("Fix your renames. Press control-c to cancel or press"
+                   " any key to open vim again.\n");
+            getc(stdin);
+            continue;
         }
     }
-    for (size_t i = 0; i < old.len; i += 1)
-        free(old.files[i].name);
-    free(old.files);
-    for (size_t i = 0; i < new.len; i += 1)
-        free(new.files[i].name);
-    free(new.files);
+
+    size_t n_changes = get_num_renames(&old, &new);
+    size_t n_renames = 0;
+    if (n_changes)
+        n_renames = execute(&old, &new);
+    if (n_changes != n_renames) {
+        fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
+                        n_changes, n_changes != 1, "s",
+                        n_renames, n_renames != 1, "s");
+        status = false;
+    } else {
+        fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames != 1, "s");
+    }
+    free_flist(&old);
+    free_flist(&new);
     unlink(tempfile);
     exit(!status);
 }
