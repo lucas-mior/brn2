@@ -64,7 +64,7 @@ void *ealloc(void *old, size_t size) {
 void *ecalloc(size_t nmemb, size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n", 
+        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
                         nmemb, size);
         exit(1);
     }
@@ -237,7 +237,7 @@ bool dup_check_naive(FileList *new) {
                 continue;
             if (!strcmp(name, new->files[j].name)) {
                 fprintf(stderr, RED"\"%s\""RESET 
-                                " appears more than once in the buffer\n", name);
+                                " repeated in the buffer\n", name);
                 rep = true;
             }
         }
@@ -289,8 +289,15 @@ size_t execute(FileList *old, FileList *new) {
         if (r < 0) {
             r = rename(oldname, newname);
         } else {
-            n_renames += 1;
-            printf("%s -> "GREEN"%s"RESET"\n", newname, oldname);
+            n_renames += 2;
+            printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", newname, oldname);
+            for (size_t j = i + 1; j < old->len; j += 1) {
+                if (old->files[j].len != new->files[i].len)
+                    continue;
+                if (!strcmp(old->files[j].name, newname))
+                    strcpy(old->files[j].name, oldname);
+            }
+            continue;
         }
 
         if (r < 0) {
@@ -303,13 +310,6 @@ size_t execute(FileList *old, FileList *new) {
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
             n_renames += 1;
         }
-
-        for (size_t j = i + 1; j < old->len; j += 1) {
-            if (old->files[j].len != new->files[i].len)
-                continue;
-            if (!strcmp(old->files[j].name, newname))
-                strcpy(old->files[j].name, oldname);
-        }
     }
     return n_renames;
 }
@@ -319,7 +319,8 @@ void usage(FILE *stream) {
     fprintf(stream, "Without arguments, rename files in current dir.\n");
     fprintf(stream, "<filename>, rename files listed in <filename>.\n");
     fprintf(stream, "--help : display this help message.\n");
-    fprintf(stream, "Be sure to have EDITOR or VISUAL environment variables properly set.\n");
+    fprintf(stream, "Be sure to have EDITOR or VISUAL "
+                    "environment variables properly set.\n");
     exit((int) (stream != stdout));
     return;
 }
@@ -336,7 +337,8 @@ int main(int argc, char *argv[]) {
     if (!(editor_cmd = getenv("EDITOR")))
         editor_cmd = getenv("VISUAL");
     if (!editor_cmd) {
-        fprintf(stderr, "$EDITOR and $VISUAL are both not set in the environment\n");
+        fprintf(stderr, "$EDITOR and $VISUAL "
+                        "are both not set in the environment\n");
         exit(1);
     }
 
@@ -402,12 +404,14 @@ int main(int argc, char *argv[]) {
     if (n_changes)
         n_renames = execute(&old, &new);
     if (n_changes != n_renames) {
-        fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. Check your files.\n", 
+        fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
+                        "Check your files.\n", 
                         n_changes, n_changes != 1, "s",
                         n_renames, n_renames != 1, "s");
         status = false;
     } else {
-        fprintf(stdout, "%zu file%.*s renamed\n", n_renames, n_renames != 1, "s");
+        fprintf(stdout, "%zu file%.*s renamed\n",
+                        n_renames, n_renames != 1, "s");
     }
     free_flist(&old);
     free_flist(&new);
