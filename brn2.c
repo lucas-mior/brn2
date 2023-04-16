@@ -391,7 +391,7 @@ int main(int argc, char *argv[]) {
         } else {
             free_flist(&new);
             printf("Fix your renames. Press control-c to cancel or press"
-                   " any key to open vim again.\n");
+                   " ENTER to open vim again.\n");
             getc(stdin);
             continue;
         }
