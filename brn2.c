@@ -56,7 +56,7 @@ void *ealloc(void *old, size_t size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     return p;
 }
@@ -66,7 +66,7 @@ void *ecalloc(size_t nmemb, size_t size) {
     if ((p = calloc(nmemb, size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
                         nmemb, size);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     return p;
 }
@@ -86,17 +86,17 @@ void cmd(char **argv) {
     case 0:
         execvp(argv[0], argv);
         fprintf(stderr, "Error running `%s`: %s\n", argv[0], strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
         break;
     case -1:
         fprintf(stderr, "Error forking: %s\n", strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
         break;
     default:
         if (wait(NULL) < 0) {
             fprintf(stderr, "Error waiting for the forked child: %s\n", 
                             strerror(errno));
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         break;
     }
@@ -107,7 +107,7 @@ FileList flist_from_dir(char *dir) {
     int n = scandir(dir, &namelist, NULL, versionsort);
     if (n < 0) {
         fprintf(stderr, "Error scanning %s: %s\n", dir, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     FileList flist;
@@ -128,7 +128,7 @@ FileList flist_from_dir(char *dir) {
     }
     if (len == 0) {
         fprintf(stderr, "Empty directory. Exiting.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     free(namelist);
     flist.len = len;
@@ -139,7 +139,7 @@ FileList flist_from_lines(char *filename, size_t cap) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     if (cap == 0)
@@ -169,7 +169,7 @@ FileList flist_from_lines(char *filename, size_t cap) {
     }
     if (len == 0) {
         fprintf(stderr, "Empty filelist. Exiting.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     fclose(file);
     flist.files = ealloc(flist.files, len * sizeof (FileName));
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
     if (!editor_cmd) {
         fprintf(stderr, "$EDITOR and $VISUAL "
                         "are both not set in the environment\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     char *tempdir = getenv("TMPDIR");
@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
     FILE *file = fopen(tempfile, "r+");
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", tempfile, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     for (size_t i = 0; i < old.len; i += 1) {
