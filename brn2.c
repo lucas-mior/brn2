@@ -34,6 +34,8 @@
 #include <fcntl.h>
 #include <sys/syscall.h>
 
+#include "util.h"
+
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -52,35 +54,6 @@ typedef struct SameHash {
     char *key;
     struct SameHash *next;
 } SameHash;
-
-void *ealloc(void *old, size_t size) {
-    void *p;
-    if ((p = realloc(old, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
-        exit(EXIT_FAILURE);
-    }
-    return p;
-}
-
-void *ecalloc(size_t nmemb, size_t size) {
-    void *p;
-    if ((p = calloc(nmemb, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
-                        nmemb, size);
-        exit(EXIT_FAILURE);
-    }
-    return p;
-}
-
-size_t hash(char *str) {
-    /* djb2 hash function */
-    size_t hash = 5381;
-    int c;
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c;
-
-    return hash;
-}
 
 void cmd(char **argv) {
     switch (fork()) {

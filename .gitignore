@@ -4,3 +4,4 @@ test/
 compile_commands.json
 brn2
 tags
+*.o
