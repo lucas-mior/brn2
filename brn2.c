@@ -39,6 +39,7 @@
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
+#define MIN_HASH_TABLE_SIZE 256
 
 typedef struct FileName {
     char *name;
@@ -177,7 +178,7 @@ bool check_insert(SameHash *sh, size_t h, char *newkey) {
 
 bool dup_check_hash(FileList *new) {
     bool rep = false;
-    size_t bsize = new->len > 256 ? new->len : 256;
+    size_t bsize = new->len > MIN_HASH_TABLE_SIZE ? new->len : MIN_HASH_TABLE_SIZE;
     SameHash *strings = util_calloc(bsize, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
