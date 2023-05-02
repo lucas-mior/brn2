@@ -85,7 +85,7 @@ FileList flist_from_dir(char *dir) {
     }
 
     FileList flist;
-    flist.files = ealloc(NULL, n * sizeof (FileName));
+    flist.files = util_realloc(NULL, n * sizeof (FileName));
 
     int len = 0;
     for (int i = 0; i < n; i += 1) {
@@ -120,14 +120,14 @@ FileList flist_from_lines(char *filename, size_t cap) {
         cap = 128;
 
     FileList flist;
-    flist.files = ealloc(NULL, cap * sizeof (FileName));
+    flist.files = util_realloc(NULL, cap * sizeof (FileName));
 
     char buffer[PATH_MAX];
     size_t len = 0;
     while (!feof(file)) {
         if (len >= cap) {
             cap *= 2;
-            flist.files = ealloc(flist.files, cap * sizeof (FileName));
+            flist.files = util_realloc(flist.files, cap * sizeof (FileName));
         }
 
         if (!fgets(buffer, sizeof(buffer), file))
@@ -146,7 +146,7 @@ FileList flist_from_lines(char *filename, size_t cap) {
         exit(EXIT_FAILURE);
     }
     fclose(file);
-    flist.files = ealloc(flist.files, len * sizeof (FileName));
+    flist.files = util_realloc(flist.files, len * sizeof (FileName));
     flist.len = len;
     return flist;
 }
@@ -169,7 +169,7 @@ bool check_insert(SameHash *sh, size_t h, char *newkey) {
             break;
     } while (true);
 
-    it->next = ecalloc(1, sizeof (SameHash));
+    it->next = util_calloc(1, sizeof (SameHash));
     it->next->key = newkey;
 
     return false;
@@ -178,7 +178,7 @@ bool check_insert(SameHash *sh, size_t h, char *newkey) {
 bool dup_check_hash(FileList *new) {
     bool rep = false;
     size_t bsize = new->len > 256 ? new->len : 256;
-    SameHash *strings = ecalloc(bsize, sizeof(SameHash));
+    SameHash *strings = util_calloc(bsize, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash(name);
