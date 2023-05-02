@@ -23,6 +23,7 @@ void *util_calloc(const size_t nmemb, const size_t size) {
     }
     return p;
 }
+
 size_t hash(char *str) {
     /* djb2 hash function */
     size_t hash = 5381;
