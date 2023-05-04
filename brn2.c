@@ -250,6 +250,8 @@ size_t get_num_renames(FileList *old, FileList *new) {
 size_t execute(FileList *old, FileList *new) {
     size_t len = old->len;
 
+    SameHash *names_renamed = util_calloc(len, sizeof(SameHash));
+
     size_t n_renames = 0;
     for (size_t i = 0; i < len; i += 1) {
         char *oldname = old->files[i].name;
@@ -264,7 +266,14 @@ size_t execute(FileList *old, FileList *new) {
         if (r < 0) {
             r = rename(oldname, newname);
         } else {
-            n_renames += 2;
+            size_t h1 = hash(oldname);
+            size_t h2 = hash(newname);
+
+            if (!check_insert(names_renamed, h1 % len, oldname))
+                n_renames += 1;
+            if (!check_insert(names_renamed, h2 % len, newname))
+                n_renames += 1;
+
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", newname, oldname);
             for (size_t j = i + 1; j < old->len; j += 1) {
                 if (old->files[j].len != new->files[i].len)
@@ -282,8 +291,10 @@ size_t execute(FileList *old, FileList *new) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
+            size_t h1 = hash(oldname);
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
-            n_renames += 1;
+            if (!check_insert(names_renamed, h1 % len, oldname))
+                n_renames += 1;
         }
     }
     return n_renames;
