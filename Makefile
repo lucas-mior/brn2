@@ -10,7 +10,7 @@ objs = util.o brn2.o
 
 all: brn2
 
-$(objs): Makefile util.h
+$(objs): Makefile brn2.h
 util.o: util.c
 brn2.o: brn2.c
 
