@@ -20,10 +20,10 @@
 #include "brn2.h"
 
 int main(int argc, char *argv[]) {
-    char *editor_cmd;
-    if (!(editor_cmd = getenv("EDITOR")))
-        editor_cmd = getenv("VISUAL");
-    if (!editor_cmd) {
+    char *EDITOR;
+    if (!(EDITOR = getenv("EDITOR")))
+        EDITOR = getenv("VISUAL");
+    if (!EDITOR) {
         fprintf(stderr, "$EDITOR and $VISUAL "
                         "are both not set in the environment\n");
         exit(EXIT_FAILURE);
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
     fclose(file);
 
-    char *args[] = { editor_cmd, tempfile, NULL };
+    char *args[] = { EDITOR, tempfile, NULL };
 
     bool status = 0;
     FileList new;
@@ -107,8 +107,8 @@ int main(int argc, char *argv[]) {
 }
 
 FileList main_file_list_from_dir(char *dir) {
-    struct dirent **namelist;
-    int n = scandir(dir, &namelist, NULL, versionsort);
+    struct dirent **directory_list;
+    int n = scandir(dir, &directory_list, NULL, versionsort);
     if (n < 0) {
         fprintf(stderr, "Error scanning %s: %s\n", dir, strerror(errno));
         exit(EXIT_FAILURE);
@@ -119,22 +119,22 @@ FileList main_file_list_from_dir(char *dir) {
 
     int len = 0;
     for (int i = 0; i < n; i += 1) {
-        char *name = namelist[i]->d_name;
+        char *name = directory_list[i]->d_name;
         if (!strcmp(name, ".") || !strcmp(name, "..")) {
-            free(namelist[i]);
+            free(directory_list[i]);
             continue;
         }
 
         file_list.files[len].name = strdup(name);
         file_list.files[len].len = strlen(name);
-        free(namelist[i]);
+        free(directory_list[i]);
         len += 1;
     }
     if (len == 0) {
         fprintf(stderr, "Empty directory. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    free(namelist);
+    free(directory_list);
     file_list.len = len;
     return file_list;
 }
@@ -181,21 +181,21 @@ FileList main_file_list_from_lines(char *filename, size_t cap) {
     return file_list;
 }
 
-bool main_duplicated_name_hash(FileList *new) {
-    bool rep = false;
+bool main_repeated_name_hash(FileList *new) {
+    bool repeated = false;
     size_t bsize = new->len > MIN_HASH_TABLE_SIZE ? new->len : MIN_HASH_TABLE_SIZE;
-    SameHash *strings = util_calloc(bsize, sizeof(SameHash));
+    SameHash *table = util_calloc(bsize, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash_function(name);
-        if (hash_insert(strings, h % bsize, name)) {
+        if (hash_insert(table, h % bsize, name)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
-            rep = true;
+            repeated = true;
         }
     }
     for (size_t i = 0; i < bsize; i += 1) {
-        SameHash *it = &strings[i];
+        SameHash *it = &table[i];
         it = it->next;
         while (it) {
             void *aux = it;
@@ -203,11 +203,11 @@ bool main_duplicated_name_hash(FileList *new) {
             free(aux);
         }
     }
-    free(strings);
-    return rep;
+    free(table);
+    return repeated;
 }
 
-bool main_duplicated_name_naive(FileList *new) {
+bool main_repeated_name_naive(FileList *new) {
     bool rep = false;
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
@@ -236,9 +236,9 @@ bool main_verify(FileList *old, FileList *new) {
 
     bool rep = false;
     if (new->len > 100)
-        rep = main_duplicated_name_hash(new);
+        rep = main_repeated_name_hash(new);
     else
-        rep = main_duplicated_name_naive(new);
+        rep = main_repeated_name_naive(new);
 
     return !rep;
 }
@@ -316,9 +316,9 @@ void main_usage(FILE *stream) {
     return;
 }
 
-void main_free_file_list(FileList *f) {
-    for (size_t i = 0; i < f->len; i += 1)
-        free(f->files[i].name);
-    free(f->files);
+void main_free_file_list(FileList *file_list) {
+    for (size_t i = 0; i < file_list->len; i += 1)
+        free(file_list->files[i].name);
+    free(file_list->files);
     return;
 }
