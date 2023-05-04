@@ -297,9 +297,9 @@ size_t main_execute(FileList *old, FileList *new) {
             continue;
         } else {
             size_t h1 = hash_function(oldname);
-            printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
             if (!hash_insert(names_renamed, h1 % len, oldname))
                 n_renames += 1;
+            printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
         }
     }
     return n_renames;
