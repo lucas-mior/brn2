@@ -40,16 +40,6 @@ void *util_calloc(const size_t nmemb, const size_t size) {
     return p;
 }
 
-size_t hash(char *str) {
-    /* djb2 hash function */
-    size_t hash = 5381;
-    int c;
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c;
-
-    return hash;
-}
-
 void util_cmd(char **argv) {
     switch (fork()) {
     case 0:

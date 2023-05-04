@@ -94,38 +94,14 @@ FileList flist_from_lines(char *filename, size_t cap) {
     return flist;
 }
 
-bool check_insert(SameHash *sh, size_t h, char *newkey) {
-    SameHash *it = &sh[h];
-
-    if (it->key == NULL) {
-        it->key = newkey;
-        return false;
-    }
-
-    do {
-        if (!strcmp(it->key, newkey))
-            return true;
-
-        if (it->next)
-            it = it->next;
-        else
-            break;
-    } while (true);
-
-    it->next = util_calloc(1, sizeof (SameHash));
-    it->next->key = newkey;
-
-    return false;
-}
-
 bool dup_check_hash(FileList *new) {
     bool rep = false;
     size_t bsize = new->len > MIN_HASH_TABLE_SIZE ? new->len : MIN_HASH_TABLE_SIZE;
     SameHash *strings = util_calloc(bsize, sizeof(SameHash));
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
-        size_t h = hash(name);
-        if (check_insert(strings, h % bsize, name)) {
+        size_t h = hash_function(name);
+        if (hash_insert(strings, h % bsize, name)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
             rep = true;
@@ -208,12 +184,12 @@ size_t execute(FileList *old, FileList *new) {
         if (r < 0) {
             r = rename(oldname, newname);
         } else {
-            size_t h1 = hash(oldname);
-            size_t h2 = hash(newname);
+            size_t h1 = hash_function(oldname);
+            size_t h2 = hash_function(newname);
 
-            if (!check_insert(names_renamed, h1 % len, oldname))
+            if (!hash_insert(names_renamed, h1 % len, oldname))
                 n_renames += 1;
-            if (!check_insert(names_renamed, h2 % len, newname))
+            if (!hash_insert(names_renamed, h2 % len, newname))
                 n_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", newname, oldname);
@@ -233,9 +209,9 @@ size_t execute(FileList *old, FileList *new) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            size_t h1 = hash(oldname);
+            size_t h1 = hash_function(oldname);
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
-            if (!check_insert(names_renamed, h1 % len, oldname))
+            if (!hash_insert(names_renamed, h1 % len, oldname))
                 n_renames += 1;
         }
     }
