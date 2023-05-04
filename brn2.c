@@ -17,65 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _USE_GNU
-#define _GNU_SOURCE
-#define _POSIX_C_SOURCE 200809L
-#include <stdio.h>
-#include <stdlib.h>
-#include <linux/limits.h>
-#include <string.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <errno.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <sys/syscall.h>
-
-#include "util.h"
-
-#define RED "\x1b[31m"
-#define GREEN "\x1b[32m"
-#define RESET "\x1b[0m"
-#define MIN_HASH_TABLE_SIZE 256
-
-typedef struct FileName {
-    char *name;
-    size_t len;
-} FileName;
-
-typedef struct FileList {
-    FileName *files;
-    size_t len;
-} FileList;
-
-typedef struct SameHash {
-    char *key;
-    struct SameHash *next;
-} SameHash;
-
-void cmd(char **argv) {
-    switch (fork()) {
-    case 0:
-        execvp(argv[0], argv);
-        fprintf(stderr, "Error running `%s`: %s\n", argv[0], strerror(errno));
-        exit(EXIT_FAILURE);
-        break;
-    case -1:
-        fprintf(stderr, "Error forking: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-        break;
-    default:
-        if (wait(NULL) < 0) {
-            fprintf(stderr, "Error waiting for the forked child: %s\n", 
-                            strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        break;
-    }
-}
+#include "brn2.h"
 
 FileList flist_from_dir(char *dir) {
     struct dirent **namelist;
@@ -372,7 +314,7 @@ int main(int argc, char *argv[]) {
     bool status = 0;
     FileList new;
     while (!status) {
-        cmd(args);
+        util_cmd(args);
         new = flist_from_lines(tempfile, old.len);
         if ((status = verify(&old, &new))) {
             break;
