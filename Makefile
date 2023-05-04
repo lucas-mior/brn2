@@ -1,5 +1,4 @@
 CC = clang
-CFLAGS = -Wall -Wextra -pedantic -O2
 PREFIX ?= /usr/local
 
 objs = util.o main.o hash.o
@@ -8,18 +7,26 @@ objs = util.o main.o hash.o
 .SUFFIXES:
 .SUFFIXES: .c .o
 
-all: brn2
+all: release
 
 $(objs): Makefile brn2.h
 util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
+release: cflags += -O2 -Weverything
+release: stripflag = -s
+release: brn2
+
+debug: cflags += -g -Weverything
+debug: clean
+debug: brn2
+
 brn2: $(objs)
-	$(CC) -O2 -Weverything $(cflags) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
+	$(CC) $(stripflag) $(cflags) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
 
 %: %.c Makefile
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(stripflag) $(cflags) $(CFLAGS) $< -o $@
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
