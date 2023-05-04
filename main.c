@@ -34,8 +34,7 @@ int main(int argc, char *argv[]) {
         tempdir = "/tmp";
 
     char tempfile[PATH_MAX];
-    strcpy(tempfile, tempdir);
-    strcat(tempfile, "/brn2.XXXXXX");
+    snprintf(tempfile, sizeof (tempfile), "%s/%s", tempdir, "brn2.XXXXXX");
 
     int fd = mkstemp(tempfile);
     close(fd);
