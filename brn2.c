@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
         } else {
             free_flist(&new);
             printf("Fix your renames. Press control-c to cancel or press"
-                   " ENTER to open vim again.\n");
+                   " ENTER to open the file list editor again.\n");
             getc(stdin);
             continue;
         }
