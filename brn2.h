@@ -60,3 +60,13 @@ void util_cmd(char **);
 
 size_t hash_function(char *);
 bool hash_insert(SameHash *, size_t, char *);
+
+FileList main_file_list_from_dir(char *);
+FileList main_file_list_from_lines(char *, size_t);
+bool main_duplicated_name_hash(FileList *);
+bool main_duplicated_name_naive(FileList *);
+bool main_verify(FileList *old, FileList *);
+size_t main_get_number_renames(FileList *, FileList *);
+size_t main_execute(FileList *, FileList *);
+void main_usage(FILE *);
+void main_free_file_list(FileList *);

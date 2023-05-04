@@ -19,7 +19,94 @@
 
 #include "brn2.h"
 
-FileList flist_from_dir(char *dir) {
+int main(int argc, char *argv[]) {
+    char *editor_cmd;
+    if (!(editor_cmd = getenv("EDITOR")))
+        editor_cmd = getenv("VISUAL");
+    if (!editor_cmd) {
+        fprintf(stderr, "$EDITOR and $VISUAL "
+                        "are both not set in the environment\n");
+        exit(EXIT_FAILURE);
+    }
+
+    char *tempdir = getenv("TMPDIR");
+    if (!tempdir)
+        tempdir = "/tmp";
+
+    char tempfile[PATH_MAX];
+    strcpy(tempfile, tempdir);
+    strcat(tempfile, "/brn2.XXXXXX");
+
+    int fd = mkstemp(tempfile);
+    close(fd);
+
+    FileList old;
+    switch (argc) {
+    case 2:
+        if (!strncmp(argv[1], "--help", 6)) {
+            main_usage(stdout);
+        } else {
+            old = main_file_list_from_lines(argv[1], 0);
+        }
+        break;
+    case 1:
+        old = main_file_list_from_dir(".");
+        break;
+    default:
+        main_usage(stderr);
+        break;
+    }
+
+    FILE *file = fopen(tempfile, "r+");
+    if (!file) {
+        fprintf(stderr, "Error opening %s: %s\n", tempfile, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < old.len; i += 1) {
+        fprintf(file, "%s\n", old.files[i].name);
+    }
+    fclose(file);
+
+    char *args[] = { editor_cmd, tempfile, NULL };
+
+    bool status = 0;
+    FileList new;
+    while (!status) {
+        util_cmd(args);
+        new = main_file_list_from_lines(tempfile, old.len);
+        if ((status = main_verify(&old, &new))) {
+            break;
+        } else {
+            main_free_file_list(&new);
+            printf("Fix your renames. Press control-c to cancel or press"
+                   " ENTER to open the file list editor again.\n");
+            getc(stdin);
+            continue;
+        }
+    }
+
+    size_t n_changes = main_get_number_renames(&old, &new);
+    size_t n_renames = 0;
+    if (n_changes)
+        n_renames = main_execute(&old, &new);
+    if (n_changes != n_renames) {
+        fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
+                        "Check your files.\n", 
+                        n_changes, n_changes != 1, "s",
+                        n_renames, n_renames != 1, "s");
+        status = false;
+    } else {
+        fprintf(stdout, "%zu file%.*s renamed\n",
+                        n_renames, n_renames != 1, "s");
+    }
+    main_free_file_list(&old);
+    main_free_file_list(&new);
+    unlink(tempfile);
+    exit(!status);
+}
+
+FileList main_file_list_from_dir(char *dir) {
     struct dirent **namelist;
     int n = scandir(dir, &namelist, NULL, versionsort);
     if (n < 0) {
@@ -27,8 +114,8 @@ FileList flist_from_dir(char *dir) {
         exit(EXIT_FAILURE);
     }
 
-    FileList flist;
-    flist.files = util_realloc(NULL, n * sizeof (FileName));
+    FileList file_list;
+    file_list.files = util_realloc(NULL, n * sizeof (FileName));
 
     int len = 0;
     for (int i = 0; i < n; i += 1) {
@@ -38,8 +125,8 @@ FileList flist_from_dir(char *dir) {
             continue;
         }
 
-        flist.files[len].name = strdup(name);
-        flist.files[len].len = strlen(name);
+        file_list.files[len].name = strdup(name);
+        file_list.files[len].len = strlen(name);
         free(namelist[i]);
         len += 1;
     }
@@ -48,11 +135,11 @@ FileList flist_from_dir(char *dir) {
         exit(EXIT_FAILURE);
     }
     free(namelist);
-    flist.len = len;
-    return flist;
+    file_list.len = len;
+    return file_list;
 }
 
-FileList flist_from_lines(char *filename, size_t cap) {
+FileList main_file_list_from_lines(char *filename, size_t cap) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
@@ -62,15 +149,15 @@ FileList flist_from_lines(char *filename, size_t cap) {
     if (cap == 0)
         cap = 128;
 
-    FileList flist;
-    flist.files = util_realloc(NULL, cap * sizeof (FileName));
+    FileList file_list;
+    file_list.files = util_realloc(NULL, cap * sizeof (FileName));
 
     char buffer[PATH_MAX];
     size_t len = 0;
     while (!feof(file)) {
         if (len >= cap) {
             cap *= 2;
-            flist.files = util_realloc(flist.files, cap * sizeof (FileName));
+            file_list.files = util_realloc(file_list.files, cap * sizeof (FileName));
         }
 
         if (!fgets(buffer, sizeof(buffer), file))
@@ -80,8 +167,8 @@ FileList flist_from_lines(char *filename, size_t cap) {
 
         size_t last = strcspn(buffer, "\n");
         buffer[last] = '\0';
-        flist.files[len].name = strdup(buffer);
-        flist.files[len].len = last;
+        file_list.files[len].name = strdup(buffer);
+        file_list.files[len].len = last;
         len += 1;
     }
     if (len == 0) {
@@ -89,12 +176,12 @@ FileList flist_from_lines(char *filename, size_t cap) {
         exit(EXIT_FAILURE);
     }
     fclose(file);
-    flist.files = util_realloc(flist.files, len * sizeof (FileName));
-    flist.len = len;
-    return flist;
+    file_list.files = util_realloc(file_list.files, len * sizeof (FileName));
+    file_list.len = len;
+    return file_list;
 }
 
-bool dup_check_hash(FileList *new) {
+bool main_duplicated_name_hash(FileList *new) {
     bool rep = false;
     size_t bsize = new->len > MIN_HASH_TABLE_SIZE ? new->len : MIN_HASH_TABLE_SIZE;
     SameHash *strings = util_calloc(bsize, sizeof(SameHash));
@@ -120,7 +207,7 @@ bool dup_check_hash(FileList *new) {
     return rep;
 }
 
-bool dup_check_naive(FileList *new) {
+bool main_duplicated_name_naive(FileList *new) {
     bool rep = false;
     for (size_t i = 0; i < new->len; i += 1) {
         char *name = new->files[i].name;
@@ -138,7 +225,7 @@ bool dup_check_naive(FileList *new) {
     return rep;
 }
 
-bool verify(FileList *old, FileList *new) {
+bool main_verify(FileList *old, FileList *new) {
     if (old->len != new->len) {
         fprintf(stderr, "You are renaming %zu file%.*s "
                         "but buffer contains %zu file name%.*s\n", 
@@ -149,14 +236,14 @@ bool verify(FileList *old, FileList *new) {
 
     bool rep = false;
     if (new->len > 100)
-        rep = dup_check_hash(new);
+        rep = main_duplicated_name_hash(new);
     else
-        rep = dup_check_naive(new);
+        rep = main_duplicated_name_naive(new);
 
     return !rep;
 }
 
-size_t get_num_renames(FileList *old, FileList *new) {
+size_t main_get_number_renames(FileList *old, FileList *new) {
     size_t num = 0;
     for (size_t i = 0; i < old->len; i += 1) {
         if (strcmp(old->files[i].name, new->files[i].name))
@@ -165,7 +252,7 @@ size_t get_num_renames(FileList *old, FileList *new) {
     return num;
 }
 
-size_t execute(FileList *old, FileList *new) {
+size_t main_execute(FileList *old, FileList *new) {
     size_t len = old->len;
 
     SameHash *names_renamed = util_calloc(len, sizeof(SameHash));
@@ -218,7 +305,7 @@ size_t execute(FileList *old, FileList *new) {
     return n_renames;
 }
 
-void usage(FILE *stream) {
+void main_usage(FILE *stream) {
     fprintf(stream, "usage: brn2 [--help | <filename>]\n");
     fprintf(stream, "Without arguments, rename files in current dir.\n");
     fprintf(stream, "<filename>, rename files listed in <filename>.\n");
@@ -229,96 +316,9 @@ void usage(FILE *stream) {
     return;
 }
 
-void free_flist(FileList *f) {
+void main_free_file_list(FileList *f) {
     for (size_t i = 0; i < f->len; i += 1)
         free(f->files[i].name);
     free(f->files);
     return;
-}
-
-int main(int argc, char *argv[]) {
-    char *editor_cmd;
-    if (!(editor_cmd = getenv("EDITOR")))
-        editor_cmd = getenv("VISUAL");
-    if (!editor_cmd) {
-        fprintf(stderr, "$EDITOR and $VISUAL "
-                        "are both not set in the environment\n");
-        exit(EXIT_FAILURE);
-    }
-
-    char *tempdir = getenv("TMPDIR");
-    if (!tempdir)
-        tempdir = "/tmp";
-
-    char tempfile[PATH_MAX];
-    strcpy(tempfile, tempdir);
-    strcat(tempfile, "/brn2.XXXXXX");
-
-    int fd = mkstemp(tempfile);
-    close(fd);
-
-    FileList old;
-    switch (argc) {
-    case 2:
-        if (!strncmp(argv[1], "--help", 6)) {
-            usage(stdout);
-        } else {
-            old = flist_from_lines(argv[1], 0);
-        }
-        break;
-    case 1:
-        old = flist_from_dir(".");
-        break;
-    default:
-        usage(stderr);
-        break;
-    }
-
-    FILE *file = fopen(tempfile, "r+");
-    if (!file) {
-        fprintf(stderr, "Error opening %s: %s\n", tempfile, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    for (size_t i = 0; i < old.len; i += 1) {
-        fprintf(file, "%s\n", old.files[i].name);
-    }
-    fclose(file);
-
-    char *args[] = { editor_cmd, tempfile, NULL };
-
-    bool status = 0;
-    FileList new;
-    while (!status) {
-        util_cmd(args);
-        new = flist_from_lines(tempfile, old.len);
-        if ((status = verify(&old, &new))) {
-            break;
-        } else {
-            free_flist(&new);
-            printf("Fix your renames. Press control-c to cancel or press"
-                   " ENTER to open the file list editor again.\n");
-            getc(stdin);
-            continue;
-        }
-    }
-
-    size_t n_changes = get_num_renames(&old, &new);
-    size_t n_renames = 0;
-    if (n_changes)
-        n_renames = execute(&old, &new);
-    if (n_changes != n_renames) {
-        fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
-                        "Check your files.\n", 
-                        n_changes, n_changes != 1, "s",
-                        n_renames, n_renames != 1, "s");
-        status = false;
-    } else {
-        fprintf(stdout, "%zu file%.*s renamed\n",
-                        n_renames, n_renames != 1, "s");
-    }
-    free_flist(&old);
-    free_flist(&new);
-    unlink(tempfile);
-    exit(!status);
 }
