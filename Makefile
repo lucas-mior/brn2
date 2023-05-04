@@ -2,7 +2,7 @@ CC = clang
 CFLAGS = -Wall -Wextra -pedantic -O2
 PREFIX ?= /usr/local
 
-objs = util.o main.o
+objs = util.o main.o hash.o
 
 .PHONY: all clean install uninstall
 .SUFFIXES:
@@ -13,6 +13,7 @@ all: brn2
 $(objs): Makefile brn2.h
 util.o: util.c
 main.o: main.c
+hash.o: hash.c
 
 brn2: $(objs)
 	$(CC) -O2 -Weverything $(cflags) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
