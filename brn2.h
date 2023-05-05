@@ -41,12 +41,12 @@
 
 typedef struct FileName {
     char *name;
-    size_t len;
+    size_t length;
 } FileName;
 
 typedef struct FileList {
     FileName *files;
-    size_t len;
+    size_t length;
 } FileList;
 
 typedef struct SameHash {
