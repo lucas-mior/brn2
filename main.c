@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < old.len; i += 1) {
+    for (size_t i = 0; i < old.length; i += 1) {
         fprintf(file, "%s\n", old.files[i].name);
     }
     fclose(file);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     FileList new;
     while (!status) {
         util_cmd(args);
-        new = main_file_list_from_lines(tempfile, old.len);
+        new = main_file_list_from_lines(tempfile, old.length);
         if ((status = main_verify(&old, &new))) {
             break;
         } else {
@@ -116,7 +116,7 @@ FileList main_file_list_from_dir(char *dir) {
     FileList file_list;
     file_list.files = util_realloc(NULL, n * sizeof (FileName));
 
-    int len = 0;
+    int length = 0;
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
         if (!strcmp(name, ".") || !strcmp(name, "..")) {
@@ -124,17 +124,17 @@ FileList main_file_list_from_dir(char *dir) {
             continue;
         }
 
-        file_list.files[len].name = strdup(name);
-        file_list.files[len].len = strlen(name);
+        file_list.files[length].name = strdup(name);
+        file_list.files[length].length = strlen(name);
         free(directory_list[i]);
-        len += 1;
+        length += 1;
     }
-    if (len == 0) {
+    if (length == 0) {
         fprintf(stderr, "Empty directory. Exiting.\n");
         exit(EXIT_FAILURE);
     }
     free(directory_list);
-    file_list.len = len;
+    file_list.length = length;
     return file_list;
 }
 
@@ -152,9 +152,9 @@ FileList main_file_list_from_lines(char *filename, size_t cap) {
     file_list.files = util_realloc(NULL, cap * sizeof (FileName));
 
     char buffer[PATH_MAX];
-    size_t len = 0;
+    size_t length = 0;
     while (!feof(file)) {
-        if (len >= cap) {
+        if (length >= cap) {
             cap *= 2;
             file_list.files = util_realloc(file_list.files, cap * sizeof (FileName));
         }
@@ -166,25 +166,25 @@ FileList main_file_list_from_lines(char *filename, size_t cap) {
 
         size_t last = strcspn(buffer, "\n");
         buffer[last] = '\0';
-        file_list.files[len].name = strdup(buffer);
-        file_list.files[len].len = last;
-        len += 1;
+        file_list.files[length].name = strdup(buffer);
+        file_list.files[length].length = last;
+        length += 1;
     }
-    if (len == 0) {
+    if (length == 0) {
         fprintf(stderr, "Empty filelist. Exiting.\n");
         exit(EXIT_FAILURE);
     }
     fclose(file);
-    file_list.files = util_realloc(file_list.files, len * sizeof (FileName));
-    file_list.len = len;
+    file_list.files = util_realloc(file_list.files, length * sizeof (FileName));
+    file_list.length = length;
     return file_list;
 }
 
 bool main_repeated_name_hash(FileList *new) {
     bool repeated = false;
-    size_t bsize = new->len > MIN_HASH_TABLE_SIZE ? new->len : MIN_HASH_TABLE_SIZE;
+    size_t bsize = new->length > MIN_HASH_TABLE_SIZE ? new->length : MIN_HASH_TABLE_SIZE;
     SameHash *table = util_calloc(bsize, sizeof(SameHash));
-    for (size_t i = 0; i < new->len; i += 1) {
+    for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash_function(name);
         if (hash_insert(table, h % bsize, name)) {
@@ -199,11 +199,11 @@ bool main_repeated_name_hash(FileList *new) {
 
 bool main_repeated_name_naive(FileList *new) {
     bool rep = false;
-    for (size_t i = 0; i < new->len; i += 1) {
+    for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
-        size_t len = new->files[i].len;
-        for (size_t j = i+1; j < new->len; j += 1) {
-            if (len != new->files[j].len)
+        size_t length = new->files[i].length;
+        for (size_t j = i+1; j < new->length; j += 1) {
+            if (length != new->files[j].length)
                 continue;
             if (!strcmp(name, new->files[j].name)) {
                 fprintf(stderr, RED"\"%s\""RESET 
@@ -216,16 +216,16 @@ bool main_repeated_name_naive(FileList *new) {
 }
 
 bool main_verify(FileList *old, FileList *new) {
-    if (old->len != new->len) {
+    if (old->length != new->length) {
         fprintf(stderr, "You are renaming %zu file%.*s "
                         "but buffer contains %zu file name%.*s\n", 
-                        old->len, old->len != 1, "s",
-                        new->len, new->len != 1, "s");
+                        old->length, old->length != 1, "s",
+                        new->length, new->length != 1, "s");
         return false;
     }
 
     bool rep = false;
-    if (new->len > 100)
+    if (new->length > 100)
         rep = main_repeated_name_hash(new);
     else
         rep = main_repeated_name_naive(new);
@@ -235,7 +235,7 @@ bool main_verify(FileList *old, FileList *new) {
 
 size_t main_get_number_renames(FileList *old, FileList *new) {
     size_t num = 0;
-    for (size_t i = 0; i < old->len; i += 1) {
+    for (size_t i = 0; i < old->length; i += 1) {
         if (strcmp(old->files[i].name, new->files[i].name))
             num += 1;
     }
@@ -243,12 +243,12 @@ size_t main_get_number_renames(FileList *old, FileList *new) {
 }
 
 size_t main_execute(FileList *old, FileList *new) {
-    size_t len = old->len;
+    size_t length = old->length;
 
-    SameHash *names_renamed = util_calloc(len, sizeof(SameHash));
+    SameHash *names_renamed = util_calloc(length, sizeof(SameHash));
 
     size_t n_renames = 0;
-    for (size_t i = 0; i < len; i += 1) {
+    for (size_t i = 0; i < length; i += 1) {
         char *oldname = old->files[i].name;
         char *newname = new->files[i].name;
 
@@ -264,14 +264,14 @@ size_t main_execute(FileList *old, FileList *new) {
             size_t h1 = hash_function(oldname);
             size_t h2 = hash_function(newname);
 
-            if (!hash_insert(names_renamed, h1 % len, oldname))
+            if (!hash_insert(names_renamed, h1 % length, oldname))
                 n_renames += 1;
-            if (!hash_insert(names_renamed, h2 % len, newname))
+            if (!hash_insert(names_renamed, h2 % length, newname))
                 n_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", newname, oldname);
-            for (size_t j = i + 1; j < old->len; j += 1) {
-                if (old->files[j].len != new->files[i].len)
+            for (size_t j = i + 1; j < old->length; j += 1) {
+                if (old->files[j].length != new->files[i].length)
                     continue;
                 if (!strcmp(old->files[j].name, newname))
                     strcpy(old->files[j].name, oldname);
@@ -287,12 +287,12 @@ size_t main_execute(FileList *old, FileList *new) {
             continue;
         } else {
             size_t h1 = hash_function(oldname);
-            if (!hash_insert(names_renamed, h1 % len, oldname))
+            if (!hash_insert(names_renamed, h1 % length, oldname))
                 n_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
         }
     }
-    hash_free(names_renamed, len);
+    hash_free(names_renamed, length);
     return n_renames;
 }
 
@@ -308,7 +308,7 @@ void main_usage(FILE *stream) {
 }
 
 void main_free_file_list(FileList *file_list) {
-    for (size_t i = 0; i < file_list->len; i += 1)
+    for (size_t i = 0; i < file_list->length; i += 1)
         free(file_list->files[i].name);
     free(file_list->files);
     return;
