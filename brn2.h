@@ -60,6 +60,7 @@ void util_cmd(char **);
 
 size_t hash_function(char *);
 bool hash_insert(SameHash *, size_t, char *);
+void hash_free(SameHash *, size_t);
 
 FileList main_file_list_from_dir(char *);
 FileList main_file_list_from_lines(char *, size_t);

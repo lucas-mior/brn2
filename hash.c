@@ -52,3 +52,16 @@ bool hash_insert(SameHash *sh, size_t h, char *newkey) {
 
     return false;
 }
+
+void hash_free(SameHash *table, size_t length) {
+    for (size_t i = 0; i < length; i += 1) {
+        SameHash *it = &table[i];
+        it = it->next;
+        while (it) {
+            void *aux = it;
+            it = it->next;
+            free(aux);
+        }
+    }
+    free(table);
+}
