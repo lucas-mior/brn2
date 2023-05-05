@@ -193,16 +193,7 @@ bool main_repeated_name_hash(FileList *new) {
             repeated = true;
         }
     }
-    for (size_t i = 0; i < bsize; i += 1) {
-        SameHash *it = &table[i];
-        it = it->next;
-        while (it) {
-            void *aux = it;
-            it = it->next;
-            free(aux);
-        }
-    }
-    free(table);
+    hash_free(table, bsize);
     return repeated;
 }
 
@@ -301,6 +292,7 @@ size_t main_execute(FileList *old, FileList *new) {
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
         }
     }
+    hash_free(names_renamed, len);
     return n_renames;
 }
 
