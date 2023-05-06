@@ -267,7 +267,7 @@ size_t main_execute(FileList *old, FileList *new) {
             if (!hash_insert(names_renamed, h2 % length, newname))
                 n_renames += 1;
 
-            printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", newname, oldname);
+            printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname, newname);
             for (size_t j = i + 1; j < old->length; j += 1) {
                 if (old->files[j].length != new->files[i].length)
                     continue;
