@@ -258,9 +258,7 @@ size_t main_execute(FileList *old, FileList *new) {
         int r;
         r = renameat2(AT_FDCWD, oldname, 
                       AT_FDCWD, newname, RENAME_EXCHANGE);
-        if (r < 0) {
-            r = rename(oldname, newname);
-        } else {
+        if (r >= 0) {
             size_t h1 = hash_function(oldname);
             size_t h2 = hash_function(newname);
 
@@ -277,6 +275,8 @@ size_t main_execute(FileList *old, FileList *new) {
                     strcpy(old->files[j].name, oldname);
             }
             continue;
+        } else {
+            r = rename(oldname, newname);
         }
 
         if (r < 0) {
