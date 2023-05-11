@@ -28,11 +28,11 @@ static size_t main_get_number_renames(FileList *, FileList *);
 static size_t main_execute(FileList *, FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
 static void main_free_file_list(FileList *);
+static char *EDITOR;
 
 int main(int argc, char *argv[]) {
     char *tempdir = "/tmp";
     File buffer;
-    char *EDITOR;
     FileList old;
     FileList new;
     bool status = 0;
@@ -51,12 +51,9 @@ int main(int argc, char *argv[]) {
         old = main_file_list_from_dir(".");
     }
 
-    if (!(EDITOR = getenv("EDITOR")))
-        EDITOR = getenv("VISUAL");
-    if (!EDITOR) {
-        fprintf(stderr, "$EDITOR and $VISUAL "
-                        "are both not set in the environment\n");
-        exit(EXIT_FAILURE);
+    if (!(EDITOR = getenv("EDITOR"))) {
+        fprintf(stderr, "EDITOR variable is not set. Using vim by default.\n");
+        EDITOR = "vim";
     }
 
     snprintf(buffer.name, sizeof (buffer.name), "%s/%s", tempdir, "brn2.XXXXXX");
