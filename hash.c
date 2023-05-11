@@ -32,12 +32,12 @@ bool hash_insert(SameHash *sh, size_t h, char *newkey) {
 
     if (iterator->key == NULL) {
         iterator->key = newkey;
-        return false;
+        return true;
     }
 
     do {
         if (!strcmp(iterator->key, newkey))
-            return true;
+            return false;
 
         if (iterator->next)
             iterator = iterator->next;
@@ -48,7 +48,7 @@ bool hash_insert(SameHash *sh, size_t h, char *newkey) {
     iterator->next = util_calloc(1, sizeof (SameHash));
     iterator->next->key = newkey;
 
-    return false;
+    return true;
 }
 
 void hash_free(SameHash *table, size_t length) {
