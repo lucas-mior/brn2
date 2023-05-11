@@ -20,6 +20,7 @@
 #include "brn2.h"
 
 int main(int argc, char *argv[]) {
+    char *tempdir = "/tmp";
     char *EDITOR;
     if (!(EDITOR = getenv("EDITOR")))
         EDITOR = getenv("VISUAL");
@@ -29,9 +30,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    char *tempdir = getenv("TMPDIR");
-    if (!tempdir)
-        tempdir = "/tmp";
 
     char tempfile[PATH_MAX];
     snprintf(tempfile, sizeof (tempfile), "%s/%s", tempdir, "brn2.XXXXXX");
