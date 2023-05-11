@@ -39,6 +39,11 @@
 #define RESET "\x1b[0m"
 #define MIN_HASH_TABLE_SIZE 256
 
+typedef struct File {
+    char name[PATH_MAX];
+    int fd;
+} File;
+
 typedef struct FileName {
     char *name;
     size_t length;
