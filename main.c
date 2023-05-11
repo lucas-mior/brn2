@@ -171,7 +171,8 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
         size_t last;
         if (length >= capacity) {
             capacity *= 2;
-            file_list.files = util_realloc(file_list.files, capacity * sizeof (FileName));
+            file_list.files = util_realloc(file_list.files,
+                                           capacity * sizeof (FileName));
         }
 
         if (!fgets(buffer, sizeof(buffer), file))
@@ -190,7 +191,8 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
         exit(EXIT_FAILURE);
     }
     fclose(file);
-    file_list.files = util_realloc(file_list.files, length * sizeof (FileName));
+    file_list.files = util_realloc(file_list.files,
+                                   length * sizeof (FileName));
     file_list.length = length;
     return file_list;
 }
