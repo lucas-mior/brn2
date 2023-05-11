@@ -39,8 +39,6 @@ sudo make install
 * It has error handling, it will safely abort if the exact number of
   filenames isn't provided or if some filenames are repeated.
  
-* It is free.
- 
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
  
