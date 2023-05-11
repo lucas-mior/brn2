@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     bool status = 0;
     FileList new;
     while (!status) {
-        util_cmd(args);
+        util_command(args);
         new = main_file_list_from_lines(tempfile, old.length);
         if ((status = main_verify(&old, &new))) {
             break;
@@ -87,19 +87,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    size_t n_changes = main_get_number_renames(&old, &new);
-    size_t n_renames = 0;
-    if (n_changes)
-        n_renames = main_execute(&old, &new);
-    if (n_changes != n_renames) {
+    size_t number_changes = main_get_number_renames(&old, &new);
+    size_t number_renames = 0;
+    if (number_changes)
+        number_renames = main_execute(&old, &new);
+    if (number_changes != number_renames) {
         fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
                         "Check your files.\n", 
-                        n_changes, n_changes != 1, "s",
-                        n_renames, n_renames != 1, "s");
+                        number_changes, number_changes != 1, "s",
+                        number_renames, number_renames != 1, "s");
         status = false;
     } else {
         fprintf(stdout, "%zu file%.*s renamed\n",
-                        n_renames, n_renames != 1, "s");
+                        number_renames, number_renames != 1, "s");
     }
     main_free_file_list(&old);
     main_free_file_list(&new);
@@ -249,7 +249,7 @@ size_t main_execute(FileList *old, FileList *new) {
 
     SameHash *names_renamed = util_calloc(length, sizeof(SameHash));
 
-    size_t n_renames = 0;
+    size_t number_renames = 0;
     for (size_t i = 0; i < length; i += 1) {
         char *oldname = old->files[i].name;
         char *newname = new->files[i].name;
@@ -265,9 +265,9 @@ size_t main_execute(FileList *old, FileList *new) {
             size_t h2 = hash_function(newname);
 
             if (!hash_insert(names_renamed, h1 % length, oldname))
-                n_renames += 1;
+                number_renames += 1;
             if (!hash_insert(names_renamed, h2 % length, newname))
-                n_renames += 1;
+                number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname, newname);
             for (size_t j = i + 1; j < old->length; j += 1) {
@@ -290,12 +290,12 @@ size_t main_execute(FileList *old, FileList *new) {
         } else {
             size_t h1 = hash_function(oldname);
             if (!hash_insert(names_renamed, h1 % length, oldname))
-                n_renames += 1;
+                number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
         }
     }
     hash_free(names_renamed, length);
-    return n_renames;
+    return number_renames;
 }
 
 void main_usage(FILE *stream) {
