@@ -23,6 +23,8 @@ debug: clean
 debug: brn2
 
 brn2: $(objs)
+	ctags --kinds-C=+l *.h *.c
+	vtags.sed tags > .tags.vim
 	$(CC) $(stripflag) $(cflags) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
 
 %: %.c Makefile
