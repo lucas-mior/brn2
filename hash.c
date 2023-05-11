@@ -22,7 +22,7 @@ size_t hash_function(char *str) {
     size_t hash = 5381;
     int c;
     while ((c = *str++))
-        hash = ((hash << 5) + hash) + c;
+        hash = ((hash << 5) + hash) + (size_t) c;
 
     return hash;
 }
