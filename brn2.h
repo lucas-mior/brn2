@@ -56,7 +56,7 @@ typedef struct SameHash {
 
 void *util_realloc(void *, size_t);
 void *util_calloc(size_t, size_t);
-void util_cmd(char **);
+void util_command(char **);
 
 size_t hash_function(char *);
 bool hash_insert(SameHash *, size_t, char *);

@@ -28,36 +28,36 @@ size_t hash_function(char *str) {
 }
 
 bool hash_insert(SameHash *sh, size_t h, char *newkey) {
-    SameHash *it = &sh[h];
+    SameHash *iterator = &sh[h];
 
-    if (it->key == NULL) {
-        it->key = newkey;
+    if (iterator->key == NULL) {
+        iterator->key = newkey;
         return false;
     }
 
     do {
-        if (!strcmp(it->key, newkey))
+        if (!strcmp(iterator->key, newkey))
             return true;
 
-        if (it->next)
-            it = it->next;
+        if (iterator->next)
+            iterator = iterator->next;
         else
             break;
     } while (true);
 
-    it->next = util_calloc(1, sizeof (SameHash));
-    it->next->key = newkey;
+    iterator->next = util_calloc(1, sizeof (SameHash));
+    iterator->next->key = newkey;
 
     return false;
 }
 
 void hash_free(SameHash *table, size_t length) {
     for (size_t i = 0; i < length; i += 1) {
-        SameHash *it = &table[i];
-        it = it->next;
-        while (it) {
-            void *aux = it;
-            it = it->next;
+        SameHash *iterator = &table[i];
+        iterator = iterator->next;
+        while (iterator) {
+            void *aux = iterator;
+            iterator = iterator->next;
             free(aux);
         }
     }
