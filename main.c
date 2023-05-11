@@ -250,7 +250,7 @@ bool main_verify(FileList *old, FileList *new) {
         return false;
     }
 
-    if (new->length > 100)
+    if (new->length > USE_HASH_TABLE_THRESHOLD)
         repeated = main_repeated_name_hash(new);
     else
         repeated = main_repeated_name_naive(new);
