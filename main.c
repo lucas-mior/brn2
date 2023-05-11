@@ -239,9 +239,11 @@ size_t main_get_number_renames(FileList *old, FileList *new) {
 }
 
 size_t main_execute(FileList *old, FileList *new) {
-    size_t length = old->length;
+    size_t length;
+    SameHash *names_renamed;
 
-    SameHash *names_renamed = util_calloc(length, sizeof(SameHash));
+    length = old->length;
+    names_renamed = util_calloc(length, sizeof(SameHash));
 
     size_t number_renames = 0;
     for (size_t i = 0; i < length; i += 1) {
