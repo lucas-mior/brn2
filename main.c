@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     File buffer;
     FileList old;
     FileList new;
-    bool status = 0;
+    bool status = true;
 
     if (argc >= 3) {
         main_usage(stderr);
@@ -56,27 +56,28 @@ int main(int argc, char *argv[]) {
         EDITOR = "vim";
     }
 
-    snprintf(buffer.name, sizeof (buffer.name), "%s/%s", tempdir, "brn2.XXXXXX");
+    {
+        snprintf(buffer.name, sizeof (buffer.name), "%s/%s", tempdir, "brn2.XXXXXX");
 
-    if ((buffer.fd = mkstemp(buffer.name)) < 0) {
-        fprintf(stderr, "Error opening %s: %s\n", buffer.name, strerror(errno));
-        exit(EXIT_FAILURE);
+        if ((buffer.fd = mkstemp(buffer.name)) < 0) {
+            fprintf(stderr, "Error opening %s: %s\n", buffer.name, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+        for (size_t i = 0; i < old.length; i += 1)
+            dprintf(buffer.fd, "%s\n", old.files[i].name);
+        close(buffer.fd);
+        buffer.fd = -1;
     }
 
-    for (size_t i = 0; i < old.length; i += 1)
-        dprintf(buffer.fd, "%s\n", old.files[i].name);
-    close(buffer.fd);
-    buffer.fd = -1;
-
     {
-        size_t number_changes;
-        size_t number_renames;
-
+        bool valid_buffer = false;
         char *args[] = { EDITOR, buffer.name, NULL };
-        while (!status) {
+
+        while (!valid_buffer) {
             util_command(args);
             new = main_file_list_from_lines(buffer.name, old.length);
-            if ((status = main_verify(&old, &new))) {
+            if ((valid_buffer = main_verify(&old, &new))) {
                 break;
             } else {
                 main_free_file_list(&new);
@@ -86,7 +87,11 @@ int main(int argc, char *argv[]) {
                 continue;
             }
         }
+    }
 
+    {
+        size_t number_changes;
+        size_t number_renames;
         number_changes = main_get_number_changes(&old, &new);
         number_renames = 0;
 
@@ -247,12 +252,12 @@ bool main_verify(FileList *old, FileList *new) {
 }
 
 size_t main_get_number_changes(FileList *old, FileList *new) {
-    size_t num = 0;
+    size_t number = 0;
     for (size_t i = 0; i < old->length; i += 1) {
         if (strcmp(old->files[i].name, new->files[i].name))
-            num += 1;
+            number += 1;
     }
-    return num;
+    return number;
 }
 
 size_t main_execute(FileList *old, FileList *new) {
@@ -272,7 +277,7 @@ size_t main_execute(FileList *old, FileList *new) {
             continue;
 
         renamed = renameat2(AT_FDCWD, oldname, 
-                      AT_FDCWD, newname, RENAME_EXCHANGE);
+                            AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             size_t h1 = hash_function(oldname);
             size_t h2 = hash_function(newname);
