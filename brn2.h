@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _USE_GNU
+/* #define _USE_GNU */
 #define _GNU_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
@@ -38,6 +38,7 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 #define MIN_HASH_TABLE_SIZE 256
+#define USE_HASH_TABLE_THRESHOLD 128
 
 typedef struct File {
     char name[PATH_MAX];
