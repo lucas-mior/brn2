@@ -27,8 +27,8 @@ brn2: $(objs)
 	vtags.sed tags > .tags.vim
 	$(CC) $(stripflag) $(cflags) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
 
-%: %.c Makefile
-	$(CC) $(stripflag) $(cflags) $(CFLAGS) $< -o $@
+.c.o:
+	$(CC) $(cflags) -c -o $@ $<
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
