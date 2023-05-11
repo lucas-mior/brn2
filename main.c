@@ -296,6 +296,7 @@ void main_usage(FILE *stream) {
     fprintf(stream, "usage: brn2 [-h | --help | <filename>]\n");
     fprintf(stream, "Without arguments, rename files in current dir.\n");
     fprintf(stream, "<filename>, rename files listed in <filename>.\n");
+    fprintf(stream, "-h     : display this help message.\n");
     fprintf(stream, "--help : display this help message.\n");
     fprintf(stream, "Be sure to have EDITOR or VISUAL "
                     "environment variables properly set.\n");
