@@ -37,8 +37,9 @@ int main(int argc, char *argv[]) {
     FileList new;
     bool status = 0;
 
-    switch (argc) {
-    case 2:
+    if (argc >= 3) {
+        main_usage(stderr);
+    } else if (argc == 2) {
         if (!strncmp(argv[1], "--help", 6)) {
             main_usage(stdout);
         } else if (!strncmp(argv[1], "-h", 2)) {
@@ -46,12 +47,8 @@ int main(int argc, char *argv[]) {
         } else {
             old = main_file_list_from_lines(argv[1], 0);
         }
-        break;
-    case 1:
+    } else {
         old = main_file_list_from_dir(".");
-        break;
-    default:
-        main_usage(stderr);
     }
 
     if (!(EDITOR = getenv("EDITOR")))
