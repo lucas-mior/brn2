@@ -21,23 +21,10 @@
 
 int main(int argc, char *argv[]) {
     char *tempdir = "/tmp";
-    char *EDITOR;
-    if (!(EDITOR = getenv("EDITOR")))
-        EDITOR = getenv("VISUAL");
-    if (!EDITOR) {
-        fprintf(stderr, "$EDITOR and $VISUAL "
-                        "are both not set in the environment\n");
-        exit(EXIT_FAILURE);
-    }
-
-
     char tempfile[PATH_MAX];
-    snprintf(tempfile, sizeof (tempfile), "%s/%s", tempdir, "brn2.XXXXXX");
-
-    int fd = mkstemp(tempfile);
-    close(fd);
-
+    char *EDITOR;
     FileList old;
+
     switch (argc) {
     case 2:
         if (!strncmp(argv[1], "--help", 6)) {
@@ -56,16 +43,25 @@ int main(int argc, char *argv[]) {
         break;
     }
 
-    FILE *file = fopen(tempfile, "r+");
-    if (!file) {
+    if (!(EDITOR = getenv("EDITOR")))
+        EDITOR = getenv("VISUAL");
+    if (!EDITOR) {
+        fprintf(stderr, "$EDITOR and $VISUAL "
+                        "are both not set in the environment\n");
+        exit(EXIT_FAILURE);
+    }
+
+    snprintf(tempfile, sizeof (tempfile), "%s/%s", tempdir, "brn2.XXXXXX");
+
+    int fd;
+    if ((fd = mkstemp(tempfile)) < 0) {
         fprintf(stderr, "Error opening %s: %s\n", tempfile, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < old.length; i += 1) {
-        fprintf(file, "%s\n", old.files[i].name);
-    }
-    fclose(file);
+    for (size_t i = 0; i < old.length; i += 1)
+        dprintf(fd, "%s\n", old.files[i].name);
+    close(fd);
 
     char *args[] = { EDITOR, tempfile, NULL };
 
