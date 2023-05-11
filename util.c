@@ -40,7 +40,7 @@ void *util_calloc(const size_t nmemb, const size_t size) {
     return p;
 }
 
-void util_cmd(char **argv) {
+void util_command(char **argv) {
     switch (fork()) {
     case 0:
         execvp(argv[0], argv);
