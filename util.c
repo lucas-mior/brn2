@@ -46,17 +46,14 @@ void util_command(char **argv) {
         execvp(argv[0], argv);
         fprintf(stderr, "Error running `%s`: %s\n", argv[0], strerror(errno));
         exit(EXIT_FAILURE);
-        break;
     case -1:
         fprintf(stderr, "Error forking: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
-        break;
     default:
         if (wait(NULL) < 0) {
             fprintf(stderr, "Error waiting for the forked child: %s\n", 
                             strerror(errno));
             exit(EXIT_FAILURE);
         }
-        break;
     }
 }
