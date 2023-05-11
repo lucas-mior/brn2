@@ -29,9 +29,9 @@ static size_t main_execute(FileList *, FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
 static void main_free_file_list(FileList *);
 static char *EDITOR;
+static const char *tempdir = "/tmp";
 
 int main(int argc, char *argv[]) {
-    char *tempdir = "/tmp";
     File buffer;
     FileList old;
     FileList new;
