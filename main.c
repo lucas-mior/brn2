@@ -57,10 +57,12 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        snprintf(buffer.name, sizeof (buffer.name), "%s/%s", tempdir, "brn2.XXXXXX");
+        snprintf(buffer.name, sizeof (buffer.name),
+                "%s/%s", tempdir, "brn2.XXXXXX");
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
-            fprintf(stderr, "Error opening %s: %s\n", buffer.name, strerror(errno));
+            fprintf(stderr, "Error opening %s: %s\n",
+                            buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -199,7 +201,10 @@ bool main_repeated_name_hash(FileList *new) {
     SameHash *table;
 
     repeated = false;
-    table_size = new->length > MIN_HASH_TABLE_SIZE ? new->length : MIN_HASH_TABLE_SIZE;
+    if (new->length + 10 > MIN_HASH_TABLE_SIZE)
+        table_size = new->length + 10;
+    else
+        table_size = MIN_HASH_TABLE_SIZE;
 
     table = util_calloc(table_size, sizeof(SameHash));
     for (size_t i = 0; i < new->length; i += 1) {
