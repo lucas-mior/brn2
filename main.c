@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
     case 2:
         if (!strncmp(argv[1], "--help", 6)) {
             main_usage(stdout);
+        } else if (!strncmp(argv[1], "-h", 2)) {
+            main_usage(stdout);
         } else {
             old = main_file_list_from_lines(argv[1], 0);
         }
@@ -297,7 +299,7 @@ size_t main_execute(FileList *old, FileList *new) {
 }
 
 void main_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [--help | <filename>]\n");
+    fprintf(stream, "usage: brn2 [-h | --help | <filename>]\n");
     fprintf(stream, "Without arguments, rename files in current dir.\n");
     fprintf(stream, "<filename>, rename files listed in <filename>.\n");
     fprintf(stream, "--help : display this help message.\n");
