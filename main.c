@@ -21,7 +21,7 @@
 
 int main(int argc, char *argv[]) {
     char *tempdir = "/tmp";
-    char tempfile[PATH_MAX];
+    File buffer;
     char *EDITOR;
     FileList old;
 
@@ -51,25 +51,25 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    snprintf(tempfile, sizeof (tempfile), "%s/%s", tempdir, "brn2.XXXXXX");
+    snprintf(buffer.name, sizeof (buffer.name), "%s/%s", tempdir, "brn2.XXXXXX");
 
-    int fd;
-    if ((fd = mkstemp(tempfile)) < 0) {
-        fprintf(stderr, "Error opening %s: %s\n", tempfile, strerror(errno));
+    if ((buffer.fd = mkstemp(buffer.name)) < 0) {
+        fprintf(stderr, "Error opening %s: %s\n", buffer.name, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     for (size_t i = 0; i < old.length; i += 1)
-        dprintf(fd, "%s\n", old.files[i].name);
-    close(fd);
+        dprintf(buffer.fd, "%s\n", old.files[i].name);
+    close(buffer.fd);
+    buffer.fd = -1;
 
-    char *args[] = { EDITOR, tempfile, NULL };
+    char *args[] = { EDITOR, buffer.name, NULL };
 
     bool status = 0;
     FileList new;
     while (!status) {
         util_command(args);
-        new = main_file_list_from_lines(tempfile, old.length);
+        new = main_file_list_from_lines(buffer.name, old.length);
         if ((status = main_verify(&old, &new))) {
             break;
         } else {
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     }
     main_free_file_list(&old);
     main_free_file_list(&new);
-    unlink(tempfile);
+    unlink(buffer.name);
     exit(!status);
 }
 
