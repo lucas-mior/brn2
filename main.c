@@ -134,25 +134,25 @@ FileList main_file_list_from_dir(char *dir) {
     return file_list;
 }
 
-FileList main_file_list_from_lines(char *filename, size_t cap) {
+FileList main_file_list_from_lines(char *filename, size_t capacity) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    if (cap == 0)
-        cap = 128;
+    if (capacity == 0)
+        capacity = 128;
 
     FileList file_list;
-    file_list.files = util_realloc(NULL, cap * sizeof (FileName));
+    file_list.files = util_realloc(NULL, capacity * sizeof (FileName));
 
     char buffer[PATH_MAX];
     size_t length = 0;
     while (!feof(file)) {
-        if (length >= cap) {
-            cap *= 2;
-            file_list.files = util_realloc(file_list.files, cap * sizeof (FileName));
+        if (length >= capacity) {
+            capacity *= 2;
+            file_list.files = util_realloc(file_list.files, capacity * sizeof (FileName));
         }
 
         if (!fgets(buffer, sizeof(buffer), file))
@@ -178,23 +178,23 @@ FileList main_file_list_from_lines(char *filename, size_t cap) {
 
 bool main_repeated_name_hash(FileList *new) {
     bool repeated = false;
-    size_t bsize = new->length > MIN_HASH_TABLE_SIZE ? new->length : MIN_HASH_TABLE_SIZE;
-    SameHash *table = util_calloc(bsize, sizeof(SameHash));
+    size_t table_size = new->length > MIN_HASH_TABLE_SIZE ? new->length : MIN_HASH_TABLE_SIZE;
+    SameHash *table = util_calloc(table_size, sizeof(SameHash));
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
         size_t h = hash_function(name);
-        if (!hash_insert(table, h % bsize, name)) {
+        if (!hash_insert(table, h % table_size, name)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
             repeated = true;
         }
     }
-    hash_free(table, bsize);
+    hash_free(table, table_size);
     return repeated;
 }
 
 bool main_repeated_name_naive(FileList *new) {
-    bool rep = false;
+    bool repeated = false;
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
         size_t length = new->files[i].length;
@@ -204,11 +204,11 @@ bool main_repeated_name_naive(FileList *new) {
             if (!strcmp(name, new->files[j].name)) {
                 fprintf(stderr, RED"\"%s\""RESET 
                                 " repeated in the buffer\n", name);
-                rep = true;
+                repeated = true;
             }
         }
     }
-    return rep;
+    return repeated;
 }
 
 bool main_verify(FileList *old, FileList *new) {
@@ -220,13 +220,13 @@ bool main_verify(FileList *old, FileList *new) {
         return false;
     }
 
-    bool rep = false;
+    bool repeated = false;
     if (new->length > 100)
-        rep = main_repeated_name_hash(new);
+        repeated = main_repeated_name_hash(new);
     else
-        rep = main_repeated_name_naive(new);
+        repeated = main_repeated_name_naive(new);
 
-    return !rep;
+    return !repeated;
 }
 
 size_t main_get_number_renames(FileList *old, FileList *new) {
@@ -251,10 +251,10 @@ size_t main_execute(FileList *old, FileList *new) {
         if (!strcmp(oldname, newname))
             continue;
 
-        int r;
-        r = renameat2(AT_FDCWD, oldname, 
+        int renamed;
+        renamed = renameat2(AT_FDCWD, oldname, 
                       AT_FDCWD, newname, RENAME_EXCHANGE);
-        if (r >= 0) {
+        if (renamed >= 0) {
             size_t h1 = hash_function(oldname);
             size_t h2 = hash_function(newname);
 
@@ -272,10 +272,10 @@ size_t main_execute(FileList *old, FileList *new) {
             }
             continue;
         } else {
-            r = rename(oldname, newname);
+            renamed = rename(oldname, newname);
         }
 
-        if (r < 0) {
+        if (renamed < 0) {
             printf("Error renaming "
                     RED"%s"RESET" to "RED"%s"RESET":\n", 
                     oldname, newname);
