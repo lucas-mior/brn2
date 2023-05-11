@@ -24,7 +24,7 @@ static FileList main_file_list_from_lines(char *, size_t);
 static bool main_repeated_name_hash(FileList *);
 static bool main_repeated_name_naive(FileList *);
 static bool main_verify(FileList *, FileList *);
-static size_t main_get_number_renames(FileList *, FileList *);
+static size_t main_get_number_changes(FileList *, FileList *);
 static size_t main_execute(FileList *, FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
 static void main_free_file_list(FileList *);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        number_changes = main_get_number_renames(&old, &new);
+        number_changes = main_get_number_changes(&old, &new);
         number_renames = 0;
 
         if (number_changes)
@@ -246,7 +246,7 @@ bool main_verify(FileList *old, FileList *new) {
     return !repeated;
 }
 
-size_t main_get_number_renames(FileList *old, FileList *new) {
+size_t main_get_number_changes(FileList *old, FileList *new) {
     size_t num = 0;
     for (size_t i = 0; i < old->length; i += 1) {
         if (strcmp(old->files[i].name, new->files[i].name))
