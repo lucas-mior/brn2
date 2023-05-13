@@ -62,7 +62,7 @@ typedef struct SameHash {
 
 typedef struct HashTable {
     size_t length;
-    struct SameHash *table;
+    SameHash *array;
 } HashTable;
 
 void *util_realloc(void *, size_t);

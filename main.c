@@ -199,7 +199,6 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
 
 bool main_repeated_name_hash(FileList *new) {
     bool repeated;
-    size_t table_size;
     HashTable table;
 
     repeated = false;
