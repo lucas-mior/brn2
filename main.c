@@ -200,25 +200,19 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
 bool main_repeated_name_hash(FileList *new) {
     bool repeated;
     size_t table_size;
-    SameHash *table;
+    HashTable table;
 
     repeated = false;
-    if (new->length + 10 > MIN_HASH_TABLE_SIZE)
-        table_size = new->length + 10;
-    else
-        table_size = MIN_HASH_TABLE_SIZE;
-
-    table = util_calloc(table_size, sizeof(SameHash));
+    table = hash_table_create(new->length);
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
-        size_t hash = hash_function(name);
-        if (!hash_insert(table, hash % table_size, name)) {
+        if (!hash_insert(&table, name)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
             repeated = true;
         }
     }
-    hash_free(table, table_size);
+    hash_table_free(table);
     return repeated;
 }
 
@@ -269,11 +263,11 @@ size_t main_get_number_changes(FileList *old, FileList *new) {
 
 size_t main_execute(FileList *old, FileList *new) {
     size_t length;
-    SameHash *names_renamed;
+    HashTable names_renamed;
     size_t number_renames = 0;
 
     length = old->length;
-    names_renamed = util_calloc(length, sizeof(SameHash));
+    names_renamed = hash_table_create(length);
 
     for (size_t i = 0; i < length; i += 1) {
         int renamed;
@@ -286,12 +280,9 @@ size_t main_execute(FileList *old, FileList *new) {
         renamed = renameat2(AT_FDCWD, oldname, 
                             AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            size_t hash1 = hash_function(oldname);
-            size_t hash2 = hash_function(newname);
-
-            if (hash_insert(names_renamed, hash1 % length, oldname))
+            if (hash_insert(&names_renamed, oldname))
                 number_renames += 1;
-            if (hash_insert(names_renamed, hash2 % length, newname))
+            if (hash_insert(&names_renamed, newname))
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname, newname);
@@ -313,13 +304,12 @@ size_t main_execute(FileList *old, FileList *new) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            size_t hash = hash_function(oldname);
-            if (hash_insert(names_renamed, hash % length, oldname))
+            if (hash_insert(&names_renamed, oldname))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", oldname, newname);
         }
     }
-    hash_free(names_renamed, length);
+    hash_table_free(names_renamed);
     return number_renames;
 }
 

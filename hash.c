@@ -27,8 +27,9 @@ size_t hash_function(char *str) {
     return hash;
 }
 
-bool hash_insert(SameHash *sh, size_t h, char *newkey) {
-    SameHash *iterator = &sh[h];
+bool hash_insert(HashTable *table, char *newkey) {
+    size_t h = hash_function(newkey) % table->length;
+    SameHash *iterator = &table->table[h];
 
     if (iterator->key == NULL) {
         iterator->key = newkey;
@@ -51,9 +52,19 @@ bool hash_insert(SameHash *sh, size_t h, char *newkey) {
     return true;
 }
 
-void hash_free(SameHash *table, size_t length) {
-    for (size_t i = 0; i < length; i += 1) {
-        SameHash *iterator = &table[i];
+HashTable hash_table_create(size_t length) {
+    HashTable table;
+
+    length += HASH_TABLE_EXTRASIZE;
+    table.length = length;
+
+    table.table = util_calloc(table.length, sizeof (SameHash));
+    return table;
+}
+
+void hash_table_free(HashTable table) {
+    for (size_t i = 0; i < table.length; i += 1) {
+        SameHash *iterator = &table.table[i];
         iterator = iterator->next;
         while (iterator) {
             void *aux = iterator;
@@ -61,5 +72,5 @@ void hash_free(SameHash *table, size_t length) {
             free(aux);
         }
     }
-    free(table);
+    free(table.table);
 }
