@@ -38,6 +38,7 @@
 #define RESET "\x1b[0m"
 #define MIN_HASH_TABLE_SIZE 256
 #define USE_HASH_TABLE_THRESHOLD 128
+#define HASH_TABLE_EXTRASIZE 8
 
 typedef struct File {
     char name[PATH_MAX];
@@ -59,10 +60,16 @@ typedef struct SameHash {
     struct SameHash *next;
 } SameHash;
 
+typedef struct HashTable {
+    size_t length;
+    struct SameHash *table;
+} HashTable;
+
 void *util_realloc(void *, size_t);
 void *util_calloc(size_t, size_t);
 void util_command(char **);
 
 size_t hash_function(char *);
-bool hash_insert(SameHash *, size_t, char *);
-void hash_free(SameHash *, size_t);
+bool hash_insert(HashTable *, char *);
+HashTable hash_table_create(size_t);
+void hash_table_free(HashTable);
