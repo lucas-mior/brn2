@@ -117,14 +117,14 @@ int main(int argc, char *argv[]) {
     exit(!status);
 }
 
-FileList main_file_list_from_dir(char *dir) {
+FileList main_file_list_from_dir(char *directory) {
     FileList file_list;
     struct dirent **directory_list;
     int length = 0;
 
-    int n = scandir(dir, &directory_list, NULL, versionsort);
+    int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
-        fprintf(stderr, "Error scanning %s: %s\n", dir, strerror(errno));
+        fprintf(stderr, "Error scanning %s: %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -314,7 +314,7 @@ size_t main_execute(FileList *old, FileList *new) {
 
 void main_usage(FILE *stream) {
     fprintf(stream, "usage: brn2 [-h | --help | <filename>]\n");
-    fprintf(stream, "Without arguments, rename files in current dir.\n");
+    fprintf(stream, "Without arguments, rename files in current directory.\n");
     fprintf(stream, "<filename>, rename files listed in <filename>.\n");
     fprintf(stream, "-h     : display this help message.\n");
     fprintf(stream, "--help : display this help message.\n");
