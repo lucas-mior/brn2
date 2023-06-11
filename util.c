@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2022 Patel, Nimai <nimai.m.patel@gmail.com>
- * Author: Patel, Nimai <nimai.m.patel@gmail.com>
  * Copyright (C) 2023 Mior, Lucas; <lucasbuddemior@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
