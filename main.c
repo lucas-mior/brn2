@@ -66,6 +66,12 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
+        dprintf(buffer.fd, "# brn2 rename buffer.\n");
+        dprintf(buffer.fd, "# lines starting with '#' or space are ignored, as well as empty lines\n");
+        dprintf(buffer.fd, "# to cancel renaming, close this file without changes.\n");
+        dprintf(buffer.fd, "# if you mess things up, remove all lines, save, and quit. no files will be renamed.\n");
+        dprintf(buffer.fd, "\n");
+
         for (size_t i = 0; i < old.length; i += 1)
             dprintf(buffer.fd, "%s\n", old.files[i].name);
         close(buffer.fd);
@@ -179,8 +185,13 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
             continue;
         if (!strcmp(buffer, ".") || !strcmp(buffer, ".."))
             continue;
+        if ((buffer[0] ==  ' ') || (buffer[0] == '#'))
+            continue;
 
         last = strcspn(buffer, "\n");
+        if (last == 0)
+            continue;
+
         buffer[last] = '\0';
         file_list.files[length].name = strdup(buffer);
         file_list.files[length].length = last;
