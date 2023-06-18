@@ -81,10 +81,10 @@ int main(int argc, char *argv[]) {
 
     {
         bool valid_buffer = false;
-        /* char *args[] = { EDITOR, buffer.name, NULL }; */
+        char *args[] = { EDITOR, buffer.name, NULL };
 
         while (!valid_buffer) {
-            /* util_command(args); */
+            util_command(args);
             new = main_file_list_from_lines(buffer.name, old.length);
             if ((valid_buffer = main_verify(&old, &new))) {
                 break;
