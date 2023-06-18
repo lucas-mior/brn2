@@ -36,8 +36,16 @@
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
-#define MIN_HASH_TABLE_SIZE 256
 #define USE_HASH_TABLE_THRESHOLD 128
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
 
 typedef struct File {
     char name[PATH_MAX];
