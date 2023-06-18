@@ -55,7 +55,7 @@ bool hash_insert(HashTable *table, char *newkey) {
 HashTable hash_table_create(size_t length) {
     HashTable table;
 
-    length += HASH_TABLE_EXTRASIZE;
+    length += length/2;
     table.length = length;
 
     table.array = util_calloc(table.length, sizeof (SameHash));

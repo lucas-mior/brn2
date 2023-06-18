@@ -38,7 +38,6 @@
 #define RESET "\x1b[0m"
 #define MIN_HASH_TABLE_SIZE 256
 #define USE_HASH_TABLE_THRESHOLD 128
-#define HASH_TABLE_EXTRASIZE 8
 
 typedef struct File {
     char name[PATH_MAX];
