@@ -292,7 +292,8 @@ size_t main_execute(FileList *old, FileList *new) {
                 if (old->files[j].length != new->files[i].length)
                     continue;
                 if (!strcmp(old->files[j].name, newname)) {
-                    strcpy(old->files[j].name, oldname);
+                    old->files[j].name = oldname;
+                    old->files[i].name = NULL;
                     break;
                 }
             }
