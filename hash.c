@@ -55,9 +55,6 @@ bool hash_insert(HashTable *table, char *newkey) {
 HashTable hash_table_create(size_t length) {
     HashTable table;
 
-    printf("hash_table_create(length = %zu)\n", length);
-    printf("sizeof(HashTable) = %zu\n", sizeof(HashTable));
-
     length += length/2;
     table.length = length;
 
