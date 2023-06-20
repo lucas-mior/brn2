@@ -288,7 +288,7 @@ size_t main_execute(FileList *old, FileList *new) {
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
-            for (size_t j = i + 1; j < old->length; j += 1) {
+            for (size_t j = i + 1; j < length; j += 1) {
                 if (old->files[j].length != new->files[i].length)
                     continue;
                 if (!strcmp(old->files[j].name, newname)) {
