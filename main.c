@@ -299,10 +299,9 @@ size_t main_execute(FileList *old, FileList *new) {
                 }
             }
             continue;
-        } else {
-            renamed = rename(*oldname, newname);
         }
 
+        renamed = rename(*oldname, newname);
         if (renamed < 0) {
             printf("Error renaming "
                     RED"%s"RESET" to "RED"%s"RESET":\n", 
