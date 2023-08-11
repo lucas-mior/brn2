@@ -73,20 +73,19 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        bool valid_buffer = false;
         char *args[] = { EDITOR, buffer.name, NULL };
 
-        while (!valid_buffer) {
+        while (true) {
             util_command(args);
             new = main_file_list_from_lines(buffer.name, old.length);
-            if ((valid_buffer = main_verify(&old, &new))) {
-                break;
-            } else {
+            if (!main_verify(&old, &new)) {
                 main_free_file_list(&new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
                 continue;
+            } else {
+                break;
             }
         }
     }
