@@ -28,16 +28,20 @@ size_t hash_function(char *str) {
 }
 
 bool hash_insert(HashTable *table, char *newkey) {
-    size_t h = hash_function(newkey) % table->length;
-    SameHash *iterator = &table->array[h];
+    size_t hash, hash_rest;
+    SameHash *iterator;
+    hash  = hash_function(newkey);
+    hash_rest = hash % table->length;
+    iterator = &table->array[hash_rest];
 
     if (iterator->key == NULL) {
         iterator->key = newkey;
+        iterator->hash = hash;
         return true;
     }
 
     do {
-        if (!strcmp(iterator->key, newkey))
+        if ((hash == iterator->hash) && !strcmp(iterator->key, newkey))
             return false;
 
         if (iterator->next)
@@ -48,6 +52,7 @@ bool hash_insert(HashTable *table, char *newkey) {
 
     iterator->next = util_calloc(1, sizeof (SameHash));
     iterator->next->key = newkey;
+    iterator->next->hash = hash;
 
     return true;
 }
