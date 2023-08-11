@@ -17,18 +17,18 @@
 
 #include "brn2.h"
 
-size_t hash_function(char *str) {
+uint32 hash_function(char *str) {
     /* djb2 hash function */
-    size_t hash = 5381;
+    uint32 hash = 5381;
     int c;
     while ((c = *str++))
-        hash = ((hash << 5) + hash) + (size_t) c;
+        hash = ((hash << 5) + hash) + (uint32) c;
 
     return hash;
 }
 
 bool hash_insert(HashTable *table, char *newkey) {
-    size_t hash, hash_rest;
+    uint32 hash, hash_rest;
     SameHash *iterator;
     hash  = hash_function(newkey);
     hash_rest = hash % table->length;
