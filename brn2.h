@@ -70,7 +70,7 @@ typedef struct SameHash {
 
 typedef struct HashTable {
     size_t length;
-    SameHash *array;
+    SameHash array[];
 } HashTable;
 
 void *util_realloc(void *, size_t);
@@ -79,5 +79,5 @@ void util_command(char **);
 
 size_t hash_function(char *);
 bool hash_insert(HashTable *, char *);
-HashTable hash_table_create(size_t);
-void hash_table_free(HashTable);
+HashTable *hash_table_create(size_t);
+void hash_table_free(HashTable *);
