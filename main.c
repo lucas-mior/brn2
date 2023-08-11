@@ -201,19 +201,19 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
 
 bool main_repeated_name_hash(FileList *new) {
     bool repeated;
-    HashTable *table;
+    HashTable *repeated_table;
 
     repeated = false;
-    table = hash_table_create(new->length);
+    repeated_table = hash_table_create(new->length);
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
-        if (!hash_insert(table, name)) {
+        if (!hash_insert(repeated_table, name)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
             repeated = true;
         }
     }
-    hash_table_destroy(table);
+    hash_table_destroy(repeated_table);
     return repeated;
 }
 
