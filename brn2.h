@@ -64,6 +64,7 @@ typedef struct FileList {
 
 typedef struct SameHash {
     char *key;
+    size_t hash;
     struct SameHash *next;
 } SameHash;
 
