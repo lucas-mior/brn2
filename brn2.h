@@ -64,8 +64,8 @@ typedef struct FileList {
 
 typedef struct SameHash {
     char *key;
+    size_t hash;
     struct SameHash *next;
-    uint32 hash;
 } SameHash;
 
 typedef struct HashTable {
@@ -77,7 +77,7 @@ void *util_realloc(void *, size_t);
 void *util_calloc(size_t, size_t);
 void util_command(char **);
 
-uint32 hash_function(char *);
+size_t hash_function(char *);
 bool hash_insert(HashTable *, char *);
 HashTable hash_table_create(size_t);
 void hash_table_free(HashTable);
