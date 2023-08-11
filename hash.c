@@ -32,7 +32,7 @@ bool hash_insert(HashTable *table, char *newkey) {
     SameHash *iterator;
     hash = hash_function(newkey);
     hash_rest = hash % table->length;
-    iterator = &table->array[hash_rest];
+    iterator = &(table->array[hash_rest]);
 
     if (iterator->key == NULL) {
         iterator->key = newkey;
