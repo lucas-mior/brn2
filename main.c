@@ -214,7 +214,7 @@ bool main_repeated_name_hash(FileList *new) {
             repeated = true;
         }
     }
-    hash_table_free(table);
+    hash_table_destroy(table);
     return repeated;
 }
 
@@ -314,7 +314,7 @@ size_t main_execute(FileList *old, FileList *new) {
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
     }
-    hash_table_free(names_renamed);
+    hash_table_destroy(names_renamed);
     return number_renames;
 }
 

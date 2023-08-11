@@ -70,7 +70,7 @@ HashTable *hash_table_create(size_t length) {
     return table;
 }
 
-void hash_table_free(HashTable *table) {
+void hash_table_destroy(HashTable *table) {
     for (size_t i = 0; i < table->length; i += 1) {
         SameHash *iterator = &(table->array[i]);
         iterator = iterator->next;
