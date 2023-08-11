@@ -57,19 +57,22 @@ bool hash_insert(HashTable *table, char *newkey) {
     return true;
 }
 
-HashTable hash_table_create(size_t length) {
-    HashTable table;
+HashTable *hash_table_create(size_t length) {
+    HashTable *table;
+    size_t size;
 
     length += 10 + length/4;
-    table.length = length;
+    size = sizeof (HashTable) + length * sizeof (SameHash);
 
-    table.array = util_calloc(table.length, sizeof (SameHash));
+    table = util_realloc(NULL, size);
+    memset(table, 0, size);
+    table->length = length;
     return table;
 }
 
-void hash_table_free(HashTable table) {
-    for (size_t i = 0; i < table.length; i += 1) {
-        SameHash *iterator = &table.array[i];
+void hash_table_free(HashTable *table) {
+    for (size_t i = 0; i < table->length; i += 1) {
+        SameHash *iterator = &(table->array[i]);
         iterator = iterator->next;
         while (iterator) {
             void *aux = iterator;
@@ -77,5 +80,5 @@ void hash_table_free(HashTable table) {
             free(aux);
         }
     }
-    free(table.array);
+    free(table);
 }
