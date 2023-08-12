@@ -62,7 +62,10 @@ HashTable *hash_table_create(size_t length) {
     HashTable *table;
     size_t size;
 
-    length += 10 + length/4;
+    if (length > SIZE_MAX/4)
+        length = SIZE_MAX/4;
+    length *= 4;
+
     size = sizeof (HashTable) + length * sizeof (SameHash);
 
     table = util_realloc(NULL, size);
