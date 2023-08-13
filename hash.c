@@ -62,8 +62,8 @@ HashTable *hash_table_create(size_t length) {
     HashTable *table;
     size_t size;
 
-    if (length > SIZE_MAX/4)
-        length = SIZE_MAX/4;
+    if (length > (SIZE_MAX/4))
+        length = (SIZE_MAX/4);
     length *= 4;
 
     size = sizeof (HashTable) + length * sizeof (SameHash);
