@@ -19,8 +19,8 @@
 
 #include "brn2.h"
 
-static FileList main_file_list_from_dir(char *);
-static FileList main_file_list_from_lines(char *, size_t);
+static FileList *main_file_list_from_dir(char *);
+static FileList *main_file_list_from_lines(char *, size_t);
 static bool main_repeated_name_hash(FileList *);
 static bool main_repeated_name_naive(FileList *);
 static bool main_verify(FileList *, FileList *);
@@ -33,8 +33,8 @@ static const char *tempdir = "/tmp";
 
 int main(int argc, char *argv[]) {
     File buffer;
-    FileList old;
-    FileList new;
+    FileList *old;
+    FileList *new;
     bool status = true;
 
     if (argc >= 3) {
@@ -66,8 +66,8 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        for (size_t i = 0; i < old.length; i += 1)
-            dprintf(buffer.fd, "%s\n", old.files[i].name);
+        for (size_t i = 0; i < old->length; i += 1)
+            dprintf(buffer.fd, "%s\n", old->files[i].name);
         close(buffer.fd);
         buffer.fd = -1;
     }
@@ -77,9 +77,9 @@ int main(int argc, char *argv[]) {
 
         while (true) {
             util_command(args);
-            new = main_file_list_from_lines(buffer.name, old.length);
-            if (!main_verify(&old, &new)) {
-                main_free_file_list(&new);
+            new = main_file_list_from_lines(buffer.name, old->length);
+            if (!main_verify(old, new)) {
+                main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -93,11 +93,11 @@ int main(int argc, char *argv[]) {
     {
         size_t number_changes;
         size_t number_renames;
-        number_changes = main_get_number_changes(&old, &new);
+        number_changes = main_get_number_changes(old, new);
         number_renames = 0;
 
         if (number_changes)
-            number_renames = main_execute(&old, &new);
+            number_renames = main_execute(old, new);
         if (number_changes != number_renames) {
             fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
                             "Check your files.\n", 
@@ -110,24 +110,31 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    main_free_file_list(&old);
-    main_free_file_list(&new);
+    main_free_file_list(old);
+    main_free_file_list(new);
     unlink(buffer.name);
     exit(!status);
 }
 
-FileList main_file_list_from_dir(char *directory) {
-    FileList file_list;
+FileList *main_file_list_from_dir(char *directory) {
+    FileList *file_list;
     struct dirent **directory_list;
-    int length = 0;
+    size_t length = 0;
+    size_t size;
 
     int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
         fprintf(stderr, "Error scanning %s: %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
+    if (n <= 2) {
+        fprintf(stderr, "Empty directory. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }
 
-    file_list.files = util_realloc(NULL, (size_t) n * sizeof (FileName));
+    size = STRUCT_ARRAY_SIZE(FileList, FileName, (n - 2));
+
+    file_list = util_realloc(NULL, size);
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -136,24 +143,21 @@ FileList main_file_list_from_dir(char *directory) {
             continue;
         }
 
-        file_list.files[length].name = strdup(name);
-        file_list.files[length].length = strlen(name);
+        file_list->files[length].name = strdup(name);
+        file_list->files[length].length = strlen(name);
         free(directory_list[i]);
         length += 1;
     }
-    if (length == 0) {
-        fprintf(stderr, "Empty directory. Exiting.\n");
-        exit(EXIT_FAILURE);
-    }
+    file_list->length = length;
     free(directory_list);
-    file_list.length = (size_t) length;
     return file_list;
 }
 
-FileList main_file_list_from_lines(char *filename, size_t capacity) {
-    FileList file_list;
+FileList *main_file_list_from_lines(char *filename, size_t capacity) {
+    FileList *file_list;
     FILE *file = fopen(filename, "r");
     size_t length = 0;
+    size_t size;
 
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
@@ -163,15 +167,15 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
     if (capacity == 0)
         capacity = 128;
 
-    file_list.files = util_realloc(NULL, capacity * sizeof (FileName));
+    size = STRUCT_ARRAY_SIZE(FileList, FileName, capacity);
+    file_list = util_realloc(NULL, size);
 
     while (!feof(file)) {
         char buffer[PATH_MAX];
         size_t last;
         if (length >= capacity) {
             capacity *= 2;
-            file_list.files = util_realloc(file_list.files,
-                                           capacity * sizeof (FileName));
+            file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
         }
 
         if (!fgets(buffer, sizeof(buffer), file))
@@ -184,8 +188,8 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
             continue;
 
         buffer[last] = '\0';
-        file_list.files[length].name = strdup(buffer);
-        file_list.files[length].length = last;
+        file_list->files[length].name = strdup(buffer);
+        file_list->files[length].length = last;
         length += 1;
     }
     if (length == 0) {
@@ -193,9 +197,8 @@ FileList main_file_list_from_lines(char *filename, size_t capacity) {
         exit(EXIT_FAILURE);
     }
     fclose(file);
-    file_list.files = util_realloc(file_list.files,
-                                   length * sizeof (FileName));
-    file_list.length = length;
+    file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    file_list->length = length;
     return file_list;
 }
 
@@ -331,6 +334,6 @@ void main_usage(FILE *stream) {
 void main_free_file_list(FileList *file_list) {
     for (size_t i = 0; i < file_list->length; i += 1)
         free(file_list->files[i].name);
-    free(file_list->files);
+    free(file_list);
     return;
 }
