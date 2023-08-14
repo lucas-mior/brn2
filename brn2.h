@@ -38,6 +38,9 @@
 #define RESET "\x1b[0m"
 #define USE_HASH_TABLE_THRESHOLD 128
 
+#define STRUCT_ARRAY_SIZE(StructType, ArrayType, ArrayLength) \
+    sizeof (StructType) + ArrayLength*sizeof (ArrayType)
+
 typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
@@ -58,8 +61,8 @@ typedef struct FileName {
 } FileName;
 
 typedef struct FileList {
-    FileName *files;
     size_t length;
+    FileName files[];
 } FileList;
 
 typedef struct SameHash {
