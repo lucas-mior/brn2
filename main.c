@@ -120,7 +120,6 @@ FileList *main_file_list_from_dir(char *directory) {
     FileList *file_list;
     struct dirent **directory_list;
     size_t length = 0;
-    size_t size;
 
     int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
@@ -132,9 +131,7 @@ FileList *main_file_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    size = STRUCT_ARRAY_SIZE(FileList, FileName, (n - 2));
-
-    file_list = util_realloc(NULL, size);
+    file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -157,7 +154,6 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FileList *file_list;
     FILE *file = fopen(filename, "r");
     size_t length = 0;
-    size_t size;
 
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
@@ -167,8 +163,7 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     if (capacity == 0)
         capacity = 128;
 
-    size = STRUCT_ARRAY_SIZE(FileList, FileName, capacity);
-    file_list = util_realloc(NULL, size);
+    file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
 
     while (!feof(file)) {
         char buffer[PATH_MAX];

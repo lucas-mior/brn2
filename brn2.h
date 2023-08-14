@@ -39,7 +39,7 @@
 #define USE_HASH_TABLE_THRESHOLD 128
 
 #define STRUCT_ARRAY_SIZE(StructType, ArrayType, ArrayLength) \
-    sizeof (StructType) + ArrayLength*sizeof (ArrayType)
+    sizeof (StructType) + (size_t)(ArrayLength)*sizeof (ArrayType)
 
 typedef int8_t int8;
 typedef int16_t int16;
