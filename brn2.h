@@ -38,8 +38,8 @@
 #define RESET "\x1b[0m"
 #define USE_HASH_TABLE_THRESHOLD 128
 
-#define STRUCT_ARRAY_SIZE(StructType, ArrayType, ArrayLength) \
-    sizeof (StructType) + (size_t)(ArrayLength)*sizeof (ArrayType)
+#define STRUCT_ARRAY_SIZE(StructType, ArrayType, array_length) \
+    sizeof (StructType) + (size_t)(array_length)*sizeof (ArrayType)
 
 typedef int8_t int8;
 typedef int16_t int16;
