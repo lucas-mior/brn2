@@ -135,13 +135,17 @@ FileList *main_file_list_from_dir(char *directory) {
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
+        size_t name_length;
         if (!strcmp(name, ".") || !strcmp(name, "..")) {
             free(directory_list[i]);
             continue;
         }
 
-        file_list->files[length].name = strdup(name);
-        file_list->files[length].length = strlen(name);
+        name_length = strlen(name);
+        file_list->files[length].name = util_realloc(NULL, name_length+1);
+        memcpy(file_list->files[length].name, name, name_length+1);
+        file_list->files[length].length = name_length;
+
         free(directory_list[i]);
         length += 1;
     }
@@ -183,7 +187,8 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
             continue;
 
         buffer[last] = '\0';
-        file_list->files[length].name = strdup(buffer);
+        file_list->files[length].name = util_realloc(NULL, last+1);
+        memcpy(file_list->files[length].name, buffer, last+1);
         file_list->files[length].length = last;
         length += 1;
     }
