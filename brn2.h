@@ -80,6 +80,7 @@ void *util_realloc(void *, size_t);
 void *util_calloc(size_t, size_t);
 void util_command(char **);
 
-bool hash_insert(HashTable *, char *, size_t);
+size_t hash_function(char *);
+bool hash_insert(HashTable *, char *);
 HashTable *hash_table_create(size_t);
 void hash_table_destroy(HashTable *);
