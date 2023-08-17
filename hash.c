@@ -17,21 +17,24 @@
 
 #include "brn2.h"
 
-size_t hash_function(char *str) {
-    /* djb2 hash function */
-    size_t hash = 5381;
-    int c;
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + (size_t) c;
-
+static size_t hash_jenkins(const char *str, size_t len) {
+    size_t hash, i;
+    for(hash = i = 0; i < len; ++i) {
+        hash += str[i];
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
     return hash;
 }
 
-bool hash_insert(HashTable *table, char *newkey) {
+bool hash_insert(HashTable *table, char *newkey, size_t length) {
     size_t hash, hash_rest;
     SameHash *iterator;
 
-    hash = hash_function(newkey);
+    hash = hash_jenkins(newkey, length);
     hash_rest = hash % table->length;
     iterator = &(table->array[hash_rest]);
 
