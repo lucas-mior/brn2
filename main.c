@@ -215,7 +215,9 @@ bool main_repeated_name_hash(FileList *new) {
     repeated_table = hash_table_create(new->length);
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
-        if (!hash_insert(repeated_table, name)) {
+        size_t length = new->files[i].length;
+
+        if (!hash_insert(repeated_table, name, length)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n", name);
             repeated = true;
@@ -281,7 +283,9 @@ size_t main_execute(FileList *old, FileList *new) {
     for (size_t i = 0; i < length; i += 1) {
         int renamed;
         char **oldname = &(old->files[i].name);
+        size_t oldlength = old->files[i].length;
         char *newname = new->files[i].name;
+        size_t newlength = new->files[i].length;
 
         if (!strcmp(*oldname, newname))
             continue;
@@ -289,9 +293,9 @@ size_t main_execute(FileList *old, FileList *new) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_insert(names_renamed, *oldname))
+            if (hash_insert(names_renamed, *oldname, oldlength))
                 number_renames += 1;
-            if (hash_insert(names_renamed, newname))
+            if (hash_insert(names_renamed, newname, newlength))
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
@@ -316,7 +320,7 @@ size_t main_execute(FileList *old, FileList *new) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_insert(names_renamed, *oldname))
+            if (hash_insert(names_renamed, *oldname, oldlength))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
