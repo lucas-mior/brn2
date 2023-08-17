@@ -17,10 +17,11 @@
 
 #include "brn2.h"
 
-static size_t hash_jenkins(const char *str, size_t len) {
-    size_t hash, i;
-    for(hash = i = 0; i < len; ++i) {
-        hash += str[i];
+static inline size_t hash_function(const char *str, size_t len) {
+    /* Jenkins OAAT */
+    size_t hash = 0;
+    for(size_t i = 0; i < len; ++i) {
+        hash += (size_t) str[i];
         hash += (hash << 10);
         hash ^= (hash >> 6);
     }
@@ -34,7 +35,7 @@ bool hash_insert(HashTable *table, char *newkey, size_t length) {
     size_t hash, hash_rest;
     SameHash *iterator;
 
-    hash = hash_jenkins(newkey, length);
+    hash = hash_function(newkey, length);
     hash_rest = hash % table->length;
     iterator = &(table->array[hash_rest]);
 
