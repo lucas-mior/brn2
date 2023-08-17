@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (!(EDITOR = getenv("EDITOR"))) {
-        fprintf(stderr, "EDITOR variable is not set. Using vim by default.\n");
         EDITOR = "vim";
+        fprintf(stderr, "EDITOR variable is not set. Using %s by default.\n", EDITOR);
     }
 
     {
