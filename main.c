@@ -283,7 +283,7 @@ size_t main_execute(FileList *old, FileList *new) {
     for (size_t i = 0; i < length; i += 1) {
         int renamed;
         char **oldname = &(old->files[i].name);
-        size_t oldlength = old->files[i].length;
+        size_t *oldlength = &(old->files[i].length);
         char *newname = new->files[i].name;
         size_t newlength = new->files[i].length;
 
@@ -293,7 +293,7 @@ size_t main_execute(FileList *old, FileList *new) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_insert(names_renamed, *oldname, oldlength))
+            if (hash_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
             if (hash_insert(names_renamed, newname, newlength))
                 number_renames += 1;
@@ -303,9 +303,8 @@ size_t main_execute(FileList *old, FileList *new) {
                 if (old->files[j].length != new->files[i].length)
                     continue;
                 if (!strcmp(old->files[j].name, newname)) {
-                    char *aux = old->files[j].name;
-                    old->files[j].name = *oldname;
-                    *oldname = aux;
+                    SWAP(old->files[j].name, *oldname);
+                    SWAP(old->files[j].length, *oldlength);
                     break;
                 }
             }
@@ -320,7 +319,7 @@ size_t main_execute(FileList *old, FileList *new) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_insert(names_renamed, *oldname, oldlength))
+            if (hash_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
