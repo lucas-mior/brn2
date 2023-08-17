@@ -14,7 +14,7 @@ of filenames in the current directory.  If given 1 argument, it is interpreted
 as the text filename with a list of filenames to rename.  You can then edit the
 filenames in the buffer and the changes will take place when you save and exit.
  
-By default it uses `$EDITOR` and if that is not set then `$VISUAL`.
+By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 
 ### Notes
 - It will not work for filenames longer than PATHMAX characters
