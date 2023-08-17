@@ -140,7 +140,6 @@ FileList *main_file_list_from_dir(char *directory) {
             free(directory_list[i]);
             continue;
         }
-
         name_length = strlen(name);
         file_list->files[length].name = util_realloc(NULL, name_length+1);
         memcpy(file_list->files[length].name, name, name_length+1);
@@ -158,14 +157,17 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FileList *file_list;
     FILE *file = fopen(filename, "r");
     size_t length = 0;
+    bool new_buffer = true;
 
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    if (capacity == 0)
+    if (capacity == 0) {
         capacity = 128;
+        new_buffer = false;
+    }
 
     file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
 
@@ -179,14 +181,17 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
 
         if (!fgets(buffer, sizeof(buffer), file))
             continue;
-        if (!strcmp(buffer, ".") || !strcmp(buffer, ".."))
-            continue;
 
         last = strcspn(buffer, "\n");
         if (last == 0)
             continue;
 
         buffer[last] = '\0';
+        if (!strcmp(buffer, ".") || !strcmp(buffer, ".."))
+            continue;
+        if (!new_buffer && access(buffer, F_OK))
+            continue;
+
         file_list->files[length].name = util_realloc(NULL, last+1);
         memcpy(file_list->files[length].name, buffer, last+1);
         file_list->files[length].length = last;
