@@ -19,6 +19,8 @@ By default it uses `$EDITOR` and if that is not set then `$VISUAL`.
 ### Notes
 - It will not work for filenames longer than PATHMAX characters
 - Newlines in filenames are also not allowed.
+- If a filename listed in `<files.txt>` does not correspond to an existing file,
+  it will be ignored.
  
 ## Install
  
