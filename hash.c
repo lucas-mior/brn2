@@ -17,6 +17,18 @@
 
 #include "brn2.h"
 
+typedef struct SameHash {
+    char *key;
+    size_t hash;
+    struct SameHash *next;
+} SameHash;
+
+typedef struct HashTable {
+    size_t length;
+    SameHash array[];
+} HashTable;
+
+
 static inline size_t hash_function(const char *str, size_t len) {
     /* Jenkins OAAT */
     size_t hash = 0;

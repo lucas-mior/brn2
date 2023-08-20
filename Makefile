@@ -9,7 +9,7 @@ objs = util.o main.o hash.o
 
 all: release
 
-$(objs): Makefile brn2.h
+$(objs): Makefile brn2.h hash.h
 util.o: util.c
 main.o: main.c
 hash.o: hash.c
