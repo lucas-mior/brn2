@@ -39,7 +39,7 @@
 
 #define STRUCT_ARRAY_SIZE(StructType, ArrayType, array_length) \
     sizeof (StructType) + (size_t)(array_length)*sizeof (ArrayType)
-#define SWAP(x, y) do { typeof(x) aux = x; x = y; y = aux; } while (0)
+#define SWAP(x, y) do { typeof(x) SWAP = x; x = y; y = SWAP; } while (0)
 
 typedef int8_t int8;
 typedef int16_t int16;
