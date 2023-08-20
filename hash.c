@@ -32,7 +32,7 @@ typedef struct HashTable {
 static inline size_t hash_function(const char *str, size_t len) {
     /* Jenkins OAAT */
     size_t hash = 0;
-    for(size_t i = 0; i < len; ++i) {
+    for(size_t i = 0; i < len; i += 1) {
         hash += (size_t) str[i];
         hash += (hash << 10);
         hash ^= (hash >> 6);
