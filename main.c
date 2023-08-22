@@ -309,8 +309,8 @@ size_t main_execute(FileList *old, FileList *new) {
                 if (old->files[j].length != new->files[i].length)
                     continue;
                 if (!strcmp(old->files[j].name, newname)) {
-                    SWAP(old->files[j].name, *oldname);
-                    SWAP(old->files[j].length, *oldlength);
+                    SWAP(char *, old->files[j].name, *oldname);
+                    SWAP(size_t, old->files[j].length, *oldlength);
                     break;
                 }
             }

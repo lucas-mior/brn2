@@ -30,10 +30,10 @@ typedef struct SameHash {
     struct SameHash *next;
 } SameHash;
 
-typedef struct HashTable {
+struct HashTable {
     size_t length;
     SameHash array[];
-} HashTable;
+};
 
 
 static inline size_t hash_function(const char *str, size_t len) {
