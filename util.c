@@ -17,10 +17,13 @@
 
 #include "stdlib.h"
 #include "stdio.h"
+#include <stdbool.h>
 #include "string.h"
 #include "errno.h"
 #include "unistd.h"
 #include "sys/wait.h"
+
+#include "util.h"
 
 void *util_realloc(void *old, const size_t size) {
     void *p;

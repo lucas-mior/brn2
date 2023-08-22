@@ -1,4 +1,4 @@
-CC = gcc
+CC = clang
 PREFIX ?= /usr/local
 
 objs = util.o main.o hash.o
@@ -14,7 +14,7 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-cflags += -std=c2x -Wall -Wextra
+cflags += -Weverything
 release: cflags += -O2
 release: stripflag = -s
 release: brn2
