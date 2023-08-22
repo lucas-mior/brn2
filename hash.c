@@ -19,8 +19,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "util.h"
+#include "hash.h"
 
 typedef struct SameHash {
     char *key;

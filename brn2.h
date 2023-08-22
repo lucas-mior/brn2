@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 #include "util.h"
 
