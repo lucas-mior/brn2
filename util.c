@@ -15,7 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "brn2.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+#include "errno.h"
+#include "unistd.h"
+#include "sys/wait.h"
 
 void *util_realloc(void *old, const size_t size) {
     void *p;
