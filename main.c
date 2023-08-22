@@ -32,6 +32,11 @@ static void main_free_file_list(FileList *);
 static char *EDITOR;
 static const char *tempdir = "/tmp";
 
+enum {
+    CAPACITY_NONE = 0,
+    CAPACITY_INITIAL_GUESS = 128,
+};
+
 int main(int argc, char *argv[]) {
     File buffer;
     FileList *old;
@@ -46,7 +51,7 @@ int main(int argc, char *argv[]) {
         } else if (!strncmp(argv[1], "-h", 2)) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_lines(argv[1], 0);
+            old = main_file_list_from_lines(argv[1], CAPACITY_NONE);
         }
     } else {
         old = main_file_list_from_dir(".");
@@ -165,9 +170,11 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
         exit(EXIT_FAILURE);
     }
 
-    if (capacity == 0) {
-        capacity = 128;
+    if (capacity == CAPACITY_NONE) {
+        capacity = CAPACITY_INITIAL_GUESS;
         new_buffer = false;
+    } else {
+        __attribute__((__assume__(capacity > length)));
     }
 
     file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
