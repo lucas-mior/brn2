@@ -173,8 +173,6 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     if (capacity == CAPACITY_NONE) {
         capacity = CAPACITY_INITIAL_GUESS;
         new_buffer = false;
-    } else {
-        __attribute__((__assume__(capacity > length)));
     }
 
     file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
