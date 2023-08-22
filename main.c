@@ -164,30 +164,15 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FILE *file = fopen(filename, "r");
     size_t length = 0;
     bool new_buffer = true;
-    void (*func)(void);
 
     if (!file) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    void realoc(void) {
-        if (length >= capacity) {
-            capacity *= 2;
-            file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
-        }
-    }
-
-    void nothing(void) {
-        return;
-    }
-
     if (capacity == CAPACITY_NONE) {
         capacity = CAPACITY_INITIAL_GUESS;
         new_buffer = false;
-        func = realoc;
-    } else {
-        func = nothing;
     }
 
     file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
@@ -195,7 +180,10 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     while (!feof(file)) {
         char buffer[PATH_MAX];
         size_t last;
-        func();
+        if (length >= capacity) {
+            capacity *= 2;
+            file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+        }
 
         if (!fgets(buffer, sizeof(buffer), file))
             continue;
