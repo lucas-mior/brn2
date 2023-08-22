@@ -43,11 +43,14 @@ void *util_calloc(const size_t nmemb, const size_t size) {
     return p;
 }
 
-void util_command(char **argv) {
+void util_command(int argc, char **argv) {
     switch (fork()) {
     case 0:
         execvp(argv[0], argv);
-        fprintf(stderr, "Error running `%s`: %s\n", argv[0], strerror(errno));
+        fprintf(stderr, "Error running '%s", argv[0]);
+        for (int i = 1; i < argc; i += 1)
+            fprintf(stderr, " %s", argv[i]);
+        fprintf(stderr, "': %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     case -1:
         fprintf(stderr, "Error forking: %s\n", strerror(errno));

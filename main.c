@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
         char *args[] = { EDITOR, buffer.name, NULL };
 
         while (true) {
-            util_command(args);
+            util_command(ARRAY_LENGTH(args), args);
             new = main_file_list_from_lines(buffer.name, old->length);
             if (!main_verify(old, new)) {
                 main_free_file_list(new);
