@@ -20,17 +20,14 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
-#include <linux/limits.h>
 #include <string.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <errno.h>
-#include <sys/wait.h>
 #include <fcntl.h>
-#include <sys/syscall.h>
+
+#include "util.h"
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
@@ -64,7 +61,3 @@ typedef struct FileList {
     size_t length;
     FileName files[];
 } FileList;
-
-void *util_realloc(void *, size_t);
-void *util_calloc(size_t, size_t);
-void util_command(char **);
