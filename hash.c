@@ -74,7 +74,7 @@ bool hash_insert(HashTable *table, char *newkey, size_t length) {
             break;
     } while (true);
 
-    iterator->next = util_calloc(1, sizeof (SameHash));
+    iterator->next = util_calloc(1, sizeof (*iterator));
     iterator->next->key = newkey;
     iterator->next->hash = hash;
 
@@ -89,7 +89,7 @@ HashTable *hash_table_create(size_t length) {
         length = (SIZE_MAX/4);
     length *= 4;
 
-    size = sizeof (HashTable) + length * sizeof (SameHash);
+    size = sizeof (*table) + length * sizeof (table->array[0]);
 
     table = util_realloc(NULL, size);
     memset(table, 0, size);
