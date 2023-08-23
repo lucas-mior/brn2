@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -66,16 +65,8 @@ bool hash_insert(HashTable *table, char *newkey, size_t length) {
     }
 
     do {
-        if (hash == iterator->hash) {
-            if (!strcmp(iterator->key, newkey)) {
-                printf("same hash for two equal strings!\n");
-                printf("%s != %s\n", iterator->key, newkey);
-                return false;
-            } else {
-                printf("same hash for two diffrents strings!\n");
-                printf("%s != %s\n", iterator->key, newkey);
-            }
-        }
+        if ((hash == iterator->hash) && !strcmp(iterator->key, newkey))
+            return false;
 
         if (iterator->next)
             iterator = iterator->next;
