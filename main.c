@@ -37,7 +37,7 @@ enum {
     CAPACITY_INITIAL_GUESS = 128,
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
     File buffer;
     FileList *old;
     FileList *new;
