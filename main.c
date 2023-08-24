@@ -98,10 +98,8 @@ int main(int argc, char **argv) {
     }
 
     {
-        size_t number_changes;
-        size_t number_renames;
-        number_changes = main_get_number_changes(old, new);
-        number_renames = 0;
+        size_t number_changes = main_get_number_changes(old, new);
+        size_t number_renames = 0;
 
         if (number_changes)
             number_renames = main_execute(old, new);
@@ -247,15 +245,15 @@ bool main_repeated_name_naive(FileList *new) {
     bool repeated = false;
 
     for (size_t i = 0; i < new->length; i += 1) {
-        char *name = new->files[i].name;
-        size_t length = new->files[i].length;
-
+        FileName file_i = new->files[i];
         for (size_t j = i+1; j < new->length; j += 1) {
-            if (length != new->files[j].length)
+            FileName file_j = new->files[j];
+
+            if (file_i.length != file_j.length)
                 continue;
-            if (!strcmp(name, new->files[j].name)) {
+            if (!memcmp(file_i.name, file_j.name, file_i.length)) {
                 fprintf(stderr, RED"\"%s\""RESET 
-                                " repeated in the buffer\n", name);
+                                " repeated in the buffer\n", file_i.name);
                 repeated = true;
             }
         }
