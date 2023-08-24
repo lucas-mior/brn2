@@ -79,30 +79,29 @@ int main(int argc, char **argv) {
         buffer.fd = -1;
     }
 
-    /* { */
-    /*     char *args[] = { EDITOR, buffer.name, NULL }; */
+    {
+        char *args[] = { EDITOR, buffer.name, NULL };
 
-    /*     while (true) { */
-    /*         util_command(ARRAY_LENGTH(args), args); */
-    /*         new = main_file_list_from_lines(buffer.name, old->length); */
-    /*         if (!main_verify(old, new)) { */
-    /*             main_free_file_list(new); */
-    /*             printf("Fix your renames. Press control-c to cancel or press" */
-    /*                    " ENTER to open the file list editor again.\n"); */
-    /*             getc(stdin); */
-    /*             continue; */
-    /*         } else { */
-    /*             break; */
-    /*         } */
-    /*     } */
-    /* } */
+        while (true) {
+            util_command(ARRAY_LENGTH(args), args);
+            new = main_file_list_from_lines(buffer.name, old->length);
+            if (!main_verify(old, new)) {
+                main_free_file_list(new);
+                printf("Fix your renames. Press control-c to cancel or press"
+                       " ENTER to open the file list editor again.\n");
+                getc(stdin);
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
 
     {
         size_t number_changes;
         size_t number_renames;
-        number_changes = main_get_number_changes(old, old);
+        number_changes = main_get_number_changes(old, new);
         number_renames = 0;
-        exit(0);
 
         if (number_changes)
             number_renames = main_execute(old, new);
