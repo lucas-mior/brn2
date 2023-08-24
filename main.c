@@ -166,11 +166,11 @@ FileList *main_file_list_from_dir(char *directory) {
 
 FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FileList *file_list;
-    FILE *file = fopen(filename, "r");
+    FILE *lines = fopen(filename, "r");
     size_t length = 0;
     bool new_buffer = true;
 
-    if (!file) {
+    if (!lines) {
         fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -182,15 +182,17 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
 
     file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
 
-    while (!feof(file)) {
+    while (!feof(lines)) {
         char buffer[PATH_MAX];
         size_t last;
+        FileName *file;
+
         if (length >= capacity) {
             capacity *= 2;
             file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
         }
 
-        if (!fgets(buffer, sizeof(buffer), file))
+        if (!fgets(buffer, sizeof(buffer), lines))
             continue;
 
         last = strcspn(buffer, "\n");
@@ -203,16 +205,17 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
         if (!new_buffer && access(buffer, F_OK))
             continue;
 
-        file_list->files[length].name = util_realloc(NULL, last+1);
-        memcpy(file_list->files[length].name, buffer, last+1);
-        file_list->files[length].length = last;
+        file = &(file_list->files[length]);
+        file->name = util_realloc(NULL, last+1);
+        memcpy(file->name, buffer, last+1);
+        file->length = last;
         length += 1;
     }
     if (length == 0) {
         fprintf(stderr, "Empty filelist. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    fclose(file);
+    fclose(lines);
     file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
     return file_list;
@@ -228,12 +231,11 @@ bool main_repeated_name_hash(FileList *new) {
     HashTable *repeated_table = hash_table_create(new->length);
 
     for (size_t i = 0; i < new->length; i += 1) {
-        char *name = new->files[i].name;
-        size_t length = new->files[i].length;
+        FileName newfile = new->files[i];
 
-        if (!hash_insert(repeated_table, name, length)) {
+        if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
             fprintf(stderr, RED"\"%s\""RESET
-                            " appears more than once in the buffer\n", name);
+                            " appears more than once in the buffer\n", newfile.name);
             repeated = true;
         }
     }
