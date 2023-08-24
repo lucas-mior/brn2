@@ -308,8 +308,8 @@ size_t main_execute(FileList *old, FileList *new) {
     for (size_t i = 0; i < length; i += 1) {
         int renamed;
         char **oldname = &(old->files[i].name);
-        size_t *oldlength = &(old->files[i].length);
         char **newname = &(new->files[i].name);
+        size_t *oldlength = &(old->files[i].length);
         size_t *newlength = &(new->files[i].length);
 
         if (!strcmp(*oldname, *newname))
