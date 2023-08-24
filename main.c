@@ -220,11 +220,9 @@ bool is_pwd_or_parent(char *filename) {
 }
 
 bool main_repeated_name_hash(FileList *new) {
-    bool repeated;
-    HashTable *repeated_table;
+    bool repeated = false;
+    HashTable *repeated_table = hash_table_create(new->length);
 
-    repeated = false;
-    repeated_table = hash_table_create(new->length);
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
         size_t length = new->files[i].length;
