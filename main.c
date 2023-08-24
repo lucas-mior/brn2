@@ -309,25 +309,25 @@ size_t main_execute(FileList *old, FileList *new) {
         int renamed;
         char **oldname = &(old->files[i].name);
         size_t *oldlength = &(old->files[i].length);
-        char *newname = new->files[i].name;
-        size_t newlength = new->files[i].length;
+        char **newname = &(new->files[i].name);
+        size_t *newlength = &(new->files[i].length);
 
-        if (!strcmp(*oldname, newname))
+        if (!strcmp(*oldname, *newname))
             continue;
 
         renamed = renameat2(AT_FDCWD, *oldname, 
-                            AT_FDCWD, newname, RENAME_EXCHANGE);
+                            AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             if (hash_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
-            if (hash_insert(names_renamed, newname, newlength))
+            if (hash_insert(names_renamed, *newname, *newlength))
                 number_renames += 1;
 
-            printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
+            printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
             for (size_t j = i + 1; j < length; j += 1) {
                 if (old->files[j].length != new->files[i].length)
                     continue;
-                if (!strcmp(old->files[j].name, newname)) {
+                if (!strcmp(old->files[j].name, *newname)) {
                     SWAP(char *, old->files[j].name, *oldname);
                     SWAP(size_t, old->files[j].length, *oldlength);
                     break;
@@ -336,17 +336,17 @@ size_t main_execute(FileList *old, FileList *new) {
             continue;
         }
 
-        renamed = rename(*oldname, newname);
+        renamed = rename(*oldname, *newname);
         if (renamed < 0) {
             printf("Error renaming "
                     RED"%s"RESET" to "RED"%s"RESET":\n", 
-                    *oldname, newname);
+                    *oldname, *newname);
             printf("%s\n", strerror(errno));
             continue;
         } else {
             if (hash_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
-            printf("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
+            printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
     hash_table_destroy(names_renamed);
