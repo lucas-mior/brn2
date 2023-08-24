@@ -35,7 +35,7 @@ sudo make install
   atomically swap the names of two files which means no temporary files are made
   either (yes, this also means you can't compile it on other Unixes).
  
-* It is written in C instead of bash which makes its behavior more robust and
+* It is written in C instead of bash which makes it faster, more robust and
   predictable.
  
 * It has error handling, it will safely abort if the exact number of
