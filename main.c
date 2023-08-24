@@ -36,6 +36,7 @@ enum {
     CAPACITY_NONE = 0,
     CAPACITY_INITIAL_GUESS = 128,
 };
+#define IS_PWD_OR_PARENT(dir) (dir[0] == '.') && (dir[1] == '.' || dir[1] == '\0')
 
 int main(int argc, char **argv) {
     File buffer;
@@ -142,7 +143,7 @@ FileList *main_file_list_from_dir(char *directory) {
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
         size_t name_length;
-        if (!strcmp(name, ".") || !strcmp(name, "..")) {
+        if (IS_PWD_OR_PARENT(name)) {
             free(directory_list[i]);
             continue;
         }
@@ -193,7 +194,7 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
             continue;
 
         buffer[last] = '\0';
-        if (!strcmp(buffer, ".") || !strcmp(buffer, ".."))
+        if (IS_PWD_OR_PARENT(buffer))
             continue;
         if (!new_buffer && access(buffer, F_OK))
             continue;
