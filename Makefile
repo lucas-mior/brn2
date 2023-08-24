@@ -14,12 +14,13 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-cflags += -std=c99 -Weverything -static
+cflags += -std=c99 -Weverything
+
 release: cflags += -O2
 release: stripflag = -s
 release: brn2
 
-debug: cflags += -g
+debug: cflags += -g2
 debug: clean
 debug: brn2
 
