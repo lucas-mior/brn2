@@ -128,7 +128,7 @@ FileList *main_file_list_from_dir(char *directory) {
     struct dirent **directory_list;
     size_t length = 0;
 
-    int n = scandir(directory, &directory_list, NULL, NULL);
+    int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
         fprintf(stderr, "Error scanning %s: %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
