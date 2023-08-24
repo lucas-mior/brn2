@@ -22,6 +22,7 @@
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
+static inline bool is_pwd_or_parent(char *filename);
 static bool main_repeated_name_hash(FileList *);
 static bool main_repeated_name_naive(FileList *);
 static bool main_verify(FileList *, FileList *);
@@ -36,7 +37,6 @@ enum {
     CAPACITY_NONE = 0,
     CAPACITY_INITIAL_GUESS = 128,
 };
-#define IS_PWD_OR_PARENT(dir) (dir[0] == '.') && (dir[1] == '.' || dir[1] == '\0')
 
 int main(int argc, char **argv) {
     File buffer;
@@ -143,7 +143,7 @@ FileList *main_file_list_from_dir(char *directory) {
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
         size_t name_length;
-        if (IS_PWD_OR_PARENT(name)) {
+        if (is_pwd_or_parent(name)) {
             free(directory_list[i]);
             continue;
         }
@@ -194,7 +194,7 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
             continue;
 
         buffer[last] = '\0';
-        if (IS_PWD_OR_PARENT(buffer))
+        if (is_pwd_or_parent(buffer))
             continue;
         if (!new_buffer && access(buffer, F_OK))
             continue;
@@ -212,6 +212,11 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
     return file_list;
+}
+
+bool is_pwd_or_parent(char *filename) {
+    return filename[0] == '.' 
+        && (filename[1] == '.' || filename[1] == '\0');
 }
 
 bool main_repeated_name_hash(FileList *new) {
