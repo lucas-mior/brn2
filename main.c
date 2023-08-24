@@ -79,29 +79,30 @@ int main(int argc, char **argv) {
         buffer.fd = -1;
     }
 
-    {
-        char *args[] = { EDITOR, buffer.name, NULL };
+    /* { */
+    /*     char *args[] = { EDITOR, buffer.name, NULL }; */
 
-        while (true) {
-            util_command(ARRAY_LENGTH(args), args);
-            new = main_file_list_from_lines(buffer.name, old->length);
-            if (!main_verify(old, new)) {
-                main_free_file_list(new);
-                printf("Fix your renames. Press control-c to cancel or press"
-                       " ENTER to open the file list editor again.\n");
-                getc(stdin);
-                continue;
-            } else {
-                break;
-            }
-        }
-    }
+    /*     while (true) { */
+    /*         util_command(ARRAY_LENGTH(args), args); */
+    /*         new = main_file_list_from_lines(buffer.name, old->length); */
+    /*         if (!main_verify(old, new)) { */
+    /*             main_free_file_list(new); */
+    /*             printf("Fix your renames. Press control-c to cancel or press" */
+    /*                    " ENTER to open the file list editor again.\n"); */
+    /*             getc(stdin); */
+    /*             continue; */
+    /*         } else { */
+    /*             break; */
+    /*         } */
+    /*     } */
+    /* } */
 
     {
         size_t number_changes;
         size_t number_renames;
-        number_changes = main_get_number_changes(old, new);
+        number_changes = main_get_number_changes(old, old);
         number_renames = 0;
+        exit(0);
 
         if (number_changes)
             number_renames = main_execute(old, new);
@@ -239,9 +240,11 @@ bool main_repeated_name_hash(FileList *new) {
 
 bool main_repeated_name_naive(FileList *new) {
     bool repeated = false;
+
     for (size_t i = 0; i < new->length; i += 1) {
         char *name = new->files[i].name;
         size_t length = new->files[i].length;
+
         for (size_t j = i+1; j < new->length; j += 1) {
             if (length != new->files[j].length)
                 continue;
@@ -257,6 +260,7 @@ bool main_repeated_name_naive(FileList *new) {
 
 bool main_verify(FileList *old, FileList *new) {
     bool repeated = false;
+
     if (old->length != new->length) {
         fprintf(stderr, "You are renaming %zu file%.*s "
                         "but buffer contains %zu file name%.*s\n", 
@@ -275,9 +279,15 @@ bool main_verify(FileList *old, FileList *new) {
 
 size_t main_get_number_changes(FileList *old, FileList *new) {
     size_t number = 0;
+
     for (size_t i = 0; i < old->length; i += 1) {
-        if (strcmp(old->files[i].name, new->files[i].name))
+        FileName oldfile = old->files[i];
+        FileName newfile = new->files[i];
+        if (oldfile.length != newfile.length) {
             number += 1;
+        } else if (memcmp(oldfile.name, newfile.name, oldfile.length)) {
+            number += 1;
+        }
     }
     return number;
 }
