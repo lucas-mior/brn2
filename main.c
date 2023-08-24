@@ -143,14 +143,18 @@ FileList *main_file_list_from_dir(char *directory) {
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
         size_t name_length;
+        FileName *file;
+
         if (is_pwd_or_parent(name)) {
             free(directory_list[i]);
             continue;
         }
         name_length = strlen(name);
-        file_list->files[length].name = util_realloc(NULL, name_length+1);
-        memcpy(file_list->files[length].name, name, name_length+1);
-        file_list->files[length].length = name_length;
+
+        file = &(file_list->files[length]);
+        file->name = util_realloc(NULL, name_length+1);
+        memcpy(file->name, name, name_length+1);
+        file->length = name_length;
 
         free(directory_list[i]);
         length += 1;
