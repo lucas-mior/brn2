@@ -16,6 +16,10 @@ filenames in the buffer and the changes will take place when you save and exit.
  
 By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 
+Note that the filenames `.` and `..` are ignored,
+as well as any filename which starts with `..`, even when listen in
+`<files.txt>`
+
 ### Notes
 - It will not work for filenames longer than PATHMAX characters
 - Newlines in filenames are also not allowed.
