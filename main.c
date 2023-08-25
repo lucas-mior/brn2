@@ -200,14 +200,20 @@ FileList *main_file_list_from_dir(char *directory) {
 
 FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FileList *file_list;
-    FILE *lines = fopen(filename, "r");
+    FILE *lines;
+
+    if (!strcmp(filename, "-")) {
+        lines = stdin;
+    } else {
+        lines = fopen(filename, "r");
+        if (!lines) {
+            fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
+
     size_t length = 0;
     bool new_buffer = true;
-
-    if (!lines) {
-        fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
 
     if (capacity == CAPACITY_NONE) {
         capacity = CAPACITY_INITIAL_GUESS;
@@ -252,7 +258,8 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
         fprintf(stderr, "Empty filelist. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    fclose(lines);
+    if (lines != stdin)
+        fclose(lines);
     file_list = 
         util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
