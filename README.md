@@ -37,8 +37,7 @@ sudo make install
 ## Examples
 - Find and rename jpg files (recursively, using `find`):
 ```
-$ find . -iname "*.jpg" > rename
-$ brn2 -f rename
+$ find . -iname "*.jpg" | brn2 -
 ```
 - Rename jpg files in current working directory:
 ```
