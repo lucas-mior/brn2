@@ -14,6 +14,9 @@ brn2 [file1 file2 ...] # rename files passed as arguments
 brn2 will open the filenames in your text editor of choice.
 You can then edit the filenames in the buffer and the changes
 will take place when you save and exit.
+- No arguments: filenames in current working directory
+- Single argument: filenames listed in this argument
+- 2 or more arguments: filenames passed as arguments
  
 By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 
