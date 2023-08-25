@@ -51,12 +51,11 @@ size_t hash_function(char *str) {
     return hash;
 }
 
-bool hash_insert(HashTable *table, char *newkey, size_t hash) {
-    size_t hash_rest;
+bool hash_insert(HashTable *table, char *newkey) {
+    size_t hash, hash_rest;
     SameHash *iterator;
 
-    if (hash == 0)
-        hash = hash_function(newkey);
+    hash = hash_function(newkey);
     hash_rest = hash % table->length;
     iterator = &(table->array[hash_rest]);
 
