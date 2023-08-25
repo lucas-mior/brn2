@@ -36,26 +36,19 @@ struct HashTable {
 };
 
 
-static inline size_t hash_function(char *str) {
-    /* Jenkins OAAT */
-    size_t hash = 0;
-    char c;
-    while ((c = *str++)) {
-        hash += (size_t) c;
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-    }
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    hash += (hash << 15);
+static inline size_t hash_function(char *str, size_t length) {
+    /* djb2 hash function */
+    size_t hash = 5381;
+    for (size_t i = 0; i < length; i += 1)
+        hash = ((hash << 5) + hash) + (size_t) str[i];
     return hash;
 }
 
-bool hash_insert(HashTable *table, char *newkey) {
+bool hash_insert(HashTable *table, char *newkey, size_t length) {
     size_t hash, hash_rest;
     SameHash *iterator;
 
-    hash = hash_function(newkey);
+    hash = hash_function(newkey, length);
     hash_rest = hash % table->length;
     iterator = &(table->array[hash_rest]);
 
