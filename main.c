@@ -44,20 +44,14 @@ int main(int argc, char **argv) {
     bool status = true;
 
     if (argc >= 3) {
-        if (!strcmp(argv[1], "--file")) {
-            old = main_file_list_from_lines(argv[2], CAPACITY_NONE);
-        } else if (!strcmp(argv[1], "-f")) {
-            old = main_file_list_from_lines(argv[2], CAPACITY_NONE);
-        } else {
-            old = main_file_list_from_args(argc, argv);
-        }
+        old = main_file_list_from_args(argc, argv);
     } else if (argc == 2) {
         if (!strcmp(argv[1], "--help")) {
             main_usage(stdout);
         } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_args(argc, argv);
+            old = main_file_list_from_lines(argv[1], CAPACITY_NONE);
         }
     } else {
         old = main_file_list_from_dir(".");
