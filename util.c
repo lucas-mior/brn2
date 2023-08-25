@@ -47,8 +47,24 @@ void *util_calloc(const size_t nmemb, const size_t size) {
 }
 
 void util_command(int argc, char **argv) {
+    int pipe_fd[2];
+    if (pipe(pipe_fd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
     switch (fork()) {
     case 0:
+        // Close the read end of the pipe (stdin for the child)
+        close(pipe_fd[0]);
+
+        // Redirect stdin to the write end of the pipe
+        if (dup2(pipe_fd[1], STDIN_FILENO) == -1) {
+            perror("dup2");
+            exit(EXIT_FAILURE);
+        }
+
+        // Close the write end of the pipe (not needed anymore)
+        close(pipe_fd[1]);
         execvp(argv[0], argv);
         fprintf(stderr, "Error running '%s", argv[0]);
         for (int i = 1; i < argc; i += 1)
@@ -59,6 +75,8 @@ void util_command(int argc, char **argv) {
         fprintf(stderr, "Error forking: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     default:
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
         if (wait(NULL) < 0) {
             fprintf(stderr, "Error waiting for the forked child: %s\n", 
                             strerror(errno));
