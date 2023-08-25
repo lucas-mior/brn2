@@ -82,10 +82,10 @@ int main(int argc, char **argv) {
         char *args[] = { EDITOR, buffer.name, NULL };
 
         while (true) {
-            /* util_command(ARRAY_LENGTH(args), args); */
-            /* new = main_file_list_from_lines(buffer.name, old->length); */
-            if (!main_verify(old, old)) {
-                /* main_free_file_list(new); */
+            util_command(ARRAY_LENGTH(args), args);
+            new = main_file_list_from_lines(buffer.name, old->length);
+            if (!main_verify(old, new)) {
+                main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -95,7 +95,6 @@ int main(int argc, char **argv) {
             }
         }
     }
-    exit(0);
 
     {
         size_t number_changes = main_get_number_changes(old, new);
@@ -303,7 +302,6 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
         char **oldname = &(old->files[i].name);
         char **newname = &(new->files[i].name);
         size_t *oldlength = &(old->files[i].length);
-        size_t *newlength = &(new->files[i].length);
 
         if (!strcmp(*oldname, *newname))
             continue;
