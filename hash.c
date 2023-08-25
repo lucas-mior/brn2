@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <threads.h>
 
 #include "util.h"
 #include "hash.h"
@@ -36,7 +35,6 @@ struct HashTable {
     SameHash array[];
 };
 
-static mtx_t *locks;
 
 static inline size_t hash_function(const char *str, size_t len) {
     /* Jenkins OAAT */
@@ -60,19 +58,15 @@ bool hash_insert(HashTable *table, char *newkey, size_t length) {
     hash_rest = hash % table->length;
     iterator = &(table->array[hash_rest]);
 
-    mtx_lock(&locks[hash_rest]);
     if (iterator->key == NULL) {
         iterator->key = newkey;
         iterator->hash = hash;
-        mtx_unlock(&locks[hash_rest]);
         return true;
     }
 
     do {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, newkey)) {
-            mtx_unlock(&locks[hash_rest]);
+        if ((hash == iterator->hash) && !strcmp(iterator->key, newkey))
             return false;
-        }
 
         if (iterator->next)
             iterator = iterator->next;
@@ -83,7 +77,6 @@ bool hash_insert(HashTable *table, char *newkey, size_t length) {
     iterator->next = util_calloc(1, sizeof (*iterator));
     iterator->next->key = newkey;
     iterator->next->hash = hash;
-    mtx_unlock(&locks[hash_rest]);
 
     return true;
 }
@@ -97,9 +90,6 @@ HashTable *hash_table_create(size_t length) {
     length *= 4;
 
     size = sizeof (*table) + length * sizeof (table->array[0]);
-    locks = util_realloc(NULL, length*sizeof (*locks));
-    for (size_t i = 0; i < length; i += 1)
-        mtx_init(&locks[i], mtx_plain);
 
     table = util_realloc(NULL, size);
     memset(table, 0, size);
