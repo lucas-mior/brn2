@@ -33,7 +33,7 @@
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
-#define USE_HASH_TABLE_THRESHOLD 128
+#define USE_HASH_TABLE_THRESHOLD 0
 
 #define STRUCT_ARRAY_SIZE(StructType, ArrayType, array_length) \
     sizeof (StructType) + (size_t)(array_length)*sizeof (ArrayType)
