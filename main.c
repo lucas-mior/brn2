@@ -19,6 +19,7 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include <threads.h>
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
@@ -230,20 +231,63 @@ bool is_pwd_or_parent(char *filename) {
         && (filename[1] == '.' || filename[1] == '\0');
 }
 
-bool main_repeated_name_hash(FileList *new) {
-    bool repeated = false;
-    HashTable *repeated_table = hash_table_create(new->length);
+typedef struct ThreadArguments {
+    int32 start;
+    int32 end;
+    FileList *filelist;
+    HashTable *table;
+    bool *repeated;
+} ThreadArguments;
 
-    for (size_t i = 0; i < new->length; i += 1) {
+static int insert_filename(void *arg) {
+    ThreadArguments *args = arg;
+
+    int32 start = args->start;
+    int32 end = args->end;
+    FileList *new = args->filelist;
+    HashTable *repeated_table = args->table;
+    bool *repeated = args->repeated;
+
+    for (int32 i = start; i < end; i += 1) {
         FileName newfile = new->files[i];
 
         if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
             fprintf(stderr, RED"\"%s\""RESET
                             " appears more than once in the buffer\n",
                             newfile.name);
-            repeated = true;
+            *repeated = true;
         }
     }
+    thrd_exit(0);
+}
+
+bool main_repeated_name_hash(FileList *new) {
+    bool repeated = false;
+    HashTable *repeated_table = hash_table_create(new->length);
+
+    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    int32 range = new->length / number_threads;
+    thrd_t threads[number_threads];
+    ThreadArguments thread_arguments[number_threads];
+
+    for (int i = 0; i < number_threads; i += 1) {
+        thread_arguments[i].start = i*range;
+
+        if (i == number_threads - 1) {
+            thread_arguments[i].end = new->length;
+        } else {
+            thread_arguments[i].end = (i + 1)*range;
+        }
+        thread_arguments[i].filelist = new;
+        thread_arguments[i].table = repeated_table;
+        thread_arguments[i].repeated = &repeated;
+
+        thrd_create(&threads[i], insert_filename, (void *) &thread_arguments[i]);
+    }
+
+    for (int i = 0; i < number_threads; i += 1)
+        thrd_join(threads[i], NULL);
+
     hash_table_destroy(repeated_table);
     return repeated;
 }
