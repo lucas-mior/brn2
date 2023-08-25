@@ -47,9 +47,9 @@ void *util_calloc(const size_t nmemb, const size_t size) {
 }
 
 void util_command(int argc, char **argv) {
-    int pipe_fd[2];
     switch (fork()) {
     case 0:
+        freopen("/dev/tty", "r", stdin);
         execvp(argv[0], argv);
         fprintf(stderr, "Error running '%s", argv[0]);
         for (int i = 1; i < argc; i += 1)
