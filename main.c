@@ -197,7 +197,7 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FILE *lines;
 
     if (!strcmp(filename, "-")) {
-        lines = freopen("/dev/stdin", "r", stdin);
+        lines = stdin;
     } else {
         lines = fopen(filename, "r");
         if (!lines) {
@@ -254,8 +254,6 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     }
     if (lines != stdin)
         fclose(lines);
-    /* else */
-    /*     fflush(stdin); */
     file_list = 
         util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
