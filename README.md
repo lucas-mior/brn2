@@ -8,7 +8,7 @@ vim).
 ## Usage
 ```
 brn2                   # rename files in current working directory
-brn2 -f <files.txt>    # rename files listed in <files.txt>
+brn2 <files.txt>       # rename files listed in <files.txt>
 brn2 [file1 file2 ...] # rename files passed as arguments
 ```
 brn2 will open the filenames in your text editor of choice.
@@ -24,7 +24,7 @@ as well as any filename which starts with `..`, even when listen in
 ### Notes
 - It will not work for filenames longer than PATHMAX characters
 - Newlines in filenames are also not allowed.
-- If a filename listed in `<files.txt>` does not correspond to an existing file,
+- If a filename listed in `<files.txt>` or passed as argument does not correspond to an existing file,
   it will be ignored.
  
 ## Install
