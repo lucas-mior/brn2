@@ -60,7 +60,8 @@ int main(int argc, char **argv) {
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
-        fprintf(stderr, "EDITOR variable is not set. Using %s by default.\n", EDITOR);
+        fprintf(stderr, "EDITOR variable is not set. "
+                        "Using %s by default.\n", EDITOR);
     }
 
     {
@@ -136,7 +137,8 @@ FileList *main_file_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
+    file_list = 
+        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -217,7 +219,8 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
         exit(EXIT_FAILURE);
     }
     fclose(lines);
-    file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    file_list = 
+        util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
     return file_list;
 }
@@ -236,7 +239,8 @@ bool main_repeated_name_hash(FileList *new) {
 
         if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
             fprintf(stderr, RED"\"%s\""RESET
-                            " appears more than once in the buffer\n", newfile.name);
+                            " appears more than once in the buffer\n",
+                            newfile.name);
             repeated = true;
         }
     }
