@@ -7,12 +7,13 @@ vim).
  
 ## Usage
 ```
-brn2 [files.txt]
+brn2                   # rename files in current working directory
+brn2 -f <files.txt>    # rename files listed in <files.txt>
+brn2 [file1 file2 ...] # rename files passed as arguments
 ```
-Without arguments, it opens a buffer in your default text editor with the list
-of filenames in the current directory.  If given 1 argument, it is interpreted
-as the text filename with a list of filenames to rename.  You can then edit the
-filenames in the buffer and the changes will take place when you save and exit.
+brn2 will open the filenames in your text editor of choice.
+You can then edit the filenames in the buffer and the changes
+will take place when you save and exit.
  
 By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 
