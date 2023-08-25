@@ -22,6 +22,7 @@
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
+static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
 static size_t main_get_number_changes(FileList *, FileList *);
@@ -43,14 +44,20 @@ int main(int argc, char **argv) {
     bool status = true;
 
     if (argc >= 3) {
-        main_usage(stderr);
+        if (!strcmp(argv[1], "--file")) {
+            old = main_file_list_from_lines(argv[2], CAPACITY_NONE);
+        } else if (!strcmp(argv[1], "-f")) {
+            old = main_file_list_from_lines(argv[2], CAPACITY_NONE);
+        } else {
+            old = main_file_list_from_args(argc, argv);
+        }
     } else if (argc == 2) {
-        if (!strncmp(argv[1], "--help", 6)) {
+        if (!strcmp(argv[1], "--help")) {
             main_usage(stdout);
-        } else if (!strncmp(argv[1], "-h", 2)) {
+        } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_lines(argv[1], CAPACITY_NONE);
+            old = main_file_list_from_args(argc, argv);
         }
     } else {
         old = main_file_list_from_dir(".");
@@ -118,6 +125,33 @@ int main(int argc, char **argv) {
     main_free_file_list(new);
     unlink(buffer.name);
     exit(!status);
+}
+
+FileList *main_file_list_from_args(int argc, char **argv) {
+    FileList *file_list;
+    size_t length = 0;
+
+    file_list = 
+        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
+
+    for (int i = 1; i < argc; i += 1) {
+        char *name = argv[i];
+        size_t name_length;
+        FileName *file;
+
+        if (is_pwd_or_parent(name))
+            continue;
+        name_length = strlen(name);
+
+        file = &(file_list->files[length]);
+        file->name = util_realloc(NULL, name_length+1);
+        memcpy(file->name, name, name_length+1);
+        file->length = name_length;
+
+        length += 1;
+    }
+    file_list->length = length;
+    return file_list;
 }
 
 FileList *main_file_list_from_dir(char *directory) {
