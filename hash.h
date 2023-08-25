@@ -17,7 +17,6 @@
 
 typedef struct HashTable HashTable;
 
-size_t hash_function(char *);
 bool hash_insert(HashTable *, char *);
 HashTable *hash_table_create(size_t);
 void hash_table_destroy(HashTable *);

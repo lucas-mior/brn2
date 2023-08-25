@@ -36,7 +36,7 @@ struct HashTable {
 };
 
 
-size_t hash_function(char *str) {
+static inline size_t hash_function(char *str) {
     /* Jenkins OAAT */
     size_t hash = 0;
     char c;
