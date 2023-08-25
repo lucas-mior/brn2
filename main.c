@@ -194,6 +194,8 @@ FileList *main_file_list_from_dir(char *directory) {
 
 FileList *main_file_list_from_lines(char *filename, size_t capacity) {
     FileList *file_list;
+    size_t length = 0;
+    bool new_buffer = true;
     FILE *lines;
 
     if (!strcmp(filename, "-")) {
@@ -205,9 +207,6 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
             exit(EXIT_FAILURE);
         }
     }
-
-    size_t length = 0;
-    bool new_buffer = true;
 
     if (capacity == CAPACITY_NONE) {
         capacity = CAPACITY_INITIAL_GUESS;
