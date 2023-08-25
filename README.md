@@ -33,6 +33,21 @@ Clone the repo and
 ```
 sudo make install
 ```
+
+## Examples
+- Find and rename jpg files (recursively, using `find`):
+```
+$ find . -iname "*.jpg" > rename
+$ brn2 -f rename
+```
+- Rename jpg files in current working directory:
+```
+$ brn2 *.jpg
+```
+- Rename all files in current working directory:
+```
+$ brn2
+```
  
 ## Why use brn2 over something like vimv?
  
@@ -48,6 +63,7 @@ sudo make install
  
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+
  
 ## Changes over original brn
 - Option to rename files listed in file given as first argument.
