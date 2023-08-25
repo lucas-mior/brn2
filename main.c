@@ -141,6 +141,8 @@ FileList *main_file_list_from_args(int argc, char **argv) {
 
         if (is_pwd_or_parent(name))
             continue;
+        if (access(name, F_OK))
+            continue;
         name_length = strlen(name);
 
         file = &(file_list->files[length]);
