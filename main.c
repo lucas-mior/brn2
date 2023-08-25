@@ -178,7 +178,8 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
         new_buffer = false;
     }
 
-    file_list = util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+    file_list =
+        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
 
     while (!feof(lines)) {
         char buffer[PATH_MAX];
@@ -187,7 +188,9 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
 
         if (length >= capacity) {
             capacity *= 2;
-            file_list = util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+            file_list = 
+                util_realloc(file_list,
+                             STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
         }
 
         if (!fgets(buffer, sizeof(buffer), lines))
