@@ -23,8 +23,6 @@
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
 static inline bool is_pwd_or_parent(char *filename);
-static bool main_repeated_name_hash(FileList *);
-static bool main_repeated_name_naive(FileList *);
 static bool main_verify(FileList *, FileList *);
 static size_t main_get_number_changes(FileList *, FileList *);
 static size_t main_execute(FileList *, FileList *);
@@ -230,44 +228,6 @@ bool is_pwd_or_parent(char *filename) {
         && (filename[1] == '.' || filename[1] == '\0');
 }
 
-bool main_repeated_name_hash(FileList *new) {
-    bool repeated = false;
-    HashTable *repeated_table = hash_table_create(new->length);
-
-    for (size_t i = 0; i < new->length; i += 1) {
-        FileName newfile = new->files[i];
-
-        if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
-            fprintf(stderr, RED"\"%s\""RESET
-                            " appears more than once in the buffer\n",
-                            newfile.name);
-            repeated = true;
-        }
-    }
-    hash_table_destroy(repeated_table);
-    return repeated;
-}
-
-bool main_repeated_name_naive(FileList *new) {
-    bool repeated = false;
-
-    for (size_t i = 0; i < new->length; i += 1) {
-        FileName file_i = new->files[i];
-        for (size_t j = i+1; j < new->length; j += 1) {
-            FileName file_j = new->files[j];
-
-            if (file_i.length != file_j.length)
-                continue;
-            if (!memcmp(file_i.name, file_j.name, file_i.length)) {
-                fprintf(stderr, RED"\"%s\""RESET 
-                                " repeated in the buffer\n", file_i.name);
-                repeated = true;
-            }
-        }
-    }
-    return repeated;
-}
-
 bool main_verify(FileList *old, FileList *new) {
     bool repeated = false;
 
@@ -279,10 +239,37 @@ bool main_verify(FileList *old, FileList *new) {
         return false;
     }
 
-    if (new->length > USE_HASH_TABLE_THRESHOLD)
-        repeated = main_repeated_name_hash(new);
-    else
-        repeated = main_repeated_name_naive(new);
+    if (new->length > USE_HASH_TABLE_THRESHOLD) {
+        HashTable *repeated_table = hash_table_create(new->length);
+
+        for (size_t i = 0; i < new->length; i += 1) {
+            FileName newfile = new->files[i];
+
+            if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
+                fprintf(stderr, RED"\"%s\""RESET
+                                " appears more than once in the buffer\n",
+                                newfile.name);
+                repeated = true;
+            }
+        }
+        hash_table_destroy(repeated_table);
+    } else {
+        for (size_t i = 0; i < new->length; i += 1) {
+            FileName file_i = new->files[i];
+            for (size_t j = i+1; j < new->length; j += 1) {
+                FileName file_j = new->files[j];
+
+                if (file_i.length != file_j.length)
+                    continue;
+                if (!memcmp(file_i.name, file_j.name, file_i.length)) {
+                    fprintf(stderr, RED"\"%s\""RESET 
+                                    " appears more than once in the buffer\n",
+                                    file_i.name);
+                    repeated = true;
+                }
+            }
+        }
+    }
 
     return !repeated;
 }
