@@ -19,6 +19,7 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include "threads.h"
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
@@ -229,6 +230,28 @@ bool is_pwd_or_parent(char *filename) {
         && (filename[1] == '.' || filename[1] == '\0');
 }
 
+typedef struct ThreadArguments {
+    int32 start;
+    int32 end;
+    FileList *filelist;
+    size_t *hashes;
+} ThreadArguments;
+
+static int create_hashes(void *arg) {
+    ThreadArguments *args = arg;
+
+    int32 start = args->start;
+    int32 end = args->end;
+    FileList *new = args->filelist;
+    size_t *hashes = args->hashes;
+
+    for (int32 i = start; i < end; i += 1) {
+        FileName newfile = new->files[i];
+        hashes[i] = hash_function(newfile.name);
+    }
+    thrd_exit(0);
+}
+
 bool main_verify(FileList *old, FileList *new) {
     bool repeated = false;
 
@@ -244,8 +267,28 @@ bool main_verify(FileList *old, FileList *new) {
         HashTable *repeated_table = hash_table_create(new->length);
         size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
 
-        for (size_t i = 0; i < new->length; i += 1)
-            hashes[i] = hash_function(new->files[i].name);
+        long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+        int32 range = new->length / number_threads;
+        thrd_t threads[number_threads];
+        
+        ThreadArguments thread_arguments[number_threads];
+
+        for (int i = 0; i < number_threads; i += 1) {
+            thread_arguments[i].start = i*range;
+
+            if (i == number_threads - 1) {
+                thread_arguments[i].end = new->length;
+            } else {
+                thread_arguments[i].end = (i + 1)*range;
+            }
+            thread_arguments[i].filelist = new;
+            thread_arguments[i].hashes = hashes;
+
+            thrd_create(&threads[i], create_hashes, (void *) &thread_arguments[i]);
+        }
+
+        for (int i = 0; i < number_threads; i += 1)
+            thrd_join(threads[i], NULL);
 
         for (size_t i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
