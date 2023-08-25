@@ -36,11 +36,12 @@ struct HashTable {
 };
 
 
-static inline size_t hash_function(const char *str, size_t len) {
+static inline size_t hash_function(const char *str) {
     /* Jenkins OAAT */
     size_t hash = 0;
-    for(size_t i = 0; i < len; i += 1) {
-        hash += (size_t) str[i];
+    char c;
+    while ((c = *str++)) {
+        hash += (size_t) c;
         hash += (hash << 10);
         hash ^= (hash >> 6);
     }
@@ -50,11 +51,11 @@ static inline size_t hash_function(const char *str, size_t len) {
     return hash;
 }
 
-bool hash_insert(HashTable *table, char *newkey, size_t length) {
+bool hash_insert(HashTable *table, char *newkey) {
     size_t hash, hash_rest;
     SameHash *iterator;
 
-    hash = hash_function(newkey, length);
+    hash = hash_function(newkey);
     hash_rest = hash % table->length;
     iterator = &(table->array[hash_rest]);
 
