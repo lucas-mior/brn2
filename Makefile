@@ -17,7 +17,7 @@ hash.o: hash.c
 cflags += -std=c99 -Weverything
 
 release: cflags += -O2
-release: stripflag = -s
+# release: stripflag = -s
 release: brn2
 
 debug: cflags += -g2
