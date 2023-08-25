@@ -242,15 +242,11 @@ bool main_verify(FileList *old, FileList *new) {
 
     if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
-        size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
-
-        for (size_t i = 0; i < new->length; i += 1)
-            hashes[i] = hash_function(new->files[i].name);
 
         for (size_t i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_insert(repeated_table, newfile.name, hashes[i])) {
+            if (!hash_insert(repeated_table, newfile.name)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -258,7 +254,6 @@ bool main_verify(FileList *old, FileList *new) {
             }
         }
         hash_table_destroy(repeated_table);
-        free(hashes);
     } else {
         for (size_t i = 0; i < new->length; i += 1) {
             FileName file_i = new->files[i];
@@ -316,9 +311,9 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_insert(names_renamed, *oldname, 0))
+            if (hash_insert(names_renamed, *oldname))
                 number_renames += 1;
-            if (hash_insert(names_renamed, *newname, 0))
+            if (hash_insert(names_renamed, *newname))
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
@@ -342,7 +337,7 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_insert(names_renamed, *oldname, 0))
+            if (hash_insert(names_renamed, *oldname))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
