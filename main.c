@@ -25,7 +25,7 @@ static FileList *main_file_list_from_lines(char *, size_t);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
 static size_t main_get_number_changes(FileList *, FileList *);
-static size_t main_execute(FileList *, FileList *);
+static size_t main_execute(FileList *, FileList *, size_t);
 static void main_usage(FILE *) __attribute__((noreturn));
 static void main_free_file_list(FileList *);
 static char *EDITOR;
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
         size_t number_renames = 0;
 
         if (number_changes)
-            number_renames = main_execute(old, new);
+            number_renames = main_execute(old, new, number_changes);
         if (number_changes != number_renames) {
             fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
                             "Check your files.\n", 
@@ -289,13 +289,13 @@ size_t main_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
-size_t main_execute(FileList *old, FileList *new) {
+size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
     size_t length;
     HashTable *names_renamed;
     size_t number_renames = 0;
 
     length = old->length;
-    names_renamed = hash_table_create(length);
+    names_renamed = hash_table_create(number_changes);
 
     for (size_t i = 0; i < length; i += 1) {
         int renamed;
