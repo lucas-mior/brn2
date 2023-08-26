@@ -383,13 +383,11 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
 }
 
 void main_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [-h | --help | <filename>]\n");
-    fprintf(stream, "Without arguments, rename files in current directory.\n");
-    fprintf(stream, "<filename>, rename files listed in <filename>.\n");
-    fprintf(stream, "-h     : display this help message.\n");
-    fprintf(stream, "--help : display this help message.\n");
-    fprintf(stream, "Be sure to have EDITOR or VISUAL "
-                    "environment variables properly set.\n");
+    fprintf(stream, "usage: brn2 [-h | --help | <filename> | file1 file2 ... ]\n");
+    fprintf(stream, "No arguments        : rename filenames in current working directory.\n");
+    fprintf(stream, "Single argument     : rename filenames listed in this argument.\n");
+    fprintf(stream, "2 or more arguments : rename filenames passed as arguments.\n");
+    fprintf(stream, "-h | --help         : display this help message.\n");
     exit((int) (stream != stdout));
 }
 
