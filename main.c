@@ -353,11 +353,12 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
             for (size_t j = i + 1; j < length; j += 1) {
-                if (old->files[j].length != new->files[i].length)
+                FileName *file_j = &(old->files[j]);
+                if (file_j->length != *newlength)
                     continue;
-                if (!strcmp(old->files[j].name, *newname)) {
-                    SWAP(char *, old->files[j].name, *oldname);
-                    SWAP(size_t, old->files[j].length, *oldlength);
+                if (!strcmp(file_j->name, *newname)) {
+                    SWAP(char *, file_j->name, *oldname);
+                    SWAP(size_t, file_j->length, *oldlength);
                     break;
                 }
             }
