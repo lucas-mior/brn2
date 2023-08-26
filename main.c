@@ -356,7 +356,7 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
                 FileName *file_j = &(old->files[j]);
                 if (file_j->length != *newlength)
                     continue;
-                if (!strcmp(file_j->name, *newname)) {
+                if (!memcmp(file_j->name, *newname, *newlength)) {
                     SWAP(char *, file_j->name, *oldname);
                     SWAP(size_t, file_j->length, *oldlength);
                     break;
