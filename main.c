@@ -251,8 +251,8 @@ FileList *main_file_list_from_lines(char *filename) {
         if (*p == '\n')
             length += 1;
     }
-    file_list = util_realloc(NULL,
-                             STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    file_list =
+        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
 
     begin = content;
@@ -260,13 +260,21 @@ FileList *main_file_list_from_lines(char *filename) {
         if (*p == '\n') {
             FileName *file = &(file_list->files[index]);
             *p = '\0';
-            index += 1;
+
+            if (is_pwd_or_parent(begin))
+                continue;
 
             file->length = (uint32) (p - begin);
             file->name = util_realloc(NULL, file->length+1);
             memcpy(file->name, begin, file->length+1);
             begin = p+1;
+
+            index += 1;
         }
+    }
+    if (index != length) {
+        file_list =
+            util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, index));
     }
 
     munmap(content, length);
