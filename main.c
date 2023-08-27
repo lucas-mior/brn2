@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 static FileList *main_file_list_from_dir(char *);
-static FileList *main_file_list_from_lines(char *, uint32);
+static FileList *main_file_list_from_lines(char *);
 static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_lines(argv[1], CAPACITY_NONE);
+            old = main_file_list_from_lines(argv[1]);
         }
     } else {
         old = main_file_list_from_dir(".");
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
         while (true) {
             util_command(ARRAY_LENGTH(args), args);
-            new = main_file_list_from_lines(buffer.name, old->length);
+            new = main_file_list_from_lines(buffer.name);
             if (!main_verify(old, new)) {
                 main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
@@ -211,7 +211,7 @@ FileList *main_file_list_from_dir(char *directory) {
     return file_list;
 }
 
-FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
+FileList *main_file_list_from_lines(char *filename) {
     FileList *file_list;
     uint32 lines_size = 0;
     int lines;
@@ -219,6 +219,7 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
     char *content;
     char *begin;
     uint32 length = 0;
+    uint32 index = 0;
 
     if ((lines = open(filename, O_RDONLY)) < 0) {
         fprintf(stderr, "Error opening history file for reading: %s\n"
@@ -231,8 +232,7 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
         close(lines);
         exit(EXIT_FAILURE);
     }
-    lines_size = (uint32) lines_stat.st_size;
-    if (lines_size <= 0) {
+    if ((lines_size = (uint32) lines_stat.st_size) <= 0) {
         fprintf(stderr, "Length: %u\n", lines_size);
         exit(EXIT_FAILURE);
     }
@@ -256,7 +256,6 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
     file_list->length = length;
 
     begin = content;
-    uint32 index = 0;
     for (char *p = content; p < content + lines_size; p++) {
         if (*p == '\n') {
             FileName *file = &(file_list->files[index]);
