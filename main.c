@@ -95,8 +95,6 @@ int main(int argc, char **argv) {
         buffer.stream = NULL;
     }
 
-    exit(0);
-
     {
         char *args[] = { EDITOR, buffer.name, NULL };
 
