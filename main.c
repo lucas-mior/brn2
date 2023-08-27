@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
         buffer.fd = -1;
         buffer.stream = NULL;
     }
+    exit(0);
 
     {
         char *args[] = { EDITOR, buffer.name, NULL };
@@ -215,7 +216,6 @@ FileList *main_file_list_from_lines(char *filename) {
     FileList *file_list;
     uint32 lines_size = 0;
     int lines;
-    struct stat lines_stat;
     char *content;
     char *begin;
     uint32 length = 0;
@@ -227,14 +227,18 @@ FileList *main_file_list_from_lines(char *filename) {
         exit(EXIT_FAILURE);
     }
     /* lines = STDIN_FILENO; */
-    if (fstat(lines, &lines_stat) < 0) {
-        fprintf(stderr, "Error getting file information: %s\n", strerror(errno));
-        close(lines);
-        exit(EXIT_FAILURE);
-    }
-    if ((lines_size = (uint32) lines_stat.st_size) <= 0) {
-        fprintf(stderr, "Length: %u\n", lines_size);
-        exit(EXIT_FAILURE);
+
+    {
+        struct stat lines_stat;
+        if (fstat(lines, &lines_stat) < 0) {
+            fprintf(stderr, "Error getting file information: %s\n", strerror(errno));
+            close(lines);
+            exit(EXIT_FAILURE);
+        }
+        if ((lines_size = (uint32) lines_stat.st_size) <= 0) {
+            fprintf(stderr, "Length: %u\n", lines_size);
+            exit(EXIT_FAILURE);
+        }
     }
 
     content = mmap(NULL, lines_size, 
