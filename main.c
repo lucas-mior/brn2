@@ -272,6 +272,16 @@ typedef struct SliceArguments {
     size_t *hashes;
 } SliceArguments;
 
+static int create_hashes(void *arg) {
+    SliceArguments *slice = arg;
+
+    for (size_t i = slice->start; i < slice->end; i += 1) {
+        FileName newfile = slice->filelist->files[i];
+        slice->hashes[i] = hash_function(newfile.name, newfile.length);
+    }
+    thrd_exit(0);
+}
+
 bool main_verify(FileList *old, FileList *new) {
     bool repeated = false;
 
@@ -283,12 +293,30 @@ bool main_verify(FileList *old, FileList *new) {
         return false;
     }
 
-    if (new->length >= 1048576) {
+    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+
+    if ((new->length >= 1048576) && (number_threads >= 2)) {
         HashTable *repeated_table = hash_table_create(new->length);
         size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
 
-        for (size_t i = 0; i < new->length; i += 1)
-            hashes[i] = hash_function(new->files[i].name, new->files[i].length);
+        size_t range = new->length / number_threads;
+        thrd_t threads[number_threads];
+        SliceArguments slices[number_threads];
+
+        for (size_t i = 0; i < number_threads; i += 1) {
+            slices[i].start = i*range;
+            if (i == number_threads - 1) {
+                slices[i].end = new->length;
+            } else {
+                slices[i].end = (i + 1)*range;
+            }
+            slices[i].filelist = new;
+            slices[i].hashes = hashes;
+            thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
+        }
+
+        for (size_t i = 0; i < number_threads; i += 1)
+            thrd_join(threads[i], NULL);
 
         for (size_t i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
