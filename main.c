@@ -23,12 +23,12 @@
 #include <stdio.h>
 
 static FileList *main_file_list_from_dir(char *);
-static FileList *main_file_list_from_lines(char *, size_t);
+static FileList *main_file_list_from_lines(char *, uint32);
 static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
-static size_t main_get_number_changes(FileList *, FileList *);
-static size_t main_execute(FileList *, FileList *, size_t);
+static uint32 main_get_number_changes(FileList *, FileList *);
+static uint32 main_execute(FileList *, FileList *, uint32);
 static void main_usage(FILE *) __attribute__((noreturn));
 static void main_free_file_list(FileList *);
 static char *EDITOR;
@@ -83,8 +83,8 @@ int main(int argc, char **argv) {
         }
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
-        for (size_t i = 0; i < old->length; i += 1) {
-            size_t length = old->files[i].length;
+        for (uint32 i = 0; i < old->length; i += 1) {
+            uint32 length = old->files[i].length;
             old->files[i].name[length] = '\n';
             fwrite(old->files[i].name, 1, length+1, buffer.stream);
             old->files[i].name[length] = '\0';
@@ -114,19 +114,19 @@ int main(int argc, char **argv) {
     }
 
     {
-        size_t number_changes = main_get_number_changes(old, new);
-        size_t number_renames = 0;
+        uint32 number_changes = main_get_number_changes(old, new);
+        uint32 number_renames = 0;
 
         if (number_changes)
             number_renames = main_execute(old, new, number_changes);
         if (number_changes != number_renames) {
-            fprintf(stderr, "%zu name%.*s changed but %zu file%.*s renamed. "
+            fprintf(stderr, "%u name%.*s changed but %u file%.*s renamed. "
                             "Check your files.\n", 
                             number_changes, number_changes != 1, "s",
                             number_renames, number_renames != 1, "s");
             status = false;
         } else {
-            fprintf(stdout, "%zu file%.*s renamed\n",
+            fprintf(stdout, "%u file%.*s renamed\n",
                             number_renames, number_renames != 1, "s");
         }
     }
@@ -139,26 +139,26 @@ int main(int argc, char **argv) {
 
 FileList *main_file_list_from_args(int argc, char **argv) {
     FileList *file_list;
-    size_t length = 0;
+    uint32 length = 0;
 
     file_list = 
         util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
 
     for (int i = 1; i < argc; i += 1) {
         char *name = argv[i];
-        size_t name_length;
+        uint32 name_length;
         FileName *file;
 
         if (is_pwd_or_parent(name))
             continue;
         if (access(name, F_OK))
             continue;
-        name_length = strlen(name);
+        name_length = (uint32) strlen(name);
 
         file = &(file_list->files[length]);
         file->name = util_realloc(NULL, name_length+1);
         memcpy(file->name, name, name_length+1);
-        file->length = name_length;
+        file->length = (uint32) name_length;
 
         length += 1;
     }
@@ -169,7 +169,7 @@ FileList *main_file_list_from_args(int argc, char **argv) {
 FileList *main_file_list_from_dir(char *directory) {
     FileList *file_list;
     struct dirent **directory_list;
-    size_t length = 0;
+    uint32 length = 0;
 
     int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
@@ -186,31 +186,31 @@ FileList *main_file_list_from_dir(char *directory) {
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
-        size_t name_length;
+        uint32 name_length;
         FileName *file;
 
         if (is_pwd_or_parent(name)) {
             free(directory_list[i]);
             continue;
         }
-        name_length = strlen(name);
+        name_length = (uint32) strlen(name);
 
         file = &(file_list->files[length]);
         file->name = util_realloc(NULL, name_length+1);
         memcpy(file->name, name, name_length+1);
-        file->length = name_length;
+        file->length = (uint32) name_length;
 
         free(directory_list[i]);
         length += 1;
     }
-    file_list->length = length;
+    file_list->length = (uint32) length;
     free(directory_list);
     return file_list;
 }
 
-FileList *main_file_list_from_lines(char *filename, size_t capacity) {
+FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
     FileList *file_list;
-    size_t length = 0;
+    uint32 length = 0;
     bool new_buffer = true;
     FILE *lines;
 
@@ -234,7 +234,7 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
 
     while (!feof(lines)) {
         char buffer[PATH_MAX];
-        size_t last;
+        uint32 last;
         FileName *file;
 
         if (length >= capacity) {
@@ -247,7 +247,7 @@ FileList *main_file_list_from_lines(char *filename, size_t capacity) {
         if (!fgets(buffer, sizeof(buffer), lines))
             continue;
 
-        last = strcspn(buffer, "\n");
+        last = (uint32) strcspn(buffer, "\n");
         if (last == 0)
             continue;
 
@@ -281,18 +281,18 @@ bool is_pwd_or_parent(char *filename) {
 }
 
 typedef struct Slice {
-    size_t start;
-    size_t end;
+    uint32 start;
+    uint32 end;
     FileList *filelist;
-    size_t *hashes;
-    size_t *hashes_rests;
-    size_t table_size;
+    uint32 *hashes;
+    uint32 *hashes_rests;
+    uint32 table_size;
 } Slice;
 
 static int create_hashes(void *arg) {
     Slice *slice = arg;
 
-    for (size_t i = slice->start; i < slice->end; i += 1) {
+    for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->filelist->files[i];
         slice->hashes[i] = hash_function(newfile.name, newfile.length);
         slice->hashes_rests[i] = slice->hashes[i] % slice->table_size;
@@ -305,8 +305,8 @@ bool main_verify(FileList *old, FileList *new) {
     long number_threads;
 
     if (old->length != new->length) {
-        fprintf(stderr, "You are renaming %zu file%.*s "
-                        "but buffer contains %zu file name%.*s\n", 
+        fprintf(stderr, "You are renaming %u file%.*s "
+                        "but buffer contains %u file name%.*s\n", 
                         old->length, old->length != 1, "s",
                         new->length, new->length != 1, "s");
         return false;
@@ -314,16 +314,16 @@ bool main_verify(FileList *old, FileList *new) {
 
     number_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if ((new->length >= 1048576) && (number_threads >= 2)) {
-        size_t nthreads = (size_t) number_threads;
+        uint32 nthreads = (uint32) number_threads;
         HashTable *repeated_table = hash_table_create(new->length);
-        size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
-        size_t *hashes_rests = util_realloc(NULL, new->length * sizeof (*hashes));
+        uint32 *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
+        uint32 *hashes_rests = util_realloc(NULL, new->length * sizeof (*hashes));
 
-        size_t range = new->length / nthreads;
+        uint32 range = new->length / nthreads;
         thrd_t *threads = util_realloc(NULL, nthreads*sizeof (*threads));
         Slice *slices = util_realloc(NULL, nthreads*sizeof (*slices));
 
-        for (size_t i = 0; i < nthreads; i += 1) {
+        for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
             if (i == nthreads - 1) {
                 slices[i].end = new->length;
@@ -333,14 +333,14 @@ bool main_verify(FileList *old, FileList *new) {
             slices[i].filelist = new;
             slices[i].hashes = hashes;
             slices[i].hashes_rests = hashes_rests;
-            slices[i].table_size = hash_table_length(repeated_table);
+            slices[i].table_size = hash_table_size(repeated_table);
             thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
         }
 
-        for (size_t i = 0; i < nthreads; i += 1)
+        for (uint32 i = 0; i < nthreads; i += 1)
             thrd_join(threads[i], NULL);
 
-        for (size_t i = 0; i < new->length; i += 1) {
+        for (uint32 i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
             if (!hash_insert_pre_calc(repeated_table, newfile.name,
@@ -357,7 +357,7 @@ bool main_verify(FileList *old, FileList *new) {
     } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
 
-        for (size_t i = 0; i < new->length; i += 1) {
+        for (uint32 i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
             if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
@@ -369,9 +369,9 @@ bool main_verify(FileList *old, FileList *new) {
         }
         hash_table_destroy(repeated_table);
     } else {
-        for (size_t i = 0; i < new->length; i += 1) {
+        for (uint32 i = 0; i < new->length; i += 1) {
             FileName file_i = new->files[i];
-            for (size_t j = i+1; j < new->length; j += 1) {
+            for (uint32 j = i+1; j < new->length; j += 1) {
                 FileName file_j = new->files[j];
 
                 if (file_i.length != file_j.length)
@@ -389,10 +389,10 @@ bool main_verify(FileList *old, FileList *new) {
     return !repeated;
 }
 
-size_t main_get_number_changes(FileList *old, FileList *new) {
-    size_t number = 0;
+uint32 main_get_number_changes(FileList *old, FileList *new) {
+    uint32 number = 0;
 
-    for (size_t i = 0; i < old->length; i += 1) {
+    for (uint32 i = 0; i < old->length; i += 1) {
         FileName oldfile = old->files[i];
         FileName newfile = new->files[i];
         if (oldfile.length != newfile.length) {
@@ -404,20 +404,20 @@ size_t main_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
-size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
-    size_t length;
+uint32 main_execute(FileList *old, FileList *new, uint32 number_changes) {
+    uint32 length;
     HashTable *names_renamed;
-    size_t number_renames = 0;
+    uint32 number_renames = 0;
 
     length = old->length;
     names_renamed = hash_table_create(number_changes);
 
-    for (size_t i = 0; i < length; i += 1) {
+    for (uint32 i = 0; i < length; i += 1) {
         int renamed;
         char **oldname = &(old->files[i].name);
         char **newname = &(new->files[i].name);
-        size_t *oldlength = &(old->files[i].length);
-        size_t *newlength = &(new->files[i].length);
+        uint32 *oldlength = &(old->files[i].length);
+        uint32 *newlength = &(new->files[i].length);
 
         if (!strcmp(*oldname, *newname))
             continue;
@@ -431,13 +431,13 @@ size_t main_execute(FileList *old, FileList *new, size_t number_changes) {
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
-            for (size_t j = i + 1; j < length; j += 1) {
+            for (uint32 j = i + 1; j < length; j += 1) {
                 FileName *file_j = &(old->files[j]);
                 if (file_j->length != *newlength)
                     continue;
                 if (!memcmp(file_j->name, *newname, *newlength)) {
                     SWAP(char *, file_j->name, *oldname);
-                    SWAP(size_t, file_j->length, *oldlength);
+                    SWAP(uint32, file_j->length, *oldlength);
                     break;
                 }
             }
@@ -471,7 +471,7 @@ void main_usage(FILE *stream) {
 }
 
 void main_free_file_list(FileList *file_list) {
-    for (size_t i = 0; i < file_list->length; i += 1)
+    for (uint32 i = 0; i < file_list->length; i += 1)
         free(file_list->files[i].name);
     free(file_list);
     return;
