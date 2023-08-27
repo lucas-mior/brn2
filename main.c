@@ -314,7 +314,7 @@ bool main_verify(FileList *old, FileList *new) {
         HashTable *repeated_table = hash_table_create(new->length);
         size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
 
-        size_t range = new->length / (size_t) nthreads;
+        size_t range = new->length / nthreads;
         thrd_t *threads = util_realloc(NULL, nthreads*sizeof (*threads));
         SliceArguments *slices = util_realloc(NULL, nthreads*sizeof (*slices));
 
