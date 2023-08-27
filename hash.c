@@ -45,7 +45,6 @@ struct HashTable {
     SameHash array[];
 };
 
-
 uint32 hash_function(char *str, uint32 length) {
     /* djb2 hash function */
     uint32 hash = 5381;
