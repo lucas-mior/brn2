@@ -20,6 +20,7 @@
 #include "brn2.h"
 #include "hash.h"
 #include "threads.h"
+#include <stdio.h>
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
@@ -73,20 +74,36 @@ int main(int argc, char **argv) {
                             buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
+        if ((buffer.stream = fdopen(buffer.fd, "w")) == NULL) {
+            fprintf(stderr, "Error opening %s: %s\n",
+                            buffer.name, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        char buffer2[BUFSIZ];
+        setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
 
-        for (size_t i = 0; i < old->length; i += 1)
-            dprintf(buffer.fd, "%s\n", old->files[i].name);
+        char newline = '\n';
+
+        size_t w = 0;
+        for (size_t i = 0; i < old->length; i += 1) {
+            w = fwrite(old->files[i].name, 1, old->files[i].length, buffer.stream);
+            w = fwrite(&newline, 1, 1, buffer.stream);
+        }
+        fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
+        buffer.stream = NULL;
     }
+
+    exit(0);
 
     {
         char *args[] = { EDITOR, buffer.name, NULL };
 
         while (true) {
-        /*     util_command(ARRAY_LENGTH(args), args); */
-            /* new = main_file_list_from_lines(buffer.name, old->length); */
-            if (!main_verify(old, old)) {
+            util_command(ARRAY_LENGTH(args), args);
+            new = main_file_list_from_lines(buffer.name, old->length);
+            if (!main_verify(old, new)) {
                 main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
@@ -97,7 +114,7 @@ int main(int argc, char **argv) {
             }
         }
     }
-    exit(0);
+    /* exit(0); */
 
     {
         size_t number_changes = main_get_number_changes(old, new);
