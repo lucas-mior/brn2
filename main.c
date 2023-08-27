@@ -20,6 +20,10 @@
 #include "brn2.h"
 #include "hash.h"
 #include "threads.h"
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/stat.h> 
+#include <unistd.h>
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, uint32);
@@ -209,68 +213,64 @@ FileList *main_file_list_from_dir(char *directory) {
 
 FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
     FileList *file_list;
+    uint32 lines_size = 0;
+    int lines;
+    struct stat lines_stat;
+    char *content;
+    char *begin;
     uint32 length = 0;
-    bool new_buffer = true;
-    FILE *lines;
 
-    if (!strcmp(filename, "-")) {
-        lines = stdin;
-    } else {
-        lines = fopen(filename, "r");
-        if (!lines) {
-            fprintf(stderr, "Error opening %s: %s\n", filename, strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    if (capacity == CAPACITY_NONE) {
-        capacity = CAPACITY_INITIAL_GUESS;
-        new_buffer = false;
-    }
-
-    file_list =
-        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
-
-    while (!feof(lines)) {
-        char buffer[PATH_MAX];
-        uint32 last;
-        FileName *file;
-
-        if (length >= capacity) {
-            capacity *= 2;
-            file_list = 
-                util_realloc(file_list,
-                             STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
-        }
-
-        if (!fgets(buffer, sizeof(buffer), lines))
-            continue;
-
-        last = (uint32) strcspn(buffer, "\n");
-        if (last == 0)
-            continue;
-
-        buffer[last] = '\0';
-        if (is_pwd_or_parent(buffer))
-            continue;
-        if (!new_buffer && access(buffer, F_OK))
-            continue;
-
-        file = &(file_list->files[length]);
-        file->name = util_realloc(NULL, last+1);
-        memcpy(file->name, buffer, last+1);
-        file->length = last;
-        length += 1;
-    }
-    if (length == 0) {
-        fprintf(stderr, "Empty filelist. Exiting.\n");
+    if ((lines = open(filename, O_RDONLY)) < 0) {
+        fprintf(stderr, "Error opening history file for reading: %s\n"
+                        "History will start empty.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-    if (lines != stdin)
-        fclose(lines);
-    file_list = 
-        util_realloc(file_list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    /* lines = STDIN_FILENO; */
+    if (fstat(lines, &lines_stat) < 0) {
+        fprintf(stderr, "Error getting file information: %s\n", strerror(errno));
+        close(lines);
+        exit(EXIT_FAILURE);
+    }
+    lines_size = (uint32) lines_stat.st_size;
+    if (lines_size <= 0) {
+        fprintf(stderr, "Length: %u\n", lines_size);
+        exit(EXIT_FAILURE);
+    }
+
+    content = mmap(NULL, lines_size, 
+                         PROT_READ | PROT_WRITE, MAP_PRIVATE,
+                         lines, 0);
+
+    if (content == MAP_FAILED) {
+        fprintf(stderr, "Error mapping file to memory: %s\n", strerror(errno));
+        close(lines);
+        exit(EXIT_FAILURE);
+    }
+
+    for (char *p = content; p < content + lines_size; p++) {
+        if (*p == '\n')
+            length += 1;
+    }
+    file_list = util_realloc(NULL,
+                             STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
+
+    begin = content;
+    uint32 index = 0;
+    for (char *p = content; p < content + lines_size; p++) {
+        if (*p == '\n') {
+            FileName *file = &(file_list->files[index]);
+            *p = '\0';
+            index += 1;
+
+            file->length = (uint32) (p - begin);
+            file->name = util_realloc(NULL, file->length+1);
+            memcpy(file->name, begin, file->length+1);
+            begin = p+1;
+        }
+    }
+
+    munmap(content, length);
     return file_list;
 }
 
