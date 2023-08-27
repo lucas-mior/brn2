@@ -84,18 +84,15 @@ int main(int argc, char **argv) {
 
         char newline = '\n';
 
-        size_t w = 0;
         for (size_t i = 0; i < old->length; i += 1) {
-            w = fwrite(old->files[i].name, 1, old->files[i].length, buffer.stream);
-            w = fwrite(&newline, 1, 1, buffer.stream);
+            fwrite(old->files[i].name, 1, old->files[i].length, buffer.stream);
+            fwrite(&newline, 1, 1, buffer.stream);
         }
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
         buffer.stream = NULL;
     }
-
-    exit(0);
 
     {
         char *args[] = { EDITOR, buffer.name, NULL };
@@ -114,7 +111,6 @@ int main(int argc, char **argv) {
             }
         }
     }
-    /* exit(0); */
 
     {
         size_t number_changes = main_get_number_changes(old, new);
