@@ -18,17 +18,15 @@ will take place when you save and exit.
 - Single argument: filenames listed in this argument
 - 2 or more arguments: filenames passed as arguments
  
-By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
-
-Note that the filenames `.` and `..` are ignored,
-as well as any filename which starts with `..`, even when listen in
-`<files.txt>`
-
 ### Notes
+- By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
+- It will not work for more than 2^32 renames at once
 - It will not work for filenames longer than PATHMAX characters
 - Newlines in filenames are also not allowed.
 - If a filename listed in `<files.txt>` or passed as argument does not correspond to an existing file,
   it will be ignored.
+- Filenames `.` and `..` are ignored, as well as any filename
+  which starts with `..`, even when listen in `<files.txt>`
  
 ## Install
  
