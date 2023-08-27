@@ -320,8 +320,8 @@ bool main_verify(FileList *old, FileList *new) {
         uint32 *hashes_rests = util_realloc(NULL, new->length * sizeof (*hashes));
 
         uint32 range = new->length / nthreads;
-        thrd_t *threads = util_realloc(NULL, nthreads*sizeof (*threads));
-        Slice *slices = util_realloc(NULL, nthreads*sizeof (*slices));
+        thrd_t *threads = util_realloc(NULL, nthreads * sizeof (*threads));
+        Slice *slices = util_realloc(NULL, nthreads * sizeof (*slices));
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
