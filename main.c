@@ -66,6 +66,9 @@ int main(int argc, char **argv) {
     }
 
     {
+        char buffer2[BUFSIZ];
+        char newline = '\n';
+
         snprintf(buffer.name, sizeof (buffer.name),
                 "%s/%s", tempdir, "brn2.XXXXXX");
 
@@ -79,11 +82,8 @@ int main(int argc, char **argv) {
                             buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
-        char buffer2[BUFSIZ];
+
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
-
-        char newline = '\n';
-
         for (size_t i = 0; i < old->length; i += 1) {
             fwrite(old->files[i].name, 1, old->files[i].length, buffer.stream);
             fwrite(&newline, 1, 1, buffer.stream);
@@ -298,6 +298,7 @@ static int create_hashes(void *arg) {
 
 bool main_verify(FileList *old, FileList *new) {
     bool repeated = false;
+    long number_threads;
 
     if (old->length != new->length) {
         fprintf(stderr, "You are renaming %zu file%.*s "
@@ -307,19 +308,19 @@ bool main_verify(FileList *old, FileList *new) {
         return false;
     }
 
-    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-
+    number_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if ((new->length >= 1048576) && (number_threads >= 2)) {
+        size_t nthreads = (size_t) number_threads;
         HashTable *repeated_table = hash_table_create(new->length);
         size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
 
-        size_t range = new->length / number_threads;
-        thrd_t threads[number_threads];
-        SliceArguments slices[number_threads];
+        size_t range = new->length / (size_t) nthreads;
+        thrd_t *threads = util_realloc(NULL, nthreads*sizeof (*threads));
+        SliceArguments *slices = util_realloc(NULL, nthreads*sizeof (*slices));
 
-        for (size_t i = 0; i < number_threads; i += 1) {
+        for (size_t i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
-            if (i == number_threads - 1) {
+            if (i == nthreads - 1) {
                 slices[i].end = new->length;
             } else {
                 slices[i].end = (i + 1)*range;
@@ -329,13 +330,13 @@ bool main_verify(FileList *old, FileList *new) {
             thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
         }
 
-        for (size_t i = 0; i < number_threads; i += 1)
+        for (size_t i = 0; i < nthreads; i += 1)
             thrd_join(threads[i], NULL);
 
         for (size_t i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_insert_pre_calc(repeated_table, newfile.name, newfile.length, hashes[i])) {
+            if (!hash_insert_pre_calc(repeated_table, newfile.name, hashes[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);

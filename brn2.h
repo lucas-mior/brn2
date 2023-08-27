@@ -49,10 +49,11 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
+#pragma clang diagnostic ignored "-Wpadded"
 typedef struct File {
     char name[PATH_MAX];
-    int fd;
     FILE *stream;
+    int fd;
 } File;
 
 typedef struct FileName {
