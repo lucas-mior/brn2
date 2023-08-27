@@ -20,31 +20,43 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
 
 #include "util.h"
 #include "hash.h"
 
 typedef struct SameHash {
     char *key;
-    size_t hash;
+    uint32 hash;
+    /* uint32 length; */
     struct SameHash *next;
 } SameHash;
 
 struct HashTable {
-    size_t length;
+    uint32 size;
+    /* uint32 length; */
     SameHash array[];
 };
 
 
-size_t hash_function(char *str, size_t length) {
+uint32 hash_function(char *str, uint32 length) {
     /* djb2 hash function */
-    size_t hash = 5381;
-    for (size_t i = 0; i < length; i += 1)
-        hash = ((hash << 5) + hash) + (size_t) str[i];
+    uint32 hash = 5381;
+    for (uint32 i = 0; i < length; i += 1)
+        hash = ((hash << 5) + hash) + (uint32) str[i];
     return hash;
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t hash, size_t hash_rest) {
+bool hash_insert_pre_calc(HashTable *table, char *newkey, uint32 hash, uint32 hash_rest) {
     SameHash *iterator = &(table->array[hash_rest]);
 
     if (iterator->key == NULL) {
@@ -70,12 +82,12 @@ bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t hash, size_t ha
     return true;
 }
 
-bool hash_insert(HashTable *table, char *newkey, size_t length) {
-    size_t hash, hash_rest;
+bool hash_insert(HashTable *table, char *newkey, uint32 key_length) {
+    uint32 hash, hash_rest;
     SameHash *iterator;
 
-    hash = hash_function(newkey, length);
-    hash_rest = hash % table->length;
+    hash = hash_function(newkey, key_length);
+    hash_rest = hash % table->size;
     iterator = &(table->array[hash_rest]);
 
     if (iterator->key == NULL) {
@@ -101,29 +113,33 @@ bool hash_insert(HashTable *table, char *newkey, size_t length) {
     return true;
 }
 
-HashTable *hash_table_create(size_t length) {
+HashTable *hash_table_create(uint32 length) {
     HashTable *table;
-    size_t size;
+    uint32 size;
 
-    if (length > (SIZE_MAX/4))
-        length = (SIZE_MAX/4);
+    if (length > (UINT32_MAX/4))
+        length = (UINT32_MAX/4);
     length *= 4;
 
     size = sizeof (*table) + length * sizeof (table->array[0]);
 
     table = util_realloc(NULL, size);
     memset(table, 0, size);
-    table->length = length;
+    table->size = length;
     return table;
 }
 
-size_t hash_table_length(HashTable *table) {
-    return table->length;
+uint32 hash_table_size(HashTable *table) {
+    return table->size;
 }
+
+/* uint32 hash_table_length(HashTable *table) { */
+/*     return table->length; */
+/* } */
 
 
 void hash_table_destroy(HashTable *table) {
-    for (size_t i = 0; i < table->length; i += 1) {
+    for (uint32 i = 0; i < table->size; i += 1) {
         SameHash *iterator = &(table->array[i]);
         iterator = iterator->next;
         while (iterator) {
