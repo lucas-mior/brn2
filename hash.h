@@ -17,9 +17,10 @@
 
 typedef struct HashTable HashTable;
 
-size_t hash_function(char *, size_t);
-bool hash_insert_pre_calc(HashTable *table, char *, size_t, size_t);
-bool hash_insert(HashTable *, char *, size_t);
-HashTable *hash_table_create(size_t);
-size_t hash_table_length(HashTable *);
+uint32 hash_function(char *, uint32);
+bool hash_insert_pre_calc(HashTable *table, char *, uint32, uint32);
+bool hash_insert(HashTable *, char *, uint32);
+HashTable *hash_table_create(uint32);
+uint32 hash_table_size(HashTable *);
+uint32 hash_table_length(HashTable *);
 void hash_table_destroy(HashTable *);

@@ -58,10 +58,10 @@ typedef struct File {
 
 typedef struct FileName {
     char *name;
-    size_t length;
+    uint32 length;
 } FileName;
 
 typedef struct FileList {
-    size_t length;
+    uint32 length;
     FileName files[];
 } FileList;
