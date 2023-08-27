@@ -279,15 +279,15 @@ bool is_pwd_or_parent(char *filename) {
         && (filename[1] == '.' || filename[1] == '\0');
 }
 
-typedef struct SliceArguments {
+typedef struct Slice {
     size_t start;
     size_t end;
     FileList *filelist;
     size_t *hashes;
-} SliceArguments;
+} Slice;
 
 static int create_hashes(void *arg) {
-    SliceArguments *slice = arg;
+    Slice *slice = arg;
 
     for (size_t i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->filelist->files[i];
@@ -316,7 +316,7 @@ bool main_verify(FileList *old, FileList *new) {
 
         size_t range = new->length / nthreads;
         thrd_t *threads = util_realloc(NULL, nthreads*sizeof (*threads));
-        SliceArguments *slices = util_realloc(NULL, nthreads*sizeof (*slices));
+        Slice *slices = util_realloc(NULL, nthreads*sizeof (*slices));
 
         for (size_t i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
