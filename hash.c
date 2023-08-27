@@ -44,12 +44,8 @@ size_t hash_function(char *str, size_t length) {
     return hash;
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t hash) {
-    size_t hash_rest;
-    SameHash *iterator;
-
-    hash_rest = hash % table->length;
-    iterator = &(table->array[hash_rest]);
+bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t hash, size_t hash_rest) {
+    SameHash *iterator = &(table->array[hash_rest]);
 
     if (iterator->key == NULL) {
         iterator->key = newkey;
@@ -120,6 +116,11 @@ HashTable *hash_table_create(size_t length) {
     table->length = length;
     return table;
 }
+
+size_t hash_table_length(HashTable *table) {
+    return table->length;
+}
+
 
 void hash_table_destroy(HashTable *table) {
     for (size_t i = 0; i < table->length; i += 1) {

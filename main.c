@@ -285,6 +285,8 @@ typedef struct Slice {
     size_t end;
     FileList *filelist;
     size_t *hashes;
+    size_t *hashes_rests;
+    size_t table_size;
 } Slice;
 
 static int create_hashes(void *arg) {
@@ -293,6 +295,7 @@ static int create_hashes(void *arg) {
     for (size_t i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->filelist->files[i];
         slice->hashes[i] = hash_function(newfile.name, newfile.length);
+        slice->hashes_rests[i] = slice->hashes[i] % slice->table_size;
     }
     thrd_exit(0);
 }
@@ -314,6 +317,7 @@ bool main_verify(FileList *old, FileList *new) {
         size_t nthreads = (size_t) number_threads;
         HashTable *repeated_table = hash_table_create(new->length);
         size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
+        size_t *hashes_rests = util_realloc(NULL, new->length * sizeof (*hashes));
 
         size_t range = new->length / nthreads;
         thrd_t *threads = util_realloc(NULL, nthreads*sizeof (*threads));
@@ -328,6 +332,8 @@ bool main_verify(FileList *old, FileList *new) {
             }
             slices[i].filelist = new;
             slices[i].hashes = hashes;
+            slices[i].hashes_rests = hashes_rests;
+            slices[i].table_size = hash_table_length(repeated_table);
             thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
         }
 
@@ -337,13 +343,16 @@ bool main_verify(FileList *old, FileList *new) {
         for (size_t i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_insert_pre_calc(repeated_table, newfile.name, hashes[i])) {
+            if (!hash_insert_pre_calc(repeated_table, newfile.name,
+                                      hashes[i], hashes_rests[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
                 repeated = true;
             }
         }
+        free(hashes);
+        free(hashes_rests);
         hash_table_destroy(repeated_table);
     } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
