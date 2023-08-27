@@ -44,7 +44,7 @@ size_t hash_function(char *str, size_t length) {
     return hash;
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t length, size_t hash) {
+bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t hash) {
     size_t hash_rest;
     SameHash *iterator;
 
