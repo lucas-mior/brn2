@@ -19,6 +19,7 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include "threads.h"
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, size_t);
@@ -264,6 +265,13 @@ bool is_pwd_or_parent(char *filename) {
         && (filename[1] == '.' || filename[1] == '\0');
 }
 
+typedef struct SliceArguments {
+    size_t start;
+    size_t end;
+    FileList *filelist;
+    size_t *hashes;
+} SliceArguments;
+
 bool main_verify(FileList *old, FileList *new) {
     bool repeated = false;
 
@@ -275,7 +283,25 @@ bool main_verify(FileList *old, FileList *new) {
         return false;
     }
 
-    if (new->length > USE_HASH_TABLE_THRESHOLD) {
+    if (new->length >= 1048576) {
+        HashTable *repeated_table = hash_table_create(new->length);
+        size_t *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
+
+        for (size_t i = 0; i < new->length; i += 1)
+            hashes[i] = hash_function(new->files[i].name, new->files[i].length);
+
+        for (size_t i = 0; i < new->length; i += 1) {
+            FileName newfile = new->files[i];
+
+            if (!hash_insert_pre_calc(repeated_table, newfile.name, newfile.length, hashes[i])) {
+                fprintf(stderr, RED"\"%s\""RESET
+                                " appears more than once in the buffer\n",
+                                newfile.name);
+                repeated = true;
+            }
+        }
+        hash_table_destroy(repeated_table);
+    } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
 
         for (size_t i = 0; i < new->length; i += 1) {

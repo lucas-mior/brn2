@@ -36,12 +36,42 @@ struct HashTable {
 };
 
 
-static inline size_t hash_function(char *str, size_t length) {
+size_t hash_function(char *str, size_t length) {
     /* djb2 hash function */
     size_t hash = 5381;
     for (size_t i = 0; i < length; i += 1)
         hash = ((hash << 5) + hash) + (size_t) str[i];
     return hash;
+}
+
+bool hash_insert_pre_calc(HashTable *table, char *newkey, size_t length, size_t hash) {
+    size_t hash_rest;
+    SameHash *iterator;
+
+    hash_rest = hash % table->length;
+    iterator = &(table->array[hash_rest]);
+
+    if (iterator->key == NULL) {
+        iterator->key = newkey;
+        iterator->hash = hash;
+        return true;
+    }
+
+    do {
+        if ((hash == iterator->hash) && !strcmp(iterator->key, newkey))
+            return false;
+
+        if (iterator->next)
+            iterator = iterator->next;
+        else
+            break;
+    } while (true);
+
+    iterator->next = util_calloc(1, sizeof (*iterator));
+    iterator->next->key = newkey;
+    iterator->next->hash = hash;
+
+    return true;
 }
 
 bool hash_insert(HashTable *table, char *newkey, size_t length) {
