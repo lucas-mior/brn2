@@ -67,7 +67,6 @@ int main(int argc, char **argv) {
 
     {
         char buffer2[BUFSIZ];
-        char newline = '\n';
 
         snprintf(buffer.name, sizeof (buffer.name),
                 "%s/%s", tempdir, "brn2.XXXXXX");
@@ -85,14 +84,18 @@ int main(int argc, char **argv) {
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (size_t i = 0; i < old->length; i += 1) {
-            fwrite(old->files[i].name, 1, old->files[i].length, buffer.stream);
-            fwrite(&newline, 1, 1, buffer.stream);
+            size_t length = old->files[i].length;
+            old->files[i].name[length] = '\n';
+            fwrite(old->files[i].name, 1, length+1, buffer.stream);
+            old->files[i].name[length] = '\0';
         }
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
         buffer.stream = NULL;
     }
+
+    exit(0);
 
     {
         char *args[] = { EDITOR, buffer.name, NULL };
