@@ -36,7 +36,7 @@
 #define USE_HASH_TABLE_THRESHOLD 128
 
 #define STRUCT_ARRAY_SIZE(StructType, ArrayType, array_length) \
-    sizeof (StructType) + (size_t)(array_length)*sizeof (ArrayType)
+    sizeof (StructType) + (size_t)(array_length) * sizeof (ArrayType)
 #define SWAP(Type, x, y) do { Type SWAP = x; x = y; y = SWAP; } while (0)
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
