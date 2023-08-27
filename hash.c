@@ -37,13 +37,11 @@ typedef uint64_t uint64;
 typedef struct SameHash {
     char *key;
     uint32 hash;
-    /* uint32 length; */
     struct SameHash *next;
 } SameHash;
 
 struct HashTable {
     uint32 size;
-    /* uint32 length; */
     SameHash array[];
 };
 
@@ -132,11 +130,6 @@ HashTable *hash_table_create(uint32 length) {
 uint32 hash_table_size(HashTable *table) {
     return table->size;
 }
-
-/* uint32 hash_table_length(HashTable *table) { */
-/*     return table->length; */
-/* } */
-
 
 void hash_table_destroy(HashTable *table) {
     for (uint32 i = 0; i < table->size; i += 1) {
