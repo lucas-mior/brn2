@@ -97,7 +97,6 @@ int main(int argc, char **argv) {
         buffer.fd = -1;
         buffer.stream = NULL;
     }
-    exit(0);
 
     {
         char *args[] = { EDITOR, buffer.name, NULL };
@@ -217,9 +216,7 @@ FileList *main_file_list_from_lines(char *filename) {
     uint32 lines_size = 0;
     int lines;
     char *content;
-    char *begin;
     uint32 length = 0;
-    uint32 index = 0;
 
     if ((lines = open(filename, O_RDONLY)) < 0) {
         fprintf(stderr, "Error opening history file for reading: %s\n"
@@ -246,7 +243,8 @@ FileList *main_file_list_from_lines(char *filename) {
                          lines, 0);
 
     if (content == MAP_FAILED) {
-        fprintf(stderr, "Error mapping file to memory: %s\n", strerror(errno));
+        fprintf(stderr, "Error mapping %s to memory: %s\n",
+                        filename, strerror(errno));
         close(lines);
         exit(EXIT_FAILURE);
     }
@@ -259,26 +257,29 @@ FileList *main_file_list_from_lines(char *filename) {
         util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
 
-    begin = content;
-    for (char *p = content; p < content + lines_size; p++) {
-        if (*p == '\n') {
-            FileName *file = &(file_list->files[index]);
-            *p = '\0';
+    {
+        uint32 index = 0;
+        char *begin = content;
+        for (char *p = content; p < content + lines_size; p++) {
+            if (*p == '\n') {
+                FileName *file = &(file_list->files[index]);
+                *p = '\0';
 
-            if (is_pwd_or_parent(begin))
-                continue;
+                if (is_pwd_or_parent(begin))
+                    continue;
 
-            file->length = (uint32) (p - begin);
-            file->name = util_realloc(NULL, file->length+1);
-            memcpy(file->name, begin, file->length+1);
-            begin = p+1;
+                file->length = (uint32) (p - begin);
+                file->name = util_realloc(NULL, file->length+1);
+                memcpy(file->name, begin, file->length+1);
+                begin = p+1;
 
-            index += 1;
+                index += 1;
+            }
         }
-    }
-    if (index != length) {
-        file_list =
-            util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, index));
+        if (index != length) {
+            file_list =
+                util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, index));
+        }
     }
 
     munmap(content, length);
