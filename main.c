@@ -217,7 +217,6 @@ FileList *main_file_list_from_lines(char *filename) {
     int lines;
     char *content;
     uint32 length = 0;
-    uint32 index = 0;
 
     if ((lines = open(filename, O_RDONLY)) < 0) {
         fprintf(stderr, "Error opening history file for reading: %s\n"
@@ -259,6 +258,7 @@ FileList *main_file_list_from_lines(char *filename) {
     file_list->length = length;
 
     {
+        uint32 index = 0;
         char *begin = content;
         for (char *p = content; p < content + lines_size; p++) {
             if (*p == '\n') {
