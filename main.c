@@ -219,8 +219,8 @@ FileList *main_file_list_from_lines(char *filename) {
     uint32 length = 0;
 
     if ((lines = open(filename, O_RDONLY)) < 0) {
-        fprintf(stderr, "Error opening history file for reading: %s\n"
-                        "History will start empty.\n", strerror(errno));
+        fprintf(stderr, "Error opening %s for reading: %s\n",
+                        filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
     /* lines = STDIN_FILENO; */
@@ -233,7 +233,7 @@ FileList *main_file_list_from_lines(char *filename) {
             exit(EXIT_FAILURE);
         }
         if ((lines_size = (uint32) lines_stat.st_size) <= 0) {
-            fprintf(stderr, "Length: %u\n", lines_size);
+            fprintf(stderr, "File is empty. Exiting.\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -324,7 +324,7 @@ bool main_verify(FileList *old, FileList *new) {
     }
 
     number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if ((new->length >= 1048576) && (number_threads >= 2)) {
+    if ((new->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
         uint32 nthreads = (uint32) number_threads;
         HashTable *repeated_table = hash_table_create(new->length);
         uint32 *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
