@@ -281,12 +281,12 @@ bool is_pwd_or_parent(char *filename) {
 }
 
 typedef struct Slice {
+    FileList *filelist;
     uint32 start;
     uint32 end;
-    FileList *filelist;
+    uint32 table_size;
     uint32 *hashes;
     uint32 *hashes_rests;
-    uint32 table_size;
 } Slice;
 
 static int create_hashes(void *arg) {
