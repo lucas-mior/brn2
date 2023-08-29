@@ -139,8 +139,7 @@ FileList *main_file_list_from_args(int argc, char **argv) {
     FileList *file_list;
     uint32 length = 0;
 
-    file_list = 
-        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
+    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
 
     for (int i = 1; i < argc; i += 1) {
         char *name = argv[i];
@@ -154,7 +153,7 @@ FileList *main_file_list_from_args(int argc, char **argv) {
         name_length = (uint32) strlen(name);
 
         file = &(file_list->files[length]);
-        file->name = util_realloc(NULL, name_length+1);
+        file->name = util_malloc(name_length+1);
         memcpy(file->name, name, name_length+1);
         file->length = (uint32) name_length;
 
@@ -179,8 +178,7 @@ FileList *main_file_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    file_list = 
-        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
+    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -194,7 +192,7 @@ FileList *main_file_list_from_dir(char *directory) {
         name_length = (uint32) strlen(name);
 
         file = &(file_list->files[length]);
-        file->name = util_realloc(NULL, name_length+1);
+        file->name = util_malloc(name_length+1);
         memcpy(file->name, name, name_length+1);
         file->length = (uint32) name_length;
 
@@ -247,8 +245,7 @@ FileList *main_file_list_from_lines(char *filename) {
         if (*p == '\n')
             length += 1;
     }
-    file_list =
-        util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
 
     {
@@ -263,16 +260,12 @@ FileList *main_file_list_from_lines(char *filename) {
                     continue;
 
                 file->length = (uint32) (p - begin);
-                file->name = util_realloc(NULL, file->length+1);
+                file->name = util_malloc(file->length+1);
                 memcpy(file->name, begin, file->length+1);
                 begin = p+1;
 
                 index += 1;
             }
-        }
-        if (index != length) {
-            file_list =
-                util_realloc(NULL, STRUCT_ARRAY_SIZE(FileList, FileName, index));
         }
     }
 
@@ -321,12 +314,12 @@ bool main_verify(FileList *old, FileList *new) {
     if ((new->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
         uint32 nthreads = (uint32) number_threads;
         HashTable *repeated_table = hash_table_create(new->length);
-        uint32 *hashes = util_realloc(NULL, new->length * sizeof (*hashes));
-        uint32 *hashes_rests = util_realloc(NULL, new->length * sizeof (*hashes));
+        uint32 *hashes = util_malloc(new->length * sizeof (*hashes));
+        uint32 *hashes_rests = util_malloc(new->length * sizeof (*hashes));
 
         uint32 range = new->length / nthreads;
-        thrd_t *threads = util_realloc(NULL, nthreads * sizeof (*threads));
-        Slice *slices = util_realloc(NULL, nthreads * sizeof (*slices));
+        thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
+        Slice *slices = util_malloc(nthreads * sizeof (*slices));
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
