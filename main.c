@@ -250,7 +250,7 @@ FileList *main_file_list_from_lines(char *filename) {
     {
         uint32 index = 0;
         char *begin = content;
-        for (char *p = content; p < content + lines_size; p++) {
+        for (char *p = content; p < content + lines_size; p += 1) {
             if (*p == '\n') {
                 FileName *file = &(file_list->files[index]);
                 *p = '\0';
@@ -263,7 +263,7 @@ FileList *main_file_list_from_lines(char *filename) {
                 file->length = (uint32) (p - begin);
                 file->name = util_malloc(file->length+1);
                 memcpy(file->name, begin, file->length+1);
-                begin = p+1;
+                begin = p + 1;
 
                 index += 1;
             }
@@ -315,13 +315,14 @@ bool main_verify(FileList *old, FileList *new) {
     number_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if ((new->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
         uint32 nthreads = (uint32) number_threads;
-        HashTable *repeated_table = hash_table_create(new->length);
-        uint32 *hashes = util_malloc(new->length * sizeof (*hashes));
-        uint32 *hashes_rests = util_malloc(new->length * sizeof (*hashes));
 
-        uint32 range = new->length / nthreads;
+        uint32 *hashes = util_malloc(new->length * sizeof (*hashes));
+        uint32 *hashes_rests = util_malloc(new->length * sizeof (*hashes_rests));
         thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
         Slice *slices = util_malloc(nthreads * sizeof (*slices));
+
+        HashTable *repeated_table = hash_table_create(new->length);
+        uint32 range = new->length / nthreads;
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
