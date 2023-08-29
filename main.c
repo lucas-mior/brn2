@@ -353,6 +353,8 @@ bool main_verify(FileList *old, FileList *new) {
         }
         free(hashes);
         free(hashes_rests);
+        free(slices);
+        free(threads);
         hash_table_destroy(repeated_table);
     } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
