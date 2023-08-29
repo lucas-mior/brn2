@@ -275,7 +275,7 @@ FileList *main_file_list_from_lines(char *filename, bool is_oldbuffer) {
         file_list->length = index;
     }
 
-    munmap(content, length);
+    munmap(content, lines_size);
     return file_list;
 }
 
