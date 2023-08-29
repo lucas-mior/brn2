@@ -223,7 +223,6 @@ FileList *main_file_list_from_lines(char *filename) {
                         filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    /* lines = STDIN_FILENO; */
 
     {
         struct stat lines_stat;
