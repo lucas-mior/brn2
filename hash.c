@@ -54,39 +54,14 @@ uint32 hash_function(char *str, uint32 length) {
     return hash;
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *newkey, uint32 hash, uint32 hash_rest) {
-    SameHash *iterator = &(table->array[hash_rest]);
-
-    if (iterator->key == NULL) {
-        iterator->key = newkey;
-        iterator->hash = hash;
-        return true;
-    }
-
-    do {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, newkey))
-            return false;
-
-        if (iterator->next)
-            iterator = iterator->next;
-        else
-            break;
-    } while (true);
-
-    iterator->next = util_calloc(1, sizeof (*iterator));
-    iterator->next->key = newkey;
-    iterator->next->hash = hash;
-
-    return true;
+bool hash_insert(HashTable *table, char *newkey, uint32 key_length) {
+    uint32 hash = hash_function(newkey, key_length);
+    uint32 hash_rest = hash % table->size;
+    return hash_insert_pre_calc(table, newkey, hash, hash_rest);
 }
 
-bool hash_insert(HashTable *table, char *newkey, uint32 key_length) {
-    uint32 hash, hash_rest;
-    SameHash *iterator;
-
-    hash = hash_function(newkey, key_length);
-    hash_rest = hash % table->size;
-    iterator = &(table->array[hash_rest]);
+bool hash_insert_pre_calc(HashTable *table, char *newkey, uint32 hash, uint32 hash_rest) {
+    SameHash *iterator = &(table->array[hash_rest]);
 
     if (iterator->key == NULL) {
         iterator->key = newkey;
