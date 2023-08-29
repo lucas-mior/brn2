@@ -246,7 +246,6 @@ FileList *main_file_list_from_lines(char *filename) {
             length += 1;
     }
     file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, length));
-    file_list->length = length;
 
     {
         uint32 index = 0;
@@ -256,8 +255,10 @@ FileList *main_file_list_from_lines(char *filename) {
                 FileName *file = &(file_list->files[index]);
                 *p = '\0';
 
-                if (is_pwd_or_parent(begin))
+                if (is_pwd_or_parent(begin)) {
+                    begin = p + 1;
                     continue;
+                }
 
                 file->length = (uint32) (p - begin);
                 file->name = util_malloc(file->length+1);
@@ -267,6 +268,7 @@ FileList *main_file_list_from_lines(char *filename) {
                 index += 1;
             }
         }
+        file_list->length = index;
     }
 
     munmap(content, length);
