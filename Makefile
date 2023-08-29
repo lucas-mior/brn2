@@ -14,7 +14,7 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-cflags += -std=c99 -Wall -Wextra
+cflags += -std=c99 -Wall -Wextra -Weverything -Wno-unsafe-buffer-usage
 
 release: cflags += -O2
 # release: stripflag = -s
