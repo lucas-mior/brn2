@@ -19,14 +19,10 @@
 
 #include "brn2.h"
 #include "hash.h"
-#include "threads.h"
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/stat.h> 
-#include <unistd.h>
+#include <malloc.h>
 
 static FileList *main_file_list_from_dir(char *);
-static FileList *main_file_list_from_lines(char *, bool);
+static FileList *main_file_list_from_lines(char *, uint32);
 static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
@@ -51,7 +47,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_lines(argv[1], true);
+            old = main_file_list_from_lines(argv[1], 0);
         }
     } else {
         old = main_file_list_from_dir(".");
@@ -98,7 +94,7 @@ int main(int argc, char **argv) {
 
         while (true) {
             util_command(ARRAY_LENGTH(args), args);
-            new = main_file_list_from_lines(buffer.name, false);
+            new = main_file_list_from_lines(buffer.name, old->length);
             if (!main_verify(old, new)) {
                 main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
@@ -204,74 +200,59 @@ FileList *main_file_list_from_dir(char *directory) {
     return file_list;
 }
 
-FileList *main_file_list_from_lines(char *filename, bool is_oldbuffer) {
+FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
     FileList *file_list;
-    uint32 lines_size = 0;
-    int lines;
-    char *content;
+    FILE *lines;
     uint32 length = 0;
 
-    if ((lines = open(filename, O_RDONLY)) < 0) {
+    if ((lines = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Error opening %s for reading: %s\n",
                         filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    {
-        struct stat lines_stat;
-        if (fstat(lines, &lines_stat) < 0) {
-            fprintf(stderr, "Error getting file information: %s\n", strerror(errno));
-            close(lines);
-            exit(EXIT_FAILURE);
-        }
-        if ((lines_size = (uint32) lines_stat.st_size) <= 0) {
-            fprintf(stderr, "File is empty. Exiting.\n");
-            exit(EXIT_FAILURE);
-        }
+    if (capacity == 0) {
+        capacity = 128;
     }
 
-    content = mmap(NULL, lines_size, 
-                         PROT_READ | PROT_WRITE, MAP_PRIVATE,
-                         lines, 0);
+    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+    while (!feof(lines)) {
+        char buffer[PATH_MAX];
+        uint32 last;
+        FileName *file;
 
-    if (content == MAP_FAILED) {
-        fprintf(stderr, "Error mapping %s to memory: %s\n",
-                        filename, strerror(errno));
-        close(lines);
+        if (length >= capacity) {
+            capacity *= 2;
+            file_list = util_realloc(file_list,
+                        STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+        }
+
+        if (!fgets(buffer, sizeof(buffer), lines))
+            continue;
+
+        last = (uint32) strcspn(buffer, "\n");
+        if (last == 0)
+            continue;
+
+        if (is_pwd_or_parent(buffer))
+            continue;
+
+        buffer[last] = '\0';
+
+        file = &(file_list->files[length]);
+        file->name = util_malloc(last + 1);
+        memcpy(file->name, buffer, last + 1);
+        file->length = last;
+        length += 1;
+    }
+    fclose(lines);
+
+    if (length == 0) {
+        fprintf(stderr, "Empty filelist. Exiting.\n");
         exit(EXIT_FAILURE);
     }
+    file_list->length = length;
 
-    for (char *p = content; p < content + lines_size; p++) {
-        if (*p == '\n')
-            length += 1;
-    }
-    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, length));
-
-    {
-        uint32 index = 0;
-        char *begin = content;
-        for (char *p = content; p < content + lines_size; p += 1) {
-            if (*p == '\n') {
-                FileName *file = &(file_list->files[index]);
-                *p = '\0';
-
-                if (is_pwd_or_parent(begin)) {
-                    begin = p + 1;
-                    continue;
-                }
-
-                file->length = (uint32) (p - begin);
-                file->name = util_malloc(file->length+1);
-                memcpy(file->name, begin, file->length+1);
-                begin = p + 1;
-
-                index += 1;
-            }
-        }
-        file_list->length = index;
-    }
-
-    munmap(content, lines_size);
     return file_list;
 }
 
