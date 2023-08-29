@@ -121,7 +121,7 @@ HashTable *hash_table_create(uint32 length) {
 
     size = sizeof (*table) + length * sizeof (table->array[0]);
 
-    table = util_realloc(NULL, size);
+    table = util_malloc(size);
     memset(table, 0, size);
     table->size = length;
     return table;
