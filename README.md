@@ -21,7 +21,7 @@ will take place when you save and exit.
 ### Notes
 - By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 - It will not work for more than 2^32 renames at once
-- It will not work for filenames longer than PATHMAX characters
+- It will not work for filenames longer than 2^32 characters.
 - Newlines in filenames are also not allowed.
 - If a filename listed in `<files.txt>` or passed as argument does not correspond to an existing file,
   it will be ignored.
