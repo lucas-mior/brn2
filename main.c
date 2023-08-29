@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 static FileList *main_file_list_from_dir(char *);
-static FileList *main_file_list_from_lines(char *);
+static FileList *main_file_list_from_lines(char *, bool);
 static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_lines(argv[1]);
+            old = main_file_list_from_lines(argv[1], true);
         }
     } else {
         old = main_file_list_from_dir(".");
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 
         while (true) {
             util_command(ARRAY_LENGTH(args), args);
-            new = main_file_list_from_lines(buffer.name);
+            new = main_file_list_from_lines(buffer.name, false);
             if (!main_verify(old, new)) {
                 main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
@@ -204,7 +204,7 @@ FileList *main_file_list_from_dir(char *directory) {
     return file_list;
 }
 
-FileList *main_file_list_from_lines(char *filename) {
+FileList *main_file_list_from_lines(char *filename, bool is_oldbuffer) {
     FileList *file_list;
     uint32 lines_size = 0;
     int lines;
@@ -256,6 +256,10 @@ FileList *main_file_list_from_lines(char *filename) {
                 *p = '\0';
 
                 if (is_pwd_or_parent(begin)) {
+                    begin = p + 1;
+                    continue;
+                }
+                if (is_oldbuffer && access(begin, F_OK)) {
                     begin = p + 1;
                     continue;
                 }
