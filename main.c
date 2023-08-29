@@ -37,11 +37,6 @@ static void main_free_file_list(FileList *);
 static char *EDITOR;
 static const char *tempdir = "/tmp";
 
-enum {
-    CAPACITY_NONE = 0,
-    CAPACITY_INITIAL_GUESS = 128,
-};
-
 int main(int argc, char **argv) {
     File buffer;
     FileList *old;
