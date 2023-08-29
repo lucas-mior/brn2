@@ -14,7 +14,7 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-cflags += -std=c99 -Weverything
+cflags += -std=c99 -Wall -Wextra
 
 release: cflags += -O2
 # release: stripflag = -s
