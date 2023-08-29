@@ -259,10 +259,6 @@ FileList *main_file_list_from_lines(char *filename, bool is_oldbuffer) {
                     begin = p + 1;
                     continue;
                 }
-                if (is_oldbuffer && access(begin, F_OK)) {
-                    begin = p + 1;
-                    continue;
-                }
 
                 file->length = (uint32) (p - begin);
                 file->name = util_malloc(file->length+1);
