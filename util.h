@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+void *util_malloc(const size_t);
 void *util_realloc(void *, const size_t);
 void *util_calloc(const size_t, const size_t);
 void util_command(int, char **);
