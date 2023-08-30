@@ -190,7 +190,7 @@ FileList *main_file_list_from_dir(char *directory) {
         file = &(file_list->files[length]);
         file->name = util_malloc(name_length+1);
         memcpy(file->name, name, name_length+1);
-        file->length = (uint32) name_length;
+        file->length = name_length;
 
         free(directory_list[i]);
         length += 1;
