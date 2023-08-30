@@ -333,6 +333,7 @@ bool main_verify(FileList *old, FileList *new) {
                 repeated = true;
             }
         }
+
         free(hashes);
         free(hashes_rests);
         free(slices);
