@@ -22,5 +22,4 @@ bool hash_insert_pre_calc(HashTable *table, char *, uint32, uint32);
 bool hash_insert(HashTable *, char *, uint32);
 HashTable *hash_table_create(uint32);
 uint32 hash_table_size(HashTable *);
-uint32 hash_table_length(HashTable *);
 void hash_table_destroy(HashTable *);
