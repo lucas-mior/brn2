@@ -28,8 +28,8 @@ static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, uint32);
-static void main_usage(FILE *) __attribute__((noreturn));
 static void main_free_file_list(FileList *);
+static void main_usage(FILE *) __attribute__((noreturn));
 static char *EDITOR;
 static const char *tempdir = "/tmp";
 
@@ -446,6 +446,14 @@ uint32 main_execute(FileList *old, FileList *new, uint32 number_changes) {
     return number_renames;
 }
 
+
+void main_free_file_list(FileList *file_list) {
+    for (uint32 i = 0; i < file_list->length; i += 1)
+        free(file_list->files[i].name);
+    free(file_list);
+    return;
+}
+
 void main_usage(FILE *stream) {
     fprintf(stream, "usage: brn2 [-h | --help | <filename> | file1 file2 ... ]\n");
     fprintf(stream, "No arguments        : rename filenames in current working directory.\n");
@@ -453,11 +461,4 @@ void main_usage(FILE *stream) {
     fprintf(stream, "2 or more arguments : rename filenames passed as arguments.\n");
     fprintf(stream, "-h | --help         : display this help message.\n");
     exit((int) (stream != stdout));
-}
-
-void main_free_file_list(FileList *file_list) {
-    for (uint32 i = 0; i < file_list->length; i += 1)
-        free(file_list->files[i].name);
-    free(file_list);
-    return;
 }
