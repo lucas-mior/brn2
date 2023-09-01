@@ -34,7 +34,6 @@ typedef uint64_t uint64;
 #include "util.h"
 #include "hash.h"
 
-#pragma clang diagnostic ignored "-Wpadded"
 typedef struct SameHash {
     char *key;
     uint32 hash;
