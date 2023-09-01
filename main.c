@@ -265,7 +265,7 @@ typedef struct Slice {
     uint32 end;
     uint32 table_size;
     uint32 *hashes;
-    uint32 *hashes_rests;
+    uint32 *indexes;
 } Slice;
 
 static int create_hashes(void *arg) {
@@ -274,7 +274,7 @@ static int create_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->filelist->files[i];
         slice->hashes[i] = hash_function(newfile.name, newfile.length);
-        slice->hashes_rests[i] = slice->hashes[i] % slice->table_size;
+        slice->indexes[i] = slice->hashes[i] % slice->table_size;
     }
     thrd_exit(0);
 }
@@ -296,7 +296,7 @@ bool main_verify(FileList *old, FileList *new) {
         uint32 nthreads = (uint32) number_threads;
 
         uint32 *hashes = util_malloc(new->length * sizeof (*hashes));
-        uint32 *hashes_rests = util_malloc(new->length * sizeof (*hashes_rests));
+        uint32 *indexes = util_malloc(new->length * sizeof (*indexes));
         thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
         Slice *slices = util_malloc(nthreads * sizeof (*slices));
 
@@ -312,7 +312,7 @@ bool main_verify(FileList *old, FileList *new) {
             }
             slices[i].filelist = new;
             slices[i].hashes = hashes;
-            slices[i].hashes_rests = hashes_rests;
+            slices[i].indexes = indexes;
             slices[i].table_size = hash_table_size(repeated_table);
             thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
         }
@@ -324,7 +324,7 @@ bool main_verify(FileList *old, FileList *new) {
             FileName newfile = new->files[i];
 
             if (!hash_insert_pre_calc(repeated_table, newfile.name,
-                                      hashes[i], hashes_rests[i])) {
+                                      hashes[i], indexes[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -333,7 +333,7 @@ bool main_verify(FileList *old, FileList *new) {
         }
 
         free(hashes);
-        free(hashes_rests);
+        free(indexes);
         free(slices);
         free(threads);
         hash_table_destroy(repeated_table);
