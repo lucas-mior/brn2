@@ -21,10 +21,11 @@ will take place when you save and exit.
 ### Notes
 - By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 - It will not work for more than 2^32 renames at once
-- It will not work for filenames longer than 2^32 characters.
-- Newlines in filenames are also not allowed.
-- If a filename listed in `<files.txt>` or passed as argument does not correspond to an existing file,
-  it will be ignored.
+- It will not work for filenames longer than PATH_MAX (typically 4096) characters when
+  reading from `<files.txt>`.
+- Newlines in filenames are not allowed.
+- Filenames listed in `<files.txt>` or given as arguments which
+  do not correpond to existing files will generate errors while renaming
 - Filenames `.` and `..` are ignored, as well as any filename
   which starts with `..`, even when listen in `<files.txt>`
  
