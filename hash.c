@@ -56,12 +56,12 @@ uint32 hash_function(char *str, uint32 length) {
 
 bool hash_insert(HashTable *table, char *key, uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 hash_rest = hash % table->size;
-    return hash_insert_pre_calc(table, key, hash, hash_rest);
+    uint32 index = hash % table->size;
+    return hash_insert_pre_calc(table, key, hash, index);
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *key, uint32 hash, uint32 hash_rest) {
-    SameHash *iterator = &(table->array[hash_rest]);
+bool hash_insert_pre_calc(HashTable *table, char *key, uint32 hash, uint32 index) {
+    SameHash *iterator = &(table->array[index]);
 
     if (iterator->key == NULL) {
         iterator->key = key;
