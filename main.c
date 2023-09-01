@@ -225,7 +225,7 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
                         STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
         }
 
-        if (!fgets(buffer, sizeof(buffer), lines))
+        if (!fgets(buffer, sizeof (buffer), lines))
             continue;
 
         last = (uint32) strcspn(buffer, "\n");
