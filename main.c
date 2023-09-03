@@ -286,8 +286,8 @@ bool main_verify(FileList *old, FileList *new) {
     long number_threads;
 
     if (old->length != new->length) {
-        fprintf(stderr, "You are renaming %u file%.*s "
-                        "but buffer contains %u file name%.*s\n", 
+        fprintf(stderr, "You are renaming "RED"%u"RESET" file%.*s "
+                        "but buffer contains "RED"%u"RESET" file name%.*s\n", 
                         old->length, old->length != 1, "s",
                         new->length, new->length != 1, "s");
         return false;
