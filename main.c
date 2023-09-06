@@ -66,8 +66,7 @@ int main(int argc, char **argv) {
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
         if (n < 0) {
-            fprintf(stderr, "Error printing buffer name: %s\n",
-                    strerror(errno));
+            fprintf(stderr, "Error printing buffer name.\n");
             exit(EXIT_FAILURE);
         }
         buffer.name[n] = '\0';
