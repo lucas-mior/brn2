@@ -27,7 +27,7 @@ static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *filename);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
-static uint32 main_execute(FileList *, FileList *, uint32);
+static uint32 main_execute(FileList *, FileList *, const uint32);
 static void main_free_file_list(FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
 static char *EDITOR;
@@ -389,7 +389,7 @@ uint32 main_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
-uint32 main_execute(FileList *old, FileList *new, uint32 number_changes) {
+uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
     uint32 length;
     HashTable *names_renamed;
     uint32 number_renames = 0;
