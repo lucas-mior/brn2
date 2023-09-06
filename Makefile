@@ -15,6 +15,7 @@ main.o: main.c
 hash.o: hash.c
 
 cflags += -std=c99 -Wall -Wextra -Weverything -Wno-unsafe-buffer-usage -Wno-padded
+LDFLAGS += -lm
 
 release: cflags += -O2
 # release: stripflag = -s
