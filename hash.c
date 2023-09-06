@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -91,6 +92,22 @@ bool hash_insert_pre_calc(HashTable *table, char *key,
     return true;
 }
 
+void hash_table_print(HashTable *table) {
+    for (uint32 i = 0; i < table->size; i += 1) {
+        SameHash *iterator = &(table->array[i]);
+        if (iterator->key) {
+            printf("\n%03d:\n", i);
+        } else {
+            continue;
+        }
+        while (iterator && iterator->key) {
+            printf(" %s ->", iterator->key);
+            iterator = iterator->next;
+        }
+        printf("\n");
+    }
+}
+
 bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->size;
@@ -132,7 +149,7 @@ HashTable *hash_table_create(uint32 length) {
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
-    length *= 4;
+    length *= 1.1;
 
     size = sizeof (*table) + length * sizeof (table->array[0]);
 
