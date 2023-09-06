@@ -41,6 +41,7 @@ typedef struct SameHash {
 } SameHash;
 
 struct HashTable {
+    uint32 collisions;
     uint32 size;
     SameHash array[];
 };
@@ -78,6 +79,7 @@ bool hash_insert_pre_calc(HashTable *table, char *key, const uint32 hash, const 
             break;
     } while (true);
 
+    table->collisions += 1;
     iterator->next = util_calloc(1, sizeof (*iterator));
     iterator->next->key = key;
     iterator->next->hash = hash;
@@ -103,6 +105,10 @@ HashTable *hash_table_create(uint32 length) {
 
 uint32 hash_table_size(HashTable *table) {
     return table->size;
+}
+
+uint32 hash_table_collisions(HashTable *table) {
+    return table->collisions;
 }
 
 void hash_table_destroy(HashTable *table) {
