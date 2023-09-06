@@ -17,15 +17,15 @@
 
 typedef struct HashMap HashMap;
 
-uint32 hash_function(char *, const uint32);
-bool hash_map_insert_pre_calc(HashMap *, char *, const uint32, const uint32);
+uint32 hash_function(char *, const uint32 );
 bool hash_map_insert(HashMap *, char *, const uint32);
+bool hash_map_insert_pre_calc(HashMap *, char *, const uint32, const uint32);
 bool hash_map_remove(HashMap *, char *, const uint32);
 HashMap *hash_map_create(uint32);
+void hash_map_print_summary(HashMap *);
+void hash_map_print(HashMap *, bool);
 uint32 hash_map_capacity(HashMap *);
 uint32 hash_map_length(HashMap *);
 uint32 hash_map_collisions(HashMap *);
 uint32 hash_map_expected_collisions(HashMap *);
 void hash_map_destroy(HashMap *);
-void hash_map_print(HashMap *, bool);
-void hash_map_print_summary(HashMap *);
