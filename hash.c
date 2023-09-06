@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -92,21 +93,6 @@ bool hash_insert_pre_calc(HashTable *table, char *key,
     return true;
 }
 
-void hash_table_print(HashTable *table) {
-    for (uint32 i = 0; i < table->size; i += 1) {
-        SameHash *iterator = &(table->array[i]);
-        if (iterator->key) {
-            printf("\n%03d:\n", i);
-        } else {
-            continue;
-        }
-        while (iterator && iterator->key) {
-            printf(" %s ->", iterator->key);
-            iterator = iterator->next;
-        }
-    }
-}
-
 bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->size;
@@ -122,15 +108,19 @@ bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
             void *aux = iterator->next;
             memmove(iterator, iterator->next, sizeof (SameHash));
             free(aux);
+            table->collisions -= 1;
         } else {
             memset(iterator, 0, sizeof (SameHash));
         }
+        table->length -= 1;
         return true;
     }
     do {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
              previous->next = iterator->next;
              free(iterator);
+             table->length -= 1;
+             table->collisions -= 1;
              return true;
         } else {
             if (iterator->next) {
@@ -161,6 +151,28 @@ HashTable *hash_table_create(uint32 length) {
     return table;
 }
 
+void hash_table_print(HashTable *table) {
+    printf("Hash Table {\n");
+    printf("  size: %u\n", table->size);
+    printf("  length: %u\n", table->length);
+    printf("  collisions: %u\n", table->collisions);
+    printf("  expected collisions: %u\n", hash_table_expected_collisions(table));
+    printf("}\n");
+
+    for (uint32 i = 0; i < table->size; i += 1) {
+        SameHash *iterator = &(table->array[i]);
+        if (iterator->key) {
+            printf("\n%03d:", i);
+        } else {
+            continue;
+        }
+        while (iterator && iterator->key) {
+            printf(" %s ->", iterator->key);
+            iterator = iterator->next;
+        }
+    }
+}
+
 uint32 hash_table_size(HashTable *table) {
     return table->size;
 }
@@ -171,6 +183,12 @@ uint32 hash_table_length(HashTable *table) {
 
 uint32 hash_table_collisions(HashTable *table) {
     return table->collisions;
+}
+
+uint32 hash_table_expected_collisions(HashTable *table) {
+    uint32 n = table->length;
+    uint32 m = table->size;
+    return n - m * (1 - pow((m-1)/m, n));
 }
 
 void hash_table_destroy(HashTable *table) {
