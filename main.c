@@ -338,14 +338,6 @@ bool main_verify(FileList *old, FileList *new) {
         free(indexes);
         free(slices);
         free(threads);
-        printf("\nbefore removal:\n");
-        hash_table_print_summary(repeated_table);
-        printf("\n");
-        for (uint32 i = 0; i < new->length; i += 1) {
-            hash_table_remove(repeated_table, new->files[i].name, new->files[i].length);
-        }
-        printf("\nafter removal:\n");
-        hash_table_print_summary(repeated_table);
         hash_table_destroy(repeated_table);
     } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
