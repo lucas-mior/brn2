@@ -60,7 +60,8 @@ bool hash_insert(HashTable *table, char *key, const uint32 key_length) {
     return hash_insert_pre_calc(table, key, hash, index);
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *key, const uint32 hash, const uint32 index) {
+bool hash_insert_pre_calc(HashTable *table, char *key,
+                          const uint32 hash, const uint32 index) {
     SameHash *iterator = &(table->array[index]);
 
     if (iterator->key == NULL) {
