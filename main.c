@@ -353,13 +353,13 @@ bool main_verify(FileList *old, FileList *new) {
             }
         }
         printf("\nbefore removal:\n");
-        hash_table_print(repeated_table);
+        hash_table_print(repeated_table, false);
         printf("\n");
         for (int j = 0; j < new->length; j += 1) {
             hash_remove(repeated_table, new->files[j].name, new->files[j].length);
         }
         printf("\nafter removal:\n");
-        hash_table_print(repeated_table);
+        hash_table_print(repeated_table, false);
         hash_table_destroy(repeated_table);
     } else {
         for (uint32 i = 0; i < new->length; i += 1) {

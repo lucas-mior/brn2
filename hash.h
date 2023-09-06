@@ -27,4 +27,5 @@ uint32 hash_table_length(HashTable *);
 uint32 hash_table_collisions(HashTable *);
 uint32 hash_table_expected_collisions(HashTable *);
 void hash_table_destroy(HashTable *);
-void hash_table_print(HashTable *);
+void hash_table_print(HashTable *, bool);
+void hash_table_print_summary(HashTable *);
