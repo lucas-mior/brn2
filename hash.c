@@ -45,7 +45,7 @@ struct HashTable {
     SameHash array[];
 };
 
-uint32 hash_function(char *str, uint32 length) {
+uint32 hash_function(char *str, const uint32 length) {
     /* djb2 hash function */
     uint32 hash = 5381;
     for (uint32 i = 0; i < length; i += 1)
@@ -53,13 +53,13 @@ uint32 hash_function(char *str, uint32 length) {
     return hash;
 }
 
-bool hash_insert(HashTable *table, char *key, uint32 key_length) {
+bool hash_insert(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->size;
     return hash_insert_pre_calc(table, key, hash, index);
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *key, uint32 hash, uint32 index) {
+bool hash_insert_pre_calc(HashTable *table, char *key, const uint32 hash, const uint32 index) {
     SameHash *iterator = &(table->array[index]);
 
     if (iterator->key == NULL) {
