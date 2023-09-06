@@ -36,7 +36,6 @@ typedef uint64_t uint64;
 #include "util.h"
 #include "hash.h"
 
-#define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
@@ -49,7 +48,7 @@ typedef struct SameHash {
 struct HashTable {
     uint32 collisions;
     uint32 length;
-    uint32 size;
+    uint32 capacity;
     SameHash array[];
 };
 
@@ -63,7 +62,7 @@ uint32 hash_function(char *str, const uint32 length) {
 
 bool hash_insert(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 index = hash % table->size;
+    uint32 index = hash % table->capacity;
     return hash_insert_pre_calc(table, key, hash, index);
 }
 
@@ -99,7 +98,7 @@ bool hash_insert_pre_calc(HashTable *table, char *key,
 
 bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 index = hash % table->size;
+    uint32 index = hash % table->capacity;
     SameHash *iterator = &(table->array[index]);
     SameHash *previous;
 
@@ -147,13 +146,13 @@ HashTable *hash_table_create(uint32 length) {
 
     table = util_malloc(size);
     memset(table, 0, size);
-    table->size = length;
+    table->capacity = length;
     return table;
 }
 
 void hash_table_print_summary(HashTable *table) {
     printf("Hash Table {\n");
-    printf("  size: %u\n", table->size);
+    printf("  capacity: %u\n", table->capacity);
     printf("  length: %u\n", table->length);
     printf("  collisions: %u\n", table->collisions);
     printf("  expected collisions: %u\n", hash_table_expected_collisions(table));
@@ -163,7 +162,7 @@ void hash_table_print_summary(HashTable *table) {
 void hash_table_print(HashTable *table, bool verbose) {
     hash_table_print_summary(table);
 
-    for (uint32 i = 0; i < table->size; i += 1) {
+    for (uint32 i = 0; i < table->capacity; i += 1) {
         SameHash *iterator = &(table->array[i]);
         if (iterator->key || verbose) {
             printf("\n%03d:", i);
@@ -177,8 +176,8 @@ void hash_table_print(HashTable *table, bool verbose) {
     }
 }
 
-uint32 hash_table_size(HashTable *table) {
-    return table->size;
+uint32 hash_table_capacity(HashTable *table) {
+    return table->capacity;
 }
 
 uint32 hash_table_length(HashTable *table) {
@@ -191,13 +190,13 @@ uint32 hash_table_collisions(HashTable *table) {
 
 uint32 hash_table_expected_collisions(HashTable *table) {
     long double n = table->length;
-    long double m = table->size;
+    long double m = table->capacity;
     long double result = n - m * (1 - powl((m-1)/m, n));
     return (uint32) (roundl(result));
 }
 
 void hash_table_destroy(HashTable *table) {
-    for (uint32 i = 0; i < table->size; i += 1) {
+    for (uint32 i = 0; i < table->capacity; i += 1) {
         SameHash *iterator = &(table->array[i]);
         iterator = iterator->next;
         while (iterator) {
