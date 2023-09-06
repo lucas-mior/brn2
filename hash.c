@@ -91,6 +91,41 @@ bool hash_insert_pre_calc(HashTable *table, char *key,
     return true;
 }
 
+bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
+    uint32 hash = hash_function(key, key_length);
+    uint32 index = hash % table->size;
+    SameHash *bucket = &(table->array[index]);
+    SameHash *iterator = &(table->array[index]);
+    SameHash *previous = &(table->array[index]);
+
+    if (iterator->key == NULL)
+        return false;
+
+    do {
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
+            if (iterator == bucket) {
+                if (iterator->next) {
+                    memcpy(iterator, iterator->next, sizeof (SameHash));
+                    return true;
+                }
+            } else {
+                previous->next = iterator->next;
+                free(iterator);
+                return true;
+            }
+        } else {
+            if (iterator->next) {
+                previous = iterator;
+                iterator = iterator->next;
+            } else {
+                break;
+            }
+        }
+    } while (true);
+
+    return false;
+}
+
 HashTable *hash_table_create(uint32 length) {
     HashTable *table;
     uint32 size;
