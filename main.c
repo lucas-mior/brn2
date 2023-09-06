@@ -265,7 +265,7 @@ typedef struct Slice {
     FileList *filelist;
     uint32 start;
     uint32 end;
-    uint32 table_size;
+    uint32 table_capacity;
     uint32 *hashes;
     uint32 *indexes;
 } Slice;
@@ -276,7 +276,7 @@ static int create_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->filelist->files[i];
         slice->hashes[i] = hash_function(newfile.name, newfile.length);
-        slice->indexes[i] = slice->hashes[i] % slice->table_size;
+        slice->indexes[i] = slice->hashes[i] % slice->table_capacity;
     }
     thrd_exit(0);
 }
@@ -315,7 +315,7 @@ bool main_verify(FileList *old, FileList *new) {
             slices[i].filelist = new;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
-            slices[i].table_size = hash_table_size(repeated_table);
+            slices[i].table_capacity = hash_table_capacity(repeated_table);
             thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
         }
 
