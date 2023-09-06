@@ -96,9 +96,8 @@ bool hash_insert_pre_calc(HashTable *table, char *key,
 bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->size;
-    SameHash *bucket = &(table->array[index]);
     SameHash *iterator = &(table->array[index]);
-    SameHash *previous = &(table->array[index]);
+    SameHash *previous;
 
     if (iterator->key == NULL)
         return false;
@@ -115,20 +114,17 @@ bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
         table->length -= 1;
         return true;
     }
-    do {
+
+    while (iterator->next) {
+        previous = iterator;
+        iterator = iterator->next;
+
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
              previous->next = iterator->next;
              free(iterator);
              table->length -= 1;
              table->collisions -= 1;
              return true;
-        } else {
-            if (iterator->next) {
-                previous = iterator;
-                iterator = iterator->next;
-            } else {
-                break;
-            }
         }
     } while (true);
 
@@ -141,7 +137,7 @@ HashTable *hash_table_create(uint32 length) {
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
-    length *= 1.1;
+    length *= 2;
 
     size = sizeof (*table) + length * sizeof (table->array[0]);
 
@@ -151,17 +147,21 @@ HashTable *hash_table_create(uint32 length) {
     return table;
 }
 
-void hash_table_print(HashTable *table) {
+void hash_table_print_summary(HashTable *table) {
     printf("Hash Table {\n");
     printf("  size: %u\n", table->size);
     printf("  length: %u\n", table->length);
     printf("  collisions: %u\n", table->collisions);
     printf("  expected collisions: %u\n", hash_table_expected_collisions(table));
     printf("}\n");
+}
+
+void hash_table_print(HashTable *table, bool verbose) {
+    hash_table_print_summary(table);
 
     for (uint32 i = 0; i < table->size; i += 1) {
         SameHash *iterator = &(table->array[i]);
-        if (iterator->key) {
+        if (iterator->key || verbose) {
             printf("\n%03d:", i);
         } else {
             continue;
