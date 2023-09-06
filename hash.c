@@ -52,6 +52,35 @@ struct HashMap {
     Bucket array[];
 };
 
+HashMap *hash_map_create(uint32 length) {
+    HashMap *map;
+    uint32 size;
+
+    if (length > (UINT32_MAX/4))
+        length = (UINT32_MAX/4);
+    length *= 4;
+
+    size = sizeof (*map) + length * sizeof (map->array[0]);
+
+    map = util_malloc(size);
+    memset(map, 0, size);
+    map->capacity = length;
+    return map;
+}
+
+void hash_map_destroy(HashMap *map) {
+    for (uint32 i = 0; i < map->capacity; i += 1) {
+        Bucket *iterator = &(map->array[i]);
+        iterator = iterator->next;
+        while (iterator) {
+            void *aux = iterator;
+            iterator = iterator->next;
+            free(aux);
+        }
+    }
+    free(map);
+}
+
 uint32 hash_function(char *str, const uint32 length) {
     /* djb2 hash function */
     uint32 hash = 5381;
@@ -134,22 +163,6 @@ bool hash_map_remove(HashMap *map, char *key, const uint32 key_length) {
     return false;
 }
 
-HashMap *hash_map_create(uint32 length) {
-    HashMap *map;
-    uint32 size;
-
-    if (length > (UINT32_MAX/4))
-        length = (UINT32_MAX/4);
-    length *= 4;
-
-    size = sizeof (*map) + length * sizeof (map->array[0]);
-
-    map = util_malloc(size);
-    memset(map, 0, size);
-    map->capacity = length;
-    return map;
-}
-
 void hash_map_print_summary(HashMap *map) {
     printf("Hash Map {\n");
     printf("  capacity: %u\n", map->capacity);
@@ -193,17 +206,4 @@ uint32 hash_map_expected_collisions(HashMap *map) {
     long double m = map->capacity;
     long double result = n - m * (1 - powl((m-1)/m, n));
     return (uint32) (roundl(result));
-}
-
-void hash_map_destroy(HashMap *map) {
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        Bucket *iterator = &(map->array[i]);
-        iterator = iterator->next;
-        while (iterator) {
-            void *aux = iterator;
-            iterator = iterator->next;
-            free(aux);
-        }
-    }
-    free(map);
 }
