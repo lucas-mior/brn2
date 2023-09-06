@@ -36,6 +36,10 @@ typedef uint64_t uint64;
 #include "util.h"
 #include "hash.h"
 
+#define RED "\x1b[31m"
+#define GREEN "\x1b[32m"
+#define RESET "\x1b[0m"
+
 typedef struct SameHash {
     char *key;
     uint32 hash;
@@ -167,7 +171,7 @@ void hash_table_print(HashTable *table, bool verbose) {
             continue;
         }
         while (iterator && iterator->key) {
-            printf(" %s ->", iterator->key);
+            printf(GREEN" %s"RESET" ->", iterator->key);
             iterator = iterator->next;
         }
     }
