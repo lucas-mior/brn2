@@ -14,24 +14,24 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-cflags += -std=c99 -Wall -Wextra -Weverything -Wno-unsafe-buffer-usage
+CFLAGS += -std=c99 -Wall -Wextra -Weverything -Wno-unsafe-buffer-usage
 LDFLAGS += -lm
 
-release: cflags += -O2
+release: CFLAGS += -O2
 # release: stripflag = -s
 release: brn2
 
-debug: cflags += -g2
+debug: CFLAGS += -g2
 debug: clean
 debug: brn2
 
 brn2: $(objs)
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
-	$(CC) $(stripflag) $(cflags) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
+	$(CC) $(stripflag) $(CFLAGS) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
 
 .c.o:
-	$(CC) $(cflags) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
