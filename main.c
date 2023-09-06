@@ -19,7 +19,6 @@
 
 #include "brn2.h"
 #include "hash.h"
-#include <malloc.h>
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, uint32);
