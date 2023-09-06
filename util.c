@@ -55,7 +55,7 @@ void *util_calloc(const size_t nmemb, const size_t size) {
     return p;
 }
 
-void util_command(int argc, char **argv) {
+void util_command(const int argc, char **argv) {
     switch (fork()) {
     case 0:
         freopen("/dev/tty", "r", stdin);
