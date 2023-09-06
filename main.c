@@ -338,6 +338,7 @@ bool main_verify(FileList *old, FileList *new) {
         free(indexes);
         free(slices);
         free(threads);
+        printf("number of collisons: %u\n", hash_table_collisions(repeated_table));
         hash_table_destroy(repeated_table);
     } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
         HashTable *repeated_table = hash_table_create(new->length);
@@ -352,6 +353,7 @@ bool main_verify(FileList *old, FileList *new) {
                 repeated = true;
             }
         }
+        printf("number of collisons: %u\n", hash_table_collisions(repeated_table));
         hash_table_destroy(repeated_table);
     } else {
         for (uint32 i = 0; i < new->length; i += 1) {
@@ -442,6 +444,7 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
+    printf("number of collisons: %u\n", hash_table_collisions(names_renamed));
     hash_table_destroy(names_renamed);
     return number_renames;
 }
