@@ -355,8 +355,8 @@ bool main_verify(FileList *old, FileList *new) {
         printf("\nbefore removal:\n");
         hash_table_print(repeated_table, false);
         printf("\n");
-        for (uint32 j = 0; j < new->length; j += 1) {
-            hash_remove(repeated_table, new->files[j].name, new->files[j].length);
+        for (uint32 i = 0; i < new->length; i += 1) {
+            hash_remove(repeated_table, new->files[i].name, new->files[i].length);
         }
         printf("\nafter removal:\n");
         hash_table_print(repeated_table, false);
