@@ -39,17 +39,17 @@ typedef uint64_t uint64;
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-typedef struct SameHash {
+typedef struct Bucket {
     char *key;
     uint32 hash;
-    struct SameHash *next;
-} SameHash;
+    struct Bucket *next;
+} Bucket;
 
 struct HashTable {
     uint32 capacity;
     uint32 collisions;
     uint32 length;
-    SameHash array[];
+    Bucket array[];
 };
 
 uint32 hash_function(char *str, const uint32 length) {
@@ -68,7 +68,7 @@ bool hash_table_insert(HashTable *table, char *key, const uint32 key_length) {
 
 bool hash_table_insert_pre_calc(HashTable *table, char *key,
                           const uint32 hash, const uint32 index) {
-    SameHash *iterator = &(table->array[index]);
+    Bucket *iterator = &(table->array[index]);
 
     if (iterator->key == NULL) {
         iterator->key = key;
@@ -99,8 +99,8 @@ bool hash_table_insert_pre_calc(HashTable *table, char *key,
 bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->capacity;
-    SameHash *iterator = &(table->array[index]);
-    SameHash *previous;
+    Bucket *iterator = &(table->array[index]);
+    Bucket *previous;
 
     if (iterator->key == NULL)
         return false;
@@ -108,11 +108,11 @@ bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
         if (iterator->next) {
             void *aux = iterator->next;
-            memmove(iterator, iterator->next, sizeof (SameHash));
+            memmove(iterator, iterator->next, sizeof (Bucket));
             free(aux);
             table->collisions -= 1;
         } else {
-            memset(iterator, 0, sizeof (SameHash));
+            memset(iterator, 0, sizeof (Bucket));
         }
         table->length -= 1;
         return true;
@@ -163,7 +163,7 @@ void hash_table_print(HashTable *table, bool verbose) {
     hash_table_print_summary(table);
 
     for (uint32 i = 0; i < table->capacity; i += 1) {
-        SameHash *iterator = &(table->array[i]);
+        Bucket *iterator = &(table->array[i]);
         if (iterator->key || verbose) {
             printf("\n%03d:", i);
         } else {
@@ -197,7 +197,7 @@ uint32 hash_table_expected_collisions(HashTable *table) {
 
 void hash_table_destroy(HashTable *table) {
     for (uint32 i = 0; i < table->capacity; i += 1) {
-        SameHash *iterator = &(table->array[i]);
+        Bucket *iterator = &(table->array[i]);
         iterator = iterator->next;
         while (iterator) {
             void *aux = iterator;
