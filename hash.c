@@ -46,9 +46,9 @@ typedef struct SameHash {
 } SameHash;
 
 struct HashTable {
+    uint32 capacity;
     uint32 collisions;
     uint32 length;
-    uint32 capacity;
     SameHash array[];
 };
 
