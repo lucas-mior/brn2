@@ -326,7 +326,7 @@ bool main_verify(FileList *old, FileList *new) {
             FileName newfile = new->files[i];
 
             if (!hash_table_insert_pre_calc(repeated_table, newfile.name,
-                                      hashes[i], indexes[i])) {
+                                            hashes[i], indexes[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
