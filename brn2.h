@@ -52,17 +52,19 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 
 typedef struct File {
-    char name[PATH_MAX];
-    FILE *stream;
+    char name[PATH_MAX-4];
     int fd;
+    FILE *stream;
 } File;
 
 typedef struct FileName {
     char *name;
     uint32 length;
+    uint32 unused;
 } FileName;
 
 typedef struct FileList {
+    uint32 unused;
     uint32 length;
     FileName files[];
 } FileList;
