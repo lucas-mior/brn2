@@ -352,11 +352,14 @@ bool main_verify(FileList *old, FileList *new) {
                 repeated = true;
             }
         }
-        printf("before removal!\n");
+        printf("\nbefore removal:\n");
         hash_table_print(repeated_table);
-        /* hash_remove(repeated_table, new->files[0].name, new->files[0].length); */
-        /* printf("after removal!\n"); */
-        /* hash_table_print(repeated_table); */
+        printf("\n");
+        for (int j = 0; j < new->length; j += 1) {
+            hash_remove(repeated_table, new->files[j].name, new->files[j].length);
+        }
+        printf("\nafter removal:\n");
+        hash_table_print(repeated_table);
         hash_table_destroy(repeated_table);
     } else {
         for (uint32 i = 0; i < new->length; i += 1) {
