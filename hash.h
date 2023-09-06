@@ -15,17 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-typedef struct HashTable HashTable;
+typedef struct HashMap HashMap;
 
 uint32 hash_function(char *, const uint32);
-bool hash_table_insert_pre_calc(HashTable *, char *, const uint32, const uint32);
-bool hash_table_insert(HashTable *, char *, const uint32);
-bool hash_table_remove(HashTable *, char *, const uint32);
-HashTable *hash_table_create(uint32);
-uint32 hash_table_capacity(HashTable *);
-uint32 hash_table_length(HashTable *);
-uint32 hash_table_collisions(HashTable *);
-uint32 hash_table_expected_collisions(HashTable *);
-void hash_table_destroy(HashTable *);
-void hash_table_print(HashTable *, bool);
-void hash_table_print_summary(HashTable *);
+bool hash_map_insert_pre_calc(HashMap *, char *, const uint32, const uint32);
+bool hash_map_insert(HashMap *, char *, const uint32);
+bool hash_map_remove(HashMap *, char *, const uint32);
+HashMap *hash_map_create(uint32);
+uint32 hash_map_capacity(HashMap *);
+uint32 hash_map_length(HashMap *);
+uint32 hash_map_collisions(HashMap *);
+uint32 hash_map_expected_collisions(HashMap *);
+void hash_map_destroy(HashMap *);
+void hash_map_print(HashMap *, bool);
+void hash_map_print_summary(HashMap *);

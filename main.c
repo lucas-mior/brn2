@@ -264,7 +264,7 @@ typedef struct Slice {
     FileList *filelist;
     uint32 start;
     uint32 end;
-    uint32 table_capacity;
+    uint32 map_capacity;
     uint32 *hashes;
     uint32 *indexes;
 } Slice;
@@ -275,7 +275,7 @@ static int create_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->filelist->files[i];
         slice->hashes[i] = hash_function(newfile.name, newfile.length);
-        slice->indexes[i] = slice->hashes[i] % slice->table_capacity;
+        slice->indexes[i] = slice->hashes[i] % slice->map_capacity;
     }
     thrd_exit(0);
 }
@@ -301,7 +301,7 @@ bool main_verify(FileList *old, FileList *new) {
         thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
         Slice *slices = util_malloc(nthreads * sizeof (*slices));
 
-        HashTable *repeated_table = hash_table_create(new->length);
+        HashMap *repeated_map = hash_map_create(new->length);
         uint32 range = new->length / nthreads;
 
         for (uint32 i = 0; i < nthreads; i += 1) {
@@ -314,7 +314,7 @@ bool main_verify(FileList *old, FileList *new) {
             slices[i].filelist = new;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
-            slices[i].table_capacity = hash_table_capacity(repeated_table);
+            slices[i].map_capacity = hash_map_capacity(repeated_map);
             thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
         }
 
@@ -324,7 +324,7 @@ bool main_verify(FileList *old, FileList *new) {
         for (uint32 i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_table_insert_pre_calc(repeated_table, newfile.name,
+            if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                             hashes[i], indexes[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
@@ -337,21 +337,21 @@ bool main_verify(FileList *old, FileList *new) {
         free(indexes);
         free(slices);
         free(threads);
-        hash_table_destroy(repeated_table);
-    } else if (new->length > USE_HASH_TABLE_THRESHOLD) {
-        HashTable *repeated_table = hash_table_create(new->length);
+        hash_map_destroy(repeated_map);
+    } else if (new->length > USE_HASH_MAP_THRESHOLD) {
+        HashMap *repeated_map = hash_map_create(new->length);
 
         for (uint32 i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_table_insert(repeated_table, newfile.name, newfile.length)) {
+            if (!hash_map_insert(repeated_map, newfile.name, newfile.length)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
                 repeated = true;
             }
         }
-        hash_table_destroy(repeated_table);
+        hash_map_destroy(repeated_map);
     } else {
         for (uint32 i = 0; i < new->length; i += 1) {
             FileName file_i = new->files[i];
@@ -391,7 +391,7 @@ uint32 main_get_number_changes(FileList *old, FileList *new) {
 uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
     uint32 number_renames = 0;
     uint32 length = old->length;
-    HashTable *names_renamed = hash_table_create(number_changes);
+    HashMap *names_renamed = hash_map_create(number_changes);
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
@@ -406,9 +406,9 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_table_insert(names_renamed, *oldname, *oldlength))
+            if (hash_map_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
-            if (hash_table_insert(names_renamed, *newname, *newlength))
+            if (hash_map_insert(names_renamed, *newname, *newlength))
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
@@ -433,12 +433,12 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_table_insert(names_renamed, *oldname, *oldlength))
+            if (hash_map_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
-    hash_table_destroy(names_renamed);
+    hash_map_destroy(names_renamed);
     return number_renames;
 }
 
