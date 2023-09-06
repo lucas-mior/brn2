@@ -325,7 +325,7 @@ bool main_verify(FileList *old, FileList *new) {
         for (uint32 i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_insert_pre_calc(repeated_table, newfile.name,
+            if (!hash_table_insert_pre_calc(repeated_table, newfile.name,
                                       hashes[i], indexes[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
@@ -345,7 +345,7 @@ bool main_verify(FileList *old, FileList *new) {
         for (uint32 i = 0; i < new->length; i += 1) {
             FileName newfile = new->files[i];
 
-            if (!hash_insert(repeated_table, newfile.name, newfile.length)) {
+            if (!hash_table_insert(repeated_table, newfile.name, newfile.length)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -356,7 +356,7 @@ bool main_verify(FileList *old, FileList *new) {
         hash_table_print(repeated_table, false);
         printf("\n");
         for (uint32 i = 0; i < new->length; i += 1) {
-            hash_remove(repeated_table, new->files[i].name, new->files[i].length);
+            hash_table_remove(repeated_table, new->files[i].name, new->files[i].length);
         }
         printf("\nafter removal:\n");
         hash_table_print(repeated_table, false);
@@ -418,9 +418,9 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_insert(names_renamed, *oldname, *oldlength))
+            if (hash_table_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
-            if (hash_insert(names_renamed, *newname, *newlength))
+            if (hash_table_insert(names_renamed, *newname, *newlength))
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
@@ -445,7 +445,7 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_insert(names_renamed, *oldname, *oldlength))
+            if (hash_table_insert(names_renamed, *oldname, *oldlength))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }

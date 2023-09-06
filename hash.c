@@ -60,13 +60,13 @@ uint32 hash_function(char *str, const uint32 length) {
     return hash;
 }
 
-bool hash_insert(HashTable *table, char *key, const uint32 key_length) {
+bool hash_table_insert(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->capacity;
-    return hash_insert_pre_calc(table, key, hash, index);
+    return hash_table_insert_pre_calc(table, key, hash, index);
 }
 
-bool hash_insert_pre_calc(HashTable *table, char *key,
+bool hash_table_insert_pre_calc(HashTable *table, char *key,
                           const uint32 hash, const uint32 index) {
     SameHash *iterator = &(table->array[index]);
 
@@ -96,7 +96,7 @@ bool hash_insert_pre_calc(HashTable *table, char *key,
     return true;
 }
 
-bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
+bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % table->capacity;
     SameHash *iterator = &(table->array[index]);
