@@ -19,6 +19,7 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include <stdlib.h>
 
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, uint32);
@@ -60,9 +61,16 @@ int main(int argc, char **argv) {
 
     {
         char buffer2[BUFSIZ];
+        int n;
 
-        snprintf(buffer.name, sizeof (buffer.name),
-                "%s/%s", tempdir, "brn2.XXXXXX");
+        n = snprintf(buffer.name, sizeof (buffer.name),
+                    "%s/%s", tempdir, "brn2.XXXXXX");
+        if (n < 0) {
+            fprintf(stderr, "Error printing buffer name: %s\n",
+                    strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        buffer.name[n] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
             fprintf(stderr, "Error opening %s: %s\n",
