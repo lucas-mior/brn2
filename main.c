@@ -390,12 +390,9 @@ uint32 main_get_number_changes(FileList *old, FileList *new) {
 }
 
 uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
-    uint32 length;
-    HashTable *names_renamed;
     uint32 number_renames = 0;
-
-    length = old->length;
-    names_renamed = hash_table_create(number_changes);
+    uint32 length = old->length;
+    HashTable *names_renamed = hash_table_create(number_changes);
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
