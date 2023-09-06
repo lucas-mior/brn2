@@ -104,7 +104,6 @@ void hash_table_print(HashTable *table) {
             printf(" %s ->", iterator->key);
             iterator = iterator->next;
         }
-        printf("\n");
     }
 }
 
@@ -118,18 +117,21 @@ bool hash_remove(HashTable *table, char *key, const uint32 key_length) {
     if (iterator->key == NULL)
         return false;
 
+    if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
+        if (iterator->next) {
+            void *aux = iterator->next;
+            memmove(iterator, iterator->next, sizeof (SameHash));
+            free(aux);
+        } else {
+            memset(iterator, 0, sizeof (SameHash));
+        }
+        return true;
+    }
     do {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
-            if (iterator == bucket) {
-                if (iterator->next) {
-                    memcpy(iterator, iterator->next, sizeof (SameHash));
-                    return true;
-                }
-            } else {
-                previous->next = iterator->next;
-                free(iterator);
-                return true;
-            }
+             previous->next = iterator->next;
+             free(iterator);
+             return true;
         } else {
             if (iterator->next) {
                 previous = iterator;
