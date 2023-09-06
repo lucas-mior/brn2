@@ -140,7 +140,7 @@ HashTable *hash_table_create(uint32 length) {
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
-    length *= 2;
+    length *= 4;
 
     size = sizeof (*table) + length * sizeof (table->array[0]);
 
