@@ -67,7 +67,7 @@ bool hash_table_insert(HashTable *table, char *key, const uint32 key_length) {
 }
 
 bool hash_table_insert_pre_calc(HashTable *table, char *key,
-                          const uint32 hash, const uint32 index) {
+                                const uint32 hash, const uint32 index) {
     Bucket *iterator = &(table->array[index]);
 
     if (iterator->key == NULL) {
