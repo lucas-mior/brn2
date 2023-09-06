@@ -108,11 +108,11 @@ bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
         if (iterator->next) {
             void *aux = iterator->next;
-            memmove(iterator, iterator->next, sizeof (Bucket));
+            memmove(iterator, iterator->next, sizeof (*iterator));
             free(aux);
             table->collisions -= 1;
         } else {
-            memset(iterator, 0, sizeof (Bucket));
+            memset(iterator, 0, sizeof (*iterator));
         }
         table->length -= 1;
         return true;
