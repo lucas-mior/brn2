@@ -42,11 +42,13 @@ typedef uint64_t uint64;
 typedef struct Bucket {
     char *key;
     uint32 hash;
+    uint32 unused;
     struct Bucket *next;
 } Bucket;
 
 struct HashMap {
     uint32 capacity;
+    uint32 unused;
     uint32 collisions;
     uint32 length;
     Bucket array[];
