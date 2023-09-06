@@ -188,9 +188,8 @@ uint32 hash_table_collisions(HashTable *table) {
 uint32 hash_table_expected_collisions(HashTable *table) {
     long double n = table->length;
     long double m = table->size;
-    long double power = powl((m-1)/m, n);
-    long double result = n - m * (1 - power);
-    return roundl(result);
+    long double result = n - m * (1 - powl((m-1)/m, n));
+    return (uint32) (roundl(result));
 }
 
 void hash_table_destroy(HashTable *table) {
