@@ -19,7 +19,7 @@ typedef struct HashMap HashMap;
 
 HashMap *hash_map_create(uint32);
 void hash_map_destroy(HashMap *);
-uint32 hash_function(char *, const uint32 );
+uint32 hash_function(char *, const uint32);
 bool hash_map_insert(HashMap *, char *, const uint32);
 bool hash_map_insert_pre_calc(HashMap *, char *, const uint32, const uint32);
 bool hash_map_remove(HashMap *, char *, const uint32);
