@@ -45,7 +45,7 @@ typedef struct Bucket {
     struct Bucket *next;
 } Bucket;
 
-struct HashTable {
+struct HashMap {
     uint32 capacity;
     uint32 collisions;
     uint32 length;
@@ -60,20 +60,20 @@ uint32 hash_function(char *str, const uint32 length) {
     return hash;
 }
 
-bool hash_table_insert(HashTable *table, char *key, const uint32 key_length) {
+bool hash_map_insert(HashMap *map, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 index = hash % table->capacity;
-    return hash_table_insert_pre_calc(table, key, hash, index);
+    uint32 index = hash % map->capacity;
+    return hash_map_insert_pre_calc(map, key, hash, index);
 }
 
-bool hash_table_insert_pre_calc(HashTable *table, char *key,
+bool hash_map_insert_pre_calc(HashMap *map, char *key,
                                 const uint32 hash, const uint32 index) {
-    Bucket *iterator = &(table->array[index]);
+    Bucket *iterator = &(map->array[index]);
 
     if (iterator->key == NULL) {
         iterator->key = key;
         iterator->hash = hash;
-        table->length += 1;
+        map->length += 1;
         return true;
     }
 
@@ -87,19 +87,19 @@ bool hash_table_insert_pre_calc(HashTable *table, char *key,
             break;
     } while (true);
 
-    table->collisions += 1;
+    map->collisions += 1;
     iterator->next = util_calloc(1, sizeof (*iterator));
     iterator->next->key = key;
     iterator->next->hash = hash;
-    table->length += 1;
+    map->length += 1;
 
     return true;
 }
 
-bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
+bool hash_map_remove(HashMap *map, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 index = hash % table->capacity;
-    Bucket *iterator = &(table->array[index]);
+    uint32 index = hash % map->capacity;
+    Bucket *iterator = &(map->array[index]);
     Bucket *previous;
 
     if (iterator->key == NULL)
@@ -110,11 +110,11 @@ bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
             void *aux = iterator->next;
             memmove(iterator, iterator->next, sizeof (*iterator));
             free(aux);
-            table->collisions -= 1;
+            map->collisions -= 1;
         } else {
             memset(iterator, 0, sizeof (*iterator));
         }
-        table->length -= 1;
+        map->length -= 1;
         return true;
     }
 
@@ -125,8 +125,8 @@ bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
              previous->next = iterator->next;
              free(iterator);
-             table->length -= 1;
-             table->collisions -= 1;
+             map->length -= 1;
+             map->collisions -= 1;
              return true;
         }
     } while (true);
@@ -134,36 +134,36 @@ bool hash_table_remove(HashTable *table, char *key, const uint32 key_length) {
     return false;
 }
 
-HashTable *hash_table_create(uint32 length) {
-    HashTable *table;
+HashMap *hash_map_create(uint32 length) {
+    HashMap *map;
     uint32 size;
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
     length *= 4;
 
-    size = sizeof (*table) + length * sizeof (table->array[0]);
+    size = sizeof (*map) + length * sizeof (map->array[0]);
 
-    table = util_malloc(size);
-    memset(table, 0, size);
-    table->capacity = length;
-    return table;
+    map = util_malloc(size);
+    memset(map, 0, size);
+    map->capacity = length;
+    return map;
 }
 
-void hash_table_print_summary(HashTable *table) {
-    printf("Hash Table {\n");
-    printf("  capacity: %u\n", table->capacity);
-    printf("  length: %u\n", table->length);
-    printf("  collisions: %u\n", table->collisions);
-    printf("  expected collisions: %u\n", hash_table_expected_collisions(table));
+void hash_map_print_summary(HashMap *map) {
+    printf("Hash Map {\n");
+    printf("  capacity: %u\n", map->capacity);
+    printf("  length: %u\n", map->length);
+    printf("  collisions: %u\n", map->collisions);
+    printf("  expected collisions: %u\n", hash_map_expected_collisions(map));
     printf("}\n");
 }
 
-void hash_table_print(HashTable *table, bool verbose) {
-    hash_table_print_summary(table);
+void hash_map_print(HashMap *map, bool verbose) {
+    hash_map_print_summary(map);
 
-    for (uint32 i = 0; i < table->capacity; i += 1) {
-        Bucket *iterator = &(table->array[i]);
+    for (uint32 i = 0; i < map->capacity; i += 1) {
+        Bucket *iterator = &(map->array[i]);
         if (iterator->key || verbose) {
             printf("\n%03d:", i);
         } else {
@@ -176,28 +176,28 @@ void hash_table_print(HashTable *table, bool verbose) {
     }
 }
 
-uint32 hash_table_capacity(HashTable *table) {
-    return table->capacity;
+uint32 hash_map_capacity(HashMap *map) {
+    return map->capacity;
 }
 
-uint32 hash_table_length(HashTable *table) {
-    return table->length;
+uint32 hash_map_length(HashMap *map) {
+    return map->length;
 }
 
-uint32 hash_table_collisions(HashTable *table) {
-    return table->collisions;
+uint32 hash_map_collisions(HashMap *map) {
+    return map->collisions;
 }
 
-uint32 hash_table_expected_collisions(HashTable *table) {
-    long double n = table->length;
-    long double m = table->capacity;
+uint32 hash_map_expected_collisions(HashMap *map) {
+    long double n = map->length;
+    long double m = map->capacity;
     long double result = n - m * (1 - powl((m-1)/m, n));
     return (uint32) (roundl(result));
 }
 
-void hash_table_destroy(HashTable *table) {
-    for (uint32 i = 0; i < table->capacity; i += 1) {
-        Bucket *iterator = &(table->array[i]);
+void hash_map_destroy(HashMap *map) {
+    for (uint32 i = 0; i < map->capacity; i += 1) {
+        Bucket *iterator = &(map->array[i]);
         iterator = iterator->next;
         while (iterator) {
             void *aux = iterator;
@@ -205,5 +205,5 @@ void hash_table_destroy(HashTable *table) {
             free(aux);
         }
     }
-    free(table);
+    free(map);
 }
