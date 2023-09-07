@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Error printing buffer name.\n");
             exit(EXIT_FAILURE);
         }
-        buffer.name[n] = '\0';
+        buffer.name[sizeof (buffer.name) - 1] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
             fprintf(stderr, "Error opening %s: %s\n",
