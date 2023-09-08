@@ -14,14 +14,13 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-CFLAGS += -std=c99 -Wall -Wextra -Weverything -Wno-unsafe-buffer-usage
+CFLAGS += -std=c99 -Weverything -Wno-unsafe-buffer-usage
 LDFLAGS += -lm
 
 release: CFLAGS += -O2
-# release: stripflag = -s
 release: brn2
 
-debug: CFLAGS += -g2
+debug: CFLAGS += -g
 debug: clean
 debug: brn2
 
