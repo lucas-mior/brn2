@@ -209,6 +209,6 @@ uint32 hash_map_collisions(HashMap *map) {
 uint32 hash_map_expected_collisions(HashMap *map) {
     long double n = map->length;
     long double m = map->capacity;
-    long double result = n - m * (1 - powl((m-1)/m, n));
+    long double result = n - m * (1 - powl((m - 1)/m, n));
     return (uint32) (roundl(result));
 }
