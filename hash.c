@@ -81,6 +81,7 @@ void hash_map_destroy(HashMap *map) {
         }
     }
     free(map);
+    return;
 }
 
 uint32 hash_function(char *str, const uint32 length) {
