@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             uint32 length = old->files[i].length;
             old->files[i].name[length] = '\n';
-            fwrite(old->files[i].name, 1, length+1, buffer.stream);
+            fwrite(old->files[i].name, 1, length + 1, buffer.stream);
             old->files[i].name[length] = '\0';
         }
         fclose(buffer.stream);
@@ -153,8 +153,8 @@ FileList *main_file_list_from_args(int argc, char **argv) {
         name_length = (uint32) strlen(name);
 
         file = &(file_list->files[length]);
-        file->name = util_malloc(name_length+1);
-        memcpy(file->name, name, name_length+1);
+        file->name = util_malloc(name_length + 1);
+        memcpy(file->name, name, name_length + 1);
         file->length = name_length;
 
         length += 1;
@@ -192,8 +192,8 @@ FileList *main_file_list_from_dir(char *directory) {
         name_length = (uint32) strlen(name);
 
         file = &(file_list->files[length]);
-        file->name = util_malloc(name_length+1);
-        memcpy(file->name, name, name_length+1);
+        file->name = util_malloc(name_length + 1);
+        memcpy(file->name, name, name_length + 1);
         file->length = name_length;
 
         free(directory_list[i]);
@@ -363,7 +363,7 @@ bool main_verify(FileList *old, FileList *new) {
     } else {
         for (uint32 i = 0; i < new->length; i += 1) {
             FileName file_i = new->files[i];
-            for (uint32 j = i+1; j < new->length; j += 1) {
+            for (uint32 j = i + 1; j < new->length; j += 1) {
                 FileName file_j = new->files[j];
 
                 if (file_i.length != file_j.length)
