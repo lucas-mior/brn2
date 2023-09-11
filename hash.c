@@ -81,6 +81,7 @@ void hash_map_destroy(HashMap *map) {
         }
     }
     free(map);
+    return;
 }
 
 uint32 hash_function(char *str, const uint32 length) {
@@ -172,6 +173,7 @@ void hash_map_print_summary(HashMap *map) {
     printf("  collisions: %u\n", map->collisions);
     printf("  expected collisions: %u\n", hash_map_expected_collisions(map));
     printf("}\n");
+    return;
 }
 
 void hash_map_print(HashMap *map, bool verbose) {
@@ -189,6 +191,7 @@ void hash_map_print(HashMap *map, bool verbose) {
             iterator = iterator->next;
         }
     }
+    return;
 }
 
 uint32 hash_map_capacity(HashMap *map) {
