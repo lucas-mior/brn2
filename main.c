@@ -256,7 +256,7 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
     file_list = util_realloc(file_list,
-                             STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+                             STRUCT_ARRAY_SIZE(FileList, FileName, length));
     file_list->length = length;
 
     return file_list;
