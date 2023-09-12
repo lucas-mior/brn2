@@ -99,7 +99,7 @@ bool hash_set_insert(HashSet *set, char *key, const uint32 key_length) {
 }
 
 bool hash_set_insert_pre_calc(HashSet *set, char *key,
-                                const uint32 hash, const uint32 index) {
+                              const uint32 hash, const uint32 index) {
     Bucket *iterator = &(set->array[index]);
 
     if (iterator->key == NULL) {
