@@ -15,17 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-typedef struct HashMap HashMap;
+typedef struct HashSet HashSet;
 
-HashMap *hash_map_create(uint32);
-void hash_map_destroy(HashMap *);
+HashSet *hash_set_create(uint32);
+void hash_set_destroy(HashSet *);
 uint32 hash_function(char *, const uint32);
-bool hash_map_insert(HashMap *, char *, const uint32);
-bool hash_map_insert_pre_calc(HashMap *, char *, const uint32, const uint32);
-bool hash_map_remove(HashMap *, char *, const uint32);
-void hash_map_print_summary(HashMap *);
-void hash_map_print(HashMap *, bool);
-uint32 hash_map_capacity(HashMap *);
-uint32 hash_map_length(HashMap *);
-uint32 hash_map_collisions(HashMap *);
-uint32 hash_map_expected_collisions(HashMap *);
+bool hash_set_insert(HashSet *, char *, const uint32);
+bool hash_set_insert_pre_calc(HashSet *, char *, const uint32, const uint32);
+bool hash_set_remove(HashSet *, char *, const uint32);
+void hash_set_print_summary(HashSet *);
+void hash_set_print(HashSet *, bool);
+uint32 hash_set_capacity(HashSet *);
+uint32 hash_set_length(HashSet *);
+uint32 hash_set_collisions(HashSet *);
+uint32 hash_set_expected_collisions(HashSet *);
