@@ -161,7 +161,7 @@ bool hash_set_remove(HashSet *set, char *key, const uint32 key_length) {
              set->collisions -= 1;
              return true;
         }
-    } while (true);
+    }
 
     return false;
 }
