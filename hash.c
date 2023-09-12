@@ -46,7 +46,7 @@ typedef struct Bucket {
     struct Bucket *next;
 } Bucket;
 
-struct HashMap {
+struct HashSet {
     uint32 capacity;
     uint32 unused;
     uint32 collisions;
@@ -54,25 +54,25 @@ struct HashMap {
     Bucket array[];
 };
 
-HashMap *hash_map_create(uint32 length) {
-    HashMap *map;
+HashSet *hash_set_create(uint32 length) {
+    HashSet *set;
     uint32 size;
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
     length *= 4;
 
-    size = sizeof (*map) + length * sizeof (map->array[0]);
+    size = sizeof (*set) + length * sizeof (set->array[0]);
 
-    map = util_malloc(size);
-    memset(map, 0, size);
-    map->capacity = length;
-    return map;
+    set = util_malloc(size);
+    memset(set, 0, size);
+    set->capacity = length;
+    return set;
 }
 
-void hash_map_destroy(HashMap *map) {
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        Bucket *iterator = &(map->array[i]);
+void hash_set_destroy(HashSet *set) {
+    for (uint32 i = 0; i < set->capacity; i += 1) {
+        Bucket *iterator = &(set->array[i]);
         iterator = iterator->next;
         while (iterator) {
             void *aux = iterator;
@@ -80,7 +80,7 @@ void hash_map_destroy(HashMap *map) {
             free(aux);
         }
     }
-    free(map);
+    free(set);
     return;
 }
 
@@ -92,20 +92,20 @@ uint32 hash_function(char *str, const uint32 length) {
     return hash;
 }
 
-bool hash_map_insert(HashMap *map, char *key, const uint32 key_length) {
+bool hash_set_insert(HashSet *set, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 index = hash % map->capacity;
-    return hash_map_insert_pre_calc(map, key, hash, index);
+    uint32 index = hash % set->capacity;
+    return hash_set_insert_pre_calc(set, key, hash, index);
 }
 
-bool hash_map_insert_pre_calc(HashMap *map, char *key,
+bool hash_set_insert_pre_calc(HashSet *set, char *key,
                                 const uint32 hash, const uint32 index) {
-    Bucket *iterator = &(map->array[index]);
+    Bucket *iterator = &(set->array[index]);
 
     if (iterator->key == NULL) {
         iterator->key = key;
         iterator->hash = hash;
-        map->length += 1;
+        set->length += 1;
         return true;
     }
 
@@ -119,19 +119,19 @@ bool hash_map_insert_pre_calc(HashMap *map, char *key,
             break;
     } while (true);
 
-    map->collisions += 1;
+    set->collisions += 1;
     iterator->next = util_calloc(1, sizeof (*iterator));
     iterator->next->key = key;
     iterator->next->hash = hash;
-    map->length += 1;
+    set->length += 1;
 
     return true;
 }
 
-bool hash_map_remove(HashMap *map, char *key, const uint32 key_length) {
+bool hash_set_remove(HashSet *set, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
-    uint32 index = hash % map->capacity;
-    Bucket *iterator = &(map->array[index]);
+    uint32 index = hash % set->capacity;
+    Bucket *iterator = &(set->array[index]);
     Bucket *previous;
 
     if (iterator->key == NULL)
@@ -142,11 +142,11 @@ bool hash_map_remove(HashMap *map, char *key, const uint32 key_length) {
             void *aux = iterator->next;
             memmove(iterator, iterator->next, sizeof (*iterator));
             free(aux);
-            map->collisions -= 1;
+            set->collisions -= 1;
         } else {
             memset(iterator, 0, sizeof (*iterator));
         }
-        map->length -= 1;
+        set->length -= 1;
         return true;
     }
 
@@ -157,8 +157,8 @@ bool hash_map_remove(HashMap *map, char *key, const uint32 key_length) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
              previous->next = iterator->next;
              free(iterator);
-             map->length -= 1;
-             map->collisions -= 1;
+             set->length -= 1;
+             set->collisions -= 1;
              return true;
         }
     } while (true);
@@ -166,21 +166,21 @@ bool hash_map_remove(HashMap *map, char *key, const uint32 key_length) {
     return false;
 }
 
-void hash_map_print_summary(HashMap *map) {
-    printf("Hash Map {\n");
-    printf("  capacity: %u\n", map->capacity);
-    printf("  length: %u\n", map->length);
-    printf("  collisions: %u\n", map->collisions);
-    printf("  expected collisions: %u\n", hash_map_expected_collisions(map));
+void hash_set_print_summary(HashSet *set) {
+    printf("Hash Set {\n");
+    printf("  capacity: %u\n", set->capacity);
+    printf("  length: %u\n", set->length);
+    printf("  collisions: %u\n", set->collisions);
+    printf("  expected collisions: %u\n", hash_set_expected_collisions(set));
     printf("}\n");
     return;
 }
 
-void hash_map_print(HashMap *map, bool verbose) {
-    hash_map_print_summary(map);
+void hash_set_print(HashSet *set, bool verbose) {
+    hash_set_print_summary(set);
 
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        Bucket *iterator = &(map->array[i]);
+    for (uint32 i = 0; i < set->capacity; i += 1) {
+        Bucket *iterator = &(set->array[i]);
         if (iterator->key || verbose) {
             printf("\n%03d:", i);
         } else {
@@ -194,21 +194,21 @@ void hash_map_print(HashMap *map, bool verbose) {
     return;
 }
 
-uint32 hash_map_capacity(HashMap *map) {
-    return map->capacity;
+uint32 hash_set_capacity(HashSet *set) {
+    return set->capacity;
 }
 
-uint32 hash_map_length(HashMap *map) {
-    return map->length;
+uint32 hash_set_length(HashSet *set) {
+    return set->length;
 }
 
-uint32 hash_map_collisions(HashMap *map) {
-    return map->collisions;
+uint32 hash_set_collisions(HashSet *set) {
+    return set->collisions;
 }
 
-uint32 hash_map_expected_collisions(HashMap *map) {
-    long double n = map->length;
-    long double m = map->capacity;
+uint32 hash_set_expected_collisions(HashSet *set) {
+    long double n = set->length;
+    long double m = set->capacity;
     long double result = n - m * (1 - powl((m - 1)/m, n));
     return (uint32) (roundl(result));
 }
