@@ -64,8 +64,7 @@ HashSet *hash_set_create(uint32 length) {
 
     size = sizeof (*set) + length * sizeof (set->array[0]);
 
-    set = util_malloc(size);
-    memset(set, 0, size);
+    set = memset(util_malloc(size), 0, size);
     set->capacity = length;
     return set;
 }
