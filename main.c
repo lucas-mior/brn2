@@ -21,7 +21,7 @@
 #include "hash.h"
 #include <stdlib.h>
 
-static void main_copy_filename(FileList *, uint32, char *, uint32);
+static void main_copy_filename(FileName *, char *, uint32);
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, uint32);
 static FileList *main_file_list_from_args(int, char **);
@@ -138,13 +138,9 @@ int main(int argc, char **argv) {
     exit(!status);
 }
 
-void main_copy_filename(FileList *file_list, uint32 index, char *name, uint32 length) {
-    FileName *file;
-    file = &(file_list->files[index]);
-    file->name = util_malloc(length + 1);
-    memcpy(file->name, name, length + 1);
+void main_copy_filename(FileName *file, char *name, uint32 length) {
+    file->name = memcpy(util_malloc(length + 1), name, length + 1);
     file->length = length;
-
     return;
 }
 
@@ -161,7 +157,7 @@ FileList *main_file_list_from_args(int argc, char **argv) {
         if (is_pwd_or_parent(name))
             continue;
         name_length = (uint32) strlen(name);
-        main_copy_filename(file_list, length, name, name_length);
+        main_copy_filename(&(file_list->files[length]), name, name_length);
 
         length += 1;
     }
@@ -195,7 +191,7 @@ FileList *main_file_list_from_dir(char *directory) {
             continue;
         }
         name_length = (uint32) strlen(name);
-        main_copy_filename(file_list, length, name, name_length);
+        main_copy_filename(&(file_list->files[length]), name, name_length);
 
         free(directory_list[i]);
         length += 1;
@@ -242,7 +238,7 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
             continue;
 
         buffer[last] = '\0';
-        main_copy_filename(file_list, length, buffer, last);
+        main_copy_filename(&(file_list->files[length]), buffer, last);
 
         length += 1;
     }
