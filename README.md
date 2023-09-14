@@ -67,7 +67,6 @@ $ brn2
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 
- 
 ## Changes over original brn
 - Option to rename files listed in file given as first argument.
 - Print renamed files.
