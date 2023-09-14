@@ -461,7 +461,7 @@ void main_free_file_list(FileList *file_list) {
 }
 
 void main_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [-h | --help | <filename> | file1 file2 ... ]\n");
+    fprintf(stream, "usage: brn2 [-h | --help | <files.txt> | [file1 file2 ... ]]\n");
     fprintf(stream, "No arguments        : rename filenames in current working directory.\n");
     fprintf(stream, "Single argument     : rename filenames listed in this argument.\n");
     fprintf(stream, "2 or more arguments : rename filenames passed as arguments.\n");

@@ -7,9 +7,12 @@ vim).
  
 ## Usage
 ```
-brn2                   # rename files in current working directory
-brn2 <files.txt>       # rename files listed in <files.txt>
-brn2 [file1 file2 ...] # rename files passed as arguments
+brn2 --help
+usage: brn2 [-h | --help | <filename> | file1 file2 ... ] 
+No arguments        : rename filenames in current working directory. 
+Single argument     : rename filenames listed in this argument. 
+2 or more arguments : rename filenames passed as arguments. 
+-h | --help         : display this help message. 
 ```
 brn2 will open the filenames in your text editor of choice.
 You can then edit the filenames in the buffer and the changes
