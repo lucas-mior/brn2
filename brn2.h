@@ -27,7 +27,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include "threads.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <threads.h>
 
 #include "util.h"
 
