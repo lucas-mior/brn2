@@ -13,7 +13,7 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-CC=tcc
+CC=clang
 ifeq ($(CC),clang)
 	CFLAGS += -Weverything -Wno-unsafe-buffer-usage
 else
