@@ -20,6 +20,7 @@
 #include "brn2.h"
 #include "hash.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 static void main_copy_filename(FileName *, char *, uint32);
 static FileList *main_file_list_from_dir(char *);
@@ -425,6 +426,12 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
                     break;
                 }
             }
+            continue;
+        }
+#else
+        if (!access(*newname, F_OK)) {
+            fprintf(stderr, "Can't rename %s to %s. File already exists.\n",
+                            *oldname, *newname);
             continue;
         }
 #endif
