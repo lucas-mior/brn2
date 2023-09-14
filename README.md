@@ -66,11 +66,12 @@ $ brn2
  
 * It has error handling, it will safely abort if the exact number of
   filenames isn't provided or if some filenames are repeated.
- 
-## License
-brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 
 ## Changes over original brn
 - Option to rename files listed in file given as first argument.
+- Option to rename files passed as arguments.
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
+ 
+## License
+brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
