@@ -139,7 +139,8 @@ int main(int argc, char **argv) {
 }
 
 void main_copy_filename(FileName *file, char *name, uint32 length) {
-    file->name = memcpy(util_malloc(length + 1), name, length + 1);
+    file->name = util_malloc(length + 1);
+    memcpy(file->name, name, length + 1);
     file->length = length;
     return;
 }
