@@ -55,7 +55,7 @@ $ brn2
  
 * It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
   atomically swap the names of two files which means no temporary files are made
-  either (yes, this also means you can't compile it on other Unixes).
+  either (only on GNU/Linux).
  
 * It is written in C instead of bash which makes it faster, more robust and
   predictable.
