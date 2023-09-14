@@ -404,6 +404,7 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
         if (!strcmp(*oldname, *newname))
             continue;
 
+#ifdef __linux__
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
@@ -425,6 +426,7 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
             }
             continue;
         }
+#endif
 
         renamed = rename(*oldname, *newname);
         if (renamed < 0) {
