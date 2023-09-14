@@ -429,6 +429,7 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
             continue;
         }
 #else
+        (void) newlength;
         if (!access(*newname, F_OK)) {
             fprintf(stderr, "Can't rename %s to %s. File already exists.\n",
                             *oldname, *newname);
