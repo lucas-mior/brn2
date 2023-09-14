@@ -19,8 +19,6 @@
 
 #include "brn2.h"
 #include "hash.h"
-#include <stdlib.h>
-#include <unistd.h>
 
 static void main_copy_filename(FileName *, char *, uint32);
 static FileList *main_file_list_from_dir(char *);
