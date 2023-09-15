@@ -89,11 +89,11 @@ int main(int argc, char **argv) {
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             uint32 length = old->files[i].length;
-            char **name = &(old->files[i].name);
+            char *name = old->files[i].name;
 
-            while (!hash_set_insert(repeated, *name, length)) {
+            while (!hash_set_insert(repeated, name, length)) {
                 fprintf(stderr, RED"%s"RESET" repeated in the buffer. "
-                                "Removing...\n", *name);
+                                "Removing...\n", name);
                 old->length -= 1;
                 if (old->length <= i)
                     goto close;
@@ -101,11 +101,11 @@ int main(int argc, char **argv) {
                 memmove(&(old->files[i]), &(old->files[i+1]),
                         (old->length-i) * sizeof(*(&(old->files[i]))));
                 length = old->files[i].length;
-                name = &(old->files[i].name);
+                name = old->files[i].name;
             }
-            (*name)[length] = '\n';
-            fwrite(*name, 1, length + 1, buffer.stream);
-            (*name)[length] = '\0';
+            name[length] = '\n';
+            fwrite(name, 1, length + 1, buffer.stream);
+            name[length] = '\0';
         }
         close:
         fclose(buffer.stream);
