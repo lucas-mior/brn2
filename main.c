@@ -33,13 +33,13 @@ static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, const uint32);
 static void main_free_list(FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
-static const char *tempdir = "/tmp";
 
 int main(int argc, char **argv) {
     File buffer;
     FileList *old;
     FileList *new;
     char *EDITOR;
+    const char *tempdir = "/tmp";
     bool status = true;
 
     if (argc >= 3) {
