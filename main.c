@@ -26,6 +26,7 @@ static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, uint32);
 static FileList *main_file_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *);
+static void main_normalize_names(FileList *);
 bool main_check_repeated(FileList *);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
@@ -60,7 +61,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "EDITOR variable is not set. "
                         "Using %s by default.\n", EDITOR);
     }
-
+    main_normalize_names(old);
     {
         char buffer2[BUFSIZ];
         int n;
@@ -90,12 +91,15 @@ int main(int argc, char **argv) {
             uint32 length = old->files[i].length;
             char **name = &(old->files[i].name);
 
-            if (!hash_set_insert(repeated, *name, length)) {
+            while (!hash_set_insert(repeated, *name, length)) {
                 fprintf(stderr, RED"%s"RESET" repeated in the buffer. "
                                 "Removing...\n", *name);
-                memmove(&(old->files[i]), &(old->files[i+1]),
-                        (old->length-i-1) * sizeof(*(&(old->files[i]))));
                 old->length -= 1;
+                if (old->length <= i)
+                    goto close;
+
+                memmove(&(old->files[i]), &(old->files[i+1]),
+                        (old->length-i) * sizeof(*(&(old->files[i]))));
                 length = old->files[i].length;
                 name = &(old->files[i].name);
             }
@@ -103,6 +107,7 @@ int main(int argc, char **argv) {
             fwrite(*name, 1, length + 1, buffer.stream);
             (*name)[length] = '\0';
         }
+        close:
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
@@ -115,6 +120,7 @@ int main(int argc, char **argv) {
         while (true) {
             util_command(ARRAY_LENGTH(args), args);
             new = main_file_list_from_lines(buffer.name, old->length);
+            main_normalize_names(new);
             if (!main_verify(old, new)) {
                 main_free_file_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
@@ -149,6 +155,25 @@ int main(int argc, char **argv) {
     main_free_file_list(new);
     unlink(buffer.name);
     exit(!status);
+}
+
+static void main_normalize_names(FileList *filelist) {
+    for (uint32 i = 0; i < filelist->length; i += 1) {
+        FileName *file = &(filelist->files[i]);
+        char *name = file->name;
+        uint32 *length = &(file->length);
+
+        while (name[*length - 1] == '/') {
+            name[*length - 1] = '\0';
+            *length -= 1;
+        }
+
+        if (name[0] == '.' && name[1] == '/') {
+            memmove(&(name[0]), &(name[2]), (*length - 1) * sizeof (*name));
+            *length -= 2;
+        }
+    }
+    return;
 }
 
 void main_copy_filename(FileName *file, char *name, uint32 length) {
