@@ -27,7 +27,7 @@ static FileList *main_list_from_lines(char *, uint32);
 static FileList *main_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *);
 static void main_normalize_names(FileList *);
-bool main_check_repeated(FileList *);
+static bool main_check_repeated(FileList *);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, const uint32);
