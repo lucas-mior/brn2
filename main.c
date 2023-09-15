@@ -55,13 +55,14 @@ int main(int argc, char **argv) {
     } else {
         old = main_list_from_dir(".");
     }
+    main_normalize_names(old);
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
         fprintf(stderr, "EDITOR variable is not set. "
                         "Using %s by default.\n", EDITOR);
     }
-    main_normalize_names(old);
+
     {
         char buffer2[BUFSIZ];
         int n;
