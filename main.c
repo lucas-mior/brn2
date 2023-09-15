@@ -160,10 +160,19 @@ static void main_normalize_names(FileList *list) {
         FileName *file = &(list->files[i]);
         char *name = file->name;
         uint32 *length = &(file->length);
+        uint32 i = 0;
 
         while (name[*length - 1] == '/') {
             name[*length - 1] = '\0';
             *length -= 1;
+        }
+
+        while (name[i] != '\0') {
+            while (name[i] == '/' && name[i+1] == '/') {
+                *length -= 1;
+                memmove(&name[i], &name[i+1], (*length - i) * sizeof (*name));
+            }
+            i += 1;
         }
 
         while (name[0] == '.' && name[1] == '/') {
