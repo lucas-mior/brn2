@@ -91,9 +91,10 @@ int main(int argc, char **argv) {
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             uint32 length = old->files[i].length;
-            old->files[i].name[length] = '\n';
-            fwrite(old->files[i].name, 1, length + 1, buffer.stream);
-            old->files[i].name[length] = '\0';
+            char **name = &(old->files[i].name);
+            (*name)[length] = '\n';
+            fwrite(*name, 1, length + 1, buffer.stream);
+            (*name)[length] = '\0';
         }
         fclose(buffer.stream);
         close(buffer.fd);
