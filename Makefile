@@ -13,7 +13,7 @@ util.o: util.c
 main.o: main.c
 hash.o: hash.c
 
-CC=clang
+CC=cc
 ifeq ($(CC),clang)
 	CFLAGS += -Weverything -Wno-unsafe-buffer-usage
 else
@@ -33,7 +33,7 @@ debug: brn2
 brn2: $(objs)
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
+	$(CC) $(CFLAGS) -o $@ $(objs) $(LDLIBS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
