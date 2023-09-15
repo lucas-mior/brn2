@@ -58,7 +58,8 @@ void *util_calloc(const size_t nmemb, const size_t size) {
 void util_command(const int argc, char **argv) {
     switch (fork()) {
     case 0:
-        freopen("/dev/tty", "r", stdin);
+        if (!freopen("/dev/tty", "r", stdin))
+            fprintf(stderr, "Error reopening stdin: %s\n", strerror(errno));
         execvp(argv[0], argv);
         fprintf(stderr, "Error running '%s", argv[0]);
         for (int i = 1; i < argc; i += 1)
