@@ -19,12 +19,14 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include <stdlib.h>
 
 static void main_copy_filename(FileName *, char *, uint32);
 static FileList *main_file_list_from_dir(char *);
 static FileList *main_file_list_from_lines(char *, uint32);
 static FileList *main_file_list_from_args(int, char **);
-static inline bool is_pwd_or_parent(char *filename);
+static inline bool is_pwd_or_parent(char *);
+bool main_check_repeated(FileList *);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, const uint32);
@@ -59,6 +61,10 @@ int main(int argc, char **argv) {
                         "Using %s by default.\n", EDITOR);
     }
 
+    if (main_check_repeated(old)) {
+        fprintf(stderr, "\"%s\" contains repeated filenames.\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
     {
         char buffer2[BUFSIZ];
         int n;
