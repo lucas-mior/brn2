@@ -33,7 +33,7 @@ debug: brn2
 brn2: $(objs)
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
-	$(CC) $(stripflag) $(CFLAGS) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(objs) $(ldlibs)
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
