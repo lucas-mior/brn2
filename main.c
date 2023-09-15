@@ -272,11 +272,10 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
         last = (uint32) strcspn(buffer, "\n");
         if (last == 0)
             continue;
+        buffer[last] = '\0';
 
         if (is_pwd_or_parent(buffer))
             continue;
-
-        buffer[last] = '\0';
         main_copy_filename(&(file_list->files[length]), buffer, last);
 
         length += 1;
@@ -295,8 +294,14 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
 }
 
 bool is_pwd_or_parent(char *filename) {
-    return filename[0] == '.' 
-        && (filename[1] == '.' || filename[1] == '\0');
+    if (filename[0] == '.') {
+        if ((filename[1] == '.') || (filename[1] == '\0')) {
+            return true;
+        } else if ((filename[1] == '/') && (filename[2] == '\0')) {
+            return true;
+        }
+    }
+    return false;
 }
 
 typedef struct Slice {
