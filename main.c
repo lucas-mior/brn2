@@ -168,7 +168,7 @@ static void main_normalize_names(FileList *filelist) {
             *length -= 1;
         }
 
-        if (name[0] == '.' && name[1] == '/') {
+        while (name[0] == '.' && name[1] == '/') {
             memmove(&(name[0]), &(name[2]), (*length - 1) * sizeof (*name));
             *length -= 2;
         }
