@@ -1,54 +1,65 @@
-.TH BRN2 1 "2023-03-25" "1.0" "brn2 man page"
+.TH BRN2 1
 
 .SH NAME
-brn2 - Command-line tool for renaming multiple files at once.
+brn2 \- Bulk Rename Files
 
 .SH SYNOPSIS
-.B brn2
-[\fIfiles.txt\fR]
+.BR brn2 " ["\-h | \-\-help | <filename> | file1 file2 ... ]
 
 .SH DESCRIPTION
-.B brn2
-opens a buffer in your default text editor with the list of filenames in the
-current directory or the filenames specified in a text file. You can edit the
-filenames in the buffer, and the changes will be applied when you save and
-exit.
+.BR "brn2 is a command line tool to easily mass-rename files in your preferred text editor (e.g., vim)."
 
-If given one argument, it is interpreted as the text filename with a list of
-filenames to rename. You can then edit the filenames in the buffer, and the
-changes will take place when you save and exit.
+.SH USAGE
+.TP
+.BR "brn2 --help"
+Display the help message.
 
-By default, it uses $EDITOR, and if that is not set, then $VISUAL.
-
-Note that it will not work for filenames longer than PATHMAX characters and
-newlines in filenames are also not allowed.
-
-.SH OPTIONS
-None.
-
-.SH EXIT STATUS
-The program returns 0 if successful, and a non-zero value if an error occurs.
-
-.SH EXAMPLES
-To rename files in the current directory, simply run:
-.P
+.TP
 .BR brn2
-.P
-To rename files specified in a text file, run:
-.P
-.BR brn2 
-files.txt
-.P
-where files.txt contains the list of filenames to rename.
+Rename filenames in the current working directory.
 
-.SH ENVIRONMENT VARIABLES
-EDITOR - Text editor used to rename files.
+.TP
+.BR "brn2 <filename>"
+Rename filenames listed in the specified file.
 
-.SH AUTHOR
-Written by Lucas Mior.
+.TP
+.BR "brn2 <file1> <file2> ..."
+Rename filenames passed as arguments.
 
-.SH COPYRIGHT
-Copyright 2023 Lucas Mior.
+.BR brn2
+will open the filenames in your text editor of choice. You can then edit the filenames in the buffer, and the changes will take place when you save and exit.
 
-.SH SEE ALSO
-rename(1), sed(1), mv(1)
+.SH NOTES
+.TP
+By default, brn2 uses the $EDITOR environment variable. If that is not set, it defaults to vim.
+
+.TP
+.BR brn2
+will not work for more than 2^32 renames at once.
+
+.TP
+.BR brn2
+will not work for filenames longer than PATH_MAX (typically 4096) characters when reading from <files.txt>. Newlines in filenames are not allowed.
+
+.TP
+Filenames listed in <files.txt> or given as arguments that do not correspond to existing files will generate errors while renaming.
+
+.TP
+Filenames . and .. are ignored, as well as any filename that starts with .. even when listed in <files.txt>
+
+.SH CHANGES OVER ORIGINAL BRN
+.TP
+.BR "option to rename files listed in a file given as the first argument"
+
+.TP
+.BR "option to rename files passed as arguments"
+
+.TP
+.BR "it prints renamed files"
+
+.TP
+.BR "faster algorithm to check for duplicated filenames"
+
+.SH LICENSE
+.BR brn2
+is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
