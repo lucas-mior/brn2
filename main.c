@@ -22,16 +22,16 @@
 #include <stdlib.h>
 
 static void main_copy_filename(FileName *, char *, uint32);
-static FileList *main_file_list_from_dir(char *);
-static FileList *main_file_list_from_lines(char *, uint32);
-static FileList *main_file_list_from_args(int, char **);
+static FileList *main_filelist_from_dir(char *);
+static FileList *main_filelist_from_lines(char *, uint32);
+static FileList *main_filelist_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *);
 static void main_normalize_names(FileList *);
 bool main_check_repeated(FileList *);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, const uint32);
-static void main_free_file_list(FileList *);
+static void main_free_filelist(FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
 static char *EDITOR;
 static const char *tempdir = "/tmp";
@@ -43,17 +43,17 @@ int main(int argc, char **argv) {
     bool status = true;
 
     if (argc >= 3) {
-        old = main_file_list_from_args(argc, argv);
+        old = main_filelist_from_args(argc, argv);
     } else if (argc == 2) {
         if (!strcmp(argv[1], "--help")) {
             main_usage(stdout);
         } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_file_list_from_lines(argv[1], 0);
+            old = main_filelist_from_lines(argv[1], 0);
         }
     } else {
-        old = main_file_list_from_dir(".");
+        old = main_filelist_from_dir(".");
     }
 
     if (!(EDITOR = getenv("EDITOR"))) {
@@ -116,10 +116,10 @@ int main(int argc, char **argv) {
 
         while (true) {
             util_command(ARRAY_LENGTH(args), args);
-            new = main_file_list_from_lines(buffer.name, old->length);
+            new = main_filelist_from_lines(buffer.name, old->length);
             main_normalize_names(new);
             if (!main_verify(old, new)) {
-                main_free_file_list(new);
+                main_free_filelist(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -148,8 +148,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    main_free_file_list(old);
-    main_free_file_list(new);
+    main_free_filelist(old);
+    main_free_filelist(new);
     unlink(buffer.name);
     exit(!status);
 }
@@ -180,11 +180,11 @@ void main_copy_filename(FileName *file, char *name, uint32 length) {
     return;
 }
 
-FileList *main_file_list_from_args(int argc, char **argv) {
-    FileList *file_list;
+FileList *main_filelist_from_args(int argc, char **argv) {
+    FileList *filelist;
     uint32 length = 0;
 
-    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
+    filelist = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
 
     for (int i = 1; i < argc; i += 1) {
         char *name = argv[i];
@@ -194,16 +194,16 @@ FileList *main_file_list_from_args(int argc, char **argv) {
             continue;
 
         name_length = (uint32) strlen(name);
-        main_copy_filename(&(file_list->files[length]), name, name_length);
+        main_copy_filename(&(filelist->files[length]), name, name_length);
 
         length += 1;
     }
-    file_list->length = length;
-    return file_list;
+    filelist->length = length;
+    return filelist;
 }
 
-FileList *main_file_list_from_dir(char *directory) {
-    FileList *file_list;
+FileList *main_filelist_from_dir(char *directory) {
+    FileList *filelist;
     struct dirent **directory_list;
     uint32 length = 0;
 
@@ -217,7 +217,7 @@ FileList *main_file_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
+    filelist = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -228,18 +228,18 @@ FileList *main_file_list_from_dir(char *directory) {
             continue;
         }
         name_length = (uint32) strlen(name);
-        main_copy_filename(&(file_list->files[length]), name, name_length);
+        main_copy_filename(&(filelist->files[length]), name, name_length);
 
         free(directory_list[i]);
         length += 1;
     }
-    file_list->length = length;
+    filelist->length = length;
     free(directory_list);
-    return file_list;
+    return filelist;
 }
 
-FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
-    FileList *file_list;
+FileList *main_filelist_from_lines(char *filename, uint32 capacity) {
+    FileList *filelist;
     FILE *lines;
     uint32 length = 0;
 
@@ -253,14 +253,14 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
         capacity = 128;
     }
 
-    file_list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+    filelist = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
     while (!feof(lines)) {
         char buffer[PATH_MAX];
         uint32 last;
 
         if (length >= capacity) {
             capacity *= 2;
-            file_list = util_realloc(file_list,
+            filelist = util_realloc(filelist,
                         STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
         }
 
@@ -274,7 +274,7 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
 
         if (is_pwd_or_parent(buffer))
             continue;
-        main_copy_filename(&(file_list->files[length]), buffer, last);
+        main_copy_filename(&(filelist->files[length]), buffer, last);
 
         length += 1;
     }
@@ -284,11 +284,11 @@ FileList *main_file_list_from_lines(char *filename, uint32 capacity) {
         fprintf(stderr, "Empty filelist. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    file_list = util_realloc(file_list,
+    filelist = util_realloc(filelist,
                              STRUCT_ARRAY_SIZE(FileList, FileName, length));
-    file_list->length = length;
+    filelist->length = length;
 
-    return file_list;
+    return filelist;
 }
 
 bool is_pwd_or_parent(char *filename) {
@@ -499,10 +499,10 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
 }
 
 
-void main_free_file_list(FileList *file_list) {
-    for (uint32 i = 0; i < file_list->length; i += 1)
-        free(file_list->files[i].name);
-    free(file_list);
+void main_free_filelist(FileList *filelist) {
+    for (uint32 i = 0; i < filelist->length; i += 1)
+        free(filelist->files[i].name);
+    free(filelist);
     return;
 }
 
