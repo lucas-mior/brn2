@@ -39,11 +39,12 @@ brn2: $(objs)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 brn2 $(DESTDIR)$(PREFIX)/bin/brn2
+	install -Dm755 brn2 $(DESTDIR)$(PREFIX)/bin/brn2
+	install -Dm644 brn2.1 $(DESTDIR)$(PREFIX)/man/man1/brn2.1
 
 uninstall: all
-	rm $(DESTDIR)$(PREFIX)/bin/brn2
+	rm -f $(DESTDIR)$(PREFIX)/bin/brn2
+	rm -f $(DESTDIR)$(PREFIX)/man/man1/brn2.1
 
 clean:
 	rm -rf ./brn2 *.o
