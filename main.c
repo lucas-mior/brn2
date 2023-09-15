@@ -61,13 +61,10 @@ int main(int argc, char **argv) {
                         "Using %s by default.\n", EDITOR);
     }
 
-    if (main_check_repeated(old)) {
-        fprintf(stderr, "\"%s\" contains repeated filenames.\n", argv[1]);
-        exit(EXIT_FAILURE);
-    }
     {
         char buffer2[BUFSIZ];
         int n;
+        HashSet *repeated = hash_set_create(old->length);
 
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
@@ -92,6 +89,14 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             uint32 length = old->files[i].length;
             char **name = &(old->files[i].name);
+
+            if (!hash_set_insert(repeated, *name, length)) {
+                fprintf(stderr, "%s repeated in the buffer. Removing...\n", *name);
+                memmove(&(old->files[i]),&(old->files[i+1]),(old->length-i-1)*sizeof(FileName));
+                old->length -= 1;
+                length = old->files[i].length;
+                name = &(old->files[i].name);
+            }
             (*name)[length] = '\n';
             fwrite(*name, 1, length + 1, buffer.stream);
             (*name)[length] = '\0';
