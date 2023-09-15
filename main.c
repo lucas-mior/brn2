@@ -33,13 +33,13 @@ static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, const uint32);
 static void main_free_list(FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
-static char *EDITOR;
 static const char *tempdir = "/tmp";
 
 int main(int argc, char **argv) {
     File buffer;
     FileList *old;
     FileList *new;
+    char *EDITOR;
     bool status = true;
 
     if (argc >= 3) {
@@ -160,19 +160,19 @@ static void main_normalize_names(FileList *list) {
         FileName *file = &(list->files[i]);
         char *name = file->name;
         uint32 *length = &(file->length);
-        uint32 i = 0;
+        uint32 j = 0;
 
         while (name[*length - 1] == '/') {
             name[*length - 1] = '\0';
             *length -= 1;
         }
 
-        while (name[i] != '\0') {
-            while (name[i] == '/' && name[i+1] == '/') {
+        while (name[j] != '\0') {
+            while (name[j] == '/' && name[j + 1] == '/') {
                 *length -= 1;
-                memmove(&name[i], &name[i+1], (*length - i) * sizeof (*name));
+                memmove(&name[j], &name[j + 1], (*length - j) * sizeof (*name));
             }
-            i += 1;
+            j += 1;
         }
 
         while (name[0] == '.' && name[1] == '/') {
