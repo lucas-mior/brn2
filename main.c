@@ -281,38 +281,28 @@ static int create_hashes(void *arg) {
     thrd_exit(0);
 }
 
-bool main_verify(FileList *old, FileList *new) {
+bool main_check_repeated(FileList *filelist) {
     bool repeated = false;
-    long number_threads;
-
-    if (old->length != new->length) {
-        fprintf(stderr, "You are renaming "RED"%u"RESET" file%.*s "
-                        "but buffer contains "RED"%u"RESET" file name%.*s\n", 
-                        old->length, old->length != 1, "s",
-                        new->length, new->length != 1, "s");
-        return false;
-    }
-
-    number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if ((new->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
+    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    if ((filelist->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
         uint32 nthreads = (uint32) number_threads;
 
-        uint32 *hashes = util_malloc(new->length * sizeof (*hashes));
-        uint32 *indexes = util_malloc(new->length * sizeof (*indexes));
+        uint32 *hashes = util_malloc(filelist->length * sizeof (*hashes));
+        uint32 *indexes = util_malloc(filelist->length * sizeof (*indexes));
         thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
         Slice *slices = util_malloc(nthreads * sizeof (*slices));
 
-        HashSet *repeated_set = hash_set_create(new->length);
-        uint32 range = new->length / nthreads;
+        HashSet *repeated_set = hash_set_create(filelist->length);
+        uint32 range = filelist->length / nthreads;
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
             if (i == nthreads - 1) {
-                slices[i].end = new->length;
+                slices[i].end = filelist->length;
             } else {
                 slices[i].end = (i + 1)*range;
             }
-            slices[i].filelist = new;
+            slices[i].filelist = filelist;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
             slices[i].set_capacity = hash_set_capacity(repeated_set);
@@ -322,8 +312,8 @@ bool main_verify(FileList *old, FileList *new) {
         for (uint32 i = 0; i < nthreads; i += 1)
             thrd_join(threads[i], NULL);
 
-        for (uint32 i = 0; i < new->length; i += 1) {
-            FileName newfile = new->files[i];
+        for (uint32 i = 0; i < filelist->length; i += 1) {
+            FileName newfile = filelist->files[i];
 
             if (!hash_set_insert_pre_calc(repeated_set, newfile.name,
                                             hashes[i], indexes[i])) {
@@ -339,11 +329,11 @@ bool main_verify(FileList *old, FileList *new) {
         free(slices);
         free(threads);
         hash_set_destroy(repeated_set);
-    } else if (new->length > USE_HASH_SET_THRESHOLD) {
-        HashSet *repeated_set = hash_set_create(new->length);
+    } else if (filelist->length > USE_HASH_SET_THRESHOLD) {
+        HashSet *repeated_set = hash_set_create(filelist->length);
 
-        for (uint32 i = 0; i < new->length; i += 1) {
-            FileName newfile = new->files[i];
+        for (uint32 i = 0; i < filelist->length; i += 1) {
+            FileName newfile = filelist->files[i];
 
             if (!hash_set_insert(repeated_set, newfile.name, newfile.length)) {
                 fprintf(stderr, RED"\"%s\""RESET
@@ -354,10 +344,10 @@ bool main_verify(FileList *old, FileList *new) {
         }
         hash_set_destroy(repeated_set);
     } else {
-        for (uint32 i = 0; i < new->length; i += 1) {
-            FileName file_i = new->files[i];
-            for (uint32 j = i + 1; j < new->length; j += 1) {
-                FileName file_j = new->files[j];
+        for (uint32 i = 0; i < filelist->length; i += 1) {
+            FileName file_i = filelist->files[i];
+            for (uint32 j = i + 1; j < filelist->length; j += 1) {
+                FileName file_j = filelist->files[j];
 
                 if (file_i.length != file_j.length)
                     continue;
@@ -370,7 +360,21 @@ bool main_verify(FileList *old, FileList *new) {
             }
         }
     }
+    return repeated;
+}
 
+bool main_verify(FileList *old, FileList *new) {
+    bool repeated = false;
+
+    if (old->length != new->length) {
+        fprintf(stderr, "You are renaming "RED"%u"RESET" file%.*s "
+                        "but buffer contains "RED"%u"RESET" file name%.*s\n", 
+                        old->length, old->length != 1, "s",
+                        new->length, new->length != 1, "s");
+        return false;
+    }
+
+    repeated = main_check_repeated(new);
     return !repeated;
 }
 
