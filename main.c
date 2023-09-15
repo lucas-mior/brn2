@@ -91,8 +91,10 @@ int main(int argc, char **argv) {
             char **name = &(old->files[i].name);
 
             if (!hash_set_insert(repeated, *name, length)) {
-                fprintf(stderr, "%s repeated in the buffer. Removing...\n", *name);
-                memmove(&(old->files[i]),&(old->files[i+1]),(old->length-i-1)*sizeof(FileName));
+                fprintf(stderr, RED"%s"RESET" repeated in the buffer. "
+                                "Removing...\n", *name);
+                memmove(&(old->files[i]), &(old->files[i+1]),
+                        (old->length-i-1) * sizeof(*(&(old->files[i]))));
                 old->length -= 1;
                 length = old->files[i].length;
                 name = &(old->files[i].name);
