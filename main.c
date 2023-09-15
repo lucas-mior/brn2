@@ -22,16 +22,16 @@
 #include <stdlib.h>
 
 static void main_copy_filename(FileName *, char *, uint32);
-static FileList *main_filelist_from_dir(char *);
-static FileList *main_filelist_from_lines(char *, uint32);
-static FileList *main_filelist_from_args(int, char **);
+static FileList *main_list_from_dir(char *);
+static FileList *main_list_from_lines(char *, uint32);
+static FileList *main_list_from_args(int, char **);
 static inline bool is_pwd_or_parent(char *);
 static void main_normalize_names(FileList *);
 bool main_check_repeated(FileList *);
 static bool main_verify(FileList *, FileList *);
 static uint32 main_get_number_changes(FileList *, FileList *);
 static uint32 main_execute(FileList *, FileList *, const uint32);
-static void main_free_filelist(FileList *);
+static void main_free_list(FileList *);
 static void main_usage(FILE *) __attribute__((noreturn));
 static char *EDITOR;
 static const char *tempdir = "/tmp";
@@ -43,17 +43,17 @@ int main(int argc, char **argv) {
     bool status = true;
 
     if (argc >= 3) {
-        old = main_filelist_from_args(argc, argv);
+        old = main_list_from_args(argc, argv);
     } else if (argc == 2) {
         if (!strcmp(argv[1], "--help")) {
             main_usage(stdout);
         } else if (!strcmp(argv[1], "-h")) {
             main_usage(stdout);
         } else {
-            old = main_filelist_from_lines(argv[1], 0);
+            old = main_list_from_lines(argv[1], 0);
         }
     } else {
-        old = main_filelist_from_dir(".");
+        old = main_list_from_dir(".");
     }
 
     if (!(EDITOR = getenv("EDITOR"))) {
@@ -116,10 +116,10 @@ int main(int argc, char **argv) {
 
         while (true) {
             util_command(ARRAY_LENGTH(args), args);
-            new = main_filelist_from_lines(buffer.name, old->length);
+            new = main_list_from_lines(buffer.name, old->length);
             main_normalize_names(new);
             if (!main_verify(old, new)) {
-                main_free_filelist(new);
+                main_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -148,15 +148,15 @@ int main(int argc, char **argv) {
         }
     }
 
-    main_free_filelist(old);
-    main_free_filelist(new);
+    main_free_list(old);
+    main_free_list(new);
     unlink(buffer.name);
     exit(!status);
 }
 
-static void main_normalize_names(FileList *filelist) {
-    for (uint32 i = 0; i < filelist->length; i += 1) {
-        FileName *file = &(filelist->files[i]);
+static void main_normalize_names(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1) {
+        FileName *file = &(list->files[i]);
         char *name = file->name;
         uint32 *length = &(file->length);
 
@@ -180,11 +180,11 @@ void main_copy_filename(FileName *file, char *name, uint32 length) {
     return;
 }
 
-FileList *main_filelist_from_args(int argc, char **argv) {
-    FileList *filelist;
+FileList *main_list_from_args(int argc, char **argv) {
+    FileList *list;
     uint32 length = 0;
 
-    filelist = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
+    list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
 
     for (int i = 1; i < argc; i += 1) {
         char *name = argv[i];
@@ -194,16 +194,16 @@ FileList *main_filelist_from_args(int argc, char **argv) {
             continue;
 
         name_length = (uint32) strlen(name);
-        main_copy_filename(&(filelist->files[length]), name, name_length);
+        main_copy_filename(&(list->files[length]), name, name_length);
 
         length += 1;
     }
-    filelist->length = length;
-    return filelist;
+    list->length = length;
+    return list;
 }
 
-FileList *main_filelist_from_dir(char *directory) {
-    FileList *filelist;
+FileList *main_list_from_dir(char *directory) {
+    FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
 
@@ -217,7 +217,7 @@ FileList *main_filelist_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    filelist = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
+    list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -228,18 +228,18 @@ FileList *main_filelist_from_dir(char *directory) {
             continue;
         }
         name_length = (uint32) strlen(name);
-        main_copy_filename(&(filelist->files[length]), name, name_length);
+        main_copy_filename(&(list->files[length]), name, name_length);
 
         free(directory_list[i]);
         length += 1;
     }
-    filelist->length = length;
+    list->length = length;
     free(directory_list);
-    return filelist;
+    return list;
 }
 
-FileList *main_filelist_from_lines(char *filename, uint32 capacity) {
-    FileList *filelist;
+FileList *main_list_from_lines(char *filename, uint32 capacity) {
+    FileList *list;
     FILE *lines;
     uint32 length = 0;
 
@@ -253,15 +253,14 @@ FileList *main_filelist_from_lines(char *filename, uint32 capacity) {
         capacity = 128;
     }
 
-    filelist = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+    list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
     while (!feof(lines)) {
         char buffer[PATH_MAX];
         uint32 last;
 
         if (length >= capacity) {
             capacity *= 2;
-            filelist = util_realloc(filelist,
-                        STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+            list = util_realloc(list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
         }
 
         if (!fgets(buffer, sizeof (buffer), lines))
@@ -274,21 +273,20 @@ FileList *main_filelist_from_lines(char *filename, uint32 capacity) {
 
         if (is_pwd_or_parent(buffer))
             continue;
-        main_copy_filename(&(filelist->files[length]), buffer, last);
+        main_copy_filename(&(list->files[length]), buffer, last);
 
         length += 1;
     }
     fclose(lines);
 
     if (length == 0) {
-        fprintf(stderr, "Empty filelist. Exiting.\n");
+        fprintf(stderr, "Empty list. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    filelist = util_realloc(filelist,
-                             STRUCT_ARRAY_SIZE(FileList, FileName, length));
-    filelist->length = length;
+    list = util_realloc(list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    list->length = length;
 
-    return filelist;
+    return list;
 }
 
 bool is_pwd_or_parent(char *filename) {
@@ -303,7 +301,7 @@ bool is_pwd_or_parent(char *filename) {
 }
 
 typedef struct Slice {
-    FileList *filelist;
+    FileList *list;
     uint32 *hashes;
     uint32 *indexes;
     uint32 start;
@@ -316,35 +314,35 @@ static int create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName newfile = slice->filelist->files[i];
+        FileName newfile = slice->list->files[i];
         slice->hashes[i] = hash_function(newfile.name, newfile.length);
         slice->indexes[i] = slice->hashes[i] % slice->set_capacity;
     }
     thrd_exit(0);
 }
 
-bool main_check_repeated(FileList *filelist) {
+bool main_check_repeated(FileList *list) {
     bool repeated = false;
     long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if ((filelist->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
+    if ((list->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
         uint32 nthreads = (uint32) number_threads;
 
-        uint32 *hashes = util_malloc(filelist->length * sizeof (*hashes));
-        uint32 *indexes = util_malloc(filelist->length * sizeof (*indexes));
+        uint32 *hashes = util_malloc(list->length * sizeof (*hashes));
+        uint32 *indexes = util_malloc(list->length * sizeof (*indexes));
         thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
         Slice *slices = util_malloc(nthreads * sizeof (*slices));
 
-        HashSet *repeated_set = hash_set_create(filelist->length);
-        uint32 range = filelist->length / nthreads;
+        HashSet *repeated_set = hash_set_create(list->length);
+        uint32 range = list->length / nthreads;
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
             if (i == nthreads - 1) {
-                slices[i].end = filelist->length;
+                slices[i].end = list->length;
             } else {
                 slices[i].end = (i + 1)*range;
             }
-            slices[i].filelist = filelist;
+            slices[i].list = list;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
             slices[i].set_capacity = hash_set_capacity(repeated_set);
@@ -354,8 +352,8 @@ bool main_check_repeated(FileList *filelist) {
         for (uint32 i = 0; i < nthreads; i += 1)
             thrd_join(threads[i], NULL);
 
-        for (uint32 i = 0; i < filelist->length; i += 1) {
-            FileName newfile = filelist->files[i];
+        for (uint32 i = 0; i < list->length; i += 1) {
+            FileName newfile = list->files[i];
 
             if (!hash_set_insert_pre_calc(repeated_set, newfile.name,
                                             hashes[i], indexes[i])) {
@@ -371,11 +369,11 @@ bool main_check_repeated(FileList *filelist) {
         free(slices);
         free(threads);
         hash_set_destroy(repeated_set);
-    } else if (filelist->length > USE_HASH_SET_THRESHOLD) {
-        HashSet *repeated_set = hash_set_create(filelist->length);
+    } else if (list->length > USE_HASH_SET_THRESHOLD) {
+        HashSet *repeated_set = hash_set_create(list->length);
 
-        for (uint32 i = 0; i < filelist->length; i += 1) {
-            FileName newfile = filelist->files[i];
+        for (uint32 i = 0; i < list->length; i += 1) {
+            FileName newfile = list->files[i];
 
             if (!hash_set_insert(repeated_set, newfile.name, newfile.length)) {
                 fprintf(stderr, RED"\"%s\""RESET
@@ -386,10 +384,10 @@ bool main_check_repeated(FileList *filelist) {
         }
         hash_set_destroy(repeated_set);
     } else {
-        for (uint32 i = 0; i < filelist->length; i += 1) {
-            FileName file_i = filelist->files[i];
-            for (uint32 j = i + 1; j < filelist->length; j += 1) {
-                FileName file_j = filelist->files[j];
+        for (uint32 i = 0; i < list->length; i += 1) {
+            FileName file_i = list->files[i];
+            for (uint32 j = i + 1; j < list->length; j += 1) {
+                FileName file_j = list->files[j];
 
                 if (file_i.length != file_j.length)
                     continue;
@@ -499,10 +497,10 @@ uint32 main_execute(FileList *old, FileList *new, const uint32 number_changes) {
 }
 
 
-void main_free_filelist(FileList *filelist) {
-    for (uint32 i = 0; i < filelist->length; i += 1)
-        free(filelist->files[i].name);
-    free(filelist);
+void main_free_list(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1)
+        free(list->files[i].name);
+    free(list);
     return;
 }
 
