@@ -4,10 +4,9 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <math.h>
-#include "util.c"
-#include "hash.c"
- 
+#include "hash.h"
+#include "util.h"
+
 static void hash_test(void **state) {
     (void) state;
     HashSet *set = hash_set_create(1000);
