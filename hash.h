@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
+
 typedef struct HashSet HashSet;
 typedef int8_t int8;
 typedef int16_t int16;
