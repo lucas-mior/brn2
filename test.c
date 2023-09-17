@@ -27,6 +27,7 @@ static void brn2_test(void **state) {
     (void) state;
     FileList *list = brn2_list_from_dir(".");
     assert_non_null(list);
+    brn2_free_list(list);
 }
 
 int main(void) {
