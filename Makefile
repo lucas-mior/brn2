@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 
-objs = util.o main.o hash.o
+objs = util.o brn2.o hash.o
 
 .PHONY: all clean install uninstall
 .SUFFIXES:
@@ -10,7 +10,7 @@ all: release
 
 $(objs): Makefile brn2.h hash.h
 util.o: util.c
-main.o: main.c
+brn2.o: brn2.c
 hash.o: hash.c
 
 CC=cc
@@ -30,16 +30,16 @@ debug: CFLAGS += -g -fsanitize=undefined
 debug: clean
 debug: brn2
 
-tests: hash.o util.o test.c
-	$(CC) $(CFLAGS) -o $@ hash.o util.o test.c -lcmocka $(LDFLAGS)
+tests: $(objs) test.c
+	$(CC) $(CFLAGS) -o $@ $(objs) test.c -lcmocka $(LDFLAGS)
 
 test: tests
 	./tests
 
-brn2: $(objs)
+brn2: $(objs) main.c
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
-	$(CC) $(CFLAGS) -o $@ $(objs) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(objs) main.c $(LDFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
