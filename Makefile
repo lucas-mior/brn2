@@ -30,6 +30,11 @@ debug: CFLAGS += -g -fsanitize=undefined
 debug: clean
 debug: brn2
 
+test: clean
+test: test.c
+	$(CC) $(CFLAGS) -o $@ $< -lcmocka $(LDFLAGS)
+	./test
+
 brn2: $(objs)
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
@@ -47,4 +52,4 @@ uninstall: all
 	rm -f $(DESTDIR)$(PREFIX)/man/man1/brn2.1
 
 clean:
-	rm -rf ./brn2 *.o
+	rm -rf ./brn2 *.o ./test
