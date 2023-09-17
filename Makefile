@@ -30,10 +30,11 @@ debug: CFLAGS += -g -fsanitize=undefined
 debug: clean
 debug: brn2
 
-test: clean
-test: test.c
-	$(CC) $(CFLAGS) -o $@ $< -lcmocka $(LDFLAGS)
-	./test
+tests: hash.o util.o test.c
+	$(CC) $(CFLAGS) -o $@ hash.o util.o test.c -lcmocka $(LDFLAGS)
+
+test: tests
+	./tests
 
 brn2: $(objs)
 	ctags --kinds-C=+l *.h *.c
