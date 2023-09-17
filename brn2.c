@@ -84,7 +84,7 @@ FileList *brn2_list_from_dir(char *directory) {
 
     int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
-        fprintf(stderr, "Error scanning %s: %s\n", directory, strerror(errno));
+        fprintf(stderr, "Error scanning \"%s\": %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (n <= 2) {
@@ -119,7 +119,7 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
     uint32 length = 0;
 
     if ((lines = fopen(filename, "r")) == NULL) {
-        fprintf(stderr, "Error opening %s for reading: %s\n",
+        fprintf(stderr, "Error opening \"%s\" for reading: %s\n",
                         filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -348,7 +348,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
 #else
         (void) newlength;
         if (!access(*newname, F_OK)) {
-            fprintf(stderr, "Can't rename %s to %s. File already exists.\n",
+            fprintf(stderr, "Can't rename \"%s\" to \"%s\". File already exists.\n",
                             *oldname, *newname);
             continue;
         }
@@ -357,7 +357,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
         renamed = rename(*oldname, *newname);
         if (renamed < 0) {
             printf("Error renaming "
-                    RED"%s"RESET" to "RED"%s"RESET":\n", 
+                    RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n", 
                     *oldname, *newname);
             printf("%s\n", strerror(errno));
             continue;
