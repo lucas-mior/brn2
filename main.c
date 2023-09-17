@@ -63,12 +63,12 @@ int main(int argc, char **argv) {
         buffer.name[sizeof (buffer.name) - 1] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
-            fprintf(stderr, "Error opening %s: %s\n",
+            fprintf(stderr, "Error opening \"%s\": %s\n",
                             buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
         if ((buffer.stream = fdopen(buffer.fd, "w")) == NULL) {
-            fprintf(stderr, "Error opening %s: %s\n",
+            fprintf(stderr, "Error opening \"%s\": %s\n",
                             buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
             FileName *file = &(old->files[i]);
 
             while (!hash_set_insert(repeated, file->name, file->length)) {
-                fprintf(stderr, RED"%s"RESET" repeated in the buffer. "
+                fprintf(stderr, RED"\"%s\""RESET" repeated in the buffer. "
                                 "Removing...\n", file->name);
                 old->length -= 1;
                 if (old->length <= i)
