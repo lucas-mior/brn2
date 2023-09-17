@@ -16,6 +16,14 @@
  */
 
 typedef struct HashSet HashSet;
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
 
 HashSet *hash_set_create(uint32);
 void hash_set_destroy(HashSet *);
