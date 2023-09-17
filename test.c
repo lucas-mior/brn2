@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "brn2.h"
 #include "hash.h"
 #include "util.h"
 
@@ -22,9 +23,16 @@ static void hash_test(void **state) {
     hash_set_destroy(set);
 }
 
+static void brn2_test(void **state) {
+    (void) state;
+    FileList *list = brn2_list_from_dir(".");
+    assert_non_null(list);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(hash_test),
+        cmocka_unit_test(brn2_test),
     };
  
     return cmocka_run_group_tests(tests, NULL, NULL);
