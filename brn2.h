@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <threads.h>
+#include <linux/limits.h>
 
 #include "util.h"
 
