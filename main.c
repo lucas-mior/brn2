@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
             file->name[file->length] = '\0';
         }
         close:
+        hash_set_destroy(repeated);
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
