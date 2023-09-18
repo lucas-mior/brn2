@@ -34,9 +34,11 @@ static bool contains_filename(FileList *list, FileName file) {
 
 static void brn2_test(void **state) {
     (void) state;
-    system("ls -a > /tmp/brn2test");
+    char *command = "ls -a > /tmp/brn2test";
+    char *file = command + 8;
+    system(command);
     FileList *list1 = brn2_list_from_dir(".");
-    FileList *list2 = brn2_list_from_lines("/tmp/brn2test", 0);
+    FileList *list2 = brn2_list_from_lines(file, 0);
 
     assert_int_equal(list1->length, list2->length);
 
@@ -46,7 +48,7 @@ static void brn2_test(void **state) {
 
     brn2_free_list(list1);
     brn2_free_list(list2);
-    unlink("/tmp/brn2test");
+    unlink(file);
 }
 
 int main(void) {
