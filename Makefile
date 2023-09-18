@@ -8,10 +8,10 @@ objs = util.o brn2.o hash.o
 
 all: release
 
-$(objs): Makefile brn2.h hash.h
-util.o: util.c
-brn2.o: brn2.c
-hash.o: hash.c
+$(objs): Makefile brn2.h
+util.o: util.c util.h
+brn2.o: brn2.c brn2.h hash.h
+hash.o: hash.c hash.h
 
 CC=cc
 ifeq ($(CC),clang)
