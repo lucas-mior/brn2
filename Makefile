@@ -23,6 +23,9 @@ endif
 CFLAGS += -std=c99
 LDFLAGS += -lm
 
+bear: Makefile
+	bear -- make > compile_commands.json 
+
 release: CFLAGS += -O2
 release: brn2
 
