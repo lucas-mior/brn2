@@ -2,7 +2,7 @@ PREFIX ?= /usr/local
 
 objs = util.o brn2.o hash.o
 
-.PHONY: all clean install uninstall
+.PHONY: all clean install uninstall test
 .SUFFIXES:
 .SUFFIXES: .c .o
 
@@ -30,11 +30,9 @@ debug: CFLAGS += -g -fsanitize=undefined
 debug: clean
 debug: brn2
 
-tests: $(objs) test.c
+test: $(objs) test.c
 	$(CC) $(CFLAGS) -o $@ $(objs) test.c -lcmocka $(LDFLAGS)
-
-test: tests
-	./tests
+	./test
 
 brn2: $(objs) main.c
 	ctags --kinds-C=+l *.h *.c
