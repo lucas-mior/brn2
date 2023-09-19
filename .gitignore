@@ -8,3 +8,4 @@ brn2
 tags
 *.o
 *.tags.vim
+.cache
