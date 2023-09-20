@@ -46,9 +46,17 @@ will take place when you save and exit.
  
 ## Install
  
-Clone the repo and
+### AUR
 ```
-sudo make install
+yay -S brn2
+```
+
+### Manual
+```
+$ git clone https://github.com/lucas-mior/brn2
+$ cd brn2
+$ make
+$ sudo make install
 ```
 
 ## Examples
