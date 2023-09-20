@@ -45,6 +45,8 @@
 #define SWAP(Type, x, y) do { Type SWAP = x; x = y; y = SWAP; } while (0)
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
+#ifndef INTEGERS
+#define INTEGERS
 typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
@@ -53,6 +55,7 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
+#endif
 
 typedef struct File {
     char name[PATH_MAX-4];
