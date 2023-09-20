@@ -320,6 +320,10 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
         char **newname = &(new->files[i].name);
         uint32 *oldlength = &(old->files[i].length);
         uint32 *newlength = &(new->files[i].length);
+        uint32 newhash = hash_function(*newname);
+        uint32 oldhash = hash_function(*oldname);
+        uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
+        uint32 oldindex = oldhash % hash_set_capacity(indexes_exchange);
 
         if (!strcmp(*oldname, *newname))
             continue;
@@ -329,10 +333,6 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             uint32 *index;
-            uint32 newhash = hash_function(*newname);
-            uint32 oldhash = hash_function(*oldname);
-            uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
-            uint32 oldindex = oldhash % hash_set_capacity(indexes_exchange);
 
             if (hash_set_insert_pre_calc(names_renamed, *oldname, oldhash, oldindex, 0))
                 number_renames += 1;
