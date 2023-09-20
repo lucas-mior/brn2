@@ -331,14 +331,16 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
             uint32 *index;
             uint32 newhash = hash_function(*newname, *newlength);
             uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
+            uint32 oldhash = hash_function(*oldname, *oldlength);
+            uint32 oldindex = oldhash % hash_set_capacity(indexes_exchange);
 
-            if (hash_set_insert(names_renamed, *oldname, *oldlength, 0))
+            if (hash_set_insert_pre_calc(names_renamed, *oldname, oldhash, oldindex, 0))
                 number_renames += 1;
             if (hash_set_insert_pre_calc(names_renamed, *newname, newhash, newindex, 0))
                 number_renames += 1;
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
-            if ((index = hash_set_lookup(indexes_exchange, *newname, *newlength))) {
+            if ((index = hash_set_lookup_pre_calc(indexes_exchange, *newname, newhash, newindex))) {
                 FileName *file_j = &(old->files[*index]);
                 SWAP(char *, file_j->name, *oldname);
                 SWAP(uint32, file_j->length, *oldlength);
