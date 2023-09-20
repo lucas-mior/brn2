@@ -15,17 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
+#include <math.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "util.h"
 #include "hash.h"
+#include "util.h"
 
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"

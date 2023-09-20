@@ -20,20 +20,20 @@
 #ifdef __linux__
 #define _GNU_SOURCE
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <dirent.h>
-#include <stdint.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <threads.h>
-#include <linux/limits.h>
 #include <getopt.h>
+#include <linux/limits.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
+#include <threads.h>
+#include <unistd.h>
+#include <unistd.h>
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
