@@ -311,12 +311,24 @@ uint32 brn2_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
+int noop(const char *restrict unused, ...) {
+    (void) unused;
+    return 0;
+}
+
 uint32 brn2_execute(FileList *old, FileList *new,
-                    const uint32 number_changes) {
+                    const uint32 number_changes, bool verbose) {
     uint32 number_renames = 0;
     uint32 length = old->length;
+    int (*verbose2)(const char *restrict, ...);
     HashMap *names_renamed = hash_map_create(number_changes);
     HashMap *indexes_exchange = hash_map_create(number_changes);
+
+    if (verbose) {
+        verbose2 = printf;
+    } else {
+        verbose2 = noop;
+    }
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
@@ -344,7 +356,7 @@ uint32 brn2_execute(FileList *old, FileList *new,
             if (hash_map_insert_pre_calc(names_renamed, *newname,
                                          newhash, newindex, 0))
                 number_renames += 1;
-            printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+            verbose2(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
             index = hash_map_lookup_pre_calc(indexes_exchange, *newname,
                                              newhash, newindex);
@@ -382,15 +394,14 @@ uint32 brn2_execute(FileList *old, FileList *new,
 #endif
         renamed = rename(*oldname, *newname);
         if (renamed < 0) {
-            printf("Error renaming "
-                    RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n",
-                    *oldname, *newname);
-            printf("%s\n", strerror(errno));
+            fprintf(stderr, "Error renaming "RED"\"%s\""RESET
+                             "to "RED"\"%s\""RESET":\n", *oldname, *newname);
+            fprintf(stderr, "%s\n", strerror(errno));
             continue;
         } else {
             if (hash_map_insert(names_renamed, *oldname, 0))
                 number_renames += 1;
-            printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
+            verbose2("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
     hash_map_destroy(indexes_exchange);
