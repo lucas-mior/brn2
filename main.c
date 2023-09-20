@@ -24,6 +24,7 @@
 struct option long_options[] = {
     {"help", no_argument, NULL, 'h'},
     {"quiet", no_argument, NULL, 'q'},
+    {"verbose", no_argument, NULL, 'v'},
     {NULL, 0, NULL, 0}
 };
 
@@ -38,7 +39,7 @@ int main(int argc, char **argv) {
     int opt;
     int optind = 0;
 
-    while ((opt = getopt_long(argc, argv, "hq", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "hqv", long_options, NULL)) != -1) {
         optind += 1;
         switch (opt) {
         case '?':
@@ -47,6 +48,9 @@ int main(int argc, char **argv) {
             brn2_usage(stdout);
         case 'q':
             quiet = true;
+            break;
+        case 'v':
+            quiet = false;
             break;
         }
     }
