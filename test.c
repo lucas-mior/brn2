@@ -11,23 +11,23 @@
 
 static void hash_test(void **state) {
     (void) state;
-    HashSet *set = hash_set_create(1000);
+    HashMap *set = hash_map_create(1000);
     assert_non_null(set);
-    assert_true(hash_set_capacity(set) >= 1000);
+    assert_true(hash_map_capacity(set) >= 1000);
 
-    assert_true(hash_set_insert(set, "a", 0));
-    assert_false(hash_set_insert(set, "a", 1));
-    assert_true(hash_set_insert(set, "b", 2));
+    assert_true(hash_map_insert(set, "a", 0));
+    assert_false(hash_map_insert(set, "a", 1));
+    assert_true(hash_map_insert(set, "b", 2));
 
-    assert_true(hash_set_length(set) == 2);
-    assert_true(*hash_set_lookup(set, "a") == 0);
-    assert_null(hash_set_lookup(set, "c"));
+    assert_true(hash_map_length(set) == 2);
+    assert_true(*hash_map_lookup(set, "a") == 0);
+    assert_null(hash_map_lookup(set, "c"));
 
-    assert_false(hash_set_remove(set, "c"));
-    assert_true(hash_set_remove(set, "b"));
+    assert_false(hash_map_remove(set, "c"));
+    assert_true(hash_map_remove(set, "b"));
 
-    assert_true(hash_set_length(set) == 1);
-    hash_set_destroy(set);
+    assert_true(hash_map_length(set) == 1);
+    hash_map_destroy(set);
 }
 
 static bool contains_filename(FileList *list, FileName file) {

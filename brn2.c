@@ -184,7 +184,7 @@ typedef struct Slice {
     uint32 *indexes;
     uint32 start;
     uint32 end;
-    uint32 set_capacity;
+    uint32 map_capacity;
     uint32 unused;
 } Slice;
 
@@ -194,7 +194,7 @@ static int brn2_create_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->list->files[i];
         slice->hashes[i] = hash_function(newfile.name);
-        slice->indexes[i] = slice->hashes[i] % slice->set_capacity;
+        slice->indexes[i] = slice->hashes[i] % slice->map_capacity;
     }
     thrd_exit(0);
 }
@@ -210,7 +210,7 @@ bool brn2_check_repeated(FileList *list) {
         thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
         Slice *slices = util_malloc(nthreads * sizeof (*slices));
 
-        HashSet *repeated_set = hash_set_create(list->length);
+        HashMap *repeated_map = hash_map_create(list->length);
         uint32 range = list->length / nthreads;
 
         for (uint32 i = 0; i < nthreads; i += 1) {
@@ -223,7 +223,7 @@ bool brn2_check_repeated(FileList *list) {
             slices[i].list = list;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
-            slices[i].set_capacity = hash_set_capacity(repeated_set);
+            slices[i].map_capacity = hash_map_capacity(repeated_map);
             thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
         }
 
@@ -233,7 +233,7 @@ bool brn2_check_repeated(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
 
-            if (!hash_set_insert_pre_calc(repeated_set, newfile.name,
+            if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                             hashes[i], indexes[i], 0)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
@@ -246,21 +246,21 @@ bool brn2_check_repeated(FileList *list) {
         free(indexes);
         free(slices);
         free(threads);
-        hash_set_destroy(repeated_set);
-    } else if (list->length > USE_HASH_SET_THRESHOLD) {
-        HashSet *repeated_set = hash_set_create(list->length);
+        hash_map_destroy(repeated_map);
+    } else if (list->length > USE_HASH_MAP_THRESHOLD) {
+        HashMap *repeated_map = hash_map_create(list->length);
 
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
 
-            if (!hash_set_insert(repeated_set, newfile.name, 0)) {
+            if (!hash_map_insert(repeated_map, newfile.name, 0)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
                 repeated = true;
             }
         }
-        hash_set_destroy(repeated_set);
+        hash_map_destroy(repeated_map);
     } else {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName file_i = list->files[i];
@@ -315,8 +315,8 @@ uint32 brn2_execute(FileList *old, FileList *new,
                     const uint32 number_changes) {
     uint32 number_renames = 0;
     uint32 length = old->length;
-    HashSet *names_renamed = hash_set_create(number_changes);
-    HashSet *indexes_exchange = hash_set_create(number_changes);
+    HashMap *names_renamed = hash_map_create(number_changes);
+    HashMap *indexes_exchange = hash_map_create(number_changes);
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
@@ -326,8 +326,8 @@ uint32 brn2_execute(FileList *old, FileList *new,
         uint32 *newlength = &(new->files[i].length);
         uint32 newhash = hash_function(*newname);
         uint32 oldhash = hash_function(*oldname);
-        uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
-        uint32 oldindex = oldhash % hash_set_capacity(indexes_exchange);
+        uint32 newindex = newhash % hash_map_capacity(indexes_exchange);
+        uint32 oldindex = oldhash % hash_map_capacity(indexes_exchange);
 
         if (!strcmp(*oldname, *newname))
             continue;
@@ -338,23 +338,23 @@ uint32 brn2_execute(FileList *old, FileList *new,
         if (renamed >= 0) {
             uint32 *index;
 
-            if (hash_set_insert_pre_calc(names_renamed, *oldname,
+            if (hash_map_insert_pre_calc(names_renamed, *oldname,
                                          oldhash, oldindex, 0))
                 number_renames += 1;
-            if (hash_set_insert_pre_calc(names_renamed, *newname,
+            if (hash_map_insert_pre_calc(names_renamed, *newname,
                                          newhash, newindex, 0))
                 number_renames += 1;
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
-            index = hash_set_lookup_pre_calc(indexes_exchange, *newname,
+            index = hash_map_lookup_pre_calc(indexes_exchange, *newname,
                                              newhash, newindex);
             if (index) {
                 FileName *file_j = &(old->files[*index]);
                 SWAP(char *, file_j->name, *oldname);
                 SWAP(uint32, file_j->length, *oldlength);
-                hash_set_remove_pre_calc(indexes_exchange, *newname,
+                hash_map_remove_pre_calc(indexes_exchange, *newname,
                                          newhash, newindex);
-                hash_set_insert_pre_calc(indexes_exchange, *oldname,
+                hash_map_insert_pre_calc(indexes_exchange, *oldname,
                                          oldhash, oldindex, *index);
                 continue;
             }
@@ -364,11 +364,11 @@ uint32 brn2_execute(FileList *old, FileList *new,
                     if (!memcmp(file_j->name, *newname, *newlength)) {
                         SWAP(char *, file_j->name, *oldname);
                         SWAP(uint32, file_j->length, *oldlength);
-                        hash_set_insert(indexes_exchange, *oldname, j);
+                        hash_map_insert(indexes_exchange, *oldname, j);
                         break;
                     }
                 }
-                hash_set_insert(indexes_exchange, file_j->name, j);
+                hash_map_insert(indexes_exchange, file_j->name, j);
             }
             continue;
         }
@@ -388,13 +388,13 @@ uint32 brn2_execute(FileList *old, FileList *new,
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_set_insert(names_renamed, *oldname, 0))
+            if (hash_map_insert(names_renamed, *oldname, 0))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
-    hash_set_destroy(indexes_exchange);
-    hash_set_destroy(names_renamed);
+    hash_map_destroy(indexes_exchange);
+    hash_map_destroy(names_renamed);
     return number_renames;
 }
 
