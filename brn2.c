@@ -330,8 +330,8 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
         if (renamed >= 0) {
             uint32 *index;
             uint32 newhash = hash_function(*newname);
-            uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
             uint32 oldhash = hash_function(*oldname);
+            uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
             uint32 oldindex = oldhash % hash_set_capacity(indexes_exchange);
 
             if (hash_set_insert_pre_calc(names_renamed, *oldname, oldhash, oldindex, 0))
