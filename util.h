@@ -20,4 +20,5 @@
 void *util_malloc(const size_t);
 void *util_realloc(void *, const size_t);
 void *util_calloc(const size_t, const size_t);
+char *util_strdup(char *);
 void util_command(const int, char **);

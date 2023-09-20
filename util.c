@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "stdlib.h"
-#include "stdio.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
-#include "string.h"
-#include "errno.h"
-#include "unistd.h"
-#include "sys/wait.h"
+#include <errno.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #include "util.h"
 
@@ -50,6 +50,15 @@ void *util_calloc(const size_t nmemb, const size_t size) {
     if ((p = calloc(nmemb, size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
                         nmemb, size);
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
+char *util_strdup(char *string) {
+    char *p;
+    if ((p = strdup(string)) == NULL) {
+        fprintf(stderr, "Failed to allocate duplicate %s.\n", string);
         exit(EXIT_FAILURE);
     }
     return p;
