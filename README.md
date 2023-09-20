@@ -38,8 +38,10 @@ will take place when you save and exit.
   do not correpond to existing files will generate errors while renaming
 - Filenames `.` and `..` are ignored, as well as any filename
   which starts with `..`, even when listen in `<files.txt>`
-- Filenames are normalized (`./` are removed, consecutive slashes are
-  bundled, and trailing slashes are removed)
+- Filenames are normalized
+    * `./` at beginning of filenames are removed
+    * consecutive slashes (`/`) are bundled together
+    * trailing slashes (`/`) are removed
 - Repeated filenames in <files.txt> are removed.
  
 ## Install
