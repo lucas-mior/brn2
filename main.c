@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
             brn2_usage(stdout);
         }
     }
-    if (optind < argc && !strcmp(argv[optind+1], "--")) {
+    if (optind < (argc-1) && !strcmp(argv[optind+1], "--")) {
         optind += 1;
     }
 
