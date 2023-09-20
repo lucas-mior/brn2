@@ -41,13 +41,13 @@ int main(int argc, char **argv) {
     while ((opt = getopt_long(argc, argv, "hq", long_options, NULL)) != -1) {
         optind += 1;
         switch (opt) {
+        case '?':
+            brn2_usage(stdout);
         case 'h':
             brn2_usage(stdout);
         case 'q':
             quiet = true;
             break;
-        case '?':
-            brn2_usage(stdout);
         }
     }
     if (optind < (argc-1) && !strcmp(argv[optind+1], "--")) {
