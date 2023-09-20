@@ -33,6 +33,7 @@ uint32 hash_function(char *, const uint32);
 bool hash_set_insert(HashSet *, char *, const uint32, const uint32);
 bool hash_set_insert_pre_calc(HashSet *, char *, const uint32, const uint32, const uint32);
 bool hash_set_remove(HashSet *, char *, const uint32);
+bool hash_set_remove_pre_calc(HashSet *, char *, const uint32, const uint32);
 void hash_set_print_summary(HashSet *);
 void hash_set_print(HashSet *, bool);
 uint32 *hash_set_lookup(HashSet *, char *, const uint32);

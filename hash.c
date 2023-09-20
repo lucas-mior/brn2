@@ -145,6 +145,10 @@ bool hash_set_insert_pre_calc(HashSet *set, char *key,
 bool hash_set_remove(HashSet *set, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % set->capacity;
+    return hash_set_remove_pre_calc(set, key, hash, index);
+}
+
+bool hash_set_remove_pre_calc(HashSet *set, char *key, const uint32 hash, const uint32 index) {
     Bucket *iterator = &(set->array[index]);
     Bucket *previous;
 
