@@ -37,9 +37,8 @@ void *util_malloc(const size_t size) {
 void *util_realloc(void *old, const size_t size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
-        if (old)
-            fprintf(stderr, "Reallocating from: %p\n", old);
+        fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
+        fprintf(stderr, "Reallocating from: %p\n", old);
         exit(EXIT_FAILURE);
     }
     return p;

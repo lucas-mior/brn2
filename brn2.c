@@ -127,9 +127,8 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
-    if (capacity == 0) {
+    if (capacity == 0)
         capacity = 128;
-    }
 
     list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
     while (!feof(lines)) {
@@ -170,11 +169,10 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
 
 bool is_pwd_or_parent(char *filename) {
     if (filename[0] == '.') {
-        if ((filename[1] == '.') || (filename[1] == '\0')) {
+        if ((filename[1] == '.') || (filename[1] == '\0'))
             return true;
-        } else if ((filename[1] == '/') && (filename[2] == '\0')) {
+        else if ((filename[1] == '/') && (filename[2] == '\0'))
             return true;
-        }
     }
     return false;
 }
@@ -216,11 +214,10 @@ bool brn2_check_repeated(FileList *list) {
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             slices[i].start = i*range;
-            if (i == nthreads - 1) {
+            if (i == nthreads - 1)
                 slices[i].end = list->length;
-            } else {
+            else
                 slices[i].end = (i + 1)*range;
-            }
             slices[i].list = list;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
@@ -303,11 +300,10 @@ uint32 brn2_get_number_changes(FileList *old, FileList *new) {
     for (uint32 i = 0; i < old->length; i += 1) {
         FileName oldfile = old->files[i];
         FileName newfile = new->files[i];
-        if (oldfile.length != newfile.length) {
+        if (oldfile.length != newfile.length)
             number += 1;
-        } else if (memcmp(oldfile.name, newfile.name, oldfile.length)) {
+        else if (memcmp(oldfile.name, newfile.name, oldfile.length))
             number += 1;
-        }
     }
     return number;
 }
@@ -325,11 +321,10 @@ uint32 brn2_execute(FileList *old, FileList *new,
     HashMap *names_renamed = hash_map_create(number_changes);
     HashMap *indexes_exchange = hash_map_create(number_changes);
 
-    if (quiet) {
+    if (quiet)
         print = noop;
-    } else {
+    else
         print = printf;
-    }
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;

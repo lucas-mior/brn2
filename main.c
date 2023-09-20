@@ -52,17 +52,15 @@ int main(int argc, char **argv) {
             break;
         }
     }
-    if (optind < argc && !strcmp(argv[optind], "--")) {
+    if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
-    }
 
-    if (argc - optind > 1) {
+    if (argc - optind > 1)
         old = brn2_list_from_args(argc - optind, &argv[optind]);
-    } else if (argc - optind == 1) {
+    else if (argc - optind == 1)
         old = brn2_list_from_lines(argv[optind], 0);
-    } else {
+    else
         old = brn2_list_from_dir(".");
-    }
 
     brn2_normalize_names(old);
 
