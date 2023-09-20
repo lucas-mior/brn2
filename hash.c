@@ -75,22 +75,24 @@ void hash_set_destroy(HashSet *set) {
     return;
 }
 
-uint32 hash_function(char *str, const uint32 length) {
+uint32 hash_function(char *str) {
     /* djb2 hash function */
     uint32 hash = 5381;
-    for (uint32 i = 0; i < length; i += 1)
-        hash = ((hash << 5) + hash) + (uint32) str[i];
+    char c;
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c;
+    }
     return hash;
 }
 
-bool hash_set_insert(HashSet *set, char *key, const uint32 key_length, const uint32 value) {
-    uint32 hash = hash_function(key, key_length);
+bool hash_set_insert(HashSet *set, char *key, const uint32 value) {
+    uint32 hash = hash_function(key);
     uint32 index = hash % set->capacity;
     return hash_set_insert_pre_calc(set, key, hash, index, value);
 }
 
-uint32 *hash_set_lookup(HashSet *set, char *key, const uint32 key_length) {
-    uint32 hash = hash_function(key, key_length);
+uint32 *hash_set_lookup(HashSet *set, char *key) {
+    uint32 hash = hash_function(key);
     uint32 index = hash % set->capacity;
     return hash_set_lookup_pre_calc(set, key, hash, index);
 }
@@ -146,8 +148,8 @@ bool hash_set_insert_pre_calc(HashSet *set, char *key,
     return true;
 }
 
-bool hash_set_remove(HashSet *set, char *key, const uint32 key_length) {
-    uint32 hash = hash_function(key, key_length);
+bool hash_set_remove(HashSet *set, char *key) {
+    uint32 hash = hash_function(key);
     uint32 index = hash % set->capacity;
     return hash_set_remove_pre_calc(set, key, hash, index);
 }
