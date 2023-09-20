@@ -84,6 +84,6 @@ void brn2_normalize_names(FileList *);
 bool brn2_check_repeated(FileList *);
 bool brn2_verify(FileList *, FileList *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
-uint32 brn2_execute(FileList *, FileList *, const uint32);
+uint32 brn2_execute(FileList *, FileList *, const uint32, bool);
 void brn2_free_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));

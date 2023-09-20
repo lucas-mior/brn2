@@ -26,7 +26,7 @@ LDFLAGS += -lm
 bear: Makefile
 	bear -- make > compile_commands.json 
 
-release: CFLAGS += -O2
+# release: CFLAGS += -O2
 release: brn2
 
 debug: CFLAGS += -g -fsanitize=undefined
