@@ -37,10 +37,8 @@ int main(int argc, char **argv) {
     bool status = true;
     bool quiet = false;
     int opt;
-    int optind = 0;
 
     while ((opt = getopt_long(argc, argv, "hqv", long_options, NULL)) != -1) {
-        optind += 1;
         switch (opt) {
         case '?':
             brn2_usage(stdout);
@@ -54,14 +52,14 @@ int main(int argc, char **argv) {
             break;
         }
     }
-    if (optind < (argc-1) && !strcmp(argv[optind+1], "--")) {
+    if (optind < argc && !strcmp(argv[optind], "--")) {
         optind += 1;
     }
 
-    if (argc - optind > 2) {
+    if (argc - optind > 1) {
         old = brn2_list_from_args(argc - optind, &argv[optind]);
-    } else if (argc - optind == 2) {
-        old = brn2_list_from_lines(argv[optind+1], 0);
+    } else if (argc - optind == 1) {
+        old = brn2_list_from_lines(argv[optind], 0);
     } else {
         old = brn2_list_from_dir(".");
     }
