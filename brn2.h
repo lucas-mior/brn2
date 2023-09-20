@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <threads.h>
 #include <linux/limits.h>
+#include <getopt.h>
 
 #include "util.h"
 
