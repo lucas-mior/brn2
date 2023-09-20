@@ -80,7 +80,7 @@ uint32 hash_function(char *str) {
     uint32 hash = 5381;
     char c;
     while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
+        hash = ((hash << 5) + hash) + (uint32) c;
     }
     return hash;
 }
