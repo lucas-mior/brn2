@@ -317,17 +317,17 @@ int noop(const char *restrict unused, ...) {
 }
 
 uint32 brn2_execute(FileList *old, FileList *new,
-                    const uint32 number_changes, bool verbose) {
+                    const uint32 number_changes, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
-    int (*verbose2)(const char *restrict, ...);
+    int (*print)(const char *restrict, ...);
     HashMap *names_renamed = hash_map_create(number_changes);
     HashMap *indexes_exchange = hash_map_create(number_changes);
 
-    if (verbose) {
-        verbose2 = printf;
+    if (quiet) {
+        print = noop;
     } else {
-        verbose2 = noop;
+        print = printf;
     }
 
     for (uint32 i = 0; i < length; i += 1) {
@@ -356,7 +356,7 @@ uint32 brn2_execute(FileList *old, FileList *new,
             if (hash_map_insert_pre_calc(names_renamed, *newname,
                                          newhash, newindex, 0))
                 number_renames += 1;
-            verbose2(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
             index = hash_map_lookup_pre_calc(indexes_exchange, *newname,
                                              newhash, newindex);
@@ -401,7 +401,7 @@ uint32 brn2_execute(FileList *old, FileList *new,
         } else {
             if (hash_map_insert(names_renamed, *oldname, 0))
                 number_renames += 1;
-            verbose2("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
+            print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
     hash_map_destroy(indexes_exchange);
