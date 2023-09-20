@@ -20,7 +20,7 @@ else
 	CFLAGS += -Wextra -Wall
 endif
 
-CFLAGS += -std=c99
+CFLAGS += -std=c99 -D_DEFAULT_SOURCE
 LDFLAGS += -lm
 
 bear: Makefile
