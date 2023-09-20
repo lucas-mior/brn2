@@ -19,6 +19,13 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include <getopt.h>
+
+struct option long_options[] = {
+    {"help", no_argument, NULL, 'h'},
+    {"quiet", no_argument, NULL, 'q'},
+    {NULL, 0, NULL, 0}
+};
 
 int main(int argc, char **argv) {
     File buffer;
@@ -27,20 +34,34 @@ int main(int argc, char **argv) {
     char *EDITOR;
     const char *tempdir = "/tmp";
     bool status = true;
+    bool quiet = false;
+    int opt;
+    int optind = 0;
 
-    if (argc >= 3) {
-        old = brn2_list_from_args(argc, argv);
-    } else if (argc == 2) {
-        if (!strcmp(argv[1], "--help")) {
+    while ((opt = getopt_long(argc, argv, "hq", long_options, NULL)) != -1) {
+        optind += 1;
+        switch (opt) {
+        case 'h':
             brn2_usage(stdout);
-        } else if (!strcmp(argv[1], "-h")) {
+        case 'q':
+            quiet = true;
+            break;
+        case '?':
             brn2_usage(stdout);
-        } else {
-            old = brn2_list_from_lines(argv[1], 0);
         }
+    }
+    if (optind < argc && !strcmp(argv[optind+1], "--")) {
+        optind += 1;
+    }
+
+    if (argc - optind > 2) {
+        old = brn2_list_from_args(argc - optind, &argv[optind]);
+    } else if (argc - optind == 2) {
+        old = brn2_list_from_lines(argv[optind+1], 0);
     } else {
         old = brn2_list_from_dir(".");
     }
+
     brn2_normalize_names(old);
 
     if (!(EDITOR = getenv("EDITOR"))) {
@@ -123,7 +144,7 @@ int main(int argc, char **argv) {
         uint32 number_renames = 0;
 
         if (number_changes)
-            number_renames = brn2_execute(old, new, number_changes, false);
+            number_renames = brn2_execute(old, new, number_changes, quiet);
         if (number_changes != number_renames) {
             fprintf(stderr, "%u name%.*s changed but %u file%.*s renamed. "
                             "Check your files.\n",
