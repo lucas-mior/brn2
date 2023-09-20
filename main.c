@@ -19,6 +19,7 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include "util.h"
 
 static struct option long_options[] = {
     {"help", no_argument, NULL, 'h'},

@@ -19,6 +19,7 @@
 
 #include "brn2.h"
 #include "hash.h"
+#include "util.h"
 
 void brn2_normalize_names(FileList *list) {
     for (uint32 i = 0; i < list->length; i += 1) {
