@@ -35,7 +35,8 @@ void brn2_normalize_names(FileList *list) {
         while (name[j] != '\0') {
             while (name[j] == '/' && name[j + 1] == '/') {
                 *length -= 1;
-                memmove(&name[j], &name[j + 1], (*length - j) * sizeof (*name));
+                memmove(&name[j], &name[j + 1],
+                        (*length - j) * sizeof (*name));
             }
             j += 1;
         }
@@ -59,7 +60,7 @@ FileList *brn2_list_from_args(int argc, char **argv) {
     FileList *list;
     uint32 length = 0;
 
-    list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, argc - 1));
+    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, argc - 1));
 
     for (int i = 1; i < argc; i += 1) {
         char *name = argv[i];
@@ -84,7 +85,8 @@ FileList *brn2_list_from_dir(char *directory) {
 
     int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
-        fprintf(stderr, "Error scanning \"%s\": %s\n", directory, strerror(errno));
+        fprintf(stderr, "Error scanning \"%s\": %s\n",
+                        directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (n <= 2) {
@@ -92,7 +94,7 @@ FileList *brn2_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, n - 2));
+    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -128,14 +130,15 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
         capacity = 128;
     }
 
-    list = util_malloc(STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
     while (!feof(lines)) {
         char buffer[PATH_MAX];
         uint32 last;
 
         if (length >= capacity) {
             capacity *= 2;
-            list = util_realloc(list, STRUCT_ARRAY_SIZE(FileList, FileName, capacity));
+            list = util_realloc(list,
+                                STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
 
         if (!fgets(buffer, sizeof (buffer), lines))
@@ -158,7 +161,7 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
         fprintf(stderr, "Empty list. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    list = util_realloc(list, STRUCT_ARRAY_SIZE(FileList, FileName, length));
+    list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
 
     return list;
@@ -267,7 +270,7 @@ bool brn2_check_repeated(FileList *list) {
                 if (file_i.length != file_j.length)
                     continue;
                 if (!memcmp(file_i.name, file_j.name, file_i.length)) {
-                    fprintf(stderr, RED"\"%s\""RESET 
+                    fprintf(stderr, RED"\"%s\""RESET
                                     " appears more than once in the buffer\n",
                                     file_i.name);
                     repeated = true;
@@ -283,7 +286,7 @@ bool brn2_verify(FileList *old, FileList *new) {
 
     if (old->length != new->length) {
         fprintf(stderr, "You are renaming "RED"%u"RESET" file%.*s "
-                        "but buffer contains "RED"%u"RESET" file name%.*s\n", 
+                        "but buffer contains "RED"%u"RESET" file name%.*s\n",
                         old->length, old->length != 1, "s",
                         new->length, new->length != 1, "s");
         return false;
@@ -308,7 +311,8 @@ uint32 brn2_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
-uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
+uint32 brn2_execute(FileList *old, FileList *new,
+                    const uint32 number_changes) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     HashSet *names_renamed = hash_set_create(number_changes);
@@ -329,23 +333,29 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
             continue;
 
 #ifdef __linux__
-        renamed = renameat2(AT_FDCWD, *oldname, 
+        renamed = renameat2(AT_FDCWD, *oldname,
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             uint32 *index;
 
-            if (hash_set_insert_pre_calc(names_renamed, *oldname, oldhash, oldindex, 0))
+            if (hash_set_insert_pre_calc(names_renamed, *oldname,
+                                         oldhash, oldindex, 0))
                 number_renames += 1;
-            if (hash_set_insert_pre_calc(names_renamed, *newname, newhash, newindex, 0))
+            if (hash_set_insert_pre_calc(names_renamed, *newname,
+                                         newhash, newindex, 0))
                 number_renames += 1;
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
-            if ((index = hash_set_lookup_pre_calc(indexes_exchange, *newname, newhash, newindex))) {
+            index = hash_set_lookup_pre_calc(indexes_exchange, *newname,
+                                             newhash, newindex);
+            if (index) {
                 FileName *file_j = &(old->files[*index]);
                 SWAP(char *, file_j->name, *oldname);
                 SWAP(uint32, file_j->length, *oldlength);
-                hash_set_remove_pre_calc(indexes_exchange, *newname, newhash, newindex);
-                hash_set_insert_pre_calc(indexes_exchange, *oldname, oldhash, oldindex, *index);
+                hash_set_remove_pre_calc(indexes_exchange, *newname,
+                                         newhash, newindex);
+                hash_set_insert_pre_calc(indexes_exchange, *oldname,
+                                         oldhash, oldindex, *index);
                 continue;
             }
             for (uint32 j = i + 1; j < length; j += 1) {
@@ -365,15 +375,15 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
 #else
         (void) newlength;
         if (!access(*newname, F_OK)) {
-            fprintf(stderr, "Can't rename \"%s\" to \"%s\". File already exists.\n",
-                            *oldname, *newname);
+            fprintf(stderr, "Can't rename \"%s\" to \"%s\": "
+                            "File already exists.\n", *oldname, *newname);
             continue;
         }
 #endif
         renamed = rename(*oldname, *newname);
         if (renamed < 0) {
             printf("Error renaming "
-                    RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n", 
+                    RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n",
                     *oldname, *newname);
             printf("%s\n", strerror(errno));
             continue;
