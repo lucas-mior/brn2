@@ -231,7 +231,7 @@ bool brn2_check_repeated(FileList *list) {
             FileName newfile = list->files[i];
 
             if (!hash_set_insert_pre_calc(repeated_set, newfile.name,
-                                            hashes[i], indexes[i])) {
+                                            hashes[i], indexes[i], 0)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -250,7 +250,7 @@ bool brn2_check_repeated(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
 
-            if (!hash_set_insert(repeated_set, newfile.name, newfile.length)) {
+            if (!hash_set_insert(repeated_set, newfile.name, newfile.length, 0)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -327,9 +327,10 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_set_insert(names_renamed, *oldname, *oldlength))
+            HashSet *lookup = hash_set_create(*oldlength);
+            if (hash_set_insert(names_renamed, *oldname, *oldlength, 0))
                 number_renames += 1;
-            if (hash_set_insert(names_renamed, *newname, *newlength))
+            if (hash_set_insert(names_renamed, *newname, *newlength, 0))
                 number_renames += 1;
 
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
@@ -362,7 +363,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_set_insert(names_renamed, *oldname, *oldlength))
+            if (hash_set_insert(names_renamed, *oldname, *oldlength, 0))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
