@@ -46,7 +46,7 @@ static void brn2_test(void **state) {
     FileList *list1 = brn2_list_from_dir(".");
     FileList *list2 = brn2_list_from_lines(file, 0);
 
-    assert_int_equal(list1->length, list2->length);
+    assert_true(list1->length == list2->length);
 
     for (uint32 i = 0; i < list1->length; i += 1) {
         assert_true(contains_filename(list2, list1->files[i]));
