@@ -33,8 +33,6 @@
 #include <linux/limits.h>
 #include <getopt.h>
 
-#include "util.h"
-
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
