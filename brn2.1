@@ -4,42 +4,49 @@
 brn2 \- Bulk Rename Files
 
 .SH SYNOPSIS
-.BR brn2 " ["\-h | \-\-help | <filename> | file1 file2 ... ]
+brn2 [OPTIONS] [<filename> | <file1> <file2> ...]
 
 .SH DESCRIPTION
-.BR "brn2 is a command line tool to easily mass-rename files in your preferred text editor (e.g., vim)."
+brn2 is a command line tool to easily mass-rename files in your preferred text editor (e.g., vim).
 
-.SH USAGE
+.SH OPTIONS
 .TP
-.BR "brn2 --help"
+.BR -h
+.BR --help
 Display the help message.
 
 .TP
-.BR brn2
-Rename filenames in the current working directory.
+.BR -q
+.BR --quiet
+Quiet mode; suppress output messages.
 
 .TP
-.BR "brn2 <filename>"
+.BR -v
+.BR --verbose
+Verbose mode; output messages (this is the default).
+
+.SH USAGE
+.TP
+.BR brn2
+Rename filenames in the current working directory. This will open the filenames in your text editor of choice. You can then edit the filenames in the buffer, and the changes will take place when you save and exit.
+
+.TP
+.BR brn2 " <filename>"
 Rename filenames listed in the specified file.
 
 .TP
-.BR "brn2 <file1> <file2> ..."
+.BR brn2 " <file1> <file2> ..."
 Rename filenames passed as arguments.
-
-.BR brn2
-will open the filenames in your text editor of choice. You can then edit the filenames in the buffer, and the changes will take place when you save and exit.
 
 .SH NOTES
 .TP
 By default, brn2 uses the $EDITOR environment variable. If that is not set, it defaults to vim.
 
 .TP
-.BR brn2
-will not work for more than 2^32 renames at once.
+.brn2 will not work for more than 2^32 renames at once.
 
 .TP
-.BR brn2
-will not work for filenames longer than PATH_MAX (typically 4096) characters when reading from <files.txt>. Newlines in filenames are not allowed.
+.brn2 will not work for filenames longer than PATH_MAX (typically 4096) characters when reading from <files.txt>. Newlines in filenames are not allowed.
 
 .TP
 Filenames listed in <files.txt> or given as arguments that do not correspond to existing files will generate errors while renaming.
@@ -49,17 +56,16 @@ Filenames . and .. are ignored, as well as any filename that starts with .. even
 
 .SH CHANGES OVER ORIGINAL BRN
 .TP
-.BR "option to rename files listed in a file given as the first argument"
+Option to rename files listed in a file given as the first argument
 
 .TP
-.BR "option to rename files passed as arguments"
+Option to rename files passed as arguments
 
 .TP
-.BR "it prints renamed files"
+It prints renamed files
 
 .TP
-.BR "faster algorithm to check for duplicated filenames"
+Faster algorithm to check for duplicated filenames
 
 .SH LICENSE
-.BR brn2
-is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+.brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
