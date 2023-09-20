@@ -418,10 +418,17 @@ void brn2_free_list(FileList *list) {
 }
 
 void brn2_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [-h | --help | <files.txt> | [file1 file2 ... ]]\n");
-    fprintf(stream, "No arguments        : rename filenames in current working directory.\n");
-    fprintf(stream, "Single argument     : rename filenames listed in this argument.\n");
-    fprintf(stream, "2 or more arguments : rename filenames passed as arguments.\n");
-    fprintf(stream, "-h | --help         : display this help message.\n");
-    exit((int) (stream != stdout));
+    fprintf(stream, "usage: brn2 [-h | -q | <files.txt> | [file1 file2 ... ]]\n");
+    fprintf(stream, "Rename filenames in the current working directory or based on provided arguments.\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "Options:\n");
+    fprintf(stream, "  -h, --help  : Display this help message.\n");
+    fprintf(stream, "  -q, --quiet : Quiet mode; suppress output messages.\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "Arguments:\n");
+    fprintf(stream, "  No arguments        : Rename filenames in the current working directory.\n");
+    fprintf(stream, "  Single argument     : Rename filenames listed in this argument.\n");
+    fprintf(stream, "  2 or more arguments : Rename filenames passed as arguments.\n");
+    fprintf(stream, "\n");
+    exit((int)(stream != stdout));
 }
