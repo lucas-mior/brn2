@@ -190,7 +190,7 @@ int create_hashes(void *arg) {
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->list->files[i];
-        slice->hashes[i] = hash_function(newfile.name, newfile.length);
+        slice->hashes[i] = hash_function(newfile.name);
         slice->indexes[i] = slice->hashes[i] % slice->set_capacity;
     }
     thrd_exit(0);
@@ -250,7 +250,7 @@ bool brn2_check_repeated(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
 
-            if (!hash_set_insert(repeated_set, newfile.name, newfile.length, 0)) {
+            if (!hash_set_insert(repeated_set, newfile.name, 0)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -329,9 +329,9 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             uint32 *index;
-            uint32 newhash = hash_function(*newname, *newlength);
+            uint32 newhash = hash_function(*newname);
             uint32 newindex = newhash % hash_set_capacity(indexes_exchange);
-            uint32 oldhash = hash_function(*oldname, *oldlength);
+            uint32 oldhash = hash_function(*oldname);
             uint32 oldindex = oldhash % hash_set_capacity(indexes_exchange);
 
             if (hash_set_insert_pre_calc(names_renamed, *oldname, oldhash, oldindex, 0))
@@ -345,7 +345,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                 SWAP(char *, file_j->name, *oldname);
                 SWAP(uint32, file_j->length, *oldlength);
                 hash_set_remove_pre_calc(indexes_exchange, *newname, newhash, newindex);
-                hash_set_insert(indexes_exchange, file_j->name, file_j->length, *index);
+                hash_set_insert(indexes_exchange, file_j->name, *index);
                 continue;
             }
             for (uint32 j = i + 1; j < length; j += 1) {
@@ -354,11 +354,11 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                     if (!memcmp(file_j->name, *newname, *newlength)) {
                         SWAP(char *, file_j->name, *oldname);
                         SWAP(uint32, file_j->length, *oldlength);
-                        hash_set_insert(indexes_exchange, *oldname, *oldlength, j);
+                        hash_set_insert(indexes_exchange, *oldname, j);
                         break;
                     }
                 }
-                hash_set_insert(indexes_exchange, file_j->name, file_j->length, j);
+                hash_set_insert(indexes_exchange, file_j->name, j);
             }
             continue;
         }
@@ -378,7 +378,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
             printf("%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_set_insert(names_renamed, *oldname, *oldlength, 0))
+            if (hash_set_insert(names_renamed, *oldname, 0))
                 number_renames += 1;
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }

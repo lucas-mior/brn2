@@ -29,14 +29,14 @@ typedef uint64_t uint64;
 
 HashSet *hash_set_create(uint32);
 void hash_set_destroy(HashSet *);
-uint32 hash_function(char *, const uint32);
-bool hash_set_insert(HashSet *, char *, const uint32, const uint32);
+uint32 hash_function(char *);
+bool hash_set_insert(HashSet *, char *, const uint32);
 bool hash_set_insert_pre_calc(HashSet *, char *, const uint32, const uint32, const uint32);
-bool hash_set_remove(HashSet *, char *, const uint32);
+bool hash_set_remove(HashSet *, char *);
 bool hash_set_remove_pre_calc(HashSet *, char *, const uint32, const uint32);
 void hash_set_print_summary(HashSet *);
 void hash_set_print(HashSet *, bool);
-uint32 *hash_set_lookup(HashSet *, char *, const uint32);
+uint32 *hash_set_lookup(HashSet *, char *);
 uint32 *hash_set_lookup_pre_calc(HashSet *, char *, const uint32, const uint32);
 uint32 hash_set_capacity(HashSet *);
 uint32 hash_set_length(HashSet *);

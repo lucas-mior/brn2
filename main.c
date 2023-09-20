@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
 
-            while (!hash_set_insert(repeated, file->name, file->length, 0)) {
+            while (!hash_set_insert(repeated, file->name, 0)) {
                 fprintf(stderr, RED"\"%s\""RESET" repeated in the buffer. "
                                 "Removing...\n", file->name);
                 old->length -= 1;
