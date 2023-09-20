@@ -185,7 +185,7 @@ typedef struct Slice {
     uint32 unused;
 } Slice;
 
-int create_hashes(void *arg) {
+static int brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -221,7 +221,7 @@ bool brn2_check_repeated(FileList *list) {
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
             slices[i].set_capacity = hash_set_capacity(repeated_set);
-            thrd_create(&threads[i], create_hashes, (void *) &slices[i]);
+            thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
         }
 
         for (uint32 i = 0; i < nthreads; i += 1)

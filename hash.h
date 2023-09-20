@@ -18,6 +18,9 @@
 #include <stdbool.h>
 
 typedef struct HashSet HashSet;
+
+#ifndef INTEGERS
+#define INTEGERS
 typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
@@ -26,6 +29,7 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
+#endif
 
 HashSet *hash_set_create(uint32);
 void hash_set_destroy(HashSet *);
