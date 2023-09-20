@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct HashSet HashSet;
+typedef struct HashMap HashMap;
 
 #ifndef INTEGERS
 #define INTEGERS
@@ -32,19 +32,19 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 #endif
 
-HashSet *hash_set_create(uint32);
-void hash_set_destroy(HashSet *);
+HashMap *hash_map_create(uint32);
+void hash_map_destroy(HashMap *);
 uint32 hash_function(char *);
-bool hash_set_insert(HashSet *, char *, const uint32);
-bool hash_set_insert_pre_calc(HashSet *, char *,
+bool hash_map_insert(HashMap *, char *, const uint32);
+bool hash_map_insert_pre_calc(HashMap *, char *,
                               const uint32, const uint32, const uint32);
-bool hash_set_remove(HashSet *, char *);
-bool hash_set_remove_pre_calc(HashSet *, char *, const uint32, const uint32);
-void hash_set_print_summary(HashSet *);
-void hash_set_print(HashSet *, bool);
-uint32 *hash_set_lookup(HashSet *, char *);
-uint32 *hash_set_lookup_pre_calc(HashSet *, char *, const uint32, const uint32);
-uint32 hash_set_capacity(HashSet *);
-uint32 hash_set_length(HashSet *);
-uint32 hash_set_collisions(HashSet *);
-uint32 hash_set_expected_collisions(HashSet *);
+bool hash_map_remove(HashMap *, char *);
+bool hash_map_remove_pre_calc(HashMap *, char *, const uint32, const uint32);
+void hash_map_print_summary(HashMap *);
+void hash_map_print(HashMap *, bool);
+uint32 *hash_map_lookup(HashMap *, char *);
+uint32 *hash_map_lookup_pre_calc(HashMap *, char *, const uint32, const uint32);
+uint32 hash_map_capacity(HashMap *);
+uint32 hash_map_length(HashMap *);
+uint32 hash_map_collisions(HashMap *);
+uint32 hash_map_expected_collisions(HashMap *);
