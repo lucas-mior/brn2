@@ -13,7 +13,7 @@ util.o: util.c util.h
 brn2.o: brn2.c brn2.h hash.h
 hash.o: hash.c hash.h
 
-CC=cc
+CC=clang
 ifeq ($(CC),clang)
 	CFLAGS += -Weverything -Wno-unsafe-buffer-usage
 else
