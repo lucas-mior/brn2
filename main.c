@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     {
         char buffer2[BUFSIZ];
         int n;
-        HashSet *repeated = hash_set_create(old->length);
+        HashMap *repeated = hash_map_create(old->length);
 
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
 
-            while (!hash_set_insert(repeated, file->name, 0)) {
+            while (!hash_map_insert(repeated, file->name, 0)) {
                 fprintf(stderr, RED"\"%s\""RESET" repeated in the buffer. "
                                 "Removing...\n", file->name);
                 old->length -= 1;
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
             file->name[file->length] = '\0';
         }
         close:
-        hash_set_destroy(repeated);
+        hash_map_destroy(repeated);
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
