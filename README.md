@@ -7,12 +7,19 @@ vim).
  
 ## Usage
 ```
-brn2 --help
-usage: brn2 [-h | --help | <filename> | file1 file2 ... ] 
-No arguments        : rename filenames in current working directory. 
-Single argument     : rename filenames listed in this argument. 
-2 or more arguments : rename filenames passed as arguments. 
--h | --help         : display this help message. 
+$ brn2 --help
+usage: brn2 [-h | -q | -v | <files.txt> | [file1 file2 ... ]]
+Rename filenames in the current working directory or based on provided arguments.
+
+Options:
+  -h, --help    : Display this help message.
+  -q, --quiet   : Quiet mode; suppress output messages.
+  -v, --verbose : Verbose mode (default); output messages.
+
+Arguments:
+  No arguments        : Rename filenames in the current working directory.
+  Single argument     : Rename filenames listed in this argument.
+  2 or more arguments : Rename filenames passed as arguments.
 ```
 brn2 will open the filenames in your text editor of choice.
 You can then edit the filenames in the buffer and the changes
