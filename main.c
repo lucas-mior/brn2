@@ -33,10 +33,11 @@ int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
     char *EDITOR;
-    const char *tempdir = "/tmp";
-    bool status = true;
-    bool quiet = false;
     int opt;
+
+    const char *tempdir = "/tmp";
+    int status = EXIT_SUCCESS;
+    bool quiet = false;
 
     while ((opt = getopt_long(argc, argv, "hqv", long_options, NULL)) != -1) {
         switch (opt) {
@@ -150,7 +151,7 @@ int main(int argc, char **argv) {
                             "Check your files.\n",
                             number_changes, number_changes != 1, "s",
                             number_renames, number_renames != 1, "s");
-            status = false;
+            status = EXIT_FAILURE;
         } else {
             fprintf(stdout, "%u file%.*s renamed\n",
                             number_renames, number_renames != 1, "s");
@@ -160,5 +161,5 @@ int main(int argc, char **argv) {
     brn2_free_list(old);
     brn2_free_list(new);
     unlink(buffer.name);
-    exit(!status);
+    exit(status);
 }
