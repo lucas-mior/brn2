@@ -92,6 +92,10 @@ bool hash_set_insert(HashSet *set, char *key, const uint32 key_length, const uin
 uint32 *hash_set_lookup(HashSet *set, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % set->capacity;
+    return hash_set_lookup_pre_calc(set, key, hash, index);
+}
+
+uint32 *hash_set_lookup_pre_calc(HashSet *set, char *key, const uint32 hash, const uint32 index) {
     Bucket *iterator = &(set->array[index]);
 
     if (iterator->key == NULL)
