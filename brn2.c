@@ -312,6 +312,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     HashSet *names_renamed = hash_set_create(number_changes);
+    HashSet *indexes_exchange = hash_set_create(length);
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
@@ -327,22 +328,33 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
         renamed = renameat2(AT_FDCWD, *oldname, 
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            HashSet *lookup = hash_set_create(*oldlength);
+            uint32 *index;
+
             if (hash_set_insert(names_renamed, *oldname, *oldlength, 0))
                 number_renames += 1;
             if (hash_set_insert(names_renamed, *newname, *newlength, 0))
                 number_renames += 1;
-
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+
+            if ((index = hash_set_lookup(indexes_exchange, *newname, *newlength))) {
+                FileName *file_j = &(old->files[*index]);
+                SWAP(char *, file_j->name, *oldname);
+                SWAP(uint32, file_j->length, *oldlength);
+                hash_set_remove(indexes_exchange, *newname, *newlength);
+                hash_set_insert(indexes_exchange, file_j->name, file_j->length, *index);
+                continue;
+            }
             for (uint32 j = i + 1; j < length; j += 1) {
                 FileName *file_j = &(old->files[j]);
-                if (file_j->length != *newlength)
-                    continue;
-                if (!memcmp(file_j->name, *newname, *newlength)) {
-                    SWAP(char *, file_j->name, *oldname);
-                    SWAP(uint32, file_j->length, *oldlength);
-                    break;
+                if (file_j->length == *newlength) {
+                    if (!memcmp(file_j->name, *newname, *newlength)) {
+                        SWAP(char *, file_j->name, *oldname);
+                        SWAP(uint32, file_j->length, *oldlength);
+                        hash_set_insert(indexes_exchange, *oldname, *oldlength, j);
+                        break;
+                    }
                 }
+                hash_set_insert(indexes_exchange, file_j->name, file_j->length, j);
             }
             continue;
         }
@@ -354,7 +366,6 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
             continue;
         }
 #endif
-
         renamed = rename(*oldname, *newname);
         if (renamed < 0) {
             printf("Error renaming "
@@ -368,6 +379,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
             printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
+    hash_set_destroy(indexes_exchange);
     hash_set_destroy(names_renamed);
     return number_renames;
 }

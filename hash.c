@@ -89,22 +89,17 @@ bool hash_set_insert(HashSet *set, char *key, const uint32 key_length, const uin
     return hash_set_insert_pre_calc(set, key, hash, index, value);
 }
 
-uint32 hash_set_lookup_or_insert(HashSet *set, char *key, const uint32 key_length, const uint32 value) {
+uint32 *hash_set_lookup(HashSet *set, char *key, const uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash % set->capacity;
     Bucket *iterator = &(set->array[index]);
 
-    if (iterator->key == NULL) {
-        iterator->key = key;
-        iterator->hash = hash;
-        iterator->value = value;
-        set->length += 1;
-        return 0;
-    }
+    if (iterator->key == NULL)
+        return NULL;
 
     do {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key))
-            return iterator->value;
+            return &(iterator->value);
 
         if (iterator->next)
             iterator = iterator->next;
@@ -112,12 +107,7 @@ uint32 hash_set_lookup_or_insert(HashSet *set, char *key, const uint32 key_lengt
             break;
     } while (true);
 
-    set->collisions += 1;
-    iterator->next = util_calloc(1, sizeof (*iterator));
-    iterator->next->key = key;
-    iterator->next->hash = hash;
-    iterator->next->value = value;
-    return 0;
+    return NULL;
 }
 
 bool hash_set_insert_pre_calc(HashSet *set, char *key,

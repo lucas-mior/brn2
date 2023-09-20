@@ -35,7 +35,7 @@ bool hash_set_insert_pre_calc(HashSet *, char *, const uint32, const uint32, con
 bool hash_set_remove(HashSet *, char *, const uint32);
 void hash_set_print_summary(HashSet *);
 void hash_set_print(HashSet *, bool);
-uint32 hash_set_lookup(HashSet *, char *, const uint32);
+uint32 *hash_set_lookup(HashSet *, char *, const uint32);
 uint32 hash_set_capacity(HashSet *);
 uint32 hash_set_length(HashSet *);
 uint32 hash_set_collisions(HashSet *);
