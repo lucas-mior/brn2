@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <stdarg.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <stdlib.h>
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
