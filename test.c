@@ -10,7 +10,6 @@
 #include "util.h"
 
 static void hash_test(void **state) {
-    (void) state;
     HashMap *set = hash_map_create(1000);
     assert_non_null(set);
     assert_true(hash_map_capacity(set) >= 1000);
@@ -28,6 +27,8 @@ static void hash_test(void **state) {
 
     assert_true(hash_map_length(set) == 1);
     hash_map_destroy(set);
+    (void) state;
+    return;
 }
 
 static bool contains_filename(FileList *list, FileName file) {
@@ -39,12 +40,13 @@ static bool contains_filename(FileList *list, FileName file) {
 }
 
 static void brn2_test(void **state) {
-    (void) state;
+    FileList *list1;
+    FileList *list2;
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
     system(command);
-    FileList *list1 = brn2_list_from_dir(".");
-    FileList *list2 = brn2_list_from_lines(file, 0);
+    list1 = brn2_list_from_dir(".");
+    list2 = brn2_list_from_lines(file, 0);
 
     assert_true(list1->length == list2->length);
 
@@ -55,6 +57,7 @@ static void brn2_test(void **state) {
     brn2_free_list(list1);
     brn2_free_list(list2);
     unlink(file);
+    (void) state;
 }
 
 int main(void) {
