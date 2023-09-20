@@ -59,7 +59,7 @@ typedef uint64_t uint64;
 #endif
 
 typedef struct File {
-    char name[PATH_MAX-4];
+    char name[PATH_MAX-12];
     int fd;
     FILE *stream;
 } File;
