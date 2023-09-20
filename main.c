@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
                 if (old->length <= i)
                     goto close;
 
-                memmove(file, file+1, (old->length-i) * sizeof(*file));
+                memmove(file, file+1, (old->length - i) * sizeof(*file));
                 file = &(old->files[i]);
             }
             file->name[file->length] = '\n';
