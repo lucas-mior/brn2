@@ -208,11 +208,12 @@ void hash_map_print(HashMap *map, bool verbose) {
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &(map->array[i]);
-        if (iterator->key || verbose) {
+
+        if (iterator->key || verbose)
             printf("\n%03d:", i);
-        } else {
+        else
             continue;
-        }
+
         while (iterator && iterator->key) {
             printf(GREEN" %s"RESET" ->", iterator->key);
             iterator = iterator->next;
