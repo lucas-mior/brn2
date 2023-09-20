@@ -48,3 +48,6 @@ uint32 hash_map_capacity(HashMap *);
 uint32 hash_map_length(HashMap *);
 uint32 hash_map_collisions(HashMap *);
 uint32 hash_map_expected_collisions(HashMap *);
+
+#define hash_set_insert(a, b)          hash_map_insert(a, b, 0)
+#define hash_set_insert_pre_calc(a, b, c, d) hash_map_insert_pre_calc(a, b, c, d, 0)
