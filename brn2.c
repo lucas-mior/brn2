@@ -325,11 +325,11 @@ uint32 brn2_execute(FileList *old, FileList *new,
     HashMap *names_renamed = hash_map_create(number_changes);
     HashMap *indexes_exchange = hash_map_create(number_changes);
 
-    if (quiet) {
-        print = noop;
-    } else {
-        print = printf;
-    }
+    /* if (quiet) { */
+    /*     print = noop; */
+    /* } else { */
+    /*     print = printf; */
+    /* } */
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
@@ -357,7 +357,9 @@ uint32 brn2_execute(FileList *old, FileList *new,
             if (hash_set_insert_pre_calc(names_renamed, *newname,
                                          newhash, newindex))
                 number_renames += 1;
-            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+            if (!quiet) {
+                printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+            }
 
             index = hash_map_lookup_pre_calc(indexes_exchange, *newname,
                                              newhash, newindex);
@@ -402,7 +404,9 @@ uint32 brn2_execute(FileList *old, FileList *new,
         } else {
             if (hash_set_insert(names_renamed, *oldname))
                 number_renames += 1;
-            print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
+            if (!quiet) {
+                printf("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
+            }
         }
     }
     hash_map_destroy(indexes_exchange);
