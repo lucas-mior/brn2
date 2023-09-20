@@ -14,12 +14,18 @@ static void hash_test(void **state) {
     HashSet *set = hash_set_create(1000);
     assert_non_null(set);
     assert_true(hash_set_capacity(set) >= 1000);
-    assert_true(hash_set_insert(set, "a", 1, 0));
-    assert_false(hash_set_insert(set, "a", 1, 0));
-    assert_true(hash_set_insert(set, "b", 1, 0));
+
+    assert_true(hash_set_insert(set, "a", 0));
+    assert_false(hash_set_insert(set, "a", 1));
+    assert_true(hash_set_insert(set, "b", 2));
+
     assert_true(hash_set_length(set) == 2);
-    assert_false(hash_set_remove(set, "c", 1));
-    assert_true(hash_set_remove(set, "b", 1));
+    assert_true(*hash_set_lookup(set, "a") == 0);
+    assert_null(hash_set_lookup(set, "c"));
+
+    assert_false(hash_set_remove(set, "c"));
+    assert_true(hash_set_remove(set, "b"));
+
     assert_true(hash_set_length(set) == 1);
     hash_set_destroy(set);
 }
