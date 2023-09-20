@@ -233,8 +233,8 @@ bool brn2_check_repeated(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
 
-            if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
-                                            hashes[i], indexes[i], 0)) {
+            if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
+                                          hashes[i], indexes[i])) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -253,7 +253,7 @@ bool brn2_check_repeated(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
 
-            if (!hash_map_insert(repeated_map, newfile.name, 0)) {
+            if (!hash_set_insert(repeated_map, newfile.name)) {
                 fprintf(stderr, RED"\"%s\""RESET
                                 " appears more than once in the buffer\n",
                                 newfile.name);
@@ -350,11 +350,11 @@ uint32 brn2_execute(FileList *old, FileList *new,
         if (renamed >= 0) {
             uint32 *index;
 
-            if (hash_map_insert_pre_calc(names_renamed, *oldname,
-                                         oldhash, oldindex, 0))
+            if (hash_set_insert_pre_calc(names_renamed, *oldname,
+                                         oldhash, oldindex))
                 number_renames += 1;
-            if (hash_map_insert_pre_calc(names_renamed, *newname,
-                                         newhash, newindex, 0))
+            if (hash_set_insert_pre_calc(names_renamed, *newname,
+                                         newhash, newindex))
                 number_renames += 1;
             print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
@@ -399,7 +399,7 @@ uint32 brn2_execute(FileList *old, FileList *new,
             fprintf(stderr, "%s\n", strerror(errno));
             continue;
         } else {
-            if (hash_map_insert(names_renamed, *oldname, 0))
+            if (hash_set_insert(names_renamed, *oldname))
                 number_renames += 1;
             print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
