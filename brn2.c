@@ -329,10 +329,12 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                             AT_FDCWD, *newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             uint32 *index;
+            uint32 newname_hash = hash_function(*newname, *newlength);
+            uint32 newname_index = newname_hash % hash_set_capacity(indexes_exchange);
 
             if (hash_set_insert(names_renamed, *oldname, *oldlength, 0))
                 number_renames += 1;
-            if (hash_set_insert(names_renamed, *newname, *newlength, 0))
+            if (hash_set_insert_pre_calc(names_renamed, *newname, newname_hash, newname_index, 0))
                 number_renames += 1;
             printf(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
@@ -340,7 +342,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                 FileName *file_j = &(old->files[*index]);
                 SWAP(char *, file_j->name, *oldname);
                 SWAP(uint32, file_j->length, *oldlength);
-                hash_set_remove(indexes_exchange, *newname, *newlength);
+                hash_set_remove_pre_calc(indexes_exchange, *newname, newname_hash, newname_index);
                 hash_set_insert(indexes_exchange, file_j->name, file_j->length, *index);
                 continue;
             }
