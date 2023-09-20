@@ -91,33 +91,9 @@ bool hash_set_insert(HashSet *set, char *key, const uint32 value) {
     return hash_set_insert_pre_calc(set, key, hash, index, value);
 }
 
-uint32 *hash_set_lookup(HashSet *set, char *key) {
-    uint32 hash = hash_function(key);
-    uint32 index = hash % set->capacity;
-    return hash_set_lookup_pre_calc(set, key, hash, index);
-}
-
-uint32 *hash_set_lookup_pre_calc(HashSet *set, char *key, const uint32 hash, const uint32 index) {
-    Bucket *iterator = &(set->array[index]);
-
-    if (iterator->key == NULL)
-        return NULL;
-
-    do {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key))
-            return &(iterator->value);
-
-        if (iterator->next)
-            iterator = iterator->next;
-        else
-            break;
-    } while (true);
-
-    return NULL;
-}
-
 bool hash_set_insert_pre_calc(HashSet *set, char *key,
-                              const uint32 hash, const uint32 index, const uint32 value) {
+                              const uint32 hash, const uint32 index,
+                              const uint32 value) {
     Bucket *iterator = &(set->array[index]);
 
     if (iterator->key == NULL) {
@@ -148,13 +124,40 @@ bool hash_set_insert_pre_calc(HashSet *set, char *key,
     return true;
 }
 
+uint32 *hash_set_lookup(HashSet *set, char *key) {
+    uint32 hash = hash_function(key);
+    uint32 index = hash % set->capacity;
+    return hash_set_lookup_pre_calc(set, key, hash, index);
+}
+
+uint32 *hash_set_lookup_pre_calc(HashSet *set, char *key,
+                                 const uint32 hash, const uint32 index) {
+    Bucket *iterator = &(set->array[index]);
+
+    if (iterator->key == NULL)
+        return NULL;
+
+    do {
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key))
+            return &(iterator->value);
+
+        if (iterator->next)
+            iterator = iterator->next;
+        else
+            break;
+    } while (true);
+
+    return NULL;
+}
+
 bool hash_set_remove(HashSet *set, char *key) {
     uint32 hash = hash_function(key);
     uint32 index = hash % set->capacity;
     return hash_set_remove_pre_calc(set, key, hash, index);
 }
 
-bool hash_set_remove_pre_calc(HashSet *set, char *key, const uint32 hash, const uint32 index) {
+bool hash_set_remove_pre_calc(HashSet *set, char *key,
+                              const uint32 hash, const uint32 index) {
     Bucket *iterator = &(set->array[index]);
     Bucket *previous;
 

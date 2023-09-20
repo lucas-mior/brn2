@@ -32,7 +32,7 @@ static void hash_test(void **state) {
 
 static bool contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {
-        if (!strcmp(list->files[i].name, file.name)) 
+        if (!strcmp(list->files[i].name, file.name))
             return true;
     }
     return false;
@@ -62,6 +62,6 @@ int main(void) {
         cmocka_unit_test(hash_test),
         cmocka_unit_test(brn2_test),
     };
- 
+
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

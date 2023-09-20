@@ -71,7 +71,7 @@ void util_command(const int argc, char **argv) {
         exit(EXIT_FAILURE);
     default:
         if (wait(NULL) < 0) {
-            fprintf(stderr, "Error waiting for the forked child: %s\n", 
+            fprintf(stderr, "Error waiting for the forked child: %s\n",
                             strerror(errno));
             exit(EXIT_FAILURE);
         }

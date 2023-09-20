@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
             number_renames = brn2_execute(old, new, number_changes);
         if (number_changes != number_renames) {
             fprintf(stderr, "%u name%.*s changed but %u file%.*s renamed. "
-                            "Check your files.\n", 
+                            "Check your files.\n",
                             number_changes, number_changes != 1, "s",
                             number_renames, number_renames != 1, "s");
             status = false;

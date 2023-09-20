@@ -16,6 +16,7 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct HashSet HashSet;
 
@@ -35,7 +36,8 @@ HashSet *hash_set_create(uint32);
 void hash_set_destroy(HashSet *);
 uint32 hash_function(char *);
 bool hash_set_insert(HashSet *, char *, const uint32);
-bool hash_set_insert_pre_calc(HashSet *, char *, const uint32, const uint32, const uint32);
+bool hash_set_insert_pre_calc(HashSet *, char *,
+                              const uint32, const uint32, const uint32);
 bool hash_set_remove(HashSet *, char *);
 bool hash_set_remove_pre_calc(HashSet *, char *, const uint32, const uint32);
 void hash_set_print_summary(HashSet *);
