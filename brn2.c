@@ -311,7 +311,7 @@ uint32 brn2_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
-int noop(const char *restrict unused, ...) {
+static inline int noop(const char *restrict unused, ...) {
     (void) unused;
     return 0;
 }

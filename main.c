@@ -21,7 +21,7 @@
 #include "hash.h"
 #include <getopt.h>
 
-struct option long_options[] = {
+static struct option long_options[] = {
     {"help", no_argument, NULL, 'h'},
     {"quiet", no_argument, NULL, 'q'},
     {"verbose", no_argument, NULL, 'v'},
