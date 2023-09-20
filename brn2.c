@@ -312,7 +312,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     HashSet *names_renamed = hash_set_create(number_changes);
-    HashSet *indexes_exchange = hash_set_create(length);
+    HashSet *indexes_exchange = hash_set_create(number_changes);
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
@@ -345,7 +345,7 @@ uint32 brn2_execute(FileList *old, FileList *new, const uint32 number_changes) {
                 SWAP(char *, file_j->name, *oldname);
                 SWAP(uint32, file_j->length, *oldlength);
                 hash_set_remove_pre_calc(indexes_exchange, *newname, newhash, newindex);
-                hash_set_insert(indexes_exchange, file_j->name, *index);
+                hash_set_insert_pre_calc(indexes_exchange, *oldname, oldhash, oldindex, *index);
                 continue;
             }
             for (uint32 j = i + 1; j < length; j += 1) {
