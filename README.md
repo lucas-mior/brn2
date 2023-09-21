@@ -60,10 +60,10 @@ $ sudo make install
 ```
 
 ## Examples
-- Find and rename jpg files (recursively, using `find`):
+- Find and rename jpg files in quiet mode (recursively, using `find`):
 ```
 $ find . -iname "*.jpg" > rename
-$ brn2 rename
+$ brn2 --quiet rename
 ```
 - Rename jpg files in current working directory:
 ```
