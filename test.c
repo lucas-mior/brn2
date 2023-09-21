@@ -34,7 +34,7 @@ static void hash_test(void **state) {
     assert_true(hash_map_insert(set, "b", 2));
 
     assert_true(hash_map_length(set) == 2);
-    assert_true(*hash_map_lookup(set, "a") == 0);
+    assert_true(*(uint32 *) hash_map_lookup(set, "a") == 0);
     assert_null(hash_map_lookup(set, "c"));
 
     assert_false(hash_map_remove(set, "c"));
