@@ -1,9 +1,6 @@
 # brn2
- 
-brn2 is a fork of brn,
-a command line tool similar to [vimv](https://github.com/thameera/vimv/).
-It can be used to easily mass-rename files in your preferred text editor (i.e.
-vim).
+brn2 is a fork of [brn](https://github.com/nimaipatel/brn), a command line tool
+used to easily mass-rename files in your preferred text editor.
  
 ## Usage
 ```
@@ -75,7 +72,7 @@ $ brn2 *.jpg
 $ brn2
 ```
  
-## Why use brn2 over something like vimv?
+## Why use brn2?
  
 * It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
   atomically swap the names of two files which means no temporary files are made
