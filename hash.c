@@ -211,8 +211,6 @@ void hash_map_print(HashMap *map, bool verbose) {
 
         if (iterator->key || verbose)
             printf("\n%03d:", i);
-        else
-            continue;
 
         while (iterator && iterator->key) {
             printf(GREEN" %s"RESET" ->", iterator->key);
