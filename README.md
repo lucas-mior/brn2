@@ -41,6 +41,12 @@ will take place when you save and exit.
     * consecutive slashes (`/`) are bundled together
     * trailing slashes (`/`) are removed
 - Repeated filenames in `<filename>` are removed.
+- It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
+  atomically swap the names of two files which means no temporary files are made
+  either (only on GNU/Linux; on other operating systems, swapping files will
+  safely fail without renaming).
+- If the exact number of filenames isn't provided or if some filenames are
+  repeated, the user will be asked to fix the rename buffer or exit.
  
 ## Install
  
@@ -72,19 +78,6 @@ $ brn2 *.jpg
 $ brn2
 ```
  
-## Why use brn2?
- 
-* It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
-  atomically swap the names of two files which means no temporary files are made
-  either (only on GNU/Linux; on other operating systems, swapping files will
-  safely fail without renaming).
- 
-* It is written in C instead of bash which makes it faster, more robust and
-  predictable.
- 
-* It has error handling, it will safely abort if the exact number of
-  filenames isn't provided or if some filenames are repeated.
-
 ## Changes over original brn
 - Option to rename files listed in file given as first argument.
 - Option to rename files passed as arguments.
