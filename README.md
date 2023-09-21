@@ -9,7 +9,7 @@ usage: brn2 [OPTIONS] -- [<filename> | <file1> <file2> ...]
 Rename filenames based on provided arguments.
 
 Options:
-  -h, --help    : Display this help message.
+  -h, --help    : Display this help message and exit.
   -q, --quiet   : Quiet mode; suppress output messages.
   -v, --verbose : Verbose mode (default); output messages.
 
