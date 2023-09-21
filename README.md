@@ -49,7 +49,7 @@ will take place when you save and exit.
  
 ### AUR
 ```
-yay -S brn2
+$ yay -S brn2
 ```
 
 ### Manual
