@@ -15,6 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef HASH_H
+#define HASH_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -51,3 +54,5 @@ uint32 hash_map_expected_collisions(HashMap *);
 
 #define hash_set_insert(a, b)                hash_map_insert(a, b, 0)
 #define hash_set_insert_pre_calc(a, b, c, d) hash_map_insert_pre_calc(a, b, c, d, 0)
+
+#endif
