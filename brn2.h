@@ -17,6 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef BRN2_H
+#define BRN2_H
+
 #ifdef __linux__
 #define _GNU_SOURCE
 #endif
@@ -88,3 +91,5 @@ uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, const uint32, bool);
 void brn2_free_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));
+
+#endif
