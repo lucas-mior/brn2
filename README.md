@@ -8,7 +8,7 @@ vim).
 ## Usage
 ```
 $ brn2 --help
-usage: brn2 [-h | -q | -v | <files.txt> | [file1 file2 ... ]]
+usage: brn2 [OPTIONS] -- [<filename> | <file1> <file2> ...]
 Rename filenames based on provided arguments.
 
 Options:
@@ -21,28 +21,29 @@ Arguments:
   Single argument     : Rename filenames listed in this argument.
   2 or more arguments : Rename filenames passed as arguments.
 ```
+
 brn2 will open the filenames in your text editor of choice.
 You can then edit the filenames in the buffer and the changes
 will take place when you save and exit.
 - No arguments: filenames in current working directory
 - Single argument: filenames listed in this argument
 - 2 or more arguments: filenames passed as arguments
- 
+
 ### Notes
 - By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 - It will not work for more than 2^32 renames at once
 - It will not work for filenames longer than PATH_MAX (typically 4096) characters when
-  reading from `<files.txt>`.
+  reading from `<filename>`.
 - Newlines in filenames are not allowed.
-- Filenames listed in `<files.txt>` or given as arguments which
+- Filenames listed in `<filename>` or given as arguments which
   do not correpond to existing files will generate errors while renaming
 - Filenames `.` and `..` are ignored, as well as any filename
-  which starts with `..`, even when listen in `<files.txt>`
+  which starts with `..`, even when listen in `<filename>`
 - Filenames are normalized
     * `./` at beginning of filenames are removed
     * consecutive slashes (`/`) are bundled together
     * trailing slashes (`/`) are removed
-- Repeated filenames in <files.txt> are removed.
+- Repeated filenames in `<filename>` are removed.
  
 ## Install
  
