@@ -9,7 +9,7 @@ vim).
 ```
 $ brn2 --help
 usage: brn2 [-h | -q | -v | <files.txt> | [file1 file2 ... ]]
-Rename filenames in the current working directory or based on provided arguments.
+Rename filenames based on provided arguments.
 
 Options:
   -h, --help    : Display this help message.
