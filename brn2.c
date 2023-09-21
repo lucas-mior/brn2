@@ -414,8 +414,8 @@ void brn2_free_list(FileList *list) {
 }
 
 void brn2_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [OPTIONS] [ <filename> | <file1> <file2> ... ]\n");
-    fprintf(stream, "Rename filenames in the current working directory or based on provided arguments.\n");
+    fprintf(stream, "usage: brn2 [OPTIONS] [<filename> | <file1> <file2> ...]\n");
+    fprintf(stream, "Rename filenames based on provided arguments.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Options:\n");
     fprintf(stream, "  -h, --help    : Display this help message.\n");
