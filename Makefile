@@ -13,18 +13,14 @@ util.o: util.c util.h
 brn2.o: brn2.c brn2.h hash.h
 hash.o: hash.c hash.h
 
-CC=cc
-ifeq ($(CC),clang)
-	CFLAGS += -Weverything -Wno-unsafe-buffer-usage
-else
-	CFLAGS += -Wextra -Wall
-endif
-
 CFLAGS += -std=c99 -D_DEFAULT_SOURCE
+CFLAGS += -Wextra -Wall
 LDFLAGS += -lm
 
-bear: Makefile
-	bear -- make > compile_commands.json 
+clang: CC=clang
+clang: clean
+clang: CFLAGS += -Weverything -Wno-unsafe-buffer-usage
+clang: release
 
 release: CFLAGS += -O2
 release: brn2
