@@ -124,14 +124,14 @@ bool hash_map_insert_pre_calc(HashMap *map, char *key,
     return true;
 }
 
-uint32 *hash_map_lookup(HashMap *map, char *key) {
+void *hash_map_lookup(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
     uint32 index = hash % map->capacity;
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
 
-uint32 *hash_map_lookup_pre_calc(HashMap *map, char *key,
-                                 const uint32 hash, const uint32 index) {
+void *hash_map_lookup_pre_calc(HashMap *map, char *key,
+                               const uint32 hash, const uint32 index) {
     Bucket *iterator = &(map->array[index]);
 
     if (iterator->key == NULL)

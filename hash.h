@@ -38,8 +38,8 @@ uint32 hash_function(char *);
 bool hash_map_insert(HashMap *, char *, const uint32);
 bool hash_map_insert_pre_calc(HashMap *, char *,
                               const uint32, const uint32, const uint32);
-uint32 *hash_map_lookup(HashMap *, char *);
-uint32 *hash_map_lookup_pre_calc(HashMap *, char *, const uint32, const uint32);
+void *hash_map_lookup(HashMap *, char *);
+void *hash_map_lookup_pre_calc(HashMap *, char *, const uint32, const uint32);
 bool hash_map_remove(HashMap *, char *);
 bool hash_map_remove_pre_calc(HashMap *, char *, const uint32, const uint32);
 void hash_map_print_summary(HashMap *);
