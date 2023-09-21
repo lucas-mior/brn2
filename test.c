@@ -65,9 +65,8 @@ static void brn2_test(void **state) {
 
     assert_true(list1->length == list2->length);
 
-    for (uint32 i = 0; i < list1->length; i += 1) {
+    for (uint32 i = 0; i < list1->length; i += 1)
         assert_true(contains_filename(list2, list1->files[i]));
-    }
 
     brn2_free_list(list1);
     brn2_free_list(list2);
