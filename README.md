@@ -5,25 +5,26 @@ used to easily mass-rename files in your preferred text editor.
 ## Usage
 ```
 $ brn2 --help
-usage: brn2 [OPTIONS] -- [<filename> | <file1> <file2> ...]
-Rename filenames based on provided arguments.
-
-Options:
-  -h, --help    : Display this help message and exit.
-  -q, --quiet   : Quiet mode; suppress output messages.
-  -v, --verbose : Verbose mode (default); output messages.
-
-Arguments:
-  No arguments        : Rename filenames in the current working directory.
-  Single argument     : Rename filenames listed in this argument.
-  2 or more arguments : Rename filenames passed as arguments.
+usage: brn2 [OPTIONS] -- <file1> <file2> ... 
+usage: brn2 [OPTIONS] -f <filename> 
+Rename filenames based on provided arguments. 
+ 
+Options: 
+  -h, --help    : Display this help message and exit. 
+  -q, --quiet   : Quiet mode; suppress output messages. 
+  -v, --verbose : Verbose mode (default); output messages. 
+ 
+Arguments: 
+  No arguments             : Rename filenames in the current working directory. 
+  1 or more arguments      : Rename filenames passed as arguments. 
+  -f <file>, --file=<file> : Rename filenames listed in this argument. 
 ```
 
 brn2 will open the filenames in your text editor of choice.
 You can then edit the filenames in the buffer and the changes
 will take place when you save and exit.
 - No arguments: filenames in current working directory
-- Single argument: filenames listed in this argument
+- Argument supplied to `-f`: filenames listed in this argument
 - 2 or more arguments: filenames passed as arguments
 
 ### Notes
@@ -67,7 +68,7 @@ $ sudo make install
 - Find and rename jpg files in quiet mode (recursively, using `find`):
 ```
 $ find . -iname "*.jpg" > rename
-$ brn2 --quiet rename
+$ brn2 --quiet --file rename
 ```
 - Rename jpg files in current working directory:
 ```

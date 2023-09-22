@@ -418,7 +418,8 @@ uint32 brn2_execute(FileList *old, FileList *new,
 
 
 void brn2_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [OPTIONS] -- [<filename> | <file1> <file2> ...]\n");
+    fprintf(stream, "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n");
+    fprintf(stream, "usage: brn2 [OPTIONS] -f <filename>\n");
     fprintf(stream, "Rename filenames based on provided arguments.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Options:\n");
@@ -427,8 +428,8 @@ void brn2_usage(FILE *stream) {
     fprintf(stream, "  -v, --verbose : Verbose mode (default); output messages.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Arguments:\n");
-    fprintf(stream, "  No arguments        : Rename filenames in the current working directory.\n");
-    fprintf(stream, "  Single argument     : Rename filenames listed in this argument.\n");
-    fprintf(stream, "  2 or more arguments : Rename filenames passed as arguments.\n");
+    fprintf(stream, "  No arguments             : Rename filenames in the current working directory.\n");
+    fprintf(stream, "  1 or more arguments      : Rename filenames passed as arguments.\n");
+    fprintf(stream, "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
