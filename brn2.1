@@ -4,7 +4,9 @@
 brn2 \- Bulk Rename Files
 
 .SH SYNOPSIS
-brn2 [OPTIONS] -- [<filename> | <file1> <file2> ... ]
+brn2 [OPTIONS] -f <filename>
+.TP
+brn2 [OPTIONS] -- [<file1> <file2> ... ]
 
 .SH DESCRIPTION
 brn2 is a command line tool to easily mass-rename files in your preferred text
@@ -34,7 +36,7 @@ Verbose mode; output messages (this is the default).
 Rename filenames in the current working directory.
 
 .TP
-.BR brn2 " <filename>"
+.BR brn2 " -f <filename>"
 Rename filenames listed in the specified file.
 
 .TP
