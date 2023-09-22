@@ -78,13 +78,11 @@ typedef struct FileList {
     FileName files[];
 } FileList;
 
-void brn2_copy_filename(FileName *, char *, uint32);
 FileList *brn2_list_from_dir(char *);
 FileList *brn2_list_from_lines(char *, uint32);
 FileList *brn2_list_from_args(int, char **);
-bool is_pwd_or_parent(char *);
+void brn2_copy_filename(FileName *, char *, uint32);
 void brn2_normalize_names(FileList *);
-bool brn2_check_repeated(FileList *);
 bool brn2_verify(FileList *, FileList *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, const uint32, bool);

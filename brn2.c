@@ -21,39 +21,14 @@
 #include "hash.h"
 #include "util.h"
 
-void brn2_normalize_names(FileList *list) {
-    for (uint32 i = 0; i < list->length; i += 1) {
-        FileName *file = &(list->files[i]);
-        char *name = file->name;
-        uint32 *length = &(file->length);
-        uint32 j = 0;
+static int brn2_create_hashes(void *arg);
+static bool brn2_is_pwd_or_parent(char *);
+static bool brn2_check_repeated(FileList *);
 
-        while (name[*length - 1] == '/') {
-            name[*length - 1] = '\0';
-            *length -= 1;
-        }
-
-        while (name[j] != '\0') {
-            while (name[j] == '/' && name[j + 1] == '/') {
-                *length -= 1;
-                memmove(&name[j], &name[j + 1],
-                        (*length - j) * sizeof (*name));
-            }
-            j += 1;
-        }
-
-        while (name[0] == '.' && name[1] == '/') {
-            memmove(&(name[0]), &(name[2]), (*length - 1) * sizeof (*name));
-            *length -= 2;
-        }
-    }
-    return;
-}
-
-void brn2_copy_filename(FileName *file, char *name, uint32 length) {
-    file->name = util_malloc(length + 1);
-    memcpy(file->name, name, length + 1);
-    file->length = length;
+void brn2_free_list(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1)
+        free(list->files[i].name);
+    free(list);
     return;
 }
 
@@ -67,7 +42,7 @@ FileList *brn2_list_from_args(int argc, char **argv) {
         char *name = argv[i];
         uint32 name_length;
 
-        if (is_pwd_or_parent(name))
+        if (brn2_is_pwd_or_parent(name))
             continue;
 
         name_length = (uint32) strlen(name);
@@ -101,7 +76,7 @@ FileList *brn2_list_from_dir(char *directory) {
         char *name = directory_list[i]->d_name;
         uint32 name_length;
 
-        if (is_pwd_or_parent(name)) {
+        if (brn2_is_pwd_or_parent(name)) {
             free(directory_list[i]);
             continue;
         }
@@ -149,7 +124,7 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
             continue;
         buffer[last] = '\0';
 
-        if (is_pwd_or_parent(buffer))
+        if (brn2_is_pwd_or_parent(buffer))
             continue;
         brn2_copy_filename(&(list->files[length]), buffer, last);
 
@@ -167,7 +142,7 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
     return list;
 }
 
-bool is_pwd_or_parent(char *filename) {
+bool brn2_is_pwd_or_parent(char *filename) {
     if (filename[0] == '.') {
         if ((filename[1] == '.') || (filename[1] == '\0'))
             return true;
@@ -175,6 +150,42 @@ bool is_pwd_or_parent(char *filename) {
             return true;
     }
     return false;
+}
+
+void brn2_normalize_names(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1) {
+        FileName *file = &(list->files[i]);
+        char *name = file->name;
+        uint32 *length = &(file->length);
+        uint32 j = 0;
+
+        while (name[*length - 1] == '/') {
+            name[*length - 1] = '\0';
+            *length -= 1;
+        }
+
+        while (name[j] != '\0') {
+            while (name[j] == '/' && name[j + 1] == '/') {
+                *length -= 1;
+                memmove(&name[j], &name[j + 1],
+                        (*length - j) * sizeof (*name));
+            }
+            j += 1;
+        }
+
+        while (name[0] == '.' && name[1] == '/') {
+            memmove(&(name[0]), &(name[2]), (*length - 1) * sizeof (*name));
+            *length -= 2;
+        }
+    }
+    return;
+}
+
+void brn2_copy_filename(FileName *file, char *name, uint32 length) {
+    file->name = util_malloc(length + 1);
+    memcpy(file->name, name, length + 1);
+    file->length = length;
+    return;
 }
 
 typedef struct Slice {
@@ -187,7 +198,7 @@ typedef struct Slice {
     uint32 unused;
 } Slice;
 
-static int brn2_create_hashes(void *arg) {
+int brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -405,13 +416,6 @@ uint32 brn2_execute(FileList *old, FileList *new,
     return number_renames;
 }
 
-
-void brn2_free_list(FileList *list) {
-    for (uint32 i = 0; i < list->length; i += 1)
-        free(list->files[i].name);
-    free(list);
-    return;
-}
 
 void brn2_usage(FILE *stream) {
     fprintf(stream, "usage: brn2 [OPTIONS] -- [<filename> | <file1> <file2> ...]\n");
