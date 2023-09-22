@@ -22,9 +22,10 @@
 #include "util.h"
 
 static struct option long_options[] = {
-    {"help", no_argument, NULL, 'h'},
-    {"quiet", no_argument, NULL, 'q'},
-    {"verbose", no_argument, NULL, 'v'},
+    {"file",    required_argument, NULL, 'f'},
+    {"help",    no_argument,       NULL, 'h'},
+    {"quiet",   no_argument,       NULL, 'q'},
+    {"verbose", no_argument,       NULL, 'v'},
     {NULL, 0, NULL, 0}
 };
 
@@ -38,28 +39,37 @@ int main(int argc, char **argv) {
     const char *tempdir = "/tmp";
     int status = EXIT_SUCCESS;
     bool quiet = false;
+    char *lines = NULL;
 
-    while ((opt = getopt_long(argc, argv, "hqv", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:hqv", long_options, NULL)) != -1) {
         switch (opt) {
         case '?':
-            brn2_usage(stdout);
+            brn2_usage(stderr);
         case 'h':
-            brn2_usage(stdout);
+            brn2_usage(stderr);
         case 'q':
             quiet = true;
             break;
         case 'v':
             quiet = false;
             break;
+        case 'f':
+            if (optarg == NULL) {
+                brn2_usage(stderr);
+            }
+            lines = optarg;
+            break;
+        default:
+            brn2_usage(stderr);
         }
     }
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
 
-    if (argc - optind > 1)
+    if (argc - optind >= 1)
         old = brn2_list_from_args(argc - optind, &argv[optind]);
-    else if (argc - optind == 1)
-        old = brn2_list_from_lines(argv[optind], 0);
+    else if (lines)
+        old = brn2_list_from_lines(lines, 0);
     else
         old = brn2_list_from_dir(".");
 
