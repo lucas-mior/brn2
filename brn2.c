@@ -369,8 +369,8 @@ uint32 brn2_execute(FileList *old, FileList *new,
                                              newhash, newindex);
             if (index) {
                 FileName *file_j = &(old->files[*index]);
-                SWAP(char *, file_j->name, *oldname);
-                SWAP(uint32, file_j->length, *oldlength);
+                SWAP( file_j->name, *oldname);
+                SWAP(file_j->length, *oldlength);
                 hash_map_remove_pre_calc(indexes_exchange, *newname,
                                          newhash, newindex);
                 hash_map_insert_pre_calc(indexes_exchange, *oldname,
@@ -381,8 +381,8 @@ uint32 brn2_execute(FileList *old, FileList *new,
                 FileName *file_j = &(old->files[j]);
                 if (file_j->length == *newlength) {
                     if (!memcmp(file_j->name, *newname, *newlength)) {
-                        SWAP(char *, file_j->name, *oldname);
-                        SWAP(uint32, file_j->length, *oldlength);
+                        SWAP(file_j->name, *oldname);
+                        SWAP(file_j->length, *oldlength);
                         hash_map_insert(indexes_exchange, *oldname, j);
                         break;
                     }
