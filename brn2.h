@@ -45,7 +45,7 @@
 
 #define STRUCT_ARRAY_SIZE(Struct, ArrayType, array_length) \
     sizeof (*Struct) + (size_t)(array_length) * sizeof (ArrayType)
-#define SWAP(Type, x, y) do { Type SWAP = x; x = y; y = SWAP; } while (0)
+#define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof(*x))
 
 #ifndef INTEGERS
