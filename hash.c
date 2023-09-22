@@ -85,15 +85,13 @@ uint32 hash_function(char *str) {
     return hash;
 }
 
-bool hash_map_insert(HashMap *map, char *key, const uint32 value) {
+bool hash_map_insert(HashMap *map, char *key, uint32 value) {
     uint32 hash = hash_function(key);
     uint32 index = hash % map->capacity;
     return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
 
-bool hash_map_insert_pre_calc(HashMap *map, char *key,
-                              const uint32 hash, const uint32 index,
-                              const uint32 value) {
+bool hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index, uint32 value) {
     Bucket *iterator = &(map->array[index]);
 
     if (iterator->key == NULL) {
@@ -130,8 +128,7 @@ void *hash_map_lookup(HashMap *map, char *key) {
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
 
-void *hash_map_lookup_pre_calc(HashMap *map, char *key,
-                               const uint32 hash, const uint32 index) {
+void *hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
 
     if (iterator->key == NULL)
@@ -157,7 +154,7 @@ bool hash_map_remove(HashMap *map, char *key) {
 }
 
 bool hash_map_remove_pre_calc(HashMap *map, char *key,
-                              const uint32 hash, const uint32 index) {
+                              uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
     Bucket *previous;
 
