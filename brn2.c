@@ -38,7 +38,7 @@ FileList *brn2_list_from_args(int argc, char **argv) {
 
     list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, argc - 1));
 
-    for (int i = 1; i < argc; i += 1) {
+    for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
         uint32 name_length;
 
