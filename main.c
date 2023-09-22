@@ -54,9 +54,8 @@ int main(int argc, char **argv) {
             quiet = false;
             break;
         case 'f':
-            if (optarg == NULL) {
+            if (optarg == NULL)
                 brn2_usage(stderr);
-            }
             lines = optarg;
             break;
         default:
@@ -66,7 +65,7 @@ int main(int argc, char **argv) {
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
 
-    if (argc - optind >= 1)
+    if ((argc - optind) >= 1)
         old = brn2_list_from_args(argc - optind, &argv[optind]);
     else if (lines)
         old = brn2_list_from_lines(lines, 0);
