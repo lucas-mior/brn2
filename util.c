@@ -62,6 +62,16 @@ char *util_strdup(char *string) {
     return p;
 }
 
+void *util_memdup(void *source, size_t size) {
+    void *p;
+    if ((p = malloc(size)) == NULL) {
+        fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
+        exit(EXIT_FAILURE);
+    }
+    memcpy(p, source, size);
+    return p;
+}
+
 void util_command(const int argc, char **argv) {
     switch (fork()) {
     case 0:
