@@ -189,11 +189,10 @@ void brn2_copy_filename(FileName *file, char *name, uint32 length) {
 }
 
 typedef struct Slice {
-    FileList *list;
-    uint32 *hashes;
+    FileName *files;
+    uint32 *hashes_start;
+    uint32 *hashes_end;
     uint32 *indexes;
-    uint32 start;
-    uint32 end;
     uint32 map_capacity;
     uint32 unused;
 } Slice;
@@ -201,10 +200,16 @@ typedef struct Slice {
 int brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
-    for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName newfile = slice->list->files[i];
-        slice->hashes[i] = hash_function(newfile.name);
-        slice->indexes[i] = slice->hashes[i] % slice->map_capacity;
+    uint32 *hash = slice->hashes_start;
+    uint32 *index = slice->indexes;
+    FileName *file = slice->files;
+
+    while (hash < slice->hashes_end) {
+        *hash = hash_function(file->name);
+        *index = *hash % slice->map_capacity;
+        hash++;
+        index++;
+        file++;
     }
     thrd_exit(0);
 }
@@ -224,14 +229,13 @@ bool brn2_check_repeated(FileList *list) {
         uint32 range = list->length / nthreads;
 
         for (uint32 i = 0; i < nthreads; i += 1) {
-            slices[i].start = i*range;
+            slices[i].hashes_start = hashes + i*range;
             if (i == nthreads - 1)
-                slices[i].end = list->length;
+                slices[i].hashes_end = hashes + list->length;
             else
-                slices[i].end = (i + 1)*range;
-            slices[i].list = list;
-            slices[i].hashes = hashes;
-            slices[i].indexes = indexes;
+                slices[i].hashes_end = hashes + (i + 1)*range;
+            slices[i].files = list->files + i*range;
+            slices[i].indexes = indexes + i*range;
             slices[i].map_capacity = hash_map_capacity(repeated_map);
             thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
         }
