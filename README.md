@@ -5,19 +5,20 @@ used to easily mass-rename files in your preferred text editor.
 ## Usage
 ```
 $ brn2 --help
-usage: brn2 [OPTIONS] -- <file1> <file2> ... 
-usage: brn2 [OPTIONS] -f <filename> 
-Rename filenames based on provided arguments. 
- 
-Options: 
-  -h, --help    : Display this help message and exit. 
-  -q, --quiet   : Quiet mode; suppress output messages. 
-  -v, --verbose : Verbose mode (default); output messages. 
- 
-Arguments: 
-  No arguments             : Rename filenames in the current working directory. 
-  1 or more arguments      : Rename filenames passed as arguments. 
-  -f <file>, --file=<file> : Rename filenames listed in this argument. 
+usage: brn2 [OPTIONS] -- <file1> <file2> ...
+usage: brn2 [OPTIONS] -f <filename>
+Rename filenames based on provided arguments.
+
+Options:
+  -h, --help    : Display this help message and exit.
+  -q, --quiet   : Quiet mode; suppress output messages.
+  -v, --verbose : Verbose mode (default); output messages.
+  -c, --check   : Check if original file names exist.
+
+Arguments:
+  No arguments             : Rename filenames in the current working directory.
+  1 or more arguments      : Rename filenames passed as arguments.
+  -f <file>, --file=<file> : Rename filenames listed in this argument.
 ```
 
 brn2 will open the filenames in your text editor of choice.

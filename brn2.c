@@ -426,6 +426,7 @@ void brn2_usage(FILE *stream) {
     fprintf(stream, "  -h, --help    : Display this help message and exit.\n");
     fprintf(stream, "  -q, --quiet   : Quiet mode; suppress output messages.\n");
     fprintf(stream, "  -v, --verbose : Verbose mode (default); output messages.\n");
+    fprintf(stream, "  -c, --check   : Check if original file names exist.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Arguments:\n");
     fprintf(stream, "  No arguments             : Rename filenames in the current working directory.\n");
