@@ -26,6 +26,7 @@ static struct option long_options[] = {
     {"help",    no_argument,       NULL, 'h'},
     {"quiet",   no_argument,       NULL, 'q'},
     {"verbose", no_argument,       NULL, 'v'},
+    {"check",   no_argument,       NULL, 'c'},
     {NULL, 0, NULL, 0}
 };
 
@@ -39,14 +40,18 @@ int main(int argc, char **argv) {
     const char *tempdir = "/tmp";
     int status = EXIT_SUCCESS;
     bool quiet = false;
+    bool check = false;
     char *lines = NULL;
 
-    while ((opt = getopt_long(argc, argv, "f:hqv", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqv", long_options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
         case 'h':
             brn2_usage(stderr);
+        case 'c':
+            check = true;
+            break;
         case 'q':
             quiet = true;
             break;
@@ -73,6 +78,22 @@ int main(int argc, char **argv) {
         old = brn2_list_from_dir(".");
 
     brn2_normalize_names(old);
+    if (check) {
+        for (uint32 i = 0; i < old->length; i += 1) {
+            FileName *file = &(old->files[i]);
+            while (access(file->name, F_OK)) {
+                old->length -= 1;
+                if (old->length <= i)
+                    break;
+                memmove(file, file+1, (old->length - i) * sizeof (*file));
+            }
+        }
+
+        if (old->length == 0) {
+            fprintf(stderr, "All filenames to not exist.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
