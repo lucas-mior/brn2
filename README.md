@@ -79,7 +79,7 @@ $ brn2
 ```
  
 ## Changes over original brn
-- Option to rename files listed in file given as first argument.
+- Option to rename files listed in file.
 - Option to rename files passed as arguments.
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
