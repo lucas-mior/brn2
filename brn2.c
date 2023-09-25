@@ -369,7 +369,7 @@ uint32 brn2_execute(FileList *old, FileList *new,
                                              newhash, newindex);
             if (index) {
                 FileName *file_j = &(old->files[*index]);
-                SWAP( file_j->name, *oldname);
+                SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
                 hash_map_remove_pre_calc(indexes_exchange, *newname,
                                          newhash, newindex);
