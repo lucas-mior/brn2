@@ -39,7 +39,7 @@ HashMap *hash_map_create(uint32);
 void hash_map_destroy(HashMap *);
 uint32 hash_function(char *);
 bool hash_map_insert(HashMap *, char *, uint32);
-bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32,uint32);
+bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32);
 void *hash_map_lookup(HashMap *, char *);
 void *hash_map_lookup_pre_calc(HashMap *, char *, uint32, uint32);
 bool hash_map_remove(HashMap *, char *);
