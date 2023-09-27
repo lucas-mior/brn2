@@ -41,7 +41,7 @@
 #define RESET "\x1b[0m"
 
 #define USE_HASH_MAP_THRESHOLD 128
-#define USE_THREADS_THRESHOLD 1048576
+#define USE_THREADS_THRESHOLD 524288
 
 #define STRUCT_ARRAY_SIZE(Struct, ArrayType, array_length) \
     sizeof (*Struct) + (size_t)(array_length) * sizeof (ArrayType)

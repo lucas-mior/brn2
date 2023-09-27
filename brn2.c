@@ -189,7 +189,7 @@ void brn2_copy_filename(FileName *file, char *name, uint32 length) {
 }
 
 typedef struct Slice {
-    FileList *list;
+    FileName *files;
     uint32 *hashes;
     uint32 *indexes;
     uint32 start;
@@ -202,7 +202,7 @@ int brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName newfile = slice->list->files[i];
+        FileName newfile = slice->files[i];
         slice->hashes[i] = hash_function(newfile.name);
         slice->indexes[i] = slice->hashes[i] % slice->map_capacity;
     }
@@ -229,7 +229,7 @@ bool brn2_check_repeated(FileList *list) {
                 slices[i].end = list->length;
             else
                 slices[i].end = (i + 1)*range;
-            slices[i].list = list;
+            slices[i].files = list->files;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
             slices[i].map_capacity = hash_map_capacity(repeated_map);
