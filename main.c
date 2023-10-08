@@ -70,10 +70,10 @@ int main(int argc, char **argv) {
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
 
-    if ((argc - optind) >= 1)
-        old = brn2_list_from_args(argc - optind, &argv[optind]);
-    else if (lines)
+    if (lines)
         old = brn2_list_from_lines(lines, 0);
+    else if ((argc - optind) >= 1)
+        old = brn2_list_from_args(argc - optind, &argv[optind]);
     else
         old = brn2_list_from_dir(".");
 
