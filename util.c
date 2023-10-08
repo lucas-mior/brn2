@@ -24,7 +24,7 @@
 
 #include "util.h"
 
-void *util_malloc(const size_t size) {
+void *util_malloc(const usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
@@ -33,7 +33,7 @@ void *util_malloc(const size_t size) {
     return p;
 }
 
-void *util_realloc(void *old, const size_t size) {
+void *util_realloc(void *old, const usize size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
         fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
@@ -43,7 +43,7 @@ void *util_realloc(void *old, const size_t size) {
     return p;
 }
 
-void *util_calloc(const size_t nmemb, const size_t size) {
+void *util_calloc(const usize nmemb, const usize size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
@@ -62,7 +62,7 @@ char *util_strdup(char *string) {
     return p;
 }
 
-void *util_memdup(void *source, size_t size) {
+void *util_memdup(void *source, usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
