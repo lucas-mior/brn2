@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct HashMap HashMap;
 
@@ -33,6 +34,9 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
+
+typedef size_t usize;
+typedef ssize_t isize;
 #endif
 
 HashMap *hash_map_create(uint32);
