@@ -19,10 +19,26 @@
 #define UTIL_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
-void *util_malloc(const size_t);
-void *util_realloc(void *, const size_t);
-void *util_calloc(const size_t, const size_t);
+#ifndef INTEGERS
+#define INTEGERS
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
+typedef size_t usize;
+typedef ssize_t isize;
+#endif
+
+void *util_malloc(const usize);
+void *util_realloc(void *, const usize);
+void *util_calloc(const usize, const usize);
 char *util_strdup(char *);
 void util_command(const int, char **);
 
