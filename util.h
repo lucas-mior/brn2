@@ -39,6 +39,7 @@ typedef ssize_t isize;
 void *util_malloc(const usize);
 void *util_realloc(void *, const usize);
 void *util_calloc(const usize, const usize);
+void *util_memdup(void *, usize);
 char *util_strdup(char *);
 void util_command(const int, char **);
 
