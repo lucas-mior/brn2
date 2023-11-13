@@ -34,8 +34,8 @@ test: $(objs) test.c
 	./test
 
 brn2: $(objs) main.c
-	ctags --kinds-C=+l *.h *.c
-	vtags.sed tags > .tags.vim
+	-ctags --kinds-C=+l *.h *.c
+	-vtags.sed tags > .tags.vim
 	$(CC) $(CFLAGS) -o $@ $(objs) main.c $(LDFLAGS)
 
 .c.o:
