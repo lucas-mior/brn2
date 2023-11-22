@@ -418,19 +418,20 @@ uint32 brn2_execute(FileList *old, FileList *new,
 
 
 void brn2_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
-                    "usage: brn2 [OPTIONS] -f <filename>\n"
-                    "Rename filenames based on provided arguments.\n"
-                    "\n"
-                    "Options:\n"
-                    "  -h, --help    : Display this help message and exit.\n"
-                    "  -q, --quiet   : Quiet mode; suppress output messages.\n"
-                    "  -v, --verbose : Verbose mode (default); output messages.\n"
-                    "  -c, --check   : Check if original file names exist.\n"
-                    "\n"
-                    "Arguments:\n"
-                    "  No arguments             : Rename filenames in the current working directory.\n"
-                    "  1 or more arguments      : Rename filenames passed as arguments.\n"
-                    "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
+    fprintf(stream,
+            "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
+            "usage: brn2 [OPTIONS] -f <filename>\n"
+            "Rename filenames based on provided arguments.\n"
+            "\n"
+            "Options:\n"
+            "  -h, --help    : Display this help message and exit.\n"
+            "  -q, --quiet   : Quiet mode; suppress output messages.\n"
+            "  -v, --verbose : Verbose mode (default); output messages.\n"
+            "  -c, --check   : Check if original file names exist.\n"
+            "\n"
+            "Arguments:\n"
+            "  No arguments             : Rename filenames in the current working directory.\n"
+            "  1 or more arguments      : Rename filenames passed as arguments.\n"
+            "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
