@@ -418,19 +418,19 @@ uint32 brn2_execute(FileList *old, FileList *new,
 
 
 void brn2_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n");
-    fprintf(stream, "usage: brn2 [OPTIONS] -f <filename>\n");
-    fprintf(stream, "Rename filenames based on provided arguments.\n");
-    fprintf(stream, "\n");
-    fprintf(stream, "Options:\n");
-    fprintf(stream, "  -h, --help    : Display this help message and exit.\n");
-    fprintf(stream, "  -q, --quiet   : Quiet mode; suppress output messages.\n");
-    fprintf(stream, "  -v, --verbose : Verbose mode (default); output messages.\n");
-    fprintf(stream, "  -c, --check   : Check if original file names exist.\n");
-    fprintf(stream, "\n");
-    fprintf(stream, "Arguments:\n");
-    fprintf(stream, "  No arguments             : Rename filenames in the current working directory.\n");
-    fprintf(stream, "  1 or more arguments      : Rename filenames passed as arguments.\n");
-    fprintf(stream, "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
+    fprintf(stream, "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
+                    "usage: brn2 [OPTIONS] -f <filename>\n"
+                    "Rename filenames based on provided arguments.\n"
+                    "\n"
+                    "Options:\n"
+                    "  -h, --help    : Display this help message and exit.\n"
+                    "  -q, --quiet   : Quiet mode; suppress output messages.\n"
+                    "  -v, --verbose : Verbose mode (default); output messages.\n"
+                    "  -c, --check   : Check if original file names exist.\n"
+                    "\n"
+                    "Arguments:\n"
+                    "  No arguments             : Rename filenames in the current working directory.\n"
+                    "  1 or more arguments      : Rename filenames passed as arguments.\n"
+                    "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
