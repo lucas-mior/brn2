@@ -210,6 +210,8 @@ int brn2_create_hashes(void *arg) {
 }
 
 bool brn2_check_repeated(FileList *list) {
+    char *repeated_format = RED"\"%s\""RESET
+                            " appears more than once in the buffer\n";
     bool repeated = false;
     long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if ((list->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
@@ -244,9 +246,7 @@ bool brn2_check_repeated(FileList *list) {
 
             if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
                                           hashes[i], indexes[i])) {
-                fprintf(stderr, RED"\"%s\""RESET
-                                " appears more than once in the buffer\n",
-                                newfile.name);
+                fprintf(stderr, repeated_format, newfile.name);
                 repeated = true;
             }
         }
@@ -263,9 +263,7 @@ bool brn2_check_repeated(FileList *list) {
             FileName newfile = list->files[i];
 
             if (!hash_set_insert(repeated_map, newfile.name)) {
-                fprintf(stderr, RED"\"%s\""RESET
-                                " appears more than once in the buffer\n",
-                                newfile.name);
+                fprintf(stderr, repeated_format, newfile.name);
                 repeated = true;
             }
         }
@@ -279,9 +277,7 @@ bool brn2_check_repeated(FileList *list) {
                 if (file_i.length != file_j.length)
                     continue;
                 if (!memcmp(file_i.name, file_j.name, file_i.length)) {
-                    fprintf(stderr, RED"\"%s\""RESET
-                                    " appears more than once in the buffer\n",
-                                    file_i.name);
+                    fprintf(stderr, repeated_format, file_i.name);
                     repeated = true;
                 }
             }
