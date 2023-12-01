@@ -19,7 +19,7 @@ LDFLAGS += -lm
 
 clang: CC=clang
 clang: clean
-clang: CFLAGS += -Weverything -Wno-unsafe-buffer-usage
+clang: CFLAGS += -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral
 clang: release
 
 release: CFLAGS += -O2 -flto
