@@ -18,16 +18,14 @@ CFLAGS += -Wextra -Wall
 LDFLAGS += -lm
 
 clang: CC=clang
-clang: clean
+clang: clean release
 clang: CFLAGS += -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral
-clang: release
 
 release: CFLAGS += -O2 -flto
 release: brn2
 
 debug: CFLAGS += -g -fsanitize=undefined
-debug: clean
-debug: brn2
+debug: clean brn2
 
 test: $(objs) test.c
 	$(CC) $(CFLAGS) -o $@ $(objs) test.c -lcmocka $(LDFLAGS)
