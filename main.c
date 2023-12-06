@@ -21,7 +21,7 @@
 #include "hash.h"
 #include "util.h"
 
-static struct option long_options[] = {
+static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
     {"help",    no_argument,       NULL, 'h'},
     {"quiet",   no_argument,       NULL, 'q'},
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     bool check = false;
     char *lines = NULL;
 
-    while ((opt = getopt_long(argc, argv, "f:chqv", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqv", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
