@@ -24,7 +24,8 @@
 #include "hash.h"
 #include "util.h"
 
-static void hash_test(void **state) {
+static void
+hash_test(void **state) {
     HashMap *set = hash_map_create(1000);
     assert_non_null(set);
     assert_true(hash_map_capacity(set) >= 1000);
@@ -46,7 +47,8 @@ static void hash_test(void **state) {
     return;
 }
 
-static bool contains_filename(FileList *list, FileName file) {
+static bool
+contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {
         if (!strcmp(list->files[i].name, file.name))
             return true;
@@ -54,7 +56,8 @@ static bool contains_filename(FileList *list, FileName file) {
     return false;
 }
 
-static void brn2_test(void **state) {
+static void
+brn2_test(void **state) {
     FileList *list1;
     FileList *list2;
     char *command = "ls -a > /tmp/brn2test";

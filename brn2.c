@@ -25,14 +25,16 @@ static int brn2_create_hashes(void *arg);
 static bool brn2_is_pwd_or_parent(char *);
 static bool brn2_check_repeated(FileList *);
 
-void brn2_free_list(FileList *list) {
+void
+brn2_free_list(FileList *list) {
     for (uint32 i = 0; i < list->length; i += 1)
         free(list->files[i].name);
     free(list);
     return;
 }
 
-FileList *brn2_list_from_args(int argc, char **argv) {
+FileList *
+brn2_list_from_args(int argc, char **argv) {
     FileList *list;
     uint32 length = 0;
 
@@ -54,7 +56,8 @@ FileList *brn2_list_from_args(int argc, char **argv) {
     return list;
 }
 
-FileList *brn2_list_from_dir(char *directory) {
+FileList *
+brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
@@ -91,7 +94,8 @@ FileList *brn2_list_from_dir(char *directory) {
     return list;
 }
 
-FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
+FileList *
+brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
     FILE *lines;
     uint32 length = 0;
@@ -142,7 +146,8 @@ FileList *brn2_list_from_lines(char *filename, uint32 capacity) {
     return list;
 }
 
-bool brn2_is_pwd_or_parent(char *filename) {
+bool
+brn2_is_pwd_or_parent(char *filename) {
     if (filename[0] == '.') {
         if ((filename[1] == '.') || (filename[1] == '\0'))
             return true;
@@ -152,7 +157,8 @@ bool brn2_is_pwd_or_parent(char *filename) {
     return false;
 }
 
-void brn2_normalize_names(FileList *list) {
+void
+brn2_normalize_names(FileList *list) {
     for (uint32 i = 0; i < list->length; i += 1) {
         FileName *file = &(list->files[i]);
         char *name = file->name;
@@ -181,7 +187,8 @@ void brn2_normalize_names(FileList *list) {
     return;
 }
 
-void brn2_copy_filename(FileName *file, char *name, uint32 length) {
+void
+brn2_copy_filename(FileName *file, char *name, uint32 length) {
     file->name = util_malloc(length + 1);
     memcpy(file->name, name, length + 1);
     file->length = length;
@@ -198,7 +205,8 @@ typedef struct Slice {
     uint32 unused;
 } Slice;
 
-int brn2_create_hashes(void *arg) {
+int
+brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -209,7 +217,8 @@ int brn2_create_hashes(void *arg) {
     thrd_exit(0);
 }
 
-bool brn2_check_repeated(FileList *list) {
+bool
+brn2_check_repeated(FileList *list) {
     char *repeated_format = RED"\"%s\""RESET
                             " appears more than once in the buffer\n";
     bool repeated = false;
@@ -286,7 +295,8 @@ bool brn2_check_repeated(FileList *list) {
     return repeated;
 }
 
-bool brn2_verify(FileList *old, FileList *new) {
+bool
+brn2_verify(FileList *old, FileList *new) {
     bool repeated = false;
 
     if (old->length != new->length) {
@@ -301,7 +311,8 @@ bool brn2_verify(FileList *old, FileList *new) {
     return !repeated;
 }
 
-uint32 brn2_get_number_changes(FileList *old, FileList *new) {
+uint32
+brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 number = 0;
 
     for (uint32 i = 0; i < old->length; i += 1) {
@@ -315,12 +326,14 @@ uint32 brn2_get_number_changes(FileList *old, FileList *new) {
     return number;
 }
 
-static inline int noop(const char *restrict unused, ...) {
+static inline int
+noop(const char *restrict unused, ...) {
     (void) unused;
     return 0;
 }
 
-uint32 brn2_execute(FileList *old, FileList *new,
+uint32
+brn2_execute(FileList *old, FileList *new,
                     const uint32 number_changes, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
@@ -413,7 +426,8 @@ uint32 brn2_execute(FileList *old, FileList *new,
 }
 
 
-void brn2_usage(FILE *stream) {
+void
+brn2_usage(FILE *stream) {
     fprintf(stream,
             "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
             "usage: brn2 [OPTIONS] -f <filename>\n"

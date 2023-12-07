@@ -24,7 +24,8 @@
 
 #include "util.h"
 
-void *util_malloc(const usize size) {
+void *
+util_malloc(const usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
@@ -33,7 +34,8 @@ void *util_malloc(const usize size) {
     return p;
 }
 
-void *util_realloc(void *old, const usize size) {
+void *
+util_realloc(void *old, const usize size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
         fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
@@ -43,7 +45,8 @@ void *util_realloc(void *old, const usize size) {
     return p;
 }
 
-void *util_calloc(const usize nmemb, const usize size) {
+void *
+util_calloc(const usize nmemb, const usize size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
         fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
@@ -53,7 +56,8 @@ void *util_calloc(const usize nmemb, const usize size) {
     return p;
 }
 
-char *util_strdup(char *string) {
+char *
+util_strdup(char *string) {
     char *p;
     if ((p = strdup(string)) == NULL) {
         fprintf(stderr, "Failed to allocate duplicate %s.\n", string);
@@ -62,7 +66,8 @@ char *util_strdup(char *string) {
     return p;
 }
 
-void *util_memdup(void *source, usize size) {
+void *
+util_memdup(void *source, usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
@@ -72,7 +77,8 @@ void *util_memdup(void *source, usize size) {
     return p;
 }
 
-void util_command(const int argc, char **argv) {
+void
+util_command(const int argc, char **argv) {
     switch (fork()) {
     case 0:
         if (!freopen("/dev/tty", "r", stdin))
