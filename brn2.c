@@ -426,8 +426,11 @@ void brn2_usage(FILE *stream) {
             "  -c, --check   : Check if original file names exist.\n"
             "\n"
             "Arguments:\n"
-            "  No arguments             : Rename filenames in the current working directory.\n"
-            "  1 or more arguments      : Rename filenames passed as arguments.\n"
-            "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
+            "  No arguments"
+            " : Rename filenames in the current working directory.\n"
+            "  1 or more arguments"
+            " : Rename filenames passed as arguments.\n"
+            "  -f <file>, --file=<file>"
+            " : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
