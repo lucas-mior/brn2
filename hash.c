@@ -45,7 +45,8 @@ struct HashMap {
     Bucket array[];
 };
 
-HashMap *hash_map_create(uint32 length) {
+HashMap *
+hash_map_create(uint32 length) {
     HashMap *map;
     uint32 size;
 
@@ -61,7 +62,8 @@ HashMap *hash_map_create(uint32 length) {
     return map;
 }
 
-void hash_map_destroy(HashMap *map) {
+void
+hash_map_destroy(HashMap *map) {
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &(map->array[i]);
         iterator = iterator->next;
@@ -75,7 +77,8 @@ void hash_map_destroy(HashMap *map) {
     return;
 }
 
-uint32 hash_function(char *str) {
+uint32
+hash_function(char *str) {
     /* djb2 hash function */
     uint32 hash = 5381;
     char c;
@@ -85,13 +88,16 @@ uint32 hash_function(char *str) {
     return hash;
 }
 
-bool hash_map_insert(HashMap *map, char *key, uint32 value) {
+bool
+hash_map_insert(HashMap *map, char *key, uint32 value) {
     uint32 hash = hash_function(key);
     uint32 index = hash % map->capacity;
     return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
 
-bool hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index, uint32 value) {
+bool
+hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
+				         uint32 index, uint32 value) {
     Bucket *iterator = &(map->array[index]);
 
     if (iterator->key == NULL) {
@@ -122,13 +128,15 @@ bool hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index
     return true;
 }
 
-void *hash_map_lookup(HashMap *map, char *key) {
+void *
+hash_map_lookup(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
     uint32 index = hash % map->capacity;
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
 
-void *hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
+void *
+hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
 
     if (iterator->key == NULL)
@@ -147,13 +155,15 @@ void *hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 inde
     return NULL;
 }
 
-bool hash_map_remove(HashMap *map, char *key) {
+bool
+hash_map_remove(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
     uint32 index = hash % map->capacity;
     return hash_map_remove_pre_calc(map, key, hash, index);
 }
 
-bool hash_map_remove_pre_calc(HashMap *map, char *key,
+bool
+hash_map_remove_pre_calc(HashMap *map, char *key,
                               uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
     Bucket *previous;
@@ -190,7 +200,8 @@ bool hash_map_remove_pre_calc(HashMap *map, char *key,
     return false;
 }
 
-void hash_map_print_summary(HashMap *map) {
+void
+hash_map_print_summary(HashMap *map) {
     printf("Hash map {\n");
     printf("  capacity: %u\n", map->capacity);
     printf("  length: %u\n", map->length);
@@ -200,7 +211,8 @@ void hash_map_print_summary(HashMap *map) {
     return;
 }
 
-void hash_map_print(HashMap *map, bool verbose) {
+void
+hash_map_print(HashMap *map, bool verbose) {
     hash_map_print_summary(map);
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
@@ -217,19 +229,23 @@ void hash_map_print(HashMap *map, bool verbose) {
     return;
 }
 
-uint32 hash_map_capacity(HashMap *map) {
+uint32
+hash_map_capacity(HashMap *map) {
     return map->capacity;
 }
 
-uint32 hash_map_length(HashMap *map) {
+uint32
+hash_map_length(HashMap *map) {
     return map->length;
 }
 
-uint32 hash_map_collisions(HashMap *map) {
+uint32
+hash_map_collisions(HashMap *map) {
     return map->collisions;
 }
 
-uint32 hash_map_expected_collisions(HashMap *map) {
+uint32
+hash_map_expected_collisions(HashMap *map) {
     long double n = map->length;
     long double m = map->capacity;
     long double result = n - m * (1 - powl((m - 1)/m, n));
