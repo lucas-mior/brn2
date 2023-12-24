@@ -21,6 +21,8 @@
 #include "hash.h"
 #include "util.h"
 
+char *program;
+
 static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
     {"help",    no_argument,       NULL, 'h'},
@@ -42,6 +44,8 @@ int main(int argc, char **argv) {
     bool quiet = false;
     bool check = false;
     char *lines = NULL;
+
+    program = argv[0];
 
     while ((opt = getopt_long(argc, argv, "f:chqv", options, NULL)) != -1) {
         switch (opt) {
