@@ -110,7 +110,7 @@ void error(char *format, ...) {
     va_end(args);
 
     if (n < 0) {
-        error("Error in vsnprintf()\n");
+        fprintf(stderr, "Error in vsnprintf()\n");
         exit(EXIT_FAILURE);
     }
 
@@ -121,14 +121,14 @@ void error(char *format, ...) {
     switch (fork()) {
         char *notifiers[2] = { "dunstify", "notify-send" };
         case -1:
-            error("Error forking: %s\n", strerror(errno));
+            fprintf(stderr, "Error forking: %s\n", strerror(errno));
             break;
         case 0:
             for (uint i = 0; i < LENGTH(notifiers); i += 1) {
                 execlp(notifiers[i], notifiers[i], "-u", "critical", 
                                      program, buffer, NULL);
             }
-            error("Error trying to exec dunstify.\n");
+            fprintf(stderr, "Error trying to exec dunstify.\n");
             break;
         default:
             break;
