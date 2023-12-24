@@ -64,12 +64,11 @@ brn2_list_from_dir(char *directory) {
 
     int n = scandir(directory, &directory_list, NULL, versionsort);
     if (n < 0) {
-        fprintf(stderr, "Error scanning \"%s\": %s\n",
-                        directory, strerror(errno));
+        error("Error scanning \"%s\": %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (n <= 2) {
-        fprintf(stderr, "Empty directory. Exiting.\n");
+        error("Empty directory. Exiting.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -101,7 +100,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     uint32 length = 0;
 
     if ((lines = fopen(filename, "r")) == NULL) {
-        fprintf(stderr, "Error opening \"%s\" for reading: %s\n",
+        error("Error opening \"%s\" for reading: %s\n",
                         filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -137,7 +136,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     fclose(lines);
 
     if (length == 0) {
-        fprintf(stderr, "Empty list. Exiting.\n");
+        error("Empty list. Exiting.\n");
         exit(EXIT_FAILURE);
     }
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
@@ -300,10 +299,10 @@ brn2_verify(FileList *old, FileList *new) {
     bool repeated = false;
 
     if (old->length != new->length) {
-        fprintf(stderr, "You are renaming "RED"%u"RESET" file%.*s "
-                        "but buffer contains "RED"%u"RESET" file name%.*s\n",
-                        old->length, old->length != 1, "s",
-                        new->length, new->length != 1, "s");
+        error("You are renaming "RED"%u"RESET" file%.*s "
+              "but buffer contains "RED"%u"RESET" file name%.*s\n",
+              old->length, old->length != 1, "s",
+              new->length, new->length != 1, "s");
         return false;
     }
 
@@ -403,16 +402,16 @@ brn2_execute(FileList *old, FileList *new,
 #else
         (void) newlength;
         if (!access(*newname, F_OK)) {
-            fprintf(stderr, "Can't rename \"%s\" to \"%s\": "
-                            "File already exists.\n", *oldname, *newname);
+            error("Can't rename \"%s\" to \"%s\": " "File already exists.\n",
+                  *oldname, *newname);
             continue;
         }
 #endif
         renamed = rename(*oldname, *newname);
         if (renamed < 0) {
-            fprintf(stderr, "Error renaming "RED"\"%s\""RESET
-                             "to "RED"\"%s\""RESET":\n", *oldname, *newname);
-            fprintf(stderr, "%s\n", strerror(errno));
+            error("Error renaming "RED"\"%s\""RESET "to "RED"\"%s\""RESET":\n",
+                  *oldname, *newname);
+            error("%s\n", strerror(errno));
             continue;
         } else {
             if (hash_set_insert(names_renamed, *oldname))
