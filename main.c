@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     bool check = false;
     char *lines = NULL;
 
-    program = argv[0];
+    program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv, "f:chqv", options, NULL)) != -1) {
         switch (opt) {
