@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <linux/limits.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -98,5 +99,6 @@ uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, const uint32, bool);
 void brn2_free_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));
+void error(char *, ...);
 
 #endif
