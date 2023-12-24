@@ -86,6 +86,8 @@ typedef struct FileList {
     FileName files[];
 } FileList;
 
+extern char *program;
+
 FileList *brn2_list_from_dir(char *);
 FileList *brn2_list_from_lines(char *, uint32);
 FileList *brn2_list_from_args(int, char **);
