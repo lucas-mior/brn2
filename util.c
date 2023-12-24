@@ -23,12 +23,13 @@
 #include <unistd.h>
 
 #include "util.h"
+#include "brn2.h"
 
 void *
 util_malloc(const usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu bytes.\n", size);
+        error("Failed to allocate %zu bytes.\n", size);
         exit(EXIT_FAILURE);
     }
     return p;
@@ -38,8 +39,8 @@ void *
 util_realloc(void *old, const usize size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
-        fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
-        fprintf(stderr, "Reallocating from: %p\n", old);
+        error("Failed to reallocate %zu bytes.\n", size);
+        error("Reallocating from: %p\n", old);
         exit(EXIT_FAILURE);
     }
     return p;
@@ -49,8 +50,7 @@ void *
 util_calloc(const usize nmemb, const usize size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
-        fprintf(stderr, "Failed to allocate %zu members of %zu bytes each.\n",
-                        nmemb, size);
+        error("Error allocating %zu members of %zu bytes each.\n", nmemb, size);
         exit(EXIT_FAILURE);
     }
     return p;
@@ -60,7 +60,7 @@ char *
 util_strdup(char *string) {
     char *p;
     if ((p = strdup(string)) == NULL) {
-        fprintf(stderr, "Failed to allocate duplicate %s.\n", string);
+        error("Error allocating duplicate \"%s\".\n", string);
         exit(EXIT_FAILURE);
     }
     return p;
@@ -70,7 +70,7 @@ void *
 util_memdup(void *source, usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
-        fprintf(stderr, "Failed to reallocate %zu bytes.\n", size);
+        error("Error reallocating %zu bytes.\n", size);
         exit(EXIT_FAILURE);
     }
     memcpy(p, source, size);
@@ -82,21 +82,57 @@ util_command(const int argc, char **argv) {
     switch (fork()) {
     case 0:
         if (!freopen("/dev/tty", "r", stdin))
-            fprintf(stderr, "Error reopening stdin: %s\n", strerror(errno));
+            error("Error reopening stdin: %s\n", strerror(errno));
         execvp(argv[0], argv);
-        fprintf(stderr, "Error running '%s", argv[0]);
+        error("Error running '%s", argv[0]);
         for (int i = 1; i < argc; i += 1)
-            fprintf(stderr, " %s", argv[i]);
-        fprintf(stderr, "': %s\n", strerror(errno));
+            error(" %s", argv[i]);
+        error("': %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     case -1:
-        fprintf(stderr, "Error forking: %s\n", strerror(errno));
+        error("Error forking: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     default:
         if (wait(NULL) < 0) {
-            fprintf(stderr, "Error waiting for the forked child: %s\n",
-                            strerror(errno));
+            error("Error waiting for the forked child: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
     }
+}
+
+void error(char *format, ...) {
+    int n;
+    va_list args;
+    char buffer[BUFSIZ];
+
+    va_start(args, format);
+    n = vsnprintf(buffer, sizeof (buffer) - 1, format, args);
+    va_end(args);
+
+    if (n < 0) {
+        error("Error in vsnprintf()\n");
+        exit(EXIT_FAILURE);
+    }
+
+    buffer[n] = '\0';
+    (void) write(STDERR_FILENO, buffer, (usize) n);
+
+#ifdef DEBUGGING
+    switch (fork()) {
+        char *notifiers[2] = { "dunstify", "notify-send" };
+        case -1:
+            error("Error forking: %s\n", strerror(errno));
+            break;
+        case 0:
+            for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+                execlp(notifiers[i], notifiers[i], "-u", "critical", 
+                                     program, buffer, NULL);
+            }
+            error("Error trying to exec dunstify.\n");
+            break;
+        default:
+            break;
+    }
+    exit(EXIT_FAILURE);
+#endif
 }

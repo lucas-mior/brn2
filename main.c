@@ -94,15 +94,14 @@ int main(int argc, char **argv) {
         }
 
         if (old->length == 0) {
-            fprintf(stderr, "All filenames to not exist.\n");
+            error("All filenames to not exist.\n");
             exit(EXIT_FAILURE);
         }
     }
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
-        fprintf(stderr, "EDITOR variable is not set. "
-                        "Using %s by default.\n", EDITOR);
+        error("EDITOR variable is not set. Using %s by default.\n", EDITOR);
     }
 
     {
@@ -113,19 +112,17 @@ int main(int argc, char **argv) {
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
         if (n < 0) {
-            fprintf(stderr, "Error printing buffer name.\n");
+            error("Error printing buffer name.\n");
             exit(EXIT_FAILURE);
         }
         buffer.name[sizeof (buffer.name) - 1] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
-            fprintf(stderr, "Error opening \"%s\": %s\n",
-                            buffer.name, strerror(errno));
+            error("Error opening \"%s\": %s\n", buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
         if ((buffer.stream = fdopen(buffer.fd, "w")) == NULL) {
-            fprintf(stderr, "Error opening \"%s\": %s\n",
-                            buffer.name, strerror(errno));
+            error("Error opening \"%s\": %s\n", buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -134,8 +131,8 @@ int main(int argc, char **argv) {
             FileName *file = &(old->files[i]);
 
             while (!hash_set_insert(repeated, file->name)) {
-                fprintf(stderr, RED"\"%s\""RESET" repeated in the buffer. "
-                                "Removing...\n", file->name);
+                error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
+                      file->name);
                 old->length -= 1;
                 if (old->length <= i)
                     goto close;
@@ -181,10 +178,10 @@ int main(int argc, char **argv) {
         if (number_changes)
             number_renames = brn2_execute(old, new, number_changes, quiet);
         if (number_changes != number_renames) {
-            fprintf(stderr, "%u name%.*s changed but %u file%.*s renamed. "
-                            "Check your files.\n",
-                            number_changes, number_changes != 1, "s",
-                            number_renames, number_renames != 1, "s");
+            error("%u name%.*s changed but %u file%.*s renamed. "
+                  "Check your files.\n",
+                  number_changes, number_changes != 1, "s",
+                  number_renames, number_renames != 1, "s");
             status = EXIT_FAILURE;
         } else {
             fprintf(stdout, "%u file%.*s renamed\n",
