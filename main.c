@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
         case '?':
             brn2_usage(stderr);
         case 'h':
-            brn2_usage(stderr);
+            brn2_usage(stdout);
         case 'c':
             check = true;
             break;
