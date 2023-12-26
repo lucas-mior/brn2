@@ -82,9 +82,8 @@ hash_function(char *str) {
     /* djb2 hash function */
     uint32 hash = 5381;
     char c;
-    while ((c = *str++)) {
+    while ((c = *str++))
         hash = ((hash << 5) + hash) + (uint32) c;
-    }
     return hash;
 }
 
@@ -163,8 +162,7 @@ hash_map_remove(HashMap *map, char *key) {
 }
 
 bool
-hash_map_remove_pre_calc(HashMap *map, char *key,
-                              uint32 hash, uint32 index) {
+hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
     Bucket *previous;
 
