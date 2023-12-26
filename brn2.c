@@ -101,7 +101,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
     if ((lines = fopen(filename, "r")) == NULL) {
         error("Error opening \"%s\" for reading: %s\n",
-                        filename, strerror(errno));
+              filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -172,8 +172,7 @@ brn2_normalize_names(FileList *list) {
         while (name[j] != '\0') {
             while (name[j] == '/' && name[j + 1] == '/') {
                 *length -= 1;
-                memmove(&name[j], &name[j + 1],
-                        (*length - j) * sizeof (*name));
+                memmove(&name[j], &name[j + 1], (*length - j) * sizeof (*name));
             }
             j += 1;
         }
@@ -333,7 +332,7 @@ noop(const char *restrict unused, ...) {
 
 uint32
 brn2_execute(FileList *old, FileList *new,
-                    const uint32 number_changes, bool quiet) {
+             const uint32 number_changes, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
