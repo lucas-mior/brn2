@@ -85,19 +85,41 @@ hash_map_balance(HashMap *old_map) {
 
     for (uint32 i = 0; i < old_map->capacity; i += 1) {
         Bucket *iterator = &(old_map->array[i]);
+
+        if (iterator->key) {
+            uint32 hash = iterator->hash;
+            uint32 index = hash % new_map->capacity;
+            hash_map_insert_pre_calc(new_map, iterator->key,
+                                     hash, index, iterator->value);
+        }
+        iterator = iterator->next;
+
         while (iterator) {
-            if (iterator->key) {
-                uint32 hash = iterator->hash;
-                uint32 index = hash % new_map->capacity;
-                hash_map_insert_pre_calc(new_map, iterator->key,
-                                         hash, index, iterator->value);
-            }
+            uint32 hash = iterator->hash;
+            uint32 index = hash % new_map->capacity;
+            hash_map_insert_pre_calc(new_map, iterator->key,
+                                     hash, index, iterator->value);
+
+            void *aux = iterator;
             iterator = iterator->next;
+            free(aux);
         }
     }
 
-    hash_map_destroy(old_map);
+    free(old_map);
     return new_map;
+}
+
+void
+hash_map_free_keys(HashMap *map) {
+    for (int i = 0; i < hash_map_capacity(map); i += 1) {
+        Bucket *iterator = &(map->array[i]);
+        while (iterator) {
+            free(iterator->key);
+            iterator = iterator->next;
+        }
+    }
+    return;
 }
 
 void

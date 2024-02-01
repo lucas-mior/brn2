@@ -41,6 +41,7 @@ typedef ssize_t isize;
 
 HashMap *hash_map_create(uint32);
 HashMap *hash_map_balance(HashMap *);
+void hash_map_free_keys(HashMap *);
 void hash_map_destroy(HashMap *);
 uint32 hash_function(char *);
 bool hash_map_insert(HashMap *, char *, uint32);
