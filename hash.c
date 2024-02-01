@@ -62,6 +62,42 @@ hash_map_create(uint32 length) {
     return map;
 }
 
+HashMap *
+hash_map_balance(HashMap *old_map) {
+    HashMap *new_map;
+    uint32 size;
+    uint32 length;
+
+    if (old_map->capacity < (UINT32_MAX/4)) {
+        length = old_map->capacity*4;
+    } else if (old_map->capacity >= UINT32_MAX) {
+        fprintf(stderr, "Error balancing hash map. Too big table.\n");
+        return old_map;
+    } else {
+        length = UINT32_MAX;
+    }
+
+    size = sizeof (*new_map) + length * sizeof (new_map->array[0]);
+
+    new_map = util_malloc(size);
+    memset(new_map, 0, size);
+    new_map->capacity = length;
+
+    for (uint32 i = 0; i < old_map->capacity; i += 1) {
+        Bucket *iterator = &(old_map->array[i]);
+        while (iterator) {
+            uint32 hash = iterator->hash;
+            uint32 index = hash % new_map->capacity;
+            hash_map_insert_pre_calc(new_map, iterator->key,
+                                     hash, index, iterator->value);
+            iterator = iterator->next;
+        }
+    }
+
+    hash_map_destroy(old_map);
+    return new_map;
+}
+
 void
 hash_map_destroy(HashMap *map) {
     for (uint32 i = 0; i < map->capacity; i += 1) {
