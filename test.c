@@ -41,23 +41,30 @@ char *random_string(void) {
     return random;
 }
 
-#define NSTRINGS 100
+#define NSTRINGS 4096
 
 static void
 hash_test(void **state) {
-    HashMap *set = hash_map_create(200);
+    HashMap *set = hash_map_create(NSTRINGS);
     assert_non_null(set);
-    assert_true(hash_map_capacity(set) >= 200);
+    assert_true(hash_map_capacity(set) >= NSTRINGS);
 
     assert_true(hash_map_insert(set, "a", 0));
     assert_false(hash_map_insert(set, "a", 1));
     assert_true(hash_map_insert(set, "b", 2));
 
-    for (int i = 0; i < NSTRINGS; i += 1)
-        assert_true(hash_map_insert(set, random_string(), rand()));
+    for (int i = 0; i < NSTRINGS; i += 1) {
+        char *key = random_string();
+        int value = rand();
+        assert_true(hash_map_insert(set, key, value));
+    }
 
     printf("Before balance:\n");
-    hash_map_print(set, true);
+    hash_map_print_summary(set);
+
+    set = hash_map_balance(set);
+    printf("After balance:\n");
+    hash_map_print_summary(set);
 
     assert_true(hash_map_length(set) == (2 + NSTRINGS));
     assert_true(*(uint32 *) hash_map_lookup(set, "a") == 0);
@@ -67,10 +74,6 @@ hash_test(void **state) {
     assert_true(hash_map_remove(set, "b"));
 
     assert_true(hash_map_length(set) == (1 + NSTRINGS));
-
-    set = hash_map_balance(set);
-    printf("After balance:\n");
-    hash_map_print(set, true);
 
     hash_map_destroy(set);
     (void) state;
