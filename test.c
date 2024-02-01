@@ -30,18 +30,16 @@ char *random_string(void) {
     srand(t.tv_nsec);
 
     const char ALLOWED[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    char *random = util_malloc(11);
-    int c = 0;
-    int nbAllowed = sizeof(ALLOWED)-1;
+    char *random_string = util_malloc(11);
 
     for (int i = 0; i < 10; i += 1) {
-        c = rand() % nbAllowed;
-        random[i] = ALLOWED[c];
+        int c = rand() % (sizeof(ALLOWED) - 1);
+        random_string[i] = ALLOWED[c];
     }
 
-    random[10] = '\0';
+    random_string[10] = '\0';
 
-    return random;
+    return random_string;
 }
 
 #define NSTRINGS 4096
