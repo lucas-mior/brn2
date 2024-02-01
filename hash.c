@@ -86,10 +86,12 @@ hash_map_balance(HashMap *old_map) {
     for (uint32 i = 0; i < old_map->capacity; i += 1) {
         Bucket *iterator = &(old_map->array[i]);
         while (iterator) {
-            uint32 hash = iterator->hash;
-            uint32 index = hash % new_map->capacity;
-            hash_map_insert_pre_calc(new_map, iterator->key,
-                                     hash, index, iterator->value);
+            if (iterator->key) {
+                uint32 hash = iterator->hash;
+                uint32 index = hash % new_map->capacity;
+                hash_map_insert_pre_calc(new_map, iterator->key,
+                                         hash, index, iterator->value);
+            }
             iterator = iterator->next;
         }
     }
