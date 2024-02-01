@@ -25,7 +25,10 @@
 #include "util.h"
 
 char *random_string(void) {
-    /* srand(time(NULL)); // define a seed for the random number generator */
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+    srand(t.tv_nsec);
+
     const char ALLOWED[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *random = util_malloc(11);
     int c = 0;
