@@ -24,24 +24,54 @@
 #include "hash.h"
 #include "util.h"
 
+char *random_string(void) {
+    /* srand(time(NULL)); // define a seed for the random number generator */
+    const char ALLOWED[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+    char *random = util_malloc(11);
+    int c = 0;
+    int nbAllowed = sizeof(ALLOWED)-1;
+
+    for (int i = 0; i < 10; i += 1) {
+        c = rand() % nbAllowed;
+        random[i] = ALLOWED[c];
+    }
+
+    random[10] = '\0';
+
+    return random;
+}
+
+#define NSTRINGS 100
+
 static void
 hash_test(void **state) {
-    HashMap *set = hash_map_create(1000);
+    HashMap *set = hash_map_create(200);
     assert_non_null(set);
-    assert_true(hash_map_capacity(set) >= 1000);
+    assert_true(hash_map_capacity(set) >= 200);
 
     assert_true(hash_map_insert(set, "a", 0));
     assert_false(hash_map_insert(set, "a", 1));
     assert_true(hash_map_insert(set, "b", 2));
 
-    assert_true(hash_map_length(set) == 2);
+    for (int i = 0; i < NSTRINGS; i += 1)
+        assert_true(hash_map_insert(set, random_string(), rand()));
+
+    printf("Before balance:\n");
+    hash_map_print(set, true);
+
+    assert_true(hash_map_length(set) == (2 + NSTRINGS));
     assert_true(*(uint32 *) hash_map_lookup(set, "a") == 0);
     assert_null(hash_map_lookup(set, "c"));
 
     assert_false(hash_map_remove(set, "c"));
     assert_true(hash_map_remove(set, "b"));
 
-    assert_true(hash_map_length(set) == 1);
+    assert_true(hash_map_length(set) == (1 + NSTRINGS));
+
+    set = hash_map_balance(set);
+    printf("After balance:\n");
+    hash_map_print(set, true);
+
     hash_map_destroy(set);
     (void) state;
     return;
