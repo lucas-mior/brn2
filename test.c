@@ -65,9 +65,11 @@ hash_test(void **state) {
     printf("Before balance:\n");
     hash_map_print_summary(set);
 
+    uint32 collisions_before = hash_map_collisions(set);
     set = hash_map_balance(set);
     printf("After balance:\n");
     hash_map_print_summary(set);
+    assert_true(collisions_before > hash_map_collisions(set));
 
     assert_true(hash_map_length(set) == (2 + NSTRINGS));
     assert_true(*(uint32 *) hash_map_lookup(set, "a") == 0);
