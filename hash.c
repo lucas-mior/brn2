@@ -95,12 +95,13 @@ hash_map_balance(HashMap *old_map) {
         iterator = iterator->next;
 
         while (iterator) {
+            void *aux;
             uint32 hash = iterator->hash;
             uint32 index = hash % new_map->capacity;
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
 
-            void *aux = iterator;
+            aux = iterator;
             iterator = iterator->next;
             free(aux);
         }
@@ -112,7 +113,7 @@ hash_map_balance(HashMap *old_map) {
 
 void
 hash_map_free_keys(HashMap *map) {
-    for (int i = 0; i < hash_map_capacity(map); i += 1) {
+    for (uint32 i = 0; i < hash_map_capacity(map); i += 1) {
         Bucket *iterator = &(map->array[i]);
         while (iterator) {
             free(iterator->key);
