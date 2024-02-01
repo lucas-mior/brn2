@@ -48,39 +48,39 @@ char *random_string(void) {
 
 static void
 hash_test(void **state) {
-    HashMap *set = hash_map_create(NSTRINGS);
-    assert_non_null(set);
-    assert_true(hash_map_capacity(set) >= NSTRINGS);
+    HashMap *map = hash_map_create(NSTRINGS);
+    assert_non_null(map);
+    assert_true(hash_map_capacity(map) >= NSTRINGS);
 
-    assert_true(hash_map_insert(set, "a", 0));
-    assert_false(hash_map_insert(set, "a", 1));
-    assert_true(hash_map_insert(set, "b", 2));
+    assert_true(hash_map_insert(map, "a", 0));
+    assert_false(hash_map_insert(map, "a", 1));
+    assert_true(hash_map_insert(map, "b", 2));
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
         int value = rand();
-        assert_true(hash_map_insert(set, key, value));
+        assert_true(hash_map_insert(map, key, value));
     }
 
-    printf("Before balance:\n");
-    hash_map_print_summary(set);
+    printf("\nOriginal hash map:\n");
+    hash_map_print_summary(map);
 
-    uint32 collisions_before = hash_map_collisions(set);
-    set = hash_map_balance(set);
-    printf("After balance:\n");
-    hash_map_print_summary(set);
-    assert_true(collisions_before > hash_map_collisions(set));
+    uint32 collisions_before = hash_map_collisions(map);
+    map = hash_map_balance(map);
+    printf("\nAfter balance:\n");
+    hash_map_print_summary(map);
+    assert_true(collisions_before > hash_map_collisions(map));
 
-    assert_true(hash_map_length(set) == (2 + NSTRINGS));
-    assert_true(*(uint32 *) hash_map_lookup(set, "a") == 0);
-    assert_null(hash_map_lookup(set, "c"));
+    assert_true(hash_map_length(map) == (2 + NSTRINGS));
+    assert_true(*(uint32 *) hash_map_lookup(map, "a") == 0);
+    assert_null(hash_map_lookup(map, "c"));
 
-    assert_false(hash_map_remove(set, "c"));
-    assert_true(hash_map_remove(set, "b"));
+    assert_false(hash_map_remove(map, "c"));
+    assert_true(hash_map_remove(map, "b"));
 
-    assert_true(hash_map_length(set) == (1 + NSTRINGS));
+    assert_true(hash_map_length(map) == (1 + NSTRINGS));
 
-    hash_map_destroy(set);
+    hash_map_destroy(map);
     (void) state;
     return;
 }
