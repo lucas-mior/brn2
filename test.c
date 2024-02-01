@@ -24,7 +24,8 @@
 #include "hash.h"
 #include "util.h"
 
-char *random_string(void) {
+static char *
+random_string(void) {
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC_RAW, &t);
     srand(t.tv_nsec);
