@@ -79,6 +79,9 @@ hash_test(void **state) {
 
     assert_true(hash_map_length(map) == (1 + NSTRINGS));
 
+    assert_true(hash_map_remove(map, "a"));
+
+    hash_map_free_keys(map);
     hash_map_destroy(map);
     (void) state;
     return;
