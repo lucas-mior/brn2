@@ -27,9 +27,8 @@ release: brn2
 debug: CFLAGS += -g -fsanitize=undefined
 debug: clean brn2
 
-test: $(objs) test.c
-	$(CC) $(CFLAGS) -o $@ $(objs) test.c -lcmocka $(LDFLAGS)
-	./test
+test: util.c hash.c brn2.c
+	./test.sh
 
 brn2: $(objs) main.c
 	-ctags --kinds-C=+l *.h *.c
@@ -48,4 +47,4 @@ uninstall: all
 	rm -f $(DESTDIR)$(PREFIX)/man/man1/brn2.1
 
 clean:
-	rm -rf ./brn2 *.o ./test
+	rm -rf ./brn2 *.o
