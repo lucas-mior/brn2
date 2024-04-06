@@ -469,7 +469,7 @@ int main(int argc, char **argv) {
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
     system(command);
-    list1 = brn2_list_from_dir("..");
+    list1 = brn2_list_from_dir(".");
     list2 = brn2_list_from_lines(file, 0);
 
     assert(list1->length == list2->length);

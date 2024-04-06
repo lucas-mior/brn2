@@ -2,7 +2,6 @@
 
 for src in *.c; do
     [ "$src" = "main.c" ] && continue
-    [ "$src" != "util.c" ] && continue
     printf "Testing $src...\n"
 
     flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
