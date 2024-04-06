@@ -446,3 +446,15 @@ brn2_usage(FILE *stream) {
             " : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
+
+#ifndef MAIN
+#define MAIN 0
+#endif
+
+#if MAIN
+// flags: hash.o util.o
+int main(int argc, char **argv) {
+    brn2_usage(stdout);
+    exit(0);
+}
+#endif
