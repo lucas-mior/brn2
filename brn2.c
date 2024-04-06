@@ -20,6 +20,7 @@
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
+#include <assert.h>
 
 static int brn2_create_hashes(void *arg);
 static bool brn2_is_pwd_or_parent(char *);
@@ -452,9 +453,33 @@ brn2_usage(FILE *stream) {
 #endif
 
 #if MAIN
+static bool
+contains_filename(FileList *list, FileName file) {
+    for (uint32 i = 0; i < list->length; i += 1) {
+        if (!strcmp(list->files[i].name, file.name))
+            return true;
+    }
+    return false;
+}
 // flags: hash.o util.o
+
 int main(int argc, char **argv) {
-    brn2_usage(stdout);
+    FileList *list1;
+    FileList *list2;
+    char *command = "ls -a > /tmp/brn2test";
+    char *file = command + 8;
+    system(command);
+    list1 = brn2_list_from_dir("..");
+    list2 = brn2_list_from_lines(file, 0);
+
+    assert(list1->length == list2->length);
+
+    for (uint32 i = 0; i < list1->length; i += 1)
+        assert(contains_filename(list2, list1->files[i]));
+
+    brn2_free_list(list1);
+    brn2_free_list(list2);
+    unlink(file);
     exit(0);
 }
 #endif
