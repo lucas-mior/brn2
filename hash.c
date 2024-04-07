@@ -320,6 +320,12 @@ hash_map_expected_collisions(HashMap *map) {
 #include "hash.h"
 #include "util.h"
 
+#ifndef TESTING_THIS_FILE
+#define TESTING_THIS_FILE 0
+#endif
+
+#if TESTING_THIS_FILE
+
 static char *
 random_string(void) {
     struct timespec t;
@@ -339,12 +345,6 @@ random_string(void) {
     return random_string;
 }
 
-
-#ifndef MAIN
-#define MAIN 0
-#endif
-
-#if MAIN
 // flags: util.o -lm
 #define NSTRINGS 4096
 int main(int argc, char **argv) {

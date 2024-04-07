@@ -60,10 +60,16 @@ util_calloc(const usize nmemb, const usize size) {
 char *
 util_strdup(char *string) {
     char *p;
-    if ((p = strdup(string)) == NULL) {
-        error("Error allocating duplicate \"%s\".\n", string);
+    size_t length;
+
+    length = strlen(string) + 1;
+    if ((p = malloc(length)) == NULL) {
+        error("Error allocating %zi bytes to duplicate \"%s\".\n",
+               length, string);
         exit(EXIT_FAILURE);
     }
+
+    memcpy(p, string, length);
     return p;
 }
 
@@ -138,11 +144,11 @@ void error(char *format, ...) {
 #endif
 }
 
-#ifndef MAIN
-#define MAIN 0
+#ifndef TESTING_THIS_FILE
+#define TESTING_THIS_FILE 0
 #endif
 
-#if MAIN
+#if TESTING_THIS_FILE
 int main(int argc, char **argv) {
     assert(true);
     exit(0);
