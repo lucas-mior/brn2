@@ -448,11 +448,11 @@ brn2_usage(FILE *stream) {
     exit((int)(stream != stdout));
 }
 
-#ifndef MAIN
-#define MAIN 0
+#ifndef TESTING_THIS_FILE
+#define TESTING_THIS_FILE 0
 #endif
 
-#if MAIN
+#if TESTING_THIS_FILE
 static bool
 contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {
