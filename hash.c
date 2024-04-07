@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -25,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "brn2.h"
 #include "hash.h"
 #include "util.h"
 
@@ -311,14 +313,6 @@ hash_map_expected_collisions(HashMap *map) {
     long double result = n - m * (1 - powl((m - 1)/m, n));
     return (uint32) (roundl(result));
 }
-
-#include <stdlib.h>
-#include <stdarg.h>
-#include <setjmp.h>
-
-#include "brn2.h"
-#include "hash.h"
-#include "util.h"
 
 #ifndef TESTING_THIS_FILE
 #define TESTING_THIS_FILE 0
