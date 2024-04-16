@@ -233,12 +233,19 @@ brn2_check_repeated(FileList *list) {
         HashMap *repeated_map = hash_map_create(list->length);
         uint32 range = list->length / nthreads;
 
-        for (uint32 i = 0; i < nthreads; i += 1) {
+        for (uint32 i = 0; i < (nthreads - 1); i += 1) {
             slices[i].start = i*range;
-            if (i == nthreads - 1)
-                slices[i].end = list->length;
-            else
-                slices[i].end = (i + 1)*range;
+            slices[i].end = (i + 1)*range;
+            slices[i].files = list->files;
+            slices[i].hashes = hashes;
+            slices[i].indexes = indexes;
+            slices[i].map_capacity = hash_map_capacity(repeated_map);
+            thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
+        }
+        {
+            uint32 i = nthreads - 1;
+            slices[i].start = i*range;
+            slices[i].end = list->length;
             slices[i].files = list->files;
             slices[i].hashes = hashes;
             slices[i].indexes = indexes;
