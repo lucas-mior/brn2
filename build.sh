@@ -7,10 +7,12 @@ testing () {
 
         flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
         set -x
-        $CC -D TESTING_THIS_FILE=1 $src -o $src.exe $flags \
-            || printf "${RED}Failed to compile $src, is main() defined? ${RES}\n"
+        if $CC -D TESTING_THIS_FILE=1 $src -o $src.exe $flags; then
+            ./$src.exe
+        else
+            printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
+        fi
 
-        ./$src.exe
         set +x 
     done
     rm *.exe
