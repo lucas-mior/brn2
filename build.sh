@@ -6,10 +6,12 @@ testing () {
         printf "Testing $src...\n"
 
         flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
+        set -x
         $CC -D TESTING_THIS_FILE=1 $src -o $src.exe $flags \
             || printf "${RED}Failed to compile $src, is main() defined? ${RES}\n"
 
         ./$src.exe
+        set +x 
     done
     rm *.exe
 }
@@ -41,8 +43,7 @@ if [ "$1" == "uninstall" ]; then
 elif [ "$1" == "test" ]; then
     testing
 elif [ "$1" == "install" ]; then
-    echo "DESTDIR: $DESTDIR"
-    echo "PREFIX: $PREFIX"
+    set -x
     install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
     install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
 else
