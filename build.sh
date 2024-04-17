@@ -24,19 +24,19 @@ DESTDIR="${DESTDIR:-/}"
 
 SRC=$(ls *.c)
 
-CFLAGS+=" -std=c99 -D_DEFAULT_SOURCE "
-CFLAGS+=" -Wextra -Wall -Wno-disabled-macro-expansion "
-LDFLAGS+=" -lm "
+CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
+CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion "
+LDFLAGS="$LDFLAGS -lm "
 
 CC=${CC:-clang}
 if [ $CC = "clang" ]; then
-    CFLAGS+=" -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
+    CFLAGS="$CFLAGS -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
 fi
 
 if [ "$target" = "debug" ]; then
-    CFLAGS+=" -g -fsanitize=undefined "
+    CFLAGS="$CFLAGS -g -fsanitize=undefined "
 else
-    CFLAGS+=" -O2 -flto "
+    CFLAGS="$CFLAGS -O2 -flto "
 fi
 
 if [ "$target" = "uninstall" ]; then
