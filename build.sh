@@ -46,8 +46,8 @@ elif [ "$1" == "install" ]; then
     install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
     install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
 else
+	ctags --kinds-C=+l *.h *.c 2> /dev/null || true
+	vtags.sed tags > .tags.vim 2> /dev/null || true
     set -x
-	ctags --kinds-C=+l *.h *.c
-	vtags.sed tags > .tags.vim
     $CC $CFLAGS -o brn2 main.c $LDFLAGS
 fi
