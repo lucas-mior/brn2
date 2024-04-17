@@ -24,6 +24,11 @@
 #include "hash.h"
 #include "util.h"
 
+#include <errno.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
 
