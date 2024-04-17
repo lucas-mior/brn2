@@ -55,5 +55,5 @@ elif [ "$target" = "build" ] || [ "$target" = "debug" ]; then
     set -x
     $CC $CFLAGS -o brn2 main.c $LDFLAGS
 else
-    echo "usahe: $0 [ uninstall / test / install / build / debug ]"
+    echo "usage: $0 [ uninstall / test / install / build / debug ]"
 fi
