@@ -19,12 +19,12 @@ testing () {
 }
 
 PREFIX="${PREFIX:-/usr/local}"
-DESTDIR="${DESTDIT:-/}"
+DESTDIR="${DESTDIR:-/}"
 
 SRC=$(ls *.c)
 
 CFLAGS+=" -std=c99 -D_DEFAULT_SOURCE "
-CFLAGS+=" -Wextra -Wall "
+CFLAGS+=" -Wextra -Wall -Wno-disabled-macro-expansion "
 LDFLAGS+=" -lm "
 
 CC=${CC:-clang}
