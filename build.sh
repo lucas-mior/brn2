@@ -32,10 +32,10 @@ if [ $CC = "clang" ]; then
     CFLAGS+=" -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
 fi
 
-if [ "$1" == "release" ]; then
-    CFLAGS+=" -O2 -flto "
-else
+if [ "$1" == "debug" ]; then
     CFLAGS+=" -g -fsanitize=undefined "
+else
+    CFLAGS+=" -O2 -flto "
 fi
 
 if [ "$1" == "uninstall" ]; then
