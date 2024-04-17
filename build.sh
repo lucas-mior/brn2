@@ -19,6 +19,7 @@ testing () {
 }
 
 PREFIX="${PREFIX:-/usr/local}"
+DESTDIR="${DESTDIT:-/}"
 
 SRC=$(ls *.c)
 
@@ -36,7 +37,6 @@ if [ "$1" == "release" ]; then
 else
     CFLAGS+=" -g -fsanitize=undefined "
 fi
-
 
 if [ "$1" == "uninstall" ]; then
     set -x
