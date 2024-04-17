@@ -18,6 +18,7 @@ testing () {
     rm *.exe
 }
 
+target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
@@ -32,25 +33,27 @@ if [ $CC = "clang" ]; then
     CFLAGS+=" -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
 fi
 
-if [ "$1" == "debug" ]; then
+if [ "$target" = "debug" ]; then
     CFLAGS+=" -g -fsanitize=undefined "
 else
     CFLAGS+=" -O2 -flto "
 fi
 
-if [ "$1" == "uninstall" ]; then
+if [ "$target" = "uninstall" ]; then
     set -x
 	rm -f ${DESTDIR}${PREFIX}/bin/brn2
 	rm -f ${DESTDIR}${PREFIX}/man/man1/brn2.1
-elif [ "$1" == "test" ]; then
+elif [ "$target" = "test" ]; then
     testing
-elif [ "$1" == "install" ]; then
+elif [ "$target" = "install" ]; then
     set -x
     install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
     install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
-else
+elif [ "$target" = "build" ]; then
 	ctags --kinds-C=+l *.h *.c 2> /dev/null || true
 	vtags.sed tags > .tags.vim 2> /dev/null || true
     set -x
     $CC $CFLAGS -o brn2 main.c $LDFLAGS
+else
+    echo "usahe: $0 [ uninstall / test / install / build ]"
 fi
