@@ -40,21 +40,27 @@ else
     CFLAGS="$CFLAGS -O2 -flto "
 fi
 
-if [ "$target" = "uninstall" ]; then
-    set -x
-	rm -f ${DESTDIR}${PREFIX}/bin/brn2
-	rm -f ${DESTDIR}${PREFIX}/man/man1/brn2.1
-elif [ "$target" = "test" ]; then
-    testing
-elif [ "$target" = "install" ]; then
-    set -x
-    install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
-    install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
-elif [ "$target" = "build" ] || [ "$target" = "debug" ]; then
-	ctags --kinds-C=+l *.h *.c 2> /dev/null || true
-	vtags.sed tags > .tags.vim 2> /dev/null || true
-    set -x
-    $CC $CFLAGS -o brn2 main.c $LDFLAGS
-else
-    echo "usage: $0 [ uninstall / test / install / build / debug ]"
-fi
+case "$target" in
+    "uninstall")
+        set -x
+        rm -f ${DESTDIR}${PREFIX}/bin/brn2
+        rm -f ${DESTDIR}${PREFIX}/man/man1/brn2.1
+        ;;
+    "test")
+        testing
+        ;;
+    "install")
+        set -x
+        install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
+        install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
+        ;;
+    "build"|"debug")
+        ctags --kinds-C=+l *.h *.c 2> /dev/null || true
+        vtags.sed tags > .tags.vim 2> /dev/null || true
+        set -x
+        $CC $CFLAGS -o brn2 main.c $LDFLAGS
+        ;;
+    *)
+        echo "usage: $0 [ uninstall / test / install / build / debug ]"
+        ;;
+esac
