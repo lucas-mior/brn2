@@ -23,7 +23,6 @@
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
-#include <assert.h>
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
@@ -471,6 +470,8 @@ brn2_usage(FILE *stream) {
 #endif
 
 #if TESTING_THIS_FILE
+#include <assert.h>
+
 static bool
 contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {

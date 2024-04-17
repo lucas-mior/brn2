@@ -18,7 +18,6 @@
 #ifndef UTIL_C
 #define UTIL_C
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,10 +151,13 @@ void error(char *format, ...) {
 #endif
 
 #if TESTING_THIS_FILE
+#include <assert.h>
+
 int main(int argc, char **argv) {
     assert(true);
     exit(0);
 }
+
 #endif
 
 #endif

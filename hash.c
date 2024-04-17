@@ -18,9 +18,7 @@
 #ifndef HASH_C
 #define HASH_C
 
-#include <assert.h>
 #include <math.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -329,6 +327,7 @@ hash_map_expected_collisions(HashMap *map) {
 #endif
 
 #if TESTING_THIS_FILE
+#include <assert.h>
 
 static char *
 random_string(void) {
