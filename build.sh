@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-function test () {
+testing () {
     for src in *.c; do
         [ "$src" = "main.c" ] && continue
         printf "Testing $src...\n"
@@ -28,7 +28,7 @@ if [ $CC = "clang" ]; then
     CFLAGS+=" -Weverything -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
 fi
 
-if [ "$1" == "release"]; then
+if [ "$1" == "release" ]; then
     CFLAGS+=" -O2 -flto "
 else
     CFLAGS+=" -g -fsanitize=undefined "
@@ -39,6 +39,8 @@ if [ "$1" == "uninstall" ]; then
     set -x
 	rm -f ${DESTDIR}${PREFIX}/bin/brn2
 	rm -f ${DESTDIR}${PREFIX}/man/man1/brn2.1
+elif [ "$1" == "test" ]; then
+    testing
 else
     set -x
 	ctags --kinds-C=+l *.h *.c
