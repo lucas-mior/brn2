@@ -24,16 +24,12 @@
 #define _GNU_SOURCE
 #endif
 #include <dirent.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <linux/limits.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <threads.h>
 #include <unistd.h>
 
