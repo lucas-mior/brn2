@@ -15,6 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef HASH_C
+#define HASH_C
+
 #include <assert.h>
 #include <math.h>
 #include <stdarg.h>
@@ -29,6 +32,13 @@
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
+
+#pragma push_macro("TESTING_THIS_FILE")
+#define TESTING_THIS_FILE 0
+
+#include "util.c"
+
+#pragma pop_macro("TESTING_THIS_FILE")
 
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -339,7 +349,7 @@ random_string(void) {
     return random_string;
 }
 
-// flags: util.o -lm
+// flags: -lm
 #define NSTRINGS 4096
 int main(int argc, char **argv) {
     HashMap *map = hash_map_create(NSTRINGS);
@@ -380,4 +390,6 @@ int main(int argc, char **argv) {
     hash_map_destroy(map);
     exit(0);
 }
+#endif
+
 #endif

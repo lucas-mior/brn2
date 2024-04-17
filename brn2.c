@@ -17,10 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef BRN2_C
+#define BRN2_C
+
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
 #include <assert.h>
+
+#pragma push_macro("TESTING_THIS_FILE")
+#define TESTING_THIS_FILE 0
+
+#include "hash.c"
+#include "util.c"
+
+#pragma pop_macro("TESTING_THIS_FILE")
 
 static int brn2_create_hashes(void *arg);
 static bool brn2_is_pwd_or_parent(char *);
@@ -468,7 +479,7 @@ contains_filename(FileList *list, FileName file) {
     }
     return false;
 }
-// flags: hash.o util.o
+// flags: -lm
 
 int main(int argc, char **argv) {
     FileList *list1;
@@ -490,4 +501,6 @@ int main(int argc, char **argv) {
     unlink(file);
     exit(0);
 }
+#endif
+
 #endif
