@@ -25,7 +25,7 @@ DESTDIR="${DESTDIR:-/}"
 SRC=$(ls *.c)
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
-CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion "
+CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion -Wno-unused-macros"
 LDFLAGS="$LDFLAGS -lm "
 
 CC=${CC:-clang}

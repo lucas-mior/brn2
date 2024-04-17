@@ -370,6 +370,7 @@ int main(int argc, char **argv) {
 
     uint32 collisions_before = hash_map_collisions(map);
     map = hash_map_balance(map);
+
     printf("\nAfter balance:\n");
     hash_map_print_summary(map);
     assert(collisions_before > hash_map_collisions(map));
