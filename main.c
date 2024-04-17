@@ -21,6 +21,10 @@
 #include "hash.h"
 #include "util.h"
 
+#include "brn2.c"
+#include "hash.c"
+#include "util.c"
+
 char *program;
 
 static struct option options[] = {
