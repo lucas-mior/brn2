@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 testing () {
     for src in *.c; do
         [ "$src" = "main.c" ] && continue
@@ -41,12 +40,14 @@ if [ "$1" == "uninstall" ]; then
 	rm -f ${DESTDIR}${PREFIX}/man/man1/brn2.1
 elif [ "$1" == "test" ]; then
     testing
+elif [ "$1" == "install" ]; then
+    echo "DESTDIR: $DESTDIR"
+    echo "PREFIX: $PREFIX"
+    install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
+    install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
 else
     set -x
 	ctags --kinds-C=+l *.h *.c
 	vtags.sed tags > .tags.vim
     $CC $CFLAGS -o brn2 main.c $LDFLAGS
-
-    install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
-    install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
 fi
