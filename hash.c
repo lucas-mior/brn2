@@ -332,18 +332,20 @@ hash_map_expected_collisions(HashMap *map) {
 static char *
 random_string(void) {
     struct timespec t;
+    int length;
     clock_gettime(CLOCK_MONOTONIC_RAW, &t);
     srand(t.tv_nsec);
 
     const char ALLOWED[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    char *random_string = util_malloc(11);
+    length = 5 + rand() % 20;
+    char *random_string = util_malloc(length + 1);
 
-    for (int i = 0; i < 10; i += 1) {
+    for (int i = 0; i < length; i += 1) {
         int c = rand() % (sizeof(ALLOWED) - 1);
         random_string[i] = ALLOWED[c];
     }
 
-    random_string[10] = '\0';
+    random_string[length] = '\0';
 
     return random_string;
 }
