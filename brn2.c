@@ -486,7 +486,7 @@ contains_filename(FileList *list, FileName file) {
 }
 // flags: -lm
 
-int main(int argc, char **argv) {
+int main(void) {
     FileList *list1;
     FileList *list2;
     char *command = "ls -a > /tmp/brn2test";

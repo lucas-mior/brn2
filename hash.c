@@ -331,18 +331,13 @@ hash_map_expected_collisions(HashMap *map) {
 
 static char *
 random_string(void) {
-    struct timespec t;
-    int length;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-    srand(t.tv_nsec);
-
-    const char ALLOWED[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    length = 5 + rand() % 20;
-    char *random_string = util_malloc(length + 1);
+    int length = 5 + rand() % 20;
+    const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+    char *random_string = util_malloc((usize) length + 1);
 
     for (int i = 0; i < length; i += 1) {
-        int c = rand() % (sizeof(ALLOWED) - 1);
-        random_string[i] = ALLOWED[c];
+        int c = rand() % ((int) sizeof(characters) - 1);
+        random_string[i] = characters[c];
     }
 
     random_string[length] = '\0';
@@ -352,7 +347,9 @@ random_string(void) {
 
 // flags: -lm
 #define NSTRINGS 4096
-int main(int argc, char **argv) {
+int main(void) {
+    struct timespec t;
+
     HashMap *map = hash_map_create(NSTRINGS);
     assert(map);
     assert(hash_map_capacity(map) >= NSTRINGS);
@@ -361,21 +358,26 @@ int main(int argc, char **argv) {
     assert(!hash_map_insert(map, "a", 1));
     assert(hash_map_insert(map, "b", 2));
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+    srand((uint) t.tv_nsec);
+
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
-        int value = rand();
+        uint32 value = (uint32) rand();
         assert(hash_map_insert(map, key, value));
     }
 
     printf("\nOriginal hash map:\n");
     hash_map_print_summary(map);
 
-    uint32 collisions_before = hash_map_collisions(map);
-    map = hash_map_balance(map);
+    {
+        uint32 collisions_before = hash_map_collisions(map);
+        map = hash_map_balance(map);
 
-    printf("\nAfter balance:\n");
-    hash_map_print_summary(map);
-    assert(collisions_before > hash_map_collisions(map));
+        printf("\nAfter balance:\n");
+        hash_map_print_summary(map);
+        assert(collisions_before > hash_map_collisions(map));
+    }
 
     assert(hash_map_length(map) == (2 + NSTRINGS));
     assert(*(uint32 *) hash_map_lookup(map, "a") == 0);
