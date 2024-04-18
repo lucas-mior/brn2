@@ -348,9 +348,12 @@ random_string(void) {
 // flags: -lm
 #define NSTRINGS 4096
 int main(void) {
-    struct timespec t;
+    struct timespec t0, t1;
+    HashMap *map; 
 
-    HashMap *map = hash_map_create(NSTRINGS);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+
+    map = hash_map_create(NSTRINGS);
     assert(map);
     assert(hash_map_capacity(map) >= NSTRINGS);
 
@@ -358,8 +361,7 @@ int main(void) {
     assert(!hash_map_insert(map, "a", 1));
     assert(hash_map_insert(map, "b", 2));
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-    srand((uint) t.tv_nsec);
+    srand((uint) t0.tv_nsec);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
@@ -392,6 +394,14 @@ int main(void) {
 
     hash_map_free_keys(map);
     hash_map_destroy(map);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    {
+        long seconds = t1.tv_sec - t0.tv_sec;
+        long nanos = t1.tv_nsec - t0.tv_nsec;
+        double total_seconds = (double) seconds + (double) nanos/1.0e9;
+        printf("\ntime elapsed (%s): %g\n\n", __FILE__, total_seconds);
+    }
     exit(0);
 }
 #endif
