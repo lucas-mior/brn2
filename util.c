@@ -154,7 +154,7 @@ void error(char *format, ...) {
 #if TESTING_THIS_FILE
 #include <assert.h>
 
-int main(int argc, char **argv) {
+int main(void) {
     assert(true);
     exit(0);
 }
