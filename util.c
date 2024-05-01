@@ -143,7 +143,6 @@ void error(char *format, ...) {
         default:
             break;
     }
-    exit(EXIT_FAILURE);
 #endif
 }
 
