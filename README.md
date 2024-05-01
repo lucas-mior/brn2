@@ -60,8 +60,8 @@ $ yay -S brn2-git
 ```
 $ git clone https://github.com/lucas-mior/brn2
 $ cd brn2
-$ make
-$ sudo make install
+$ ./build.sh
+$ sudo ./build.sh install
 ```
 
 ## Examples
