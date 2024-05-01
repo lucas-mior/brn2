@@ -28,7 +28,7 @@ CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion -Wno-unused-macros"
 LDFLAGS="$LDFLAGS -lm "
 
-CC=${CC:-clang}
+CC=${CC:-cc}
 if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
