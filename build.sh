@@ -23,6 +23,7 @@ PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
 main="main.c"
+program="brn2"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros "
@@ -44,22 +45,22 @@ fi
 case "$target" in
     "uninstall")
         set -x
-        rm -f ${DESTDIR}${PREFIX}/bin/brn2
-        rm -f ${DESTDIR}${PREFIX}/man/man1/brn2.1
+        rm -f ${DESTDIR}${PREFIX}/bin/${program}
+        rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "test")
         testing
         ;;
     "install")
         set -x
-        install -Dm755 brn2 ${DESTDIR}${PREFIX}/bin/brn2
-        install -Dm644 brn2.1 ${DESTDIR}${PREFIX}/man/man1/brn2.1
+        install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
+        install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "build"|"debug")
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x
-        $CC $CFLAGS -o brn2 "$main" $LDFLAGS
+        $CC $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
     *)
         echo "usage: $0 [ uninstall / test / install / build / debug ]"
