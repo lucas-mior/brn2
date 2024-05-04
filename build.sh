@@ -25,13 +25,14 @@ DESTDIR="${DESTDIR:-/}"
 SRC=$(ls *.c)
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
-CFLAGS="$CFLAGS -Wextra -Wall -Wno-disabled-macro-expansion -Wno-unused-macros"
+CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros "
 LDFLAGS="$LDFLAGS -lm "
 
 CC=${CC:-cc}
 if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
+    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
 fi
 
 if [ "$target" = "debug" ]; then

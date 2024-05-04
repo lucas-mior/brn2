@@ -339,7 +339,6 @@ random_string(void) {
         int c = rand() % ((int) sizeof(characters) - 1);
         random_string[i] = characters[c];
     }
-
     random_string[length] = '\0';
 
     return random_string;
