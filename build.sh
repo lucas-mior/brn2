@@ -2,7 +2,7 @@
 
 testing () {
     for src in *.c; do
-        [ "$src" = "main.c" ] && continue
+        [ "$src" = "$main" ] && continue
         printf "Testing $src...\n"
 
         flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
@@ -22,7 +22,7 @@ target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
-SRC=$(ls *.c)
+main="main.c"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros "
@@ -59,7 +59,7 @@ case "$target" in
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x
-        $CC $CFLAGS -o brn2 main.c $LDFLAGS
+        $CC $CFLAGS -o brn2 "$main" $LDFLAGS
         ;;
     *)
         echo "usage: $0 [ uninstall / test / install / build / debug ]"
