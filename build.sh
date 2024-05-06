@@ -52,6 +52,7 @@ case "$target" in
         testing
         ;;
     "install")
+        [ ! -f $program ] && $0 build
         set -x
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
