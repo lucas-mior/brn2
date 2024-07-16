@@ -90,6 +90,8 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             while (access(file->name, F_OK)) {
+                error("\"%s\" can't be accessed: %s\n",
+                      file->name, strerror(errno));
                 old->length -= 1;
                 if (old->length <= i)
                     break;
@@ -98,7 +100,7 @@ int main(int argc, char **argv) {
         }
 
         if (old->length == 0) {
-            error("All filenames to not exist.\n");
+            error("No files to rename.\n");
             exit(EXIT_FAILURE);
         }
     }
