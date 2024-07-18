@@ -38,8 +38,10 @@ fi
 
 if [ "$target" = "debug" ]; then
     CFLAGS="$CFLAGS -g -fsanitize=undefined "
+    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1"
 else
-    CFLAGS="$CFLAGS -O2 -flto "
+    CFLAGS="$CFLAGS -g -O2 -flto "
+    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0"
 fi
 
 case "$target" in
@@ -61,7 +63,7 @@ case "$target" in
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x
-        $CC $CFLAGS -o ${program} "$main" $LDFLAGS
+        $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
     *)
         echo "usage: $0 [ uninstall / test / install / build / debug ]"
