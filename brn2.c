@@ -92,8 +92,7 @@ brn2_list_from_dir(char *directory) {
             continue;
         }
         file->length = (uint32) strlen(name);
-        file->name = util_malloc(file->length);
-        memcpy(file->name, name, file->length + 1);
+        file->name = name;
 
         length += 1;
     }
@@ -218,6 +217,14 @@ brn2_normalize_names(FileList *list) {
             *length -= 2;
         }
     }
+    return;
+}
+
+void
+brn2_copy_filename(FileName *file, char *name, uint32 length) {
+    file->name = util_malloc(length + 1);
+    memcpy(file->name, name, length + 1);
+    file->length = length;
     return;
 }
 
