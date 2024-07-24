@@ -42,8 +42,15 @@ static int brn2_create_hashes(void *arg);
 static bool brn2_is_pwd_or_parent(char *);
 static bool brn2_check_repeated(FileList *);
 
+int
+brn2_compare(const void *a, const void *b) {
+    const FileName *file_a = a;
+    const FileName *file_b = b;
+    return strcmp(file_a->name, file_b->name);
+}
+
 FileList *
-brn2_list_from_args(int argc, char **argv) {
+brn2_list_from_args(int argc, char **argv, bool sort_list) {
     FileList *list;
     uint32 length = 0;
 
@@ -62,16 +69,25 @@ brn2_list_from_args(int argc, char **argv) {
         length += 1;
     }
     list->length = length;
+
+    if (sort_list)
+        qsort(list->files, list->length, sizeof (*(list->files)), brn2_compare);
     return list;
 }
 
 FileList *
-brn2_list_from_dir(char *directory) {
+brn2_list_from_dir(char *directory, bool sort_list) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
+    int (*sort)(const struct dirent **, const struct dirent **);
 
-    int n = scandir(directory, &directory_list, NULL, versionsort);
+    if (sort_list)
+        sort = versionsort;
+    else
+        sort = NULL;
+
+    int n = scandir(directory, &directory_list, NULL, sort);
     if (n < 0) {
         error("Error scanning \"%s\": %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
@@ -108,7 +124,7 @@ brn2_free_lines_list(FileList *list) {
 }
 
 FileList *
-brn2_list_from_lines(char *filename, uint32 capacity) {
+brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
     FileList *list;
     char *begin;
     uint32 length = 0;
@@ -176,6 +192,8 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
     list->map_size = list->map_size;
+    if (sort_list)
+        qsort(list->files, list->length, sizeof (*(list->files)), brn2_compare);
 
     return list;
 }
@@ -483,6 +501,7 @@ brn2_usage(FILE *stream) {
             "  -q, --quiet   : Quiet mode; suppress output messages.\n"
             "  -v, --verbose : Verbose mode (default); output messages.\n"
             "  -c, --check   : Check if original file names exist.\n"
+            "  -s, --sort    : Disable sorting of original list.\n"
             "\n"
             "Arguments:\n"
             "  No arguments"
@@ -523,8 +542,8 @@ int main(void) {
     char *file = command + 8;
 
     system(command);
-    list1 = brn2_list_from_dir(".");
-    list2 = brn2_list_from_lines(file, 0);
+    list1 = brn2_list_from_dir(".", true);
+    list2 = brn2_list_from_lines(file, 0, true);
 
     assert(list1->length == list2->length);
 

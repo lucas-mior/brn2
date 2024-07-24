@@ -33,6 +33,7 @@ static struct option options[] = {
     {"quiet",   no_argument,       NULL, 'q'},
     {"verbose", no_argument,       NULL, 'v'},
     {"check",   no_argument,       NULL, 'c'},
+    {"sort",    no_argument,       NULL, 's'},
     {NULL, 0, NULL, 0}
 };
 
@@ -47,11 +48,12 @@ int main(int argc, char **argv) {
     int status = EXIT_SUCCESS;
     bool quiet = false;
     bool check = false;
+    bool sort = true;
     char *lines = NULL;
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "f:chqv", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqvs", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -66,6 +68,9 @@ int main(int argc, char **argv) {
         case 'v':
             quiet = false;
             break;
+        case 's':
+            sort = false;
+            break;
         case 'f':
             if (optarg == NULL)
                 brn2_usage(stderr);
@@ -79,11 +84,11 @@ int main(int argc, char **argv) {
         optind += 1;
 
     if (lines)
-        old = brn2_list_from_lines(lines, 0);
+        old = brn2_list_from_lines(lines, 0, sort);
     else if ((argc - optind) >= 1)
-        old = brn2_list_from_args(argc - optind, &argv[optind]);
+        old = brn2_list_from_args(argc - optind, &argv[optind], sort);
     else
-        old = brn2_list_from_dir(".");
+        old = brn2_list_from_dir(".", sort);
 
     brn2_normalize_names(old);
     if (check) {
@@ -165,7 +170,7 @@ int main(int argc, char **argv) {
 #ifndef BRN2_BENCHMARK
             util_command(ARRAY_LENGTH(args), args);
 #endif
-            new = brn2_list_from_lines(buffer.name, old->length);
+            new = brn2_list_from_lines(buffer.name, old->length, false);
             brn2_normalize_names(new);
             if (!brn2_verify(old, new)) {
                 brn2_free_lines_list(new);
