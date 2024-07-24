@@ -39,7 +39,7 @@
 #pragma pop_macro("TESTING_THIS_FILE")
 
 static int brn2_create_hashes(void *arg);
-static bool brn2_is_pwd_or_parent(char *);
+static inline bool brn2_is_pwd_or_parent(char *);
 static bool brn2_check_repeated(FileList *);
 
 int
