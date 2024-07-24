@@ -44,6 +44,10 @@ else
     CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0"
 fi
 
+if [ "$target" = "benchmark" ]; then
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+fi
+
 case "$target" in
     "uninstall")
         set -x
@@ -59,7 +63,7 @@ case "$target" in
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "build"|"debug")
+    "build"|"debug"|"benchmark")
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         set -x

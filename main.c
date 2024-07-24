@@ -162,7 +162,9 @@ int main(int argc, char **argv) {
         char *args[] = { EDITOR, buffer.name, NULL };
 
         while (true) {
+#ifndef BRN2_BENCHMARK
             util_command(ARRAY_LENGTH(args), args);
+#endif
             new = brn2_list_from_lines(buffer.name, old->length);
             brn2_normalize_names(new);
             if (!brn2_verify(old, new)) {
