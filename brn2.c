@@ -164,7 +164,7 @@ brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
     }
 
     begin = list->map;
-    for (char *p = list->map; p < list->map + list->map_size; p += 1) {
+    for (char *p = list->map; p < (list->map + list->map_size); p += 1) {
         if (length >= capacity) {
             capacity *= 2;
             list = util_realloc(list,
