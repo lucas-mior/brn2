@@ -14,6 +14,7 @@ Options:
   -q, --quiet   : Quiet mode; suppress output messages.
   -v, --verbose : Verbose mode (default); output messages.
   -c, --check   : Check if original file names exist.
+  -s, --sort    : Disable sorting of original list.
 
 Arguments:
   No arguments             : Rename filenames in the current working directory.
@@ -77,6 +78,10 @@ $ brn2 *.jpg
 - Rename all files in current working directory:
 ```
 $ brn2
+```
+- Rename all files in current working directory without sorting:
+```
+$ brn2 -s
 ```
  
 ## Changes over original brn
