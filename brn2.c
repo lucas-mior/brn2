@@ -524,11 +524,15 @@ static bool
 contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {
         if (!strcmp(list->files[i].name, file.name)) {
+            printf(GREEN "%s == %s\n" RESET, file.name, list->files[i].name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
-                memmove(&list->files[i], &list->files[i+1], (list->length - i) * sizeof (list->files[0]));
+                memmove(&list->files[i], &list->files[i+1],
+                        (list->length - i) * sizeof (*(list->files)));
             }
             return true;
+        } else {
+            printf("%s != %s\n", file.name, list->files[i].name);
         }
     }
     return false;
@@ -543,7 +547,7 @@ int main(void) {
 
     system(command);
     list1 = brn2_list_from_dir(".", true);
-    list2 = brn2_list_from_lines(file, 0, true);
+    list2 = brn2_list_from_lines(file, 0, false);
 
     assert(list1->length == list2->length);
 
