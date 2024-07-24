@@ -86,9 +86,9 @@ typedef struct FileList {
 
 extern char *program;
 
-FileList *brn2_list_from_dir(char *);
-FileList *brn2_list_from_lines(char *, uint32);
-FileList *brn2_list_from_args(int, char **);
+FileList *brn2_list_from_dir(char *, bool);
+FileList *brn2_list_from_lines(char *, uint32, bool);
+FileList *brn2_list_from_args(int, char **, bool);
 void brn2_copy_filename(FileName *, char *, uint32);
 void brn2_normalize_names(FileList *);
 bool brn2_verify(FileList *, FileList *);
