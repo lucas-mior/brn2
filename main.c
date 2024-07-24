@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
             new = brn2_list_from_lines(buffer.name, old->length);
             brn2_normalize_names(new);
             if (!brn2_verify(old, new)) {
-                brn2_free_list(new);
+                brn2_free_lines_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -195,8 +195,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    brn2_free_list(old);
-    brn2_free_list(new);
+    brn2_free_lines_list(new);
     unlink(buffer.name);
     exit(status);
 }

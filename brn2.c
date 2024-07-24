@@ -27,6 +27,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
@@ -40,14 +42,6 @@ static int brn2_create_hashes(void *arg);
 static bool brn2_is_pwd_or_parent(char *);
 static bool brn2_check_repeated(FileList *);
 
-void
-brn2_free_list(FileList *list) {
-    for (uint32 i = 0; i < list->length; i += 1)
-        free(list->files[i].name);
-    free(list);
-    return;
-}
-
 FileList *
 brn2_list_from_args(int argc, char **argv) {
     FileList *list;
@@ -57,13 +51,13 @@ brn2_list_from_args(int argc, char **argv) {
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
-        uint32 name_length;
+        FileName *file = &(list->files[length]);
 
         if (brn2_is_pwd_or_parent(name))
             continue;
 
-        name_length = (uint32) strlen(name);
-        brn2_copy_filename(&(list->files[length]), name, name_length);
+        file->length = (uint32) strlen(name);
+        file->name = name;
 
         length += 1;
     }
@@ -91,64 +85,89 @@ brn2_list_from_dir(char *directory) {
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
-        uint32 name_length;
+        FileName *file = &(list->files[length]);
 
         if (brn2_is_pwd_or_parent(name)) {
             free(directory_list[i]);
             continue;
         }
-        name_length = (uint32) strlen(name);
-        brn2_copy_filename(&(list->files[length]), name, name_length);
+        file->length = (uint32) strlen(name);
+        file->name = name;
 
-        free(directory_list[i]);
         length += 1;
     }
     list->length = length;
-    free(directory_list);
     return list;
+}
+
+void
+brn2_free_lines_list(FileList *list) {
+    munmap(list->map, list->map_size);
+    free(list);
+    return;
 }
 
 FileList *
 brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
-    FILE *lines;
+    char *begin;
     uint32 length = 0;
-
-    if ((lines = fopen(filename, "r")) == NULL) {
-        error("Error opening \"%s\" for reading: %s\n",
-              filename, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+    int fd;
 
     if (capacity == 0)
         capacity = 128;
-
     list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
-    while (!feof(lines)) {
-        char buffer[PATH_MAX];
-        uint32 last;
 
+    if ((fd = open(filename, O_RDWR)) < 0) {
+        error("Error opening file for reading: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    {
+        struct stat lines_stat;
+        if (fstat(fd, &lines_stat) < 0) {
+            error("Error getting file information: %s\n"
+                  "History will start empty.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        list->map_size = (uint32) lines_stat.st_size;
+        if (list->map_size <= 0) {
+            error("list->map_size: %zu\n", list->map_size);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    list->map = mmap(NULL, list->map_size, 
+                     PROT_READ | PROT_WRITE, MAP_PRIVATE,
+                     fd, 0);
+
+    if (list->map == MAP_FAILED) {
+        error("Error mapping history file to memory: %s"
+              "History will start empty.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    begin = list->map;
+    for (char *p = list->map; p < list->map + list->map_size; p += 1) {
         if (length >= capacity) {
             capacity *= 2;
             list = util_realloc(list,
                                 STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
+        if (*p == '\n') {
+            *p = '\0';
+            if (brn2_is_pwd_or_parent(begin)) {
+                begin = p + 1;
+                continue;
+            }
 
-        if (!fgets(buffer, sizeof (buffer), lines))
-            continue;
-
-        last = (uint32) strcspn(buffer, "\n");
-        if (last == 0)
-            continue;
-        buffer[last] = '\0';
-
-        if (brn2_is_pwd_or_parent(buffer))
-            continue;
-        brn2_copy_filename(&(list->files[length]), buffer, last);
-
-        length += 1;
+            list->files[length].name = begin;
+            list->files[length].length = (uint32) (p - begin);
+            begin = p + 1;
+            length += 1;
+        }
     }
-    fclose(lines);
+    close(fd);
 
     if (length == 0) {
         error("Empty list. Exiting.\n");
@@ -156,6 +175,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     }
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
+    list->map_size = list->map_size;
 
     return list;
 }
@@ -440,6 +460,9 @@ brn2_execute(FileList *old, FileList *new,
             print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
+#ifndef BRN2_DEBUG
+#define BRN2_DEBUG 0
+#endif
     if (BRN2_DEBUG) {
         hash_map_destroy(indexes_exchange);
         hash_map_destroy(names_renamed);
@@ -481,8 +504,13 @@ brn2_usage(FILE *stream) {
 static bool
 contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {
-        if (!strcmp(list->files[i].name, file.name))
+        if (!strcmp(list->files[i].name, file.name)) {
+            if (i < (list->length - 1)) {
+                list->length -= 1;
+                memmove(&list->files[i], &list->files[i+1], (list->length - i) * sizeof (list->files[0]));
+            }
             return true;
+        }
     }
     return false;
 }
@@ -500,11 +528,10 @@ int main(void) {
 
     assert(list1->length == list2->length);
 
-    for (uint32 i = 0; i < list1->length; i += 1)
+    for (uint32 i = 0; i < list1->length; i += 1) {
         assert(contains_filename(list2, list1->files[i]));
+    }
 
-    brn2_free_list(list1);
-    brn2_free_list(list2);
     unlink(file);
     exit(0);
 }

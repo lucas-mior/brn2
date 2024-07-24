@@ -78,7 +78,8 @@ typedef struct FileName {
 } FileName;
 
 typedef struct FileList {
-    uint32 unused;
+    char *map;
+    uint32 map_size;
     uint32 length;
     FileName files[];
 } FileList;
@@ -93,7 +94,7 @@ void brn2_normalize_names(FileList *);
 bool brn2_verify(FileList *, FileList *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, const uint32, bool);
-void brn2_free_list(FileList *);
+void brn2_free_lines_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
 
