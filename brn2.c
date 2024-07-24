@@ -110,7 +110,7 @@ brn2_free_lines_list(FileList *list) {
 FileList *
 brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
-    void *lines_map;
+    char *lines_map;
     char *begin;
     uint32 length = 0;
     uint32 lines_length = 0;
@@ -165,6 +165,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
             list->files[length].name = begin;
             list->files[length].length = p - begin;
+            begin = p + 1;
             length += 1;
         }
     }
@@ -527,6 +528,9 @@ int main(void) {
     list2 = brn2_list_from_lines(file, 0);
 
     assert(list1->length == list2->length);
+    for (uint32 i = 0; i < list1->length; i += 1) {
+        printf("list2[%d] %s\n", i, list2->files[i].name);
+    }
 
     /* for (uint32 i = 0; i < list1->length; i += 1) { */
     /*     printf("testing %s...\n", list1->files[i].name); */
