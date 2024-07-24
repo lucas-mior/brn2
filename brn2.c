@@ -110,11 +110,13 @@ brn2_free_lines_list(FileList *list) {
 FileList *
 brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
-    char *lines_map;
     char *begin;
     uint32 length = 0;
-    uint32 lines_length = 0;
     int fd;
+
+    if (capacity == 0)
+        capacity = 128;
+    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening file for reading: %s\n", strerror(errno));
@@ -128,29 +130,25 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
                   "History will start empty.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        lines_length = (uint32) lines_stat.st_size;
-        if (lines_length <= 0) {
-            error("lines_length: %zu\n", lines_length);
+        list->map_size = (uint32) lines_stat.st_size;
+        if (list->map_size <= 0) {
+            error("list->map_size: %zu\n", list->map_size);
             exit(EXIT_FAILURE);
         }
     }
 
-    lines_map = mmap(NULL, lines_length, 
+    list->map = mmap(NULL, list->map_size, 
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
 
-    if (lines_map == MAP_FAILED) {
+    if (list->map == MAP_FAILED) {
         error("Error mapping history file to memory: %s"
               "History will start empty.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    if (capacity == 0)
-        capacity = 128;
-    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
-
-    begin = lines_map;
-    for (char *p = lines_map; p < lines_map + lines_length; p += 1) {
+    begin = list->map;
+    for (char *p = list->map; p < list->map + list->map_size; p += 1) {
         if (length >= capacity) {
             capacity *= 2;
             list = util_realloc(list,
@@ -177,8 +175,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     }
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
-    list->map = lines_map;
-    list->map_size = lines_length;
+    list->map_size = list->map_size;
 
     return list;
 }
@@ -528,14 +525,11 @@ int main(void) {
     list2 = brn2_list_from_lines(file, 0);
 
     assert(list1->length == list2->length);
-    for (uint32 i = 0; i < list1->length; i += 1) {
-        printf("list2[%d] %s\n", i, list2->files[i].name);
-    }
 
-    /* for (uint32 i = 0; i < list1->length; i += 1) { */
-    /*     printf("testing %s...\n", list1->files[i].name); */
-    /*     assert(contains_filename(list2, list1->files[i])); */
-    /* } */
+    for (uint32 i = 0; i < list1->length; i += 1) {
+        printf("testing %s...\n", list1->files[i].name);
+        assert(contains_filename(list2, list1->files[i]));
+    }
 
     unlink(file);
     exit(0);
