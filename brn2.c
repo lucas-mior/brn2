@@ -192,9 +192,9 @@ brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
     list->map_size = list->map_size;
+
     if (sort_list)
         qsort(list->files, list->length, sizeof (*(list->files)), brn2_compare);
-
     return list;
 }
 
