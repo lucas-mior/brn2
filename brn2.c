@@ -261,48 +261,56 @@ brn2_create_hashes(void *arg) {
     thrd_exit(0);
 }
 
+uint32 *
+brn2_create_hashes_threads(FileList *list, uint32 map_size, uint32 nthreads) {
+    uint32 *hashes;
+    thrd_t *threads;
+    Slice *slices;
+    uint32 range;
+
+    hashes = util_malloc(2 * list->length * sizeof (*hashes));
+    threads = util_malloc(nthreads * sizeof (*threads)
+                          + nthreads * sizeof (*slices));
+    slices = (Slice *) &threads[nthreads];
+
+    range = list->length / nthreads;
+
+    for (uint32 i = 0; i < (nthreads - 1); i += 1) {
+        slices[i].start = i*range;
+        slices[i].end = (i + 1)*range;
+        slices[i].files = list->files;
+        slices[i].hashes = hashes;
+        slices[i].map_capacity = map_size;
+        thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
+    }
+    {
+        uint32 i = nthreads - 1;
+        slices[i].start = i*range;
+        slices[i].end = list->length;
+        slices[i].files = list->files;
+        slices[i].hashes = hashes;
+        slices[i].map_capacity = map_size;
+        thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
+    }
+
+    for (uint32 i = 0; i < nthreads; i += 1)
+        thrd_join(threads[i], NULL);
+    free(threads);
+    return hashes;
+}
+
 bool
 brn2_check_repeated(FileList *list) {
     char *repeated_format = RED"\"%s\""RESET
                             " appears more than once in the buffer\n";
     bool repeated = false;
     long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if ((list->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
+    if (number_threads >= 2) {
+        HashMap *repeated_map = hash_map_create(list->length);
         uint32 *hashes;
-        thrd_t *threads;
-        Slice *slices;
-        HashMap *repeated_map;
-        uint32 nthreads = (uint32) number_threads;
-        uint32 range;
-
-        hashes = util_malloc(2 * list->length * sizeof (*hashes));
-        threads = util_malloc(nthreads * sizeof (*threads)
-                              + nthreads * sizeof (*slices));
-        slices = (Slice *) &threads[nthreads];
-
-        repeated_map = hash_map_create(list->length);
-        range = list->length / nthreads;
-
-        for (uint32 i = 0; i < (nthreads - 1); i += 1) {
-            slices[i].start = i*range;
-            slices[i].end = (i + 1)*range;
-            slices[i].files = list->files;
-            slices[i].hashes = hashes;
-            slices[i].map_capacity = hash_map_capacity(repeated_map);
-            thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
-        }
-        {
-            uint32 i = nthreads - 1;
-            slices[i].start = i*range;
-            slices[i].end = list->length;
-            slices[i].files = list->files;
-            slices[i].hashes = hashes;
-            slices[i].map_capacity = hash_map_capacity(repeated_map);
-            thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
-        }
-
-        for (uint32 i = 0; i < nthreads; i += 1)
-            thrd_join(threads[i], NULL);
+        hashes = brn2_create_hashes_threads(list,
+                                            hash_map_capacity(repeated_map),
+                                            (uint32) number_threads);
 
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
@@ -315,7 +323,6 @@ brn2_check_repeated(FileList *list) {
         }
 
         free(hashes);
-        free(threads);
         hash_map_destroy(repeated_map);
     } else if (list->length > USE_HASH_MAP_THRESHOLD) {
         HashMap *repeated_map = hash_map_create(list->length);
