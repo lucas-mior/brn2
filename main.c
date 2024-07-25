@@ -137,11 +137,9 @@ int main(int argc, char **argv) {
             exit(EXIT_FAILURE);
         }
 
-        long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
         uint32 *hashes;
         hashes = brn2_create_hashes_threads(old,
-                                            hash_map_capacity(repeated_map),
-                                            (uint32) number_threads);
+                                            hash_map_capacity(repeated_map));
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {

@@ -262,11 +262,17 @@ brn2_create_hashes(void *arg) {
 }
 
 uint32 *
-brn2_create_hashes_threads(FileList *list, uint32 map_size, uint32 nthreads) {
+brn2_create_hashes_threads(FileList *list, uint32 map_size) {
     uint32 *hashes;
     thrd_t *threads;
     Slice *slices;
     uint32 range;
+    uint32 nthreads;
+    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    if (number_threads <= 0)
+        nthreads = 1; 
+    else
+        nthreads = number_threads;
 
     hashes = util_malloc(2 * list->length * sizeof (*hashes));
     threads = util_malloc(nthreads * sizeof (*threads)
@@ -304,13 +310,11 @@ brn2_check_repeated(FileList *list) {
     char *repeated_format = RED"\"%s\""RESET
                             " appears more than once in the buffer\n";
     bool repeated = false;
-    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if (number_threads >= 2) {
+    if (list->length > USE_HASH_MAP_THRESHOLD) {
         HashMap *repeated_map = hash_map_create(list->length);
         uint32 *hashes;
         hashes = brn2_create_hashes_threads(list,
-                                            hash_map_capacity(repeated_map),
-                                            (uint32) number_threads);
+                                            hash_map_capacity(repeated_map));
 
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName newfile = list->files[i];
@@ -323,18 +327,6 @@ brn2_check_repeated(FileList *list) {
         }
 
         free(hashes);
-        hash_map_destroy(repeated_map);
-    } else if (list->length > USE_HASH_MAP_THRESHOLD) {
-        HashMap *repeated_map = hash_map_create(list->length);
-
-        for (uint32 i = 0; i < list->length; i += 1) {
-            FileName newfile = list->files[i];
-
-            if (!hash_set_insert(repeated_map, newfile.name)) {
-                fprintf(stderr, repeated_format, newfile.name);
-                repeated = true;
-            }
-        }
         hash_map_destroy(repeated_map);
     } else {
         for (uint32 i = 0; i < list->length; i += 1) {
