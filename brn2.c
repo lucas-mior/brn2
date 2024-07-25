@@ -241,7 +241,6 @@ brn2_normalize_names(FileList *list) {
 typedef struct Slice {
     FileName *files;
     uint32 *hashes;
-    uint32 *indexes;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
@@ -254,8 +253,8 @@ brn2_create_hashes(void *arg) {
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->files[i];
-        slice->hashes[i] = hash_function(newfile.name);
-        slice->indexes[i] = slice->hashes[i] % slice->map_capacity;
+        slice->hashes[2*i] = hash_function(newfile.name);
+        slice->hashes[2*i + 1] = slice->hashes[2*i] % slice->map_capacity;
     }
     thrd_exit(0);
 }
@@ -267,12 +266,15 @@ brn2_check_repeated(FileList *list) {
     bool repeated = false;
     long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if ((list->length >= USE_THREADS_THRESHOLD) && (number_threads >= 2)) {
+        uint32 *hashes;
+        thrd_t *threads;
+        Slice *slices;
         uint32 nthreads = (uint32) number_threads;
 
-        uint32 *hashes = util_malloc(list->length * sizeof (*hashes));
-        uint32 *indexes = util_malloc(list->length * sizeof (*indexes));
-        thrd_t *threads = util_malloc(nthreads * sizeof (*threads));
-        Slice *slices = util_malloc(nthreads * sizeof (*slices));
+        hashes = util_malloc(2 * list->length * sizeof (*hashes));
+        threads = util_malloc(nthreads * sizeof (*threads)
+                              + nthreads * sizeof (*slices));
+        slices = (Slice *) &threads[nthreads];
 
         HashMap *repeated_map = hash_map_create(list->length);
         uint32 range = list->length / nthreads;
@@ -282,7 +284,6 @@ brn2_check_repeated(FileList *list) {
             slices[i].end = (i + 1)*range;
             slices[i].files = list->files;
             slices[i].hashes = hashes;
-            slices[i].indexes = indexes;
             slices[i].map_capacity = hash_map_capacity(repeated_map);
             thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
         }
@@ -292,7 +293,6 @@ brn2_check_repeated(FileList *list) {
             slices[i].end = list->length;
             slices[i].files = list->files;
             slices[i].hashes = hashes;
-            slices[i].indexes = indexes;
             slices[i].map_capacity = hash_map_capacity(repeated_map);
             thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
         }
@@ -304,15 +304,13 @@ brn2_check_repeated(FileList *list) {
             FileName newfile = list->files[i];
 
             if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
-                                          hashes[i], indexes[i])) {
+                                          hashes[2*i], hashes[2*i + 1])) {
                 fprintf(stderr, repeated_format, newfile.name);
                 repeated = true;
             }
         }
 
         free(hashes);
-        free(indexes);
-        free(slices);
         free(threads);
         hash_map_destroy(repeated_map);
     } else if (list->length > USE_HASH_MAP_THRESHOLD) {
