@@ -238,14 +238,6 @@ brn2_normalize_names(FileList *list) {
     return;
 }
 
-void
-brn2_copy_filename(FileName *file, char *name, uint32 length) {
-    file->name = util_malloc(length + 1);
-    memcpy(file->name, name, length + 1);
-    file->length = length;
-    return;
-}
-
 typedef struct Slice {
     FileName *files;
     uint32 *hashes;
