@@ -173,11 +173,14 @@ int main(int argc, char **argv) {
     }
 
     {
-        char *args[] = { EDITOR, buffer.name, NULL };
+        char *args_edit[] = { EDITOR, buffer.name, NULL };
+        char *args_shuf[] = { "shuf", buffer.name, "-o", buffer.name, NULL };
 
         while (true) {
-#ifndef BRN2_BENCHMARK
-            util_command(ARRAY_LENGTH(args), args);
+#ifdef BRN2_BENCHMARK
+            util_command(ARRAY_LENGTH(args_shuf), args_shuf);
+#else
+            util_command(ARRAY_LENGTH(args_edit), args_edit);
 #endif
             new = brn2_list_from_lines(buffer.name, old->length, false);
             brn2_normalize_names(new);
