@@ -38,6 +38,7 @@
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
+static int brn2_compare(const void *, const void *);
 static int brn2_create_hashes(void *arg);
 static inline bool brn2_is_pwd_or_parent(char *);
 static bool brn2_check_repeated(FileList *);
@@ -81,13 +82,14 @@ brn2_list_from_dir(char *directory, bool sort_list) {
     struct dirent **directory_list;
     uint32 length = 0;
     int (*sort)(const struct dirent **, const struct dirent **);
+    int n;
 
     if (sort_list)
         sort = versionsort;
     else
         sort = NULL;
 
-    int n = scandir(directory, &directory_list, NULL, sort);
+    n = scandir(directory, &directory_list, NULL, sort);
     if (n < 0) {
         error("Error scanning \"%s\": %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
@@ -269,15 +271,17 @@ brn2_check_repeated(FileList *list) {
         uint32 *hashes;
         thrd_t *threads;
         Slice *slices;
+        HashMap *repeated_map;
         uint32 nthreads = (uint32) number_threads;
+        uint32 range;
 
         hashes = util_malloc(2 * list->length * sizeof (*hashes));
         threads = util_malloc(nthreads * sizeof (*threads)
                               + nthreads * sizeof (*slices));
         slices = (Slice *) &threads[nthreads];
 
-        HashMap *repeated_map = hash_map_create(list->length);
-        uint32 range = list->length / nthreads;
+        repeated_map = hash_map_create(list->length);
+        range = list->length / nthreads;
 
         for (uint32 i = 0; i < (nthreads - 1); i += 1) {
             slices[i].start = i*range;
