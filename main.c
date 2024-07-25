@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
     {
         char buffer2[BUFSIZ];
         int n;
-        HashMap *repeated = hash_map_create(old->length);
+        HashMap *repeated_map = hash_map_create(old->length);
 
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
@@ -137,11 +137,18 @@ int main(int argc, char **argv) {
             exit(EXIT_FAILURE);
         }
 
+        long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+        uint32 *hashes;
+        hashes = brn2_create_hashes_threads(old,
+                                            hash_map_capacity(repeated_map),
+                                            (uint32) number_threads);
+
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
 
-            while (!hash_set_insert(repeated, file->name)) {
+            while (!hash_set_insert_pre_calc(repeated_map, file->name,
+                                             hashes[2*i], hashes[2*i + 1])) {
                 error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
@@ -156,7 +163,8 @@ int main(int argc, char **argv) {
             file->name[file->length] = '\0';
         }
         close:
-        hash_map_destroy(repeated);
+        free(hashes);
+        hash_map_destroy(repeated_map);
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;
