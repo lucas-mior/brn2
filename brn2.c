@@ -171,14 +171,15 @@ brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
                                 STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
         if (*p == '\n') {
+            FileName *file = &(list->files[length]);
             *p = '\0';
             if (brn2_is_pwd_or_parent(begin)) {
                 begin = p + 1;
                 continue;
             }
 
-            list->files[length].name = begin;
-            list->files[length].length = (uint32) (p - begin);
+            file->name = begin;
+            file->length = (uint32) (p - begin);
             begin = p + 1;
             length += 1;
         }
@@ -191,7 +192,6 @@ brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
     }
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
-    list->map_size = list->map_size;
 
     if (sort_list)
         qsort(list->files, list->length, sizeof (*(list->files)), brn2_compare);
