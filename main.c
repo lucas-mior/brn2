@@ -144,9 +144,10 @@ int main(int argc, char **argv) {
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
+            uint32 *hash = &hashes[2*i];
 
             while (!hash_set_insert_pre_calc(repeated_map, file->name,
-                                             hashes[2*i], hashes[2*i + 1])) {
+                                             hash[0], hash[1])) {
                 error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
@@ -154,7 +155,9 @@ int main(int argc, char **argv) {
                     goto close;
 
                 memmove(file, file+1, (old->length - i) * sizeof(*file));
+                memmove(hash, hash+2, (old->length - i) * 2 * sizeof(*hash));
                 file = &(old->files[i]);
+                hash = &hashes[2*i];
             }
             file->name[file->length] = '\n';
             fwrite(file->name, 1, file->length + 1, buffer.stream);
