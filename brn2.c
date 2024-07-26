@@ -242,7 +242,7 @@ brn2_normalize_names(FileList *list) {
 
 typedef struct Slice {
     FileName *files;
-    uint32 *hashes;
+    Hash *hashes;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
@@ -255,15 +255,15 @@ brn2_create_hashes(void *arg) {
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName newfile = slice->files[i];
-        slice->hashes[2*i] = hash_function(newfile.name);
-        slice->hashes[2*i + 1] = slice->hashes[2*i] % slice->map_capacity;
+        slice->hashes[i].hash = hash_function(newfile.name);
+        slice->hashes[i].mod = slice->hashes[i].hash % slice->map_capacity;
     }
     thrd_exit(0);
 }
 
-uint32 *
+Hash *
 brn2_create_hashes_threads(FileList *list, uint32 map_size) {
-    uint32 *hashes;
+    Hash *hashes;
     thrd_t *threads;
     Slice *slices;
     uint32 range;
@@ -312,7 +312,7 @@ brn2_check_repeated(FileList *list) {
     bool repeated = false;
     if (list->length > USE_HASH_MAP_THRESHOLD) {
         HashMap *repeated_map = hash_map_create(list->length);
-        uint32 *hashes;
+        Hash *hashes;
         hashes = brn2_create_hashes_threads(list,
                                             hash_map_capacity(repeated_map));
 
@@ -320,7 +320,7 @@ brn2_check_repeated(FileList *list) {
             FileName newfile = list->files[i];
 
             if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
-                                          hashes[2*i], hashes[2*i + 1])) {
+                                          hashes[i].hash, hashes[i].mod)) {
                 fprintf(stderr, repeated_format, newfile.name);
                 repeated = true;
             }
