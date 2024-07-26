@@ -118,7 +118,8 @@ int main(int argc, char **argv) {
     {
         char buffer2[BUFSIZ];
         int n;
-        HashMap *repeated_map = hash_map_create(old->length);
+        HashMap *repeated_map;
+        uint32 *hashes;
 
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
@@ -137,7 +138,7 @@ int main(int argc, char **argv) {
             exit(EXIT_FAILURE);
         }
 
-        uint32 *hashes;
+        repeated_map = hash_map_create(old->length);
         hashes = brn2_create_hashes_threads(old,
                                             hash_map_capacity(repeated_map));
 
@@ -175,6 +176,8 @@ int main(int argc, char **argv) {
     {
         char *args_edit[] = { EDITOR, buffer.name, NULL };
         char *args_shuf[] = { "shuf", buffer.name, "-o", buffer.name, NULL };
+        (void) args_edit;
+        (void) args_shuf;
 
         while (true) {
 #ifdef BRN2_BENCHMARK
