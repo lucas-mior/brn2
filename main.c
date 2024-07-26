@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
         char buffer2[BUFSIZ];
         int n;
         HashMap *repeated_map;
-        uint32 *hashes;
+        Hash *hashes;
 
         n = snprintf(buffer.name, sizeof (buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
@@ -145,10 +145,10 @@ int main(int argc, char **argv) {
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
-            uint32 *hash = &hashes[2*i];
+            Hash *hash = &hashes[i];
 
             while (!hash_set_insert_pre_calc(repeated_map, file->name,
-                                             hash[0], hash[1])) {
+                                             hash->hash, hash->mod)) {
                 error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
@@ -156,9 +156,9 @@ int main(int argc, char **argv) {
                     goto close;
 
                 memmove(file, file+1, (old->length - i) * sizeof(*file));
-                memmove(hash, hash+2, (old->length - i) * 2 * sizeof(*hash));
+                memmove(hash, hash+1, (old->length - i) * sizeof(*hash));
                 file = &(old->files[i]);
-                hash = &hashes[2*i];
+                hash = &hashes[i];
             }
             file->name[file->length] = '\n';
             fwrite(file->name, 1, file->length + 1, buffer.stream);
@@ -167,6 +167,7 @@ int main(int argc, char **argv) {
         close:
         free(hashes);
         hash_map_destroy(repeated_map);
+
         fclose(buffer.stream);
         close(buffer.fd);
         buffer.fd = -1;

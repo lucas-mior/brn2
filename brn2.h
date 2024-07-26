@@ -84,13 +84,18 @@ typedef struct FileList {
     FileName files[];
 } FileList;
 
+typedef struct Hash {
+    uint32 hash;
+    uint32 mod;
+} Hash;
+
 extern char *program;
 
 FileList *brn2_list_from_dir(char *, bool);
 FileList *brn2_list_from_lines(char *, uint32, bool);
 FileList *brn2_list_from_args(int, char **, bool);
 void brn2_normalize_names(FileList *);
-uint32 *brn2_create_hashes_threads(FileList *, uint32);
+Hash *brn2_create_hashes_threads(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, const uint32, bool);
