@@ -288,8 +288,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         slices[i].hashes = hashes;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
-    }
-    {
+    }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
         slices[i].end = list->length;
