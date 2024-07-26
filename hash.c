@@ -65,7 +65,7 @@ hash_map_create(uint32 length) {
         length = (UINT32_MAX/4);
     length *= 4;
 
-    size = sizeof (*map) + length * sizeof (map->array[0]);
+    size = sizeof(*map) + length*sizeof(map->array[0]);
 
     map = util_malloc(size);
     memset(map, 0, size);
@@ -88,7 +88,7 @@ hash_map_balance(HashMap *old_map) {
         length = UINT32_MAX;
     }
 
-    size = sizeof (*new_map) + length * sizeof (new_map->array[0]);
+    size = sizeof(*new_map) + length*sizeof(new_map->array[0]);
 
     new_map = util_malloc(size);
     memset(new_map, 0, size);
@@ -190,7 +190,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
     } while (true);
 
     map->collisions += 1;
-    iterator->next = util_calloc(1, sizeof (*iterator));
+    iterator->next = util_calloc(1, sizeof(*iterator));
     iterator->next->key = key;
     iterator->next->hash = hash;
     iterator->next->value = value;
@@ -244,11 +244,11 @@ hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
         if (iterator->next) {
             void *aux = iterator->next;
-            memmove(iterator, iterator->next, sizeof (*iterator));
+            memmove(iterator, iterator->next, sizeof(*iterator));
             free(aux);
             map->collisions -= 1;
         } else {
-            memset(iterator, 0, sizeof (*iterator));
+            memset(iterator, 0, sizeof(*iterator));
         }
         map->length -= 1;
         return true;
