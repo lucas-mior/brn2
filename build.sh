@@ -64,9 +64,9 @@ case "$target" in
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "build"|"debug"|"benchmark")
+        set -x
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
-        set -x
         $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
     *)
