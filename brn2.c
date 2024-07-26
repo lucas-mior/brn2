@@ -72,7 +72,7 @@ brn2_list_from_args(int argc, char **argv, bool sort_list) {
     list->length = length;
 
     if (sort_list)
-        qsort(list->files, list->length, sizeof (*(list->files)), brn2_compare);
+        qsort(list->files, list->length, sizeof(*(list->files)), brn2_compare);
     return list;
 }
 
@@ -196,7 +196,7 @@ brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
     list->length = length;
 
     if (sort_list)
-        qsort(list->files, list->length, sizeof (*(list->files)), brn2_compare);
+        qsort(list->files, list->length, sizeof(*(list->files)), brn2_compare);
     return list;
 }
 
@@ -227,13 +227,13 @@ brn2_normalize_names(FileList *list) {
         while (name[j] != '\0') {
             while (name[j] == '/' && name[j + 1] == '/') {
                 *length -= 1;
-                memmove(&name[j], &name[j + 1], (*length - j) * sizeof (*name));
+                memmove(&name[j], &name[j + 1], (*length - j)*sizeof(*name));
             }
             j += 1;
         }
 
         while (name[0] == '.' && name[1] == '/') {
-            memmove(&(name[0]), &(name[2]), (*length - 1) * sizeof (*name));
+            memmove(&(name[0]), &(name[2]), (*length - 1)*sizeof(*name));
             *length -= 2;
         }
     }
@@ -274,9 +274,8 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
     else
         nthreads = (uint32) number_threads;
 
-    hashes = util_malloc(2 * list->length * sizeof (*hashes));
-    threads = util_malloc(nthreads * sizeof (*threads)
-                          + nthreads * sizeof (*slices));
+    hashes = util_malloc(2*list->length*sizeof(*hashes));
+    threads = util_malloc(nthreads*sizeof(*threads) + nthreads*sizeof(*slices));
     slices = (Slice *) &threads[nthreads];
 
     range = list->length / nthreads;
@@ -520,7 +519,7 @@ contains_filename(FileList *list, FileName file) {
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove(&list->files[i], &list->files[i+1],
-                        (list->length - i) * sizeof (*(list->files)));
+                        (list->length - i)*sizeof (*(list->files)));
             }
             return true;
         } else {

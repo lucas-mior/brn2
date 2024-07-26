@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
                 old->length -= 1;
                 if (old->length <= i)
                     break;
-                memmove(file, file+1, (old->length - i) * sizeof (*file));
+                memmove(file, file+1, (old->length - i)*sizeof(*file));
             }
         }
 
@@ -121,13 +121,13 @@ int main(int argc, char **argv) {
         HashMap *repeated_map;
         Hash *hashes;
 
-        n = snprintf(buffer.name, sizeof (buffer.name),
+        n = snprintf(buffer.name, sizeof(buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
         if (n < 0) {
             error("Error printing buffer name.\n");
             exit(EXIT_FAILURE);
         }
-        buffer.name[sizeof (buffer.name) - 1] = '\0';
+        buffer.name[sizeof(buffer.name) - 1] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
             error("Error opening \"%s\": %s\n", buffer.name, strerror(errno));
@@ -155,8 +155,8 @@ int main(int argc, char **argv) {
                 if (old->length <= i)
                     goto close;
 
-                memmove(file, file+1, (old->length - i) * sizeof(*file));
-                memmove(hash, hash+1, (old->length - i) * sizeof(*hash));
+                memmove(file, file+1, (old->length - i)*sizeof(*file));
+                memmove(hash, hash+1, (old->length - i)*sizeof(*hash));
                 file = &(old->files[i]);
                 hash = &hashes[i];
             }
