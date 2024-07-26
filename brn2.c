@@ -469,9 +469,6 @@ brn2_execute(FileList *old, FileList *new,
             print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
-#ifndef BRN2_DEBUG
-#define BRN2_DEBUG 0
-#endif
     if (BRN2_DEBUG) {
         hash_map_destroy(indexes_exchange);
         hash_map_destroy(names_renamed);
