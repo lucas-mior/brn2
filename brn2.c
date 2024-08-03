@@ -38,7 +38,6 @@
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
-static int brn2_compare(const void *, const void *);
 static int brn2_create_hashes(void *arg);
 static inline bool brn2_is_pwd_or_parent(char *);
 static bool brn2_check_repeated(FileList *);
@@ -51,7 +50,7 @@ brn2_compare(const void *a, const void *b) {
 }
 
 FileList *
-brn2_list_from_args(int argc, char **argv, bool sort_list) {
+brn2_list_from_args(int argc, char **argv) {
     FileList *list;
     uint32 length = 0;
 
@@ -71,25 +70,17 @@ brn2_list_from_args(int argc, char **argv, bool sort_list) {
     }
     list->length = length;
 
-    if (sort_list)
-        qsort(list->files, list->length, sizeof(*(list->files)), brn2_compare);
     return list;
 }
 
 FileList *
-brn2_list_from_dir(char *directory, bool sort_list) {
+brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
-    int (*sort)(const struct dirent **, const struct dirent **);
     int n;
 
-    if (sort_list)
-        sort = versionsort;
-    else
-        sort = NULL;
-
-    n = scandir(directory, &directory_list, NULL, sort);
+    n = scandir(directory, &directory_list, NULL, NULL);
     if (n < 0) {
         error("Error scanning \"%s\": %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
@@ -126,7 +117,7 @@ brn2_free_lines_list(FileList *list) {
 }
 
 FileList *
-brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
+brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
     char *begin;
     uint32 length = 0;
@@ -195,8 +186,6 @@ brn2_list_from_lines(char *filename, uint32 capacity, bool sort_list) {
     list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
 
-    if (sort_list)
-        qsort(list->files, list->length, sizeof(*(list->files)), brn2_compare);
     return list;
 }
 

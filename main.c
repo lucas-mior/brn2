@@ -84,11 +84,14 @@ int main(int argc, char **argv) {
         optind += 1;
 
     if (lines)
-        old = brn2_list_from_lines(lines, 0, sort);
+        old = brn2_list_from_lines(lines, 0);
     else if ((argc - optind) >= 1)
-        old = brn2_list_from_args(argc - optind, &argv[optind], sort);
+        old = brn2_list_from_args(argc - optind, &argv[optind]);
     else
-        old = brn2_list_from_dir(".", sort);
+        old = brn2_list_from_dir(".");
+
+    if (sort)
+        qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
     brn2_normalize_names(old);
     if (check) {
@@ -186,7 +189,7 @@ int main(int argc, char **argv) {
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);
 #endif
-            new = brn2_list_from_lines(buffer.name, old->length, false);
+            new = brn2_list_from_lines(buffer.name, old->length);
             brn2_normalize_names(new);
             if (!brn2_verify(old, new)) {
                 brn2_free_lines_list(new);
