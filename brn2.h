@@ -91,9 +91,10 @@ typedef struct Hash {
 
 extern char *program;
 
-FileList *brn2_list_from_dir(char *, bool);
-FileList *brn2_list_from_lines(char *, uint32, bool);
-FileList *brn2_list_from_args(int, char **, bool);
+int brn2_compare(const void *, const void *);
+FileList *brn2_list_from_dir(char *);
+FileList *brn2_list_from_lines(char *, uint32);
+FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *);
 Hash *brn2_create_hashes_threads(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *);
