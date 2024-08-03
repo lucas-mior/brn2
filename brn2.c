@@ -253,8 +253,8 @@ brn2_create_hashes(void *arg) {
 Hash *
 brn2_create_hashes_threads(FileList *list, uint32 map_size) {
     Hash *hashes;
-    thrd_t *threads;
-    Slice *slices;
+    thrd_t threads[MAX_THREADS];
+    Slice slices[MAX_THREADS];
     uint32 range;
     uint32 nthreads;
     long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
@@ -264,8 +264,6 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         nthreads = (uint32) number_threads;
 
     hashes = util_malloc(list->length*sizeof(*hashes));
-    threads = util_malloc(nthreads*sizeof(*threads) + nthreads*sizeof(*slices));
-    slices = (Slice *) &threads[nthreads];
 
     range = list->length / nthreads;
 
@@ -288,7 +286,6 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
 
     for (uint32 i = 0; i < nthreads; i += 1)
         thrd_join(threads[i], NULL);
-    free(threads);
     return hashes;
 }
 
