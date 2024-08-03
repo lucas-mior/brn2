@@ -185,11 +185,30 @@ int main(int argc, char **argv) {
 
         while (true) {
 #ifdef BRN2_BENCHMARK
+            char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                             "abcdefghijklmnopqrstuvwxyz"
+                             "0123456789";
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);
 #endif
             new = brn2_list_from_lines(buffer.name, old->length);
+#ifdef BRN2_BENCHMARK
+            for (uint32 i = 0; i < new->length; i += 1) {
+                float x = (float) rand() / (float) RAND_MAX;
+                uint32 length = new->files[i].length;
+                int size = sizeof(allowed) - 1;
+                if (x < 0.5f) {
+                    new->files[i].name[length - 1] = allowed[rand() % size];
+                    new->files[i].name[length - 2] = allowed[rand() % size];
+                    new->files[i].name[length - 3] = allowed[rand() % size];
+                    new->files[i].name[length - 4] = allowed[rand() % size];
+                    new->files[i].name[length - 5] = allowed[rand() % size];
+                    new->files[i].name[length - 6] = allowed[rand() % size];
+                    new->files[i].name[length - 7] = allowed[rand() % size];
+                }
+            }
+#endif
             brn2_normalize_names(new);
             if (!brn2_verify(old, new)) {
                 brn2_free_lines_list(new);
