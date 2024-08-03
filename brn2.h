@@ -39,6 +39,7 @@
 
 #define USE_HASH_MAP_THRESHOLD 128
 #define USE_THREADS_THRESHOLD 524288
+#define MAX_THREADS 64
 
 #define STRUCT_ARRAY_SIZE(Struct, ArrayType, array_length) \
     sizeof (*Struct) + (usize)(array_length) * sizeof (ArrayType)
