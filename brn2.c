@@ -263,7 +263,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
     else
         nthreads = (uint32) number_threads;
 
-    hashes = util_malloc(2*list->length*sizeof(*hashes));
+    hashes = util_malloc(list->length*sizeof(*hashes));
     threads = util_malloc(nthreads*sizeof(*threads) + nthreads*sizeof(*slices));
     slices = (Slice *) &threads[nthreads];
 
