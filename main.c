@@ -90,10 +90,10 @@ int main(int argc, char **argv) {
     else
         old = brn2_list_from_dir(".");
 
+    brn2_normalize_names(old);
     if (sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
-    brn2_normalize_names(old);
     if (check) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
