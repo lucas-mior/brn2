@@ -221,9 +221,9 @@ brn2_normalize_names(FileList *list) {
             j += 1;
         }
 
-        while (name[0] == '.' && name[1] == '/') {
-            memmove(&(name[0]), &(name[2]), (*length - 1)*sizeof(*name));
-            *length -= 2;
+        while (file->name[0] == '.' && file->name[1] == '/') {
+            file->name += 2;
+            file->length -= 2;
         }
     }
     return;
