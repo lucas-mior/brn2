@@ -520,8 +520,8 @@ int main(void) {
     char *file = command + 8;
 
     system(command);
-    list1 = brn2_list_from_dir(".", true);
-    list2 = brn2_list_from_lines(file, 0, false);
+    list1 = brn2_list_from_dir(".");
+    list2 = brn2_list_from_lines(file, 0);
 
     assert(list1->length == list2->length);
 
