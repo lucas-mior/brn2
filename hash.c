@@ -236,7 +236,6 @@ hash_map_remove(HashMap *map, char *key) {
 bool
 hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
-    Bucket *previous;
 
     if (iterator->key == NULL)
         return false;
@@ -255,7 +254,7 @@ hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     }
 
     while (iterator->next) {
-        previous = iterator;
+        Bucket *previous = iterator;
         iterator = iterator->next;
 
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
