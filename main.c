@@ -26,6 +26,7 @@
 #include "util.c"
 
 char *program;
+bool brn2_fatal;
 
 static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "f:chqvs", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqvsF", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -70,6 +71,9 @@ int main(int argc, char **argv) {
             break;
         case 's':
             sort = false;
+            break;
+        case 'F':
+            brn2_fatal = true;
             break;
         case 'f':
             if (optarg == NULL)

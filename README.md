@@ -15,6 +15,7 @@ Options:
   -v, --verbose : Verbose mode (default); output messages.
   -c, --check   : Check if original file names exist.
   -s, --sort    : Disable sorting of original list.
+  -F, --fatal   : Exit on first renaming error.
 
 Arguments:
   No arguments             : Rename filenames in the current working directory.
