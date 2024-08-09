@@ -121,6 +121,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
     char *begin;
     uint32 length = 0;
+    bool is_old = capacity == 0;
     int fd;
 
     if (capacity == 0)
@@ -166,7 +167,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         if (*p == '\n') {
             FileName *file = &(list->files[length]);
             *p = '\0';
-            if (brn2_is_pwd_or_parent(begin)) {
+            if (is_old && brn2_is_pwd_or_parent(begin)) {
                 begin = p + 1;
                 continue;
             }
