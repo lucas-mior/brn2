@@ -295,7 +295,7 @@ brn2_check_repeated(FileList *list) {
                             " appears more than once in the buffer\n";
     bool repeated = false;
     if (list->length > USE_HASH_MAP_THRESHOLD) {
-        HashMap *repeated_map = hash_map_create(list->length);
+        HashMap *repeated_map = hash_set_create(list->length);
         Hash *hashes;
         hashes = brn2_create_hashes_threads(list,
                                             hash_map_capacity(repeated_map));
@@ -373,7 +373,7 @@ brn2_execute(FileList *old, FileList *new,
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
-    HashMap *names_renamed = hash_map_create(number_changes);
+    HashMap *names_renamed = hash_set_create(number_changes);
     HashMap *indexes_exchange = hash_map_create(number_changes);
 
     if (quiet)
