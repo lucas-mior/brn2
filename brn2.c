@@ -291,7 +291,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
 
 bool
 brn2_check_repeated(FileList *list) {
-    char *repeated_format = RED"\"%s\""RESET
+    char *repeated_format = RED"\"%s\""RESET " (line %d)"
                             " appears more than once in the buffer\n";
     bool repeated = false;
     if (list->length > USE_HASH_MAP_THRESHOLD) {
@@ -305,7 +305,7 @@ brn2_check_repeated(FileList *list) {
 
             if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
                                           hashes[i].hash, hashes[i].mod)) {
-                fprintf(stderr, repeated_format, newfile.name);
+                fprintf(stderr, repeated_format, newfile.name, i + 1);
                 repeated = true;
             }
         }
@@ -321,7 +321,7 @@ brn2_check_repeated(FileList *list) {
                 if (file_i.length != file_j.length)
                     continue;
                 if (!memcmp(file_i.name, file_j.name, file_i.length)) {
-                    fprintf(stderr, repeated_format, file_i.name);
+                    fprintf(stderr, repeated_format, file_i.name, j + 1);
                     repeated = true;
                 }
             }
