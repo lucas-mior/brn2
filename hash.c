@@ -179,7 +179,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
         return true;
     }
 
-    do {
+    while (true) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key))
             return false;
 
@@ -187,7 +187,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
             iterator = iterator->next;
         else
             break;
-    } while (true);
+    }
 
     map->collisions += 1;
     iterator->next = util_calloc(1, sizeof(*iterator));
@@ -213,7 +213,7 @@ hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     if (iterator->key == NULL)
         return NULL;
 
-    do {
+    while (true) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key))
             return &(iterator->value);
 
@@ -221,7 +221,7 @@ hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
             iterator = iterator->next;
         else
             break;
-    } while (true);
+    }
 
     return NULL;
 }
