@@ -42,6 +42,10 @@
 #define MAX_THREADS 64
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 
+#ifndef BRN2_DEBUG
+#define BRN2_DEBUG 0
+#endif
+
 #define STRUCT_ARRAY_SIZE(Struct, ArrayType, array_length) \
     sizeof (*Struct) + (usize)(array_length) * sizeof (ArrayType)
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
