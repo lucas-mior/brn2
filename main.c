@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     bool check = false;
     bool sort = true;
     char *lines = NULL;
-    bool from_dir = false;
+    bool from_dir;
 
     program = basename(argv[0]);
 
@@ -90,8 +90,10 @@ int main(int argc, char **argv) {
 
     if (lines) {
         old = brn2_list_from_lines(lines, 0);
+        from_dir = false;
     } else if ((argc - optind) >= 1) {
         old = brn2_list_from_args(argc - optind, &argv[optind]);
+        from_dir = false;
     } else {
         old = brn2_list_from_dir(".");
         from_dir = true;
