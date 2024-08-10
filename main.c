@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
     bool check = false;
     bool sort = true;
     char *lines = NULL;
+    bool from_dir = false;
 
     program = basename(argv[0]);
 
@@ -87,12 +88,14 @@ int main(int argc, char **argv) {
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
 
-    if (lines)
+    if (lines) {
         old = brn2_list_from_lines(lines, 0);
-    else if ((argc - optind) >= 1)
+    } else if ((argc - optind) >= 1) {
         old = brn2_list_from_args(argc - optind, &argv[optind]);
-    else
+    } else {
         old = brn2_list_from_dir(".");
+        from_dir = true;
+    }
 
     brn2_normalize_names(old);
     if (sort)
@@ -245,6 +248,8 @@ int main(int argc, char **argv) {
     }
 
     brn2_free_lines_list(new);
+    if (from_dir)
+        brn2_free_dir_list(old);
     unlink(buffer.name);
     exit(status);
 }

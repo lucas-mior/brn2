@@ -101,12 +101,25 @@ brn2_list_from_dir(char *directory) {
             continue;
         }
         file->length = (uint32) strlen(name);
-        file->name = name;
+        file->name = util_malloc(file->length + 1);
+        memcpy(file->name, name, file->length + 1);
+        free(directory_list[i]);
 
         length += 1;
     }
+    free(directory_list);
     list->length = length;
     return list;
+}
+
+void
+brn2_free_dir_list(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1) {
+        FileName *file = &(list->files[i]);
+        free(file->name);
+    }
+    free(list);
+    return;
 }
 
 void
