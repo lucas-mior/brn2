@@ -249,9 +249,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    brn2_free_lines_list(new);
-    if (from_dir)
-        brn2_free_dir_list(old);
+    if (BRN2_DEBUG) {
+        brn2_free_lines_list(new);
+        if (from_dir)
+            brn2_free_dir_list(old);
+    }
     unlink(buffer.name);
     exit(status);
 }
