@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
     {
         char buffer2[BUFSIZ];
         int n;
-        HashMap *repeated_map;
+        HashSet *repeated_set;
         Hash *hashes;
 
         n = snprintf(buffer.name, sizeof(buffer.name),
@@ -145,16 +145,16 @@ int main(int argc, char **argv) {
             exit(EXIT_FAILURE);
         }
 
-        repeated_map = hash_map_create(old->length);
+        repeated_set = hash_set_create(old->length);
         hashes = brn2_create_hashes_threads(old,
-                                            hash_map_capacity(repeated_map));
+                                            hash_set_capacity(repeated_set));
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             Hash *hash = &hashes[i];
 
-            while (!hash_set_insert_pre_calc(repeated_map, file->name,
+            while (!hash_set_insert_pre_calc(repeated_set, file->name,
                                              hash->hash, hash->mod)) {
                 error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
                       file->name);
@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
         }
         close:
         free(hashes);
-        hash_map_destroy(repeated_map);
+        hash_set_destroy(repeated_set);
 
         fclose(buffer.stream);
         close(buffer.fd);
