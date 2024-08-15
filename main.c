@@ -135,6 +135,7 @@ int main(int argc, char **argv) {
 
     {
         char buffer2[BUFSIZ];
+        uint32 capacity_set;
         int n;
 
         n = snprintf(buffer.name, sizeof(buffer.name),
@@ -155,7 +156,7 @@ int main(int argc, char **argv) {
         }
 
         oldlist_map = hash_map_create(old->length);
-        uint32 capacity_set = hash_map_capacity(oldlist_map);
+        capacity_set = hash_map_capacity(oldlist_map);
         hashes_old = brn2_create_hashes_threads(old, capacity_set);
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
@@ -210,7 +211,7 @@ int main(int argc, char **argv) {
                 uint32 length = new->files[i].length;
                 if (x < 0.5f) {
                     for (uint32 j = 0; j < length; j += 1) {
-                        char c = allowed[rand() % (sizeof(allowed) - 1)];
+                        char c = allowed[(usize) rand() % (sizeof(allowed) - 1)];
                         new->files[i].name[j] = c;
                     }
                 }

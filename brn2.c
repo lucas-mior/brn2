@@ -399,7 +399,7 @@ brn2_execute(FileList *old, FileList *new,
             index = hash_map_lookup_pre_calc(oldlist_map, newname,
                                              newhash, newindex);
             if (index) {
-                int next = *index;
+                uint32 next = *index;
                 FileName *file_j = &(old->files[next]);
 
                 hash_map_remove_pre_calc(oldlist_map, newname,
