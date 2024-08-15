@@ -410,9 +410,7 @@ brn2_execute(FileList *old, FileList *new,
                 hash_map_insert(oldlist_map, *newname, i);
                 hash_map_insert(oldlist_map, file_j->name, next);
 
-                Hash aux = hashes_old[i];
-                hashes_old[i].hash = hashes_old[next].hash;
-                hashes_old[next] = aux;
+                SWAP(hashes_old[i], hashes_old[next]);
             } else {
                 error("Debugging: Not finding index of \"%s\" on old list.\n",
                       *newname);
