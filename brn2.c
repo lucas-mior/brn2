@@ -41,7 +41,6 @@
 
 static int brn2_create_hashes(void *arg);
 static inline bool brn2_is_pwd_or_parent(char *);
-static bool brn2_check_repeated(FileList *);
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -305,17 +304,25 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
 }
 
 bool
-brn2_check_repeated(FileList *list) {
+brn2_verify(FileList *old, FileList *new) {
+    bool repeated = false;
     char *repeated_format = RED"\"%s\""RESET " (line %d)"
                             " appears more than once in the buffer\n";
-    bool repeated = false;
-    HashSet *repeated_map = hash_set_create(list->length);
+    HashSet *repeated_map = hash_set_create(new->length);
     Hash *hashes;
-    hashes = brn2_create_hashes_threads(list,
-                                        hash_map_capacity(repeated_map));
+    hashes = brn2_create_hashes_threads(new, hash_map_capacity(repeated_map));
 
-    for (uint32 i = 0; i < list->length; i += 1) {
-        FileName newfile = list->files[i];
+
+    if (old->length != new->length) {
+        error("You are renaming "RED"%u"RESET" file%.*s "
+              "but buffer contains "RED"%u"RESET" file name%.*s\n",
+              old->length, old->length != 1, "s",
+              new->length, new->length != 1, "s");
+        return false;
+    }
+
+    for (uint32 i = 0; i < new->length; i += 1) {
+        FileName newfile = new->files[i];
 
         if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
                                       hashes[i].hash, hashes[i].mod)) {
@@ -326,22 +333,7 @@ brn2_check_repeated(FileList *list) {
 
     free(hashes);
     hash_set_destroy(repeated_map);
-    return repeated;
-}
 
-bool
-brn2_verify(FileList *old, FileList *new) {
-    bool repeated = false;
-
-    if (old->length != new->length) {
-        error("You are renaming "RED"%u"RESET" file%.*s "
-              "but buffer contains "RED"%u"RESET" file name%.*s\n",
-              old->length, old->length != 1, "s",
-              new->length, new->length != 1, "s");
-        return false;
-    }
-
-    repeated = brn2_check_repeated(new);
     return !repeated;
 }
 
@@ -502,6 +494,8 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_THIS_FILE
 #include <assert.h>
+
+bool brn2_fatal = false;
 
 static bool
 contains_filename(FileList *list, FileName file) {

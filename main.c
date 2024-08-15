@@ -26,7 +26,7 @@
 #include "util.c"
 
 char *program;
-bool brn2_fatal;
+bool brn2_fatal = false;
 
 static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
