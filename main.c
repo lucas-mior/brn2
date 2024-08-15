@@ -210,10 +210,11 @@ int main(int argc, char **argv) {
             for (uint32 i = 0; i < new->length; i += 1) {
                 float x = (float) rand() / (float) RAND_MAX;
                 uint32 length = new->files[i].length;
-                int size = sizeof(allowed) - 1;
                 if (x < 0.5f) {
-                    for (uint32 j = 0; j < length; j += 1)
-                        new->files[i].name[j] = allowed[rand() % size];
+                    for (uint32 j = 0; j < length; j += 1) {
+                        char c = allowed[rand() % (sizeof(allowed) - 1)];
+                        new->files[i].name[j] = c;
+                    }
                 }
             }
 #endif
