@@ -309,39 +309,23 @@ brn2_check_repeated(FileList *list) {
     char *repeated_format = RED"\"%s\""RESET " (line %d)"
                             " appears more than once in the buffer\n";
     bool repeated = false;
-    if (list->length > USE_HASH_MAP_THRESHOLD) {
-        HashSet *repeated_map = hash_set_create(list->length);
-        Hash *hashes;
-        hashes = brn2_create_hashes_threads(list,
-                                            hash_map_capacity(repeated_map));
+    HashSet *repeated_map = hash_set_create(list->length);
+    Hash *hashes;
+    hashes = brn2_create_hashes_threads(list,
+                                        hash_map_capacity(repeated_map));
 
-        for (uint32 i = 0; i < list->length; i += 1) {
-            FileName newfile = list->files[i];
+    for (uint32 i = 0; i < list->length; i += 1) {
+        FileName newfile = list->files[i];
 
-            if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
-                                          hashes[i].hash, hashes[i].mod)) {
-                fprintf(stderr, repeated_format, newfile.name, i + 1);
-                repeated = true;
-            }
-        }
-
-        free(hashes);
-        hash_set_destroy(repeated_map);
-    } else {
-        for (uint32 i = 0; i < list->length; i += 1) {
-            FileName file_i = list->files[i];
-            for (uint32 j = i + 1; j < list->length; j += 1) {
-                FileName file_j = list->files[j];
-
-                if (file_i.length != file_j.length)
-                    continue;
-                if (!memcmp(file_i.name, file_j.name, file_i.length)) {
-                    fprintf(stderr, repeated_format, file_i.name, j + 1);
-                    repeated = true;
-                }
-            }
+        if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
+                                      hashes[i].hash, hashes[i].mod)) {
+            fprintf(stderr, repeated_format, newfile.name, i + 1);
+            repeated = true;
         }
     }
+
+    free(hashes);
+    hash_set_destroy(repeated_map);
     return repeated;
 }
 
