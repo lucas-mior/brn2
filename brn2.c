@@ -359,13 +359,12 @@ noop(const char *restrict unused, ...) {
 }
 
 uint32
-brn2_execute(FileList *old, FileList *new,
-             const uint32 number_changes, bool quiet) {
+brn2_execute(FileList *old, FileList *new, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
-    HashSet *names_renamed = hash_set_create(number_changes);
-    HashMap *indexes_exchange = hash_map_create(number_changes);
+    HashSet *names_renamed = hash_set_create(old->length);
+    HashMap *indexes_exchange = hash_map_create(old->length);
 
     if (quiet)
         print = noop;
