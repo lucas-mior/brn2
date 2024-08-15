@@ -476,7 +476,7 @@ brn2_execute(FileList *old, FileList *new,
         } else if (errno != ENOENT) {
             error("Error swapping %s and %s: %s\n",
                   *oldname, newname, strerror(errno));
-            if (brn2_fatal)
+            if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
         }
 #else
@@ -484,7 +484,7 @@ brn2_execute(FileList *old, FileList *new,
         if (!access(newname, F_OK)) {
             error("Can't rename \"%s\" to \"%s\": " "File already exists.\n",
                   *oldname, newname);
-            if (brn2_fatal)
+            if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
         }
@@ -494,7 +494,7 @@ brn2_execute(FileList *old, FileList *new,
             error("Error renaming "RED"\"%s\""RESET "to "RED"\"%s\""RESET":\n",
                   *oldname, newname);
             error("%s\n", strerror(errno));
-            if (brn2_fatal)
+            if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
         } else {
