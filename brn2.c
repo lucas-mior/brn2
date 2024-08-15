@@ -445,9 +445,9 @@ brn2_execute(FileList *old, FileList *new,
                 exit(EXIT_FAILURE);
             continue;
         } else {
-            if (hash_set_insert(names_renamed, *oldname)) {
+            if (hash_set_insert_pre_calc(names_renamed, *oldname,
+                                         oldhash, oldindex))
                 number_renames += 1;
-            }
             print("  %s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
     }
