@@ -29,6 +29,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
