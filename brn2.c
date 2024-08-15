@@ -331,19 +331,67 @@ brn2_verify(FileList *old, FileList *new,
     return !repeated;
 }
 
+typedef struct ChangesSlice {
+    FileList *old;
+    FileList *new;
+    uint32 start;
+    uint32 end;
+    uint32 *partial;
+} ChangesSlice;
+
+int brn2_thread_changes(void *arg) {
+    ChangesSlice *slice = arg;
+    for (uint32 i = slice->start; i < slice->end; i += 1) {
+        FileName oldfile = slice->old->files[i];
+        FileName newfile = slice->new->files[i];
+        if (oldfile.length == newfile.length) {
+            if (!memcmp(oldfile.name, newfile.name, oldfile.length))
+                continue;
+        }
+        *(slice->partial) += 1;
+    }
+    printf("slice->partial: %d\n", *slice->partial);
+    thrd_exit(0);
+}
+
 uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
-    uint32 number = 0;
+    uint32 total = 0;
+    uint32 numbers[MAX_THREADS] = {0};
+    thrd_t threads[MAX_THREADS];
+    ChangesSlice slices[MAX_THREADS];
+    uint32 range;
+    uint32 nthreads;
+    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    if (number_threads <= 0)
+        nthreads = 1; 
+    else
+        nthreads = MIN((uint32) number_threads, MAX_THREADS);
 
-    for (uint32 i = 0; i < old->length; i += 1) {
-        FileName oldfile = old->files[i];
-        FileName newfile = new->files[i];
-        if (oldfile.length != newfile.length)
-            number += 1;
-        else if (memcmp(oldfile.name, newfile.name, oldfile.length))
-            number += 1;
+    range = old->length / nthreads;
+    for (uint32 i = 0; i < (nthreads - 1); i += 1) {
+        slices[i].start = i*range;
+        slices[i].end = (i + 1)*range;
+        slices[i].old = old;
+        slices[i].new = new;
+        slices[i].partial = &numbers[i];
+        thrd_create(&threads[i], brn2_thread_changes, (void *) &slices[i]);
+    }{
+        uint32 i = nthreads - 1;
+        slices[i].start = i*range;
+        slices[i].end = (i + 1)*range;
+        slices[i].old = old;
+        slices[i].new = new;
+        slices[i].partial = &numbers[i];
+        thrd_create(&threads[i], brn2_thread_changes, (void *) &slices[i]);
     }
-    return number;
+
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        printf("numbers[%d] = %d\n", i, numbers[i]);
+        thrd_join(threads[i], NULL);
+        total += numbers[i];
+    }
+    return total;
 }
 
 static inline int

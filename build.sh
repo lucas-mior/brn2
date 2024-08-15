@@ -40,7 +40,7 @@ if [ "$target" = "debug" ]; then
     CFLAGS="$CFLAGS -g -fsanitize=undefined "
     CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1"
 else
-    CFLAGS="$CFLAGS -g "
+    CFLAGS="$CFLAGS -g -O2 -flto"
     CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0"
 fi
 
