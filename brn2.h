@@ -83,7 +83,7 @@ typedef struct File {
 typedef struct FileName {
     char *name;
     uint32 length;
-    uint32 unused;
+    uint32 hash;
 } FileName;
 
 typedef struct FileList {
@@ -106,13 +106,13 @@ FileList *brn2_list_from_dir(char *);
 FileList *brn2_list_from_lines(char *, uint32);
 FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *);
-Hash *brn2_create_hashes_threads(FileList *, uint32);
-bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
+uint32 *brn2_create_hashes_threads(FileList *, uint32);
+bool brn2_verify(FileList *, FileList *, HashMap *, uint32 *);
 int brn2_thread_changes(void *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *,
                     HashMap *,
-                    Hash *, Hash *, bool);
+                    uint32 *, uint32 *, bool);
 
 void brn2_free_lines_list(FileList *);
 void brn2_free_dir_list(FileList *);
