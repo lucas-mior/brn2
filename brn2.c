@@ -411,14 +411,20 @@ brn2_execute(FileList *old, FileList *new,
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
 
+                hash_map_remove_pre_calc(oldlist_map, *newname,
+                                         newhash, newindex);
+                hash_map_remove_pre_calc(oldlist_map, file_j->name,
+                                         oldhash, oldindex);
+
+                hash_map_insert_pre_calc(oldlist_map, *newname,
+                                         newhash, newindex, i);
+                hash_map_insert_pre_calc(oldlist_map, *oldname,
+                                         oldhash, oldindex, *index);
+
                 Hash aux = hashes_old[i];
                 hashes_old[i].hash = hashes_old[*index].hash;
                 hashes_old[*index] = aux;
 
-                hash_map_remove_pre_calc(oldlist_map, *newname,
-                                         newhash, newindex);
-                hash_map_insert_pre_calc(oldlist_map, *oldname,
-                                         oldhash, oldindex, *index);
             } else {
                 error("Error finding index of \"%s\" on old list.\n", *newname);
                 exit(EXIT_FAILURE);
