@@ -107,7 +107,8 @@ void brn2_normalize_names(FileList *);
 Hash *brn2_create_hashes_threads(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
-uint32 brn2_execute(FileList *, FileList *,
+uint32 brn2_execute(FileList *old, FileList *new,
+                    HashMap *oldlist_map, HashMap *newlist_map,
                     Hash *hashes_old, Hash *hashes_new, bool quiet);
 
 void brn2_free_lines_list(FileList *);
