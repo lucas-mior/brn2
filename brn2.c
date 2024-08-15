@@ -374,14 +374,8 @@ brn2_execute(FileList *old, FileList *new,
         uint32 newhash = hashes_new[i].hash;
         uint32 newindex = hashes_new[i].mod;
 
-        uint32 oldhash = hash_function(*oldname);
-        uint32 oldindex = oldhash % hash_map_capacity(oldlist_map);
-
-        uint32 oldhash2 = hashes_old[i].hash;
-        uint32 oldindex2 = hashes_old[i].mod;
-
-        assert(oldhash == oldhash2);
-        assert(oldindex == oldindex2);
+        uint32 oldhash = hashes_old[i].hash;
+        uint32 oldindex = hashes_old[i].mod;
 
         if (!strcmp(*oldname, *newname))
             continue;
