@@ -276,6 +276,8 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         nthreads = 1; 
     else
         nthreads = MIN((uint32) number_threads, MAX_THREADS);
+    if (nthreads > (list->length / 2))
+        nthreads = 1;
 
     hashes = util_malloc(list->length*sizeof(*hashes));
 
@@ -368,6 +370,8 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     else
         nthreads = MIN((uint32) number_threads, MAX_THREADS);
 
+    if (nthreads > (old->length / 2))
+        nthreads = 1;
     range = old->length / nthreads;
 
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
