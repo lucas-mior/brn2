@@ -108,6 +108,7 @@ bool brn2_verify(FileList *, FileList *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, const uint32, bool);
 void brn2_free_lines_list(FileList *);
+void brn2_free_dir_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
 
