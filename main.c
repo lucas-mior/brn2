@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
                 float x = (float) rand() / (float) RAND_MAX;
                 uint32 length = new->files[i].length;
                 int size = sizeof(allowed) - 1;
-                if (x < 0.5f) {
+                if (x < 0.4f) {
                     new->files[i].name[length - 1] = allowed[rand() % size];
                     new->files[i].name[length - 2] = allowed[rand() % size];
                     new->files[i].name[length - 3] = allowed[rand() % size];
