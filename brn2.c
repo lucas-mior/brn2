@@ -321,8 +321,8 @@ brn2_verify(FileList *old, FileList *new,
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
 
-        if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
-                                      hashes_new[i].hash, hashes_new[i].mod)) {
+        if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
+                                      hashes_new[i].hash, hashes_new[i].mod, i)) {
             fprintf(stderr, repeated_format, newfile.name, i + 1);
             repeated = true;
         }
@@ -354,6 +354,7 @@ noop(const char *restrict unused, ...) {
 
 uint32
 brn2_execute(FileList *old, FileList *new,
+             HashMap *oldlist_map, HashMap *newlist_map,
              Hash *hashes_old, Hash *hashes_new, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
@@ -372,10 +373,10 @@ brn2_execute(FileList *old, FileList *new,
         char **newname = &(new->files[i].name);
         uint32 *oldlength = &(old->files[i].length);
         uint32 *newlength = &(new->files[i].length);
-        uint32 newhash = hash_function(*newname);
-        uint32 oldhash = hash_function(*oldname);
-        uint32 newindex = newhash % hash_map_capacity(indexes_exchange);
-        uint32 oldindex = oldhash % hash_map_capacity(indexes_exchange);
+        uint32 newhash = hashes_new[i].hash;
+        uint32 oldhash = hashes_old[i].hash;
+        uint32 newindex = hashes_new[i].mod;
+        uint32 oldindex = hashes_old[i].mod;
 
         if (!strcmp(*oldname, *newname))
             continue;
