@@ -369,7 +369,7 @@ brn2_execute(FileList *old, FileList *new,
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
         char **oldname = &(old->files[i].name);
-        char **newname = &(new->files[i].name);
+        char *newname = new->files[i].name;
 
         uint32 *oldlength = &(old->files[i].length);
 
@@ -379,24 +379,24 @@ brn2_execute(FileList *old, FileList *new,
         uint32 oldhash = hashes_old[i].hash;
         uint32 oldindex = hashes_old[i].mod;
 
-        if (!strcmp(*oldname, *newname))
+        if (!strcmp(*oldname, newname))
             continue;
 
 #ifdef __linux__
         renamed = renameat2(AT_FDCWD, *oldname,
-                            AT_FDCWD, *newname, RENAME_EXCHANGE);
+                            AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             uint32 *index;
 
             if (hash_set_insert_pre_calc(names_renamed, *oldname,
                                          oldhash, oldindex))
                 number_renames += 1;
-            if (hash_set_insert_pre_calc(names_renamed, *newname,
+            if (hash_set_insert_pre_calc(names_renamed, newname,
                                          newhash, newindex))
                 number_renames += 1;
-            print(GREEN"  %s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+            print(GREEN"  %s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
 
-            index = hash_map_lookup_pre_calc(oldlist_map, *newname,
+            index = hash_map_lookup_pre_calc(oldlist_map, newname,
                                              newhash, newindex);
             if (index) {
                 int next = *index;
@@ -404,38 +404,38 @@ brn2_execute(FileList *old, FileList *new,
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
 
-                hash_map_remove(oldlist_map, *newname);
+                hash_map_remove(oldlist_map, newname);
                 hash_map_remove(oldlist_map, file_j->name);
 
-                hash_map_insert(oldlist_map, *newname, i);
+                hash_map_insert(oldlist_map, newname, i);
                 hash_map_insert(oldlist_map, file_j->name, next);
 
                 SWAP(hashes_old[i], hashes_old[next]);
             } else {
                 error("Debugging: Not finding index of \"%s\" on old list.\n",
-                      *newname);
+                      newname);
             }
             continue;
         } else if (errno != ENOENT) {
             error("Error swapping %s and %s: %s\n",
-                  *oldname, *newname, strerror(errno));
+                  *oldname, newname, strerror(errno));
             if (brn2_fatal)
                 exit(EXIT_FAILURE);
         }
 #else
         (void) newlength;
-        if (!access(*newname, F_OK)) {
+        if (!access(newname, F_OK)) {
             error("Can't rename \"%s\" to \"%s\": " "File already exists.\n",
-                  *oldname, *newname);
+                  *oldname, newname);
             if (brn2_fatal)
                 exit(EXIT_FAILURE);
             continue;
         }
 #endif
-        renamed = rename(*oldname, *newname);
+        renamed = rename(*oldname, newname);
         if (renamed < 0) {
             error("Error renaming "RED"\"%s\""RESET "to "RED"\"%s\""RESET":\n",
-                  *oldname, *newname);
+                  *oldname, newname);
             error("%s\n", strerror(errno));
             if (brn2_fatal)
                 exit(EXIT_FAILURE);
@@ -444,7 +444,7 @@ brn2_execute(FileList *old, FileList *new,
             if (hash_set_insert(names_renamed, *oldname)) {
                 number_renames += 1;
             }
-            print("  %s -> "GREEN"%s"RESET"\n", *oldname, *newname);
+            print("  %s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
     }
     if (BRN2_DEBUG)
