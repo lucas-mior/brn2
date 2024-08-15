@@ -42,6 +42,9 @@ int main(int argc, char **argv) {
     File buffer;
     FileList *old;
     FileList *new;
+    Hash *hashes_old;
+    Hash *hashes_new;
+    uint32 main_capacity;
     char *EDITOR;
     int opt;
 
@@ -131,7 +134,6 @@ int main(int argc, char **argv) {
         char buffer2[BUFSIZ];
         int n;
         HashSet *repeated_set;
-        Hash *hashes;
 
         n = snprintf(buffer.name, sizeof(buffer.name),
                     "%s/%s", tempdir, "brn2.XXXXXX");
@@ -151,13 +153,13 @@ int main(int argc, char **argv) {
         }
 
         repeated_set = hash_set_create(old->length);
-        hashes = brn2_create_hashes_threads(old,
-                                            hash_set_capacity(repeated_set));
+        uint32 capacity_set = hash_set_capacity(repeated_set);
+        hashes_old = brn2_create_hashes_threads(old, capacity_set);
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
-            Hash *hash = &hashes[i];
+            Hash *hash = &hashes_old[i];
 
             while (!hash_set_insert_pre_calc(repeated_set, file->name,
                                              hash->hash, hash->mod)) {
@@ -170,14 +172,13 @@ int main(int argc, char **argv) {
                 memmove(file, file+1, (old->length - i)*sizeof(*file));
                 memmove(hash, hash+1, (old->length - i)*sizeof(*hash));
                 file = &(old->files[i]);
-                hash = &hashes[i];
+                hash = &hashes_old[i];
             }
             file->name[file->length] = '\n';
             fwrite(file->name, 1, file->length + 1, buffer.stream);
             file->name[file->length] = '\0';
         }
         close:
-        free(hashes);
         hash_set_destroy(repeated_set);
 
         fclose(buffer.stream);
@@ -218,8 +219,14 @@ int main(int argc, char **argv) {
             new = brn2_list_from_lines(buffer.name, old->length);
 #endif
             brn2_normalize_names(new);
-            if (!brn2_verify(old, new)) {
+            HashSet *repeated_map = hash_set_create(new->length);
+            main_capacity = hash_map_capacity(repeated_map);
+            hashes_new = brn2_create_hashes_threads(new, main_capacity);
+
+            if (!brn2_verify(old, new, repeated_map, hashes_new)) {
                 brn2_free_lines_list(new);
+                hash_set_destroy(repeated_map);
+                free(hashes_new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -235,7 +242,8 @@ int main(int argc, char **argv) {
         uint32 number_renames = 0;
 
         if (number_changes)
-            number_renames = brn2_execute(old, new, quiet);
+            number_renames = brn2_execute(old, new,
+                                          hashes_old, hashes_new, quiet);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",

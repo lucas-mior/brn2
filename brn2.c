@@ -304,14 +304,11 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
 }
 
 bool
-brn2_verify(FileList *old, FileList *new) {
+brn2_verify(FileList *old, FileList *new,
+            HashMap *repeated_map, Hash *hashes_new) {
     bool repeated = false;
     char *repeated_format = RED"\"%s\""RESET " (line %d)"
                             " appears more than once in the buffer\n";
-    HashSet *repeated_map = hash_set_create(new->length);
-    Hash *hashes;
-    hashes = brn2_create_hashes_threads(new, hash_map_capacity(repeated_map));
-
 
     if (old->length != new->length) {
         error("You are renaming "RED"%u"RESET" file%.*s "
@@ -325,14 +322,11 @@ brn2_verify(FileList *old, FileList *new) {
         FileName newfile = new->files[i];
 
         if (!hash_set_insert_pre_calc(repeated_map, newfile.name,
-                                      hashes[i].hash, hashes[i].mod)) {
+                                      hashes_new[i].hash, hashes_new[i].mod)) {
             fprintf(stderr, repeated_format, newfile.name, i + 1);
             repeated = true;
         }
     }
-
-    free(hashes);
-    hash_set_destroy(repeated_map);
 
     return !repeated;
 }
@@ -359,7 +353,8 @@ noop(const char *restrict unused, ...) {
 }
 
 uint32
-brn2_execute(FileList *old, FileList *new, bool quiet) {
+brn2_execute(FileList *old, FileList *new,
+             Hash *hashes_old, Hash *hashes_new, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
