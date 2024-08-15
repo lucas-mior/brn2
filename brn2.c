@@ -416,7 +416,7 @@ brn2_execute(FileList *old, FileList *new,
                 hash_map_insert_pre_calc(oldlist_map, *oldname,
                                          oldhash, oldindex, *index);
             } else {
-                error("Error finding index of %s on old list.\n", *newname);
+                error("Error finding index of \"%s\" on old list.\n", *newname);
                 exit(EXIT_FAILURE);
             }
             continue;
