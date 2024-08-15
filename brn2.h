@@ -23,6 +23,7 @@
 #ifdef __linux__
 #define _GNU_SOURCE
 #endif
+#include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>
