@@ -245,7 +245,7 @@ int main(int argc, char **argv) {
 
         if (number_changes)
             number_renames = brn2_execute(old, new,
-                                          oldlist_map, newlist_map,
+                                          oldlist_map,
                                           hashes_old, hashes_new, quiet);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
