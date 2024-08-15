@@ -176,7 +176,6 @@ int main(int argc, char **argv) {
                 file = &(old->files[i]);
                 hash = &hashes_old[i];
             }
-            printf("inserted %s at %d OLDLIST\n", file->name, i);
 
             file->name[file->length] = '\n';
             fwrite(file->name, 1, file->length + 1, buffer.stream);
