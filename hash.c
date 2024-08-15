@@ -291,10 +291,11 @@ hash_map_print(HashMap *map, bool verbose) {
             printf("\n%03d:", i);
 
         while (iterator && iterator->key) {
-            printf(GREEN" %s"RESET" ->", iterator->key);
+            printf(GREEN" %s=%u"RESET" ->", iterator->key, iterator->value);
             iterator = iterator->next;
         }
     }
+    printf("\n");
     return;
 }
 
