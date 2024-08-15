@@ -327,6 +327,8 @@ brn2_verify(FileList *old, FileList *new,
                                       newfile.hash, indexes_new[i], i)) {
             fprintf(stderr, repeated_format, newfile.name, i + 1);
             repeated = true;
+            if (brn2_fatal || BRN2_DEBUG)
+                exit(EXIT_FAILURE);
         }
     }
 
@@ -343,13 +345,13 @@ typedef struct ChangesSlice {
 
 int brn2_thread_changes(void *arg) {
     ChangesSlice *slice = arg;
+
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName oldfile = slice->old->files[i];
         FileName newfile = slice->new->files[i];
         if (oldfile.length == newfile.length) {
-            if (!memcmp(oldfile.name, newfile.name, oldfile.length)) {
+            if (!memcmp(oldfile.name, newfile.name, oldfile.length))
                 continue;
-            }
         }
         *(slice->partial) += 1;
     }
