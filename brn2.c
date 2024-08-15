@@ -469,8 +469,8 @@ brn2_execute(FileList *old, FileList *new,
                 SWAP(file_j->length, *oldlength);
                 SWAP(hashes_old[i], hashes_old[next]);
             } else {
-                error("Debugging: Not finding index of \"%s\" on old list.\n",
-                      newname);
+                hash_map_insert_pre_calc(oldlist_map, newname,
+                                         newhash, newindex, i);
             }
             continue;
         } else if (errno != ENOENT) {
