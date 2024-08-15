@@ -204,18 +204,16 @@ int main(int argc, char **argv) {
 #endif
             new = brn2_list_from_lines(buffer.name, old->length);
 #ifdef BRN2_BENCHMARK
+            struct timespec t;
+            clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+            srand(t.tv_nsec);
             for (uint32 i = 0; i < new->length; i += 1) {
                 float x = (float) rand() / (float) RAND_MAX;
                 uint32 length = new->files[i].length;
                 int size = sizeof(allowed) - 1;
-                if (x < 0.4f) {
-                    new->files[i].name[length - 1] = allowed[rand() % size];
-                    new->files[i].name[length - 2] = allowed[rand() % size];
-                    new->files[i].name[length - 3] = allowed[rand() % size];
-                    new->files[i].name[length - 4] = allowed[rand() % size];
-                    new->files[i].name[length - 5] = allowed[rand() % size];
-                    new->files[i].name[length - 6] = allowed[rand() % size];
-                    new->files[i].name[length - 7] = allowed[rand() % size];
+                if (x < 0.5f) {
+                    for (int j = 0; j < 30; j += 1)
+                        new->files[i].name[j] = allowed[rand() % size];
                 }
             }
 #endif
