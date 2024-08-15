@@ -369,10 +369,6 @@ brn2_get_number_changes(FileList *old, FileList *new) {
         nthreads = MIN((uint32) number_threads, MAX_THREADS);
 
     range = old->length / nthreads;
-    if (nthreads > old->length) {
-        nthreads = 1;
-        range = old->length;
-    }
 
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
         slices[i].start = i*range;
@@ -384,7 +380,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
-        slices[i].end = (i + 1)*range;
+        slices[i].end = old->length;
         slices[i].old = old;
         slices[i].new = new;
         slices[i].partial = &numbers[i];
