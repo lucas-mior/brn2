@@ -377,6 +377,12 @@ brn2_execute(FileList *old, FileList *new,
         uint32 oldhash = hashes_old[i].hash;
         uint32 oldindex = hashes_old[i].mod;
 
+        printf("\ntable[%i]\n", i);
+        printf("OLD    NEW\n");
+        for (uint32 k = 0; k < length; k += 1) {
+            printf("%s   %s\n", old->files[k].name, new->files[k].name);
+        }
+
         if (!strcmp(*oldname, *newname))
             continue;
 
@@ -392,12 +398,16 @@ brn2_execute(FileList *old, FileList *new,
             if (hash_set_insert_pre_calc(names_renamed, *newname,
                                          newhash, newindex))
                 number_renames += 1;
-            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
+            print(GREEN"  %s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
+            printf("looking for %s at %d on oldlist_map...\n",
+                    *newname, newhash);
             index = hash_map_lookup_pre_calc(oldlist_map, *newname,
                                              newhash, newindex);
             if (index) {
                 FileName *file_j = &(old->files[*index]);
+                printf("found on index %d:\nswapping %s with %s ...\n",
+                        *index, file_j->name, *oldname);
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
 
@@ -443,7 +453,7 @@ brn2_execute(FileList *old, FileList *new,
                                          *oldname, oldhash, oldindex)) {
                 number_renames += 1;
             }
-            print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
+            print("  %s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
     if (BRN2_DEBUG)
