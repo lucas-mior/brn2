@@ -345,8 +345,9 @@ int brn2_thread_changes(void *arg) {
         FileName oldfile = slice->old->files[i];
         FileName newfile = slice->new->files[i];
         if (oldfile.length == newfile.length) {
-            if (!memcmp(oldfile.name, newfile.name, oldfile.length))
+            if (!memcmp(oldfile.name, newfile.name, oldfile.length)) {
                 continue;
+            }
         }
         *(slice->partial) += 1;
     }
@@ -368,6 +369,11 @@ brn2_get_number_changes(FileList *old, FileList *new) {
         nthreads = MIN((uint32) number_threads, MAX_THREADS);
 
     range = old->length / nthreads;
+    if (nthreads > old->length) {
+        nthreads = 1;
+        range = old->length;
+    }
+
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
         slices[i].start = i*range;
         slices[i].end = (i + 1)*range;

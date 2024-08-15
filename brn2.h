@@ -43,6 +43,7 @@
 #define USE_THREADS_THRESHOLD 524288
 #define MAX_THREADS 64
 #define MIN(a,b) (a) < (b) ? (a) : (b)
+#define MAX(a,b) (a) > (b) ? (a) : (b)
 
 #ifndef BRN2_DEBUG
 #define BRN2_DEBUG 0
