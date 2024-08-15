@@ -350,7 +350,6 @@ int brn2_thread_changes(void *arg) {
         }
         *(slice->partial) += 1;
     }
-    printf("slice->partial: %d\n", *slice->partial);
     thrd_exit(0);
 }
 
@@ -387,7 +386,6 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     }
 
     for (uint32 i = 0; i < nthreads; i += 1) {
-        printf("numbers[%d] = %d\n", i, numbers[i]);
         thrd_join(threads[i], NULL);
         total += numbers[i];
     }
