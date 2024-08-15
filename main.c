@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
     File buffer;
     FileList *old;
     FileList *new;
-    uint32 *indexes_old;
-    uint32 *indexes_new;
+    Hash *hashes_old;
+    Hash *hashes_new;
     HashSet *oldlist_map;
     HashSet *newlist_map;
 
@@ -157,15 +157,15 @@ int main(int argc, char **argv) {
 
         oldlist_map = hash_map_create(old->length);
         capacity_set = hash_map_capacity(oldlist_map);
-        indexes_old = brn2_create_hashes_threads(old, capacity_set);
+        hashes_old = brn2_create_hashes_threads(old, capacity_set);
 
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
-            uint32 *index = &indexes_old[i];
+            Hash *hash = &hashes_old[i];
 
             while (!hash_map_insert_pre_calc(oldlist_map, file->name,
-                                             file->hash, *index, i)) {
+                                             hash->hash, hash->mod, i)) {
                 error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
@@ -173,9 +173,9 @@ int main(int argc, char **argv) {
                     goto close;
 
                 memmove(file, file+1, (old->length - i)*sizeof(*file));
-                memmove(index, index+1, (old->length - i)*sizeof(*index));
+                memmove(hash, hash+1, (old->length - i)*sizeof(*hash));
                 file = &(old->files[i]);
-                index = &indexes_old[i];
+                hash = &hashes_old[i];
             }
 
             file->name[file->length] = '\n';
@@ -223,12 +223,12 @@ int main(int argc, char **argv) {
             brn2_normalize_names(new);
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_map_capacity(newlist_map);
-            indexes_new = brn2_create_hashes_threads(new, main_capacity);
+            hashes_new = brn2_create_hashes_threads(new, main_capacity);
 
-            if (!brn2_verify(old, new, newlist_map, indexes_new)) {
+            if (!brn2_verify(old, new, newlist_map, hashes_new)) {
                 brn2_free_lines_list(new);
                 hash_map_destroy(newlist_map);
-                free(indexes_new);
+                free(hashes_new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
         if (number_changes)
             number_renames = brn2_execute(old, new,
                                           oldlist_map,
-                                          indexes_old, indexes_new, quiet);
+                                          hashes_old, hashes_new, quiet);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
