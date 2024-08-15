@@ -161,7 +161,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     }
 
     list->map = mmap(NULL, list->map_size, 
-                     PROT_READ | PROT_WRITE, MAP_PRIVATE,
+                     PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE,
                      fd, 0);
 
     if (list->map == MAP_FAILED) {
