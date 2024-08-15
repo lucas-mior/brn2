@@ -362,6 +362,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 numbers[MAX_THREADS] = {0};
     thrd_t threads[MAX_THREADS];
     ChangesSlice slices[MAX_THREADS];
+
     uint32 range;
     uint32 nthreads;
     long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
