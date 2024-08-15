@@ -200,11 +200,7 @@ int main(int argc, char **argv) {
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
-#else
-            util_command(ARRAY_LENGTH(args_edit), args_edit);
-#endif
             new = brn2_list_from_lines(buffer.name, old->length);
-#ifdef BRN2_BENCHMARK
             clock_gettime(CLOCK_MONOTONIC_RAW, &t);
             srand((uint) t.tv_nsec);
             for (uint32 i = 0; i < new->length; i += 1) {
@@ -217,6 +213,9 @@ int main(int argc, char **argv) {
                     }
                 }
             }
+#else
+            util_command(ARRAY_LENGTH(args_edit), args_edit);
+            new = brn2_list_from_lines(buffer.name, old->length);
 #endif
             brn2_normalize_names(new);
             if (!brn2_verify(old, new)) {
