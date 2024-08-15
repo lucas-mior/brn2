@@ -354,7 +354,7 @@ noop(const char *restrict unused, ...) {
 
 uint32
 brn2_execute(FileList *old, FileList *new,
-             HashMap *oldlist_map, HashMap *newlist_map,
+             HashMap *oldlist_map,
              Hash *hashes_old, Hash *hashes_new, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
@@ -370,18 +370,14 @@ brn2_execute(FileList *old, FileList *new,
         int renamed;
         char **oldname = &(old->files[i].name);
         char **newname = &(new->files[i].name);
+
         uint32 *oldlength = &(old->files[i].length);
+
         uint32 newhash = hashes_new[i].hash;
         uint32 newindex = hashes_new[i].mod;
 
         uint32 oldhash = hashes_old[i].hash;
         uint32 oldindex = hashes_old[i].mod;
-
-        printf("\ntable[%i]\n", i);
-        printf("OLD    NEW\n");
-        for (uint32 k = 0; k < length; k += 1) {
-            printf("%s   %s\n", old->files[k].name, new->files[k].name);
-        }
 
         if (!strcmp(*oldname, *newname))
             continue;
@@ -415,8 +411,8 @@ brn2_execute(FileList *old, FileList *new,
                 hash_map_insert(oldlist_map, file_j->name, next);
 
                 Hash aux = hashes_old[i];
-                hashes_old[i].hash = hashes_old[*index].hash;
-                hashes_old[*index] = aux;
+                hashes_old[i].hash = hashes_old[next].hash;
+                hashes_old[next] = aux;
             } else {
                 error("Debugging: Not finding index of \"%s\" on old list.\n",
                       *newname);
