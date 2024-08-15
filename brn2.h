@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <threads.h>
 #include <unistd.h>
+#include "hash.h"
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
@@ -104,9 +105,11 @@ FileList *brn2_list_from_lines(char *, uint32);
 FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *);
 Hash *brn2_create_hashes_threads(FileList *, uint32);
-bool brn2_verify(FileList *, FileList *);
+bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
-uint32 brn2_execute(FileList *, FileList *, bool);
+uint32 brn2_execute(FileList *, FileList *,
+                    Hash *hashes_old, Hash *hashes_new, bool quiet);
+
 void brn2_free_lines_list(FileList *);
 void brn2_free_dir_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));
