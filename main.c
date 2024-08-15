@@ -215,6 +215,7 @@ int main(int argc, char **argv) {
                     new->files[i].name[length - 4] = allowed[rand() % size];
                     new->files[i].name[length - 5] = allowed[rand() % size];
                     new->files[i].name[length - 6] = allowed[rand() % size];
+                    new->files[i].name[length - 7] = allowed[rand() % size];
                 }
             }
 #endif
