@@ -245,7 +245,7 @@ brn2_normalize_names(FileList *list) {
 
 typedef struct Slice {
     FileList *list;
-    uint32 *indexes;
+    Hash *hashes;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
@@ -259,15 +259,15 @@ brn2_create_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileList *list = slice->list;
         FileName *newfile = &(list->files[i]);
-        newfile->hash = hash_function(newfile->name);
-        slice->indexes[i] = newfile->hash % slice->map_capacity;
+        slice->hashes[i].hash = hash_function(newfile->name);
+        slice->hashes[i].mod = slice->hashes[i].hash % slice->map_capacity;
     }
     thrd_exit(0);
 }
 
-uint32 *
+Hash *
 brn2_create_hashes_threads(FileList *list, uint32 map_size) {
-    uint32 *indexes;
+    Hash *hashes;
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
     uint32 range;
@@ -280,7 +280,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
     if (nthreads > (list->length / 2))
         nthreads = 1;
 
-    indexes = util_malloc(list->length*sizeof(*indexes));
+    hashes = util_malloc(list->length*sizeof(*hashes));
 
     range = list->length / nthreads;
 
@@ -288,7 +288,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         slices[i].start = i*range;
         slices[i].end = (i + 1)*range;
         slices[i].list = list;
-        slices[i].indexes = indexes;
+        slices[i].hashes = hashes;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
     }{
@@ -296,19 +296,19 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         slices[i].start = i*range;
         slices[i].end = list->length;
         slices[i].list = list;
-        slices[i].indexes = indexes;
+        slices[i].hashes = hashes;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
     }
 
     for (uint32 i = 0; i < nthreads; i += 1)
         thrd_join(threads[i], NULL);
-    return indexes;
+    return hashes;
 }
 
 bool
 brn2_verify(FileList *old, FileList *new,
-            HashMap *repeated_map, uint32 *indexes_new) {
+            HashMap *repeated_map, Hash *hashes_new) {
     bool repeated = false;
     char *repeated_format = RED"\"%s\""RESET " (line %d)"
                             " appears more than once in the buffer\n";
@@ -325,7 +325,7 @@ brn2_verify(FileList *old, FileList *new,
         FileName newfile = new->files[i];
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
-                                      newfile.hash, indexes_new[i], i)) {
+                                      hashes_new[i].hash, hashes_new[i].mod, i)) {
             fprintf(stderr, repeated_format, newfile.name, i + 1);
             repeated = true;
             if (brn2_fatal || BRN2_DEBUG)
@@ -411,7 +411,7 @@ noop(const char *restrict unused, ...) {
 uint32
 brn2_execute(FileList *old, FileList *new,
              HashMap *oldlist_map,
-             uint32 *indexes_old, uint32 *indexes_new, bool quiet) {
+             Hash *hashes_old, Hash *hashes_new, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
@@ -429,11 +429,11 @@ brn2_execute(FileList *old, FileList *new,
 
         uint32 *oldlength = &(old->files[i].length);
 
-        uint32 newhash = new->files[i].hash;
-        uint32 newindex = indexes_new[i];
+        uint32 newhash = hashes_new[i].hash;
+        uint32 newindex = hashes_new[i].mod;
 
-        uint32 oldhash = old->files[i].hash;
-        uint32 oldindex = indexes_old[i];
+        uint32 oldhash = hashes_old[i].hash;
+        uint32 oldindex = hashes_old[i].mod;
 
         if (!strcmp(*oldname, newname))
             continue;
@@ -470,7 +470,7 @@ brn2_execute(FileList *old, FileList *new,
 
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
-                SWAP(old->files[i].hash, old->files[next].hash);
+                SWAP(hashes_old[i], hashes_old[next]);
             } else {
                 hash_map_insert_pre_calc(oldlist_map, newname,
                                          newhash, newindex, i);
