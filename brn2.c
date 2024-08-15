@@ -360,7 +360,6 @@ brn2_execute(FileList *old, FileList *new,
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
     HashSet *names_renamed = hash_set_create(old->length);
-    HashMap *indexes_exchange = hash_map_create(old->length);
 
     if (quiet)
         print = noop;
@@ -373,9 +372,16 @@ brn2_execute(FileList *old, FileList *new,
         char **newname = &(new->files[i].name);
         uint32 *oldlength = &(old->files[i].length);
         uint32 newhash = hashes_new[i].hash;
+        uint32 newindex = hashes_new[i].mod;
+
         uint32 oldhash = hash_function(*oldname);
-        uint32 newindex = newhash % hash_map_capacity(indexes_exchange);
-        uint32 oldindex = oldhash % hash_map_capacity(indexes_exchange);
+        uint32 oldindex = oldhash % hash_map_capacity(oldlist_map);
+
+        uint32 oldhash2 = hashes_old[i].hash;
+        uint32 oldindex2 = hashes_old[i].mod;
+
+        assert(oldhash == oldhash2);
+        assert(oldindex == oldindex2);
 
         if (!strcmp(*oldname, *newname))
             continue;
@@ -400,6 +406,11 @@ brn2_execute(FileList *old, FileList *new,
                 FileName *file_j = &(old->files[*index]);
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
+
+                Hash aux = hashes_old[i];
+                hashes_old[i].hash = hashes_old[*index].hash;
+                hashes_old[*index] = aux;
+
                 hash_map_remove_pre_calc(oldlist_map, *newname,
                                          newhash, newindex);
                 hash_map_insert_pre_calc(oldlist_map, *oldname,
@@ -439,10 +450,8 @@ brn2_execute(FileList *old, FileList *new,
             print("%s -> "GREEN"%s"RESET"\n", *oldname, *newname);
         }
     }
-    if (BRN2_DEBUG) {
-        hash_map_destroy(indexes_exchange);
+    if (BRN2_DEBUG)
         hash_set_destroy(names_renamed);
-    }
     return number_renames;
 }
 
