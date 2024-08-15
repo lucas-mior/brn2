@@ -244,7 +244,7 @@ brn2_normalize_names(FileList *list) {
 }
 
 typedef struct Slice {
-    FileName *files;
+    FileList *list;
     uint32 *indexes;
     uint32 start;
     uint32 end;
@@ -257,7 +257,8 @@ brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName *newfile = &(slice->files[i]);
+        FileList *list = slice->list;
+        FileName *newfile = &(list->files[i]);
         newfile->hash = hash_function(newfile->name);
         slice->indexes[i] = newfile->hash % slice->map_capacity;
     }
@@ -286,7 +287,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
         slices[i].start = i*range;
         slices[i].end = (i + 1)*range;
-        slices[i].files = list->files;
+        slices[i].list = list;
         slices[i].indexes = indexes;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
@@ -294,7 +295,7 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
         slices[i].end = list->length;
-        slices[i].files = list->files;
+        slices[i].list = list;
         slices[i].indexes = indexes;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
