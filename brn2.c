@@ -372,8 +372,7 @@ brn2_execute(FileList *old, FileList *new,
         char **oldname = &(old->files[i].name);
         char **newname = &(new->files[i].name);
         uint32 *oldlength = &(old->files[i].length);
-        uint32 *newlength = &(new->files[i].length);
-        uint32 newhash = hash_function(*newname);
+        uint32 newhash = hashes_new[i].hash;
         uint32 oldhash = hash_function(*oldname);
         uint32 newindex = newhash % hash_map_capacity(indexes_exchange);
         uint32 oldindex = oldhash % hash_map_capacity(indexes_exchange);
