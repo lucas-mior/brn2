@@ -401,15 +401,19 @@ brn2_execute(FileList *old, FileList *new,
             if (index) {
                 int next = *index;
                 FileName *file_j = &(old->files[next]);
+
+                hash_map_remove_pre_calc(oldlist_map, newname,
+                                         newhash, newindex);
+                hash_map_remove_pre_calc(oldlist_map, *oldname,
+                                         oldhash, oldindex);
+
+                hash_map_insert_pre_calc(oldlist_map, newname,
+                                         newhash, newindex, i);
+                hash_map_insert_pre_calc(oldlist_map, *oldname,
+                                         oldhash, oldindex, next);
+
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
-
-                hash_map_remove(oldlist_map, newname);
-                hash_map_remove(oldlist_map, file_j->name);
-
-                hash_map_insert(oldlist_map, newname, i);
-                hash_map_insert(oldlist_map, file_j->name, next);
-
                 SWAP(hashes_old[i], hashes_old[next]);
             } else {
                 error("Debugging: Not finding index of \"%s\" on old list.\n",
