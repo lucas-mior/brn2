@@ -373,10 +373,10 @@ brn2_execute(FileList *old, FileList *new,
         char **newname = &(new->files[i].name);
         uint32 *oldlength = &(old->files[i].length);
         uint32 *newlength = &(new->files[i].length);
-        uint32 newhash = hashes_new[i].hash;
-        uint32 oldhash = hashes_old[i].hash;
-        uint32 newindex = hashes_new[i].mod;
-        uint32 oldindex = hashes_old[i].mod;
+        uint32 newhash = hash_function(*newname);
+        uint32 oldhash = hash_function(*oldname);
+        uint32 newindex = newhash % hash_map_capacity(indexes_exchange);
+        uint32 oldindex = oldhash % hash_map_capacity(indexes_exchange);
 
         if (!strcmp(*oldname, *newname))
             continue;
@@ -395,29 +395,19 @@ brn2_execute(FileList *old, FileList *new,
                 number_renames += 1;
             print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, *newname);
 
-            index = hash_map_lookup_pre_calc(indexes_exchange, *newname,
+            index = hash_map_lookup_pre_calc(oldlist_map, *newname,
                                              newhash, newindex);
             if (index) {
                 FileName *file_j = &(old->files[*index]);
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
-                hash_map_remove_pre_calc(indexes_exchange, *newname,
+                hash_map_remove_pre_calc(oldlist_map, *newname,
                                          newhash, newindex);
-                hash_map_insert_pre_calc(indexes_exchange, *oldname,
+                hash_map_insert_pre_calc(oldlist_map, *oldname,
                                          oldhash, oldindex, *index);
             } else {
-                for (uint32 j = i + 1; j < length; j += 1) {
-                    FileName *file_j = &(old->files[j]);
-                    if (file_j->length == *newlength) {
-                        if (!memcmp(file_j->name, *newname, *newlength)) {
-                            SWAP(file_j->name, *oldname);
-                            SWAP(file_j->length, *oldlength);
-                            hash_map_insert(indexes_exchange, *oldname, j);
-                            break;
-                        }
-                    }
-                    hash_map_insert(indexes_exchange, file_j->name, j);
-                }
+                error("Error finding index of %s on old list.\n", *newname);
+                exit(EXIT_FAILURE);
             }
             continue;
         } else if (errno != ENOENT) {
