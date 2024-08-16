@@ -100,6 +100,7 @@ typedef struct Hash {
 
 extern char *program;
 extern bool brn2_fatal;
+extern uint32 nthreads;
 
 int brn2_compare(const void *, const void *);
 FileList *brn2_list_from_dir(char *);
