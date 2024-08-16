@@ -83,7 +83,7 @@ typedef struct File {
 typedef struct FileName {
     char *name;
     uint32 length;
-    uint32 unused;
+    uint32 hash;
 } FileName;
 
 typedef struct FileList {
@@ -94,7 +94,6 @@ typedef struct FileList {
 } FileList;
 
 typedef struct Hash {
-    uint32 hash;
     uint32 mod;
 } Hash;
 

@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
             Hash *hash = &hashes_old[i];
 
             while (!hash_map_insert_pre_calc(oldlist_map, file->name,
-                                             hash->hash, hash->mod, i)) {
+                                             file->hash, hash->mod, i)) {
                 error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
