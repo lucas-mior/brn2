@@ -170,6 +170,10 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     list->map = mmap(NULL, list->map_size, 
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
+    if (close(fd) < 0) {
+        error("Error closing %s: %s\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    };
 
     if (list->map == MAP_FAILED) {
         error("Error mapping history file to memory: %s"
@@ -201,7 +205,6 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             p = oldp + 15;
         }
     }
-    close(fd);
 
     if (length == 0) {
         error("Empty list. Exiting.\n");
