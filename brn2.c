@@ -273,19 +273,6 @@ brn2_work_hashes(void *arg) {
     thrd_exit(0);
 }
 
-void
-brn2_normalize_names(FileList *list) {
-    brn2_threads(brn2_work_normalization, list, NULL, NULL, NULL, 0);
-    return;
-}
-
-Hash *
-brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
-    brn2_threads(brn2_work_hashes, list, NULL, hashes, NULL, map_capacity);
-    return hashes;
-}
-
 int brn2_work_changes(void *arg) {
     Slice *slice = arg;
 
@@ -299,6 +286,19 @@ int brn2_work_changes(void *arg) {
         *(slice->partial) += 1;
     }
     thrd_exit(0);
+}
+
+void
+brn2_normalize_names(FileList *list) {
+    brn2_threads(brn2_work_normalization, list, NULL, NULL, NULL, 0);
+    return;
+}
+
+Hash *
+brn2_create_hashes(FileList *list, uint32 map_capacity) {
+    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
+    brn2_threads(brn2_work_hashes, list, NULL, hashes, NULL, map_capacity);
+    return hashes;
 }
 
 uint32
