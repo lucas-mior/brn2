@@ -502,7 +502,6 @@ brn2_execute(FileList *old, FileList *new,
     return number_renames;
 }
 
-
 void
 brn2_usage(FILE *stream) {
     fprintf(stream,
