@@ -163,7 +163,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             error("list->map_size: %zu\n", list->map_size);
             exit(EXIT_FAILURE);
         }
-        list->map_size += (32 - (list->map_size % 32));
+        list->map_size += (MEMCHR_BYTES - (list->map_size % MEMCHR_BYTES));
     }
 
     list->map = mmap(NULL, list->map_size, 
@@ -190,7 +190,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             list = util_realloc(list,
                                 STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
-        if ((p = memchr(p, '\n', 16))) {
+        if ((p = memchr(p, '\n', MEMCHR_BYTES))) {
             FileName *file = &(list->files[length]);
             *p = '\0';
             if (is_old && brn2_is_pwd_or_parent(begin)) {
