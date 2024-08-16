@@ -218,14 +218,14 @@ brn2_is_pwd_or_parent(char *filename) {
 }
 
 typedef struct Slice {
-    FileList *old_list;
-    FileList *new_list;
-    Hash *hashes;
+    FileList *restrict old_list;
+    FileList *restrict new_list;
+    Hash *restrict hashes;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
     uint32 unused;
-    uint32 *partial;
+    uint32 *restrict partial;
 } Slice;
 
 int
@@ -281,8 +281,9 @@ brn2_create_hashes(void *arg) {
 }
 
 int brn2_threads(int (*function)(void *),
-                 FileList *old, FileList *new,
-                 Hash *hashes, uint32 *numbers, uint32 map_size) {
+                 FileList *restrict old, FileList *restrict new,
+                 Hash *restrict hashes, uint32 *restrict numbers,
+                 uint32 map_size) {
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
     uint32 range;
@@ -319,15 +320,15 @@ int brn2_threads(int (*function)(void *),
 }
 
 Hash *
-brn2_create_hashes_threads(FileList *list, uint32 map_size) {
-    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
+brn2_create_hashes_threads(FileList *restrict list, uint32 map_size) {
+    Hash *restrict hashes = util_malloc(list->length*sizeof(*hashes));
     brn2_threads(brn2_create_hashes, list, NULL, hashes, NULL, map_size);
     return hashes;
 }
 
 bool
-brn2_verify(FileList *old, FileList *new,
-            HashMap *repeated_map, Hash *hashes_new) {
+brn2_verify(FileList *restrict old, FileList *restrict new,
+            HashMap *restrict repeated_map, Hash *restrict hashes_new) {
     bool repeated = false;
     char *repeated_format = RED"\"%s\""RESET " (line %d)"
                             " appears more than once in the buffer\n";
@@ -371,7 +372,7 @@ int brn2_thread_changes(void *arg) {
 }
 
 uint32
-brn2_get_number_changes(FileList *old, FileList *new) {
+brn2_get_number_changes(FileList *restrict old, FileList *restrict new) {
     uint32 total = 0;
     uint32 numbers[MAX_THREADS] = {0};
     brn2_threads(brn2_thread_changes, old, new, NULL, numbers, 0);
@@ -388,9 +389,9 @@ noop(const char *restrict unused, ...) {
 }
 
 uint32
-brn2_execute(FileList *old, FileList *new,
-             HashMap *oldlist_map,
-             Hash *hashes_old, Hash *hashes_new, bool quiet) {
+brn2_execute(FileList *restrict old, FileList *restrict new,
+             HashMap *restrict oldlist_map,
+             Hash *restrict hashes_old, Hash *restrict hashes_new, bool quiet) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *restrict, ...);
