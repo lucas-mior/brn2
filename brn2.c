@@ -41,6 +41,7 @@
 
 static int brn2_work_hashes(void *);
 static int brn2_work_normalization(void *);
+static int brn2_work_changes(void *);
 static inline bool brn2_is_pwd_or_parent(char *);
 static uint32 brn2_threads(int (*)(void *),
                            FileList *, FileList *,
@@ -267,8 +268,8 @@ brn2_work_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileList *list = slice->old_list;
         FileName *newfile = &(list->files[i]);
-        slice->hashes[i].hash = hash_function(newfile->name);
-        slice->hashes[i].mod = slice->hashes[i].hash % slice->map_capacity;
+        newfile->hash = hash_function(newfile->name);
+        slice->hashes[i].mod = newfile->hash % slice->map_capacity;
     }
     thrd_exit(0);
 }
@@ -370,7 +371,7 @@ brn2_verify(FileList *old, FileList *new,
         FileName newfile = new->files[i];
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
-                                      hashes_new[i].hash, hashes_new[i].mod, i)) {
+                                      newfile.hash, hashes_new[i].mod, i)) {
             fprintf(stderr, repeated_format, newfile.name, i + 1);
             repeated = true;
             if (brn2_fatal || BRN2_DEBUG)
@@ -408,10 +409,10 @@ brn2_execute(FileList *old, FileList *new,
 
         uint32 *oldlength = &(old->files[i].length);
 
-        uint32 newhash = hashes_new[i].hash;
+        uint32 newhash = new->files[i].hash;
         uint32 newindex = hashes_new[i].mod;
 
-        uint32 oldhash = hashes_old[i].hash;
+        uint32 oldhash = old->files[i].hash;
         uint32 oldindex = hashes_old[i].mod;
 
         if (!strcmp(*oldname, newname))
@@ -449,6 +450,7 @@ brn2_execute(FileList *old, FileList *new,
 
                 SWAP(file_j->name, *oldname);
                 SWAP(file_j->length, *oldlength);
+                SWAP(file_j->hash, old->files[i].hash);
                 SWAP(hashes_old[i], hashes_old[next]);
             } else {
                 hash_map_insert_pre_calc(oldlist_map, newname,
