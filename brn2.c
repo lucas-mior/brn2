@@ -235,19 +235,19 @@ brn2_normalize_threads(void *arg) {
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName *file = &(list->files[i]);
-        char *name = file->name;
         uint32 *length = &(file->length);
         uint32 j = 0;
 
-        while (name[*length - 1] == '/') {
-            name[*length - 1] = '\0';
+        while (file->name[*length - 1] == '/') {
+            file->name[*length - 1] = '\0';
             *length -= 1;
         }
 
-        while (name[j] != '\0') {
-            while (name[j] == '/' && name[j + 1] == '/') {
+        while (file->name[j] != '\0') {
+            while (file->name[j] == '/' && file->name[j + 1] == '/') {
                 *length -= 1;
-                memmove(&name[j], &name[j + 1], (*length - j)*sizeof(*name));
+                memmove(&(file->name[j]), &(file->name[j + 1]),
+                        (*length - j)*sizeof(*(file->name)));
             }
             j += 1;
         }
