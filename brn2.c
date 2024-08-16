@@ -201,6 +201,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             file->length = (uint32) (p - begin);
             begin = p + 1;
             length += 1;
+            p += 1;
         } else {
             p = oldp + MEMCHR_BYTES;
         }
