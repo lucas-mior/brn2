@@ -551,8 +551,6 @@ contains_filename(FileList *list, FileName file) {
                         (list->length - i)*sizeof (*(list->files)));
             }
             return true;
-        } else {
-            printf("%s != %s ", file.name, list->files[i].name);
         }
     }
     return false;
