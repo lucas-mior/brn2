@@ -27,6 +27,7 @@
 
 char *program;
 bool brn2_fatal = false;
+uint32 nthreads;
 
 static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
@@ -46,6 +47,7 @@ int main(int argc, char **argv) {
     Hash *hashes_new;
     HashSet *oldlist_map;
     HashSet *newlist_map;
+    long available_threads;
 
     uint32 main_capacity;
     char *EDITOR;
@@ -93,6 +95,12 @@ int main(int argc, char **argv) {
     }
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
+
+    available_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    if (available_threads <= 0)
+        nthreads = 1; 
+    else
+        nthreads = MIN((uint32) available_threads, MAX_THREADS);
 
     if (lines) {
         old = brn2_list_from_lines(lines, 0);
