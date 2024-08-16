@@ -164,7 +164,6 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             exit(EXIT_FAILURE);
         }
         list->map_size += (32 - (list->map_size % 32));
-        printf("map_size: %u / 32 = %u\n", list->map_size, list->map_size / 32);
     }
 
     list->map = mmap(NULL, list->map_size, 
