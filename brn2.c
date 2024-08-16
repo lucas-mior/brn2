@@ -541,7 +541,7 @@ uint32 nthreads = 1;
 static bool
 contains_filename(FileList *list, FileName file) {
     for (uint32 i = 0; i < list->length; i += 1) {
-        if (list-files[i].length != file.length)
+        if (list->files[i].length != file.length)
             continue;
         if (!memcmp(list->files[i].name, file.name, file.length)) {
             printf(GREEN "%s == %s\n" RESET, file.name, list->files[i].name);
@@ -550,7 +550,6 @@ contains_filename(FileList *list, FileName file) {
                 memmove(&list->files[i], &list->files[i+1],
                         (list->length - i)*sizeof (*(list->files)));
             }
-            printf("\n");
             return true;
         } else {
             printf("%s != %s ", file.name, list->files[i].name);
@@ -573,7 +572,7 @@ int main(void) {
     assert(list1->length == list2->length);
 
     for (uint32 i = 0; i < list1->length; i += 1) {
-        printf(RED"%u / %u\n"RESET, i, list1->length);
+        printf(RED"%u / %u\n"RESET, i+1, list1->length);
         assert(contains_filename(list2, list1->files[i]));
     }
 
