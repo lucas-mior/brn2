@@ -15,7 +15,6 @@ testing () {
 
         set +x 
     done
-    rm *.exe
 }
 
 target="${1:-build}"
