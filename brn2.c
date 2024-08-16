@@ -179,7 +179,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     if (close(fd) < 0) {
         error("Error closing %s: %s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
-    };
+    }
 
 
     begin = list->map;
