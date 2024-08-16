@@ -539,7 +539,7 @@ bool brn2_fatal = false;
 uint32 nthreads = 1;
 
 static bool
-contains_filename(FileList *list, FileName file) {
+contains_filename(FileList *list, FileName file, bool verbose) {
     for (uint32 i = 0; i < list->length; i += 1) {
         if (list->files[i].length != file.length)
             continue;
@@ -551,6 +551,10 @@ contains_filename(FileList *list, FileName file) {
                         (list->length - i)*sizeof (*(list->files)));
             }
             return true;
+        }
+        if (verbose) {
+            printf("%d / %d | %s != %s \n",
+                   i+1, list->length, list->files[i].name, file.name);
         }
     }
     return false;
@@ -571,7 +575,7 @@ int main(void) {
 
     for (uint32 i = 0; i < list1->length; i += 1) {
         printf(RED"%u / %u\n"RESET, i+1, list1->length);
-        assert(contains_filename(list2, list1->files[i]));
+        assert(contains_filename(list2, list1->files[i], list1->length < 9999));
     }
 
     unlink(file);
