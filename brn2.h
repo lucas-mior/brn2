@@ -81,13 +81,13 @@ typedef struct File {
 } File;
 
 typedef struct FileName {
-    char *restrict name;
+    char *name;
     uint32 length;
     uint32 unused;
 } FileName;
 
 typedef struct FileList {
-    char *restrict map;
+    char *map;
     uint32 map_size;
     uint32 length;
     FileName files[];
