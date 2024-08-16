@@ -183,7 +183,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
 
     begin = list->map;
-    for (char *p = list->map; p < (list->map + list->map_size); p += 1) {
+    for (char *p = list->map; p < (list->map + list->map_size);) {
         char *oldp = p;
         if (length >= capacity) {
             capacity *= 2;
@@ -203,7 +203,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             begin = p + 1;
             length += 1;
         } else {
-            p = oldp + 15;
+            p = oldp + MEMCHR_BYTES;
         }
     }
 
