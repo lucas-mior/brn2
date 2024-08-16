@@ -49,8 +49,8 @@
 #define BRN2_DEBUG 0
 #endif
 
-#define STRUCT_ARRAY_SIZE(Struct, ArrayType, array_length) \
-    (sizeof (*Struct) + (usize)(array_length) * sizeof (ArrayType))
+#define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
+    (sizeof (*struct_object) + (usize)(array_length) * sizeof (ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 #define ARRAY_LENGTH(ARRAY_LENGTH) \
     (sizeof(ARRAY_LENGTH) / sizeof(*ARRAY_LENGTH))
