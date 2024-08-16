@@ -41,6 +41,9 @@
 
 static int brn2_create_hashes(void *arg);
 static inline bool brn2_is_pwd_or_parent(char *);
+static void brn2_threads(int (*)(void *), 
+                         FileList *, FileList *,
+                         Hash *, uint32 *, uint32);
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -214,9 +217,23 @@ brn2_is_pwd_or_parent(char *filename) {
     return false;
 }
 
-void
-brn2_normalize_names(FileList *list) {
-    for (uint32 i = 0; i < list->length; i += 1) {
+typedef struct Slice {
+    FileList *old_list;
+    FileList *new_list;
+    Hash *hashes;
+    uint32 start;
+    uint32 end;
+    uint32 map_capacity;
+    uint32 unused;
+    uint32 *partial;
+} Slice;
+
+int
+brn2_normalize_threads(void *arg) {
+    Slice *slice = arg;
+    FileList *list = slice->old_list;
+
+    for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName *file = &(list->files[i]);
         char *name = file->name;
         uint32 *length = &(file->length);
@@ -240,19 +257,15 @@ brn2_normalize_names(FileList *list) {
             file->length -= 2;
         }
     }
+    thrd_exit(0);
+}
+
+void
+brn2_normalize_names(FileList *list) {
+    brn2_threads(brn2_normalize_threads, list, NULL, NULL, NULL, 0);
     return;
 }
 
-typedef struct Slice {
-    FileList *old_list;
-    FileList *new_list;
-    Hash *hashes;
-    uint32 start;
-    uint32 end;
-    uint32 map_capacity;
-    uint32 unused;
-    uint32 *partial;
-} Slice;
 
 int
 brn2_create_hashes(void *arg) {
