@@ -39,11 +39,12 @@
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
-static int brn2_create_hashes(void *arg);
+static int brn2_create_hashes(void *);
+static int brn2_normalize_threads(void *);
 static inline bool brn2_is_pwd_or_parent(char *);
-static int brn2_threads(int (*)(void *),
-                        FileList *, FileList *,
-                        Hash *, uint32 *, uint32);
+static uint32 brn2_threads(int (*)(void *),
+                           FileList *, FileList *,
+                           Hash *, uint32 *, uint32);
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -279,10 +280,10 @@ brn2_create_hashes(void *arg) {
     thrd_exit(0);
 }
 
-int brn2_threads(int (*function)(void *),
-                 FileList *old, FileList *new,
-                 Hash *hashes, uint32 *numbers,
-                 uint32 map_size) {
+uint32 brn2_threads(int (*function)(void *),
+                    FileList *old, FileList *new,
+                    Hash *hashes, uint32 *numbers,
+                    uint32 map_size) {
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
     uint32 range;
