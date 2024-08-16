@@ -244,12 +244,14 @@ brn2_normalize_names(FileList *list) {
 }
 
 typedef struct Slice {
-    FileList *list;
+    FileList *old_list;
+    FileList *new_list;
     Hash *hashes;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
     uint32 unused;
+    uint32 *partial;
 } Slice;
 
 int
@@ -257,7 +259,7 @@ brn2_create_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileList *list = slice->list;
+        FileList *list = slice->old_list;
         FileName *newfile = &(list->files[i]);
         slice->hashes[i].hash = hash_function(newfile->name);
         slice->hashes[i].mod = slice->hashes[i].hash % slice->map_capacity;
@@ -265,9 +267,9 @@ brn2_create_hashes(void *arg) {
     thrd_exit(0);
 }
 
-Hash *
-brn2_create_hashes_threads(FileList *list, uint32 map_size) {
-    Hash *hashes;
+void brn2_threads(int (*function)(void *), 
+                  FileList *old, FileList *new,
+                  Hash *hashes, uint32 *partial, uint32 map_size) {
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
     uint32 range;
@@ -277,32 +279,39 @@ brn2_create_hashes_threads(FileList *list, uint32 map_size) {
         nthreads = 1; 
     else
         nthreads = MIN((uint32) number_threads, MAX_THREADS);
-    if (nthreads > (list->length / 2))
+    if (nthreads > (old->length / 2))
         nthreads = 1;
 
-    hashes = util_malloc(list->length*sizeof(*hashes));
-
-    range = list->length / nthreads;
+    range = old->length / nthreads;
 
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
         slices[i].start = i*range;
         slices[i].end = (i + 1)*range;
-        slices[i].list = list;
+        slices[i].old_list = old;
         slices[i].hashes = hashes;
+        slices[i].partial = partial;
         slices[i].map_capacity = map_size;
-        thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
+        thrd_create(&threads[i], function, (void *) &slices[i]);
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
-        slices[i].end = list->length;
-        slices[i].list = list;
+        slices[i].end = old->length;
+        slices[i].old_list = old;
+        slices[i].new_list = new;
         slices[i].hashes = hashes;
+        slices[i].partial = partial;
         slices[i].map_capacity = map_size;
-        thrd_create(&threads[i], brn2_create_hashes, (void *) &slices[i]);
+        thrd_create(&threads[i], function, (void *) &slices[i]);
     }
 
     for (uint32 i = 0; i < nthreads; i += 1)
         thrd_join(threads[i], NULL);
+}
+
+Hash *
+brn2_create_hashes_threads(FileList *list, uint32 map_size) {
+    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
+    brn2_threads(brn2_create_hashes, list, NULL, hashes, NULL, map_size);
     return hashes;
 }
 
@@ -336,20 +345,12 @@ brn2_verify(FileList *old, FileList *new,
     return !repeated;
 }
 
-typedef struct ChangesSlice {
-    FileList *old;
-    FileList *new;
-    uint32 start;
-    uint32 end;
-    uint32 *partial;
-} ChangesSlice;
-
 int brn2_thread_changes(void *arg) {
-    ChangesSlice *slice = arg;
+    Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName oldfile = slice->old->files[i];
-        FileName newfile = slice->new->files[i];
+        FileName oldfile = slice->old_list->files[i];
+        FileName newfile = slice->new_list->files[i];
         if (oldfile.length == newfile.length) {
             if (!memcmp(oldfile.name, newfile.name, oldfile.length))
                 continue;
@@ -364,7 +365,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
     uint32 numbers[MAX_THREADS] = {0};
     thrd_t threads[MAX_THREADS];
-    ChangesSlice slices[MAX_THREADS];
+    Slice slices[MAX_THREADS];
 
     uint32 range;
     uint32 nthreads;
@@ -381,16 +382,16 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
         slices[i].start = i*range;
         slices[i].end = (i + 1)*range;
-        slices[i].old = old;
-        slices[i].new = new;
+        slices[i].old_list = old;
+        slices[i].new_list = new;
         slices[i].partial = &numbers[i];
         thrd_create(&threads[i], brn2_thread_changes, (void *) &slices[i]);
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
         slices[i].end = old->length;
-        slices[i].old = old;
-        slices[i].new = new;
+        slices[i].old_list = old;
+        slices[i].new_list = new;
         slices[i].partial = &numbers[i];
         thrd_create(&threads[i], brn2_thread_changes, (void *) &slices[i]);
     }
