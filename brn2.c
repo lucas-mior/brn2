@@ -260,13 +260,6 @@ brn2_normalize_threads(void *arg) {
     thrd_exit(0);
 }
 
-void
-brn2_normalize_names(FileList *list) {
-    brn2_threads(brn2_normalize_threads, list, NULL, NULL, NULL, 0);
-    return;
-}
-
-
 int
 brn2_create_hashes(void *arg) {
     Slice *slice = arg;
@@ -278,6 +271,45 @@ brn2_create_hashes(void *arg) {
         slice->hashes[i].mod = slice->hashes[i].hash % slice->map_capacity;
     }
     thrd_exit(0);
+}
+
+void
+brn2_normalize_names(FileList *list) {
+    brn2_threads(brn2_normalize_threads, list, NULL, NULL, NULL, 0);
+    return;
+}
+
+Hash *
+brn2_create_hashes_threads(FileList *list, uint32 map_size) {
+    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
+    brn2_threads(brn2_create_hashes, list, NULL, hashes, NULL, map_size);
+    return hashes;
+}
+
+int brn2_thread_changes(void *arg) {
+    Slice *slice = arg;
+
+    for (uint32 i = slice->start; i < slice->end; i += 1) {
+        FileName oldfile = slice->old_list->files[i];
+        FileName newfile = slice->new_list->files[i];
+        if (oldfile.length == newfile.length) {
+            if (!memcmp(oldfile.name, newfile.name, oldfile.length))
+                continue;
+        }
+        *(slice->partial) += 1;
+    }
+    thrd_exit(0);
+}
+
+uint32
+brn2_get_number_changes(FileList *old, FileList *new) {
+    uint32 total = 0;
+    uint32 numbers[MAX_THREADS] = {0};
+    brn2_threads(brn2_thread_changes, old, new, NULL, numbers, 0);
+
+    for (uint32 i = 0; i < MAX_THREADS; i += 1)
+        total += numbers[i];
+    return total;
 }
 
 uint32 brn2_threads(int (*function)(void *),
@@ -319,13 +351,6 @@ uint32 brn2_threads(int (*function)(void *),
     return nthreads;
 }
 
-Hash *
-brn2_create_hashes_threads(FileList *list, uint32 map_size) {
-    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
-    brn2_threads(brn2_create_hashes, list, NULL, hashes, NULL, map_size);
-    return hashes;
-}
-
 bool
 brn2_verify(FileList *old, FileList *new,
             HashMap *repeated_map, Hash *hashes_new) {
@@ -354,32 +379,6 @@ brn2_verify(FileList *old, FileList *new,
     }
 
     return !repeated;
-}
-
-int brn2_thread_changes(void *arg) {
-    Slice *slice = arg;
-
-    for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName oldfile = slice->old_list->files[i];
-        FileName newfile = slice->new_list->files[i];
-        if (oldfile.length == newfile.length) {
-            if (!memcmp(oldfile.name, newfile.name, oldfile.length))
-                continue;
-        }
-        *(slice->partial) += 1;
-    }
-    thrd_exit(0);
-}
-
-uint32
-brn2_get_number_changes(FileList *old, FileList *new) {
-    uint32 total = 0;
-    uint32 numbers[MAX_THREADS] = {0};
-    brn2_threads(brn2_thread_changes, old, new, NULL, numbers, 0);
-
-    for (uint32 i = 0; i < MAX_THREADS; i += 1)
-        total += numbers[i];
-    return total;
 }
 
 static inline int
