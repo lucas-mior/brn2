@@ -320,7 +320,7 @@ uint32 brn2_threads(int (*function)(void *),
     Slice slices[MAX_THREADS];
     uint32 range;
 
-    if (nthreads > (old->length / 2))
+    if (nthreads >= old->length)
         nthreads = 1;
 
     range = old->length / nthreads;
