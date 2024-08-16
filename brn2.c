@@ -181,7 +181,6 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
-
     begin = list->map;
     for (char *p = list->map; p < (list->map + list->map_size);) {
         char *oldp = p;
