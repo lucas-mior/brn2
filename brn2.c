@@ -47,8 +47,8 @@ static int brn2_threads(int (*)(void *),
 
 int
 brn2_compare(const void *a, const void *b) {
-    const FileName *file_a = a;
-    const FileName *file_b = b;
+    const FileName *restrict file_a = a;
+    const FileName *restrict file_b = b;
     return strcmp(file_a->name, file_b->name);
 }
 
