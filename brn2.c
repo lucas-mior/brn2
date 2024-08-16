@@ -282,7 +282,7 @@ brn2_create_hashes(void *arg) {
 
 void brn2_threads(int (*function)(void *), 
                   FileList *old, FileList *new,
-                  Hash *hashes, uint32 *partial, uint32 map_size) {
+                  Hash *hashes, uint32 *numbers, uint32 map_size) {
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
     uint32 range;
@@ -301,8 +301,9 @@ void brn2_threads(int (*function)(void *),
         slices[i].start = i*range;
         slices[i].end = (i + 1)*range;
         slices[i].old_list = old;
+        slices[i].new_list = new;
         slices[i].hashes = hashes;
-        slices[i].partial = partial;
+        slices[i].partial = &numbers[i];
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], function, (void *) &slices[i]);
     }{
@@ -312,7 +313,7 @@ void brn2_threads(int (*function)(void *),
         slices[i].old_list = old;
         slices[i].new_list = new;
         slices[i].hashes = hashes;
-        slices[i].partial = partial;
+        slices[i].partial = &numbers[i];
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], function, (void *) &slices[i]);
     }
@@ -377,42 +378,10 @@ uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
     uint32 numbers[MAX_THREADS] = {0};
-    thrd_t threads[MAX_THREADS];
-    Slice slices[MAX_THREADS];
+    brn2_threads(brn2_thread_changes, old, new, NULL, numbers, 0);
 
-    uint32 range;
-    uint32 nthreads;
-    long number_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if (number_threads <= 0)
-        nthreads = 1; 
-    else
-        nthreads = MIN((uint32) number_threads, MAX_THREADS);
-
-    if (nthreads > (old->length / 2))
-        nthreads = 1;
-    range = old->length / nthreads;
-
-    for (uint32 i = 0; i < (nthreads - 1); i += 1) {
-        slices[i].start = i*range;
-        slices[i].end = (i + 1)*range;
-        slices[i].old_list = old;
-        slices[i].new_list = new;
-        slices[i].partial = &numbers[i];
-        thrd_create(&threads[i], brn2_thread_changes, (void *) &slices[i]);
-    }{
-        uint32 i = nthreads - 1;
-        slices[i].start = i*range;
-        slices[i].end = old->length;
-        slices[i].old_list = old;
-        slices[i].new_list = new;
-        slices[i].partial = &numbers[i];
-        thrd_create(&threads[i], brn2_thread_changes, (void *) &slices[i]);
-    }
-
-    for (uint32 i = 0; i < nthreads; i += 1) {
-        thrd_join(threads[i], NULL);
+    for (uint32 i = 0; i < MAX_THREADS; i += 1)
         total += numbers[i];
-    }
     return total;
 }
 
