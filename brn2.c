@@ -527,6 +527,7 @@ brn2_usage(FILE *stream) {
 #include <assert.h>
 
 bool brn2_fatal = false;
+uint32 nthreads = 1;
 
 static bool
 contains_filename(FileList *list, FileName file) {
