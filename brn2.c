@@ -469,6 +469,9 @@ brn2_execute(FileList *old, FileList *new,
                 SWAP(file_j->hash, old->files[i].hash);
                 SWAP(hashes_old[i], hashes_old[next]);
             } else {
+                error("Warning: %s was swapped with %s, even though"
+                      "%s was not in the list of files to rename.\n",
+                      newname, *oldname, newname);
                 hash_map_insert_pre_calc(oldlist_map, newname,
                                          newhash, newindex, i);
             }
