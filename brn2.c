@@ -138,6 +138,8 @@ FileList *
 brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
     char *begin;
+    char *pointer;
+    size_t left;
     uint32 length = 0;
     bool is_old = capacity == 0;
     int fd;
@@ -181,30 +183,29 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
-    begin = list->map;
-    for (char *p = list->map; p < (list->map + list->map_size);) {
-        char *oldp = p;
+    begin = pointer = list->map;
+    left = list->map_size;
+
+    while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
+        FileName *file;
         if (length >= capacity) {
             capacity *= 2;
             list = util_realloc(list,
                                 STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
-        if ((p = memchr(p, '\n', MEMCHR_BYTES))) {
-            FileName *file = &(list->files[length]);
-            *p = '\0';
-            if (is_old && brn2_is_pwd_or_parent(begin)) {
-                begin = p + 1;
-                continue;
-            }
 
-            file->name = begin;
-            file->length = (uint32) (p - begin);
-            begin = p + 1;
-            length += 1;
-            p += 1;
-        } else {
-            p = oldp + MEMCHR_BYTES;
+        file = &(list->files[length]);
+        *pointer = '\0';
+        if (is_old && brn2_is_pwd_or_parent(begin)) {
+            begin = pointer + 1;
+            continue;
         }
+
+        file->name = begin;
+        file->length = (uint32) (pointer - begin);
+        begin = pointer + 1;
+        length += 1;
+        left -= (file->length + 1);
     }
 
     if (length == 0) {
