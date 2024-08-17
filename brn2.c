@@ -429,8 +429,10 @@ brn2_execute(FileList *old, FileList *new,
         uint32 oldhash = old->files[i].hash;
         uint32 oldindex = hashes_old[i].mod;
 
-        if (!strcmp(*oldname, newname))
-            continue;
+        if (newhash == oldhash) {
+            if (!strcmp(*oldname, newname))
+                continue;
+        }
 
 #ifdef __linux__
         renamed = renameat2(AT_FDCWD, *oldname,
