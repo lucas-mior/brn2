@@ -276,6 +276,14 @@ brn2_work_normalization(void *arg) {
 }
 
 int
+brn2_work_sort(void *arg) {
+    Slice *slice = arg;
+    FileName *files = &(slice->old_list->files[slice->start]);
+    qsort(files, slice->end - slice->start, sizeof (*files), brn2_compare);
+    thrd_exit(0);
+}
+
+int
 brn2_work_hashes(void *arg) {
     Slice *slice = arg;
 
