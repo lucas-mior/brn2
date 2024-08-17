@@ -200,6 +200,10 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             begin = pointer + 1;
             continue;
         }
+        if (begin == pointer) {
+            error("Empty line in file. Exiting.\n");
+            exit(EXIT_FAILURE);
+        }
 
         file->name = begin;
         file->length = (uint32) (pointer - begin);
