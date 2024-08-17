@@ -446,7 +446,7 @@ brn2_execute(FileList *old, FileList *new,
             if (hash_set_insert_pre_calc(names_renamed, newname,
                                          newhash, newindex))
                 number_renames += 1;
-            print(GREEN"  %s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
+            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
 
             index = hash_map_lookup_pre_calc(oldlist_map, newname,
                                              newhash, newindex);
@@ -504,7 +504,7 @@ brn2_execute(FileList *old, FileList *new,
             if (hash_set_insert_pre_calc(names_renamed, *oldname,
                                          oldhash, oldindex))
                 number_renames += 1;
-            print("  %s -> "GREEN"%s"RESET"\n", *oldname, newname);
+            print("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
     }
     if (BRN2_DEBUG)
