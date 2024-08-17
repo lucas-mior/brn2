@@ -481,14 +481,6 @@ brn2_execute(FileList *old, FileList *new,
                   *oldname, newname, strerror(errno));
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
-        }
-#else
-        (void) newlength;
-        if (!access(newname, F_OK)) {
-            error("Can't rename \"%s\" to \"%s\": " "File already exists.\n",
-                  *oldname, newname);
-            if (brn2_fatal || BRN2_DEBUG)
-                exit(EXIT_FAILURE);
             continue;
         }
 #endif
