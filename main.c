@@ -116,8 +116,10 @@ int main(int argc, char **argv) {
     /* exit(0); */
 
     brn2_normalize_names(old);
-    if (sort)
+    if (sort) {
+        brn2_threads(brn2_work_sort, old, NULL, NULL, NULL, 0);
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
+    }
 
     if (check) {
         for (uint32 i = 0; i < old->length; i += 1) {
