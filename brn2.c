@@ -448,7 +448,7 @@ brn2_execute(FileList *old, FileList *new,
                                                             newhash, newindex);
         newname_exists = !access(newname, F_OK);
 #ifdef __linux__
-        if (!brn2_implict && !newname_index_on_oldlist && newname_exists) {
+        if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
             error("Error renaming "RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n"
                   RED"\"%s\""RESET" already exists,"
                   " but it was not given in the list of"
