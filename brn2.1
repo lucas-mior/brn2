@@ -65,21 +65,23 @@ Rename filenames passed as arguments.
 
 .SH NOTES
 .TP
-By default, brn2 uses the $EDITOR environment variable. If that is not set, it defaults to vim.
+By default, brn2 uses the $EDITOR environment variable. \
+If that is not set, it defaults to vim.
 
 .TP
 .brn2 will not work for more than 2^32 renames at once.
 
 .TP
-.brn2 will not work for filenames longer than PATH_MAX (typically 4096)
+.brn2 will not work for filenames longer than PATH_MAX (typically 4096) \
 characters when reading from <filename>. Newlines in filenames are not allowed.
 
 .TP
-Filenames listed in <filename> or given as arguments that do not correspond to existing files will generate errors while renaming.
+Filenames listed in <filename> or given as arguments that \
+do not correspond to existing files will generate errors while renaming.
 
 .TP
-Filenames . and .. are ignored, as well as any filename that starts with .. even
-when listed in <filename>
+Filenames . and .. are ignored, as well as any filename that \
+starts with .. even when listed in <filename>
 
 .SH EXIT STATUS
 .BR 1
