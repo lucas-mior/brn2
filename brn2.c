@@ -498,7 +498,8 @@ brn2_execute(FileList *old, FileList *new,
             }
             continue;
         } else if (errno != ENOENT) {
-            error("Error swapping "RED"\"%s\""RESET" and "RED"\"%s\""RESET": %s\n",
+            error("Error swapping "RED"\"%s\""RESET
+                  " and "RED"\"%s\""RESET": %s\n",
                   *oldname, newname, strerror(errno));
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
