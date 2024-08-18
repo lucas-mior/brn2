@@ -40,6 +40,7 @@
 #pragma pop_macro("TESTING_THIS_FILE")
 
 static int brn2_work_hashes(void *);
+static int brn2_work_sort(void *);
 static int brn2_work_normalization(void *);
 static int brn2_work_changes(void *);
 static inline bool brn2_is_pwd_or_parent(char *);
