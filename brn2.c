@@ -445,16 +445,15 @@ brn2_execute(FileList *old, FileList *new,
         }
         newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map, newname,
                                          newhash, newindex);
-
-#ifdef __linux__
         newname_exists = !access(newname, F_OK);
+#ifdef __linux__
         if (!brn2_implict && !newname_index_on_oldlist && newname_exists) {
             error("Error renaming "RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n"
                   RED"\"%s\""RESET" already exists,"
                   " but it was not given in the list of"
                   " files to rename, and --implict option is off.\n",
                   *oldname, newname, newname);
-            if (brn2_fatal)
+            if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
         }
@@ -505,7 +504,7 @@ brn2_execute(FileList *old, FileList *new,
         }
 #else
         (void) newlength;
-        if (!access(newname, F_OK)) {
+        if (newname_exists) {
             error("Can't rename \"%s\" to \"%s\", because it exists.\n",
                   *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
