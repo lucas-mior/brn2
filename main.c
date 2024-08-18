@@ -27,6 +27,7 @@
 
 char *program;
 bool brn2_fatal = false;
+bool brn2_implict = false;
 uint32 nthreads;
 
 static struct option options[] = {
@@ -36,6 +37,7 @@ static struct option options[] = {
     {"verbose", no_argument,       NULL, 'v'},
     {"check",   no_argument,       NULL, 'c'},
     {"sort",    no_argument,       NULL, 's'},
+    {"implict", no_argument,       NULL, 'i'},
     {NULL, 0, NULL, 0}
 };
 
@@ -63,7 +65,7 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "f:chqvsF", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqvsFi", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -83,6 +85,9 @@ int main(int argc, char **argv) {
             break;
         case 'F':
             brn2_fatal = true;
+            break;
+        case 'i':
+            brn2_implict = true;
             break;
         case 'f':
             if (optarg == NULL)

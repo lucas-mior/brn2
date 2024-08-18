@@ -16,6 +16,7 @@ Options:
   -c, --check   : Check if original file names exist.
   -s, --sort    : Disable sorting of original list.
   -F, --fatal   : Exit on first renaming error.
+  -i, --implict : Rename files not given in the list of files to rename.
 
 Arguments:
   No arguments             : Rename filenames in the current working directory.
@@ -48,6 +49,11 @@ will take place when you save and exit.
   atomically swap the names of two files which means no temporary files are made
   either (only on GNU/Linux; on other operating systems, swapping files will
   safely fail without renaming).
+  * By default, files which were not specified in the rename list will be
+    unaffected. If you try to rename `a` to `b`, but `b` was not specified in
+    the rename list, this rename won't happen. Supply the `--implict` command
+    line option to force this swap, then `a` will become `b` and `b` will become
+    `a`.
 - If the exact number of filenames isn't provided or if some filenames are
   repeated, the user will be asked to fix the rename buffer or exit.
  
@@ -83,6 +89,11 @@ $ brn2
 - Rename all files in current working directory without sorting:
 ```
 $ brn2 -s
+```
+- Rename files `a`, `b`, and `c`,
+  allowing for swapping with other files which already exist.
+```
+$ brn2 -i a b c
 ```
  
 ## Changes over original brn
