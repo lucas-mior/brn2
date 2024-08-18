@@ -168,7 +168,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         list->map_size += (MEMCHR_BYTES - (list->map_size % MEMCHR_BYTES));
     }
 
-    list->map = mmap(NULL, list->map_size, 
+    list->map = mmap(NULL, list->map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
 
