@@ -33,17 +33,17 @@ will take place when you save and exit.
 
 ### Notes
 - By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
-- It will not work for more than 2^32 renames at once
+- It will not work for more than 2^32 renames at once.
 - It will not work for filenames longer than PATH_MAX (typically 4096) bytes.
 - Newlines in filenames are not allowed.
 - Filenames listed in `<filename>` or given as arguments which
-  do not correpond to existing files will generate errors while renaming
+  do not correpond to existing files will generate errors while renaming.
 - Filenames `.` and `..` are ignored, as well as any filename
   which starts with `..`, even when listen in `<filename>`
-- Filenames are normalized
-    * `./` at beginning of filenames are removed
-    * consecutive slashes (`/`) are bundled together
-    * trailing slashes (`/`) are removed
+- Filenames are normalized:
+    * `./` at beginning of filenames are removed.
+    * consecutive slashes (`/`) are bundled together.
+    * trailing slashes (`/`) are removed.
 - Repeated filenames in `<filename>` or repeated arguments are removed.
 - It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
   atomically swap the names of two files which means no temporary files are made
