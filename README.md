@@ -56,6 +56,8 @@ will take place when you save and exit.
     `a`.
 - If the exact number of filenames isn't provided or if some filenames are
   repeated, the user will be asked to fix the rename buffer or exit.
+- Renaming millions or billions of files can be slow. Disabling sorting
+  (`-s` option) and printing (`-q` option) might help a bit.
  
 ## Install
  
