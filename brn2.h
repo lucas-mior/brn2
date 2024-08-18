@@ -111,11 +111,8 @@ FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *);
 Hash *brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
-int brn2_thread_changes(void *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
-uint32 brn2_execute(FileList *, FileList *,
-                    HashMap *,
-                    Hash *, Hash *, bool);
+uint32 brn2_execute(FileList *, FileList *, HashMap *, Hash *, Hash *, bool);
 
 void brn2_free_lines_list(FileList *);
 void brn2_free_dir_list(FileList *);
