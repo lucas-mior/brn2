@@ -97,10 +97,11 @@ $ brn2 -i a b c
 ```
  
 ## Changes over original brn
-- Option to rename files listed in file.
-- Option to rename files passed as arguments.
+- Option to rename files listed in file or passed as arguments.
+  * By default, won't swap files which were not specified in the rename list.
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
+- Option to check if original files exist.
  
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
