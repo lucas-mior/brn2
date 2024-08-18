@@ -516,9 +516,9 @@ brn2_execute(FileList *old, FileList *new,
 #endif
         renamed = rename(*oldname, newname);
         if (renamed < 0) {
-            error("Error renaming "RED"\"%s\""RESET " to "RED"\"%s\""RESET":\n",
-                  *oldname, newname);
-            error("%s\n", strerror(errno));
+            error("Error renaming "RED"\"%s\""RESET
+                  " to "RED"\"%s\""RESET": %s\n",
+                  *oldname, newname, strerror(errno));
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
