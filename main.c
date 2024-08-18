@@ -117,8 +117,6 @@ int main(int argc, char **argv) {
         old = brn2_list_from_dir(".");
         from_dir = true;
     }
-    /* volatile FileList *x = old; */
-    /* exit(0); */
 
     brn2_normalize_names(old);
     if (sort)
