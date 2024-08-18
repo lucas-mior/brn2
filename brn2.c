@@ -426,6 +426,8 @@ brn2_execute(FileList *old, FileList *new,
 
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
+        uint32 *newname_index_on_oldlist;
+        bool newname_exists;
         char **oldname = &(old->files[i].name);
         char *newname = new->files[i].name;
 
@@ -441,13 +443,24 @@ brn2_execute(FileList *old, FileList *new,
             if (!strcmp(*oldname, newname))
                 continue;
         }
+        newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map, newname,
+                                         newhash, newindex);
 
 #ifdef __linux__
+        newname_exists = !access(newname, F_OK);
+        if (!brn2_implict && !newname_index_on_oldlist && newname_exists) {
+            error("Error renaming "RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n"
+                  RED"\"%s\""RESET" already exists,"
+                  " but it was not given in the list of"
+                  " files to rename, and --implict option is off.\n",
+                  *oldname, newname, newname);
+            if (brn2_fatal)
+                exit(EXIT_FAILURE);
+            continue;
+        }
         renamed = renameat2(AT_FDCWD, *oldname,
                             AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            uint32 *index;
-
             if (hash_set_insert_pre_calc(names_renamed, *oldname,
                                          oldhash, oldindex))
                 number_renames += 1;
@@ -456,10 +469,8 @@ brn2_execute(FileList *old, FileList *new,
                 number_renames += 1;
             print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
 
-            index = hash_map_lookup_pre_calc(oldlist_map, newname,
-                                             newhash, newindex);
-            if (index) {
-                uint32 next = *index;
+            if (newname_index_on_oldlist) {
+                uint32 next = *newname_index_on_oldlist;
                 FileName *file_j = &(old->files[next]);
 
                 hash_map_remove_pre_calc(oldlist_map, newname,
@@ -480,6 +491,8 @@ brn2_execute(FileList *old, FileList *new,
                 error("Warning: \"%s\" was swapped with \"%s\", even though"
                       " \"%s\" was not in the list of files to rename.\n",
                       newname, *oldname, newname);
+                error("To disable this behaviour,"
+                      " don't pass the --implict option.\n");
                 hash_map_insert_pre_calc(oldlist_map, newname,
                                          newhash, newindex, i);
             }
@@ -553,6 +566,7 @@ brn2_usage(FILE *stream) {
 #include <assert.h>
 
 bool brn2_fatal = false;
+bool brn2_implict = false;
 uint32 nthreads = 1;
 
 static bool
