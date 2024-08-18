@@ -443,8 +443,9 @@ brn2_execute(FileList *old, FileList *new,
             if (!strcmp(*oldname, newname))
                 continue;
         }
-        newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map, newname,
-                                         newhash, newindex);
+        newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
+                                                            newname,
+                                                            newhash, newindex);
         newname_exists = !access(newname, F_OK);
 #ifdef __linux__
         if (!brn2_implict && !newname_index_on_oldlist && newname_exists) {
