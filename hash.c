@@ -99,7 +99,7 @@ hash_map_balance(HashMap *old_map) {
 
         if (iterator->key) {
             uint32 hash = iterator->hash;
-            uint32 index = hash % new_map->capacity;
+            uint32 index = hash_normal(new_map, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
         }
@@ -108,7 +108,7 @@ hash_map_balance(HashMap *old_map) {
         while (iterator) {
             void *aux;
             uint32 hash = iterator->hash;
-            uint32 index = hash % new_map->capacity;
+            uint32 index = hash_normal(new_map, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
 
@@ -159,10 +159,15 @@ hash_function(char *str) {
     return hash;
 }
 
+uint32
+hash_normal(HashMap *map, uint32 hash) {
+    return hash % map->capacity;
+}
+
 bool
 hash_map_insert(HashMap *map, char *key, uint32 value) {
     uint32 hash = hash_function(key);
-    uint32 index = hash % map->capacity;
+    uint32 index = hash_normal(map, hash);
     return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
 
@@ -202,7 +207,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
 void *
 hash_map_lookup(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
-    uint32 index = hash % map->capacity;
+    uint32 index = hash_normal(map, hash);
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
 
@@ -229,7 +234,7 @@ hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 bool
 hash_map_remove(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
-    uint32 index = hash % map->capacity;
+    uint32 index = hash_normal(map, hash);
     return hash_map_remove_pre_calc(map, key, hash, index);
 }
 
