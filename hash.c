@@ -50,7 +50,7 @@ typedef struct Bucket {
 
 struct HashMap {
     uint32 capacity;
-    uint32 power2;
+    uint32 bitmask;
     uint32 collisions;
     uint32 length;
     Bucket array[];
@@ -73,7 +73,7 @@ hash_map_create(uint32 length) {
     map = util_malloc(size);
     memset(map, 0, size);
     map->capacity = capacity;
-    map->power2 = power;
+    map->bitmask = (1 << power) - 1;
     return map;
 }
 
@@ -82,17 +82,17 @@ hash_map_balance(HashMap *old_map) {
     HashMap *new_map;
     uint32 size;
     uint32 capacity;
-    uint32 power2;
+    uint32 bitmask;
 
     if (old_map->capacity < (UINT32_MAX/2)) {
         capacity = old_map->capacity*2;
-        power2 = old_map->power2 + 1;
+        bitmask = (old_map->bitmask << 1) + 1;
     } else if (old_map->capacity >= UINT32_MAX) {
         fprintf(stderr, "Error balancing hash map. Too big table.\n");
         return old_map;
     } else {
         capacity = UINT32_MAX;
-        power2 = 32;
+        bitmask = UINT32_MAX;
     }
 
     size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]);
@@ -100,7 +100,7 @@ hash_map_balance(HashMap *old_map) {
     new_map = util_malloc(size);
     memset(new_map, 0, size);
     new_map->capacity = capacity;
-    new_map->power2 = power2;
+    new_map->bitmask = bitmask;
 
     for (uint32 i = 0; i < old_map->capacity; i += 1) {
         Bucket *iterator = &(old_map->array[i]);
@@ -170,7 +170,7 @@ hash_function(char *str) {
 uint32
 hash_normal(HashMap *map, uint32 hash) {
     // capacity has to be power of 2
-    uint32 normal = hash & ((1 << map->power2) - 1);
+    uint32 normal = hash & map->bitmask;
     return normal;
 }
 
