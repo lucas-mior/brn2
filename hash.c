@@ -81,25 +81,25 @@ HashMap *
 hash_map_balance(HashMap *old_map) {
     HashMap *new_map;
     uint32 size;
-    uint32 length;
+    uint32 capacity;
     uint32 power2;
 
     if (old_map->capacity < (UINT32_MAX/2)) {
-        length = old_map->capacity*2;
+        capacity = old_map->capacity*2;
         power2 = old_map->power2 + 1;
     } else if (old_map->capacity >= UINT32_MAX) {
         fprintf(stderr, "Error balancing hash map. Too big table.\n");
         return old_map;
     } else {
-        length = UINT32_MAX;
+        capacity = UINT32_MAX;
         power2 = 32;
     }
 
-    size = sizeof(*new_map) + length*sizeof(new_map->array[0]);
+    size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]);
 
     new_map = util_malloc(size);
     memset(new_map, 0, size);
-    new_map->capacity = length;
+    new_map->capacity = capacity;
     new_map->power2 = power2;
 
     for (uint32 i = 0; i < old_map->capacity; i += 1) {
