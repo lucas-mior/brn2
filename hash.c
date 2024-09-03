@@ -59,23 +59,20 @@ struct HashMap {
 HashMap *
 hash_map_create(uint32 length) {
     HashMap *map;
-    uint32 size = 1;
+    uint32 size;
+    uint32 capacity = 1;
     uint32 power = 0;
 
-    if (length > (UINT32_MAX/4))
-        length = (UINT32_MAX/4);
-    length *= 4;
-
-    while (size <= length) {
-        size *= 2;
+    while (capacity <= length) {
+        capacity *= 2;
         power += 1;
     }
 
-    size = sizeof(*map) + length*sizeof(map->array[0]);
+    size = sizeof(*map) + capacity*sizeof(map->array[0]);
 
     map = util_malloc(size);
     memset(map, 0, size);
-    map->capacity = length;
+    map->capacity = capacity;
     map->power2 = power;
     return map;
 }
@@ -168,7 +165,10 @@ hash_function(char *str) {
 
 uint32
 hash_normal(HashMap *map, uint32 hash) {
-    uint32 normal = hash % map->capacity;
+    uint32 normal = hash & (map->capacity - 1);
+    printf("map->capacity: %b\n", map->capacity - 1);
+    exit(0);
+    /* uint32 normal = hash % map->capacity; */
     return normal;
 }
 
