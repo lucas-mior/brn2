@@ -360,7 +360,7 @@ random_string(void) {
 }
 
 // flags: -lm
-#define NSTRINGS 100000
+#define NSTRINGS 1000000
 int main(void) {
     struct timespec t0, t1;
     HashMap *original_map; 
