@@ -52,7 +52,7 @@ void *hash_map_lookup(HashMap *, char *);
 void *hash_map_lookup_pre_calc(HashMap *, char *, uint32, uint32);
 bool hash_map_remove(HashMap *, char *);
 bool hash_map_remove_pre_calc(HashMap *, char *, uint32, uint32);
-void hash_map_print_summary(HashMap *);
+void hash_map_print_summary(HashMap *, char *);
 void hash_map_print(HashMap *, bool);
 uint32 hash_map_capacity(HashMap *);
 uint32 hash_map_length(HashMap *);
@@ -75,5 +75,9 @@ uint32 hash_map_expected_collisions(HashMap *);
 #define hash_set_length(a)                   hash_map_length(a)
 #define hash_set_collisions(a)               hash_map_collisions(a)
 #define hash_set_expected_collisions(a)      hash_map_expected_collisions(a)
+
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+#define HASH_MAP_PRINT_SUMMARY(MAP) hash_map_print_summary(MAP, QUOTE(MAP))
 
 #endif

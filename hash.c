@@ -281,8 +281,8 @@ hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 }
 
 void
-hash_map_print_summary(HashMap *map) {
-    printf("Hash map {\n");
+hash_map_print_summary(HashMap *map, char *name) {
+    printf("HashMap %s {\n", name);
     printf("  capacity: %u\n", map->capacity);
     printf("  length: %u\n", map->length);
     printf("  collisions: %u\n", map->collisions);
@@ -293,7 +293,7 @@ hash_map_print_summary(HashMap *map) {
 
 void
 hash_map_print(HashMap *map, bool verbose) {
-    hash_map_print_summary(map);
+    HASH_MAP_PRINT_SUMMARY(map);
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &(map->array[i]);
@@ -359,54 +359,53 @@ random_string(void) {
 #define NSTRINGS 100000
 int main(void) {
     struct timespec t0, t1;
-    HashMap *map; 
+    HashMap *original_map; 
+    HashMap *balanced_map; 
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 
-    map = hash_map_create(NSTRINGS);
-    assert(map);
-    assert(hash_map_capacity(map) >= NSTRINGS);
+    original_map = hash_map_create(NSTRINGS);
+    assert(original_map);
+    assert(hash_map_capacity(original_map) >= NSTRINGS);
 
-    assert(hash_map_insert(map, "a", 0));
-    assert(!hash_map_insert(map, "a", 1));
-    assert(hash_map_insert(map, "b", 2));
+    assert(hash_map_insert(original_map, "a", 0));
+    assert(!hash_map_insert(original_map, "a", 1));
+    assert(hash_map_insert(original_map, "b", 2));
 
     srand((uint) t0.tv_nsec);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
         uint32 value = (uint32) rand();
-        assert(hash_map_insert(map, key, value));
+        assert(hash_map_insert(original_map, key, value));
     }
 
-    printf("\nOriginal hash map:\n");
-    hash_map_print_summary(map);
+    HASH_MAP_PRINT_SUMMARY(original_map);
 
     {
-        uint32 collisions_before = hash_map_collisions(map);
-        uint32 expected_collisions = hash_map_expected_collisions(map);
+        uint32 collisions_before = hash_map_collisions(original_map);
+        uint32 expected_collisions = hash_map_expected_collisions(original_map);
         float ratio = (float)collisions_before / (float)expected_collisions;
         assert(ratio <= 1.5);
-        map = hash_map_balance(map);
+        balanced_map = hash_map_balance(original_map);
 
-        printf("\nAfter balance:\n");
-        hash_map_print_summary(map);
-        assert(collisions_before > hash_map_collisions(map));
+        HASH_MAP_PRINT_SUMMARY(balanced_map);
+        assert(collisions_before > hash_map_collisions(balanced_map));
     }
 
-    assert(hash_map_length(map) == (2 + NSTRINGS));
-    assert(*(uint32 *) hash_map_lookup(map, "a") == 0);
-    assert(!hash_map_lookup(map, "c"));
+    assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
+    assert(*(uint32 *) hash_map_lookup(balanced_map, "a") == 0);
+    assert(!hash_map_lookup(balanced_map, "c"));
 
-    assert(!hash_map_remove(map, "c"));
-    assert(hash_map_remove(map, "b"));
+    assert(!hash_map_remove(balanced_map, "c"));
+    assert(hash_map_remove(balanced_map, "b"));
 
-    assert(hash_map_length(map) == (1 + NSTRINGS));
+    assert(hash_map_length(balanced_map) == (1 + NSTRINGS));
 
-    assert(hash_map_remove(map, "a"));
+    assert(hash_map_remove(balanced_map, "a"));
 
-    hash_map_free_keys(map);
-    hash_map_destroy(map);
+    hash_map_free_keys(balanced_map);
+    hash_map_destroy(balanced_map);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     {
