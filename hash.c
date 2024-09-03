@@ -50,7 +50,7 @@ typedef struct Bucket {
 
 struct HashMap {
     uint32 capacity;
-    uint32 unused;
+    uint32 power2;
     uint32 collisions;
     uint32 length;
     Bucket array[];
@@ -60,19 +60,23 @@ HashMap *
 hash_map_create(uint32 length) {
     HashMap *map;
     uint32 size = 1;
+    uint32 power = 0;
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
     length *= 4;
 
-    while (size <= length)
+    while (size <= length) {
         size *= 2;
+        power += 1;
+    }
 
     size = sizeof(*map) + length*sizeof(map->array[0]);
 
     map = util_malloc(size);
     memset(map, 0, size);
     map->capacity = length;
+    map->power2 = power;
     return map;
 }
 
@@ -164,7 +168,8 @@ hash_function(char *str) {
 
 uint32
 hash_normal(HashMap *map, uint32 hash) {
-    return hash % map->capacity;
+    uint32 normal = hash & (map->capacity - 1);
+    return normal;
 }
 
 bool
