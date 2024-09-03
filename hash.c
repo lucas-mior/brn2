@@ -384,6 +384,9 @@ int main(void) {
 
     {
         uint32 collisions_before = hash_map_collisions(map);
+        uint32 expected_collisions = hash_map_expected_collisions(map);
+        float ratio = (float)collisions_before / (float)expected_collisions;
+        assert(ratio <= 1.5);
         map = hash_map_balance(map);
 
         printf("\nAfter balance:\n");
