@@ -103,7 +103,7 @@ hash_map_balance(HashMap *old_map) {
 
         if (iterator->key) {
             uint32 hash = iterator->hash;
-            uint32 index = hash_normal(new_map, hash);
+            uint32 index = hash_normal(new_map->capacity, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
         }
@@ -112,7 +112,7 @@ hash_map_balance(HashMap *old_map) {
         while (iterator) {
             void *aux;
             uint32 hash = iterator->hash;
-            uint32 index = hash_normal(new_map, hash);
+            uint32 index = hash_normal(new_map->capacity, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
 
@@ -164,16 +164,16 @@ hash_function(char *str) {
 }
 
 uint32
-hash_normal(HashMap *map, uint32 hash) {
-    // map->capacity has to be power of 2
-    uint32 normal = hash & (map->capacity - 1);
+hash_normal(uint32 capacity, uint32 hash) {
+    // capacity has to be power of 2
+    uint32 normal = hash & (capacity - 1);
     return normal;
 }
 
 bool
 hash_map_insert(HashMap *map, char *key, uint32 value) {
     uint32 hash = hash_function(key);
-    uint32 index = hash_normal(map, hash);
+    uint32 index = hash_normal(map->capacity, hash);
     return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
 
@@ -213,7 +213,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
 void *
 hash_map_lookup(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
-    uint32 index = hash_normal(map, hash);
+    uint32 index = hash_normal(map->capacity, hash);
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
 
@@ -240,7 +240,7 @@ hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 bool
 hash_map_remove(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
-    uint32 index = hash_normal(map, hash);
+    uint32 index = hash_normal(map->capacity, hash);
     return hash_map_remove_pre_calc(map, key, hash, index);
 }
 
@@ -356,7 +356,7 @@ random_string(void) {
 }
 
 // flags: -lm
-#define NSTRINGS 10000000
+#define NSTRINGS 100000
 int main(void) {
     struct timespec t0, t1;
     HashMap *map; 

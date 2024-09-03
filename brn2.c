@@ -292,7 +292,7 @@ brn2_work_hashes(void *arg) {
         FileList *list = slice->old_list;
         FileName *newfile = &(list->files[i]);
         newfile->hash = hash_function(newfile->name);
-        slice->hashes[i].mod = newfile->hash % slice->map_capacity;
+        slice->hashes[i].mod = hash_normal(slice->map_capacity, newfile->hash);
     }
     thrd_exit(0);
 }
