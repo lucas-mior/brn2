@@ -45,7 +45,7 @@ HashMap *hash_map_balance(HashMap *);
 void hash_map_free_keys(HashMap *);
 void hash_map_destroy(HashMap *);
 uint32 hash_function(char *);
-uint32 hash_normal(uint32, uint32);
+uint32 hash_normal(HashMap *, uint32);
 bool hash_map_insert(HashMap *, char *, uint32);
 bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32);
 void *hash_map_lookup(HashMap *, char *);

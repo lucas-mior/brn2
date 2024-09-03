@@ -82,14 +82,17 @@ hash_map_balance(HashMap *old_map) {
     HashMap *new_map;
     uint32 size;
     uint32 length;
+    uint32 power2;
 
     if (old_map->capacity < (UINT32_MAX/2)) {
         length = old_map->capacity*2;
+        power2 = old_map->power2 + 1;
     } else if (old_map->capacity >= UINT32_MAX) {
         fprintf(stderr, "Error balancing hash map. Too big table.\n");
         return old_map;
     } else {
         length = UINT32_MAX;
+        power2 = 32;
     }
 
     size = sizeof(*new_map) + length*sizeof(new_map->array[0]);
@@ -97,13 +100,14 @@ hash_map_balance(HashMap *old_map) {
     new_map = util_malloc(size);
     memset(new_map, 0, size);
     new_map->capacity = length;
+    new_map->power2 = power2;
 
     for (uint32 i = 0; i < old_map->capacity; i += 1) {
         Bucket *iterator = &(old_map->array[i]);
 
         if (iterator->key) {
             uint32 hash = iterator->hash;
-            uint32 index = hash_normal(new_map->capacity, hash);
+            uint32 index = hash_normal(new_map, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
         }
@@ -112,7 +116,7 @@ hash_map_balance(HashMap *old_map) {
         while (iterator) {
             void *aux;
             uint32 hash = iterator->hash;
-            uint32 index = hash_normal(new_map->capacity, hash);
+            uint32 index = hash_normal(new_map, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
 
@@ -164,16 +168,16 @@ hash_function(char *str) {
 }
 
 uint32
-hash_normal(uint32 capacity, uint32 hash) {
+hash_normal(HashMap *map, uint32 hash) {
     // capacity has to be power of 2
-    uint32 normal = hash & (capacity - 1);
+    uint32 normal = hash & ((1 << map->power2) - 1);
     return normal;
 }
 
 bool
 hash_map_insert(HashMap *map, char *key, uint32 value) {
     uint32 hash = hash_function(key);
-    uint32 index = hash_normal(map->capacity, hash);
+    uint32 index = hash_normal(map, hash);
     return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
 
@@ -213,7 +217,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
 void *
 hash_map_lookup(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
-    uint32 index = hash_normal(map->capacity, hash);
+    uint32 index = hash_normal(map, hash);
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
 
@@ -240,7 +244,7 @@ hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 bool
 hash_map_remove(HashMap *map, char *key) {
     uint32 hash = hash_function(key);
-    uint32 index = hash_normal(map->capacity, hash);
+    uint32 index = hash_normal(map, hash);
     return hash_map_remove_pre_calc(map, key, hash, index);
 }
 
