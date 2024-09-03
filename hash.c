@@ -165,8 +165,8 @@ hash_function(char *str) {
 
 uint32
 hash_normal(HashMap *map, uint32 hash) {
+    // map->capacity has to be power of 2
     uint32 normal = hash & (map->capacity - 1);
-    /* uint32 normal = hash % map->capacity; */
     return normal;
 }
 
