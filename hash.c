@@ -63,10 +63,15 @@ hash_map_create(uint32 length) {
     uint32 capacity = 1;
     uint32 power = 0;
 
-    while (capacity <= length) {
+    if (length > (UINT32_MAX/2))
+        length = UINT32_MAX/2;
+
+    while (capacity < length) {
         capacity *= 2;
         power += 1;
     }
+    capacity *= 2;
+    power += 1;
 
     size = sizeof(*map) + capacity*sizeof(map->array[0]);
 
@@ -360,7 +365,7 @@ random_string(void) {
 }
 
 // flags: -lm
-#define NSTRINGS 1000000
+#define NSTRINGS 5000000
 int main(void) {
     struct timespec t0, t1;
     HashMap *original_map; 
