@@ -59,11 +59,14 @@ struct HashMap {
 HashMap *
 hash_map_create(uint32 length) {
     HashMap *map;
-    uint32 size;
+    uint32 size = 1;
 
     if (length > (UINT32_MAX/4))
         length = (UINT32_MAX/4);
     length *= 4;
+
+    while (size <= length)
+        size *= 2;
 
     size = sizeof(*map) + length*sizeof(map->array[0]);
 
@@ -79,8 +82,8 @@ hash_map_balance(HashMap *old_map) {
     uint32 size;
     uint32 length;
 
-    if (old_map->capacity < (UINT32_MAX/4)) {
-        length = old_map->capacity*4;
+    if (old_map->capacity < (UINT32_MAX/2)) {
+        length = old_map->capacity*2;
     } else if (old_map->capacity >= UINT32_MAX) {
         fprintf(stderr, "Error balancing hash map. Too big table.\n");
         return old_map;
