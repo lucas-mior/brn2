@@ -166,8 +166,6 @@ hash_function(char *str) {
 uint32
 hash_normal(HashMap *map, uint32 hash) {
     uint32 normal = hash & (map->capacity - 1);
-    printf("map->capacity: %b\n", map->capacity - 1);
-    exit(0);
     /* uint32 normal = hash % map->capacity; */
     return normal;
 }
@@ -344,7 +342,7 @@ hash_map_expected_collisions(HashMap *map) {
 
 static char *
 random_string(void) {
-    int length = 40 + rand() % 70;
+    int length = 10 + rand() % 60;
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *random_string = util_malloc((usize) length + 1);
 
@@ -358,7 +356,7 @@ random_string(void) {
 }
 
 // flags: -lm
-#define NSTRINGS 1000000
+#define NSTRINGS 10000000
 int main(void) {
     struct timespec t0, t1;
     HashMap *map; 
