@@ -549,6 +549,8 @@ brn2_usage(FILE *stream) {
             "  -c, --check   : Check if original file names exist.\n"
             "  -s, --sort    : Disable sorting of original list.\n"
             "  -F, --fatal   : Exit on first renaming error.\n"
+            "  -i, --implict : Rename files not given in the list of files to rename.\n"
+            "  -e, --explict : Only rename files given in the list of files to rename (default).\n"
             "\n"
             "Arguments:\n"
             "  No arguments"
