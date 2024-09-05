@@ -553,8 +553,8 @@ brn2_usage(FILE *stream) {
             "  -e, --explict : Only rename files given in the list of files to rename (default).\n"
             "\n"
             "Arguments:\n"
-            "  No arguments : Rename filenames in the current working directory.\n"
-            "  1 or more arguments : Rename filenames passed as arguments.\n"
+            "  No arguments             : Rename filenames in the current working directory.\n"
+            "  1 or more arguments      : Rename filenames passed as arguments.\n"
             "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
