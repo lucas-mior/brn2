@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "brn2.h"
 #include "hash.h"
 #include "util.h"
 
