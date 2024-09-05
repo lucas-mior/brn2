@@ -38,6 +38,7 @@ static struct option options[] = {
     {"check",   no_argument,       NULL, 'c'},
     {"sort",    no_argument,       NULL, 's'},
     {"implict", no_argument,       NULL, 'i'},
+    {"explict", no_argument,       NULL, 'e'},
     {NULL, 0, NULL, 0}
 };
 
@@ -65,7 +66,7 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "f:chqvsFi", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqvsFie", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -88,6 +89,9 @@ int main(int argc, char **argv) {
             break;
         case 'i':
             brn2_implict = true;
+            break;
+        case 'e':
+            brn2_implict = false;
             break;
         case 'f':
             if (optarg == NULL)
