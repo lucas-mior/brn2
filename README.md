@@ -17,7 +17,7 @@ Options:
   -s, --sort    : Disable sorting of original list.
   -F, --fatal   : Exit on first renaming error.
   -i, --implict : Rename files not given in the list of files to rename.
-  -e, --implict : Only rename files given in the list of files to rename (default).
+  -e, --explict : Only rename files given in the list of files to rename (default).
 
 Arguments:
   No arguments             : Rename filenames in the current working directory.
