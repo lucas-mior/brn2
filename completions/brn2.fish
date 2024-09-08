@@ -14,5 +14,3 @@ complete -c brn2 -s i -d 'Rename files not given in the list of files to rename.
 complete -c brn2 -l implict -d 'Rename files not given in the list of files to rename.'
 complete -c brn2 -s e -d 'Only rename files given in the list of files to rename (default).'
 complete -c brn2 -l explict -d 'Only rename files given in the list of files to rename (default).'
-complete -c brn2 -s f -d 'Rename files listed in]:filename:_files'
-complete -c brn2 -l filename -d 'Rename files listed in]:filename:_files'
