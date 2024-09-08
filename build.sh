@@ -52,6 +52,12 @@ case "$target" in
         set -x
         rm -f ${DESTDIR}${PREFIX}/bin/${program}
         rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
+        rm -f completions/brn2.fish \
+            ${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/brn2.fish
+        rm -f completions/brn2.bash \
+            ${DESTDIR}${PREFIX}/share/bash-completion/completions/brn2
+        rm -f completions/brn2.zsh  \
+            ${DESTDIR}${PREFIX}/share/zsh/site-functions/_brn2
         ;;
     "test")
         testing
@@ -61,6 +67,12 @@ case "$target" in
         set -x
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+        install -Dm644 completions/brn2.fish \
+            ${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/brn2.fish
+        install -Dm644 completions/brn2.bash \
+            ${DESTDIR}${PREFIX}/share/bash-completion/completions/brn2
+        install -Dm644 completions/brn2.zsh  \
+            ${DESTDIR}${PREFIX}/share/zsh/site-functions/_brn2
         ;;
     "build"|"debug"|"benchmark")
         set -x
