@@ -37,6 +37,7 @@ static struct option options[] = {
     {"verbose", no_argument,       NULL, 'v'},
     {"check",   no_argument,       NULL, 'c'},
     {"sort",    no_argument,       NULL, 's'},
+    {"fatal",   no_argument,       NULL, 'F'},
     {"implict", no_argument,       NULL, 'i'},
     {"explict", no_argument,       NULL, 'e'},
     {NULL, 0, NULL, 0}
