@@ -44,7 +44,6 @@ will take place when you save and exit.
 - Filenames are normalized:
     * `./` at beginning of filenames are removed.
     * consecutive slashes (`/`) are bundled together.
-    * trailing slashes (`/`) are removed.
 - Repeated filenames in `<filename>` or repeated arguments are removed.
 - It can handle swapping names. It uses GNU/Linux's `renameat2` system call to
   atomically swap the names of two files which means no temporary files are made

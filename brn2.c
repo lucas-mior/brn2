@@ -254,7 +254,8 @@ brn2_work_normalization(void *arg) {
         FileName *file = &(list->files[i]);
         uint32 j = 0;
 
-        while (file->name[file->length - 1] == '/') {
+        while ((file->name[file->length - 1] == '/')
+               && (file->name[file->length - 2] == '/')) {
             file->name[file->length - 1] = '\0';
             file->length -= 1;
         }
