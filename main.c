@@ -114,16 +114,17 @@ int main(int argc, char **argv) {
 
     if (lines) {
         old = brn2_list_from_lines(lines, 0);
+        brn2_normalize_names(old);
         from_dir = false;
     } else if ((argc - optind) >= 1) {
         old = brn2_list_from_args(argc - optind, &argv[optind]);
+        brn2_normalize_names(old);
         from_dir = false;
     } else {
         old = brn2_list_from_dir(".");
         from_dir = true;
     }
 
-    brn2_normalize_names(old);
     if (sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
