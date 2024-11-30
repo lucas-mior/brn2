@@ -43,7 +43,7 @@ static int brn2_work_hashes(void *);
 static int brn2_work_sort(void *);
 static int brn2_work_normalization(void *);
 static int brn2_work_changes(void *);
-static inline bool brn2_is_pwd_or_parent(char *);
+static inline bool brn2_is_invalid_name(char *);
 static uint32 brn2_threads(int (*)(void *),
                            FileList *, FileList *,
                            Hash *, uint32 *, uint32);
@@ -66,7 +66,7 @@ brn2_list_from_args(int argc, char **argv) {
         char *name = argv[i];
         FileName *file = &(list->files[length]);
 
-        if (brn2_is_pwd_or_parent(name))
+        if (brn2_is_invalid_name(name))
             continue;
 
         file->length = (uint32) strlen(name);
@@ -102,7 +102,7 @@ brn2_list_from_dir(char *directory) {
         char *name = directory_list[i]->d_name;
         FileName *file = &(list->files[length]);
 
-        if (brn2_is_pwd_or_parent(name)) {
+        if (brn2_is_invalid_name(name)) {
             free(directory_list[i]);
             continue;
         }
@@ -197,7 +197,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
         file = &(list->files[length]);
         *pointer = '\0';
-        if (is_old && brn2_is_pwd_or_parent(begin)) {
+        if (is_old && brn2_is_invalid_name(begin)) {
             begin = pointer + 1;
             continue;
         }
@@ -224,14 +224,13 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 }
 
 bool
-brn2_is_pwd_or_parent(char *filename) {
-    if (filename[0] == '.') {
-        if ((filename[1] == '.') || (filename[1] == '\0'))
-            return true;
-        else if ((filename[1] == '/') && (filename[2] == '\0'))
-            return true;
+brn2_is_invalid_name(char *filename) {
+    while (*filename) {
+        if ((*filename != '.') && (*filename != '/'))
+            return false;
+        filename += 1;
     }
-    return false;
+    return true;
 }
 
 typedef struct Slice {
