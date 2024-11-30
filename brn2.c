@@ -252,13 +252,8 @@ brn2_work_normalization(void *arg) {
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName *file = &(list->files[i]);
+        uint32 old_length = file->length;
         uint32 j = 0;
-
-        while ((file->name[file->length - 1] == '/')
-               && (file->name[file->length - 2] == '/')) {
-            file->name[file->length - 1] = '\0';
-            file->length -= 1;
-        }
 
         while (file->name[j] != '\0') {
             while (file->name[j] == '/' && file->name[j + 1] == '/') {
@@ -270,8 +265,21 @@ brn2_work_normalization(void *arg) {
         }
 
         while (file->name[0] == '.' && file->name[1] == '/') {
-            file->name += 2;
+            memmove(&file->name[0], &file->name[2], file->length - 1);
             file->length -= 2;
+        }
+
+        if (file->length < old_length) {
+            struct stat file_stat;
+            if (stat(file->name, &file_stat) < 0) {
+                error("Error in stat(%s): %s\n", file->name, strerror(errno));
+                continue;
+            }
+            if (S_ISDIR(file_stat.st_mode)) {
+                file->name[file->length] = '/';
+                file->name[file->length+1] = '\0';
+                file->length += 1;
+            }
         }
     }
     thrd_exit(0);
