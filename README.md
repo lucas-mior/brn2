@@ -39,8 +39,7 @@ will take place when you save and exit.
 - Newlines in filenames are not allowed.
 - Filenames listed in `<filename>` or given as arguments which
   do not correpond to existing files will generate errors while renaming.
-- Filenames `.` and `..` are ignored, as well as any filename
-  which starts with `..`, even when listen in `<filename>`
+- Filenames that contain only dots and slashes are ignored.
 - Filenames are normalized:
     * `./` at beginning of filenames are removed.
     * consecutive slashes (`/`) are bundled together.
