@@ -58,6 +58,22 @@ will take place when you save and exit.
   repeated, the user will be asked to fix the rename buffer or exit.
 - Renaming millions or billions of files can be slow. Disabling sorting
   (`-s` option) and printing (`-q` option) might help a bit.
+
+#### Be careful when renaming in depth
+If you supply the files:
+```
+dir/
+dir/file
+```
+and proceed to rename `dir/`, `dir/file` will always fail because it no longer
+exists.
+There is no good default way to deal with this, because you can either:
+- update names recursively while renaming
+- skip outdated names
+
+Both alternatives are cumbersome and error prone to implement.  So the best
+thing to do is to launch brn2 multiple times and operate in steps. Try renaming
+the regular files first, and then directories, starting from the most deep.
  
 ## Install
  
