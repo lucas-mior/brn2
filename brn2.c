@@ -181,8 +181,8 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     {
         struct stat lines_stat;
         if (fstat(fd, &lines_stat) < 0) {
-            error("Error getting file information: %s\n"
-                  "History will start empty.\n", strerror(errno));
+            error("Error getting information from %s: %s\n",
+                  filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
         list->map_size = (uint32) lines_stat.st_size;
