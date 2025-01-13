@@ -198,8 +198,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
                      fd, 0);
 
     if (list->map == MAP_FAILED) {
-        error("Error mapping history file to memory: %s"
-              "History will start empty.\n", strerror(errno));
+        error("Error mapping history file to memory: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
