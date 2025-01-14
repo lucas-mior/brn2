@@ -410,8 +410,6 @@ bool
 brn2_verify(FileList *old, FileList *new,
             HashMap *repeated_map, Hash *hashes_new) {
     bool repeated = false;
-    char *repeated_format = RED"\"%s\""RESET " (line %d)"
-                            " appears more than once in the buffer\n";
 
     if (old->length != new->length) {
         error("You are renaming "RED"%u"RESET" file%.*s "
@@ -426,7 +424,9 @@ brn2_verify(FileList *old, FileList *new,
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                       newfile.hash, hashes_new[i].mod, i)) {
-            fprintf(stderr, repeated_format, newfile.name, i + 1);
+            fprintf(stderr, RED"\"%s\""RESET " (line %d)"
+                            " appears more than once in the buffer\n",
+                            newfile.name, i + 1);
             repeated = true;
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
