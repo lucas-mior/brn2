@@ -104,7 +104,7 @@ $ brn2 --quiet --file rename
 ```
 - Find and rename files (recursively):
 ```
-$ brn2 -r
+$ brn2 -r .
 ```
 - Rename jpg files in current working directory:
 ```
