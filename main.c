@@ -80,6 +80,24 @@ int main(int argc, char **argv) {
 
     while ((opt = getopt_long(argc, argv, "d:f:r:ceFhiqsv", options, NULL)) != -1) {
         switch (opt) {
+        case 'd':
+            mode = FILES_FROM_DIR;
+            if (optarg == NULL)
+                brn2_usage(stderr);
+            directory = optarg;
+            break;
+        case 'f':
+            mode = FILES_FROM_FILE;
+            if (optarg == NULL)
+                brn2_usage(stderr);
+            lines = optarg;
+            break;
+        case 'r':
+            mode = FILES_FROM_DIR_RECURSE;
+            if (optarg == NULL)
+                brn2_usage(stderr);
+            directory = optarg;
+            break;
         case '?':
             brn2_usage(stderr);
         case 'c':
@@ -104,24 +122,6 @@ int main(int argc, char **argv) {
             break;
         case 'v':
             brn2_quiet = false;
-            break;
-        case 'd':
-            mode = FILES_FROM_DIR;
-            if (optarg == NULL)
-                brn2_usage(stderr);
-            directory = optarg;
-            break;
-        case 'f':
-            mode = FILES_FROM_FILE;
-            if (optarg == NULL)
-                brn2_usage(stderr);
-            lines = optarg;
-            break;
-        case 'r':
-            mode = FILES_FROM_DIR_RECURSE;
-            if (optarg == NULL)
-                brn2_usage(stderr);
-            directory = optarg;
             break;
         default:
             brn2_usage(stderr);
