@@ -78,7 +78,8 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "d:f:r:ceFhiqsv", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv,
+                              "d:f:r:ceFhiqsv", options, NULL)) != -1) {
         switch (opt) {
         case 'd':
             mode = FILES_FROM_DIR;
