@@ -112,7 +112,7 @@ brn2_list_from_dir_recurse(char *directory) {
             is_dir = true;
             // fallthrough
         case FTS_F: {
-            char *name = ent->fts_path + 2;
+            char *name = ent->fts_path;
             FileName *file;
 
             if (brn2_is_invalid_name(name))
@@ -125,7 +125,7 @@ brn2_list_from_dir_recurse(char *directory) {
             }
 
             file = &(list->files[length]);
-            file->length = ent->fts_pathlen - 2 + is_dir;
+            file->length = ent->fts_pathlen + is_dir;
             file->name = util_malloc(file->length + 1);
             memcpy(file->name, name, file->length + 1);
             if (is_dir) {
@@ -637,23 +637,26 @@ brn2_usage(FILE *stream) {
     fprintf(stream,
             "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
             "usage: brn2 [OPTIONS] -f <filename>\n"
+            "usage: brn2 [OPTIONS] -d <dir>\n"
+            "usage: brn2 [OPTIONS] -r <dir>\n"
             "Rename filenames based on provided arguments.\n"
             "\n"
             "Options:\n"
-            "  -h, --help    : Display this help message and exit.\n"
-            "  -q, --quiet   : Quiet mode; suppress output messages.\n"
-            "  -v, --verbose : Verbose mode (default); output messages.\n"
-            "  -c, --check   : Check if original file names exist.\n"
-            "  -s, --sort    : Disable sorting of original list.\n"
             "  -F, --fatal   : Exit on first renaming error.\n"
-            "  -i, --implict : Rename files not given in the list of files to rename.\n"
+            "  -c, --check   : Check if original file names exist.\n"
             "  -e, --explict : Only rename files given in the list of files to rename (default).\n"
-            "  -r, --recurse : Recursively find files to rename.\n"
+            "  -h, --help    : Display this help message and exit.\n"
+            "  -i, --implict : Rename files not given in the list of files to rename.\n"
+            "  -q, --quiet   : Quiet mode; suppress output messages.\n"
+            "  -s, --sort    : Disable sorting of original list.\n"
+            "  -v, --verbose : Verbose mode (default); output messages.\n"
             "\n"
             "Arguments:\n"
-            "  No arguments             : Rename filenames in the current working directory.\n"
-            "  1 or more arguments      : Rename filenames passed as arguments.\n"
-            "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
+            "  No arguments              : Rename filenames in the current working directory.\n"
+            "  1 or more arguments       : Rename filenames passed as arguments.\n"
+            "  -d <dir>, --dir=<dir>     : Rename files in directory.\n"
+            "  -f <file>, --file=<file>  : Rename filenames listed in this argument.\n"
+            "  -r <dir>, --recurse=<dir> : Recursively find files to rename.\n");
     exit((int)(stream != stdout));
 }
 
