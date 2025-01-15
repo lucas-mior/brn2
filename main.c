@@ -26,6 +26,7 @@
 #include "util.c"
 
 char *program;
+bool brn2_check = false;
 bool brn2_fatal = false;
 bool brn2_implict = false;
 bool brn2_quiet = false;
@@ -71,7 +72,6 @@ int main(int argc, char **argv) {
     const char *tempdir = "/tmp";
     char *directory = ".";
     int status = EXIT_SUCCESS;
-    bool brn2_check = false;
     char *lines = NULL;
     bool from_dir;
     int mode = FILES_FROM_DIR;
