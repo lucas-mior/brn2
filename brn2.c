@@ -30,6 +30,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <fts.h>
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
@@ -80,6 +81,70 @@ brn2_list_from_args(int argc, char **argv) {
 }
 
 FileList *
+brn2_list_from_dir_recurse(char *directory) {
+    FileList *list;
+    char* const paths[] = { directory, NULL };
+    FTS *file_system = NULL;
+    FTSENT *ent = NULL;
+    int32 length = 0;
+    int32 capacity = 64;
+
+    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+
+    file_system = fts_open(paths, FTS_COMFOLLOW | FTS_NOCHDIR, NULL);
+    if (file_system == NULL) {
+        error("Error opening %s for traversal: %s.\n",
+                directory, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    while ((ent = fts_read(file_system))) {
+        bool is_dir = false;
+        if (errno) {
+            error("errno is set after fts_read\n");
+            exit(EXIT_FAILURE);
+        }
+        switch (ent->fts_info) {
+        case FTS_ERR:
+            error("FTS_ERR.\n");
+            exit(EXIT_FAILURE);
+        case FTS_D:
+            is_dir = true;
+        case FTS_F: {
+            char *name = ent->fts_path + 2;
+            FileName *file;
+
+            if (brn2_is_invalid_name(name))
+                continue;
+
+            if (length >= capacity) {
+                capacity *= 2;
+                list = util_realloc(list,
+                                    STRUCT_ARRAY_SIZE(list, FileName, capacity));
+            }
+
+            file = &(list->files[length]);
+            file->length = ent->fts_pathlen - 2 + is_dir;
+            file->name = util_malloc(file->length + 1);
+            memcpy(file->name, name, file->length + 1);
+            if (is_dir) {
+                file->name[file->length - 1] = '/';
+                file->name[file->length] = '\0';
+            }
+
+            length += 1;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    list->length = length;
+    fts_close(file_system);
+    return list;
+}
+
+FileList *
 brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
@@ -110,19 +175,19 @@ brn2_list_from_dir(char *directory) {
         }
 
         switch (directory_list[i]->d_type) {
-        case DT_DIR:
-            is_dir = 1;
-            break;
-        case DT_UNKNOWN:
-            if (stat(name, &file_stat) < 0) {
-                error("Error in stat(%s): %s\n", name, strerror(errno));
-            } else {
-                if (S_ISDIR(file_stat.st_mode))
-                    is_dir = 1;
-            }
-            break;
-        default:
-            break;
+            case DT_DIR:
+                is_dir = 1;
+                break;
+            case DT_UNKNOWN:
+                if (stat(name, &file_stat) < 0) {
+                    error("Error in stat(%s): %s\n", name, strerror(errno));
+                } else {
+                    if (S_ISDIR(file_stat.st_mode))
+                        is_dir = 1;
+                }
+                break;
+            default:
+                break;
         }
 
         file->length = (uint32) strlen(name) + is_dir;
