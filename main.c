@@ -32,6 +32,8 @@ uint32 nthreads;
 
 static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
+    {"dir",     optional_argument, NULL, 'd'},
+    {"recurse", optional_argument, NULL, 'r'},
     {"help",    no_argument,       NULL, 'h'},
     {"quiet",   no_argument,       NULL, 'q'},
     {"verbose", no_argument,       NULL, 'v'},
@@ -40,8 +42,14 @@ static struct option options[] = {
     {"fatal",   no_argument,       NULL, 'F'},
     {"implict", no_argument,       NULL, 'i'},
     {"explict", no_argument,       NULL, 'e'},
-    {"recurse", no_argument,       NULL, 'r'},
     {NULL, 0, NULL, 0}
+};
+
+enum {
+    FILES_FROM_FILE,
+    FILES_FROM_ARGS,
+    FILES_FROM_DIR,
+    FILES_FROM_DIR_RECURSE,
 };
 
 int main(int argc, char **argv) {
@@ -59,17 +67,18 @@ int main(int argc, char **argv) {
     int opt;
 
     const char *tempdir = "/tmp";
+    char *directory = ".";
     int status = EXIT_SUCCESS;
     bool quiet = false;
     bool check = false;
     bool sort = true;
     char *lines = NULL;
     bool from_dir;
-    bool recurse = false;
+    int mode = FILES_FROM_DIR;
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "f:chqvsFier", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "fdr:chqvsFie", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -97,7 +106,14 @@ int main(int argc, char **argv) {
             brn2_implict = false;
             break;
         case 'r':
-            recurse = true;
+            mode = FILES_FROM_DIR_RECURSE;
+            if (optarg)
+                directory = optarg;
+            break;
+        case 'd':
+            mode = FILES_FROM_DIR;
+            if (optarg)
+                directory = optarg;
             break;
         case 'f':
             if (optarg == NULL)
@@ -110,6 +126,8 @@ int main(int argc, char **argv) {
     }
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
+    if ((argc - optind) >= 2)
+        mode = FILES_FROM_ARGS;
 
     available_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if (available_threads <= 0)
@@ -117,20 +135,25 @@ int main(int argc, char **argv) {
     else
         nthreads = MIN((uint32) available_threads, MAX_THREADS);
 
-    if (lines) {
+    switch (mode) {
+    case FILES_FROM_FILE:
         old = brn2_list_from_lines(lines, 0);
         brn2_normalize_names(old);
         from_dir = false;
-    } else if ((argc - optind) >= 1) {
+        break;
+    case FILES_FROM_ARGS:
         old = brn2_list_from_args(argc - optind, &argv[optind]);
         brn2_normalize_names(old);
         from_dir = false;
-    } else if (recurse) {
-        old = brn2_list_from_dir_recurse(".");
+        break;
+    case FILES_FROM_DIR_RECURSE:
+        old = brn2_list_from_dir_recurse(directory);
         from_dir = true;
-    } else {
-        old = brn2_list_from_dir(".");
+        break;
+    case FILES_FROM_DIR:
+        old = brn2_list_from_dir(directory);
         from_dir = true;
+        break;
     }
 
     if (sort)
