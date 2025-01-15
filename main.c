@@ -158,6 +158,9 @@ int main(int argc, char **argv) {
         old = brn2_list_from_dir(directory);
         from_dir = true;
         break;
+    default:
+        error("Unexpected mode: %d\n", mode);
+        exit(EXIT_FAILURE);
     }
 
     if (brn2_sort)

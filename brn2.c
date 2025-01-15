@@ -86,8 +86,8 @@ brn2_list_from_dir_recurse(char *directory) {
     char* const paths[] = { directory, NULL };
     FTS *file_system = NULL;
     FTSENT *ent = NULL;
-    int32 length = 0;
-    int32 capacity = 64;
+    uint32 length = 0;
+    uint32 capacity = 64;
 
     list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
@@ -490,7 +490,7 @@ brn2_verify(FileList *old, FileList *new,
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                       newfile.hash, hashes_new[i].mod, i)) {
-            fprintf(stderr, RED"\"%s\""RESET " (line %d)"
+            fprintf(stderr, RED"\"%s\""RESET " (line %u)"
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
             repeated = true;

@@ -307,7 +307,7 @@ hash_map_print(HashMap *map, bool verbose) {
         Bucket *iterator = &(map->array[i]);
 
         if (iterator->key || verbose)
-            printf("\n%03d:", i);
+            printf("\n%03u:", i);
 
         while (iterator && iterator->key) {
             printf(GREEN" %s=%u"RESET" ->", iterator->key, iterator->value);
