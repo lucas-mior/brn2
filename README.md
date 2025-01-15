@@ -43,8 +43,6 @@ will take place when you save and exit.
 - It will not work for more than 2^32 renames at once.
 - It will not work for filenames longer than PATH_MAX (typically 4096) bytes.
 - Newlines in filenames are not allowed.
-- Filenames listed in `<filename>` or given as arguments which
-  do not correpond to existing files will generate errors while renaming.
 - Filenames that contain only dots and slashes are ignored.
 - Filenames are normalized:
     * `./` at beginning of filenames are removed.
@@ -67,6 +65,8 @@ will take place when you save and exit.
 - If you want to filter/organize the files to rename, use command line utilities
   like `find` and output it to a file. Edit this file as you like and then
   launch brn2 with the `-f` option. See examples below.
+- Filenames listed in `<filename>` or given as arguments which
+  do not correpond to existing files will generate errors while renaming.
 
 #### Be careful when renaming in depth
 If you supply the files:
