@@ -33,9 +33,9 @@ bool brn2_sort = true;
 uint32 nthreads;
 
 static struct option options[] = {
+    {"dir",     required_argument, NULL, 'd'},
     {"file",    required_argument, NULL, 'f'},
-    {"dir",     optional_argument, NULL, 'd'},
-    {"recurse", optional_argument, NULL, 'r'},
+    {"recurse", required_argument, NULL, 'r'},
     {"check",   no_argument,       NULL, 'c'},
     {"explict", no_argument,       NULL, 'e'},
     {"fatal",   no_argument,       NULL, 'F'},
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "fdr:ceFhiqsv", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "d:f:r:ceFhiqsv", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -105,20 +105,23 @@ int main(int argc, char **argv) {
         case 'e':
             brn2_implict = false;
             break;
-        case 'r':
-            mode = FILES_FROM_DIR_RECURSE;
-            if (optarg)
-                directory = optarg;
-            break;
         case 'd':
             mode = FILES_FROM_DIR;
-            if (optarg)
-                directory = optarg;
+            if (optarg == NULL)
+                brn2_usage(stderr);
+            directory = optarg;
             break;
         case 'f':
+            mode = FILES_FROM_FILE;
             if (optarg == NULL)
                 brn2_usage(stderr);
             lines = optarg;
+            break;
+        case 'r':
+            mode = FILES_FROM_DIR_RECURSE;
+            if (optarg == NULL)
+                brn2_usage(stderr);
+            directory = optarg;
             break;
         default:
             brn2_usage(stderr);
@@ -148,6 +151,7 @@ int main(int argc, char **argv) {
         break;
     case FILES_FROM_DIR_RECURSE:
         old = brn2_list_from_dir_recurse(directory);
+        brn2_normalize_names(old);
         from_dir = true;
         break;
     case FILES_FROM_DIR:
