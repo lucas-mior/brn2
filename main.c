@@ -36,14 +36,14 @@ static struct option options[] = {
     {"file",    required_argument, NULL, 'f'},
     {"dir",     optional_argument, NULL, 'd'},
     {"recurse", optional_argument, NULL, 'r'},
-    {"help",    no_argument,       NULL, 'h'},
-    {"quiet",   no_argument,       NULL, 'q'},
-    {"verbose", no_argument,       NULL, 'v'},
     {"check",   no_argument,       NULL, 'c'},
-    {"sort",    no_argument,       NULL, 's'},
-    {"fatal",   no_argument,       NULL, 'F'},
-    {"implict", no_argument,       NULL, 'i'},
     {"explict", no_argument,       NULL, 'e'},
+    {"fatal",   no_argument,       NULL, 'F'},
+    {"help",    no_argument,       NULL, 'h'},
+    {"implict", no_argument,       NULL, 'i'},
+    {"quiet",   no_argument,       NULL, 'q'},
+    {"sort",    no_argument,       NULL, 's'},
+    {"verbose", no_argument,       NULL, 'v'},
     {NULL, 0, NULL, 0}
 };
 
