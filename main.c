@@ -26,7 +26,7 @@
 #include "util.c"
 
 char *program;
-bool brn2_check = false;
+static bool brn2_check = false;
 bool brn2_fatal = false;
 bool brn2_implict = false;
 bool brn2_quiet = false;
