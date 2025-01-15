@@ -34,6 +34,8 @@ You can then edit the filenames in the buffer and the changes
 will take place when you save and exit.
 - No arguments: filenames in current working directory
 - Argument supplied to `-f`: filenames listed in this argument
+- Argument supplied to `-d`: filenames of this dir
+- Argument supplied to `-r`: filenames recursively found on this dir
 - 2 or more arguments: filenames passed as arguments
 
 ### Notes
