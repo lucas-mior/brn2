@@ -12,9 +12,9 @@ usage: brn2 [OPTIONS] -r <dir>
 Rename filenames based on provided arguments.
 
 Options:
-  -F, --fatal   : Exit on first renaming error.
   -c, --check   : Check if original file names exist.
   -e, --explict : Only rename files given in the list of files to rename (default).
+  -F, --fatal   : Exit on first renaming error.
   -h, --help    : Display this help message and exit.
   -i, --implict : Rename files not given in the list of files to rename.
   -q, --quiet   : Quiet mode; suppress output messages.
