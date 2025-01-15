@@ -100,6 +100,8 @@ typedef struct Hash {
 } Hash;
 
 extern char *program;
+extern bool brn2_quiet;
+extern bool brn2_sort;
 extern bool brn2_fatal;
 extern bool brn2_implict;
 extern uint32 nthreads;
@@ -113,7 +115,7 @@ void brn2_normalize_names(FileList *);
 Hash *brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
-uint32 brn2_execute(FileList *, FileList *, HashMap *, Hash *, Hash *, bool);
+uint32 brn2_execute(FileList *, FileList *, HashMap *, Hash *, Hash *);
 
 void brn2_free_lines_list(FileList *);
 void brn2_free_dir_list(FileList *);

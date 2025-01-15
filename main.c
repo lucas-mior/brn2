@@ -28,6 +28,8 @@
 char *program;
 bool brn2_fatal = false;
 bool brn2_implict = false;
+bool brn2_quiet = false;
+bool brn2_sort = true;
 uint32 nthreads;
 
 static struct option options[] = {
@@ -69,9 +71,7 @@ int main(int argc, char **argv) {
     const char *tempdir = "/tmp";
     char *directory = ".";
     int status = EXIT_SUCCESS;
-    bool quiet = false;
-    bool check = false;
-    bool sort = true;
+    bool brn2_check = false;
     char *lines = NULL;
     bool from_dir;
     int mode = FILES_FROM_DIR;
@@ -85,16 +85,16 @@ int main(int argc, char **argv) {
         case 'h':
             brn2_usage(stdout);
         case 'c':
-            check = true;
+            brn2_check = true;
             break;
         case 'q':
-            quiet = true;
+            brn2_quiet = true;
             break;
         case 'v':
-            quiet = false;
+            brn2_quiet = false;
             break;
         case 's':
-            sort = false;
+            brn2_sort = false;
             break;
         case 'F':
             brn2_fatal = true;
@@ -156,10 +156,10 @@ int main(int argc, char **argv) {
         break;
     }
 
-    if (sort)
+    if (brn2_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
-    if (check) {
+    if (brn2_check) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             while (access(file->name, F_OK)) {
@@ -296,7 +296,7 @@ int main(int argc, char **argv) {
         if (number_changes)
             number_renames = brn2_execute(old, new,
                                           oldlist_map,
-                                          hashes_old, hashes_new, quiet);
+                                          hashes_old, hashes_new);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
