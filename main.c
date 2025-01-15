@@ -40,6 +40,7 @@ static struct option options[] = {
     {"fatal",   no_argument,       NULL, 'F'},
     {"implict", no_argument,       NULL, 'i'},
     {"explict", no_argument,       NULL, 'e'},
+    {"recurse", no_argument,       NULL, 'r'},
     {NULL, 0, NULL, 0}
 };
 
@@ -64,10 +65,11 @@ int main(int argc, char **argv) {
     bool sort = true;
     char *lines = NULL;
     bool from_dir;
+    bool recurse = false;
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "f:chqvsFie", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "f:chqvsFier", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
@@ -93,6 +95,9 @@ int main(int argc, char **argv) {
             break;
         case 'e':
             brn2_implict = false;
+            break;
+        case 'r':
+            recurse = true;
             break;
         case 'f':
             if (optarg == NULL)
@@ -120,6 +125,9 @@ int main(int argc, char **argv) {
         old = brn2_list_from_args(argc - optind, &argv[optind]);
         brn2_normalize_names(old);
         from_dir = false;
+    } else if (recurse) {
+        old = brn2_list_from_dir_recurse(".");
+        from_dir = true;
     } else {
         old = brn2_list_from_dir(".");
         from_dir = true;
