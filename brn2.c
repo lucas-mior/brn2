@@ -116,7 +116,7 @@ brn2_list_from_dir_recurse(char *directory) {
             if (length >= capacity) {
                 capacity *= 2;
                 list = xrealloc(list,
-                                    STRUCT_ARRAY_SIZE(list, FileName, capacity));
+                                STRUCT_ARRAY_SIZE(list, FileName, capacity));
             }
 
             file = &(list->files[length]);
@@ -280,8 +280,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         FileName *file;
         if (length >= capacity) {
             capacity *= 2;
-            list = xrealloc(list,
-                                STRUCT_ARRAY_SIZE(list, FileName, capacity));
+            list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
 
         file = &(list->files[length]);
