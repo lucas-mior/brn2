@@ -66,7 +66,8 @@ will take place when you save and exit.
   like `find` and output it to a file. Edit this file as you like and then
   launch brn2 with the `-f` option. See examples below.
 - Filenames listed in `<filename>` or given as arguments which
-  do not correpond to existing files will generate errors while renaming.
+  do not correpond to existing files will generate errors while renaming,
+  so you might want to enable `--check` option.
 
 #### Be careful when renaming in depth
 If you supply the files:
