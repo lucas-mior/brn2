@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "fdr:chqvsFie", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "fdr:ceFhiqsv", options, NULL)) != -1) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
