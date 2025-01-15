@@ -110,6 +110,7 @@ brn2_list_from_dir_recurse(char *directory) {
             exit(EXIT_FAILURE);
         case FTS_D:
             is_dir = true;
+            // fallthrough
         case FTS_F: {
             char *name = ent->fts_path + 2;
             FileName *file;
