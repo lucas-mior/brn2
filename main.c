@@ -269,7 +269,7 @@ int main(int argc, char **argv) {
                 uint32 length = new->files[i].length;
                 if (x < 0.5f) {
                     for (uint32 j = 0; j < length; j += 1) {
-                        char c = allowed[(usize) rand() % (sizeof(allowed) - 1)];
+                        char c = allowed[(usize)rand() % (sizeof(allowed) - 1)];
                         new->files[i].name[j] = c;
                     }
                 }
