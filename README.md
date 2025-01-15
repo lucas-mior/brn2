@@ -64,6 +64,9 @@ will take place when you save and exit.
   repeated, the user will be asked to fix the rename buffer or exit.
 - Renaming millions or billions of files can be slow. Disabling sorting
   (`-s` option) and printing (`-q` option) might help a bit.
+- If you want to filter/organize the files to rename, use command line utilities
+  like `find` and output it to a file. Edit this file as you like and then
+  launch brn2 with the `-f` option. See examples below.
 
 #### Be careful when renaming in depth
 If you supply the files:
@@ -121,6 +124,12 @@ $ brn2 -r .
 - Find and rename jpg files in quiet mode (recursively, using `find`):
 ```
 $ find . -iname "*.jpg" > rename
+$ brn2 --quiet --file rename
+```
+- Find and rename only regular files recursively while sorting them by
+  modification date (using `find(1)`, `sort(1)` and `cut(1)`)
+```
+$ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- > rename
 $ brn2 --quiet --file rename
 ```
  
