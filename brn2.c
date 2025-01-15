@@ -139,8 +139,9 @@ brn2_list_from_dir_recurse(char *directory) {
         error("Empty list. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    list->length = length;
 
+    list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
+    list->length = length;
     return list;
 }
 
