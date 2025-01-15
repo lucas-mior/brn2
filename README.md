@@ -7,22 +7,26 @@ used to easily mass-rename files in your preferred text editor.
 $ brn2 --help
 usage: brn2 [OPTIONS] -- <file1> <file2> ...
 usage: brn2 [OPTIONS] -f <filename>
+usage: brn2 [OPTIONS] -d <dir>
+usage: brn2 [OPTIONS] -r <dir>
 Rename filenames based on provided arguments.
 
 Options:
-  -h, --help    : Display this help message and exit.
-  -q, --quiet   : Quiet mode; suppress output messages.
-  -v, --verbose : Verbose mode (default); output messages.
-  -c, --check   : Check if original file names exist.
-  -s, --sort    : Disable sorting of original list.
   -F, --fatal   : Exit on first renaming error.
-  -i, --implict : Rename files not given in the list of files to rename.
+  -c, --check   : Check if original file names exist.
   -e, --explict : Only rename files given in the list of files to rename (default).
+  -h, --help    : Display this help message and exit.
+  -i, --implict : Rename files not given in the list of files to rename.
+  -q, --quiet   : Quiet mode; suppress output messages.
+  -s, --sort    : Disable sorting of original list.
+  -v, --verbose : Verbose mode (default); output messages.
 
 Arguments:
-  No arguments             : Rename filenames in the current working directory.
-  1 or more arguments      : Rename filenames passed as arguments.
-  -f <file>, --file=<file> : Rename filenames listed in this argument.
+  No arguments              : Rename filenames in the current working directory.
+  1 or more arguments       : Rename filenames passed as arguments.
+  -d <dir>, --dir=<dir>     : Rename files in directory.
+  -f <file>, --file=<file>  : Rename filenames listed in this argument.
+  -r <dir>, --recurse=<dir> : Recursively find files to rename.
 ```
 
 brn2 will open the filenames in your text editor of choice.
