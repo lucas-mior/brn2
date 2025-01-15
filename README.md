@@ -127,10 +127,11 @@ $ find . -iname "*.jpg" > rename
 $ brn2 --quiet --file rename
 ```
 - Find and rename only regular files recursively while sorting them by
-  modification date (using `find(1)`, `sort(1)` and `cut(1)`)
+  modification date (using `find(1)`, `sort(1)` and `cut(1)`). Also check if
+  each line correspond to an existing file (`--check` option).
 ```
 $ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- > rename
-$ brn2 --quiet --file rename
+$ brn2 --check --file rename
 ```
  
 ## Changes over original brn
