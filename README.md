@@ -141,6 +141,7 @@ $ brn2 --check --file rename
 ## Changes over original brn
 - Option to rename files listed in file or passed as arguments.
   * By default, won't swap files which were not specified in the rename list.
+- Option to recursively find files.
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
 - Option to check if original files exist.
