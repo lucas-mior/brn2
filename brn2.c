@@ -91,7 +91,7 @@ brn2_list_from_dir_recurse(char *directory) {
 
     list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
-    file_system = fts_open(paths, FTS_COMFOLLOW | FTS_NOCHDIR, NULL);
+    file_system = fts_open(paths, FTS_NOSTAT, NULL);
     if (file_system == NULL) {
         error("Error opening %s for traversal: %s.\n",
                 directory, strerror(errno));
@@ -99,17 +99,12 @@ brn2_list_from_dir_recurse(char *directory) {
     }
 
     while ((ent = fts_read(file_system))) {
-        bool is_dir = false;
-        if (errno) {
-            error("errno is set after fts_read\n");
-            exit(EXIT_FAILURE);
-        }
         switch (ent->fts_info) {
         case FTS_ERR:
-            error("FTS_ERR.\n");
+            error("Error in fts_read(%s): %s.\n",
+                  directory, strerror(ent->fts_errno));
             exit(EXIT_FAILURE);
         case FTS_D:
-            is_dir = true;
             // fallthrough
         case FTS_F: {
             char *name = ent->fts_path;
@@ -125,13 +120,9 @@ brn2_list_from_dir_recurse(char *directory) {
             }
 
             file = &(list->files[length]);
-            file->length = ent->fts_pathlen + is_dir;
+            file->length = ent->fts_pathlen;
             file->name = util_malloc(file->length + 1);
             memcpy(file->name, name, file->length + 1);
-            if (is_dir) {
-                file->name[file->length - 1] = '/';
-                file->name[file->length] = '\0';
-            }
 
             length += 1;
             break;
@@ -140,8 +131,16 @@ brn2_list_from_dir_recurse(char *directory) {
             break;
         }
     }
-    list->length = length;
+    if (errno)
+        error("Error in fts_read(%s): %s.\n", directory, strerror(errno));
     fts_close(file_system);
+
+    if (length == 0) {
+        error("Empty list. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }
+    list->length = length;
+
     return list;
 }
 
