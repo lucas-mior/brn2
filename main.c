@@ -82,28 +82,28 @@ int main(int argc, char **argv) {
         switch (opt) {
         case '?':
             brn2_usage(stderr);
-        case 'h':
-            brn2_usage(stdout);
         case 'c':
             brn2_check = true;
             break;
-        case 'q':
-            brn2_quiet = true;
-            break;
-        case 'v':
-            brn2_quiet = false;
-            break;
-        case 's':
-            brn2_sort = false;
+        case 'e':
+            brn2_implict = false;
             break;
         case 'F':
             brn2_fatal = true;
             break;
+        case 'h':
+            brn2_usage(stdout);
         case 'i':
             brn2_implict = true;
             break;
-        case 'e':
-            brn2_implict = false;
+        case 'q':
+            brn2_quiet = true;
+            break;
+        case 's':
+            brn2_sort = false;
+            break;
+        case 'v':
+            brn2_quiet = false;
             break;
         case 'd':
             mode = FILES_FROM_DIR;
