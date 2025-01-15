@@ -100,10 +100,10 @@ typedef struct Hash {
 } Hash;
 
 extern char *program;
-extern bool brn2_quiet;
-extern bool brn2_sort;
 extern bool brn2_fatal;
 extern bool brn2_implict;
+extern bool brn2_quiet;
+extern bool brn2_sort;
 extern uint32 nthreads;
 
 int brn2_compare(const void *, const void *);
