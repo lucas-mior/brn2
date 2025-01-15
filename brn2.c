@@ -511,13 +511,13 @@ noop(const char *unused, ...) {
 uint32
 brn2_execute(FileList *old, FileList *new,
              HashMap *oldlist_map,
-             Hash *hashes_old, Hash *hashes_new, bool quiet) {
+             Hash *hashes_old, Hash *hashes_new) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *, ...);
     HashSet *names_renamed = hash_set_create(old->length);
 
-    if (quiet)
+    if (brn2_quiet)
         print = noop;
     else
         print = printf;
