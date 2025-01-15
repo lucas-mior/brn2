@@ -30,7 +30,7 @@
 #include "brn2.h"
 
 void *
-util_malloc(const usize size) {
+xmalloc(const usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         error("Failed to allocate %zu bytes.\n", size);
@@ -40,7 +40,7 @@ util_malloc(const usize size) {
 }
 
 void *
-util_realloc(void *old, const usize size) {
+xrealloc(void *old, const usize size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
         error("Failed to reallocate %zu bytes.\n", size);
@@ -51,7 +51,7 @@ util_realloc(void *old, const usize size) {
 }
 
 void *
-util_calloc(const usize nmemb, const usize size) {
+xcalloc(const usize nmemb, const usize size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
         error("Error allocating %zu members of %zu bytes each.\n", nmemb, size);
@@ -61,7 +61,7 @@ util_calloc(const usize nmemb, const usize size) {
 }
 
 char *
-util_strdup(char *string) {
+xstrdup(char *string) {
     char *p;
     size_t length;
 
@@ -77,7 +77,7 @@ util_strdup(char *string) {
 }
 
 void *
-util_memdup(void *source, usize size) {
+xmemdup(void *source, usize size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         error("Error reallocating %zu bytes.\n", size);
