@@ -97,19 +97,6 @@ $ sudo ./build.sh install
 ```
 
 ## Examples
-- Find and rename jpg files in quiet mode (recursively, using `find`):
-```
-$ find . -iname "*.jpg" > rename
-$ brn2 --quiet --file rename
-```
-- Find and rename files (recursively):
-```
-$ brn2 -r .
-```
-- Rename jpg files in current working directory:
-```
-$ brn2 *.jpg
-```
 - Rename all files in current working directory:
 ```
 $ brn2
@@ -118,10 +105,23 @@ $ brn2
 ```
 $ brn2 -s
 ```
+- Rename jpg files in current working directory:
+```
+$ brn2 *.jpg
+```
 - Rename files `a`, `b`, and `c`,
   allowing for swapping with other files which already exist.
 ```
 $ brn2 -i a b c
+```
+- Find and rename files (recursively):
+```
+$ brn2 -r .
+```
+- Find and rename jpg files in quiet mode (recursively, using `find`):
+```
+$ find . -iname "*.jpg" > rename
+$ brn2 --quiet --file rename
 ```
  
 ## Changes over original brn
