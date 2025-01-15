@@ -74,7 +74,7 @@ hash_map_create(uint32 length) {
 
     size = sizeof(*map) + capacity*sizeof(map->array[0]);
 
-    map = util_malloc(size);
+    map = xmalloc(size);
     memset(map, 0, size);
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
@@ -101,7 +101,7 @@ hash_map_balance(HashMap *old_map) {
 
     size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]);
 
-    new_map = util_malloc(size);
+    new_map = xmalloc(size);
     memset(new_map, 0, size);
     new_map->capacity = capacity;
     new_map->bitmask = bitmask;
@@ -209,7 +209,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
     }
 
     map->collisions += 1;
-    iterator->next = util_calloc(1, sizeof(*iterator));
+    iterator->next = xcalloc(1, sizeof(*iterator));
     iterator->next->key = key;
     iterator->next->hash = hash;
     iterator->next->value = value;
@@ -352,7 +352,7 @@ static char *
 random_string(void) {
     int length = 10 + rand() % 60;
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    char *random_string = util_malloc((usize) length + 1);
+    char *random_string = xmalloc((usize) length + 1);
 
     for (int i = 0; i < length; i += 1) {
         int c = rand() % ((int) sizeof(characters) - 1);

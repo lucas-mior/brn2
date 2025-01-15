@@ -61,7 +61,7 @@ brn2_list_from_args(int argc, char **argv) {
     FileList *list;
     uint32 length = 0;
 
-    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, argc));
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, argc));
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -89,7 +89,7 @@ brn2_list_from_dir_recurse(char *directory) {
     uint32 length = 0;
     uint32 capacity = 64;
 
-    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
     if (file_system == NULL) {
@@ -115,13 +115,13 @@ brn2_list_from_dir_recurse(char *directory) {
 
             if (length >= capacity) {
                 capacity *= 2;
-                list = util_realloc(list,
+                list = xrealloc(list,
                                     STRUCT_ARRAY_SIZE(list, FileName, capacity));
             }
 
             file = &(list->files[length]);
             file->length = ent->fts_pathlen;
-            file->name = util_malloc(file->length + 1);
+            file->name = xmalloc(file->length + 1);
             memcpy(file->name, name, file->length + 1);
 
             length += 1;
@@ -140,7 +140,7 @@ brn2_list_from_dir_recurse(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
+    list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
     return list;
 }
@@ -162,7 +162,7 @@ brn2_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
 
-    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, n - 2));
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, n - 2));
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -192,7 +192,7 @@ brn2_list_from_dir(char *directory) {
         }
 
         file->length = (uint32) strlen(name) + is_dir;
-        file->name = util_malloc(file->length + 1);
+        file->name = xmalloc(file->length + 1);
         memcpy(file->name, name, file->length + 1);
         if (is_dir) {
             file->name[file->length - 1] = '/';
@@ -237,7 +237,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
     if (capacity == 0)
         capacity = 128;
-    list = util_malloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening file for reading: %s\n", strerror(errno));
@@ -280,7 +280,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         FileName *file;
         if (length >= capacity) {
             capacity *= 2;
-            list = util_realloc(list,
+            list = xrealloc(list,
                                 STRUCT_ARRAY_SIZE(list, FileName, capacity));
         }
 
@@ -306,7 +306,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         error("Empty list. Exiting.\n");
         exit(EXIT_FAILURE);
     }
-    list = util_realloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
+    list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
 
     return list;
@@ -417,7 +417,7 @@ brn2_normalize_names(FileList *list) {
 
 Hash *
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    Hash *hashes = util_malloc(list->length*sizeof(*hashes));
+    Hash *hashes = xmalloc(list->length*sizeof(*hashes));
     brn2_threads(brn2_work_hashes, list, NULL, hashes, NULL, map_capacity);
     return hashes;
 }
