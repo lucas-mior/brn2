@@ -91,7 +91,7 @@ brn2_list_from_dir_recurse(char *directory) {
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
-    file_system = fts_open(paths, FTS_PHYSICAL, NULL);
+    file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
     if (file_system == NULL) {
         error("Error opening %s for traversal: %s.\n",
                 directory, strerror(errno));
@@ -106,7 +106,7 @@ brn2_list_from_dir_recurse(char *directory) {
             exit(EXIT_FAILURE);
         case FTS_D:
             // fallthrough
-        case FTS_F: {
+        case FTS_NSOK: {
             char *name = ent->fts_path;
             FileName *file;
 
