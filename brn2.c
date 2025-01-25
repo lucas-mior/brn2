@@ -91,7 +91,7 @@ brn2_list_from_dir_recurse(char *directory) {
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
-    file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
+    file_system = fts_open(paths, FTS_PHYSICAL, NULL);
     if (file_system == NULL) {
         error("Error opening %s for traversal: %s.\n",
                 directory, strerror(errno));
