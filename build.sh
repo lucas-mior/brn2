@@ -7,8 +7,8 @@ testing () {
 
         flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
         set -x
-        if $CC $CPPFLAGS $CFLAGS -D TESTING_THIS_FILE=1 $src -o $src.exe $flags; then
-            ./$src.exe
+        if $CC $CPPFLAGS $CFLAGS -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags; then
+            /tmp/$src.exe
         else
             printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
         fi
