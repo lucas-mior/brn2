@@ -703,6 +703,9 @@ int main(void) {
     list1 = brn2_list_from_dir(".");
     list2 = brn2_list_from_lines(file, 0);
 
+    brn2_normalize_names(list1);
+    brn2_normalize_names(list2);
+
     assert(list1->length == list2->length);
 
     for (uint32 i = 0; i < list1->length; i += 1) {
