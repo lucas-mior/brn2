@@ -364,7 +364,7 @@ random_string(void) {
 }
 
 // flags: -lm
-#define NSTRINGS 5000000
+#define NSTRINGS 500000
 int main(void) {
     struct timespec t0, t1;
     HashMap *original_map; 
@@ -420,7 +420,7 @@ int main(void) {
         long seconds = t1.tv_sec - t0.tv_sec;
         long nanos = t1.tv_nsec - t0.tv_nsec;
         double total_seconds = (double) seconds + (double) nanos/1.0e9;
-        printf("\ntime elapsed (%s): %g\n\n", __FILE__, total_seconds);
+        printf("\ntime elapsed (%s): %gs\n\n", __FILE__, total_seconds);
     }
     exit(0);
 }
