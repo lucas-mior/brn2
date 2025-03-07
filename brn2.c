@@ -356,17 +356,22 @@ brn2_work_normalization(void *arg) {
             file->length -= 2;
         }
 
-        if (file->length < old_length) {
-            struct stat file_stat;
-            if (stat(file->name, &file_stat) < 0) {
-                error("Error in stat(%s): %s\n", file->name, strerror(errno));
-                continue;
+        struct stat file_stat;
+        if (stat(file->name, &file_stat) < 0) {
+            error("Error in stat(%s): %s\n", file->name, strerror(errno));
+            continue;
+        }
+
+        if (S_ISDIR(file_stat.st_mode) && file->name[file->length - 1] != '/') {
+            if (file->length >= old_length) {
+                char *aux = xmalloc(file->length + 2);
+                memcpy(aux, file->name, file->length);
+                file->name = aux;
             }
-            if (S_ISDIR(file_stat.st_mode)) {
-                file->name[file->length] = '/';
-                file->name[file->length+1] = '\0';
-                file->length += 1;
-            }
+
+            file->name[file->length] = '/';
+            file->name[file->length+1] = '\0';
+            file->length += 1;
         }
     }
     thrd_exit(0);
