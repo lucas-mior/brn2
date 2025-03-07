@@ -341,6 +341,7 @@ brn2_work_normalization(void *arg) {
         FileName *file = &(list->files[i]);
         uint32 old_length = file->length;
         uint32 j = 0;
+        struct stat file_stat;
 
         while (file->name[j] != '\0') {
             while (file->name[j] == '/' && file->name[j + 1] == '/') {
@@ -356,7 +357,6 @@ brn2_work_normalization(void *arg) {
             file->length -= 2;
         }
 
-        struct stat file_stat;
         if (stat(file->name, &file_stat) < 0) {
             error("Error in stat(%s): %s\n", file->name, strerror(errno));
             continue;
