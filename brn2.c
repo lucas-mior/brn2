@@ -71,7 +71,8 @@ brn2_list_from_args(int argc, char **argv) {
             continue;
 
         file->length = (uint32) strlen(name);
-        file->name = name;
+        file->name = xmalloc(file->length + 2);
+        memcpy(file->name, name, file->length + 1);
 
         length += 1;
     }
@@ -121,7 +122,7 @@ brn2_list_from_dir_recurse(char *directory) {
 
             file = &(list->files[length]);
             file->length = ent->fts_pathlen;
-            file->name = xmalloc(file->length + 1);
+            file->name = xmalloc(file->length + 2);
             memcpy(file->name, name, file->length + 1);
 
             length += 1;
@@ -192,7 +193,7 @@ brn2_list_from_dir(char *directory) {
         }
 
         file->length = (uint32) strlen(name) + is_dir;
-        file->name = xmalloc(file->length + 1);
+        file->name = xmalloc(file->length + 2);
         memcpy(file->name, name, file->length + 1);
         if (is_dir) {
             file->name[file->length - 1] = '/';
@@ -209,7 +210,7 @@ brn2_list_from_dir(char *directory) {
 }
 
 void
-brn2_free_dir_list(FileList *list) {
+brn2_free_list(FileList *list) {
     for (uint32 i = 0; i < list->length; i += 1) {
         FileName *file = &(list->files[i]);
         free(file->name);
@@ -218,16 +219,10 @@ brn2_free_dir_list(FileList *list) {
     return;
 }
 
-void
-brn2_free_lines_list(FileList *list) {
-    munmap(list->map, list->map_size);
-    free(list);
-    return;
-}
-
 FileList *
 brn2_list_from_lines(char *filename, uint32 capacity) {
     FileList *list;
+    char *map;
     char *begin;
     char *pointer;
     size_t left;
@@ -259,11 +254,11 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         list->map_size += (MEMCHR_BYTES - (list->map_size % MEMCHR_BYTES));
     }
 
-    list->map = mmap(NULL, list->map_size,
+    map = mmap(NULL, list->map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
 
-    if (list->map == MAP_FAILED) {
+    if (map == MAP_FAILED) {
         error("Error mapping history file to memory: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -273,7 +268,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
-    begin = pointer = list->map;
+    begin = pointer = map;
     left = list->map_size;
 
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
@@ -294,8 +289,9 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             exit(EXIT_FAILURE);
         }
 
-        file->name = begin;
         file->length = (uint32) (pointer - begin);
+        file->name = xmalloc(file->length + 2);
+        memcpy(file->name, begin, file->length + 1);
         begin = pointer + 1;
         length += 1;
         left -= (file->length + 1);
@@ -307,6 +303,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     }
     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
+    munmap(map, list->map_size);
 
     return list;
 }
