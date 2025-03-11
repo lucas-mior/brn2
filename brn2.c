@@ -154,7 +154,7 @@ brn2_list_from_dir(char *directory) {
 
     n = scandir(directory, &directory_list, NULL, NULL);
     if (n < 0) {
-        error("Error scanning \"%s\": %s\n", directory, strerror(errno));
+        error("Error scanning '%s': %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (n <= 2) {
@@ -358,7 +358,7 @@ brn2_work_normalization(void *arg) {
         }
 
         if (stat(file->name, &file_stat) < 0) {
-            error("Error in stat(%s): %s\n", file->name, strerror(errno));
+            error("Error in stat('%s'): %s\n", file->name, strerror(errno));
             continue;
         }
 
@@ -494,7 +494,7 @@ brn2_verify(FileList *old, FileList *new,
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                       newfile.hash, hashes_new[i].mod, i)) {
-            fprintf(stderr, RED"\"%s\""RESET " (line %u)"
+            fprintf(stderr, RED"'%s'"RESET " (line %u)"
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
             repeated = true;
@@ -551,8 +551,8 @@ brn2_execute(FileList *old, FileList *new,
         newname_exists = !access(newname, F_OK);
 #ifdef __linux__
         if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
-            error("Error renaming "RED"\"%s\""RESET" to "RED"\"%s\""RESET":\n"
-                  RED"\"%s\""RESET" already exists,"
+            error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n"
+                  RED"'%s'"RESET" already exists,"
                   " but it was not given in the list of"
                   " files to rename, and --implict option is off.\n",
                   *oldname, newname, newname);
@@ -590,8 +590,8 @@ brn2_execute(FileList *old, FileList *new,
                 SWAP(file_j->hash, old->files[i].hash);
                 SWAP(hashes_old[i], hashes_old[next]);
             } else {
-                error("Warning: \"%s\" was swapped with \"%s\", even though"
-                      " \"%s\" was not in the list of files to rename.\n",
+                error("Warning: '%s' was swapped with '%s', even though"
+                      " '%s' was not in the list of files to rename.\n",
                       newname, *oldname, newname);
                 error("To disable this behaviour,"
                       " don't pass the --implict option.\n");
@@ -600,8 +600,8 @@ brn2_execute(FileList *old, FileList *new,
             }
             continue;
         } else if (errno != ENOENT) {
-            error("Error swapping "RED"\"%s\""RESET
-                  " and "RED"\"%s\""RESET": %s\n",
+            error("Error swapping "RED"'%s'"RESET
+                  " and "RED"'%s'"RESET": %s\n",
                   *oldname, newname, strerror(errno));
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
@@ -609,7 +609,7 @@ brn2_execute(FileList *old, FileList *new,
 #else
         (void) newlength;
         if (newname_exists) {
-            error("Can't rename \"%s\" to \"%s\", because it exists.\n",
+            error("Can't rename '%s' to '%s', because it exists.\n",
                   *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
@@ -618,8 +618,8 @@ brn2_execute(FileList *old, FileList *new,
 #endif
         renamed = rename(*oldname, newname);
         if (renamed < 0) {
-            error("Error renaming "RED"\"%s\""RESET
-                  " to "RED"\"%s\""RESET": %s\n",
+            error("Error renaming "RED"'%s'"RESET
+                  " to "RED"'%s'"RESET": %s\n",
                   *oldname, newname, strerror(errno));
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
