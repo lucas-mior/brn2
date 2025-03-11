@@ -73,7 +73,6 @@ int main(int argc, char **argv) {
     char *directory = ".";
     int status = EXIT_SUCCESS;
     char *lines = NULL;
-    bool from_dir;
     int mode = FILES_FROM_DIR;
 
     program = basename(argv[0]);
@@ -142,27 +141,21 @@ int main(int argc, char **argv) {
     switch (mode) {
     case FILES_FROM_FILE:
         old = brn2_list_from_lines(lines, 0);
-        brn2_normalize_names(old);
-        from_dir = false;
         break;
     case FILES_FROM_ARGS:
         old = brn2_list_from_args(argc - optind, &argv[optind]);
-        brn2_normalize_names(old);
-        from_dir = false;
         break;
     case FILES_FROM_DIR_RECURSE:
         old = brn2_list_from_dir_recurse(directory);
-        brn2_normalize_names(old);
-        from_dir = true;
         break;
     case FILES_FROM_DIR:
         old = brn2_list_from_dir(directory);
-        from_dir = true;
         break;
     default:
         error("Unexpected mode: %d\n", mode);
         exit(EXIT_FAILURE);
     }
+    brn2_normalize_names(old);
 
     if (brn2_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
@@ -284,7 +277,7 @@ int main(int argc, char **argv) {
             hashes_new = brn2_create_hashes(new, main_capacity);
 
             if (!brn2_verify(old, new, newlist_map, hashes_new)) {
-                brn2_free_lines_list(new);
+                brn2_free_list(new);
                 hash_map_destroy(newlist_map);
                 free(hashes_new);
                 printf("Fix your renames. Press control-c to cancel or press"
@@ -319,8 +312,7 @@ int main(int argc, char **argv) {
 
     if (BRN2_DEBUG) {
         brn2_free_lines_list(new);
-        if (from_dir)
-            brn2_free_dir_list(old);
+        brn2_free_dir_list(old);
     }
     unlink(buffer.name);
     exit(status);
