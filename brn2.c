@@ -336,7 +336,6 @@ brn2_work_normalization(void *arg) {
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName *file = &(list->files[i]);
-        uint32 old_length = file->length;
         uint32 j = 0;
         struct stat file_stat;
 
@@ -360,12 +359,6 @@ brn2_work_normalization(void *arg) {
         }
 
         if (S_ISDIR(file_stat.st_mode) && file->name[file->length - 1] != '/') {
-            if (file->length >= old_length) {
-                char *aux = xmalloc(file->length + 2);
-                memcpy(aux, file->name, file->length);
-                file->name = aux;
-            }
-
             file->name[file->length] = '/';
             file->name[file->length+1] = '\0';
             file->length += 1;
