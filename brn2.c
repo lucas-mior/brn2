@@ -108,7 +108,7 @@ brn2_list_from_dir_recurse(char *directory) {
             // fallthrough
         case FTS_NSOK: {
             char *name = ent->fts_path;
-            FileName *file = &(list->files[length]);
+            FileName *file;
 
             if (brn2_is_invalid_name(name))
                 continue;
@@ -119,6 +119,7 @@ brn2_list_from_dir_recurse(char *directory) {
                                 STRUCT_ARRAY_SIZE(list, FileName, capacity));
             }
 
+            file = &(list->files[length]);
             file->length = ent->fts_pathlen;
             file->name = xmalloc(file->length + 1);
             memcpy(file->name, name, file->length + 1);
