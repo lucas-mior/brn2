@@ -104,17 +104,19 @@ extern bool brn2_implict;
 extern bool brn2_quiet;
 extern bool brn2_sort;
 extern uint32 nthreads;
+extern bool *is_dir;
 
 int brn2_compare(const void *, const void *);
 FileList *brn2_list_from_dir_recurse(char *);
 FileList *brn2_list_from_dir(char *);
 FileList *brn2_list_from_lines(char *, uint32);
 FileList *brn2_list_from_args(int, char **);
-void brn2_normalize_names(FileList *);
+void brn2_normalize_names(FileList *, FileList *);
 Hash *brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, HashMap *, Hash *, Hash *);
+void brn2_slash_add(FileName *file);
 
 void brn2_free_lines_list(FileList *);
 void brn2_free_dir_list(FileList *);
