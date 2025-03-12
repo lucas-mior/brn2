@@ -332,12 +332,20 @@ typedef struct Slice {
 int
 brn2_work_normalization(void *arg) {
     Slice *slice = arg;
-    FileList *list = slice->old_list;
+    FileList *list;
+    bool old_list;
+
+    if (slice->old_list) {
+        list = slice->old_list;
+        old_list = true;
+    } else {
+        list = slice->new_list;
+        old_list = false;
+    }
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName *file = &(list->files[i]);
         uint32 j = 0;
-        struct stat file_stat;
 
         while (file->name[j] != '\0') {
             while (file->name[j] == '/' && file->name[j + 1] == '/') {
@@ -353,18 +361,32 @@ brn2_work_normalization(void *arg) {
             file->length -= 2;
         }
 
-        if (stat(file->name, &file_stat) < 0) {
-            error("Error in stat('%s'): %s\n", file->name, strerror(errno));
-            continue;
-        }
-
-        if (S_ISDIR(file_stat.st_mode) && file->name[file->length - 1] != '/') {
-            file->name[file->length] = '/';
-            file->name[file->length+1] = '\0';
-            file->length += 1;
+        if (old_list) {
+            struct stat file_stat;
+            if (stat(file->name, &file_stat) < 0) {
+                error("Error in stat('%s'): %s\n", file->name, strerror(errno));
+                continue;
+            }
+            if (S_ISDIR(file_stat.st_mode)) {
+                is_dir[i] = true;
+                brn2_slash_add(file);
+            }
+        } else {
+            if (is_dir[i])
+                brn2_slash_add(file);
         }
     }
     thrd_exit(0);
+}
+
+void
+brn2_slash_add(FileName *file) {
+    if (file->name[file->length - 1] != '/') {
+        file->name[file->length] = '/';
+        file->name[file->length+1] = '\0';
+        file->length += 1;
+    }
+    return;
 }
 
 int
@@ -404,8 +426,8 @@ int brn2_work_changes(void *arg) {
 }
 
 void
-brn2_normalize_names(FileList *list) {
-    brn2_threads(brn2_work_normalization, list, NULL, NULL, NULL, 0);
+brn2_normalize_names(FileList *old, FileList *new) {
+    brn2_threads(brn2_work_normalization, old, new, NULL, NULL, 0);
     return;
 }
 
@@ -434,11 +456,18 @@ uint32 brn2_threads(int (*function)(void *),
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
     uint32 range;
+    uint32 length;
 
-    if (nthreads >= old->length)
+    if (old) {
+        length = old->length;
+    } else {
+        length = new->length;
+    }
+
+    if (nthreads >= length)
         nthreads = 1;
 
-    range = old->length / nthreads;
+    range = length / nthreads;
 
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
         slices[i].start = i*range;
@@ -452,7 +481,7 @@ uint32 brn2_threads(int (*function)(void *),
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
-        slices[i].end = old->length;
+        slices[i].end = length;
         slices[i].old_list = old;
         slices[i].new_list = new;
         slices[i].hashes = hashes;
@@ -663,6 +692,7 @@ brn2_usage(FILE *stream) {
 
 bool brn2_fatal = false;
 bool brn2_implict = false;
+bool *is_dir;
 uint32 nthreads = 1;
 
 static bool
@@ -698,8 +728,8 @@ int main(void) {
     list1 = brn2_list_from_dir(".");
     list2 = brn2_list_from_lines(file, 0);
 
-    brn2_normalize_names(list1);
-    brn2_normalize_names(list2);
+    brn2_normalize_names(list1, NULL);
+    brn2_normalize_names(list2, NULL);
 
     assert(list1->length == list2->length);
 
