@@ -541,11 +541,11 @@ brn2_execute(FileList *old, FileList *new,
         newname_exists = !access(newname, F_OK);
 #ifdef __linux__
         if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
-            error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n"
-                  RED"'%s'"RESET" already exists,"
+            error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
+                  *oldname, newname);
+            error(RED"'%s'"RESET" already exists,"
                   " but it was not given in the list of"
-                  " files to rename, and --implict option is off.\n",
-                  *oldname, newname, newname);
+                  " files to rename, and --implict option is off.\n", newname);
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
