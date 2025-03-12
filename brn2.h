@@ -86,6 +86,7 @@ typedef struct FileName {
     char *name;
     uint32 length;
     uint32 hash;
+    bool dir;
 } FileName;
 
 typedef struct FileList {
@@ -104,7 +105,6 @@ extern bool brn2_implict;
 extern bool brn2_quiet;
 extern bool brn2_sort;
 extern uint32 nthreads;
-extern bool *is_dir;
 
 int brn2_compare(const void *, const void *);
 FileList *brn2_list_from_dir_recurse(char *);
