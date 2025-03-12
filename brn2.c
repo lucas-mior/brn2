@@ -335,12 +335,12 @@ brn2_work_normalization(void *arg) {
     FileList *list;
     bool old_list;
 
-    if (slice->old_list) {
-        list = slice->old_list;
-        old_list = true;
-    } else {
+    if (slice->new_list) {
         list = slice->new_list;
         old_list = false;
+    } else {
+        list = slice->old_list;
+        old_list = true;
     }
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -365,14 +365,17 @@ brn2_work_normalization(void *arg) {
             struct stat file_stat;
             if (stat(file->name, &file_stat) < 0) {
                 error("Error in stat('%s'): %s\n", file->name, strerror(errno));
+                exit(EXIT_FAILURE);
                 continue;
             }
             if (S_ISDIR(file_stat.st_mode)) {
-                is_dir[i] = true;
+                slice->old_list->files[i].dir = true;
                 brn2_slash_add(file);
+            } else {
+                slice->old_list->files[i].dir = false;
             }
         } else {
-            if (is_dir[i])
+            if (slice->old_list->files[i].dir)
                 brn2_slash_add(file);
         }
     }
@@ -692,7 +695,6 @@ brn2_usage(FILE *stream) {
 
 bool brn2_fatal = false;
 bool brn2_implict = false;
-bool *is_dir;
 uint32 nthreads = 1;
 
 static bool

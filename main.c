@@ -32,7 +32,6 @@ bool brn2_implict = false;
 bool brn2_quiet = false;
 bool brn2_sort = true;
 uint32 nthreads;
-bool *is_dir;
 
 static struct option options[] = {
     {"dir",     required_argument, NULL, 'd'},
@@ -156,7 +155,6 @@ int main(int argc, char **argv) {
         error("Unexpected mode: %d\n", mode);
         exit(EXIT_FAILURE);
     }
-    is_dir = xmalloc(old->length*sizeof(*is_dir));
     brn2_normalize_names(old, NULL);
 
     if (brn2_sort)
@@ -273,7 +271,7 @@ int main(int argc, char **argv) {
             util_command(ARRAY_LENGTH(args_edit), args_edit);
             new = brn2_list_from_lines(buffer.name, old->length);
 #endif
-            brn2_normalize_names(NULL, new);
+            brn2_normalize_names(old, new);
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_map_capacity(newlist_map);
             hashes_new = brn2_create_hashes(new, main_capacity);
