@@ -169,15 +169,18 @@ brn2_list_from_dir(char *directory) {
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
         FileName *file = &(list->files[length]);
+        uint16 name_length = (uint16)strlen(name);
 
         if (brn2_is_invalid_name(name)) {
             free(directory_list[i]);
             continue;
         }
 
-        file->length = directory_length + (uint16)strlen(name) + 1;
+        file->length = directory_length + name_length + 1;
         file->name = xmalloc(file->length + 2);
-        snprintf(file->name, file->length + 1, "%s/%s", directory, name);
+        memcpy(file->name, directory, directory_length);
+        file->name[directory_length] = '/';
+        memcpy(file->name + directory_length + 1, name, name_length + 1);
 
         free(directory_list[i]);
         length += 1;
