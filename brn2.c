@@ -151,6 +151,7 @@ brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
+    uint32 directory_length = strlen(directory);
     int n;
 
     n = scandir(directory, &directory_list, NULL, NULL);
@@ -168,42 +169,17 @@ brn2_list_from_dir(char *directory) {
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
         FileName *file = &(list->files[length]);
-        struct stat file_stat;
-        uint32 is_dir = 0;
 
         if (brn2_is_invalid_name(name)) {
             free(directory_list[i]);
             continue;
         }
 
-        printf("from dir:%s\n", name);
-
-        switch (directory_list[i]->d_type) {
-            case DT_DIR:
-                is_dir = 1;
-                break;
-            case DT_UNKNOWN:
-                if (stat(name, &file_stat) < 0) {
-                    error("Error in stat(%s): %s\n", name, strerror(errno));
-                } else {
-                    if (S_ISDIR(file_stat.st_mode))
-                        is_dir = 1;
-                }
-                break;
-            default:
-                break;
-        }
-
-        file->length = (uint32) strlen(name) + is_dir;
+        file->length = directory_length + (uint32)strlen(name) + 1;
         file->name = xmalloc(file->length + 2);
-        memcpy(file->name, name, file->length + 1);
-        if (is_dir) {
-            file->name[file->length - 1] = '/';
-            file->name[file->length] = '\0';
-        }
+        snprintf(file->name, file->length + 1, "%s/%s", directory, name);
 
         free(directory_list[i]);
-
         length += 1;
     }
     free(directory_list);
