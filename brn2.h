@@ -84,8 +84,8 @@ typedef struct File {
 
 typedef struct FileName {
     char *name;
-    uint32 length;
     uint32 hash;
+    uint16 length;
     bool dir;
 } FileName;
 

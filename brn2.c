@@ -70,7 +70,7 @@ brn2_list_from_args(int argc, char **argv) {
         if (brn2_is_invalid_name(name))
             continue;
 
-        file->length = (uint32) strlen(name);
+        file->length = (uint16)strlen(name);
         file->name = xmalloc(file->length + 2);
         memcpy(file->name, name, file->length + 1);
 
@@ -151,7 +151,7 @@ brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
-    uint32 directory_length = (uint32)strlen(directory);
+    uint16 directory_length = (uint16)strlen(directory);
     int n;
 
     n = scandir(directory, &directory_list, NULL, NULL);
@@ -175,7 +175,7 @@ brn2_list_from_dir(char *directory) {
             continue;
         }
 
-        file->length = directory_length + (uint32)strlen(name) + 1;
+        file->length = directory_length + (uint16)strlen(name) + 1;
         file->name = xmalloc(file->length + 2);
         snprintf(file->name, file->length + 1, "%s/%s", directory, name);
 
@@ -267,7 +267,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             exit(EXIT_FAILURE);
         }
 
-        file->length = (uint32) (pointer - begin);
+        file->length = (uint16)(pointer - begin);
         file->name = xmalloc(file->length + 2);
         memcpy(file->name, begin, file->length + 1);
         begin = pointer + 1;
@@ -533,7 +533,7 @@ brn2_execute(FileList *old, FileList *new,
         char **oldname = &(old->files[i].name);
         char *newname = new->files[i].name;
 
-        uint32 *oldlength = &(old->files[i].length);
+        uint16 *oldlength = &(old->files[i].length);
 
         uint32 newhash = new->files[i].hash;
         uint32 newindex = hashes_new[i].mod;
