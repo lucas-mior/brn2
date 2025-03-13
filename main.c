@@ -325,6 +325,5 @@ int main(int argc, char **argv) {
         free(hashes_old);
         free(hashes_new);
     }
-
-    unlink(buffer.name);
+    exit(EXIT_SUCCESS);
 }
