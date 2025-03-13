@@ -270,7 +270,9 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         file->length = (uint16)(pointer - begin);
         file->name = xmalloc(file->length + 2);
         memcpy(file->name, begin, file->length + 1);
+
         begin = pointer + 1;
+        pointer += 1;
         length += 1;
         left -= (file->length + 1);
     }
