@@ -205,6 +205,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     char *pointer;
     size_t left;
     uint32 length = 0;
+    uint32 map_size;
     bool is_old = capacity == 0;
     int fd;
 
@@ -224,15 +225,14 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
                   filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
-        list->map_size = (uint32) lines_stat.st_size;
-        if (list->map_size <= 0) {
-            error("list->map_size: %zu\n", list->map_size);
+        map_size = (uint32) lines_stat.st_size;
+        if (map_size <= 0) {
+            error("map_size: %zu\n", map_size);
             exit(EXIT_FAILURE);
         }
-        list->map_size += (MEMCHR_BYTES - (list->map_size % MEMCHR_BYTES));
     }
 
-    map = mmap(NULL, list->map_size,
+    map = mmap(NULL, map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
 
@@ -247,7 +247,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     }
 
     begin = pointer = map;
-    left = list->map_size;
+    left = map_size;
 
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
         FileName *file;
@@ -281,7 +281,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     }
     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
-    munmap(map, list->map_size);
+    munmap(map, map_size);
 
     return list;
 }

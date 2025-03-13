@@ -91,7 +91,6 @@ typedef struct FileName {
 } FileName;
 
 typedef struct FileList {
-    uint32 map_size;
     uint32 length;
     FileName files[];
 } FileList;
