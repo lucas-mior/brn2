@@ -176,6 +176,8 @@ brn2_list_from_dir(char *directory) {
             continue;
         }
 
+        printf("from dir:%s\n", name);
+
         switch (directory_list[i]->d_type) {
             case DT_DIR:
                 is_dir = 1;
