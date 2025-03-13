@@ -17,6 +17,16 @@ testing () {
     done
 }
 
+benchmark() {
+    mkdir /tmp/brn2/
+    set +x
+    for i in $(seq 10000); do
+        touch "/tmp/brn2/$i"
+    done
+    set -x
+    valgrind --tool=callgrind --callgrind-out-file=brn2.out ./brn2 -q -d /tmp/brn2/
+}
+
 target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -72,3 +82,7 @@ case "$target" in
         echo "usage: $0 [ uninstall / test / install / build / debug ]"
         ;;
 esac
+
+if [ "$target" = "benchmark" ]; then
+    benchmark
+fi
