@@ -89,7 +89,8 @@ xmemdup(void *source, usize size) {
 
 void
 util_command(const int argc, char **argv) {
-    switch (fork()) {
+    pid_t child;
+    switch (child = fork()) {
     case 0:
         if (!freopen("/dev/tty", "r", stdin))
             error("Error reopening stdin: %s\n", strerror(errno));
@@ -103,7 +104,7 @@ util_command(const int argc, char **argv) {
         error("Error forking: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     default:
-        if (wait(NULL) < 0) {
+        if (waitpid(child, NULL, 0) < 0) {
             error("Error waiting for the forked child: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
@@ -136,18 +137,18 @@ void error(char *format, ...) {
 #if BRN2_DEBUG
     char *notifiers[2] = { "dunstify", "notify-send" };
     switch (fork()) {
-        case -1:
-            fprintf(stderr, "Error forking: %s\n", strerror(errno));
-            break;
-        case 0:
-            for (uint i = 0; i < ARRAY_LENGTH(notifiers); i += 1) {
-                execlp(notifiers[i], notifiers[i], "-u", "critical", 
-                                     program, buffer, NULL);
-                fprintf(stderr, "Error trying to exec(%s).\n", notifiers[i]);
-            }
-            exit(EXIT_FAILURE);
-        default:
-            break;
+    case -1:
+        fprintf(stderr, "Error forking: %s\n", strerror(errno));
+        break;
+    case 0:
+        for (uint i = 0; i < ARRAY_LENGTH(notifiers); i += 1) {
+            execlp(notifiers[i], notifiers[i], "-u", "critical", 
+                                 program, buffer, NULL);
+            fprintf(stderr, "Error trying to exec(%s).\n", notifiers[i]);
+        }
+        _exit(EXIT_FAILURE);
+    default:
+        break;
     }
 #endif
 }
