@@ -55,8 +55,15 @@ enum {
     FILES_FROM_DIR_RECURSE,
 };
 
+static File buffer;
+
+static void
+delete_buffer(void) {
+    unlink(buffer.name);
+    return;
+}
+
 int main(int argc, char **argv) {
-    File buffer;
     FileList *old;
     FileList *new;
     Hash *hashes_old;
@@ -71,7 +78,6 @@ int main(int argc, char **argv) {
 
     const char *tempdir = "/tmp";
     char *directory = ".";
-    int status = EXIT_SUCCESS;
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
 
@@ -238,6 +244,7 @@ int main(int argc, char **argv) {
         close(buffer.fd);
         buffer.fd = -1;
         buffer.stream = NULL;
+        atexit(delete_buffer);
     }
 
     {
@@ -303,15 +310,21 @@ int main(int argc, char **argv) {
                   "Check your files.\n",
                   number_changes, number_changes != 1, "s",
                   number_renames, number_renames != 1, "s");
-            status = EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         } else {
             fprintf(stdout, "%u file%.*s renamed\n",
                             number_renames, number_renames != 1, "s");
         }
     }
 
-    if (BRN2_DEBUG)
+    if (BRN2_DEBUG) {
         brn2_free_list(old);
+        brn2_free_list(new);
+        hash_map_destroy(oldlist_map);
+        hash_map_destroy(newlist_map);
+        free(hashes_old);
+        free(hashes_new);
+    }
+
     unlink(buffer.name);
-    exit(status);
 }
