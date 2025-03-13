@@ -393,7 +393,7 @@ int main(void) {
     {
         uint32 collisions_before = hash_map_collisions(original_map);
         uint32 expected_collisions = hash_map_expected_collisions(original_map);
-        float ratio = (float)collisions_before / (float)expected_collisions;
+        double ratio = (double)collisions_before / (double)expected_collisions;
         assert(ratio <= 1.2);
         balanced_map = hash_map_balance(original_map);
 

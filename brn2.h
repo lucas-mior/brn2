@@ -87,6 +87,7 @@ typedef struct FileName {
     uint32 hash;
     uint16 length;
     bool dir;
+    uint8 unused;
 } FileName;
 
 typedef struct FileList {

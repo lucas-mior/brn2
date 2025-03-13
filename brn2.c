@@ -690,7 +690,7 @@ contains_filename(FileList *list, FileName file, bool verbose) {
             return true;
         }
         if (verbose) {
-            printf("%d / %d | %s != %s \n",
+            printf("%u / %u | %s != %s \n",
                    i+1, list->length, list->files[i].name, file.name);
         }
     }
