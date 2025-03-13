@@ -1,5 +1,6 @@
 #!/bin/sh
 
+dir="$(realpath "$(dirname "$0")")"
 testing () {
     for src in *.c; do
         [ "$src" = "$main" ] && continue
@@ -19,12 +20,14 @@ testing () {
 
 benchmark() {
     mkdir /tmp/brn2/
+    cd /tmp/brn2 || exit
     set +x
-    for i in $(seq 10000); do
-        touch "/tmp/brn2/$i"
-    done
+    # for i in $(seq 10000); do
+    #     touch "$i"
+    # done
     set -x
-    valgrind --tool=callgrind --callgrind-out-file=brn2.out ./brn2 -q -d /tmp/brn2/
+    valgrind --tool=callgrind --callgrind-out-file=brn2.out \
+        $dir/brn2 -s -i -q -d .
 }
 
 target="${1:-build}"
