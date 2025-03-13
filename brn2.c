@@ -609,7 +609,7 @@ brn2_execute(FileList *old, FileList *new,
 #else
         (void) newlength;
         if (newname_exists) {
-            error("Can't rename '%s' to '%s', because it exists.\n",
+            error("Error renaming '%s' to '%s': File already exists.\n",
                   *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
