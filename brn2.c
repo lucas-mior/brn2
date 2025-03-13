@@ -365,7 +365,7 @@ brn2_work_normalization(void *arg) {
             struct stat file_stat;
             if (stat(file->name, &file_stat) < 0) {
                 error("Error in stat('%s'): %s\n", file->name, strerror(errno));
-                exit(EXIT_FAILURE);
+                slice->old_list->files[i].dir = false;
                 continue;
             }
             if (S_ISDIR(file_stat.st_mode)) {
