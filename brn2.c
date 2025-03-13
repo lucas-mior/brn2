@@ -151,7 +151,7 @@ brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
-    uint32 directory_length = strlen(directory);
+    uint32 directory_length = (uint32)strlen(directory);
     int n;
 
     n = scandir(directory, &directory_list, NULL, NULL);
