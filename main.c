@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             while (access(file->name, F_OK)) {
-                error("\"%s\" can't be accessed: %s\n",
+                error("'%s' can't be accessed: %s\n",
                       file->name, strerror(errno));
                 old->length -= 1;
                 if (old->length <= i)
@@ -198,11 +198,11 @@ int main(int argc, char **argv) {
         buffer.name[sizeof(buffer.name) - 1] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
-            error("Error opening \"%s\": %s\n", buffer.name, strerror(errno));
+            error("Error opening '%s': %s\n", buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
         if ((buffer.stream = fdopen(buffer.fd, "w")) == NULL) {
-            error("Error opening \"%s\": %s\n", buffer.name, strerror(errno));
+            error("Error opening '%s': %s\n", buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
 
             while (!hash_map_insert_pre_calc(oldlist_map, file->name,
                                              file->hash, hash->mod, i)) {
-                error(RED"\"%s\""RESET" repeated in the buffer. Removing...\n",
+                error(RED"'%s'"RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
                 if (old->length <= i)
