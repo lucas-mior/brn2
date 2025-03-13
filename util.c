@@ -111,7 +111,6 @@ util_command(const int argc, char **argv) {
 }
 
 void error(char *format, ...) {
-    char *notifiers[2] = { "dunstify", "notify-send" };
     int n;
     ssize_t w;
     va_list args;
@@ -134,13 +133,14 @@ void error(char *format, ...) {
         fprintf(stderr, ".\n");
     }
 
-#ifdef DEBUGGING
+#if BRN2_DEBUG
+    char *notifiers[2] = { "dunstify", "notify-send" };
     switch (fork()) {
         case -1:
             fprintf(stderr, "Error forking: %s\n", strerror(errno));
             break;
         case 0:
-            for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+            for (uint i = 0; i < ARRAY_LENGTH(notifiers); i += 1) {
                 execlp(notifiers[i], notifiers[i], "-u", "critical", 
                                      program, buffer, NULL);
                 fprintf(stderr, "Error trying to exec(%s).\n", notifiers[i]);
