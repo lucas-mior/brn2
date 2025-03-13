@@ -117,6 +117,7 @@ bool brn2_verify(FileList *, FileList *, HashMap *, Hash *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, HashMap *, Hash *, Hash *);
 void brn2_slash_add(FileName *file);
+void brn2_free_list(FileList *list);
 
 void brn2_free_lines_list(FileList *);
 void brn2_free_dir_list(FileList *);
