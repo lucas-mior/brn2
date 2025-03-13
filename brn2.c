@@ -225,7 +225,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
                   filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
-        map_size = (uint32) lines_stat.st_size;
+        map_size = (uint32)lines_stat.st_size;
         if (map_size <= 0) {
             error("map_size: %zu\n", map_size);
             exit(EXIT_FAILURE);
@@ -458,7 +458,7 @@ uint32 brn2_threads(int (*function)(void *),
         slices[i].hashes = hashes;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        thrd_create(&threads[i], function, (void *) &slices[i]);
+        thrd_create(&threads[i], function, (void *)&slices[i]);
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
@@ -468,7 +468,7 @@ uint32 brn2_threads(int (*function)(void *),
         slices[i].hashes = hashes;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        thrd_create(&threads[i], function, (void *) &slices[i]);
+        thrd_create(&threads[i], function, (void *)&slices[i]);
     }
 
     for (uint32 i = 0; i < nthreads; i += 1)

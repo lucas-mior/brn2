@@ -167,7 +167,7 @@ hash_function(char *str) {
     uint32 hash = 5381;
     char c;
     while ((c = *str++))
-        hash = ((hash << 5) + hash) + (uint32) c;
+        hash = ((hash << 5) + hash) + (uint32)c;
     return hash;
 }
 
@@ -338,7 +338,7 @@ hash_map_expected_collisions(HashMap *map) {
     long double n = map->length;
     long double m = map->capacity;
     long double result = n - m * (1 - powl((m - 1)/m, n));
-    return (uint32) (roundl(result));
+    return (uint32)(roundl(result));
 }
 
 #ifndef TESTING_THIS_FILE
@@ -355,7 +355,7 @@ random_string(void) {
     char *random_string = xmalloc((usize)length + 1);
 
     for (int i = 0; i < length; i += 1) {
-        int c = rand() % ((int) sizeof(characters) - 1);
+        int c = rand() % ((int)sizeof(characters) - 1);
         random_string[i] = characters[c];
     }
     random_string[length] = '\0';
@@ -380,11 +380,11 @@ int main(void) {
     assert(!hash_map_insert(original_map, "a", 1));
     assert(hash_map_insert(original_map, "b", 2));
 
-    srand((uint) t0.tv_nsec);
+    srand((uint)t0.tv_nsec);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
-        uint32 value = (uint32) rand();
+        uint32 value = (uint32)rand();
         assert(hash_map_insert(original_map, key, value));
     }
 
@@ -402,7 +402,7 @@ int main(void) {
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
-    assert(*(uint32 *) hash_map_lookup(balanced_map, "a") == 0);
+    assert(*(uint32 *)hash_map_lookup(balanced_map, "a") == 0);
     assert(!hash_map_lookup(balanced_map, "c"));
 
     assert(!hash_map_remove(balanced_map, "c"));
@@ -419,7 +419,7 @@ int main(void) {
     {
         long seconds = t1.tv_sec - t0.tv_sec;
         long nanos = t1.tv_nsec - t0.tv_nsec;
-        double total_seconds = (double) seconds + (double) nanos/1.0e9;
+        double total_seconds = (double)seconds + (double)nanos/1.0e9;
         printf("\ntime elapsed (%s): %gs\n\n", __FILE__, total_seconds);
     }
     exit(0);

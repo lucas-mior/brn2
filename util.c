@@ -112,11 +112,12 @@ util_command(const int argc, char **argv) {
 
 void error(char *format, ...) {
     int n;
+    ssize_t w;
     va_list args;
     char buffer[BUFSIZ];
 
     va_start(args, format);
-    n = vsnprintf(buffer, sizeof (buffer) - 1, format, args);
+    n = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
     va_end(args);
 
     if (n < 0) {
@@ -125,7 +126,12 @@ void error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    (void) write(STDERR_FILENO, buffer, (usize) n);
+    if ((w = write(STDERR_FILENO, buffer, (usize)n)) < n) {
+        fprintf(stderr, "Error writing to STDERR_FILENO");
+        if (w < 0)
+            fprintf(stderr, ": %s", strerror(errno));
+        fprintf(stderr, ".\n");
+    }
 
 #ifdef DEBUGGING
     switch (fork()) {
