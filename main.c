@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
     if (available_threads <= 0)
         nthreads = 1; 
     else
-        nthreads = MIN((uint32) available_threads, MAX_THREADS);
+        nthreads = MIN((uint32)available_threads, MAX_THREADS);
 
     switch (mode) {
     case FILES_FROM_FILE:
@@ -263,9 +263,9 @@ int main(int argc, char **argv) {
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
             new = brn2_list_from_lines(buffer.name, old->length);
             clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-            srand((uint) t.tv_nsec);
+            srand((uint)t.tv_nsec);
             for (uint32 i = 0; i < new->length; i += 1) {
-                float x = (float) rand() / (float) RAND_MAX;
+                float x = (float)rand() / (float)RAND_MAX;
                 uint32 length = new->files[i].length;
                 if (x < 0.5f) {
                     for (uint32 j = 0; j < length; j += 1) {
