@@ -609,8 +609,8 @@ brn2_execute(FileList *old, FileList *new,
 #else
         (void) newlength;
         if (newname_exists) {
-            error("Error renaming '%s' to '%s': File already exists.\n",
-                  *oldname, newname);
+            error("Error renaming "RED"'%s'"RESET" to '%s':"
+                  " File already exists.\n", *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
