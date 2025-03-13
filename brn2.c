@@ -151,8 +151,13 @@ brn2_list_from_dir(char *directory) {
     FileList *list;
     struct dirent **directory_list;
     uint32 length = 0;
-    uint16 directory_length = (uint16)strlen(directory);
+    uint16 directory_length;
     int n;
+
+    if (strcmp(directory, "."))
+       directory_length = (uint16)strlen(directory);
+    else
+       directory_length = 0;
 
     n = scandir(directory, &directory_list, NULL, NULL);
     if (n < 0) {
@@ -176,11 +181,17 @@ brn2_list_from_dir(char *directory) {
             continue;
         }
 
-        file->length = directory_length + name_length + 1;
-        file->name = xmalloc(file->length + 2);
-        memcpy(file->name, directory, directory_length);
-        file->name[directory_length] = '/';
-        memcpy(file->name + directory_length + 1, name, name_length + 1);
+        if (directory_length) {
+            file->length = directory_length + name_length + 1;
+            file->name = xmalloc(file->length + 2);
+            memcpy(file->name, directory, directory_length);
+            file->name[directory_length] = '/';
+            memcpy(file->name + directory_length + 1, name, name_length + 1);
+        } else {
+            file->length = name_length;
+            file->name = xmalloc(file->length + 2);
+            memcpy(file->name, name, name_length + 1);
+        }
 
         free(directory_list[i]);
         length += 1;
