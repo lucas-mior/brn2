@@ -40,10 +40,10 @@
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
-static int brn2_work_hashes(void *);
-static int brn2_work_sort(void *);
-static int brn2_work_normalization(void *);
-static int brn2_work_changes(void *);
+static int brn2_threads_work_hashes(void *);
+static int brn2_threads_work_sort(void *);
+static int brn2_threads_work_normalization(void *);
+static int brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
 static uint32 brn2_threads(int (*)(void *),
                            FileList *, FileList *,
@@ -308,7 +308,7 @@ typedef struct Slice {
 } Slice;
 
 int
-brn2_work_normalization(void *arg) {
+brn2_threads_work_normalization(void *arg) {
     Slice *slice = arg;
     FileList *list;
     bool old_list;
@@ -371,7 +371,7 @@ brn2_slash_add(FileName *file) {
 }
 
 int
-brn2_work_sort(void *arg) {
+brn2_threads_work_sort(void *arg) {
     Slice *slice = arg;
     FileName *files = &(slice->old_list->files[slice->start]);
     qsort(files, slice->end - slice->start, sizeof (*files), brn2_compare);
@@ -379,7 +379,7 @@ brn2_work_sort(void *arg) {
 }
 
 int
-brn2_work_hashes(void *arg) {
+brn2_threads_work_hashes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -391,7 +391,7 @@ brn2_work_hashes(void *arg) {
     thrd_exit(0);
 }
 
-int brn2_work_changes(void *arg) {
+int brn2_threads_work_changes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -408,14 +408,15 @@ int brn2_work_changes(void *arg) {
 
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-    brn2_threads(brn2_work_normalization, old, new, NULL, NULL, 0);
+    brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, 0);
     return;
 }
 
 Hash *
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
     Hash *hashes = xmalloc(list->length*sizeof(*hashes));
-    brn2_threads(brn2_work_hashes, list, NULL, hashes, NULL, map_capacity);
+    brn2_threads(brn2_threads_work_hashes,
+                 list, NULL, hashes, NULL, map_capacity);
     return hashes;
 }
 
@@ -423,7 +424,7 @@ uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
     uint32 numbers[MAX_THREADS] = {0};
-    brn2_threads(brn2_work_changes, old, new, NULL, numbers, 0);
+    brn2_threads(brn2_threads_work_changes, old, new, NULL, numbers, 0);
 
     for (uint32 i = 0; i < MAX_THREADS; i += 1)
         total += numbers[i];
