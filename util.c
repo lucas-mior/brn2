@@ -111,6 +111,7 @@ util_command(const int argc, char **argv) {
 }
 
 void error(char *format, ...) {
+    char *notifiers[2] = { "dunstify", "notify-send" };
     int n;
     ssize_t w;
     va_list args;
@@ -135,7 +136,6 @@ void error(char *format, ...) {
 
 #ifdef DEBUGGING
     switch (fork()) {
-        char *notifiers[2] = { "dunstify", "notify-send" };
         case -1:
             fprintf(stderr, "Error forking: %s\n", strerror(errno));
             break;
@@ -143,9 +143,9 @@ void error(char *format, ...) {
             for (uint i = 0; i < LENGTH(notifiers); i += 1) {
                 execlp(notifiers[i], notifiers[i], "-u", "critical", 
                                      program, buffer, NULL);
+                fprintf(stderr, "Error trying to exec(%s).\n", notifiers[i]);
             }
-            fprintf(stderr, "Error trying to exec dunstify.\n");
-            break;
+            exit(EXIT_FAILURE);
         default:
             break;
     }
