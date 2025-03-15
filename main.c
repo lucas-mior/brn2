@@ -292,6 +292,14 @@ int main(int argc, char **argv) {
             util_command(ARRAY_LENGTH(args_edit), args_edit);
             new = brn2_list_from_lines(buffer.name, old->length);
 #endif
+            if (old->length != new->length) {
+                error("You are renaming "RED"%u"RESET" file%.*s "
+                      "but buffer contains "RED"%u"RESET" file name%.*s\n",
+                      old->length, old->length != 1, "s",
+                      new->length, new->length != 1, "s");
+                exit(EXIT_FAILURE);
+            }
+
             brn2_normalize_names(old, new);
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_map_capacity(newlist_map);
