@@ -162,10 +162,9 @@ hash_map_destroy(HashMap *map) {
 }
 
 uint32 __attribute__ ((noinline))
+#if 0
 hash_function(char *key, uint32 key_size) {
-    /* djb2 hash function */
-    uint32_t state[] = { 5381, 5381, 5381, 5381 };
-    uint32_t cookie[] = { 10, 200, 30000, 400000 };
+    uint32 state[] = { 5381, 5381, 5381, 5381 };
     uint32 hash = 5381;
     char *end = key + key_size;
     BRN2_ASSUME_ALIGNED(key, ALIGNMENT);
@@ -194,13 +193,20 @@ hash_function(char *key, uint32 key_size) {
     key += ALIGNMENT;
   }
   
-#undef HX4_DJB2X4_COPT_ROUND
-    for (int i=0; i<16; i++) {
-        ((uint8_t*)state)[i] ^= ((uint8_t*)cookie)[i];
-    }
-    memcpy(&hash, state, sizeof(*(&hash)));
+#undef ROUND
+    for (int i = 0; i < ARRAY_LENGTH(state); i += 1)
+        hash += (hash << 5) ^ state[i];
     return hash;
 }
+#else
+hash_function(char *key, uint32 key_size) {
+    BRN2_ASSUME_ALIGNED(key, ALIGNMENT);
+    uint32 hash = 5381;
+    for (int i = 0; i < key_size; i += 1)
+        hash = ((hash << 5) + hash) + (uint32)key[i];
+    return hash;
+}
+#endif
 
 uint32
 hash_normal(HashMap *map, uint32 hash) {
