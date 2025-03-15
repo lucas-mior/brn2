@@ -77,6 +77,7 @@ brn2_list_from_args(int argc, char **argv) {
         size = ALIGN(file->length+2);
         file->name = arena_push(list->arena, size);
         memcpy(file->name, name, size);
+        memset(&file->name[file->length], 0, size - file->length);
 
         length += 1;
     }
@@ -131,6 +132,7 @@ brn2_list_from_dir_recurse(char *directory) {
             size = ALIGN(file->length+2);
             file->name = arena_push(list->arena, size);
             memcpy(file->name, name, size);
+            memset(&file->name[file->length], 0, size - file->length);
 
             length += 1;
             break;
@@ -203,6 +205,7 @@ brn2_list_from_dir(char *directory) {
             file->name = arena_push(list->arena, size);
             memcpy(file->name, name, size);
         }
+        memset(&file->name[file->length], 0, size - file->length);
 
         free(directory_list[i]);
         length += 1;
@@ -304,6 +307,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         size = ALIGN(file->length+2);
         file->name = arena_push(list->arena, size);
         memcpy(file->name, begin, size);
+        memset(&file->name[file->length], 0, size - file->length);
 
         begin = pointer + 1;
         pointer += 1;
@@ -739,10 +743,11 @@ contains_filename(FileList *list, FileName file, bool verbose) {
 // flags: -lm
 
 int main(void) {
-    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
-    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
     FileList *list1;
     FileList *list2;
+    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
+
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
 
