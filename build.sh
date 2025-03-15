@@ -30,8 +30,15 @@ benchmark() {
 }
 
 callgrind() {
-    valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_aligned64.out \
-        $dir/brn2 -s -i -q -d .
+    if [ ! -d /tmp/brn2 ]; then
+        mkdir -p /tmp/brn2/files
+    fi
+    cd /tmp/brn2/files || exit
+    if [ $(find . | wc -l) -lt 999999 ]; then
+        seq -w 1000000 | xargs -P$(nproc) touch
+    fi
+    valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_$1.out \
+        $dir/brn2 -q -d .
 }
 
 target="${1:-build}"
@@ -94,5 +101,5 @@ esac
 
 case "$target" in
     "benchmark") benchmark ;;
-    "callgrind") callgrind ;;
+    "callgrind") callgrind $2 ;;
 esac
