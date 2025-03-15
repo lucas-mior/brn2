@@ -48,7 +48,7 @@ static int brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
 static uint32 brn2_threads(int (*)(void *),
                            FileList *, FileList *,
-                           Hash *, uint32 *, uint32);
+                           uint32 *, uint32 *, uint32);
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -350,7 +350,7 @@ brn2_is_invalid_name(char *filename) {
 typedef struct Slice {
     FileList *old_list;
     FileList *new_list;
-    Hash *hashes;
+    uint32 *hashes;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
@@ -437,7 +437,7 @@ brn2_threads_work_hashes(void *arg) {
         FileList *list = slice->old_list;
         FileName *newfile = &(list->files[i]);
         newfile->hash = hash_function(newfile->name, newfile->length);
-        slice->hashes[i].mod = newfile->hash % slice->map_capacity;
+        slice->hashes[i] = newfile->hash % slice->map_capacity;
     }
     thrd_exit(0);
 }
@@ -463,9 +463,9 @@ brn2_normalize_names(FileList *old, FileList *new) {
     return;
 }
 
-Hash *
+uint32 *
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    Hash *hashes = xmalloc(list->length*sizeof(*hashes));
+    uint32 *hashes = xmalloc(list->length*sizeof(*hashes));
     brn2_threads(brn2_threads_work_hashes,
                  list, NULL, hashes, NULL, map_capacity);
     return hashes;
@@ -484,7 +484,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 
 uint32 brn2_threads(int (*function)(void *),
                     FileList *old, FileList *new,
-                    Hash *hashes, uint32 *numbers,
+                    uint32 *hashes, uint32 *numbers,
                     uint32 map_size) {
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
@@ -529,14 +529,14 @@ uint32 brn2_threads(int (*function)(void *),
 }
 
 bool
-brn2_verify(FileList *new, HashMap *repeated_map, Hash *hashes_new) {
+brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
     bool repeated = false;
 
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
-                                      newfile.hash, hashes_new[i].mod, i)) {
+                                      newfile.hash, hashes_new[i], i)) {
             fprintf(stderr, RED"'%s'"RESET " (line %u)"
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
@@ -558,7 +558,7 @@ noop(const char *unused, ...) {
 uint32
 brn2_execute(FileList *old, FileList *new,
              HashMap *oldlist_map,
-             Hash *hashes_old, Hash *hashes_new) {
+             uint32 *hashes_old, uint32 *hashes_new) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *, ...);
@@ -579,10 +579,10 @@ brn2_execute(FileList *old, FileList *new,
         uint16 *oldlength = &(old->files[i].length);
 
         uint32 newhash = new->files[i].hash;
-        uint32 newindex = hashes_new[i].mod;
+        uint32 newindex = hashes_new[i];
 
         uint32 oldhash = old->files[i].hash;
-        uint32 oldindex = hashes_old[i].mod;
+        uint32 oldindex = hashes_old[i];
 
         if (newhash == oldhash) {
             if (!strcmp(*oldname, newname))

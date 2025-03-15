@@ -69,8 +69,8 @@ delete_buffer(void) {
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
-    Hash *hashes_old;
-    Hash *hashes_new;
+    uint32 *hashes_old;
+    uint32 *hashes_new;
     HashSet *oldlist_map;
     HashSet *newlist_map;
     long available_threads;
@@ -225,10 +225,10 @@ int main(int argc, char **argv) {
         setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
-            Hash *hash = &hashes_old[i];
+            uint32 *hash = &hashes_old[i];
 
             while (!hash_map_insert_pre_calc(oldlist_map, file->name,
-                                             file->hash, hash->mod, i)) {
+                                             file->hash, *hash, i)) {
                 error(RED"'%s'"RESET" repeated in the buffer. Removing...\n",
                       file->name);
                 old->length -= 1;
