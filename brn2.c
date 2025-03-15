@@ -572,6 +572,7 @@ brn2_execute(FileList *old, FileList *new,
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
         uint32 *newname_index_on_oldlist;
+        bool newname_exists;
         char **oldname = &(old->files[i].name);
         char *newname = new->files[i].name;
 
@@ -590,10 +591,9 @@ brn2_execute(FileList *old, FileList *new,
         newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
                                                             newname,
                                                             newhash, newindex);
+        newname_exists = !access(newname, F_OK);
 #ifdef __linux__
-        if (!newname_index_on_oldlist
-            && !brn2_implict
-            && !access(newname, F_OK)) {
+        if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
             error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
                   *oldname, newname);
             error(RED"'%s'"RESET" already exists,"
@@ -603,55 +603,57 @@ brn2_execute(FileList *old, FileList *new,
                 exit(EXIT_FAILURE);
             continue;
         }
-        renamed = renameat2(AT_FDCWD, *oldname,
-                            AT_FDCWD, newname, RENAME_EXCHANGE);
-        if (renamed >= 0) {
-            if (hash_set_insert_pre_calc(names_renamed, *oldname,
-                                         oldhash, oldindex))
-                number_renames += 1;
-            if (hash_set_insert_pre_calc(names_renamed, newname,
-                                         newhash, newindex))
-                number_renames += 1;
-            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
+        if (newname_exists) {
+            renamed = renameat2(AT_FDCWD, *oldname,
+                                AT_FDCWD, newname, RENAME_EXCHANGE);
+            if (renamed >= 0) {
+                if (hash_set_insert_pre_calc(names_renamed, *oldname,
+                                             oldhash, oldindex))
+                    number_renames += 1;
+                if (hash_set_insert_pre_calc(names_renamed, newname,
+                                             newhash, newindex))
+                    number_renames += 1;
+                print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
 
-            if (newname_index_on_oldlist) {
-                uint32 next = *newname_index_on_oldlist;
-                FileName *file_j = &(old->files[next]);
+                if (newname_index_on_oldlist) {
+                    uint32 next = *newname_index_on_oldlist;
+                    FileName *file_j = &(old->files[next]);
 
-                hash_map_remove_pre_calc(oldlist_map, newname,
-                                         newhash, newindex);
-                hash_map_remove_pre_calc(oldlist_map, *oldname,
-                                         oldhash, oldindex);
+                    hash_map_remove_pre_calc(oldlist_map, newname,
+                                             newhash, newindex);
+                    hash_map_remove_pre_calc(oldlist_map, *oldname,
+                                             oldhash, oldindex);
 
-                hash_map_insert_pre_calc(oldlist_map, newname,
-                                         newhash, newindex, i);
-                hash_map_insert_pre_calc(oldlist_map, *oldname,
-                                         oldhash, oldindex, next);
+                    hash_map_insert_pre_calc(oldlist_map, newname,
+                                             newhash, newindex, i);
+                    hash_map_insert_pre_calc(oldlist_map, *oldname,
+                                             oldhash, oldindex, next);
 
-                SWAP(file_j->name, *oldname);
-                SWAP(file_j->length, *oldlength);
-                SWAP(file_j->hash, old->files[i].hash);
-                SWAP(hashes_old[i], hashes_old[next]);
-            } else {
-                error("Warning: '%s' was swapped with '%s', even though"
-                      " '%s' was not in the list of files to rename.\n",
-                      newname, *oldname, newname);
-                error("To disable this behaviour,"
-                      " don't pass the --implict option.\n");
-                hash_map_insert_pre_calc(oldlist_map, newname,
-                                         newhash, newindex, i);
+                    SWAP(file_j->name, *oldname);
+                    SWAP(file_j->length, *oldlength);
+                    SWAP(file_j->hash, old->files[i].hash);
+                    SWAP(hashes_old[i], hashes_old[next]);
+                } else {
+                    error("Warning: '%s' was swapped with '%s', even though"
+                          " '%s' was not in the list of files to rename.\n",
+                          newname, *oldname, newname);
+                    error("To disable this behaviour,"
+                          " don't pass the --implict option.\n");
+                    hash_map_insert_pre_calc(oldlist_map, newname,
+                                             newhash, newindex, i);
+                }
+                continue;
+            } else if (errno != ENOENT) {
+                error("Error swapping "RED"'%s'"RESET
+                      " and "RED"'%s'"RESET": %s\n",
+                      *oldname, newname, strerror(errno));
+                if (brn2_fatal || BRN2_DEBUG)
+                    exit(EXIT_FAILURE);
             }
-            continue;
-        } else if (errno != ENOENT) {
-            error("Error swapping "RED"'%s'"RESET
-                  " and "RED"'%s'"RESET": %s\n",
-                  *oldname, newname, strerror(errno));
-            if (brn2_fatal || BRN2_DEBUG)
-                exit(EXIT_FAILURE);
         }
 #else
         (void) newlength;
-        if (!access(newname, F_OK)) {
+        if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
