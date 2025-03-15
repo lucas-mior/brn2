@@ -214,10 +214,7 @@ brn2_list_from_dir(char *directory) {
 
 void
 brn2_free_list(FileList *list) {
-    for (uint32 i = 0; i < list->length; i += 1) {
-        FileName *file = &(list->files[i]);
-        free(file->name);
-    }
+    arena_release(list->arena);
     free(list);
     return;
 }
