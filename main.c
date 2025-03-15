@@ -286,7 +286,7 @@ int main(int argc, char **argv) {
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_map_capacity(newlist_map);
             hashes_new = brn2_create_hashes(new, main_capacity);
-            brn2_verify(old, new, newlist_map, hashes_new);
+            brn2_verify(new, newlist_map, hashes_new);
             break;
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);

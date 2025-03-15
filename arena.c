@@ -23,7 +23,7 @@ arena_alloc(size_t size) {
     return arena;
 }
 
-#if 0
+#if 1
 void *
 arena_push(Arena *arena, uint32 size) {
     void *before = arena->pos;
