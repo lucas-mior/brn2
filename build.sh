@@ -26,7 +26,7 @@ benchmark() {
     if [ $(find . | wc -l) -lt 999999 ]; then
         seq -w 1000000 | xargs -P$(nproc) touch
     fi
-    time $dir/brn2 . -q
+    time $dir/brn2 -s -q -d .
     cd "$dir"
 }
 
@@ -39,7 +39,7 @@ callgrind() {
         seq -w 1000000 | xargs -P$(nproc) touch
     fi
     valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_$1.out \
-        $dir/brn2 -q -d .
+        $dir/brn2 -s -q -d .
     cd "$dir"
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
