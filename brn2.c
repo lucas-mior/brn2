@@ -523,8 +523,7 @@ uint32 brn2_threads(int (*function)(void *),
 }
 
 bool
-brn2_verify(FileList *old, FileList *new,
-            HashMap *repeated_map, Hash *hashes_new) {
+brn2_verify(FileList *new, HashMap *repeated_map, Hash *hashes_new) {
     bool repeated = false;
 
     for (uint32 i = 0; i < new->length; i += 1) {
