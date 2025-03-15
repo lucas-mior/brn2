@@ -63,7 +63,7 @@ brn2_list_from_args(int argc, char **argv) {
     uint32 length = 0;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, argc));
-    Arena *arena = arena_alloc(PATH_MAX*UINT32_MAX);
+    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -75,7 +75,7 @@ brn2_list_from_args(int argc, char **argv) {
 
         file->length = (uint16)strlen(name);
         size = ALIGN(file->length+2);
-        file->name = xmalloc(size);
+        file->name = arena_push(list->arena, size);
         memcpy(file->name, name, size);
 
         length += 1;
@@ -96,6 +96,7 @@ brn2_list_from_dir_recurse(char *directory) {
     uint32 size;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
 
     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
     if (file_system == NULL) {
@@ -128,7 +129,7 @@ brn2_list_from_dir_recurse(char *directory) {
             file = &(list->files[length]);
             file->length = ent->fts_pathlen;
             size = ALIGN(file->length+2);
-            file->name = xmalloc(size);
+            file->name = arena_push(list->arena, size);
             memcpy(file->name, name, size);
 
             length += 1;
@@ -176,6 +177,7 @@ brn2_list_from_dir(char *directory) {
     }
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, n - 2));
+    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -191,15 +193,14 @@ brn2_list_from_dir(char *directory) {
         if (directory_length) {
             file->length = directory_length + name_length + 1;
             size = ALIGN(file->length+2);
-            file->name = xmalloc(size);
-            file->name = xmalloc(file->length + 2);
+            file->name = arena_push(list->arena, size);
             memcpy(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy(file->name + directory_length + 1, name, name_length + 1);
         } else {
             file->length = name_length;
             size = ALIGN(file->length+2);
-            file->name = xmalloc(size);
+            file->name = arena_push(list->arena, size);
             memcpy(file->name, name, size);
         }
 
@@ -236,6 +237,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     if (capacity == 0)
         capacity = 128;
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
 
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening file for reading: %s\n", strerror(errno));
@@ -300,7 +302,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
         file->length = (uint16)(pointer - begin);
         size = ALIGN(file->length+2);
-        file->name = xmalloc(size);
+        file->name = arena_push(list->arena, size);
         memcpy(file->name, begin, size);
 
         begin = pointer + 1;
