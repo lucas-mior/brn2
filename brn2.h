@@ -45,6 +45,7 @@
 #define MEMCHR_BYTES 16
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 #define MAX(a,b) (a) > (b) ? (a) : (b)
+#define ALIGN(x) ((x) + (ALIGNMENT - ((x) % ALIGNMENT)))
 
 #ifndef BRN2_DEBUG
 #define BRN2_DEBUG 0

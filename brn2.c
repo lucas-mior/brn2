@@ -66,13 +66,15 @@ brn2_list_from_args(int argc, char **argv) {
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
         FileName *file = &(list->files[length]);
+        uint32 size;
 
         if (brn2_is_invalid_name(name))
             continue;
 
         file->length = (uint16)strlen(name);
-        file->name = xmalloc(file->length + 2);
-        memcpy(file->name, name, file->length + 1);
+        size = ALIGN(file->length+2);
+        file->name = xmalloc(size);
+        memcpy(file->name, name, size);
 
         length += 1;
     }
@@ -89,6 +91,7 @@ brn2_list_from_dir_recurse(char *directory) {
     FTSENT *ent = NULL;
     uint32 length = 0;
     uint32 capacity = 64;
+    uint32 size;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
 
@@ -122,8 +125,9 @@ brn2_list_from_dir_recurse(char *directory) {
 
             file = &(list->files[length]);
             file->length = ent->fts_pathlen;
-            file->name = xmalloc(file->length + 2);
-            memcpy(file->name, name, file->length + 1);
+            size = ALIGN(file->length+2);
+            file->name = xmalloc(size);
+            memcpy(file->name, name, size);
 
             length += 1;
             break;
@@ -175,6 +179,7 @@ brn2_list_from_dir(char *directory) {
         char *name = directory_list[i]->d_name;
         FileName *file = &(list->files[length]);
         uint16 name_length = (uint16)strlen(name);
+        uint32 size;
 
         if (brn2_is_invalid_name(name)) {
             free(directory_list[i]);
@@ -183,14 +188,17 @@ brn2_list_from_dir(char *directory) {
 
         if (directory_length) {
             file->length = directory_length + name_length + 1;
+            size = ALIGN(file->length+2);
+            file->name = xmalloc(size);
             file->name = xmalloc(file->length + 2);
             memcpy(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy(file->name + directory_length + 1, name, name_length + 1);
         } else {
             file->length = name_length;
-            file->name = xmalloc(file->length + 2);
-            memcpy(file->name, name, name_length + 1);
+            size = ALIGN(file->length+2);
+            file->name = xmalloc(size);
+            memcpy(file->name, name, size);
         }
 
         free(directory_list[i]);
@@ -245,6 +253,11 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             exit(EXIT_FAILURE);
         }
     }
+    map_size = ALIGN(map_size);
+    if (ftruncate(fd, map_size) < 0) {
+        error("Error truncating %s: %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     map = mmap(NULL, map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
@@ -265,6 +278,8 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
 
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
         FileName *file;
+        uint32 size;
+
         if (length >= capacity) {
             capacity *= 2;
             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, capacity));
@@ -282,8 +297,9 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         }
 
         file->length = (uint16)(pointer - begin);
-        file->name = xmalloc(file->length + 2);
-        memcpy(file->name, begin, file->length + 1);
+        size = ALIGN(file->length+2);
+        file->name = xmalloc(size);
+        memcpy(file->name, begin, size);
 
         begin = pointer + 1;
         pointer += 1;
