@@ -235,6 +235,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     size_t left;
     uint32 length = 0;
     uint32 map_size;
+    uint32 padding;
     bool is_old = capacity == 0;
     int fd;
 
@@ -264,7 +265,8 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             exit(EXIT_FAILURE);
         }
     }
-    map_size = ALIGN(map_size);
+    padding = ALIGNMENT - (map_size % ALIGNMENT);
+    map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
         error("Error truncating %s: %s.\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
@@ -279,13 +281,8 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
-    if (close(fd) < 0) {
-        error("Error closing %s: %s\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
     begin = pointer = map;
-    left = map_size;
+    left = map_size - padding;
 
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
         FileName *file;
@@ -327,6 +324,15 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
     munmap(map, map_size);
+
+    if (ftruncate(fd, map_size - padding) < 0) {
+        error("Error truncating %s: %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    if (close(fd) < 0) {
+        error("Error closing %s: %s\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     return list;
 }
