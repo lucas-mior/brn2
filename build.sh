@@ -27,6 +27,7 @@ benchmark() {
         seq -w 1000000 | xargs -P$(nproc) touch
     fi
     time $dir/brn2 . -q
+    cd "$dir"
 }
 
 callgrind() {
@@ -39,6 +40,8 @@ callgrind() {
     fi
     valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_$1.out \
         $dir/brn2 -q -d .
+    cd "$dir"
+    setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
 
 target="${1:-build}"
@@ -88,7 +91,7 @@ case "$target" in
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "build"|"debug"|"benchmark")
+    "build"|"debug"|"benchmark"|"callgrind")
         set -x
         ctags --kinds-C=+l *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
