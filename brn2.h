@@ -91,8 +91,15 @@ typedef struct FileName {
     uint8 unused;
 } FileName;
 
+typedef struct Arena {
+    void *begin;
+    void *pos;
+    size_t size;
+} Arena;
+
 typedef struct FileList {
     uint32 length;
+    Arena *arena;
     FileName files[];
 } FileList;
 
