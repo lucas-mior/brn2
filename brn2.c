@@ -572,7 +572,6 @@ brn2_execute(FileList *old, FileList *new,
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
         uint32 *newname_index_on_oldlist;
-        bool newname_exists;
         char **oldname = &(old->files[i].name);
         char *newname = new->files[i].name;
 
@@ -591,9 +590,10 @@ brn2_execute(FileList *old, FileList *new,
         newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
                                                             newname,
                                                             newhash, newindex);
-        newname_exists = !access(newname, F_OK);
 #ifdef __linux__
-        if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
+        if (!newname_index_on_oldlist
+            && !brn2_implict
+            && !access(newname, F_OK)) {
             error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
                   *oldname, newname);
             error(RED"'%s'"RESET" already exists,"
@@ -651,7 +651,7 @@ brn2_execute(FileList *old, FileList *new,
         }
 #else
         (void) newlength;
-        if (newname_exists) {
+        if (!access(newname, F_OK)) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
