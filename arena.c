@@ -2,12 +2,6 @@
 #include <sys/mman.h>
 #include "util.c"
 
-typedef struct Arena {
-    void *begin;
-    void *pos;
-    size_t size;
-} Arena;
-
 #define PushArray(arena, type, count) (type *)ArenaPush((arena), sizeof(type)*(count))
 #define PushArrayZero(arena, type, count) (type *)ArenaPushZero((arena), sizeof(type)*(count))
 #define PushStruct(arena, type) PushArray((arena), (type), 1)
