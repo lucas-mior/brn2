@@ -162,14 +162,43 @@ hash_map_destroy(HashMap *map) {
 }
 
 uint32 __attribute__ ((noinline))
-hash_function(char *str, uint32 key_size) {
+hash_function(char *key, uint32 key_size) {
     /* djb2 hash function */
+    uint32_t state[] = { 5381, 5381, 5381, 5381 };
+    uint32_t cookie[] = { 10, 200, 30000, 400000 };
     uint32 hash = 5381;
-    char c;
-    BRN2_ASSUME_ALIGNED(str, ALIGNMENT);
-    for (uint32 i = 0; i < key_size; i += 1) {
-        hash = ((hash << 5) + hash) + (uint32)str[i];
+    char *end = key + key_size;
+    BRN2_ASSUME_ALIGNED(key, ALIGNMENT);
+
+    while (key < end) {
+#define ROUND(state_i, round) \
+    state[state_i] = (state[state_i] << 5) + state[state_i] + key[round];
+
+    ROUND(0,0)
+    ROUND(1,1)
+    ROUND(2,2)
+    ROUND(3,3)
+    ROUND(0,4)
+    ROUND(1,5)
+    ROUND(2,6)
+    ROUND(3,7)
+    ROUND(0,8)
+    ROUND(1,9)
+    ROUND(2,10)
+    ROUND(3,11)
+    ROUND(0,12)
+    ROUND(1,13)
+    ROUND(2,14)
+    ROUND(3,15)
+
+    key += ALIGNMENT;
+  }
+  
+#undef HX4_DJB2X4_COPT_ROUND
+    for (int i=0; i<16; i++) {
+        ((uint8_t*)state)[i] ^= ((uint8_t*)cookie)[i];
     }
+    memcpy(&hash, state, sizeof(*(&hash)));
     return hash;
 }
 
@@ -378,16 +407,16 @@ int main(void) {
     assert(original_map);
     assert(hash_map_capacity(original_map) >= NSTRINGS);
 
-    assert(hash_map_insert(original_map, "a", 0));
-    assert(!hash_map_insert(original_map, "a", 1));
-    assert(hash_map_insert(original_map, "b", 2));
+    assert(hash_map_insert(original_map, "a", strlen("a"), 0));
+    assert(!hash_map_insert(original_map, "a", strlen("a"), 1));
+    assert(hash_map_insert(original_map, "b", strlen("b"), 2));
 
     srand((uint)t0.tv_nsec);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
         uint32 value = (uint32)rand();
-        assert(hash_map_insert(original_map, key, value));
+        assert(hash_map_insert(original_map, key, strlen(key), value));
     }
 
     HASH_MAP_PRINT_SUMMARY(original_map);
@@ -404,15 +433,15 @@ int main(void) {
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
-    assert(*(uint32 *)hash_map_lookup(balanced_map, "a") == 0);
-    assert(!hash_map_lookup(balanced_map, "c"));
+    assert(*(uint32 *)hash_map_lookup(balanced_map, "a", strlen("a")) == 0);
+    assert(!hash_map_lookup(balanced_map, "c", strlen("c")));
 
-    assert(!hash_map_remove(balanced_map, "c"));
-    assert(hash_map_remove(balanced_map, "b"));
+    assert(!hash_map_remove(balanced_map, "c", strlen("c")));
+    assert(hash_map_remove(balanced_map, "b", strlen("b")));
 
     assert(hash_map_length(balanced_map) == (1 + NSTRINGS));
 
-    assert(hash_map_remove(balanced_map, "a"));
+    assert(hash_map_remove(balanced_map, "a", strlen("a")));
 
     hash_map_free_keys(balanced_map);
     hash_map_destroy(balanced_map);
