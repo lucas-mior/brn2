@@ -352,15 +352,15 @@ static char *
 random_string(void) {
     int length = 10 + rand() % 60;
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    char *random_string = xmalloc((usize)length + 1);
+    char *string = xmalloc((usize)length + 1);
 
     for (int i = 0; i < length; i += 1) {
         int c = rand() % ((int)sizeof(characters) - 1);
-        random_string[i] = characters[c];
+        string[i] = characters[c];
     }
-    random_string[length] = '\0';
+    string[length] = '\0';
 
-    return random_string;
+    return string;
 }
 
 // flags: -lm
