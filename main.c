@@ -33,6 +33,9 @@ bool brn2_quiet = false;
 bool brn2_sort = true;
 uint32 nthreads;
 
+Arena *arena_old;
+Arena *arena_new;
+
 static struct option options[] = {
     {"dir",     required_argument, NULL, 'd'},
     {"file",    required_argument, NULL, 'f'},
@@ -143,6 +146,9 @@ int main(int argc, char **argv) {
         nthreads = 1; 
     else
         nthreads = MIN((uint32)available_threads, MAX_THREADS);
+
+    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
 
     switch (mode) {
     case FILES_FROM_FILE:
