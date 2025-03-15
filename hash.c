@@ -161,7 +161,7 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
-uint32 __attribute__ ((noinline))
+uint32
 hash_function(char *key, uint32 key_size) {
     BRN2_ASSUME_ALIGNED(key, ALIGNMENT);
     uint32 hash = 5381;
