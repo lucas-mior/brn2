@@ -30,6 +30,12 @@ arena_push(Arena *arena, uint32 size) {
     return before;
 }
 
+void *
+arena_reset(Arena *arena) {
+    arena->pos = arena->begin;
+    return arena->begin;
+}
+
 void
 arena_release(Arena *arena) {
     munmap(arena->begin, arena->size);

@@ -63,7 +63,7 @@ brn2_list_from_args(int argc, char **argv) {
     uint32 length = 0;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, argc));
-    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
+    list->arena = arena_old;
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -96,7 +96,7 @@ brn2_list_from_dir_recurse(char *directory) {
     uint32 size;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
-    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
+    list->arena = arena_old;
 
     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
     if (file_system == NULL) {
@@ -177,7 +177,7 @@ brn2_list_from_dir(char *directory) {
     }
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, n - 2));
-    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
+    list->arena = arena_old;
 
     for (int i = 0; i < n; i += 1) {
         char *name = directory_list[i]->d_name;
@@ -214,7 +214,7 @@ brn2_list_from_dir(char *directory) {
 
 void
 brn2_free_list(FileList *list) {
-    arena_release(list->arena);
+    arena_reset(list->arena);
     free(list);
     return;
 }
@@ -234,7 +234,10 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     if (capacity == 0)
         capacity = 128;
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
-    list->arena = arena_alloc(PATH_MAX*UINT32_MAX);
+    if (is_old)
+        list->arena = arena_old;
+    else
+        list->arena = arena_new;
 
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening file for reading: %s\n", strerror(errno));
@@ -709,6 +712,8 @@ bool brn2_fatal = false;
 bool brn2_implict = false;
 bool brn2_quiet = false;
 uint32 nthreads = 1;
+Arena *arena_old;
+Arena *arena_new;
 
 static bool
 contains_filename(FileList *list, FileName file, bool verbose) {
@@ -734,6 +739,8 @@ contains_filename(FileList *list, FileName file, bool verbose) {
 // flags: -lm
 
 int main(void) {
+    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
     FileList *list1;
     FileList *list2;
     char *command = "ls -a > /tmp/brn2test";
