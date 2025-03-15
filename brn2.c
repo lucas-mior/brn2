@@ -37,6 +37,7 @@
 
 #include "hash.c"
 #include "util.c"
+#include "arena.c"
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
@@ -62,6 +63,7 @@ brn2_list_from_args(int argc, char **argv) {
     uint32 length = 0;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, argc));
+    Arena *arena = arena_alloc(PATH_MAX*UINT32_MAX);
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
