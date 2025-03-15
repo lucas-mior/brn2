@@ -29,12 +29,12 @@
 #include "util.h"
 #include "brn2.h"
 
-#define ALIGNMENT 32
+#define ALIGNMENT 16
 
 void *
 xmalloc(const usize size) {
     void *p;
-    if ((p = aligned_alloc(ALIGNMENT, size)) == NULL) {
+    if ((p = malloc(size)) == NULL) {
         error("Failed to allocate %zu bytes.\n", size);
         exit(EXIT_FAILURE);
     }
@@ -68,7 +68,7 @@ xstrdup(char *string) {
     size_t length;
 
     length = strlen(string) + 1;
-    if ((p = aligned_alloc(ALIGNMENT, length)) == NULL) {
+    if ((p = malloc(length)) == NULL) {
         error("Error allocating %zi bytes to duplicate \"%s\".\n",
                length, string);
         exit(EXIT_FAILURE);
@@ -81,7 +81,7 @@ xstrdup(char *string) {
 void *
 xmemdup(void *source, usize size) {
     void *p;
-    if ((p = aligned_alloc(ALIGNMENT, size)) == NULL) {
+    if ((p = malloc(size)) == NULL) {
         error("Error reallocating %zu bytes.\n", size);
         exit(EXIT_FAILURE);
     }
