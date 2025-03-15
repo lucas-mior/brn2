@@ -161,11 +161,12 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
-uint32
+uint32 __attribute__ ((noinline))
 hash_function(char *str) {
     /* djb2 hash function */
     uint32 hash = 5381;
     char c;
+    BRN2_ASSUME_ALIGNED(str, ALIGNMENT);
     while ((c = *str++))
         hash = ((hash << 5) + hash) + (uint32)c;
     return hash;
