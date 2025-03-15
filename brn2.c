@@ -527,14 +527,6 @@ brn2_verify(FileList *old, FileList *new,
             HashMap *repeated_map, Hash *hashes_new) {
     bool repeated = false;
 
-    if (old->length != new->length) {
-        error("You are renaming "RED"%u"RESET" file%.*s "
-              "but buffer contains "RED"%u"RESET" file name%.*s\n",
-              old->length, old->length != 1, "s",
-              new->length, new->length != 1, "s");
-        return false;
-    }
-
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
 
