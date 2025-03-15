@@ -60,9 +60,11 @@ else
     CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0"
 fi
 
-if [ "$target" = "benchmark" ]; then
-    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
-fi
+case "$target" in
+    "benchmark") CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+    "callgrind") CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+    "*") ;;
+esac
 
 case "$target" in
     "uninstall")
