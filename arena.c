@@ -8,22 +8,10 @@ typedef struct Arena {
     size_t size;
 } Arena;
 
-void ArenaRelease(Arena *arena);
-
-void *ArenaPush(Arena *arena, uint64 size);
-void *ArenaPushZero(Arena *arena, uint64 size);
-
 #define PushArray(arena, type, count) (type *)ArenaPush((arena), sizeof(type)*(count))
 #define PushArrayZero(arena, type, count) (type *)ArenaPushZero((arena), sizeof(type)*(count))
 #define PushStruct(arena, type) PushArray((arena), (type), 1)
 #define PushStructZero(arena, type) PushArrayZero((arena), (type), 1)
-
-void ArenaPop(Arena *arena, uint64 size);
-
-uint64 ArenaGetPos(Arena *arena);
-
-void ArenaSetPosBack(Arena *arena, uint64 pos);
-void ArenaClear(Arena *arena);
 
 Arena *
 arena_alloc(size_t size) {
@@ -49,7 +37,7 @@ arena_push(Arena *arena, uint32 size) {
 }
 
 void
-arena_clear(Arena *arena) {
+arena_release(Arena *arena) {
     munmap(arena->begin, arena->size);
     free(arena);
     return;
