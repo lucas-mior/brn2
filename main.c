@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
             main_capacity = hash_map_capacity(newlist_map);
             hashes_new = brn2_create_hashes(new, main_capacity);
 
-            if (!brn2_verify(old, new, newlist_map, hashes_new)) {
+            if (!brn2_verify(new, newlist_map, hashes_new)) {
                 brn2_free_list(new);
                 hash_map_destroy(newlist_map);
                 free(hashes_new);
