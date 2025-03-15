@@ -1,4 +1,5 @@
 test/
+benchmark
 tests
 test
 .ccls-cache/
