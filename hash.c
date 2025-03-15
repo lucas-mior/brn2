@@ -162,43 +162,6 @@ hash_map_destroy(HashMap *map) {
 }
 
 uint32 __attribute__ ((noinline))
-#if 0
-hash_function(char *key, uint32 key_size) {
-    uint32 state[] = { 5381, 5381, 5381, 5381 };
-    uint32 hash = 5381;
-    char *end = key + key_size;
-    BRN2_ASSUME_ALIGNED(key, ALIGNMENT);
-
-    while (key < end) {
-#define ROUND(state_i, round) \
-    state[state_i] = (state[state_i] << 5) + state[state_i] + key[round];
-
-    ROUND(0,0)
-    ROUND(1,1)
-    ROUND(2,2)
-    ROUND(3,3)
-    ROUND(0,4)
-    ROUND(1,5)
-    ROUND(2,6)
-    ROUND(3,7)
-    ROUND(0,8)
-    ROUND(1,9)
-    ROUND(2,10)
-    ROUND(3,11)
-    ROUND(0,12)
-    ROUND(1,13)
-    ROUND(2,14)
-    ROUND(3,15)
-
-    key += ALIGNMENT;
-  }
-  
-#undef ROUND
-    for (int i = 0; i < ARRAY_LENGTH(state); i += 1)
-        hash += (hash << 5) ^ state[i];
-    return hash;
-}
-#else
 hash_function(char *key, uint32 key_size) {
     BRN2_ASSUME_ALIGNED(key, ALIGNMENT);
     uint32 hash = 5381;
@@ -206,7 +169,6 @@ hash_function(char *key, uint32 key_size) {
         hash = ((hash << 5) + hash) + (uint32)key[i];
     return hash;
 }
-#endif
 
 uint32
 hash_normal(HashMap *map, uint32 hash) {
