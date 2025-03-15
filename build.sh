@@ -90,6 +90,7 @@ case "$target" in
         ;;
 esac
 
-if [ "$target" = "benchmark" ]; then
-    benchmark
-fi
+case "$target" in
+    "benchmark") benchmark ;;
+    "callgrind") callgrind ;;
+esac
