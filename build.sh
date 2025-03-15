@@ -19,15 +19,16 @@ testing () {
 }
 
 benchmark() {
-    mkdir /tmp/brn2/
-    cd /tmp/brn2 || exit
-    set +x
-    for i in $(seq -w 50000); do
-        touch "$i"
-    done
-    set -x
-    valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_aligned64.out \
-        $dir/brn2 -s -i -q -d .
+    ls
+    # mkdir /tmp/brn2/
+    # cd /tmp/brn2 || exit
+    # set +x
+    # for i in $(seq -w 50000); do
+    #     touch "$i"
+    # done
+    # set -x
+    # valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_aligned64.out \
+    #     $dir/brn2 -s -i -q -d .
 }
 
 target="${1:-build}"

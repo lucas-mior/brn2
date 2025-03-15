@@ -268,18 +268,6 @@ int main(int argc, char **argv) {
                              "0123456789";
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
             new = brn2_list_from_lines(buffer.name, old->length);
-            clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-            srand((uint)t.tv_nsec);
-            for (uint32 i = 0; i < new->length; i += 1) {
-                float x = (float)rand() / (float)RAND_MAX;
-                uint32 length = new->files[i].length + 1;
-                if (x < 0.4f) {
-                    for (uint32 j = 0; j < length; j += 1) {
-                        char c = allowed[(usize)rand() % (sizeof(allowed) - 1)];
-                        new->files[i].name[j] = c;
-                    }
-                }
-            }
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);
             new = brn2_list_from_lines(buffer.name, old->length);
