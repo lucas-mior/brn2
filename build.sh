@@ -19,16 +19,19 @@ testing () {
 }
 
 benchmark() {
-    ls
-    # mkdir /tmp/brn2/
-    # cd /tmp/brn2 || exit
-    # set +x
-    # for i in $(seq -w 50000); do
-    #     touch "$i"
-    # done
-    # set -x
-    # valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_aligned64.out \
-    #     $dir/brn2 -s -i -q -d .
+    if [ ! -d /tmp/brn2 ]; then
+        mkdir -p /tmp/brn2/files
+    fi
+    cd /tmp/brn2/files || exit
+    if [ $(find . | wc -l) -lt 999999 ]; then
+        seq -w 1000000 | xargs -P$(nproc) touch
+    fi
+    time $dir/brn2 . -q
+}
+
+callgrind() {
+    valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_aligned64.out \
+        $dir/brn2 -s -i -q -d .
 }
 
 target="${1:-build}"
