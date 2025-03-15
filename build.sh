@@ -34,7 +34,7 @@ create_files() {
 benchmark() {
     create_files
     cd /tmp/brn2/files || exit
-    time $dir/brn2 -s -q -d .
+    time $dir/brn2 -s -q -d . 2>&1
     cd "$dir"
 }
 
