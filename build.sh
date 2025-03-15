@@ -18,26 +18,29 @@ testing () {
     done
 }
 
-benchmark() {
+NFILES=500000
+
+create_files() {
     if [ ! -d /tmp/brn2 ]; then
         mkdir -p /tmp/brn2/files
     fi
     cd /tmp/brn2/files || exit
-    if [ $(find . | wc -l) -lt 999999 ]; then
-        seq -w 1000000 | xargs -P$(nproc) touch
+    if [ $(find . | wc -l) -lt $NFILES ]; then
+        seq -w $NFILES | xargs -P$(nproc) touch
     fi
+    cd "$dir"
+}
+
+benchmark() {
+    create_files
+    cd /tmp/brn2/files || exit
     time $dir/brn2 -s -q -d .
     cd "$dir"
 }
 
 callgrind() {
-    if [ ! -d /tmp/brn2 ]; then
-        mkdir -p /tmp/brn2/files
-    fi
+    create_files
     cd /tmp/brn2/files || exit
-    if [ $(find . | wc -l) -lt 999999 ]; then
-        seq -w 1000000 | xargs -P$(nproc) touch
-    fi
     valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_$1.out \
         $dir/brn2 -s -q -d .
     cd "$dir"
