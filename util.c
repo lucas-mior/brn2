@@ -29,8 +29,6 @@
 #include "util.h"
 #include "brn2.h"
 
-#define ALIGNMENT 16
-
 void *
 xmalloc(const usize size) {
     void *p;
