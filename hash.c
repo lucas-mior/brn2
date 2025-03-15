@@ -162,13 +162,14 @@ hash_map_destroy(HashMap *map) {
 }
 
 uint32 __attribute__ ((noinline))
-hash_function(char *str) {
+hash_function(char *str, uint32 key_size) {
     /* djb2 hash function */
     uint32 hash = 5381;
     char c;
     BRN2_ASSUME_ALIGNED(str, ALIGNMENT);
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + (uint32)c;
+    for (uint32 i = 0; i < key_size; i += 1) {
+        hash = ((hash << 5) + hash) + (uint32)str[i];
+    }
     return hash;
 }
 
@@ -180,8 +181,8 @@ hash_normal(HashMap *map, uint32 hash) {
 }
 
 bool
-hash_map_insert(HashMap *map, char *key, uint32 value) {
-    uint32 hash = hash_function(key);
+hash_map_insert(HashMap *map, char *key, uint32 key_size, uint32 value) {
+    uint32 hash = hash_function(key, key_size);
     uint32 index = hash_normal(map, hash);
     return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
@@ -220,8 +221,8 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
 }
 
 void *
-hash_map_lookup(HashMap *map, char *key) {
-    uint32 hash = hash_function(key);
+hash_map_lookup(HashMap *map, char *key, uint32 key_size) {
+    uint32 hash = hash_function(key, key_size);
     uint32 index = hash_normal(map, hash);
     return hash_map_lookup_pre_calc(map, key, hash, index);
 }
@@ -247,8 +248,8 @@ hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 }
 
 bool
-hash_map_remove(HashMap *map, char *key) {
-    uint32 hash = hash_function(key);
+hash_map_remove(HashMap *map, char *key, uint32 key_size) {
+    uint32 hash = hash_function(key, key_size);
     uint32 index = hash_normal(map, hash);
     return hash_map_remove_pre_calc(map, key, hash, index);
 }

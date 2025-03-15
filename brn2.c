@@ -436,7 +436,7 @@ brn2_threads_work_hashes(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileList *list = slice->old_list;
         FileName *newfile = &(list->files[i]);
-        newfile->hash = hash_function(newfile->name);
+        newfile->hash = hash_function(newfile->name, newfile->length);
         slice->hashes[i].mod = newfile->hash % slice->map_capacity;
     }
     thrd_exit(0);
