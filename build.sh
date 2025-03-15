@@ -21,7 +21,7 @@ testing () {
 NFILES=500000
 
 create_files() {
-    if [ ! -d /tmp/brn2 ]; then
+    if [ ! -d /tmp/brn2/files ]; then
         mkdir -p /tmp/brn2/files
     fi
     cd /tmp/brn2/files || exit
