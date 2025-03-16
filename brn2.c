@@ -45,11 +45,10 @@ static int brn2_threads_work_hashes(void *);
 static int brn2_threads_work_sort(void *);
 static int brn2_threads_work_normalization(void *);
 static int brn2_threads_work_changes(void *);
-static int brn2_threads_work_exists(void *);
 static inline bool brn2_is_invalid_name(char *);
 static uint32 brn2_threads(int (*)(void *),
                            FileList *, FileList *,
-                           uint32 *, uint32 *, bool *, uint32);
+                           uint32 *, uint32 *, uint32);
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -352,7 +351,6 @@ typedef struct Slice {
     FileList *old_list;
     FileList *new_list;
     uint32 *hashes;
-    bool *exists;
     uint32 start;
     uint32 end;
     uint32 map_capacity;
@@ -459,19 +457,9 @@ int brn2_threads_work_changes(void *arg) {
     thrd_exit(0);
 }
 
-int brn2_threads_work_exists(void *arg) {
-    Slice *slice = arg;
-
-    for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName newfile = slice->new_list->files[i];
-        slice->exists[i] = !access(newfile.name, F_OK);
-    }
-    thrd_exit(0);
-}
-
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-    brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, NULL, 0);
+    brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, 0);
     return;
 }
 
@@ -479,7 +467,7 @@ uint32 *
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
     uint32 *hashes = xmalloc(list->length*sizeof(*hashes));
     brn2_threads(brn2_threads_work_hashes,
-                 list, NULL, hashes, NULL, NULL, map_capacity);
+                 list, NULL, hashes, NULL, map_capacity);
     return hashes;
 }
 
@@ -487,23 +475,16 @@ uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
     uint32 numbers[MAX_THREADS] = {0};
-    brn2_threads(brn2_threads_work_changes, old, new, NULL, numbers, NULL, 0);
+    brn2_threads(brn2_threads_work_changes, old, new, NULL, numbers, 0);
 
     for (uint32 i = 0; i < MAX_THREADS; i += 1)
         total += numbers[i];
     return total;
 }
 
-bool *
-brn2_newname_exists(FileList *new) {
-    bool *exists = xmalloc(new->length*sizeof(*exists));
-    brn2_threads(brn2_threads_work_exists, NULL, new, NULL, NULL, exists, 0);
-    return exists;
-}
-
 uint32 brn2_threads(int (*function)(void *),
                     FileList *old, FileList *new,
-                    uint32 *hashes, uint32 *numbers, bool *exists,
+                    uint32 *hashes, uint32 *numbers,
                     uint32 map_size) {
     thrd_t threads[MAX_THREADS];
     Slice slices[MAX_THREADS];
@@ -527,7 +508,6 @@ uint32 brn2_threads(int (*function)(void *),
         slices[i].old_list = old;
         slices[i].new_list = new;
         slices[i].hashes = hashes;
-        slices[i].exists = exists;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], function, (void *)&slices[i]);
@@ -538,7 +518,6 @@ uint32 brn2_threads(int (*function)(void *),
         slices[i].old_list = old;
         slices[i].new_list = new;
         slices[i].hashes = hashes;
-        slices[i].exists = exists;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
         thrd_create(&threads[i], function, (void *)&slices[i]);
@@ -579,7 +558,7 @@ noop(const char *unused, ...) {
 uint32
 brn2_execute(FileList *old, FileList *new,
              HashMap *oldlist_map,
-             uint32 *hashes_old, uint32 *hashes_new, bool *newname_exists) {
+             uint32 *hashes_old, uint32 *hashes_new) {
     uint32 number_renames = 0;
     uint32 length = old->length;
     int (*print)(const char *, ...);
@@ -593,6 +572,7 @@ brn2_execute(FileList *old, FileList *new,
     for (uint32 i = 0; i < length; i += 1) {
         int renamed;
         uint32 *newname_index_on_oldlist;
+        bool newname_exists;
         char **oldname = &(old->files[i].name);
         char *newname = new->files[i].name;
 
@@ -611,8 +591,9 @@ brn2_execute(FileList *old, FileList *new,
         newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
                                                             newname,
                                                             newhash, newindex);
+        newname_exists = !access(newname, F_OK);
 #ifdef __linux__
-        if (newname_exists[i] && !newname_index_on_oldlist && !brn2_implict) {
+        if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
             error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
                   *oldname, newname);
             error(RED"'%s'"RESET" already exists,"
@@ -622,7 +603,7 @@ brn2_execute(FileList *old, FileList *new,
                 exit(EXIT_FAILURE);
             continue;
         }
-        if (newname_exists[i]) {
+        if (newname_exists) {
             renamed = renameat2(AT_FDCWD, *oldname,
                                 AT_FDCWD, newname, RENAME_EXCHANGE);
             if (renamed >= 0) {
@@ -672,7 +653,7 @@ brn2_execute(FileList *old, FileList *new,
         }
 #else
         (void) newlength;
-        if (newname_exists[i]) {
+        if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
             if (brn2_fatal || BRN2_DEBUG)
