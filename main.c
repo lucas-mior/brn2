@@ -322,12 +322,11 @@ int main(int argc, char **argv) {
     {
         uint32 number_changes = brn2_get_number_changes(old, new);
         uint32 number_renames = 0;
-        bool *newname_exists = brn2_newname_exists(new);
 
         if (number_changes)
             number_renames = brn2_execute(old, new,
                                           oldlist_map,
-                                          hashes_old, hashes_new, newname_exists);
+                                          hashes_old, hashes_new);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
