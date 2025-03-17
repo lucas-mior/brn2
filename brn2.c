@@ -165,27 +165,27 @@ brn2_list_from_dir(char *directory) {
     struct dirent **directory_list;
     uint32 length = 0;
     uint16 directory_length;
-    int n;
+    int number_files;
 
     if (strcmp(directory, "."))
        directory_length = (uint16)strlen(directory);
     else
        directory_length = 0;
 
-    n = scandir(directory, &directory_list, NULL, NULL);
-    if (n < 0) {
+    number_files = scandir(directory, &directory_list, NULL, NULL);
+    if (number_files < 0) {
         error("Error scanning '%s': %s\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    if (n <= 2) {
+    if (number_files <= 2) {
         error("Empty directory. Exiting.\n");
         exit(EXIT_FAILURE);
     }
 
-    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, n - 2));
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files - 2));
     list->arena = arena_old;
 
-    for (int i = 0; i < n; i += 1) {
+    for (int i = 0; i < number_files; i += 1) {
         char *name = directory_list[i]->d_name;
         FileName *file = &(list->files[length]);
         uint16 name_length = (uint16)strlen(name);
