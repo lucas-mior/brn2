@@ -108,6 +108,6 @@ case "$target" in
 esac
 
 case "$target" in
-    "benchmark") benchmark ;;
+    "benchmark") benchmark $2 ;;
     "callgrind") callgrind $2 ;;
 esac
