@@ -197,7 +197,7 @@ brn2_list_from_dir(char *directory) {
         }
 
         if (directory_length) {
-            file->length = directory_length + name_length + 1;
+            file->length = directory_length + 1 + name_length;
             size = ALIGN(file->length+2);
             file->name = arena_push(list->arena, size);
             BRN2_ASSUME_ALIGNED(file->name, ALIGNMENT);
