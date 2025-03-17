@@ -1,3 +1,6 @@
+#ifndef ARENA_C
+#define ARENA_C
+
 #include "brn2.h"
 #include <sys/mman.h>
 #include "util.c"
@@ -45,3 +48,5 @@ arena_release(Arena *arena) {
     free(arena);
     return;
 }
+
+#endif

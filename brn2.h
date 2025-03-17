@@ -48,16 +48,16 @@
 #define MAX(a,b) (a) > (b) ? (a) : (b)
 #define ALIGN(x) ((x) + (BRN2_ALIGNMENT - ((x) % BRN2_ALIGNMENT)))
 
-#if 1
 #ifdef __GNUC__
 # define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) \
     { BRN2_ASSUME_ALIGNED \
         = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); }
+#elif __clang__
+# define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) \
+    { BRN2_ASSUME_ALIGNED \
+        = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); }
 #else
-# error HX4_ASSUME_ALIGNED not yet implement on this compiler
-#endif
-#else
-#define BRN2_ASSUME_ALIGNED(ptr, alignment)
+#define BRN2_ASSUME_ALIGNED(ptr, alignment) do {} while (0)
 #endif
 
 #ifndef BRN2_DEBUG
