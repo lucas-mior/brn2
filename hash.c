@@ -156,15 +156,6 @@ hash_map_free_keys(HashMap *map) {
 void
 hash_map_destroy(HashMap *map) {
     usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]);
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        Bucket *iterator = &(map->array[i]);
-        iterator = iterator->next;
-        while (iterator) {
-            void *aux = iterator;
-            iterator = iterator->next;
-            free(aux);
-        }
-    }
     arena_destroy(map->arena);
     xmunmap(map, size);
     return;
@@ -217,7 +208,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
     }
 
     map->collisions += 1;
-    iterator->next = xmalloc(sizeof(*iterator));
+    iterator->next = arena_push(map->arena, sizeof(*(iterator->next)));
     iterator->next->key = key;
     iterator->next->hash = hash;
     iterator->next->value = value;
@@ -270,9 +261,7 @@ hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
         if (iterator->next) {
-            void *aux = iterator->next;
             memmove(iterator, iterator->next, sizeof(*iterator));
-            free(aux);
             map->collisions -= 1;
         } else {
             memset(iterator, 0, sizeof(*iterator));
@@ -287,7 +276,6 @@ hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
 
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
              previous->next = iterator->next;
-             free(iterator);
              map->length -= 1;
              map->collisions -= 1;
              return true;
