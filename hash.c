@@ -161,16 +161,17 @@ hash_map_destroy(HashMap *map) {
 uint32
 hash_function(char *key, uint32 key_size) {
     BRN2_ASSUME_ALIGNED(key);
-#if 1
+#if 0
     uint32 hash = 2166136261u;
     for (uint32 i = 0; i < key_size; i += 1) {
         hash ^= key[i];
         hash *= 16777619u;
     }
 #else
-    uint32 hash = 5381;
+    uint64 hash = 14695981039346656037u;
     for (uint32 i = 0; i < key_size; i += 1) {
-        hash = ((hash << 5) + hash) + (uint32)key[i];
+        hash ^= key[i];
+        hash *= 1099511628211u;
     }
 #endif
     return (uint32)hash;
