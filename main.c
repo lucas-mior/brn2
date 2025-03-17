@@ -199,7 +199,8 @@ int main(int argc, char **argv) {
     }
 
     {
-        char buffer2[BUFSIZ];
+        char write_buffer[BUFSIZ];
+        char *pointer = write_buffer;
         uint32 capacity_set;
         int n;
 
@@ -215,16 +216,11 @@ int main(int argc, char **argv) {
             error("Error opening '%s': %s\n", buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
-        if ((buffer.stream = fdopen(buffer.fd, "w")) == NULL) {
-            error("Error opening '%s': %s\n", buffer.name, strerror(errno));
-            exit(EXIT_FAILURE);
-        }
 
         oldlist_map = hash_map_create(old->length);
         capacity_set = hash_map_capacity(oldlist_map);
         hashes_old = brn2_create_hashes(old, capacity_set);
 
-        setvbuf(buffer.stream, buffer2, _IOFBF, sizeof(buffer2));
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             uint32 *hash = &hashes_old[i];
@@ -242,16 +238,21 @@ int main(int argc, char **argv) {
                 file = &(old->files[i]);
                 hash = &hashes_old[i];
             }
+            if ((pointer - write_buffer) >= (BUFSIZ/2)) {
+                write(buffer.fd, write_buffer, (usize)(pointer - write_buffer));
+                pointer = write_buffer;
+            }
 
             file->name[file->length] = '\n';
-            fwrite(file->name, 1, file->length + 1, buffer.stream);
+            memcpy(pointer, file->name, file->length + 1);
+            pointer += file->length + 1;
             file->name[file->length] = '\0';
+
         }
         close:
-        fclose(buffer.stream);
+        write(buffer.fd, write_buffer, (usize)(pointer - write_buffer));
         close(buffer.fd);
         buffer.fd = -1;
-        buffer.stream = NULL;
         atexit(delete_buffer);
     }
 
