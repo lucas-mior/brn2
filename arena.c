@@ -14,7 +14,8 @@ arena_alloc(size_t size) {
     arena = xmalloc(sizeof(*arena));
     arena->size = size;
     arena->begin = mmap(NULL, arena->size,
-                 PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+                        PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE,
+                        -1, 0);
     if (arena->begin == MAP_FAILED) {
         error("Error in mmap: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
