@@ -342,12 +342,12 @@ int main(int argc, char **argv) {
     }
 
     if (BRN2_DEBUG) {
+        xmunmap(hashes_old, old->length*sizeof(*hashes_old));
+        xmunmap(hashes_new, new->length*sizeof(*hashes_new));
         brn2_free_list(old);
         brn2_free_list(new);
         hash_map_destroy(oldlist_map);
         hash_map_destroy(newlist_map);
-        free(hashes_old);
-        free(hashes_new);
         free(arena_old);
         free(arena_new);
     }

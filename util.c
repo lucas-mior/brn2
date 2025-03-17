@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
 #include "util.h"
@@ -50,6 +51,13 @@ xmmap(const usize size) {
         exit(EXIT_FAILURE);
     }
     return p;
+}
+
+void
+xmunmap(void *p, usize size) {
+    if (munmap(p, size) < 0)
+        error("Error in munmap(%p, %zu): %s\n", (void *)p, strerror(errno));
+    return;
 }
 
 void *
