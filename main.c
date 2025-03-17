@@ -20,10 +20,12 @@
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
+#include "arena.h"
 
 #include "brn2.c"
 #include "hash.c"
 #include "util.c"
+#include "arena.c"
 
 char *program;
 static bool brn2_check = false;

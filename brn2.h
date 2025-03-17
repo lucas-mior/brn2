@@ -49,13 +49,10 @@
 #define ALIGN(x) ((x) + (BRN2_ALIGNMENT - ((x) % BRN2_ALIGNMENT)))
 
 #ifdef __GNUC__
-# define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) \
-    { BRN2_ASSUME_ALIGNED \
-        = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); }
-#elif __clang__
-# define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) \
-    { BRN2_ASSUME_ALIGNED \
-        = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); }
+# define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) do { \
+    BRN2_ASSUME_ALIGNED \
+    = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); \
+    } while (0)
 #else
 #define BRN2_ASSUME_ALIGNED(ptr, alignment) do {} while (0)
 #endif
