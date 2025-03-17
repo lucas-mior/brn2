@@ -47,7 +47,7 @@ void hash_map_destroy(HashMap *);
 uint32 hash_function(char *, uint32);
 uint32 hash_normal(HashMap *, uint32);
 bool hash_map_insert(HashMap *, char *, uint32, uint32);
-bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32);
+bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32, uint32);
 void *hash_map_lookup(HashMap *, char *, uint32);
 void *hash_map_lookup_pre_calc(HashMap *, char *, uint32, uint32);
 bool hash_map_remove(HashMap *, char *, uint32);
@@ -64,7 +64,7 @@ uint32 hash_map_expected_collisions(HashMap *);
 #define hash_set_free_keys(a)                hash_map_free_keys(a)
 #define hash_set_destroy(a)                  hash_map_destroy(a)
 #define hash_set_insert(a, b)                hash_map_insert(a, b, 0)
-#define hash_set_insert_pre_calc(a, b, c, d) hash_map_insert_pre_calc(a, b, c, d, 0)
+#define hash_set_insert_pre_calc(a, b, c, d, e) hash_map_insert_pre_calc(a, b, c, d, e, 0)
 #define hash_set_lookup(a, b)                hash_map_lookup(a, b)
 #define hash_set_lookup_pre_calc(a, b, c, d) hash_map_lookup_pre_calc(a, b, c, d)
 #define hash_set_remove(a, b)                hash_map_remove(a, b)
