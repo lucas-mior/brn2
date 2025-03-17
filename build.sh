@@ -21,7 +21,7 @@ testing () {
     done
 }
 
-NFILES=1000000
+NFILES=500000
 d="/tmp/brn2"
 
 create_files() {
