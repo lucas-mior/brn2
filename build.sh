@@ -6,9 +6,11 @@ testing () {
         [ "$src" = "$main" ] && continue
         printf "Testing $src...\n"
 
-        flags="$(awk '/flags:/ { $1=$2=""; print $0 }' "$src")"
+        flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
+        cmdline="$CC $CPPFLAGS $CFLAGS \
+                 -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
         set -x
-        if $CC $CPPFLAGS $CFLAGS -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags; then
+        if $cmdline; then
             /tmp/$src.exe || gdb /tmp/$src.exe
         else
             printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
