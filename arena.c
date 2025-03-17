@@ -44,8 +44,8 @@ arena_reset_zero(Arena *arena) {
 }
 
 void
-arena_release(Arena *arena) {
-    munmap(arena->begin, arena->size);
+arena_destroy(Arena *arena) {
+    xmunmap(arena->begin, arena->size);
     free(arena);
     return;
 }

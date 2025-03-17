@@ -30,11 +30,13 @@
 
 #include "hash.h"
 #include "util.h"
+#include "arena.h"
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
 
 #include "util.c"
+#include "arena.c"
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
@@ -53,6 +55,7 @@ struct HashMap {
     uint32 bitmask;
     uint32 collisions;
     uint32 length;
+    Arena *arena;
     Bucket array[];
 };
 
@@ -76,6 +79,7 @@ hash_map_create(uint32 length) {
     size = sizeof(*map) + capacity*sizeof(map->array[0]);
 
     map = xmmap(size);
+    map->arena = arena_alloc(capacity*sizeof(*(map->array[0].next)));
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     return map;
@@ -103,7 +107,7 @@ hash_map_balance(HashMap *old_map) {
     size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]);
 
     new_map = xmmap(size);
-    memset(new_map, 0, size);
+    new_map->arena = arena_alloc(capacity*sizeof(*(new_map->array[0].next)));
     new_map->capacity = capacity;
     new_map->bitmask = bitmask;
 
@@ -132,6 +136,7 @@ hash_map_balance(HashMap *old_map) {
     }
 
     old_size = sizeof(*old_map) + old_map->capacity*sizeof(old_map->array[0]);
+    arena_destroy(old_map->arena);
     xmunmap(old_map, old_size);
     return new_map;
 }
@@ -160,6 +165,7 @@ hash_map_destroy(HashMap *map) {
             free(aux);
         }
     }
+    arena_destroy(map->arena);
     xmunmap(map, size);
     return;
 }

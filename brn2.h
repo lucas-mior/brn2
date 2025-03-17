@@ -34,6 +34,7 @@
 #include <threads.h>
 #include <unistd.h>
 #include "hash.h"
+#include "arena.h"
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
@@ -97,12 +98,6 @@ typedef struct FileName {
     bool dir;
     uint8 unused;
 } FileName;
-
-typedef struct Arena {
-    void *begin;
-    void *pos;
-    size_t size;
-} Arena;
 
 typedef struct FileList {
     uint32 length;
