@@ -72,16 +72,16 @@ case "$target" in
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
     "benchmark")
-        CFLAGS="$CFLAGS -O2 -flto -march=native"
+        CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "callgrind") 
-        CFLAGS="$CFLAGS -g -O2 -flto -march=native"
+        CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
-        CFLAGS="$CFLAGS -g -O2 -flto -march=native"
+        CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS" ;;
     "*") 
-        CFLAGS="$CFLAGS -O2 -flto -march=native"
+        CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
 esac
 
