@@ -123,15 +123,12 @@ hash_map_balance(HashMap *old_map) {
         iterator = iterator->next;
 
         while (iterator) {
-            void *aux;
             uint32 hash = iterator->hash;
             uint32 index = hash_normal(new_map, hash);
             hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
 
-            aux = iterator;
             iterator = iterator->next;
-            free(aux);
         }
     }
 
