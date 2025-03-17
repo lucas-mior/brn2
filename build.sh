@@ -67,15 +67,10 @@ if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
 fi
 
-if [ "$target" = "debug" ]; then
-    CFLAGS="$CFLAGS -g -fsanitize=undefined "
-    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1"
-else
-    CFLAGS="$CFLAGS -g -O2 -flto"
-    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0"
-fi
-
 case "$target" in
+    "debug")
+        CFLAGS="$CFLAGS -g -fsanitize=undefined "
+        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
     "benchmark")
         CFLAGS="$CFLAGS "
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
@@ -85,7 +80,9 @@ case "$target" in
     "test") 
         CFLAGS="$CFLAGS -g "
         CPPFLAGS="$CPPFLAGS" ;;
-    "*") ;;
+    "*") 
+        CFLAGS="$CFLAGS -g -O2 -flto"
+        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
 esac
 
 case "$target" in
