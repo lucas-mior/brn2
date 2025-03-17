@@ -161,8 +161,17 @@ uint32
 hash_function(char *key, uint32 key_size) {
     uint32 hash = 5381;
     BRN2_ASSUME_ALIGNED(key);
+#if 1
+    for (uint32 i = 0; i < key_size; i += 4) {
+        volatile uint32 aux;
+        memcpy(&aux, key, sizeof(*(&aux)));
+#else
     for (uint32 i = 0; i < key_size; i += 1) {
-        hash = ((hash << 5) + hash) + (uint32)key[i];
+        volatile uint32 aux2 = (uint32)key[i];
+        volatile uint32 aux;
+        memcpy(&aux, &aux2, sizeof(*(&aux2)));
+#endif
+        hash = ((hash << 5) + hash) + (uint32)aux;
     }
     return hash;
 }
@@ -344,7 +353,7 @@ hash_map_expected_collisions(HashMap *map) {
 
 static char *
 random_string(void) {
-    int length = 10 + rand() % 60;
+    int length = 16 + rand() % 50;
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *string = xmalloc((usize)length + 1);
 
@@ -370,9 +379,13 @@ int main(void) {
     assert(original_map);
     assert(hash_map_capacity(original_map) >= NSTRINGS);
 
-    assert(hash_map_insert(original_map, "a", strlen("a"), 0));
-    assert(!hash_map_insert(original_map, "a", strlen("a"), 1));
-    assert(hash_map_insert(original_map, "b", strlen("b"), 2));
+    char *string1 = "aaaaaaaaaaaaaaaa";
+    char *string2 = "bbbbbbbbbbbbbbbb";
+    char *string3 = "cccccccccccccccc";
+
+    assert(hash_map_insert(original_map, string1, strlen(string1), 0));
+    assert(!hash_map_insert(original_map, string1, strlen(string1), 1));
+    assert(hash_map_insert(original_map, string2, strlen(string2), 2));
 
     srand((uint)t0.tv_nsec);
 
@@ -396,15 +409,15 @@ int main(void) {
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
-    assert(*(uint32 *)hash_map_lookup(balanced_map, "a", strlen("a")) == 0);
-    assert(!hash_map_lookup(balanced_map, "c", strlen("c")));
+    assert(*(uint32 *)hash_map_lookup(balanced_map, string1, strlen(string1)) == 0);
+    assert(!hash_map_lookup(balanced_map, string3, strlen(string3)));
 
-    assert(!hash_map_remove(balanced_map, "c", strlen("c")));
-    assert(hash_map_remove(balanced_map, "b", strlen("b")));
+    assert(!hash_map_remove(balanced_map, string3, strlen(string3)));
+    assert(hash_map_remove(balanced_map, string2, strlen(string2)));
 
     assert(hash_map_length(balanced_map) == (1 + NSTRINGS));
 
-    assert(hash_map_remove(balanced_map, "a", strlen("a")));
+    assert(hash_map_remove(balanced_map, string1, strlen(string1)));
 
     hash_map_free_keys(balanced_map);
     hash_map_destroy(balanced_map);
