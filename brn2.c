@@ -376,10 +376,10 @@ brn2_threads_work_normalization(void *arg) {
         uint32 j = 0;
 
         while (file->name[j] != '\0') {
-            while (file->name[j] == '/' && file->name[j + 1] == '/') {
+            while (!memcmp(&(file->name[j]), "//", 2)) {
                 file->length -= 1;
                 memmove(&(file->name[j]), &(file->name[j + 1]),
-                        (file->length - j)*sizeof(*(file->name)));
+                        (file->length - j + 1)*sizeof(*(file->name)));
             }
             j += 1;
         }
