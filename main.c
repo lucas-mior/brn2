@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     if (available_threads <= 0)
         nthreads = 1; 
     else
-        nthreads = MIN((uint32)available_threads, MAX_THREADS);
+        nthreads = MIN((uint32)available_threads, BRN2_MAX_THREADS);
 
     arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
     arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
