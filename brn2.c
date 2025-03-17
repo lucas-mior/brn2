@@ -76,7 +76,7 @@ brn2_list_from_args(int argc, char **argv) {
         file->length = (uint16)strlen(name);
         size = ALIGN(file->length+2);
         file->name = arena_push(list->arena, size);
-        BRN2_ASSUME_ALIGNED(file->name, ALIGNMENT);
+        BRN2_ASSUME_ALIGNED(file->name);
         memcpy(file->name, name, size);
         memset(&file->name[file->length], 0, size - file->length);
 
@@ -133,7 +133,7 @@ brn2_list_from_dir_recurse(char *directory) {
             file->length = ent->fts_pathlen;
             size = ALIGN(file->length+2);
             file->name = arena_push(list->arena, size);
-            BRN2_ASSUME_ALIGNED(file->name, ALIGNMENT);
+            BRN2_ASSUME_ALIGNED(file->name);
             memcpy(file->name, name, size);
             memset(&file->name[file->length], 0, size - file->length);
 
@@ -200,7 +200,7 @@ brn2_list_from_dir(char *directory) {
             file->length = directory_length + 1 + name_length;
             size = ALIGN(file->length+2);
             file->name = arena_push(list->arena, size);
-            BRN2_ASSUME_ALIGNED(file->name, ALIGNMENT);
+            BRN2_ASSUME_ALIGNED(file->name);
             memcpy(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy(file->name + directory_length + 1, name, name_length + 1);
@@ -208,7 +208,7 @@ brn2_list_from_dir(char *directory) {
             file->length = name_length;
             size = ALIGN(file->length+2);
             file->name = arena_push(list->arena, size);
-            BRN2_ASSUME_ALIGNED(file->name, ALIGNMENT);
+            BRN2_ASSUME_ALIGNED(file->name);
             memcpy(file->name, name, size);
         }
         memset(&file->name[file->length], 0, size - file->length);
@@ -267,7 +267,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
             exit(EXIT_FAILURE);
         }
     }
-    padding = ALIGNMENT - (map_size % ALIGNMENT);
+    padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
         error("Error truncating %s: %s.\n", filename, strerror(errno));
@@ -309,7 +309,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         file->length = (uint16)(pointer - begin);
         size = ALIGN(file->length+2);
         file->name = arena_push(list->arena, size);
-        BRN2_ASSUME_ALIGNED(file->name, ALIGNMENT);
+        BRN2_ASSUME_ALIGNED(file->name);
         memcpy(file->name, begin, size);
         memset(&file->name[file->length], 0, size - file->length);
 

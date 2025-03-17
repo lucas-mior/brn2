@@ -43,15 +43,16 @@
 #define USE_THREADS_THRESHOLD 524288
 #define MAX_THREADS 64
 #define MEMCHR_BYTES 16
-#define ALIGNMENT 16
+#define BRN2_ALIGNMENT 16
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 #define MAX(a,b) (a) > (b) ? (a) : (b)
-#define ALIGN(x) ((x) + (ALIGNMENT - ((x) % ALIGNMENT)))
+#define ALIGN(x) ((x) + (BRN2_ALIGNMENT - ((x) % BRN2_ALIGNMENT)))
 
 #if 1
 #ifdef __GNUC__
-# define BRN2_ASSUME_ALIGNED(ptr, alignment) \
-    { ptr = __builtin_assume_aligned( (ptr) , (alignment) ); }
+# define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) \
+    { BRN2_ASSUME_ALIGNED \
+        = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); }
 #else
 # error HX4_ASSUME_ALIGNED not yet implement on this compiler
 #endif
