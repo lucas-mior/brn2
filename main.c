@@ -346,6 +346,8 @@ int main(int argc, char **argv) {
         hash_map_destroy(newlist_map);
         free(hashes_old);
         free(hashes_new);
+        free(arena_old);
+        free(arena_new);
     }
     exit(EXIT_SUCCESS);
 }
