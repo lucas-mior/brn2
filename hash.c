@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 
 #include "hash.h"
 #include "util.h"
@@ -74,8 +75,7 @@ hash_map_create(uint32 length) {
 
     size = sizeof(*map) + capacity*sizeof(map->array[0]);
 
-    map = xmalloc(size);
-    memset(map, 0, size);
+    map = xmmap(size);
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     return map;
@@ -101,7 +101,7 @@ hash_map_balance(HashMap *old_map) {
 
     size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]);
 
-    new_map = xmalloc(size);
+    new_map = xmmap(size);
     memset(new_map, 0, size);
     new_map->capacity = capacity;
     new_map->bitmask = bitmask;
@@ -148,6 +148,7 @@ hash_map_free_keys(HashMap *map) {
 
 void
 hash_map_destroy(HashMap *map) {
+    usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]);
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &(map->array[i]);
         iterator = iterator->next;
@@ -157,7 +158,8 @@ hash_map_destroy(HashMap *map) {
             free(aux);
         }
     }
-    free(map);
+    if (munmap(map, size) < 0)
+        error("Error in munmap(%p): %s\n", (void *)map, strerror(errno));
     return;
 }
 
