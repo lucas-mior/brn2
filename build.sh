@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# shellcheck disable=SC2086
+
 dir="$(realpath "$(dirname "$0")")"
 testing () {
     for src in *.c; do
@@ -28,8 +30,8 @@ create_files() {
     rm -rf "$d"
     mkdir -p "$d"
     cd "$d" || exit
-    seq -w $NFILES | xargs -P$(nproc) touch
-    cd "$dir"
+    seq -w $NFILES | xargs -P"$(nproc)" touch
+    cd "$dir" || exit
 }
 
 benchmark() {
@@ -37,7 +39,7 @@ benchmark() {
     cd "$d" || exit
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
     time $dir/brn2 -s -q -d . 2>&1
-    cd "$dir"
+    cd "$dir" || exit
 }
 
 callgrind() {
@@ -45,7 +47,7 @@ callgrind() {
     cd "$d" || exit
     valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_$1.out \
         $dir/brn2 -s -q -d .
-    cd "$dir"
+    cd "$dir" || exit
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
 
@@ -72,14 +74,14 @@ case "$target" in
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
     "benchmark")
-        CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+        CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "callgrind") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS" ;;
+        CPPFLAGS="$CPPFLAGS " ;;
     "*") 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
@@ -102,7 +104,7 @@ case "$target" in
         ;;
     "build"|"debug"|"benchmark"|"callgrind")
         set -x
-        ctags --kinds-C=+l *.h *.c 2> /dev/null || true
+        ctags --kinds-C=+l -- *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;
@@ -112,6 +114,6 @@ case "$target" in
 esac
 
 case "$target" in
-    "benchmark") benchmark $2 ;;
-    "callgrind") callgrind $2 ;;
+    "benchmark") benchmark "$2" ;;
+    "callgrind") callgrind "$2" ;;
 esac
