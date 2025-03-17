@@ -162,17 +162,8 @@ uint32
 hash_function(char *key, uint32 key_size) {
     uint32 hash = 5381;
     BRN2_ASSUME_ALIGNED(key);
-#if 1
-    for (uint32 i = 0; i < key_size; i += 4) {
-        volatile uint32 aux;
-        memcpy(&aux, &key[i], sizeof(*(&aux)));
-#else
     for (uint32 i = 0; i < key_size; i += 1) {
-        /* volatile uint32 aux2 = (uint32)key[i]; */
-        /* volatile uint32 aux; */
-        /* memcpy(&aux, &aux2, sizeof(*(&aux2))); */
-#endif
-        hash = ((hash << 5) + hash) + (uint32)aux;
+        hash = ((hash << 5) + hash) + (uint32)key[i];
     }
     return (uint32)hash;
 }
