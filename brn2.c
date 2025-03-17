@@ -191,7 +191,8 @@ brn2_list_from_dir(char *directory) {
         uint32 size;
 
         if (brn2_is_invalid_name(name)) {
-            free(directory_list[i]);
+            if (BRN2_DEBUG)
+                free(directory_list[i]);
             continue;
         }
 
@@ -211,7 +212,8 @@ brn2_list_from_dir(char *directory) {
             memcpy(file->name, name, size);
         }
 
-        free(directory_list[i]);
+        if (BRN2_DEBUG)
+            free(directory_list[i]);
         length += 1;
     }
     free(directory_list);
