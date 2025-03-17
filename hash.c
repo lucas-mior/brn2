@@ -161,8 +161,9 @@ uint32
 hash_function(char *key, uint32 key_size) {
     uint32 hash = 5381;
     BRN2_ASSUME_ALIGNED(key);
-    for (uint32 i = 0; i < key_size; i += 1)
+    for (uint32 i = 0; i < key_size; i += 1) {
         hash = ((hash << 5) + hash) + (uint32)key[i];
+    }
     return hash;
 }
 
