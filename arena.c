@@ -2,11 +2,6 @@
 #include <sys/mman.h>
 #include "util.c"
 
-#define PushArray(arena, type, count) (type *)ArenaPush((arena), sizeof(type)*(count))
-#define PushArrayZero(arena, type, count) (type *)ArenaPushZero((arena), sizeof(type)*(count))
-#define PushStruct(arena, type) PushArray((arena), (type), 1)
-#define PushStructZero(arena, type) PushArrayZero((arena), (type), 1)
-
 Arena *
 arena_alloc(size_t size) {
     Arena *arena;
