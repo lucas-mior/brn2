@@ -117,7 +117,7 @@ hash_map_balance(HashMap *old_map) {
         if (iterator->key) {
             uint32 hash = iterator->hash;
             uint32 index = hash_normal(new_map, hash);
-            hash_map_insert_pre_calc(new_map, iterator->key, strlen(iterator->key),
+            hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
         }
         iterator = iterator->next;
@@ -125,7 +125,7 @@ hash_map_balance(HashMap *old_map) {
         while (iterator) {
             uint32 hash = iterator->hash;
             uint32 index = hash_normal(new_map, hash);
-            hash_map_insert_pre_calc(new_map, iterator->key, strlen(iterator->key),
+            hash_map_insert_pre_calc(new_map, iterator->key,
                                      hash, index, iterator->value);
 
             iterator = iterator->next;
@@ -178,11 +178,11 @@ bool
 hash_map_insert(HashMap *map, char *key, uint32 key_size, uint32 value) {
     uint32 hash = hash_function(key, key_size);
     uint32 index = hash_normal(map, hash);
-    return hash_map_insert_pre_calc(map, key, key_size, hash, index, value);
+    return hash_map_insert_pre_calc(map, key, hash, index, value);
 }
 
 bool
-hash_map_insert_pre_calc(HashMap *map, char *key, uint32 key_size, uint32 hash,
+hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
 				         uint32 index, uint32 value) {
     Bucket *iterator = &(map->array[index]);
 
@@ -195,7 +195,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 key_size, uint32 hash,
     }
 
     while (true) {
-        if ((hash == iterator->hash) && !memcmp(iterator->key, key, key_size))
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key))
             return false;
 
         if (iterator->next)
