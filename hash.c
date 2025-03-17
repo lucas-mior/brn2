@@ -157,7 +157,7 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
-#define NSTRINGS 1000000
+#define NSTRINGS 2000000
 uint32
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
