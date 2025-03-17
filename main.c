@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
             FileName *file = &(old->files[i]);
             uint32 *hash = &hashes_old[i];
 
-            while (!hash_map_insert_pre_calc(oldlist_map, file->name, file->length,
+            while (!hash_map_insert_pre_calc(oldlist_map, file->name,
                                              file->hash, *hash, i)) {
                 error(RED"'%s'"RESET" repeated in the buffer. Removing...\n",
                       file->name);
