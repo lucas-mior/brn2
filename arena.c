@@ -25,7 +25,7 @@ arena_alloc(size_t size) {
 void *
 arena_push(Arena *arena, uint32 size) {
     void *before = arena->pos;
-    arena->pos += size;
+    arena->pos = (char *)arena->pos + size;
     return before;
 }
 
@@ -37,7 +37,8 @@ arena_reset(Arena *arena) {
 
 void *
 arena_reset_zero(Arena *arena) {
-    memset(arena->begin, 0, arena->pos - arena->begin);
+    size_t size = (size_t)((char *)arena->pos - (char *)arena->begin);
+    memset(arena->begin, 0, size);
     arena->pos = arena->begin;
     return arena->begin;
 }
