@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
         capacity_set = hash_map_capacity(oldlist_map);
         hashes_old = brn2_create_hashes(old, capacity_set);
 
-        setvbuf(buffer.stream, buffer2, _IOFBF, BUFSIZ);
+        setvbuf(buffer.stream, buffer2, _IOFBF, sizeof(buffer2));
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             uint32 *hash = &hashes_old[i];
