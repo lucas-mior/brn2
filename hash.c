@@ -29,7 +29,6 @@
 #include <sys/mman.h>
 
 #include "hash.h"
-#include "util.h"
 #include "arena.h"
 
 #pragma push_macro("TESTING_THIS_FILE")
