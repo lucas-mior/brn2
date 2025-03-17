@@ -14,6 +14,7 @@ testing () {
             /tmp/$src.exe || gdb /tmp/$src.exe
         else
             printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
+            exit
         fi
 
         set +x 
