@@ -157,6 +157,7 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
+#define NSTRINGS 20
 uint32
 hash_function(char *key, uint32 key_size) {
     uint32 hash = 5381;
@@ -173,13 +174,14 @@ hash_function(char *key, uint32 key_size) {
 #endif
         hash = ((hash << 5) + hash) + (uint32)aux;
     }
-    return hash;
+    return (uint32)hash;
 }
 
 uint32
 hash_normal(HashMap *map, uint32 hash) {
     // capacity has to be power of 2
     uint32 normal = hash & map->bitmask;
+    printf("normal(0x%x) = 0x%x\n", hash, normal);
     return normal;
 }
 
@@ -203,6 +205,7 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
         return true;
     }
 
+    printf("%s collides with %s @ 0x%x/0x%x -> 0x%x\n", key, iterator->key, hash, hash_function(iterator->key, strlen(iterator->key)), index);
     while (true) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key))
             return false;
@@ -353,7 +356,7 @@ hash_map_expected_collisions(HashMap *map) {
 
 static char *
 random_string(void) {
-    int length = 16 + rand() % 50;
+    int length = 16 + rand() % 4;
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *string = xmalloc((usize)length + 1);
 
@@ -367,7 +370,6 @@ random_string(void) {
 }
 
 // flags: -lm
-#define NSTRINGS 500000
 int main(void) {
     struct timespec t0, t1;
     HashMap *original_map; 
