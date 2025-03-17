@@ -146,7 +146,8 @@ brn2_list_from_dir_recurse(char *directory) {
     }
     if (errno)
         error("Error in fts_read(%s): %s.\n", directory, strerror(errno));
-    fts_close(file_system);
+    if (fts_close(file_system) < 0)
+        error("Error in fts_close('%s'): %s.\n", directory, strerror(errno));
 
     if (length == 0) {
         error("Empty list. Exiting.\n");
