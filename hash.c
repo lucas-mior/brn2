@@ -165,29 +165,10 @@ hash_function(char *key, uint32 key_size) {
 #if 1
     uint32 hash = 2166136261u;
     do {
-        hash ^= key[i]; hash *= 16777619u;
-        hash ^= key[i+1]; hash *= 16777619u;
-        hash ^= key[i+2]; hash *= 16777619u;
-        hash ^= key[i+3]; hash *= 16777619u;
-        hash ^= key[i+4]; hash *= 16777619u;
-        hash ^= key[i+5]; hash *= 16777619u;
-        hash ^= key[i+6]; hash *= 16777619u;
-        hash ^= key[i+7]; hash *= 16777619u;
-        hash ^= key[i+8]; hash *= 16777619u;
-        hash ^= key[i+9]; hash *= 16777619u;
-        hash ^= key[i+10]; hash *= 16777619u;
-        hash ^= key[i+11]; hash *= 16777619u;
-        hash ^= key[i+12]; hash *= 16777619u;
-        hash ^= key[i+13]; hash *= 16777619u;
-        hash ^= key[i+14]; hash *= 16777619u;
-        hash ^= key[i+15]; hash *= 16777619u;
-        i += BRN2_ALIGNMENT;
-    } while (i+BRN2_ALIGNMENT < key_size);
-    while (i < key_size) {
         hash ^= key[i];
         hash *= 16777619u;
         i += 1;
-    }
+    } while (i < key_size);
 #else
     uint64 hash = 14695981039346656037u;
     do {
