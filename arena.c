@@ -45,7 +45,10 @@ arena_reset_zero(Arena *arena) {
 
 void
 arena_destroy(Arena *arena) {
-    xmunmap(arena->begin, arena->size);
+    if (munmap(arena->begin, arena->size) < 0) {
+        error("Error in %s:\n", __func__);
+        error("Error in munmap(%p, %zu): %s\n", arena->begin, arena->size);
+    }
     free(arena);
     return;
 }
