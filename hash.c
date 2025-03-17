@@ -167,8 +167,19 @@ hash_function(char *key, uint32 key_size) {
     do {
         hash ^= key[i];
         hash *= 16777619u;
+        hash ^= key[i+1];
+        hash *= 16777619u;
+        hash ^= key[i+2];
+        hash *= 16777619u;
+        hash ^= key[i+3];
+        hash *= 16777619u;
         i += 1;
-    } while (i < key_size);
+    } while (i+4 < key_size);
+    while (i < key_size) {
+        hash ^= key[i];
+        hash *= 16777619u;
+        i += 1;
+    }
 #else
     uint64 hash = 14695981039346656037u;
     do {
