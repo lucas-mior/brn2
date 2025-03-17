@@ -157,7 +157,7 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
-#define NSTRINGS 20
+#define NSTRINGS 1000000
 uint32
 hash_function(char *key, uint32 key_size) {
     uint32 hash = 5381;
@@ -165,12 +165,12 @@ hash_function(char *key, uint32 key_size) {
 #if 1
     for (uint32 i = 0; i < key_size; i += 4) {
         volatile uint32 aux;
-        memcpy(&aux, key, sizeof(*(&aux)));
+        memcpy(&aux, &key[i], sizeof(*(&aux)));
 #else
     for (uint32 i = 0; i < key_size; i += 1) {
-        volatile uint32 aux2 = (uint32)key[i];
-        volatile uint32 aux;
-        memcpy(&aux, &aux2, sizeof(*(&aux2)));
+        /* volatile uint32 aux2 = (uint32)key[i]; */
+        /* volatile uint32 aux; */
+        /* memcpy(&aux, &aux2, sizeof(*(&aux2))); */
 #endif
         hash = ((hash << 5) + hash) + (uint32)aux;
     }
@@ -181,7 +181,6 @@ uint32
 hash_normal(HashMap *map, uint32 hash) {
     // capacity has to be power of 2
     uint32 normal = hash & map->bitmask;
-    printf("normal(0x%x) = 0x%x\n", hash, normal);
     return normal;
 }
 
@@ -205,7 +204,6 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
         return true;
     }
 
-    printf("%s collides with %s @ 0x%x/0x%x -> 0x%x\n", key, iterator->key, hash, hash_function(iterator->key, strlen(iterator->key)), index);
     while (true) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key))
             return false;
