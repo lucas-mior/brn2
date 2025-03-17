@@ -87,6 +87,7 @@ hash_map_balance(HashMap *old_map) {
     uint32 size;
     uint32 capacity;
     uint32 bitmask;
+    usize old_size;
 
     if (old_map->capacity < (UINT32_MAX/2)) {
         capacity = old_map->capacity*2;
@@ -130,7 +131,8 @@ hash_map_balance(HashMap *old_map) {
         }
     }
 
-    free(old_map);
+    old_size = sizeof(*old_map) + old_map->capacity*sizeof(old_map->array[0]);
+    xmunmap(old_map, old_size);
     return new_map;
 }
 
@@ -158,8 +160,7 @@ hash_map_destroy(HashMap *map) {
             free(aux);
         }
     }
-    if (munmap(map, size) < 0)
-        error("Error in munmap(%p): %s\n", (void *)map, strerror(errno));
+    xmunmap(map, size);
     return;
 }
 
