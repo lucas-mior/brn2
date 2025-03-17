@@ -40,6 +40,19 @@ xmalloc(const usize size) {
 }
 
 void *
+xmmap(const usize size) {
+    void *p;
+    p = mmap(NULL, size,
+             PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE,
+             -1, 0);
+    if (p == MAP_FAILED) {
+        error("Failed to map memory: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
+void *
 xrealloc(void *old, const usize size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
