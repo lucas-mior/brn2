@@ -79,7 +79,6 @@ brn2_list_from_args(int argc, char **argv) {
         file->name = arena_push(list->arena, size);
         BRN2_ASSUME_ALIGNED(file->name);
         memcpy(file->name, name, size);
-        memset(&file->name[file->length], 0, size - file->length);
 
         length += 1;
     }
@@ -136,7 +135,6 @@ brn2_list_from_dir_recurse(char *directory) {
             file->name = arena_push(list->arena, size);
             BRN2_ASSUME_ALIGNED(file->name);
             memcpy(file->name, name, size);
-            memset(&file->name[file->length], 0, size - file->length);
 
             length += 1;
             break;
@@ -213,7 +211,6 @@ brn2_list_from_dir(char *directory) {
             BRN2_ASSUME_ALIGNED(file->name);
             memcpy(file->name, name, size);
         }
-        memset(&file->name[file->length], 0, size - file->length);
 
         if (BRN2_DEBUG)
             free(directory_list[i]);
@@ -314,7 +311,6 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         file->name = arena_push(list->arena, size);
         BRN2_ASSUME_ALIGNED(file->name);
         memcpy(file->name, begin, size);
-        memset(&file->name[file->length], 0, size - file->length);
 
         begin = pointer + 1;
         pointer += 1;
