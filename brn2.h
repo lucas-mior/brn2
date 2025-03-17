@@ -39,8 +39,6 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-#define USE_HASH_MAP_THRESHOLD 128
-#define USE_THREADS_THRESHOLD 524288
 #define MAX_THREADS 64
 #define BRN2_ALIGNMENT 16
 #define MIN(a,b) (a) < (b) ? (a) : (b)
