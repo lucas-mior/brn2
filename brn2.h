@@ -109,6 +109,7 @@ typedef struct Arena {
 
 typedef struct FileList {
     uint32 length;
+    uint32 unused;
     Arena *arena;
     FileName files[];
 } FileList;
