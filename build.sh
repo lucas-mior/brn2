@@ -73,8 +73,11 @@ else
 fi
 
 case "$target" in
-    "benchmark") CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
-    "callgrind") CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+    "benchmark")
+        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+    "callgrind") 
+        CFLAGS="$CFLAGS -g "
+        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "*") ;;
 esac
 
