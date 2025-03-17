@@ -615,7 +615,8 @@ brn2_execute(FileList *old, FileList *new,
                 if (hash_set_insert_pre_calc(names_renamed, newname,
                                              newhash, newindex))
                     number_renames += 1;
-                print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", *oldname, newname);
+                print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n",
+                      *oldname, newname);
 
                 if (newname_index_on_oldlist) {
                     uint32 next = *newname_index_on_oldlist;
