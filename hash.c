@@ -208,10 +208,11 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
     }
 
     map->collisions += 1;
-    iterator->next = xcalloc(1, sizeof(*iterator));
+    iterator->next = xmalloc(sizeof(*iterator));
     iterator->next->key = key;
     iterator->next->hash = hash;
     iterator->next->value = value;
+    iterator->next->next = NULL;
     map->length += 1;
 
     return true;
