@@ -103,14 +103,15 @@ brn2_list_from_dir_recurse(char *directory) {
     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
     if (file_system == NULL) {
         error("Error opening %s for traversal: %s.\n",
-                directory, strerror(errno));
+              directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
+    errno = 0;
 
     while ((ent = fts_read(file_system))) {
         switch (ent->fts_info) {
         case FTS_ERR:
-            error("Error in fts_read(%s): %s.\n",
+            error("Error in fts_read('%s'): %s.\n",
                   directory, strerror(ent->fts_errno));
             exit(EXIT_FAILURE);
         case FTS_D:
