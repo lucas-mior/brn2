@@ -69,19 +69,19 @@ fi
 
 case "$target" in
     "debug")
-        CFLAGS="$CFLAGS -g -fsanitize=undefined "
+        CFLAGS="$CFLAGS -g -fsanitize=undefined"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
     "benchmark")
-        CFLAGS="$CFLAGS "
+        CFLAGS="$CFLAGS -O2 -flto -march=native"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "callgrind") 
-        CFLAGS="$CFLAGS -g "
+        CFLAGS="$CFLAGS -g -O2 -flto -march=native"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
-        CFLAGS="$CFLAGS -g "
+        CFLAGS="$CFLAGS -g -O2 -flto -march=native"
         CPPFLAGS="$CPPFLAGS" ;;
     "*") 
-        CFLAGS="$CFLAGS -g -O2 -flto"
+        CFLAGS="$CFLAGS -O2 -flto -march=native"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
 esac
 
