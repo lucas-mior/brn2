@@ -9,8 +9,7 @@ testing () {
         printf "Testing $src...\n"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        cmdline="$CC $CPPFLAGS $CFLAGS \
-                 -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
+        cmdline="$CC $CPPFLAGS $CFLAGS -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
         set -x
         if $cmdline; then
             /tmp/$src.exe || gdb /tmp/$src.exe
@@ -85,7 +84,7 @@ case "$target" in
     "test") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS " ;;
-    "*") 
+    *) 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
 esac
