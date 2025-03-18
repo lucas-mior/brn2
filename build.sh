@@ -37,7 +37,7 @@ benchmark() {
     create_files
     cd "$d" || exit
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
-    time $dir/brn2 -s -q -d . 2>&1
+    $dir/brn2 -s -q -d .
     cd "$dir" || exit
 }
 

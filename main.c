@@ -80,6 +80,11 @@ int main(int argc, char **argv) {
     uint32 main_capacity;
     char *EDITOR;
     int opt;
+#ifdef BRN2_BENCHMARK
+    struct timespec t0;
+    struct timespec t1;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+#endif
 
     const char *tempdir = "/tmp";
     char *directory = ".";
@@ -342,6 +347,17 @@ int main(int argc, char **argv) {
                             number_renames, number_renames != 1, "s");
         }
     }
+
+#ifdef BRN2_BENCHMARK
+    {
+        clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+        long seconds = t1.tv_sec - t0.tv_sec;
+        long nanos = t1.tv_nsec - t0.tv_nsec;
+        double total_seconds = (double)seconds + (double)nanos/1.0e9;
+        printf("\ntime elapsed (%s): %gs = %gus per file\n\n",
+               __FILE__, total_seconds, 1e6*(total_seconds/(double)old->length));
+    }
+#endif
 
     if (BRN2_DEBUG) {
         xmunmap(hashes_old, old->length*sizeof(*hashes_old));
