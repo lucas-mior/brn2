@@ -163,7 +163,7 @@ uint32 __attribute__ ((noinline))
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     BRN2_ASSUME_ALIGNED(key);
-#if 0
+#if 1
     uint32 hash = 0;
     do {
         uint64 *p = (void *)&key[i];
@@ -358,7 +358,7 @@ hash_map_expected_collisions(HashMap *map) {
 
 static char *
 random_string(void) {
-    int length = BRN2_ALIGNMENT + rand() % BRN2_ALIGNMENT;
+    int length = BRN2_ALIGNMENT*100 + rand() % BRN2_ALIGNMENT;
     int size = ALIGN(length + 1);
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *string = xmalloc(size);
