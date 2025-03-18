@@ -228,10 +228,9 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     left = map_size - padding;
 
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
-        FileName *file;
+        FileName *file = &(list->files[length]);
         uint32 size;
 
-        file = &(list->files[length]);
         *pointer = '\0';
         if (is_old && brn2_is_invalid_name(begin)) {
             begin = pointer + 1;
