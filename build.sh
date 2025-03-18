@@ -29,7 +29,7 @@ create_files() {
     rm -rf "$d"
     mkdir -p "$d"
     cd "$d" || exit
-    seq -w $NFILES | sed 's/^/000/g' | xargs -P"$(nproc)" touch
+    seq -w $NFILES | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
     cd "$dir" || exit
 }
 
