@@ -163,24 +163,20 @@ uint32 __attribute__ ((noinline))
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     BRN2_ASSUME_ALIGNED(key);
-#if 1
+#if 0
+    uint32 hash = 0;
+    do {
+        uint64 *p = (void *)&key[i];
+        hash = _mm_crc32_u64(hash, *p);
+        i += 8;
+    } while (i < key_size);
+#else
     uint32 hash = 2166136261u;
     do {
         hash ^= key[i];
         hash *= 16777619u;
         i += 1;
     } while (i < key_size);
-#else
-    uint32 hash = 0;
-    do {
-        uint64 *p = (void *)&key[i];
-        hash = _mm_crc32_u64(hash, *p);
-        i += 8;
-    } while ((i + 8) < key_size);
-    while (i < key_size) {
-        hash = _mm_crc32_u8(hash, key[i]);
-        i += 1;
-    }
 #endif
     return (uint32)hash;
 }
