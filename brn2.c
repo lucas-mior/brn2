@@ -244,14 +244,6 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     bool is_old = capacity == 0;
     int fd;
 
-    if (capacity == 0)
-        capacity = 128;
-    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
-    if (is_old)
-        list->arena = arena_old;
-    else
-        list->arena = arena_new;
-
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening file for reading: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
@@ -277,6 +269,14 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
+    if (capacity == 0)
+        capacity = map_size/2;
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    if (is_old)
+        list->arena = arena_old;
+    else
+        list->arena = arena_new;
+
     map = mmap(NULL, map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
@@ -292,11 +292,6 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
         FileName *file;
         uint32 size;
-
-        if (length >= capacity) {
-            capacity *= 2;
-            list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, capacity));
-        }
 
         file = &(list->files[length]);
         *pointer = '\0';
