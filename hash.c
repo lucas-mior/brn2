@@ -180,11 +180,12 @@ hash_function(char *key, uint32 key_size) {
 #else
     uint32 hash = 0;
     do {
-        hash = _mm_crc32_u32(hash, key[i]);
+        uint64 *p = (void *)&key[i];
+        hash = _mm_crc32_u32(hash, *p);
         i += 4;
     } while ((i + 4) < key_size);
     while (i < key_size) {
-        hash = _mm_crc32_u32(hash, key[i]);
+        hash = _mm_crc32_u8(hash, key[i]);
         i += 1;
     }
 #endif
