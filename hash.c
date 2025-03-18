@@ -370,8 +370,9 @@ hash_map_expected_collisions(HashMap *map) {
 static char *
 random_string(void) {
     int length = BRN2_ALIGNMENT + rand() % 15;
+    int size = ALIGN(length + 1);
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    char *string = xmalloc((usize)length + 1);
+    char *string = xmalloc(size);
 
     for (int i = 0; i < length; i += 1) {
         int c = rand() % ((int)sizeof(characters) - 1);
