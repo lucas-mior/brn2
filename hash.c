@@ -163,7 +163,7 @@ uint32 __attribute__ ((noinline))
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     BRN2_ASSUME_ALIGNED(key);
-#if 0
+#if 1
     uint32 hash = 2166136261u;
     do {
         hash ^= key[i];
