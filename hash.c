@@ -159,7 +159,7 @@ hash_map_destroy(HashMap *map) {
 }
 
 #define NSTRINGS 2000000
-uint32
+uint32 __attribute__ ((noinline))
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     BRN2_ASSUME_ALIGNED(key);
