@@ -30,7 +30,7 @@ create_files() {
     rm -rf "$d"
     mkdir -p "$d"
     cd "$d" || exit
-    seq -w $NFILES | xargs -P"$(nproc)" touch
+    seq -w $NFILES | sed 's/^/000/g' | xargs -P"$(nproc)" touch
     cd "$dir" || exit
 }
 
@@ -49,7 +49,7 @@ callgrind() {
         --collect-systime=msec \
         --dump-instr=yes \
         --callgrind-out-file=$dir/brn2_$1.out \
-        $dir/brn2 -s -q -d .
+        $dir/brn2 -s -q -r .
     cd "$dir" || exit
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
