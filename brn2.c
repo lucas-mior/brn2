@@ -89,7 +89,7 @@ brn2_list_from_args(int argc, char **argv) {
 }
 
 FileList *
-brn2_list_from_dir_recurse(char *directory) {
+brn2_list_from_dir(char *directory, int depth) {
     FileList *list;
     char* const paths[] = { directory, NULL };
     FTS *file_system = NULL;
@@ -110,6 +110,8 @@ brn2_list_from_dir_recurse(char *directory) {
     errno = 0;
 
     while ((ent = fts_read(file_system))) {
+        if (ent->fts_level > depth)
+            continue;
         switch (ent->fts_info) {
         case FTS_ERR:
             error("Error in fts_read('%s'): %s.\n",
@@ -156,70 +158,6 @@ brn2_list_from_dir_recurse(char *directory) {
     }
 
     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
-    list->length = length;
-    return list;
-}
-
-FileList *
-brn2_list_from_dir(char *directory) {
-    FileList *list;
-    struct dirent **directory_list;
-    uint32 length = 0;
-    uint16 directory_length;
-    int number_files;
-
-    if (strcmp(directory, "."))
-       directory_length = (uint16)strlen(directory);
-    else
-       directory_length = 0;
-
-    number_files = scandir(directory, &directory_list, NULL, NULL);
-    if (number_files < 0) {
-        error("Error scanning '%s': %s\n", directory, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    if (number_files <= 2) {
-        error("Empty directory. Exiting.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files - 2));
-    list->arena = arena_old;
-
-    for (int i = 0; i < number_files; i += 1) {
-        char *name = directory_list[i]->d_name;
-        FileName *file = &(list->files[length]);
-        uint16 name_length = (uint16)strlen(name);
-        uint32 size;
-
-        if (brn2_is_invalid_name(name)) {
-            if (BRN2_DEBUG)
-                free(directory_list[i]);
-            continue;
-        }
-
-        if (directory_length) {
-            file->length = directory_length + 1 + name_length;
-            size = ALIGN(file->length+2);
-            file->name = arena_push(list->arena, size);
-            BRN2_ASSUME_ALIGNED(file->name);
-            memcpy(file->name, directory, directory_length);
-            file->name[directory_length] = '/';
-            memcpy(file->name + directory_length + 1, name, name_length + 1);
-        } else {
-            file->length = name_length;
-            size = ALIGN(file->length+2);
-            file->name = arena_push(list->arena, size);
-            BRN2_ASSUME_ALIGNED(file->name);
-            memcpy(file->name, name, size);
-        }
-        memset(&file->name[file->length], 0, size - file->length);
-
-        if (BRN2_DEBUG)
-            free(directory_list[i]);
-        length += 1;
-    }
-    free(directory_list);
     list->length = length;
     return list;
 }
@@ -757,7 +695,7 @@ int main(void) {
     char *file = command + 8;
 
     system(command);
-    list1 = brn2_list_from_dir(".");
+    list1 = brn2_list_from_dir(".", 1);
     list2 = brn2_list_from_lines(file, 0);
 
     brn2_normalize_names(list1, NULL);
