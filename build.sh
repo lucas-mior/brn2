@@ -53,6 +53,14 @@ callgrind() {
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
 
+profile() {
+    create_files
+    cd "$d" || exit
+    $dir/brn2 -s -q -r .
+    gprof $dir/brn2 > "profile_$1.gprof"
+    cd "$dir" || exit
+}
+
 target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -81,6 +89,9 @@ case "$target" in
     "callgrind") 
         CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+    "profile") 
+        CFLAGS="$CFLAGS -g -O2 -flto -march=native -pg -ftree-vectorize"
+        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS " ;;
@@ -104,7 +115,7 @@ case "$target" in
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "build"|"debug"|"benchmark"|"callgrind")
+    "build"|"debug"|"benchmark"|"callgrind"|"profile")
         set -x
         ctags --kinds-C=+l -- *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
@@ -118,4 +129,5 @@ esac
 case "$target" in
     "benchmark") benchmark "$2" ;;
     "callgrind") callgrind "$2" ;;
+    "profile") profile "$2" ;;
 esac
