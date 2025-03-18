@@ -57,7 +57,7 @@ profile() {
     create_files
     cd "$d" || exit
     $dir/brn2 -s -q -r .
-    gprof $dir/brn2 > "profile_$1.gprof"
+    gprof $dir/brn2 | tee "$dir/profile_$1.gprof"
     cd "$dir" || exit
 }
 
@@ -90,7 +90,7 @@ case "$target" in
         CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "profile") 
-        CFLAGS="$CFLAGS -g -O2 -flto -march=native -pg -ftree-vectorize"
+        CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize -pg"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
