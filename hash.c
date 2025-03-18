@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <immintrin.h>
 
 #include "hash.h"
 #include "arena.h"
@@ -162,20 +163,30 @@ uint32
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     BRN2_ASSUME_ALIGNED(key);
-#if 1
+#if 0
     uint32 hash = 2166136261u;
     do {
         hash ^= key[i];
         hash *= 16777619u;
         i += 1;
     } while (i < key_size);
-#else
+#elif 0
     uint64 hash = 14695981039346656037u;
     do {
         hash ^= key[i];
         hash *= 1099511628211u;
         i += 1;
     } while (i < key_size);
+#else
+    uint32 hash = 0;
+    do {
+        hash = _mm_crc32_u32(hash, key[i]);
+        i += 4;
+    } while ((i + 4) < key_size);
+    while (i < key_size) {
+        hash = _mm_crc32_u32(hash, key[i]);
+        i += 1;
+    }
 #endif
     return (uint32)hash;
 }
