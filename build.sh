@@ -45,7 +45,10 @@ benchmark() {
 callgrind() {
     create_files
     cd "$d" || exit
-    valgrind --tool=callgrind --callgrind-out-file=$dir/brn2_$1.out \
+    valgrind --tool=callgrind \
+        --collect-systime=msec \
+        --dump-instr=yes \
+        --callgrind-out-file=$dir/brn2_$1.out \
         $dir/brn2 -s -q -d .
     cd "$dir" || exit
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
