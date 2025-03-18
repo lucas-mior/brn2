@@ -358,7 +358,7 @@ hash_map_expected_collisions(HashMap *map) {
 
 static char *
 random_string(void) {
-    int length = BRN2_ALIGNMENT + rand() % 15;
+    int length = BRN2_ALIGNMENT + rand() % BRN2_ALIGNMENT;
     int size = ALIGN(length + 1);
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *string = xmalloc(size);
@@ -392,7 +392,7 @@ int main(void) {
     assert(!hash_map_insert(original_map, string1, strlen(string1), 1));
     assert(hash_map_insert(original_map, string2, strlen(string2), 2));
 
-    srand((uint)t0.tv_nsec);
+    srand(42);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         char *key = random_string();
