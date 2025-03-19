@@ -181,7 +181,12 @@ void error(char *format, ...) {
 #include <assert.h>
 
 int main(void) {
-    assert(true);
+    void *p1 = xmalloc(1024*1024*1024);
+    void *p2 = xcalloc(1024, 1024*1024);
+    char *string = __FILE__;
+    memcpy(p1, string, strlen(string));
+    char *p3 = xstrdup(p1);
+    error("%s == %s is working? %b\n", string, p3, !strcmp(string, p3));
     exit(0);
 }
 
