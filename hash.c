@@ -398,7 +398,8 @@ int main(void) {
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
-    assert(*(uint32 *)hash_map_lookup(balanced_map, string1, strlen(string1)) == 0);
+    uint32 *value = hash_map_lookup(balanced_map, string1, strlen(string1));
+    assert(*value == 0);
     assert(!hash_map_lookup(balanced_map, string3, strlen(string3)));
 
     assert(!hash_map_remove(balanced_map, string3, strlen(string3)));
