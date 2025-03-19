@@ -22,7 +22,6 @@
 
 #include "brn2.h"
 #include "hash.h"
-#include "util.h"
 
 #include <errno.h>
 #include <stdlib.h>

@@ -19,7 +19,6 @@
 
 #include "brn2.h"
 #include "hash.h"
-#include "util.h"
 
 #include "brn2.c"
 #include "hash.c"

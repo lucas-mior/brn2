@@ -27,7 +27,6 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "util.h"
 #include "brn2.h"
 
 void *
