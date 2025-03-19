@@ -9,7 +9,8 @@ testing () {
         printf "Testing $src...\n"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        cmdline="$CC $CPPFLAGS $CFLAGS -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
+        cmdline="$CC $CPPFLAGS $CFLAGS"
+        cmdline="$cmdline -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
         set -x
         if $cmdline; then
             /tmp/$src.exe || gdb /tmp/$src.exe
@@ -109,6 +110,8 @@ case "$target" in
     "test")
         testing
         ;;
+    "check")
+        ;;
     "install")
         [ ! -f $program ] && $0 build
         set -x
@@ -130,4 +133,5 @@ case "$target" in
     "benchmark") benchmark "$2" ;;
     "callgrind") callgrind "$2" ;;
     "profile") profile "$2" ;;
+    "check") scan-build -analyze-headers ./build.sh
 esac

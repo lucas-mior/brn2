@@ -61,7 +61,7 @@ struct HashMap {
 HashMap *
 hash_map_create(uint32 length) {
     HashMap *map;
-    uint32 size;
+    uint64 size;
     uint32 capacity = 1;
     uint32 power = 0;
 
@@ -87,7 +87,7 @@ hash_map_create(uint32 length) {
 HashMap *
 hash_map_balance(HashMap *old_map) {
     HashMap *new_map;
-    uint32 size;
+    usize size;
     uint32 capacity;
     uint32 bitmask;
     usize old_size;
