@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 typedef struct HashMap HashMap;
 typedef struct HashMap HashSet;
