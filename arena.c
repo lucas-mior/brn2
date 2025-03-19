@@ -18,8 +18,8 @@
 #ifndef ARENA_C
 #define ARENA_C
 
-#include "brn2.h"
 #include <sys/mman.h>
+#include "brn2.h"
 #include "util.c"
 
 Arena *

@@ -23,7 +23,6 @@
 #include "brn2.h"
 #include "hash.h"
 #include "util.h"
-#include "arena.h"
 
 #include <errno.h>
 #include <stdlib.h>
