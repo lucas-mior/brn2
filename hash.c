@@ -165,7 +165,7 @@ hash_function(char *key, uint32 key_size) {
     uint32 hash = 2166136261u;
 
     do {
-        hash ^= key[i];
+        hash ^= (uint32)key[i];
         hash *= 16777619u;
         i += 1;
     } while (i < key_size);
