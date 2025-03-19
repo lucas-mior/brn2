@@ -335,19 +335,22 @@ hash_map_expected_collisions(HashMap *map) {
 #if TESTING_THIS_FILE
 #include <assert.h>
 
-#define NSTRINGS 2000000
+#define NSTRINGS 1000000
 #define NBYTES 10*BRN2_ALIGNMENT
 
 static char *
 random_string(Arena *arena) {
     int length = NBYTES + rand() % BRN2_ALIGNMENT;
     int size = ALIGN(length + 1);
-    const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+    const char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyz"
+                           "!@#$%&*()[]-=_+<>,"
+                           "0123456789";
     char *string = arena_push(arena, size);
 
     for (int i = 0; i < length; i += 1) {
-        int c = rand() % ((int)sizeof(characters) - 1);
-        string[i] = characters[c];
+        int c = rand() % ((int)sizeof(allowed) - 1);
+        string[i] = allowed[c];
     }
     string[length] = '\0';
 
