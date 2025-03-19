@@ -114,10 +114,10 @@ typedef struct FileList {
 } FileList;
 
 extern char *program;
-extern bool brn2_fatal;
-extern bool brn2_implict;
-extern bool brn2_quiet;
-extern bool brn2_sort;
+extern bool brn2_options_fatal;
+extern bool brn2_options_implicit;
+extern bool brn2_options_quiet;
+extern bool brn2_options_sort;
 extern uint32 nthreads;
 
 extern Arena *arena_old;
