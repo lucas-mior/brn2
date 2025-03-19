@@ -36,13 +36,4 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
-void *xmalloc(const usize);
-void *xmmap(const usize);
-void xmunmap(void *p, usize size);
-void *xrealloc(void *, const usize);
-void *xcalloc(const usize, const usize);
-void *xmemdup(void *, usize);
-char *xstrdup(char *);
-void util_command(const int, char **);
-
 #endif
