@@ -336,7 +336,7 @@ hash_map_expected_collisions(HashMap *map) {
 #include <assert.h>
 
 #define NSTRINGS 2000000
-#define NBYTES BRN2_ALIGNMENT
+#define NBYTES 10*BRN2_ALIGNMENT
 
 static char *
 random_string(Arena *arena) {
@@ -415,8 +415,8 @@ int main(void) {
         long nanos = t1.tv_nsec - t0.tv_nsec;
 
         double total_seconds = (double)seconds + (double)nanos/1.0e9;
-        double micros_per_str = 1e6*(total_seconds/(double)NSTRINGS);
-        double nanos_per_byte = 1e3*(micros_per_str/(double)NBYTES);
+        double micros_per_str = 1e6*(total_seconds/(double)(NSTRINGS));
+        double nanos_per_byte = 1e3*(micros_per_str/(double)(NBYTES));
 
         printf("\ntime elapsed (%s):\n", __FILE__);
         printf("%gs = %gus per string = %gns per byte\n\n",
