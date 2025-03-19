@@ -56,9 +56,11 @@ callgrind() {
 
 valgrind2() {
     ls > rename
-    valgrind --leak-check=full --show-leak-kinds=all $dir/brn2 -r . || exit
-    valgrind --leak-check=full --show-leak-kinds=all $dir/brn2 -d . || exit
-    valgrind --leak-check=full --show-leak-kinds=all $dir/brn2 -f rename || exit
+    vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
+    vg_flags="--leak-check=full --show-leak-kinds=all"
+    valgrind $vg_flags $dir/brn2 -r . || exit
+    valgrind $vg_flags $dir/brn2 -d . || exit
+    valgrind $vg_flags $dir/brn2 -f rename || exit
 }
 
 profile() {
