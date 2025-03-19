@@ -366,8 +366,8 @@ int main(int argc, char **argv) {
         brn2_free_list(new);
         hash_map_destroy(oldlist_map);
         hash_map_destroy(newlist_map);
-        free(arena_old);
-        free(arena_new);
+        arena_destroy(arena_old);
+        arena_destroy(arena_new);
     }
     exit(EXIT_SUCCESS);
 }
