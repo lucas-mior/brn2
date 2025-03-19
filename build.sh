@@ -12,7 +12,7 @@ testing () {
         cmdline="$CC $CPPFLAGS $CFLAGS -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
         set -x
         if $cmdline; then
-            /tmp/$src.exe || exit
+            /tmp/$src.exe || gdb /tmp/$src.exe
         else
             printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
             exit
