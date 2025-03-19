@@ -96,6 +96,10 @@ case "$target" in
     "test") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS " ;;
+    "check") 
+        CC=gcc
+        CFLAGS="$CFLAGS -fanalyzer"
+        CPPFLAGS="$CPPFLAGS " ;;
     *) 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
@@ -110,15 +114,13 @@ case "$target" in
     "test")
         testing
         ;;
-    "check")
-        ;;
     "install")
         [ ! -f $program ] && $0 build
         set -x
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "build"|"debug"|"benchmark"|"callgrind"|"profile")
+    "build"|"debug"|"benchmark"|"callgrind"|"profile"|"check")
         set -x
         ctags --kinds-C=+l -- *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
@@ -133,5 +135,5 @@ case "$target" in
     "benchmark") benchmark "$2" ;;
     "callgrind") callgrind "$2" ;;
     "profile") profile "$2" ;;
-    "check") scan-build --view -analyze-headers ./build.sh
+    "check") scan-build --view -analyze-headers ./build.sh ;;
 esac
