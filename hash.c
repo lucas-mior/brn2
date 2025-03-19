@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
-#include <immintrin.h>
 
 #include "hash.h"
 
