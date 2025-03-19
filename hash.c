@@ -163,7 +163,7 @@ uint32 __attribute__ ((noinline))
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     BRN2_ASSUME_ALIGNED(key);
-#if 1
+#if 0
     uint32 hash = 0;
     do {
         uint64 *p = (void *)&key[i];
