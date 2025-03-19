@@ -42,6 +42,7 @@ xmalloc(const usize size) {
 void *
 xmmap(const usize size) {
     void *p;
+
     p = mmap(NULL, size,
              PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_POPULATE,
              -1, 0);
