@@ -54,6 +54,13 @@ callgrind() {
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
 
+valgrind2() {
+    ls > rename
+    valgrind --leak-check=full --show-leak-kinds=all $dir/brn2 -r . || exit
+    valgrind --leak-check=full --show-leak-kinds=all $dir/brn2 -d . || exit
+    valgrind --leak-check=full --show-leak-kinds=all $dir/brn2 -f rename || exit
+}
+
 profile() {
     create_files
     cd "$d" || exit
@@ -90,6 +97,9 @@ case "$target" in
     "callgrind") 
         CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+    "valgrind") 
+        CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
+        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG" ;;
     "profile") 
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize -pg"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
@@ -120,7 +130,7 @@ case "$target" in
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
-    "build"|"debug"|"benchmark"|"callgrind"|"profile"|"check")
+    "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check")
         set -x
         ctags --kinds-C=+l -- *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
@@ -134,6 +144,7 @@ esac
 case "$target" in
     "benchmark") benchmark "$2" ;;
     "callgrind") callgrind "$2" ;;
+    "valgrind") valgrind2 "$2" ;;
     "profile") profile "$2" ;;
     "check") scan-build --view -analyze-headers ./build.sh ;;
 esac
