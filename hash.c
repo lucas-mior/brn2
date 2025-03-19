@@ -146,7 +146,7 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
-uint32 __attribute__ ((noinline))
+uint32 BRN2_INLINE
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
     uint32 hash = 2166136261u;

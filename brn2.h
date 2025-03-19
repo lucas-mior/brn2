@@ -60,6 +60,12 @@
 #define BRN2_DEBUG 0
 #endif
 
+#ifdef BRN2_BENCHMARK
+#define BRN2_INLINE __attribute__ ((noinline))
+#else
+#define BRN2_INLINE
+#endif
+
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (sizeof(*struct_object) + (usize)(array_length)*sizeof(ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
