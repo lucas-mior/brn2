@@ -36,7 +36,7 @@ arena_alloc(size_t size) {
     }
 
     arena = p;
-    arena->begin = arena + sizeof(*arena);
+    arena->begin = arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
     return arena;
@@ -65,7 +65,7 @@ arena_reset_zero(Arena *arena) {
 
 void
 arena_destroy(Arena *arena) {
-    if (munmap(arena, arena->size + sizeof(*arena)) < 0) {
+    if (munmap(arena, arena->size + ALIGN(sizeof(*arena))) < 0) {
         error("Error in %s:\n", __func__);
         error("Error in munmap(%p, %zu): %s\n",
               arena, arena->size + sizeof(*arena));
