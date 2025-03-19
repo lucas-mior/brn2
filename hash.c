@@ -139,18 +139,6 @@ hash_map_balance(HashMap *old_map) {
 }
 
 void
-hash_map_free_keys(HashMap *map) {
-    for (uint32 i = 0; i < hash_map_capacity(map); i += 1) {
-        Bucket *iterator = &(map->array[i]);
-        while (iterator) {
-            free(iterator->key);
-            iterator = iterator->next;
-        }
-    }
-    return;
-}
-
-void
 hash_map_destroy(HashMap *map) {
     usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]);
     arena_destroy(map->arena);
@@ -349,11 +337,11 @@ hash_map_expected_collisions(HashMap *map) {
 #include <assert.h>
 
 static char *
-random_string(void) {
+random_string(Arena *arena) {
     int length = BRN2_ALIGNMENT*10 + rand() % BRN2_ALIGNMENT;
     int size = ALIGN(length + 1);
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
-    char *string = xmalloc(size);
+    char *string = arena_push(arena, size);
 
     for (int i = 0; i < length; i += 1) {
         int c = rand() % ((int)sizeof(characters) - 1);
@@ -373,6 +361,7 @@ int main(void) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 
     original_map = hash_map_create(NSTRINGS);
+    Arena *arena = arena_alloc((usize)4096*NSTRINGS);
     assert(original_map);
     assert(hash_map_capacity(original_map) >= NSTRINGS);
 
@@ -387,7 +376,7 @@ int main(void) {
     srand(42);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
-        char *key = random_string();
+        char *key = random_string(arena);
         uint32 value = (uint32)rand();
         assert(hash_map_insert(original_map, key, strlen(key), value));
     }
@@ -416,7 +405,6 @@ int main(void) {
 
     assert(hash_map_remove(balanced_map, string1, strlen(string1)));
 
-    hash_map_free_keys(balanced_map);
     hash_map_destroy(balanced_map);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
