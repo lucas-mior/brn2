@@ -691,6 +691,7 @@ int main(void) {
     arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
 
     char *command = "ls -a > /tmp/brn2test";
+    char *dir = "/tmp/brn2"
     char *file = command + 8;
 
     system(command);
@@ -706,6 +707,37 @@ int main(void) {
         printf(RED"%u / %u\n"RESET, i+1, list1->length);
         assert(contains_filename(list2, list1->files[i], list1->length < 9999));
     }
+    brn2_free_list(list1);
+    brn2_free_list(list2);
+
+    system("mkdir /tmp/brn2");
+    for (uint32 i = 0; i < 100000; i += 1) {
+        char buffer[256];
+        FILE *file;
+
+        snprintf(buffer, sizeof(buffer), "/tmp/brn2/%010d", i);
+        if ((file = fopen(buffer, "w")) == NULL) {
+            error("Error opening %s: %s\n", buffer, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if (fclose(file) != 0) {
+            error("Error closing %s: %s\n", buffer, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
+    list1 = brn2_list_from_dir(dir, 1);
+    list2 = brn2_list_from_dir(dir, 1);
+    FileName *file1 = &(list2->files[0]);
+    FileName *file2 = &(list2->files[1]);
+    FileName *aux = xmalloc(sizeof(*aux));
+    memcpy(aux, file1, sizeof(*aux));
+    memcpy(file1, file2, sizeof(*aux));
+    memcpy(file2, aux, sizeof(*aux));
+
+    for (uint32 i = 0; i < list2->length; i += 1) {
+    }
+
+    assert(false);
 
     unlink(file);
     exit(0);
