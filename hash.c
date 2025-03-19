@@ -146,7 +146,6 @@ hash_map_destroy(HashMap *map) {
     return;
 }
 
-#define NSTRINGS 2000000
 uint32 __attribute__ ((noinline))
 hash_function(char *key, uint32 key_size) {
     uint32 i = 0;
@@ -336,9 +335,12 @@ hash_map_expected_collisions(HashMap *map) {
 #if TESTING_THIS_FILE
 #include <assert.h>
 
+#define NSTRINGS 2000000
+#define NBYTES BRN2_ALIGNMENT
+
 static char *
 random_string(Arena *arena) {
-    int length = BRN2_ALIGNMENT*10 + rand() % BRN2_ALIGNMENT;
+    int length = NBYTES + rand() % BRN2_ALIGNMENT;
     int size = ALIGN(length + 1);
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     char *string = arena_push(arena, size);
@@ -411,9 +413,14 @@ int main(void) {
     {
         long seconds = t1.tv_sec - t0.tv_sec;
         long nanos = t1.tv_nsec - t0.tv_nsec;
+
         double total_seconds = (double)seconds + (double)nanos/1.0e9;
-        printf("\ntime elapsed (%s): %gs = %gus per string\n\n",
-               __FILE__, total_seconds, 1e6*(total_seconds/(double)NSTRINGS));
+        double micros_per_str = 1e6*(total_seconds/(double)NSTRINGS);
+        double nanos_per_byte = 1e3*(micros_per_str/(double)NBYTES);
+
+        printf("\ntime elapsed (%s):\n", __FILE__);
+        printf("%gs = %gus per string = %gns per byte\n\n",
+               total_seconds, micros_per_str, nanos_per_byte);
     }
     exit(0);
 }
