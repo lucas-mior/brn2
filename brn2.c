@@ -478,7 +478,7 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
             repeated = true;
-            if (brn2_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
         }
     }
@@ -501,7 +501,7 @@ brn2_execute(FileList *old, FileList *new,
     int (*print)(const char *, ...);
     HashSet *names_renamed = hash_set_create(old->length);
 
-    if (brn2_quiet)
+    if (brn2_options_quiet)
         print = noop;
     else
         print = printf;
@@ -530,13 +530,15 @@ brn2_execute(FileList *old, FileList *new,
                                                             newhash, newindex);
         newname_exists = !access(newname, F_OK);
 #ifdef __linux__
-        if (newname_exists && !newname_index_on_oldlist && !brn2_implict) {
+        if (newname_exists
+            && !newname_index_on_oldlist
+            && !brn2_options_implicit) {
             error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
                   *oldname, newname);
             error(RED"'%s'"RESET" already exists,"
                   " but it was not given in the list of"
                   " files to rename, and --implict option is off.\n", newname);
-            if (brn2_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
         }
@@ -585,7 +587,7 @@ brn2_execute(FileList *old, FileList *new,
                 error("Error swapping "RED"'%s'"RESET
                       " and "RED"'%s'"RESET": %s\n",
                       *oldname, newname, strerror(errno));
-                if (brn2_fatal || BRN2_DEBUG)
+                if (brn2_options_fatal || BRN2_DEBUG)
                     exit(EXIT_FAILURE);
             }
         }
@@ -594,7 +596,7 @@ brn2_execute(FileList *old, FileList *new,
         if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
-            if (brn2_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
         }
@@ -604,7 +606,7 @@ brn2_execute(FileList *old, FileList *new,
             error("Error renaming "RED"'%s'"RESET
                   " to "RED"'%s'"RESET": %s\n",
                   *oldname, newname, strerror(errno));
-            if (brn2_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
             continue;
         } else {
@@ -654,9 +656,9 @@ brn2_usage(FILE *stream) {
 #if TESTING_THIS_FILE
 #include <assert.h>
 
-bool brn2_fatal = false;
-bool brn2_implict = false;
-bool brn2_quiet = false;
+bool brn2_options_fatal = false;
+bool brn2_options_implicit = false;
+bool brn2_options_quiet = false;
 uint32 nthreads = 1;
 Arena *arena_old;
 Arena *arena_new;
