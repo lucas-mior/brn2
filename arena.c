@@ -27,11 +27,12 @@ arena_alloc(size_t size) {
     void *p;
     Arena *arena;
 
-    p = mmap(NULL, size + sizeof(*arena),
+    size += ALIGN(sizeof(*arena));
+    p = mmap(NULL, size,
                    PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE,
                    -1, 0);
     if (p == MAP_FAILED) {
-        error("Error in mmap: %s\n", strerror(errno));
+        error("Error in mmap(%zu): %s\n", size, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -65,10 +66,9 @@ arena_reset_zero(Arena *arena) {
 
 void
 arena_destroy(Arena *arena) {
-    if (munmap(arena, arena->size + ALIGN(sizeof(*arena))) < 0) {
+    if (munmap(arena, arena->size) < 0) {
         error("Error in %s:\n", __func__);
-        error("Error in munmap(%p, %zu): %s\n",
-              arena, arena->size + sizeof(*arena));
+        error("Error in munmap(%p, %zu): %s\n", arena, arena->size);
     }
     return;
 }
