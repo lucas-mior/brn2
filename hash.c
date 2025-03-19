@@ -45,6 +45,9 @@ typedef struct Bucket {
     char *key;
     uint32 hash;
     uint32 value;
+    char *key2;
+    uint32 hash2;
+    uint32 value2;
     struct Bucket *next;
 } Bucket;
 
@@ -185,8 +188,21 @@ hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
         return true;
     }
 
+    if ((hash == iterator->hash) && !strcmp(iterator->key, key))
+        return false;
+
+    if (iterator->key2 == NULL) {
+        iterator->key2 = key;
+        iterator->hash2 = hash;
+        iterator->value2 = value;
+        map->length += 1;
+        return true;
+    }
+
     while (true) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key))
+            return false;
+        if ((hash == iterator->hash2) && !strcmp(iterator->key2, key))
             return false;
 
         if (iterator->next)
@@ -244,10 +260,34 @@ bool
 hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
     Bucket *iterator = &(map->array[index]);
 
-    if (iterator->key == NULL)
+    if ((iterator->key == NULL) && (iterator->key2 == NULL))
         return false;
 
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
+        if (iterator->key2) {
+            iterator->key = iterator->key2;
+            iterator->hash = iterator->hash2;
+            iterator->value = iterator->value2;
+
+            iterator->key2 = NULL;
+            iterator->hash2 = 0;
+            iterator->value2 = 0;
+
+            map->collisions -= 1;
+            map->length -= 1;
+            return true;
+        }
+        if (iterator->next) {
+            memmove(iterator, iterator->next, sizeof(*iterator));
+            map->collisions -= 1;
+        } else {
+            memset(iterator, 0, sizeof(*iterator));
+        }
+        map->length -= 1;
+        return true;
+    }
+
+    if ((hash == iterator->hash2) && !strcmp(iterator->key2, key)) {
         if (iterator->next) {
             memmove(iterator, iterator->next, sizeof(*iterator));
             map->collisions -= 1;
