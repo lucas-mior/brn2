@@ -133,5 +133,5 @@ case "$target" in
     "benchmark") benchmark "$2" ;;
     "callgrind") callgrind "$2" ;;
     "profile") profile "$2" ;;
-    "check") scan-build -analyze-headers ./build.sh
+    "check") scan-build --view -analyze-headers ./build.sh
 esac
