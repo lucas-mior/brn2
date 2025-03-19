@@ -28,11 +28,11 @@
 #include "arena.c"
 
 char *program;
-static bool brn2_check = false;
-bool brn2_fatal = false;
-bool brn2_implict = false;
-bool brn2_quiet = false;
-bool brn2_sort = true;
+static bool brn2_options_check = false;
+bool brn2_options_fatal = false;
+bool brn2_options_implicit = false;
+bool brn2_options_quiet = false;
+bool brn2_options_sort = true;
 uint32 nthreads;
 
 Arena *arena_old;
@@ -117,27 +117,27 @@ int main(int argc, char **argv) {
         case '?':
             brn2_usage(stderr);
         case 'c':
-            brn2_check = true;
+            brn2_options_check = true;
             break;
         case 'e':
-            brn2_implict = false;
+            brn2_options_implicit = false;
             break;
         case 'F':
-            brn2_fatal = true;
+            brn2_options_fatal = true;
             break;
         case 'h':
             brn2_usage(stdout);
         case 'i':
-            brn2_implict = true;
+            brn2_options_implicit = true;
             break;
         case 'q':
-            brn2_quiet = true;
+            brn2_options_quiet = true;
             break;
         case 's':
-            brn2_sort = false;
+            brn2_options_sort = false;
             break;
         case 'v':
-            brn2_quiet = false;
+            brn2_options_quiet = false;
             break;
         default:
             brn2_usage(stderr);
@@ -176,10 +176,10 @@ int main(int argc, char **argv) {
     }
     brn2_normalize_names(old, NULL);
 
-    if (brn2_sort)
+    if (brn2_options_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
-    if (brn2_check) {
+    if (brn2_options_check) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             while (access(file->name, F_OK)) {
