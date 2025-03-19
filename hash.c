@@ -30,7 +30,6 @@
 #include <immintrin.h>
 
 #include "hash.h"
-#include "arena.h"
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0

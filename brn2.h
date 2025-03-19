@@ -23,6 +23,7 @@
 #ifdef __linux__
 #define _GNU_SOURCE
 #endif
+
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -34,8 +35,8 @@
 #include <stdio.h>
 #include <threads.h>
 #include <unistd.h>
+
 #include "hash.h"
-#include "arena.h"
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
@@ -91,6 +92,18 @@ typedef uint64_t uint64;
 typedef size_t usize;
 typedef ssize_t isize;
 #endif
+
+typedef struct Arena {
+    void *begin;
+    void *pos;
+    size_t size;
+} Arena;
+
+Arena *arena_alloc(size_t);
+void *arena_push(Arena *, uint32);
+void *arena_reset(Arena *);
+void *arena_reset_zero(Arena *);
+void arena_destroy(Arena *);
 
 typedef struct File {
     char name[PATH_MAX-12];
