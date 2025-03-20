@@ -29,6 +29,7 @@
 #include <sys/mman.h>
 
 #include "hash.h"
+#include "rapidhash.h"
 
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
@@ -146,15 +147,8 @@ hash_map_destroy(HashMap *map) {
 
 uint32 BRN2_INLINE
 hash_function(char *key, uint32 key_size) {
-    uint32 i = 0;
-    uint32 hash = 2166136261u;
-
-    do {
-        hash ^= (uint32)key[i];
-        hash *= 16777619u;
-        i += 1;
-    } while (i < key_size);
-
+    uint32 hash;
+    hash = rapidhash(key, key_size);
     return (uint32)hash;
 }
 
