@@ -45,19 +45,23 @@ benchmark() {
 callgrind() {
     create_files
     cd "$d" || exit
+
     valgrind --tool=callgrind \
         --collect-systime=msec \
         --dump-instr=yes \
         --callgrind-out-file=$dir/brn2_$1.out \
         $dir/brn2 -s -q -r .
+
     cd "$dir" || exit
     setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
 
 valgrind2() {
     ls > rename
+
     vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
+
     valgrind $vg_flags $dir/brn2 -r . || exit
     valgrind $vg_flags $dir/brn2 -d . || exit
     valgrind $vg_flags $dir/brn2 -f rename || exit
