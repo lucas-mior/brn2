@@ -70,8 +70,10 @@ valgrind2() {
 profile() {
     create_files
     cd "$d" || exit
+
     $dir/brn2 -s -q -r .
     gprof $dir/brn2 | tee "$dir/profile_$1.gprof"
+
     cd "$dir" || exit
 }
 
