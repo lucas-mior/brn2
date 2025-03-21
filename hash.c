@@ -174,7 +174,6 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
     if (iterator->key == NULL) { \
         iterator->key = key; \
-        printf("inserted %s\n", iterator->key); \
         iterator->hash = hash; \
         iterator->next = 0; \
         HASH_ITERATOR_VALUE_ASSIGN; \
@@ -197,7 +196,6 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     uint32 aux = iterator->next; \
     iterator = &(map->arena->begin[iterator->next]); \
     iterator->key = key; \
-    printf("inserted %s @ %u\n", iterator->key, aux); \
     iterator->hash = hash; \
     HASH_ITERATOR_VALUE_ASSIGN; \
     iterator->next = 0; \
