@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-typedef struct HashMap HashMap;
-typedef struct HashMap HashSet;
+typedef struct Hashmap HashMap;
+typedef struct Hashset HashSet;
 
 #ifndef INTEGERS
 #define INTEGERS
@@ -45,8 +45,8 @@ HashMap *hash_map_create(uint32);
 HashMap *hash_map_balance(HashMap *);
 void hash_map_free_keys(HashMap *);
 void hash_map_destroy(HashMap *);
-uint32 hash_function(char *, uint32);
-uint32 hash_normal(HashMap *, uint32);
+uint32 hash_map_function(char *, uint32);
+uint32 hash_map_normal(HashMap *, uint32);
 bool hash_map_insert(HashMap *, char *, uint32, uint32);
 bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32);
 void *hash_map_lookup(HashMap *, char *, uint32);
@@ -60,25 +60,29 @@ uint32 hash_map_length(HashMap *);
 uint32 hash_map_collisions(HashMap *);
 uint32 hash_map_expected_collisions(HashMap *);
 
-#define hash_set_create(a)                   hash_map_create(a)
-#define hash_set_balance(a)                  hash_map_balance(a)
-#define hash_set_free_keys(a)                hash_map_free_keys(a)
-#define hash_set_destroy(a)                  hash_map_destroy(a)
-#define hash_set_insert(a, b)                hash_map_insert(a, b, 0)
-#define hash_set_insert_pre_calc(a, b, c, d) hash_map_insert_pre_calc(a, b, c, d, 0)
-#define hash_set_lookup(a, b)                hash_map_lookup(a, b)
-#define hash_set_lookup_pre_calc(a, b, c, d) hash_map_lookup_pre_calc(a, b, c, d)
-#define hash_set_remove(a, b)                hash_map_remove(a, b)
-#define hash_set_remove_pre_calc(a, b, c, d) hash_map_remove_pre_calc(a, b, c, d)
-#define hash_set_print_summary(a)            hash_map_print_summary(a)
-#define hash_set_print(a, b)                 hash_map_print(a, b)
-#define hash_set_capacity(a)                 hash_map_capacity(a)
-#define hash_set_length(a)                   hash_map_length(a)
-#define hash_set_collisions(a)               hash_map_collisions(a)
-#define hash_set_expected_collisions(a)      hash_map_expected_collisions(a)
+HashSet *hash_set_create(uint32);
+HashSet *hash_set_balance(HashSet *);
+void hash_set_free_keys(HashSet *);
+void hash_set_destroy(HashSet *);
+uint32 hash_set_function(char *, uint32);
+uint32 hash_set_normal(HashSet *, uint32);
+bool hash_set_insert(HashSet *, char *, uint32, uint32);
+bool hash_set_insert_pre_calc(HashSet *, char *, uint32, uint32, uint32);
+void *hash_set_lookup(HashSet *, char *, uint32);
+void *hash_set_lookup_pre_calc(HashSet *, char *, uint32, uint32);
+bool hash_set_remove(HashSet *, char *, uint32);
+bool hash_set_remove_pre_calc(HashSet *, char *, uint32, uint32);
+void hash_set_print_summary(HashSet *, char *);
+void hash_set_print(HashSet *, bool);
+uint32 hash_set_capacity(HashSet *);
+uint32 hash_set_length(HashSet *);
+uint32 hash_set_collisions(HashSet *);
+uint32 hash_set_expected_collisions(HashSet *);
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
-#define HASH_MAP_PRINT_SUMMARY(MAP) hash_map_print_summary(MAP, QUOTE(MAP))
+#define HASH_map_PRINT_SUMMARY(MAP) hash_map_print_summary(MAP, QUOTE(MAP))
+#define HASH_set_PRINT_SUMMARY(MAP) hash_set_print_summary(MAP, QUOTE(MAP))
+#define hash_function(a, b) hash_map_function(a, b)
 
 #endif
