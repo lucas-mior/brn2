@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Mior, Lucas; 
+ * Copyright (C) 2024 Mior, Lucas;
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -400,8 +400,8 @@ random_string(Arena *arena) {
 // flags: -lm
 int main(void) {
     struct timespec t0, t1;
-    HashMap *original_map; 
-    HashMap *balanced_map; 
+    HashMap *original_map;
+    HashMap *balanced_map;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 
