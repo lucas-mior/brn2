@@ -84,5 +84,6 @@ uint32 hash_set_expected_collisions(HashSet *);
 #define HASH_map_PRINT_SUMMARY(MAP) hash_map_print_summary(MAP, QUOTE(MAP))
 #define HASH_set_PRINT_SUMMARY(MAP) hash_set_print_summary(MAP, QUOTE(MAP))
 #define hash_function(a, b) hash_map_function(a, b)
+#define HASH_MAP_SIZE(map) (sizeof(*map) + map->capacity*sizeof(map->array[0]))
 
 #endif
