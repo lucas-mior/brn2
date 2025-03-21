@@ -124,7 +124,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
         } \
 \
         while (iterator->next) { \
-            iterator = &(old_map->arena->begin[iterator->next]); \
+            iterator = old_map->arena->begin + iterator->next; \
             uint32 hash = iterator->hash; \
             uint32 index = hash_##T##_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
@@ -186,7 +186,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
             return false; \
 \
         if (iterator->next) \
-            iterator = &(map->arena->begin[iterator->next]); \
+            iterator = map->arena->begin + iterator->next; \
         else \
             break; \
     } \
@@ -194,7 +194,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     map->collisions += 1; \
     iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
     uint32 aux = iterator->next; \
-    iterator = &(map->arena->begin[iterator->next]); \
+    iterator = map->arena->begin + iterator->next; \
     iterator->key = key; \
     iterator->hash = hash; \
     HASH_ITERATOR_VALUE_ASSIGN; \
@@ -223,7 +223,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
             return HASH_ITERATOR_VALUE_RETURN; \
 \
         if (iterator->next) \
-            iterator = &(map->arena->begin[iterator->next]); \
+            iterator = map->arena->begin + iterator->next; \
         else \
             break; \
     } \
@@ -247,7 +247,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
         if (iterator->next) { \
-            memmove(iterator, &(map->arena->begin[iterator->next]), sizeof(*iterator)); \
+            memmove(iterator, map->arena->begin + iterator->next, sizeof(*iterator)); \
             map->collisions -= 1; \
         } else { \
             memset(iterator, 0, sizeof(*iterator)); \
@@ -258,7 +258,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     while (iterator->next) { \
         Bucket##T *previous = iterator; \
-        iterator = &(map->arena->begin[iterator->next]); \
+        iterator = map->arena->begin + iterator->next; \
 \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
              previous->next = iterator->next; \
@@ -295,7 +295,7 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
         while (iterator->key) { \
             printf(RED" '%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
             if (iterator->next) \
-                iterator = &(map->arena->begin[iterator->next]); \
+                iterator = map->arena->begin + iterator->next; \
             else { \
                 break; \
             } \
