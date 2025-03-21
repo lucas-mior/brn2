@@ -42,283 +42,285 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-typedef struct Bucket {
-    char *key;
-    uint32 hash;
-    uint32 value;
-    struct Bucket *next;
-} Bucket;
+#define HASH_IMPLEMENT(MAPORSET) \
+typedef struct Bucket { \
+    char *key; \
+    uint32 hash; \
+    uint32 value; \
+    struct Bucket *next; \
+} Bucket; \
+ \
+struct HashMap { \
+    uint32 capacity; \
+    uint32 bitmask; \
+    uint32 collisions; \
+    uint32 length; \
+    Arena *arena; \
+    Bucket array[]; \
+}; \
+ \
+HashMap * \
+hash_map_create(uint32 length) { \
+    HashMap *map; \
+    uint64 size; \
+    uint32 capacity = 1; \
+    uint32 power = 0; \
+ \
+    if (length > (UINT32_MAX/2)) \
+        length = UINT32_MAX/2; \
+ \
+    while (capacity < length) { \
+        capacity *= 2; \
+        power += 1; \
+    } \
+    capacity *= 2; \
+    power += 1; \
+ \
+    size = sizeof(*map) + capacity*sizeof(map->array[0]); \
+ \
+    map = xmmap(size); \
+    map->arena = arena_alloc(capacity*sizeof(*(map->array[0].next))); \
+    map->capacity = capacity; \
+    map->bitmask = (1 << power) - 1; \
+    return map; \
+} \
+ \
+HashMap * \
+hash_map_balance(HashMap *old_map) { \
+    HashMap *new_map; \
+    usize size; \
+    uint32 capacity; \
+    uint32 bitmask; \
+    usize old_size; \
+ \
+    if (old_map->capacity < (UINT32_MAX/2)) { \
+        capacity = old_map->capacity*2; \
+        bitmask = (old_map->bitmask << 1) + 1; \
+    } else if (old_map->capacity >= UINT32_MAX) { \
+        fprintf(stderr, "Error balancing hash map. Too big table.\n"); \
+        return old_map; \
+    } else { \
+        capacity = UINT32_MAX; \
+        bitmask = UINT32_MAX; \
+    } \
+ \
+    size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]); \
+ \
+    new_map = xmmap(size); \
+    new_map->arena = arena_alloc(capacity*sizeof(*(new_map->array[0].next))); \
+    new_map->capacity = capacity; \
+    new_map->bitmask = bitmask; \
+ \
+    for (uint32 i = 0; i < old_map->capacity; i += 1) { \
+        Bucket *iterator = &(old_map->array[i]); \
+ \
+        if (iterator->key) { \
+            uint32 hash = iterator->hash; \
+            uint32 index = hash_normal(new_map, hash); \
+            hash_map_insert_pre_calc(new_map, iterator->key, \
+                                     hash, index, iterator->value); \
+        } \
+        iterator = iterator->next; \
+ \
+        while (iterator) { \
+            uint32 hash = iterator->hash; \
+            uint32 index = hash_normal(new_map, hash); \
+            hash_map_insert_pre_calc(new_map, iterator->key, \
+                                     hash, index, iterator->value); \
+ \
+            iterator = iterator->next; \
+        } \
+    } \
+ \
+    old_size = sizeof(*old_map) + old_map->capacity*sizeof(old_map->array[0]); \
+    arena_destroy(old_map->arena); \
+    xmunmap(old_map, old_size); \
+    return new_map; \
+} \
+ \
+void \
+hash_map_destroy(HashMap *map) { \
+    usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]); \
+    arena_destroy(map->arena); \
+    xmunmap(map, size); \
+    return; \
+} \
+ \
+uint32 BRN2_INLINE \
+hash_function(char *key, uint32 key_size) { \
+    uint32 hash; \
+    hash = rapidhash(key, key_size); \
+    return (uint32)hash; \
+} \
+ \
+uint32 \
+hash_normal(HashMap *map, uint32 hash) { \
+    uint32 normal = hash & map->bitmask; \
+    return normal; \
+} \
+ \
+bool \
+hash_map_insert(HashMap *map, char *key, uint32 key_size, uint32 value) { \
+    uint32 hash = hash_function(key, key_size); \
+    uint32 index = hash_normal(map, hash); \
+    return hash_map_insert_pre_calc(map, key, hash, index, value); \
+} \
+ \
+bool \
+hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash, \
+				         uint32 index, uint32 value) { \
+    Bucket *iterator = &(map->array[index]); \
+ \
+    if (iterator->key == NULL) { \
+        iterator->key = key; \
+        iterator->hash = hash; \
+        iterator->value = value; \
+        map->length += 1; \
+        return true; \
+    } \
+ \
+    while (true) { \
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
+            return false; \
+ \
+        if (iterator->next) \
+            iterator = iterator->next; \
+        else \
+            break; \
+    } \
+ \
+    map->collisions += 1; \
+    iterator->next = arena_push(map->arena, sizeof(*(iterator->next))); \
+    iterator->next->key = key; \
+    iterator->next->hash = hash; \
+    iterator->next->value = value; \
+    iterator->next->next = NULL; \
+    map->length += 1; \
+ \
+    return true; \
+} \
+ \
+void * \
+hash_map_lookup(HashMap *map, char *key, uint32 key_size) { \
+    uint32 hash = hash_function(key, key_size); \
+    uint32 index = hash_normal(map, hash); \
+    return hash_map_lookup_pre_calc(map, key, hash, index); \
+} \
+ \
+void * \
+hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) { \
+    Bucket *iterator = &(map->array[index]); \
+ \
+    if (iterator->key == NULL) \
+        return NULL; \
+ \
+    while (true) { \
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
+            return &(iterator->value); \
+ \
+        if (iterator->next) \
+            iterator = iterator->next; \
+        else \
+            break; \
+    } \
+ \
+    return NULL; \
+} \
+ \
+bool \
+hash_map_remove(HashMap *map, char *key, uint32 key_size) { \
+    uint32 hash = hash_function(key, key_size); \
+    uint32 index = hash_normal(map, hash); \
+    return hash_map_remove_pre_calc(map, key, hash, index); \
+} \
+ \
+bool \
+hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) { \
+    Bucket *iterator = &(map->array[index]); \
+ \
+    if (iterator->key == NULL) \
+        return false; \
+ \
+    if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
+        if (iterator->next) { \
+            memmove(iterator, iterator->next, sizeof(*iterator)); \
+            map->collisions -= 1; \
+        } else { \
+            memset(iterator, 0, sizeof(*iterator)); \
+        } \
+        map->length -= 1; \
+        return true; \
+    } \
+ \
+    while (iterator->next) { \
+        Bucket *previous = iterator; \
+        iterator = iterator->next; \
+ \
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
+             previous->next = iterator->next; \
+             map->length -= 1; \
+             map->collisions -= 1; \
+             return true; \
+        } \
+    } \
+ \
+    return false; \
+} \
+ \
+void \
+hash_map_print_summary(HashMap *map, char *name) { \
+    printf("HashMap %s {\n", name); \
+    printf("  capacity: %u\n", map->capacity); \
+    printf("  length: %u\n", map->length); \
+    printf("  collisions: %u\n", map->collisions); \
+    printf("  expected collisions: %u\n", hash_map_expected_collisions(map)); \
+    printf("}\n"); \
+    return; \
+} \
+ \
+void \
+hash_map_print(HashMap *map, bool verbose) { \
+    HASH_MAP_PRINT_SUMMARY(map); \
+ \
+    for (uint32 i = 0; i < map->capacity; i += 1) { \
+        Bucket *iterator = &(map->array[i]); \
+ \
+        if (iterator->key || verbose) \
+            printf("\n%03u:", i); \
+ \
+        while (iterator && iterator->key) { \
+            printf(GREEN" %s=%u"RESET" ->", iterator->key, iterator->value); \
+            iterator = iterator->next; \
+        } \
+    } \
+    printf("\n"); \
+    return; \
+} \
+ \
+uint32 \
+hash_map_capacity(HashMap *map) { \
+    return map->capacity; \
+} \
+ \
+uint32 \
+hash_map_length(HashMap *map) { \
+    return map->length; \
+} \
+ \
+uint32 \
+hash_map_collisions(HashMap *map) { \
+    return map->collisions; \
+} \
+ \
+uint32 \
+hash_map_expected_collisions(HashMap *map) { \
+    long double n = map->length; \
+    long double m = map->capacity; \
+    long double result = n - m * (1 - powl((m - 1)/m, n)); \
+    return (uint32)(roundl(result)); \
+} \
 
-struct HashMap {
-    uint32 capacity;
-    uint32 bitmask;
-    uint32 collisions;
-    uint32 length;
-    Arena *arena;
-    Bucket array[];
-};
-
-HashMap *
-hash_map_create(uint32 length) {
-    HashMap *map;
-    uint64 size;
-    uint32 capacity = 1;
-    uint32 power = 0;
-
-    if (length > (UINT32_MAX/2))
-        length = UINT32_MAX/2;
-
-    while (capacity < length) {
-        capacity *= 2;
-        power += 1;
-    }
-    capacity *= 2;
-    power += 1;
-
-    size = sizeof(*map) + capacity*sizeof(map->array[0]);
-
-    map = xmmap(size);
-    map->arena = arena_alloc(capacity*sizeof(*(map->array[0].next)));
-    map->capacity = capacity;
-    map->bitmask = (1 << power) - 1;
-    return map;
-}
-
-HashMap *
-hash_map_balance(HashMap *old_map) {
-    HashMap *new_map;
-    usize size;
-    uint32 capacity;
-    uint32 bitmask;
-    usize old_size;
-
-    if (old_map->capacity < (UINT32_MAX/2)) {
-        capacity = old_map->capacity*2;
-        bitmask = (old_map->bitmask << 1) + 1;
-    } else if (old_map->capacity >= UINT32_MAX) {
-        fprintf(stderr, "Error balancing hash map. Too big table.\n");
-        return old_map;
-    } else {
-        capacity = UINT32_MAX;
-        bitmask = UINT32_MAX;
-    }
-
-    size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]);
-
-    new_map = xmmap(size);
-    new_map->arena = arena_alloc(capacity*sizeof(*(new_map->array[0].next)));
-    new_map->capacity = capacity;
-    new_map->bitmask = bitmask;
-
-    for (uint32 i = 0; i < old_map->capacity; i += 1) {
-        Bucket *iterator = &(old_map->array[i]);
-
-        if (iterator->key) {
-            uint32 hash = iterator->hash;
-            uint32 index = hash_normal(new_map, hash);
-            hash_map_insert_pre_calc(new_map, iterator->key,
-                                     hash, index, iterator->value);
-        }
-        iterator = iterator->next;
-
-        while (iterator) {
-            uint32 hash = iterator->hash;
-            uint32 index = hash_normal(new_map, hash);
-            hash_map_insert_pre_calc(new_map, iterator->key,
-                                     hash, index, iterator->value);
-
-            iterator = iterator->next;
-        }
-    }
-
-    old_size = sizeof(*old_map) + old_map->capacity*sizeof(old_map->array[0]);
-    arena_destroy(old_map->arena);
-    xmunmap(old_map, old_size);
-    return new_map;
-}
-
-void
-hash_map_destroy(HashMap *map) {
-    usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]);
-    arena_destroy(map->arena);
-    xmunmap(map, size);
-    return;
-}
-
-uint32 BRN2_INLINE
-hash_function(char *key, uint32 key_size) {
-    uint32 hash;
-    hash = rapidhash(key, key_size);
-    return (uint32)hash;
-}
-
-uint32
-hash_normal(HashMap *map, uint32 hash) {
-    // capacity has to be power of 2
-    uint32 normal = hash & map->bitmask;
-    return normal;
-}
-
-bool
-hash_map_insert(HashMap *map, char *key, uint32 key_size, uint32 value) {
-    uint32 hash = hash_function(key, key_size);
-    uint32 index = hash_normal(map, hash);
-    return hash_map_insert_pre_calc(map, key, hash, index, value);
-}
-
-bool
-hash_map_insert_pre_calc(HashMap *map, char *key, uint32 hash,
-				         uint32 index, uint32 value) {
-    Bucket *iterator = &(map->array[index]);
-
-    if (iterator->key == NULL) {
-        iterator->key = key;
-        iterator->hash = hash;
-        iterator->value = value;
-        map->length += 1;
-        return true;
-    }
-
-    while (true) {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key))
-            return false;
-
-        if (iterator->next)
-            iterator = iterator->next;
-        else
-            break;
-    }
-
-    map->collisions += 1;
-    iterator->next = arena_push(map->arena, sizeof(*(iterator->next)));
-    iterator->next->key = key;
-    iterator->next->hash = hash;
-    iterator->next->value = value;
-    iterator->next->next = NULL;
-    map->length += 1;
-
-    return true;
-}
-
-void *
-hash_map_lookup(HashMap *map, char *key, uint32 key_size) {
-    uint32 hash = hash_function(key, key_size);
-    uint32 index = hash_normal(map, hash);
-    return hash_map_lookup_pre_calc(map, key, hash, index);
-}
-
-void *
-hash_map_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
-    Bucket *iterator = &(map->array[index]);
-
-    if (iterator->key == NULL)
-        return NULL;
-
-    while (true) {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key))
-            return &(iterator->value);
-
-        if (iterator->next)
-            iterator = iterator->next;
-        else
-            break;
-    }
-
-    return NULL;
-}
-
-bool
-hash_map_remove(HashMap *map, char *key, uint32 key_size) {
-    uint32 hash = hash_function(key, key_size);
-    uint32 index = hash_normal(map, hash);
-    return hash_map_remove_pre_calc(map, key, hash, index);
-}
-
-bool
-hash_map_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) {
-    Bucket *iterator = &(map->array[index]);
-
-    if (iterator->key == NULL)
-        return false;
-
-    if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
-        if (iterator->next) {
-            memmove(iterator, iterator->next, sizeof(*iterator));
-            map->collisions -= 1;
-        } else {
-            memset(iterator, 0, sizeof(*iterator));
-        }
-        map->length -= 1;
-        return true;
-    }
-
-    while (iterator->next) {
-        Bucket *previous = iterator;
-        iterator = iterator->next;
-
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
-             previous->next = iterator->next;
-             map->length -= 1;
-             map->collisions -= 1;
-             return true;
-        }
-    }
-
-    return false;
-}
-
-void
-hash_map_print_summary(HashMap *map, char *name) {
-    printf("HashMap %s {\n", name);
-    printf("  capacity: %u\n", map->capacity);
-    printf("  length: %u\n", map->length);
-    printf("  collisions: %u\n", map->collisions);
-    printf("  expected collisions: %u\n", hash_map_expected_collisions(map));
-    printf("}\n");
-    return;
-}
-
-void
-hash_map_print(HashMap *map, bool verbose) {
-    HASH_MAP_PRINT_SUMMARY(map);
-
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        Bucket *iterator = &(map->array[i]);
-
-        if (iterator->key || verbose)
-            printf("\n%03u:", i);
-
-        while (iterator && iterator->key) {
-            printf(GREEN" %s=%u"RESET" ->", iterator->key, iterator->value);
-            iterator = iterator->next;
-        }
-    }
-    printf("\n");
-    return;
-}
-
-uint32
-hash_map_capacity(HashMap *map) {
-    return map->capacity;
-}
-
-uint32
-hash_map_length(HashMap *map) {
-    return map->length;
-}
-
-uint32
-hash_map_collisions(HashMap *map) {
-    return map->collisions;
-}
-
-uint32
-hash_map_expected_collisions(HashMap *map) {
-    long double n = map->length;
-    long double m = map->capacity;
-    long double result = n - m * (1 - powl((m - 1)/m, n));
-    return (uint32)(roundl(result));
-}
+HASH_IMPLEMENT("a")
 
 #ifndef TESTING_THIS_FILE
 #define TESTING_THIS_FILE 0
