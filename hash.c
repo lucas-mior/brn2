@@ -120,15 +120,14 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
         } \
-        iterator = &(old_map->arena->begin[iterator->next]); \
 \
-        while (iterator) { \
+        while (iterator->next) { \
+            iterator = &(old_map->arena->begin[iterator->next]); \
             uint32 hash = iterator->hash; \
             uint32 index = hash_##T##_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
 \
-            iterator = &(old_map->arena->begin[iterator->next]); \
         } \
     } \
 \
@@ -427,7 +426,9 @@ int main(void) {
         uint32 expected_collisions = hash_map_expected_collisions(original_map);
         double ratio = (double)collisions_before / (double)expected_collisions;
         assert(ratio <= 1.2);
+        printf("creating balanced map...\n");
         balanced_map = hash_map_balance(original_map);
+        printf("balanced map!\n");
 
         HASH_map_PRINT_SUMMARY(balanced_map);
         assert(collisions_before > hash_map_collisions(balanced_map));
