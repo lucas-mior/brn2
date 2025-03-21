@@ -46,7 +46,7 @@
 typedef struct Bucket##T { \
     char *key; \
     uint32 hash; \
-    uint32 value; \
+    HASH_VALUE_FIELD \
     struct Bucket##T *next; \
 } Bucket##T; \
 \
@@ -118,7 +118,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             uint32 hash = iterator->hash; \
             uint32 index = hash_##T##_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
-                                     hash, index, iterator->value); \
+                                     hash, index, HASH_ITERATOR_VALUE); \
         } \
         iterator = iterator->next; \
 \
@@ -126,7 +126,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             uint32 hash = iterator->hash; \
             uint32 index = hash_##T##_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
-                                     hash, index, iterator->value); \
+                                     hash, index, HASH_ITERATOR_VALUE); \
 \
             iterator = iterator->next; \
         } \
@@ -174,7 +174,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     if (iterator->key == NULL) { \
         iterator->key = key; \
         iterator->hash = hash; \
-        iterator->value = value; \
+        HASH_ITERATOR_VALUE_ASSIGN; \
         map->length += 1; \
         return true; \
     } \
@@ -191,10 +191,11 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
     map->collisions += 1; \
     iterator->next = arena_push(map->arena, sizeof(*(iterator->next))); \
-    iterator->next->key = key; \
-    iterator->next->hash = hash; \
-    iterator->next->value = value; \
-    iterator->next->next = NULL; \
+    iterator = iterator->next; \
+    iterator->key = key; \
+    iterator->hash = hash; \
+    HASH_ITERATOR_VALUE_ASSIGN; \
+    iterator->next = NULL; \
     map->length += 1; \
 \
     return true; \
@@ -216,7 +217,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     while (true) { \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
-            return &(iterator->value); \
+            return HASH_ITERATOR_VALUE_RETURN; \
 \
         if (iterator->next) \
             iterator = iterator->next; \
@@ -289,7 +290,7 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
             printf("\n%03u:", i); \
 \
         while (iterator && iterator->key) { \
-            printf(GREEN" %s=%u"RESET" ->", iterator->key, iterator->value); \
+            printf(GREEN" %s=%u"RESET" ->", iterator->key, HASH_ITERATOR_VALUE); \
             iterator = iterator->next; \
         } \
     } \
@@ -320,8 +321,25 @@ hash_##T##_expected_collisions(struct Hash##T *map) { \
     return (uint32)(roundl(result)); \
 } \
 
+#define HASH_VALUE_FIELD uint32 value;
+#define HASH_ITERATOR_VALUE iterator->value
+#define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
+#define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
 HASH_IMPLEMENT(map)
+#undef HASH_VALUE_FIELD
+#undef HASH_ITERATOR_VALUE
+#undef HASH_ITERATOR_VALUE_ASSIGN
+#undef HASH_ITERATOR_VALUE_RETURN
+
+#define HASH_VALUE_FIELD
+#define HASH_ITERATOR_VALUE 0
+#define HASH_ITERATOR_VALUE_ASSIGN
+#define HASH_ITERATOR_VALUE_RETURN NULL
 HASH_IMPLEMENT(set)
+#undef HASH_VALUE_FIELD
+#undef HASH_ITERATOR_VALUE
+#undef HASH_ITERATOR_VALUE_ASSIGN
+#undef HASH_ITERATOR_VALUE_RETURN
 
 #define hash_set_create(a)                   hash_set_create(a)
 #define hash_set_balance(a)                  hash_set_balance(a)
