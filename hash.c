@@ -293,7 +293,7 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
             printf("\n%03u:", i); \
 \
         while (iterator->key) { \
-            printf(RED"'%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
+            printf(RED" '%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
             if (iterator->next) \
                 iterator = &(map->arena->begin[iterator->next]); \
             else { \
