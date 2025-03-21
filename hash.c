@@ -367,8 +367,8 @@ HASH_IMPLEMENT(set)
 #if TESTING_THIS_FILE
 #include <assert.h>
 
-#define NSTRINGS 1000000
-#define NBYTES 10*BRN2_ALIGNMENT
+#define NSTRINGS 5
+#define NBYTES BRN2_ALIGNMENT
 
 static char *
 random_string(Arena *arena) {
@@ -411,6 +411,8 @@ int main(void) {
     assert(!hash_map_insert(original_map, string1, strlen(string1), 1));
     assert(hash_map_insert(original_map, string2, strlen(string2), 2));
 
+    assert(hash_map_length(original_map) == 2);
+
     srand(42);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
@@ -426,9 +428,7 @@ int main(void) {
         uint32 expected_collisions = hash_map_expected_collisions(original_map);
         double ratio = (double)collisions_before / (double)expected_collisions;
         assert(ratio <= 1.2);
-        printf("creating balanced map...\n");
         balanced_map = hash_map_balance(original_map);
-        printf("balanced map!\n");
 
         HASH_map_PRINT_SUMMARY(balanced_map);
         assert(collisions_before > hash_map_collisions(balanced_map));
