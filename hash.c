@@ -80,6 +80,7 @@ hash_##T##_create(uint32 length) { \
 \
     map = xmmap(size); \
     map->arena = arena_alloc(capacity*sizeof(*(&map->array[0]))); \
+    arena_push(map->arena, BRN2_ALIGNMENT); \
     map->capacity = capacity; \
     map->bitmask = (1 << power) - 1; \
     return map; \
@@ -108,6 +109,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
 \
     new_map = xmmap(size); \
     new_map->arena = arena_alloc(capacity*sizeof(*(&new_map->array[0]))); \
+    arena_push(new_map->arena, BRN2_ALIGNMENT); \
     new_map->capacity = capacity; \
     new_map->bitmask = bitmask; \
 \
@@ -172,7 +174,9 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
     if (iterator->key == NULL) { \
         iterator->key = key; \
+        printf("inserted %s\n", iterator->key); \
         iterator->hash = hash; \
+        iterator->next = 0; \
         HASH_ITERATOR_VALUE_ASSIGN; \
         map->length += 1; \
         return true; \
@@ -190,8 +194,10 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
     map->collisions += 1; \
     iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
+    uint32 aux = iterator->next; \
     iterator = &(map->arena->begin[iterator->next]); \
     iterator->key = key; \
+    printf("inserted %s @ %u\n", iterator->key, aux); \
     iterator->hash = hash; \
     HASH_ITERATOR_VALUE_ASSIGN; \
     iterator->next = 0; \
@@ -292,8 +298,9 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
             printf(RED"'%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
             if (iterator->next) \
                 iterator = &(map->arena->begin[iterator->next]); \
-            else \
+            else { \
                 break; \
+            } \
         } \
     } \
     printf("\n"); \
@@ -437,11 +444,12 @@ int main(void) {
         assert(ratio <= 1.2);
         balanced_map = hash_map_balance(original_map);
 
-        assert(collisions_before > hash_map_collisions(balanced_map));
         if (NSTRINGS < 10)
             hash_map_print(balanced_map, true);
         else
             HASH_map_PRINT_SUMMARY(balanced_map);
+
+        assert(collisions_before > hash_map_collisions(balanced_map));
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
