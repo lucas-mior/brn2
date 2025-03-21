@@ -375,7 +375,7 @@ HASH_IMPLEMENT(set)
 #if TESTING_THIS_FILE
 #include <assert.h>
 
-#define NSTRINGS 5
+#define NSTRINGS 1000000
 #define NBYTES BRN2_ALIGNMENT
 
 static char *
@@ -420,7 +420,7 @@ int main(void) {
     assert(hash_map_insert(original_map, string2, strlen(string2), 2));
 
     assert(hash_map_length(original_map) == 2);
-    hash_map_print(original_map, true);
+    hash_map_print(original_map, false);
 
     srand(42);
 
@@ -431,7 +431,7 @@ int main(void) {
     }
 
     if (NSTRINGS < 10)
-        hash_map_print(original_map, true);
+        hash_map_print(original_map, false);
     else
         HASH_map_PRINT_SUMMARY(original_map);
 
@@ -443,7 +443,7 @@ int main(void) {
         balanced_map = hash_map_balance(original_map);
 
         if (NSTRINGS < 10)
-            hash_map_print(balanced_map, true);
+            hash_map_print(balanced_map, false);
         else
             HASH_map_PRINT_SUMMARY(balanced_map);
 
