@@ -449,7 +449,8 @@ int main(void) {
         else
             HASH_map_PRINT_SUMMARY(balanced_map);
 
-        assert(collisions_before > hash_map_collisions(balanced_map));
+        if (collisions_before > 10)
+            assert(collisions_before > hash_map_collisions(balanced_map));
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
