@@ -42,26 +42,26 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-#define HASH_IMPLEMENT(MAPORSET) \
-typedef struct Bucket { \
+#define HASH_IMPLEMENT(T) \
+typedef struct Bucket##T { \
     char *key; \
     uint32 hash; \
     uint32 value; \
-    struct Bucket *next; \
-} Bucket; \
+    struct Bucket##T *next; \
+} Bucket##T; \
  \
-struct HashMap { \
+struct Hash##T { \
     uint32 capacity; \
     uint32 bitmask; \
     uint32 collisions; \
     uint32 length; \
     Arena *arena; \
-    Bucket array[]; \
+    Bucket##T array[]; \
 }; \
  \
-HashMap * \
-hash_##MAPORSET##_create(uint32 length) { \
-    HashMap *map; \
+struct Hash##T * \
+hash_##T##_create(uint32 length) { \
+    struct Hash##T *map; \
     uint64 size; \
     uint32 capacity = 1; \
     uint32 power = 0; \
@@ -85,9 +85,9 @@ hash_##MAPORSET##_create(uint32 length) { \
     return map; \
 } \
  \
-HashMap * \
-hash_##MAPORSET##_balance(HashMap *old_map) { \
-    HashMap *new_map; \
+struct Hash##T * \
+hash_##T##_balance(struct Hash##T *old_map) { \
+    struct Hash##T *new_map; \
     usize size; \
     uint32 capacity; \
     uint32 bitmask; \
@@ -112,20 +112,20 @@ hash_##MAPORSET##_balance(HashMap *old_map) { \
     new_map->bitmask = bitmask; \
  \
     for (uint32 i = 0; i < old_map->capacity; i += 1) { \
-        Bucket *iterator = &(old_map->array[i]); \
+        Bucket##T *iterator = &(old_map->array[i]); \
  \
         if (iterator->key) { \
             uint32 hash = iterator->hash; \
-            uint32 index = hash_normal(new_map, hash); \
-            hash_##MAPORSET##_insert_pre_calc(new_map, iterator->key, \
+            uint32 index = hash_##T##_normal(new_map, hash); \
+            hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, iterator->value); \
         } \
         iterator = iterator->next; \
  \
         while (iterator) { \
             uint32 hash = iterator->hash; \
-            uint32 index = hash_normal(new_map, hash); \
-            hash_##MAPORSET##_insert_pre_calc(new_map, iterator->key, \
+            uint32 index = hash_##T##_normal(new_map, hash); \
+            hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, iterator->value); \
  \
             iterator = iterator->next; \
@@ -139,7 +139,7 @@ hash_##MAPORSET##_balance(HashMap *old_map) { \
 } \
  \
 void \
-hash_##MAPORSET##_destroy(HashMap *map) { \
+hash_##T##_destroy(struct Hash##T *map) { \
     usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]); \
     arena_destroy(map->arena); \
     xmunmap(map, size); \
@@ -147,29 +147,29 @@ hash_##MAPORSET##_destroy(HashMap *map) { \
 } \
  \
 uint32 BRN2_INLINE \
-hash_function(char *key, uint32 key_size) { \
+hash_##T##_function(char *key, uint32 key_size) { \
     uint32 hash; \
     hash = rapidhash(key, key_size); \
     return (uint32)hash; \
 } \
  \
 uint32 \
-hash_normal(HashMap *map, uint32 hash) { \
+hash_##T##_normal(struct Hash##T *map, uint32 hash) { \
     uint32 normal = hash & map->bitmask; \
     return normal; \
 } \
  \
 bool \
-hash_##MAPORSET##_insert(HashMap *map, char *key, uint32 key_size, uint32 value) { \
-    uint32 hash = hash_function(key, key_size); \
-    uint32 index = hash_normal(map, hash); \
-    return hash_##MAPORSET##_insert_pre_calc(map, key, hash, index, value); \
+hash_##T##_insert(struct Hash##T *map, char *key, uint32 key_size, uint32 value) { \
+    uint32 hash = hash_##T##_function(key, key_size); \
+    uint32 index = hash_##T##_normal(map, hash); \
+    return hash_##T##_insert_pre_calc(map, key, hash, index, value); \
 } \
  \
 bool \
-hash_##MAPORSET##_insert_pre_calc(HashMap *map, char *key, uint32 hash, \
+hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 				         uint32 index, uint32 value) { \
-    Bucket *iterator = &(map->array[index]); \
+    Bucket##T *iterator = &(map->array[index]); \
  \
     if (iterator->key == NULL) { \
         iterator->key = key; \
@@ -201,15 +201,15 @@ hash_##MAPORSET##_insert_pre_calc(HashMap *map, char *key, uint32 hash, \
 } \
  \
 void * \
-hash_##MAPORSET##_lookup(HashMap *map, char *key, uint32 key_size) { \
-    uint32 hash = hash_function(key, key_size); \
-    uint32 index = hash_normal(map, hash); \
-    return hash_##MAPORSET##_lookup_pre_calc(map, key, hash, index); \
+hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_size) { \
+    uint32 hash = hash_##T##_function(key, key_size); \
+    uint32 index = hash_##T##_normal(map, hash); \
+    return hash_##T##_lookup_pre_calc(map, key, hash, index); \
 } \
  \
 void * \
-hash_##MAPORSET##_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) { \
-    Bucket *iterator = &(map->array[index]); \
+hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 index) { \
+    Bucket##T *iterator = &(map->array[index]); \
  \
     if (iterator->key == NULL) \
         return NULL; \
@@ -228,15 +228,15 @@ hash_##MAPORSET##_lookup_pre_calc(HashMap *map, char *key, uint32 hash, uint32 i
 } \
  \
 bool \
-hash_##MAPORSET##_remove(HashMap *map, char *key, uint32 key_size) { \
-    uint32 hash = hash_function(key, key_size); \
-    uint32 index = hash_normal(map, hash); \
-    return hash_##MAPORSET##_remove_pre_calc(map, key, hash, index); \
+hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_size) { \
+    uint32 hash = hash_##T##_function(key, key_size); \
+    uint32 index = hash_##T##_normal(map, hash); \
+    return hash_##T##_remove_pre_calc(map, key, hash, index); \
 } \
  \
 bool \
-hash_##MAPORSET##_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 index) { \
-    Bucket *iterator = &(map->array[index]); \
+hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 index) { \
+    Bucket##T *iterator = &(map->array[index]); \
  \
     if (iterator->key == NULL) \
         return false; \
@@ -253,7 +253,7 @@ hash_##MAPORSET##_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 i
     } \
  \
     while (iterator->next) { \
-        Bucket *previous = iterator; \
+        Bucket##T *previous = iterator; \
         iterator = iterator->next; \
  \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
@@ -268,22 +268,22 @@ hash_##MAPORSET##_remove_pre_calc(HashMap *map, char *key, uint32 hash, uint32 i
 } \
  \
 void \
-hash_##MAPORSET##_print_summary(HashMap *map, char *name) { \
-    printf("HashMap %s {\n", name); \
+hash_##T##_print_summary(struct Hash##T *map, char *name) { \
+    printf("struct Hash##T %s {\n", name); \
     printf("  capacity: %u\n", map->capacity); \
     printf("  length: %u\n", map->length); \
     printf("  collisions: %u\n", map->collisions); \
-    printf("  expected collisions: %u\n", hash_##MAPORSET##_expected_collisions(map)); \
+    printf("  expected collisions: %u\n", hash_##T##_expected_collisions(map)); \
     printf("}\n"); \
     return; \
 } \
  \
 void \
-hash_##MAPORSET##_print(HashMap *map, bool verbose) { \
-    HASH_MAP_PRINT_SUMMARY(map); \
+hash_##T##_print(struct Hash##T *map, bool verbose) { \
+    HASH_##T##_PRINT_SUMMARY(map); \
  \
     for (uint32 i = 0; i < map->capacity; i += 1) { \
-        Bucket *iterator = &(map->array[i]); \
+        Bucket##T *iterator = &(map->array[i]); \
  \
         if (iterator->key || verbose) \
             printf("\n%03u:", i); \
@@ -298,22 +298,22 @@ hash_##MAPORSET##_print(HashMap *map, bool verbose) { \
 } \
  \
 uint32 \
-hash_##MAPORSET##_capacity(HashMap *map) { \
+hash_##T##_capacity(struct Hash##T *map) { \
     return map->capacity; \
 } \
  \
 uint32 \
-hash_##MAPORSET##_length(HashMap *map) { \
+hash_##T##_length(struct Hash##T *map) { \
     return map->length; \
 } \
  \
 uint32 \
-hash_##MAPORSET##_collisions(HashMap *map) { \
+hash_##T##_collisions(struct Hash##T *map) { \
     return map->collisions; \
 } \
  \
 uint32 \
-hash_##MAPORSET##_expected_collisions(HashMap *map) { \
+hash_##T##_expected_collisions(struct Hash##T *map) { \
     long double n = map->length; \
     long double m = map->capacity; \
     long double result = n - m * (1 - powl((m - 1)/m, n)); \
@@ -321,6 +321,27 @@ hash_##MAPORSET##_expected_collisions(HashMap *map) { \
 } \
 
 HASH_IMPLEMENT(map)
+HASH_IMPLEMENT(set)
+
+#define hash_set_create(a)                   hash_set_create(a)
+#define hash_set_balance(a)                  hash_set_balance(a)
+#define hash_set_free_keys(a)                hash_set_free_keys(a)
+#define hash_set_destroy(a)                  hash_set_destroy(a)
+#define hash_set_insert(a, b)                hash_set_insert(a, b, 0)
+#define hash_set_insert_pre_calc(a, b, c, d) hash_set_insert_pre_calc(a, b, c, d, 0)
+#define hash_set_lookup(a, b)                hash_set_lookup(a, b)
+#define hash_set_lookup_pre_calc(a, b, c, d) hash_set_lookup_pre_calc(a, b, c, d)
+#define hash_set_remove(a, b)                hash_set_remove(a, b)
+#define hash_set_remove_pre_calc(a, b, c, d) hash_set_remove_pre_calc(a, b, c, d)
+#define hash_set_print_summary(a)            hash_set_print_summary(a)
+#define hash_set_print(a, b)                 hash_set_print(a, b)
+#define hash_set_capacity(a)                 hash_set_capacity(a)
+#define hash_set_length(a)                   hash_set_length(a)
+#define hash_set_collisions(a)               hash_set_collisions(a)
+#define hash_set_expected_collisions(a)      hash_set_expected_collisions(a)
+#define hash_set_normal(a, b)                hash_set_normal(a, b)
+#define hash_set_function(a, b)              hash_set_function(a, b)
+
 
 #ifndef TESTING_THIS_FILE
 #define TESTING_THIS_FILE 0
@@ -354,8 +375,8 @@ random_string(Arena *arena) {
 // flags: -lm
 int main(void) {
     struct timespec t0, t1;
-    HashMap *original_map; 
-    HashMap *balanced_map; 
+    struct Hash##T *original_map; 
+    struct Hash##T *balanced_map; 
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 
@@ -380,7 +401,7 @@ int main(void) {
         assert(hash_map_insert(original_map, key, strlen(key), value));
     }
 
-    HASH_MAP_PRINT_SUMMARY(original_map);
+    HASH_map_PRINT_SUMMARY(original_map);
 
     {
         uint32 collisions_before = hash_map_collisions(original_map);
@@ -389,7 +410,7 @@ int main(void) {
         assert(ratio <= 1.2);
         balanced_map = hash_map_balance(original_map);
 
-        HASH_MAP_PRINT_SUMMARY(balanced_map);
+        HASH_map_PRINT_SUMMARY(balanced_map);
         assert(collisions_before > hash_map_collisions(balanced_map));
     }
 
