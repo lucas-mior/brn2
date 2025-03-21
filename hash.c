@@ -92,7 +92,6 @@ hash_##T##_balance(struct Hash##T *old_map) { \
     usize size; \
     uint32 capacity; \
     uint32 bitmask; \
-    usize old_size; \
 \
     if (old_map->capacity < (UINT32_MAX/2)) { \
         capacity = old_map->capacity*2; \
@@ -133,17 +132,15 @@ hash_##T##_balance(struct Hash##T *old_map) { \
         } \
     } \
 \
-    old_size = sizeof(*old_map) + old_map->capacity*sizeof(old_map->array[0]); \
     arena_destroy(old_map->arena); \
-    xmunmap(old_map, old_size); \
+    xmunmap(old_map, HASH_MAP_SIZE(old_map)); \
     return new_map; \
 } \
 \
 void \
 hash_##T##_destroy(struct Hash##T *map) { \
-    usize size = sizeof(*map) + map->capacity*sizeof(map->array[0]); \
     arena_destroy(map->arena); \
-    xmunmap(map, size); \
+    xmunmap(map, HASH_MAP_SIZE(map)); \
     return; \
 } \
 \
@@ -193,7 +190,6 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
     map->collisions += 1; \
     iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
-    uint32 aux = iterator->next; \
     iterator = map->arena->begin + iterator->next; \
     iterator->key = key; \
     iterator->hash = hash; \
