@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
     FileList *new;
     uint32 *hashes_old;
     uint32 *hashes_new;
-    HashSet *oldlist_map;
-    HashSet *newlist_map;
+    HashMap *oldlist_map;
+    HashMap *newlist_map;
     long available_threads;
 
     uint32 main_capacity;
