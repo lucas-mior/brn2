@@ -50,6 +50,13 @@ arena_push(Arena *arena, uint32 size) {
     return before;
 }
 
+uint32
+arena_push_index(Arena *arena, uint32 size) {
+    void *before = arena->pos;
+    arena->pos = (char *)arena->pos + size;
+    return (uint32)((char *)before - (char *)arena->begin);
+}
+
 void *
 arena_reset(Arena *arena) {
     arena->pos = arena->begin;

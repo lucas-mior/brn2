@@ -47,7 +47,7 @@ typedef struct Bucket##T { \
     char *key; \
     uint32 hash; \
     HASH_VALUE_FIELD \
-    struct Bucket##T *next; \
+    uint32 next; \
 } Bucket##T; \
 \
 struct Hash##T { \
@@ -79,7 +79,7 @@ hash_##T##_create(uint32 length) { \
     size = sizeof(*map) + capacity*sizeof(map->array[0]); \
 \
     map = xmmap(size); \
-    map->arena = arena_alloc(capacity*sizeof(*(map->array[0].next))); \
+    map->arena = arena_alloc(capacity*sizeof(*(&map->array[0]))); \
     map->capacity = capacity; \
     map->bitmask = (1 << power) - 1; \
     return map; \
@@ -107,7 +107,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
     size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]); \
 \
     new_map = xmmap(size); \
-    new_map->arena = arena_alloc(capacity*sizeof(*(new_map->array[0].next))); \
+    new_map->arena = arena_alloc(capacity*sizeof(*(&new_map->array[0]))); \
     new_map->capacity = capacity; \
     new_map->bitmask = bitmask; \
 \
@@ -120,7 +120,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
         } \
-        iterator = iterator->next; \
+        iterator = &(old_map->arena->begin[iterator->next]); \
 \
         while (iterator) { \
             uint32 hash = iterator->hash; \
@@ -128,7 +128,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
 \
-            iterator = iterator->next; \
+            iterator = &(old_map->arena->begin[iterator->next]); \
         } \
     } \
 \
@@ -184,18 +184,18 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
             return false; \
 \
         if (iterator->next) \
-            iterator = iterator->next; \
+            iterator = &(map->arena->begin[iterator->next]); \
         else \
             break; \
     } \
 \
     map->collisions += 1; \
-    iterator->next = arena_push(map->arena, sizeof(*(iterator->next))); \
-    iterator = iterator->next; \
+    iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
+    iterator = &(map->arena->begin[iterator->next]); \
     iterator->key = key; \
     iterator->hash = hash; \
     HASH_ITERATOR_VALUE_ASSIGN; \
-    iterator->next = NULL; \
+    iterator->next = 0; \
     map->length += 1; \
 \
     return true; \
@@ -220,7 +220,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
             return HASH_ITERATOR_VALUE_RETURN; \
 \
         if (iterator->next) \
-            iterator = iterator->next; \
+            iterator = &(map->arena->begin[iterator->next]); \
         else \
             break; \
     } \
@@ -244,7 +244,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
         if (iterator->next) { \
-            memmove(iterator, iterator->next, sizeof(*iterator)); \
+            memmove(iterator, &(map->arena->begin[iterator->next]), sizeof(*iterator)); \
             map->collisions -= 1; \
         } else { \
             memset(iterator, 0, sizeof(*iterator)); \
@@ -255,7 +255,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     while (iterator->next) { \
         Bucket##T *previous = iterator; \
-        iterator = iterator->next; \
+        iterator = &(map->arena->begin[iterator->next]); \
 \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
              previous->next = iterator->next; \
@@ -291,7 +291,7 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
 \
         while (iterator && iterator->key) { \
             printf(GREEN" %s=%u"RESET" ->", iterator->key, HASH_ITERATOR_VALUE); \
-            iterator = iterator->next; \
+            iterator = &(map->arena->begin[iterator->next]); \
         } \
     } \
     printf("\n"); \
@@ -400,6 +400,7 @@ int main(void) {
 
     original_map = hash_map_create(NSTRINGS);
     Arena *arena = arena_alloc((usize)4096*NSTRINGS);
+    arena_push(arena, BRN2_ALIGNMENT); // in order to set [0] as invalid
     assert(original_map);
     assert(hash_map_capacity(original_map) >= NSTRINGS);
 
