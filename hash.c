@@ -269,7 +269,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
  \
 void \
 hash_##T##_print_summary(struct Hash##T *map, char *name) { \
-    printf("struct Hash##T %s {\n", name); \
+    printf("struct Hash%s %s {\n", QUOTE(T), name); \
     printf("  capacity: %u\n", map->capacity); \
     printf("  length: %u\n", map->length); \
     printf("  collisions: %u\n", map->collisions); \
@@ -375,8 +375,8 @@ random_string(Arena *arena) {
 // flags: -lm
 int main(void) {
     struct timespec t0, t1;
-    struct Hash##T *original_map; 
-    struct Hash##T *balanced_map; 
+    HashMap *original_map; 
+    HashMap *balanced_map; 
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 
