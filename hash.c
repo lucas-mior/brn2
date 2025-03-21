@@ -376,7 +376,7 @@ HASH_IMPLEMENT(set)
 #include <assert.h>
 
 #define NSTRINGS 1000000
-#define NBYTES BRN2_ALIGNMENT
+#define NBYTES 10*BRN2_ALIGNMENT
 
 static char *
 random_string(Arena *arena) {
