@@ -288,9 +288,12 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
         if (iterator->key || verbose) \
             printf("\n%03u:", i); \
 \
-        while (iterator && iterator->key) { \
-            printf(GREEN" %s=%u"RESET" ->", iterator->key, HASH_ITERATOR_VALUE); \
-            iterator = &(map->arena->begin[iterator->next]); \
+        while (iterator->key) { \
+            printf(RED"'%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
+            if (iterator->next) \
+                iterator = &(map->arena->begin[iterator->next]); \
+            else \
+                break; \
         } \
     } \
     printf("\n"); \
@@ -412,6 +415,7 @@ int main(void) {
     assert(hash_map_insert(original_map, string2, strlen(string2), 2));
 
     assert(hash_map_length(original_map) == 2);
+    hash_map_print(original_map, true);
 
     srand(42);
 
@@ -421,7 +425,10 @@ int main(void) {
         assert(hash_map_insert(original_map, key, strlen(key), value));
     }
 
-    HASH_map_PRINT_SUMMARY(original_map);
+    if (NSTRINGS < 10)
+        hash_map_print(original_map, true);
+    else
+        HASH_map_PRINT_SUMMARY(original_map);
 
     {
         uint32 collisions_before = hash_map_collisions(original_map);
@@ -430,8 +437,11 @@ int main(void) {
         assert(ratio <= 1.2);
         balanced_map = hash_map_balance(original_map);
 
-        HASH_map_PRINT_SUMMARY(balanced_map);
         assert(collisions_before > hash_map_collisions(balanced_map));
+        if (NSTRINGS < 10)
+            hash_map_print(balanced_map, true);
+        else
+            HASH_map_PRINT_SUMMARY(balanced_map);
     }
 
     assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
