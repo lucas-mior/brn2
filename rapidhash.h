@@ -191,7 +191,7 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
 RAPIDHASH_INLINE uint64
 rapid_mix(uint64 A, uint64 B) RAPIDHASH_NOEXCEPT {
     rapid_mum(&A, &B);
-    return A^B;
+    return A ^ B;
 }
 
 #ifdef RAPIDHASH_LITTLE_ENDIAN
@@ -292,7 +292,7 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
     uint64 a;
     uint64 b;
 
-    seed ^= rapid_mix(seed^secret[0], secret[1])^len;
+    seed ^= rapid_mix(seed ^ secret[0], secret[1]) ^ len;
     if (LIKELY(len <= 16)) {
         if (LIKELY(len >= 4)) {
             const uint8 *plast = p + len - 4;
@@ -312,37 +312,37 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
             uint64 see2 = seed;
 #ifdef RAPIDHASH_UNROLLED
             while (LIKELY(i >= 96)) {
-                seed = rapid_mix(read64(p)^secret[0], read64(p + 8)^seed);
-                see1 = rapid_mix(read64(p + 16)^secret[1], read64(p + 24)^see1);
-                see2 = rapid_mix(read64(p + 32)^secret[2], read64(p + 40)^see2);
-                seed = rapid_mix(read64(p + 48)^secret[0], read64(p + 56)^seed);
-                see1 = rapid_mix(read64(p + 64)^secret[1], read64(p + 72)^see1);
-                see2 = rapid_mix(read64(p + 80)^secret[2], read64(p + 88)^see2);
+                seed = rapid_mix(read64(p) ^ secret[0], read64(p + 8) ^ seed);
+                see1 = rapid_mix(read64(p + 16) ^ secret[1], read64(p + 24) ^ see1);
+                see2 = rapid_mix(read64(p + 32) ^ secret[2], read64(p + 40) ^ see2);
+                seed = rapid_mix(read64(p + 48) ^ secret[0], read64(p + 56) ^ seed);
+                see1 = rapid_mix(read64(p + 64) ^ secret[1], read64(p + 72) ^ see1);
+                see2 = rapid_mix(read64(p + 80) ^ secret[2], read64(p + 88) ^ see2);
                 p += 96;
                 i -= 96;
             }
             if (UNLIKELY(i >= 48)) {
-                seed = rapid_mix(read64(p)^secret[0], read64(p + 8)^seed);
-                see1 = rapid_mix(read64(p + 16)^secret[1], read64(p + 24)^see1);
-                see2 = rapid_mix(read64(p + 32)^secret[2], read64(p + 40)^see2);
+                seed = rapid_mix(read64(p) ^ secret[0], read64(p + 8) ^ seed);
+                see1 = rapid_mix(read64(p + 16) ^ secret[1], read64(p + 24) ^ see1);
+                see2 = rapid_mix(read64(p + 32) ^ secret[2], read64(p + 40) ^ see2);
                 p += 48;
                 i -= 48;
             }
 #else
             do {
-                seed = rapid_mix(read64(p)^secret[0], read64(p + 8)^seed);
-                see1 = rapid_mix(read64(p + 16)^secret[1], read64(p + 24)^see1);
-                see2 = rapid_mix(read64(p + 32)^secret[2], read64(p + 40)^see2);
+                seed = rapid_mix(read64(p) ^ secret[0], read64(p + 8) ^ seed);
+                see1 = rapid_mix(read64(p + 16) ^ secret[1], read64(p + 24) ^ see1);
+                see2 = rapid_mix(read64(p + 32) ^ secret[2], read64(p + 40) ^ see2);
                 p += 48;
                 i -= 48;
             } while (LIKELY(i >= 48));
 #endif
-            seed ^= see1^see2;
+            seed ^= see1 ^ see2;
         }
         if (i > 16) {
-            seed = rapid_mix(read64(p)^secret[2], read64(p + 8)^seed^secret[1]);
+            seed = rapid_mix(read64(p) ^ secret[2], read64(p + 8) ^ seed ^ secret[1]);
             if (i > 32) {
-                seed = rapid_mix(read64(p + 16)^secret[2], read64(p + 24)^seed);
+                seed = rapid_mix(read64(p + 16) ^ secret[2], read64(p + 24) ^ seed);
             }
         }
         a = read64(p + i - 16);
@@ -351,7 +351,7 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
     a ^= secret[1];
     b ^= seed;
     rapid_mum(&a, &b);
-    return rapid_mix(a^secret[0]^len, b^secret[1]);
+    return rapid_mix(a ^ secret[0] ^ len, b ^ secret[1]);
 }
 
 RAPIDHASH_INLINE uint64
