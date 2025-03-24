@@ -74,11 +74,11 @@ typedef uint8_t uint8;
 #endif
 
 #if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
-#define _likely_(x) __builtin_expect(x, 1)
-#define _unlikely_(x) __builtin_expect(x, 0)
+#define likely(x) __builtin_expect(x, 1)
+#define unlikely(x) __builtin_expect(x, 0)
 #else
-#define _likely_(x) (x)
-#define _unlikely_(x) (x)
+#define likely(x) (x)
+#define unlikely(x) (x)
 #endif
 
 #ifndef RAPIDHASH_LITTLE_ENDIAN
@@ -285,13 +285,13 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
     const uint8 *p = (const uint8 *)key;
     seed ^= rapid_mix(seed ^ secret[0], secret[1]) ^ len;
     uint64 a, b;
-    if (_likely_(len <= 16)) {
-        if (_likely_(len >= 4)) {
+    if (likely(len <= 16)) {
+        if (likely(len >= 4)) {
             const uint8 *plast = p + len - 4;
             a = (rapid_read32(p) << 32) | rapid_read32(plast);
             const uint64 delta = ((len & 24) >> (len >> 3));
             b = ((rapid_read32(p + delta) << 32) | rapid_read32(plast - delta));
-        } else if (_likely_(len > 0)) {
+        } else if (likely(len > 0)) {
             a = rapid_readSmall(p, len);
             b = 0;
         } else {
@@ -299,11 +299,11 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
         }
     } else {
         size_t i = len;
-        if (_unlikely_(i > 48)) {
+        if (unlikely(i > 48)) {
             uint64 see1 = seed;
             uint64 see2 = seed;
 #ifdef RAPIDHASH_UNROLLED
-            while (_likely_(i >= 96)) {
+            while (likely(i >= 96)) {
                 seed = rapid_mix(rapid_read64(p) ^ secret[0], rapid_read64(p + 8) ^ seed);
                 see1 = rapid_mix(rapid_read64(p + 16) ^ secret[1], rapid_read64(p + 24) ^ see1);
                 see2 = rapid_mix(rapid_read64(p + 32) ^ secret[2], rapid_read64(p + 40) ^ see2);
@@ -313,7 +313,7 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
                 p += 96;
                 i -= 96;
             }
-            if (_unlikely_(i >= 48)) {
+            if (unlikely(i >= 48)) {
                 seed = rapid_mix(rapid_read64(p) ^ secret[0], rapid_read64(p + 8) ^ seed);
                 see1 = rapid_mix(rapid_read64(p + 16) ^ secret[1], rapid_read64(p + 24) ^ see1);
                 see2 = rapid_mix(rapid_read64(p + 32) ^ secret[2], rapid_read64(p + 40) ^ see2);
@@ -327,7 +327,7 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
                 see2 = rapid_mix(rapid_read64(p + 32) ^ secret[2], rapid_read64(p + 40) ^ see2);
                 p += 48;
                 i -= 48;
-            } while (_likely_(i >= 48));
+            } while (likely(i >= 48));
 #endif
             seed ^= see1 ^ see2;
         }
