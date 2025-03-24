@@ -373,7 +373,7 @@ typedef struct String {
 } String;
 
 static String
-random_string(uint32 nbytes) {
+random_string(Arena *arena, uint32 nbytes) {
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     String string;
     int size;
@@ -381,7 +381,7 @@ random_string(uint32 nbytes) {
 
     length = nbytes + rand() % 16;
     size = length + 1;
-    string.s = xmalloc(size);
+    string.s = arena_push(arena, size);
 
     for (int i = 0; i < length; i += 1) {
         int c = rand() % ((int)sizeof(characters) - 1);
@@ -421,7 +421,7 @@ int main(void) {
     srand(42);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
-        String key = random_string(NBYTES);
+        String key = random_string(arena, NBYTES);
         uint32 value = (uint32)rand();
         assert(hash_map_insert(original_map, key.s, key.length, value));
     }
