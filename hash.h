@@ -45,7 +45,6 @@ HashMap *hash_map_create(uint32);
 HashMap *hash_map_balance(HashMap *);
 void hash_map_free_keys(HashMap *);
 void hash_map_destroy(HashMap *);
-uint32 hash_map_function(char *, uint32);
 uint32 hash_map_normal(HashMap *, uint32);
 bool hash_map_insert(HashMap *, char *, uint32, uint32);
 bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32);
@@ -64,7 +63,6 @@ HashSet *hash_set_create(uint32);
 HashSet *hash_set_balance(HashSet *);
 void hash_set_free_keys(HashSet *);
 void hash_set_destroy(HashSet *);
-uint32 hash_set_function(char *, uint32);
 uint32 hash_set_normal(HashSet *, uint32);
 bool hash_set_insert(HashSet *, char *, uint32, uint32);
 bool hash_set_insert_pre_calc(HashSet *, char *, uint32, uint32, uint32);
@@ -83,7 +81,6 @@ uint32 hash_set_expected_collisions(HashSet *);
 #define QUOTE(x) Q(x)
 #define HASH_map_PRINT_SUMMARY(MAP) hash_map_print_summary(MAP, QUOTE(MAP))
 #define HASH_set_PRINT_SUMMARY(MAP) hash_set_print_summary(MAP, QUOTE(MAP))
-#define hash_function(a, b) hash_map_function(a, b)
 #define HASH_MAP_SIZE(map) (sizeof(*map) + map->capacity*sizeof(map->array[0]))
 
 #endif
