@@ -140,7 +140,7 @@ case "$target" in
         ;;
     "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check")
         set -x
-        ctags --kinds-C=+l -- *.h *.c 2> /dev/null || true
+        ctags --kinds-C=+l+d *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
         ;;

@@ -108,6 +108,25 @@ xmemdup(void *source, usize size) {
     return p;
 }
 
+void *
+snprintf2(char *buffer, size_t size, char *format, ...) {
+    int n;
+    va_list args;
+    va_start(args, format);
+    n = snprintf(buffer, size, format, args);
+    va_end(args);
+
+    if (n >= (int)size) {
+        error("Error in snprintf: Too long string.\n");
+        exit(EXIT_FAILURE);
+    }
+    if (n <= 0) {
+        error("Error in snprintf.\n");
+        exit(EXIT_FAILURE);
+    }
+    return buffer;
+}
+
 void
 util_command(const int argc, char **argv) {
     pid_t child;
