@@ -67,9 +67,8 @@
 #define BRN2_INLINE
 #endif
 
-#define SNPRINTF(BUFFER, FORMAT, ...) do { \
-    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__); \
-} while (0)
+#define SNPRINTF(BUFFER, FORMAT, ...) \
+    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
