@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             newlist_map = hash_map_create(new->length);
-            main_capacity = hash_map_capacity(newlist_map);
+            main_capacity = hash_capacity(newlist_map);
             hashes_new = brn2_create_hashes(new, main_capacity);
             brn2_verify(new, newlist_map, hashes_new);
             hash_map_print_summary(newlist_map, "newlist_map");
