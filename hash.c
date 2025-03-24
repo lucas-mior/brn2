@@ -279,8 +279,8 @@ hash_##T##_print_summary(struct Hash##T *map, char *name) { \
     printf("struct Hash%s %s {\n", QUOTE(T), name); \
     printf("  capacity: %u\n", map->capacity); \
     printf("  length: %u\n", map->length); \
+    printf("  max collisions in a Bucket: %u\n", map->maxcol); \
     printf("  collisions: %u\n", map->collisions); \
-    printf("  maxcol: %u\n", map->maxcol); \
     printf("  expected collisions: %u\n", hash_##T##_expected_collisions(map)); \
     printf("}\n"); \
     return; \
