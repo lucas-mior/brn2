@@ -59,7 +59,6 @@ uint32 hash_map_capacity(HashMap *);
 uint32 hash_map_length(HashMap *);
 uint32 hash_map_collisions(HashMap *);
 uint32 hash_map_expected_collisions(HashMap *);
-uint32 hash_map_expected_max_collisions(HashMap *map);
 
 HashSet *hash_set_create(uint32);
 HashSet *hash_set_balance(HashSet *);
@@ -78,7 +77,6 @@ uint32 hash_set_capacity(HashSet *);
 uint32 hash_set_length(HashSet *);
 uint32 hash_set_collisions(HashSet *);
 uint32 hash_set_expected_collisions(HashSet *);
-uint32 hash_set_expected_max_collisions(HashSet *);
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
