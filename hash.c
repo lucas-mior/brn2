@@ -61,6 +61,7 @@ struct Hash##T { \
     uint32 capacity; \
     uint32 bitmask; \
     uint32 collisions; \
+    uint32 maxcol; \
     uint32 length; \
     Arena *arena; \
     Bucket##T array[]; \
@@ -170,6 +171,7 @@ bool \
 hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 				         uint32 index, uint32 value) { \
     Bucket##T *iterator = &(map->array[index]); \
+    uint32 cols = 0; \
 \
     if (iterator->key == NULL) { \
         iterator->key = key; \
@@ -181,6 +183,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     } \
 \
     while (true) { \
+        cols += 1; \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
             return false; \
 \
@@ -191,6 +194,8 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     } \
 \
     map->collisions += 1; \
+    if (cols > map->maxcol) \
+        map->maxcol = cols; \
     iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
     iterator = (void *)(map->arena->begin + iterator->next); \
     iterator->key = key; \
@@ -275,6 +280,7 @@ hash_##T##_print_summary(struct Hash##T *map, char *name) { \
     printf("  capacity: %u\n", map->capacity); \
     printf("  length: %u\n", map->length); \
     printf("  collisions: %u\n", map->collisions); \
+    printf("  maxcol: %u\n", map->maxcol); \
     printf("  expected collisions: %u\n", hash_##T##_expected_collisions(map)); \
     printf("}\n"); \
     return; \
@@ -375,21 +381,28 @@ HASH_IMPLEMENT(set)
 #define NSTRINGS 1000000
 #define NBYTES 10*BRN2_ALIGNMENT
 
-static char *
-random_string(Arena *arena) {
-    int length = NBYTES + rand() % BRN2_ALIGNMENT;
-    int size = ALIGN(length + 1);
-    const char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                           "abcdefghijklmnopqrstuvwxyz"
-                           "!@#$%&*()[]-=_+<>,"
-                           "0123456789";
-    char *string = arena_push(arena, size);
+typedef struct String {
+    char *s;
+    int length;
+} String;
+
+static String
+random_string(uint32 nbytes) {
+    const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+    String string;
+    int size;
+    int length;
+
+    length = nbytes + rand() % 16;
+    size = length + 1;
+    string.s = xmalloc(size);
 
     for (int i = 0; i < length; i += 1) {
-        int c = rand() % ((int)sizeof(allowed) - 1);
-        string[i] = allowed[c];
+        int c = rand() % ((int)sizeof(characters) - 1);
+        string.s[i] = characters[c];
     }
-    string[length] = '\0';
+    string.s[length] = '\0';
+    string.length = length;
 
     return string;
 }
@@ -422,9 +435,9 @@ int main(void) {
     srand(42);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
-        char *key = random_string(arena);
+        String key = random_string(NBYTES);
         uint32 value = (uint32)rand();
-        assert(hash_map_insert(original_map, key, strlen(key), value));
+        assert(hash_map_insert(original_map, key.s, key.length, value));
     }
 
     if (NSTRINGS < 10)
