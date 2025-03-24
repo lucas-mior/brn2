@@ -41,8 +41,13 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
-uint32 hash_function(char *key, uint32 key_size);
-uint32 hash_normal(void *map, uint32 hash);
+uint32 hash_function(char *, uint32);
+uint32 hash_normal(void *, uint32);
+uint32 hash_capacity(void *);
+uint32 hash_length(void *);
+uint32 hash_collisions(void *);
+uint32 hash_expected_collisions(void *);
+
 HashMap *hash_map_create(uint32);
 HashMap *hash_map_balance(HashMap *);
 void hash_map_destroy(HashMap *);
@@ -54,10 +59,6 @@ bool hash_map_remove(HashMap *, char *, uint32);
 bool hash_map_remove_pre_calc(HashMap *, char *, uint32, uint32);
 void hash_map_print_summary(HashMap *, char *);
 void hash_map_print(HashMap *, bool);
-uint32 hash_capacity(void *);
-uint32 hash_length(void *);
-uint32 hash_collisions(void *);
-uint32 hash_expected_collisions(void *);
 
 HashSet *hash_set_create(uint32);
 HashSet *hash_set_balance(HashSet *);
