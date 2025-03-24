@@ -42,6 +42,13 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
+uint32 BRN2_INLINE
+hash_function(char *key, uint32 key_size) {
+    uint32 hash;
+    hash = rapidhash(key, key_size);
+    return (uint32)hash;
+}
+
 #define HASH_IMPLEMENT(T) \
 typedef struct Bucket##T { \
     char *key; \
@@ -144,13 +151,6 @@ hash_##T##_destroy(struct Hash##T *map) { \
     return; \
 } \
 \
-uint32 BRN2_INLINE \
-hash_##T##_function(char *key, uint32 key_size) { \
-    uint32 hash; \
-    hash = rapidhash(key, key_size); \
-    return (uint32)hash; \
-} \
-\
 uint32 \
 hash_##T##_normal(struct Hash##T *map, uint32 hash) { \
     uint32 normal = hash & map->bitmask; \
@@ -159,7 +159,7 @@ hash_##T##_normal(struct Hash##T *map, uint32 hash) { \
 \
 bool \
 hash_##T##_insert(struct Hash##T *map, char *key, uint32 key_size, uint32 value) { \
-    uint32 hash = hash_##T##_function(key, key_size); \
+    uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_##T##_normal(map, hash); \
     return hash_##T##_insert_pre_calc(map, key, hash, index, value); \
 } \
@@ -202,7 +202,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
 void * \
 hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_size) { \
-    uint32 hash = hash_##T##_function(key, key_size); \
+    uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_##T##_normal(map, hash); \
     return hash_##T##_lookup_pre_calc(map, key, hash, index); \
 } \
@@ -229,7 +229,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
 bool \
 hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_size) { \
-    uint32 hash = hash_##T##_function(key, key_size); \
+    uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_##T##_normal(map, hash); \
     return hash_##T##_remove_pre_calc(map, key, hash, index); \
 } \
@@ -361,7 +361,6 @@ HASH_IMPLEMENT(set)
 #define hash_set_collisions(a)               hash_set_collisions(a)
 #define hash_set_expected_collisions(a)      hash_set_expected_collisions(a)
 #define hash_set_normal(a, b)                hash_set_normal(a, b)
-#define hash_set_function(a, b)              hash_set_function(a, b)
 
 
 #ifndef TESTING_THIS_FILE
