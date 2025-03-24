@@ -154,7 +154,8 @@ hash_##T##_destroy(struct Hash##T *map) { \
 } \
 \
 bool \
-hash_##T##_insert(struct Hash##T *map, char *key, uint32 key_size, uint32 value) { \
+hash_##T##_insert(struct Hash##T *map, \
+                  char *key, uint32 key_size, uint32 value) { \
     uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_normal(map, hash); \
     return hash_##T##_insert_pre_calc(map, key, hash, index, value); \
@@ -206,7 +207,8 @@ hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_size) { \
 } \
 \
 void * \
-hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 index) { \
+hash_##T##_lookup_pre_calc(struct Hash##T *map, \
+                           char *key, uint32 hash, uint32 index) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) \
@@ -233,7 +235,8 @@ hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_size) { \
 } \
 \
 bool \
-hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 index) { \
+hash_##T##_remove_pre_calc(struct Hash##T *map, \
+                           char *key, uint32 hash, uint32 index) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) \
@@ -241,7 +244,8 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
         if (iterator->next) { \
-            memmove(iterator, map->arena->begin + iterator->next, sizeof(*iterator)); \
+            memmove(iterator, \
+                    map->arena->begin + iterator->next, sizeof(*iterator)); \
             map->collisions -= 1; \
         } else { \
             memset(iterator, 0, sizeof(*iterator)); \
@@ -287,7 +291,8 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
             printf("\n%03u:", i); \
 \
         while (iterator->key) { \
-            printf(RED" '%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
+            printf(RED" '%s'"RESET"=%u ->", \
+                   iterator->key, HASH_ITERATOR_VALUE); \
             if (iterator->next) \
                 iterator = (void *)(map->arena->begin + iterator->next); \
             else { \
