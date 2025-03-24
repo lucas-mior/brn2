@@ -279,9 +279,8 @@ readSmall(const uint8 *p, size_t k) RAPIDHASH_NOEXCEPT {
  *
  *  @param key     Buffer to be hashed.
  *  @param len     @key length, in bytes.
- *  @param seed    64-bit seed used to alter the hash result predictably.
- *  @param secret  Triplet of 64-bit secrets used to alter hash result
- * predictably.
+ *  @param seed    64-bit seed used to alter the hash predictably.
+ *  @param secret  Triplet of 64-bit secrets used to alter hash predictably.
  *
  *  Returns a 64-bit hash.
  */
