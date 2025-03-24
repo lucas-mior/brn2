@@ -205,14 +205,8 @@ int main(int argc, char **argv) {
         char write_buffer[BUFSIZ];
         char *pointer = write_buffer;
         uint32 capacity_set;
-        int n;
 
-        n = snprintf(buffer.name, sizeof(buffer.name),
-                    "%s/%s", tempdir, "brn2.XXXXXX");
-        if (n < 0) {
-            error("Error printing buffer name.\n");
-            exit(EXIT_FAILURE);
-        }
+        SNPRINTF(buffer.name, "%s/%s", tempdir, "brn2.XXXXXX");
         buffer.name[sizeof(buffer.name) - 1] = '\0';
 
         if ((buffer.fd = mkstemp(buffer.name)) < 0) {
