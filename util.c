@@ -119,14 +119,12 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     va_end(args);
 
     if (n >= (int)size) {
-        printf("huge case\n");
         buffer = xmalloc(n + 1);
         va_start(args, format);
         va_copy(args2, args);
         n = vsnprintf(buffer, n + 1, format, args);
         va_end(args);
     }
-    printf("buffer: %s\n", buffer);
     if (n <= 0) {
         error("Error in snprintf.\n");
         exit(EXIT_FAILURE);
