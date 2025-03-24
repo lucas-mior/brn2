@@ -280,6 +280,8 @@ hash_##T##_print_summary(struct Hash##T *map, char *name) { \
     printf("  capacity: %u\n", map->capacity); \
     printf("  length: %u\n", map->length); \
     printf("  max collisions in a Bucket: %u\n", map->maxcol); \
+    printf("  expected max collisions in a Bucket: %u\n", \
+            hash_##T##_expected_max_collisions(map)); \
     printf("  collisions: %u\n", map->collisions); \
     printf("  expected collisions: %u\n", hash_##T##_expected_collisions(map)); \
     printf("}\n"); \
@@ -331,6 +333,17 @@ hash_##T##_expected_collisions(struct Hash##T *map) { \
     long double result = n - m * (1 - powl((m - 1)/m, n)); \
     return (uint32)(roundl(result)); \
 } \
+\
+uint32 \
+hash_##T##_expected_max_collisions(struct Hash##T *map) { \
+    long double n = map->length; \
+    long double m = map->capacity; \
+    long double avg_load = (double)n / (double)m; \
+    long double fluctuation = sqrt((n * log(m)) / m); \
+    long double log_term = log(m); \
+\
+    return (uint32)ceil(avg_load + fluctuation + log_term); \
+}
 
 #define HASH_VALUE_FIELD uint32 value; uint32 unused;
 #define HASH_ITERATOR_VALUE iterator->value
