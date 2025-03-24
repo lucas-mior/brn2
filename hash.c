@@ -126,7 +126,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
 \
         if (iterator->key) { \
             hash = iterator->hash; \
-            index = hash_##T##_normal(new_map, hash); \
+            index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
         } \
@@ -134,7 +134,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
         while (iterator->next) { \
             iterator = (void *)(old_map->arena->begin + iterator->next); \
             hash = iterator->hash; \
-            index = hash_##T##_normal(new_map, hash); \
+            index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
 \
@@ -153,16 +153,10 @@ hash_##T##_destroy(struct Hash##T *map) { \
     return; \
 } \
 \
-uint32 \
-hash_##T##_normal(struct Hash##T *map, uint32 hash) { \
-    uint32 normal = hash & map->bitmask; \
-    return normal; \
-} \
-\
 bool \
 hash_##T##_insert(struct Hash##T *map, char *key, uint32 key_size, uint32 value) { \
     uint32 hash = hash_function(key, key_size); \
-    uint32 index = hash_##T##_normal(map, hash); \
+    uint32 index = hash_normal(map, hash); \
     return hash_##T##_insert_pre_calc(map, key, hash, index, value); \
 } \
 \
@@ -207,7 +201,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 void * \
 hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_size) { \
     uint32 hash = hash_function(key, key_size); \
-    uint32 index = hash_##T##_normal(map, hash); \
+    uint32 index = hash_normal(map, hash); \
     return hash_##T##_lookup_pre_calc(map, key, hash, index); \
 } \
 \
@@ -234,7 +228,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 bool \
 hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_size) { \
     uint32 hash = hash_function(key, key_size); \
-    uint32 index = hash_##T##_normal(map, hash); \
+    uint32 index = hash_normal(map, hash); \
     return hash_##T##_remove_pre_calc(map, key, hash, index); \
 } \
 \
@@ -348,6 +342,13 @@ HASH_IMPLEMENT(set)
 #undef HASH_ITERATOR_VALUE_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
 
+uint32
+hash_normal(void *map, uint32 hash) {
+    HashMap *map2 = map;
+    uint32 normal = hash & map2->bitmask;
+    return normal;
+}
+
 #define hash_set_create(a)                   hash_set_create(a)
 #define hash_set_balance(a)                  hash_set_balance(a)
 #define hash_set_free_keys(a)                hash_set_free_keys(a)
@@ -364,7 +365,6 @@ HASH_IMPLEMENT(set)
 #define hash_set_length(a)                   hash_set_length(a)
 #define hash_set_collisions(a)               hash_set_collisions(a)
 #define hash_set_expected_collisions(a)      hash_set_expected_collisions(a)
-#define hash_set_normal(a, b)                hash_set_normal(a, b)
 
 
 #ifndef TESTING_THIS_FILE
