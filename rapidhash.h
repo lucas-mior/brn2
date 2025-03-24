@@ -238,16 +238,23 @@ RAPIDHASH_INLINE uint64
 rapid_read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint64 v;
     memcpy(&v, p, sizeof(*(&v)));
-    return ((v >> 56) & 0xff) | ((v >> 40) & 0xff00) | ((v >> 24) & 0xff0000) |
-            ((v >> 8) & 0xff000000) | ((v << 8) & 0xff00000000) | ((v << 24) & 0xff0000000000) |
-            ((v << 40) & 0xff000000000000) | ((v << 56) & 0xff00000000000000);
+    return ((v >> 56) & 0xff)
+         | ((v >> 40) & 0xff00)
+         | ((v >> 24) & 0xff0000)
+         | ((v >>  8) & 0xff000000)
+         | ((v <<  8) & 0xff00000000)
+         | ((v << 24) & 0xff0000000000)
+         | ((v << 40) & 0xff000000000000)
+         | ((v << 56) & 0xff00000000000000);
 }
 RAPIDHASH_INLINE uint64
 rapid_read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint32 v;
     memcpy(&v, p, sizeof(*(&v)));
-    return (((v >> 24) & 0xff) | ((v >> 8) & 0xff00) | ((v << 8) & 0xff0000) |
-            ((v << 24) & 0xff000000));
+    return ((v >> 24) & 0xff)
+         | ((v >>  8) & 0xff00)
+         | ((v <<  8) & 0xff0000)
+         | ((v << 24) & 0xff000000);
 }
 #endif
 
