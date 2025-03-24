@@ -370,6 +370,7 @@ hash_expected_collisions(void *map) { \
 typedef struct String {
     char *s;
     int length;
+    int value;
 } String;
 
 static String
@@ -389,6 +390,7 @@ random_string(Arena *arena, uint32 nbytes) {
     }
     string.s[length] = '\0';
     string.length = length;
+    string.value = rand();
 
     return string;
 }
@@ -399,8 +401,6 @@ int main(void) {
     HashMap *original_map;
     HashMap *balanced_map;
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-
     original_map = hash_map_create(NSTRINGS);
     Arena *arena = arena_alloc((usize)4096*NSTRINGS);
     arena_push(arena, BRN2_ALIGNMENT); // in order to set [0] as invalid
@@ -410,6 +410,7 @@ int main(void) {
     char *string1 = "aaaaaaaaaaaaaaaa";
     char *string2 = "bbbbbbbbbbbbbbbb";
     char *string3 = "cccccccccccccccc";
+    String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     assert(hash_map_insert(original_map, string1, strlen(string1), 0));
     assert(!hash_map_insert(original_map, string1, strlen(string1), 1));
@@ -420,11 +421,17 @@ int main(void) {
 
     srand(42);
 
+    for (int i = 0; i < NSTRINGS; i += 1)
+        strings[i] = random_string(arena, NBYTES);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     for (int i = 0; i < NSTRINGS; i += 1) {
-        String key = random_string(arena, NBYTES);
-        uint32 value = (uint32)rand();
-        assert(hash_map_insert(original_map, key.s, key.length, value));
+        assert(hash_map_insert(original_map,
+                               strings[i].s,
+                               strings[i].length,
+                               strings[i].value));
     }
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
 
     if (NSTRINGS < 10)
         hash_map_print(original_map, false);
@@ -461,7 +468,6 @@ int main(void) {
 
     hash_map_destroy(balanced_map);
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     {
         long seconds = t1.tv_sec - t0.tv_sec;
         long nanos = t1.tv_nsec - t0.tv_nsec;
