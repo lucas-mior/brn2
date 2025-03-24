@@ -94,8 +94,7 @@ typedef uint8_t uint8;
 #endif
 #endif
 
-#define RAPID_SEED (0xbdd89aa982704029ull)
-
+RAPIDHASH_CONSTEXPR uint64 rapid_seed = 0xbdd89aa982704029ull;
 RAPIDHASH_CONSTEXPR uint64 rapid_secret[3] = {
     0x2d358dccaa6c78a5ull,
     0x8bb84b93962eacc9ull,
@@ -355,5 +354,5 @@ rapidhash_withSeed(const void *key, size_t len, uint64 seed) RAPIDHASH_NOEXCEPT 
 
 RAPIDHASH_INLINE uint64
 rapidhash(const void *key, size_t len) RAPIDHASH_NOEXCEPT {
-    return rapidhash_withSeed(key, len, RAPID_SEED);
+    return rapidhash_withSeed(key, len, rapid_seed);
 }
