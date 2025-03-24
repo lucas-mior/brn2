@@ -283,8 +283,10 @@ RAPIDHASH_INLINE uint64
 rapidhash_internal(const void *key, size_t len, uint64 seed,
                    const uint64 *secret) RAPIDHASH_NOEXCEPT {
     const uint8 *p = (const uint8 *)key;
+    uint64 a;
+    uint64 b;
+
     seed ^= rapid_mix(seed ^ secret[0], secret[1]) ^ len;
-    uint64 a, b;
     if (LIKELY(len <= 16)) {
         if (LIKELY(len >= 4)) {
             const uint8 *plast = p + len - 4;
