@@ -110,7 +110,7 @@ void *arena_reset_zero(Arena *);
 void arena_destroy(Arena *);
 
 typedef struct File {
-    char name[PATH_MAX-12];
+    char name[20];
     int fd;
     FILE *stream;
 } File;

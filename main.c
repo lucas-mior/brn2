@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
         uint32 capacity_set;
 
         brn2_buffer_name = SNPRINTF(brn2_buffer.name, "%s/%s",
-                                    tempdir, "brn2.XXXXXX");
+                                    tempdir, "brn2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.XXXXXX");
 
         if ((brn2_buffer.fd = mkstemp(brn2_buffer_name)) < 0) {
             error("Error opening '%s': %s\n", brn2_buffer_name, strerror(errno));
