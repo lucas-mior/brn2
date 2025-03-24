@@ -55,10 +55,10 @@ bool hash_map_remove(HashMap *, char *, uint32);
 bool hash_map_remove_pre_calc(HashMap *, char *, uint32, uint32);
 void hash_map_print_summary(HashMap *, char *);
 void hash_map_print(HashMap *, bool);
-uint32 hash_map_capacity(HashMap *);
-uint32 hash_map_length(HashMap *);
-uint32 hash_map_collisions(HashMap *);
-uint32 hash_map_expected_collisions(HashMap *);
+uint32 hash_capacity(void *);
+uint32 hash_length(void *);
+uint32 hash_collisions(void *);
+uint32 hash_expected_collisions(void *);
 
 HashSet *hash_set_create(uint32);
 HashSet *hash_set_balance(HashSet *);
@@ -72,10 +72,6 @@ bool hash_set_remove(HashSet *, char *, uint32);
 bool hash_set_remove_pre_calc(HashSet *, char *, uint32, uint32);
 void hash_set_print_summary(HashSet *, char *);
 void hash_set_print(HashSet *, bool);
-uint32 hash_set_capacity(HashSet *);
-uint32 hash_set_length(HashSet *);
-uint32 hash_set_collisions(HashSet *);
-uint32 hash_set_expected_collisions(HashSet *);
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)

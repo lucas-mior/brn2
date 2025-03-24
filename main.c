@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
         }
 
         oldlist_map = hash_map_create(old->length);
-        capacity_set = hash_map_capacity(oldlist_map);
+        capacity_set = hash_capacity(oldlist_map);
         hashes_old = brn2_create_hashes(old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
@@ -309,7 +309,7 @@ int main(int argc, char **argv) {
 
             brn2_normalize_names(old, new);
             newlist_map = hash_map_create(new->length);
-            main_capacity = hash_map_capacity(newlist_map);
+            main_capacity = hash_capacity(newlist_map);
             hashes_new = brn2_create_hashes(new, main_capacity);
 
             if (!brn2_verify(new, newlist_map, hashes_new)) {
