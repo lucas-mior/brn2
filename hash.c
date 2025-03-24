@@ -271,7 +271,7 @@ hash_##T##_print_summary(struct Hash##T *map, char *name) { \
     printf("  capacity: %u\n", map->capacity); \
     printf("  length: %u\n", map->length); \
     printf("  collisions: %u\n", map->collisions); \
-    printf("  expected collisions: %u\n", hash_##T##_expected_collisions(map)); \
+    printf("  expected collisions: %u\n", hash_expected_collisions(map)); \
     printf("}\n"); \
     return; \
 } \
@@ -299,28 +299,6 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
     return; \
 } \
 \
-uint32 \
-hash_##T##_capacity(struct Hash##T *map) { \
-    return map->capacity; \
-} \
-\
-uint32 \
-hash_##T##_length(struct Hash##T *map) { \
-    return map->length; \
-} \
-\
-uint32 \
-hash_##T##_collisions(struct Hash##T *map) { \
-    return map->collisions; \
-} \
-\
-uint32 \
-hash_##T##_expected_collisions(struct Hash##T *map) { \
-    long double n = map->length; \
-    long double m = map->capacity; \
-    long double result = n - m * (1 - powl((m - 1)/m, n)); \
-    return (uint32)(roundl(result)); \
-} \
 
 #define HASH_VALUE_FIELD uint32 value; uint32 unused;
 #define HASH_ITERATOR_VALUE iterator->value
@@ -347,6 +325,33 @@ hash_normal(void *map, uint32 hash) {
     HashMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
     return normal;
+}
+
+uint32
+hash_capacity(void *map) {
+    HashMap *map2 = map;
+    return map2->capacity;
+}
+
+uint32
+hash_length(void *map) {
+    HashMap *map2 = map;
+    return map2->length;
+}
+
+uint32
+hash_collisions(void *map) {
+    HashMap *map2 = map;
+    return map2->collisions;
+}
+
+uint32
+hash_expected_collisions(void *map) { \
+    HashMap *map2 = map;
+    long double n = map2->length; \
+    long double m = map2->capacity; \
+    long double result = n - m * (1 - powl((m - 1)/m, n)); \
+    return (uint32)(roundl(result)); \
 }
 
 #define hash_set_create(a)                   hash_set_create(a)
@@ -415,7 +420,7 @@ int main(void) {
     Arena *arena = arena_alloc((usize)4096*NSTRINGS);
     arena_push(arena, BRN2_ALIGNMENT); // in order to set [0] as invalid
     assert(original_map);
-    assert(hash_map_capacity(original_map) >= NSTRINGS);
+    assert(hash_capacity(original_map) >= NSTRINGS);
 
     char *string1 = "aaaaaaaaaaaaaaaa";
     char *string2 = "bbbbbbbbbbbbbbbb";
@@ -425,7 +430,7 @@ int main(void) {
     assert(!hash_map_insert(original_map, string1, strlen(string1), 1));
     assert(hash_map_insert(original_map, string2, strlen(string2), 2));
 
-    assert(hash_map_length(original_map) == 2);
+    assert(hash_length(original_map) == 2);
     hash_map_print(original_map, false);
 
     srand(42);
@@ -442,8 +447,8 @@ int main(void) {
         HASH_map_PRINT_SUMMARY(original_map);
 
     {
-        uint32 collisions_before = hash_map_collisions(original_map);
-        uint32 expected_collisions = hash_map_expected_collisions(original_map);
+        uint32 collisions_before = hash_collisions(original_map);
+        uint32 expected_collisions = hash_expected_collisions(original_map);
         double ratio = (double)collisions_before / (double)expected_collisions;
         assert(ratio <= 1.2);
         balanced_map = hash_map_balance(original_map);
@@ -454,10 +459,10 @@ int main(void) {
             HASH_map_PRINT_SUMMARY(balanced_map);
 
         if (collisions_before > 10)
-            assert(collisions_before > hash_map_collisions(balanced_map));
+            assert(collisions_before > hash_collisions(balanced_map));
     }
 
-    assert(hash_map_length(balanced_map) == (2 + NSTRINGS));
+    assert(hash_length(balanced_map) == (2 + NSTRINGS));
     uint32 *value = hash_map_lookup(balanced_map, string1, strlen(string1));
     assert(*value == 0);
     assert(!hash_map_lookup(balanced_map, string3, strlen(string3)));
@@ -465,7 +470,7 @@ int main(void) {
     assert(!hash_map_remove(balanced_map, string3, strlen(string3)));
     assert(hash_map_remove(balanced_map, string2, strlen(string2)));
 
-    assert(hash_map_length(balanced_map) == (1 + NSTRINGS));
+    assert(hash_length(balanced_map) == (1 + NSTRINGS));
 
     assert(hash_map_remove(balanced_map, string1, strlen(string1)));
 
