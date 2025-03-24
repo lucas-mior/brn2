@@ -37,7 +37,7 @@ arena_alloc(size_t size) {
     }
 
     arena = p;
-    arena->begin = arena + ALIGN(sizeof(*arena));
+    arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
     return arena;
