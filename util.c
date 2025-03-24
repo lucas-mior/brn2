@@ -114,7 +114,7 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     va_list args;
 
     va_start(args, format);
-    n = snprintf(buffer, size, format, args);
+    n = vsnprintf(buffer, size, format, args);
     va_end(args);
 
     if (n >= (int)size) {
