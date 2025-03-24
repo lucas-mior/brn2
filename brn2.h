@@ -94,7 +94,7 @@ typedef ssize_t isize;
 #endif
 
 typedef struct Arena {
-    void *begin;
+    char *begin;
     void *pos;
     size_t size;
 } Arena;
