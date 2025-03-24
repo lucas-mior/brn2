@@ -165,7 +165,6 @@ bool \
 hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 				         uint32 index, uint32 value) { \
     Bucket##T *iterator = &(map->array[index]); \
-    uint32 cols = 0; \
 \
     if (iterator->key == NULL) { \
         iterator->key = key; \
@@ -177,7 +176,6 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     } \
 \
     while (true) { \
-        cols += 1; \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
             return false; \
 \
