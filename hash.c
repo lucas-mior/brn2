@@ -354,23 +354,8 @@ hash_expected_collisions(void *map) { \
     return (uint32)(roundl(result)); \
 }
 
-#define hash_set_create(a)                   hash_set_create(a)
-#define hash_set_balance(a)                  hash_set_balance(a)
-#define hash_set_free_keys(a)                hash_set_free_keys(a)
-#define hash_set_destroy(a)                  hash_set_destroy(a)
 #define hash_set_insert(a, b)                hash_set_insert(a, b, 0)
 #define hash_set_insert_pre_calc(a, b, c, d) hash_set_insert_pre_calc(a, b, c, d, 0)
-#define hash_set_lookup(a, b)                hash_set_lookup(a, b)
-#define hash_set_lookup_pre_calc(a, b, c, d) hash_set_lookup_pre_calc(a, b, c, d)
-#define hash_set_remove(a, b)                hash_set_remove(a, b)
-#define hash_set_remove_pre_calc(a, b, c, d) hash_set_remove_pre_calc(a, b, c, d)
-#define hash_set_print_summary(a)            hash_set_print_summary(a)
-#define hash_set_print(a, b)                 hash_set_print(a, b)
-#define hash_set_capacity(a)                 hash_set_capacity(a)
-#define hash_set_length(a)                   hash_set_length(a)
-#define hash_set_collisions(a)               hash_set_collisions(a)
-#define hash_set_expected_collisions(a)      hash_set_expected_collisions(a)
-
 
 #ifndef TESTING_THIS_FILE
 #define TESTING_THIS_FILE 0
