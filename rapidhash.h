@@ -123,36 +123,36 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
 #if defined(__SIZEOF_INT128__)
     __uint128_t r = *A;
     r *= *B;
-#ifdef RAPIDHASH_PROTECTED
+  #ifdef RAPIDHASH_PROTECTED
     *A ^= (uint64)r;
     *B ^= (uint64)(r >> 64);
-#else
+  #else
     *A = (uint64)r;
     *B = (uint64)(r >> 64);
-#endif
+  #endif
 #elif defined(_MSC_VER) && (defined(_WIN64) || defined(_M_HYBRID_CHPE_ARM64))
-#if defined(_M_X64)
-#ifdef RAPIDHASH_PROTECTED
+  #if defined(_M_X64)
+    #ifdef RAPIDHASH_PROTECTED
     uint64 a, b;
     a = _umul128(*A, *B, &b);
     *A ^= a;
     *B ^= b;
-#else
+    #else
     *A = _umul128(*A, *B, B);
-#endif
-#else
-#ifdef RAPIDHASH_PROTECTED
+    #endif
+  #else
+    #ifdef RAPIDHASH_PROTECTED
     uint64 a, b;
     b = __umulh(*A, *B);
     a = *A * *B;
     *A ^= a;
     *B ^= b;
-#else
+    #else
     uint64 c = __umulh(*A, *B);
     *A = *A * *B;
     *B = c;
-#endif
-#endif
+    #endif
+  #endif
 #else
     uint64 ha = *A >> 32;
     uint64 hb = *B >> 32;
@@ -170,13 +170,13 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
     lo = t + (rm1 << 32);
     c += lo < t;
     hi = rh + (rm0 >> 32) + (rm1 >> 32) + c;
-#ifdef RAPIDHASH_PROTECTED
+  #ifdef RAPIDHASH_PROTECTED
     *A ^= lo;
     *B ^= hi;
-#else
+  #else
     *A = lo;
     *B = hi;
-#endif
+  #endif
 #endif
 }
 
