@@ -85,7 +85,6 @@ int main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    const char *tempdir = "/tmp";
     char *directory = ".";
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
@@ -207,8 +206,7 @@ int main(int argc, char **argv) {
         char *pointer = write_buffer;
         uint32 capacity_set;
 
-        brn2_buffer_name = SNPRINTF(brn2_buffer.name, "%s/%s",
-                                    tempdir, "brn2.XXXXXX");
+        brn2_buffer_name = SNPRINTF(brn2_buffer.name, "/tmp/%s", "brn2.XXXXXX");
 
         if ((brn2_buffer.fd = mkstemp(brn2_buffer_name)) < 0) {
             error("Error opening '%s': %s\n", brn2_buffer_name, strerror(errno));
