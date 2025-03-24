@@ -151,4 +151,21 @@ void brn2_free_list(FileList *list);
 void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
 
+void *xmalloc(const usize size);
+void *xmmap(const usize size);
+void xmunmap(void *p, usize size);
+void *xrealloc(void *old, const usize size);
+void *xcalloc(const usize nmemb, const usize size);
+char *xstrdup(char *string);
+void *xmemdup(void *source, usize size);
+void util_command(const int argc, char **argv);
+void error(char *format, ...);
+
+Arena * arena_alloc(size_t size);
+void * arena_push(Arena *arena, uint32 size);
+uint32 arena_push_index(Arena *arena, uint32 size);
+void * arena_reset(Arena *arena);
+void * arena_reset_zero(Arena *arena);
+void arena_destroy(Arena *arena);
+
 #endif

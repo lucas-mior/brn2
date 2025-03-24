@@ -41,6 +41,7 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
+uint32 hash_function(char *key, uint32 key_size);
 HashMap *hash_map_create(uint32);
 HashMap *hash_map_balance(HashMap *);
 void hash_map_free_keys(HashMap *);

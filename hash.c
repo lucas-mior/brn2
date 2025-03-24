@@ -45,7 +45,7 @@
 uint32 BRN2_INLINE
 hash_function(char *key, uint32 key_size) {
     uint32 hash;
-    hash = rapidhash(key, key_size);
+    hash = (uint32)rapidhash(key, key_size);
     return (uint32)hash;
 }
 
@@ -121,18 +121,20 @@ hash_##T##_balance(struct Hash##T *old_map) { \
 \
     for (uint32 i = 0; i < old_map->capacity; i += 1) { \
         Bucket##T *iterator = &(old_map->array[i]); \
+        uint32 hash; \
+        uint32 index; \
 \
         if (iterator->key) { \
-            uint32 hash = iterator->hash; \
-            uint32 index = hash_##T##_normal(new_map, hash); \
+            hash = iterator->hash; \
+            index = hash_##T##_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
         } \
 \
         while (iterator->next) { \
-            iterator = old_map->arena->begin + iterator->next; \
-            uint32 hash = iterator->hash; \
-            uint32 index = hash_##T##_normal(new_map, hash); \
+            iterator = (void *)((char *)old_map->arena->begin + iterator->next); \
+            hash = iterator->hash; \
+            index = hash_##T##_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
 \
@@ -183,14 +185,14 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
             return false; \
 \
         if (iterator->next) \
-            iterator = map->arena->begin + iterator->next; \
+            iterator = (void *)((char *)map->arena->begin + iterator->next); \
         else \
             break; \
     } \
 \
     map->collisions += 1; \
     iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
-    iterator = map->arena->begin + iterator->next; \
+    iterator = (void *)((char *)map->arena->begin + iterator->next); \
     iterator->key = key; \
     iterator->hash = hash; \
     HASH_ITERATOR_VALUE_ASSIGN; \
@@ -219,7 +221,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
             return HASH_ITERATOR_VALUE_RETURN; \
 \
         if (iterator->next) \
-            iterator = map->arena->begin + iterator->next; \
+            iterator = (void *)((char *)map->arena->begin + iterator->next); \
         else \
             break; \
     } \
@@ -243,7 +245,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
         if (iterator->next) { \
-            memmove(iterator, map->arena->begin + iterator->next, sizeof(*iterator)); \
+            memmove(iterator, (char *)map->arena->begin + iterator->next, sizeof(*iterator)); \
             map->collisions -= 1; \
         } else { \
             memset(iterator, 0, sizeof(*iterator)); \
@@ -254,7 +256,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, uint32 hash, uint32 i
 \
     while (iterator->next) { \
         Bucket##T *previous = iterator; \
-        iterator = map->arena->begin + iterator->next; \
+        iterator = (void *)((char *)map->arena->begin + iterator->next); \
 \
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
              previous->next = iterator->next; \
@@ -291,7 +293,7 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
         while (iterator->key) { \
             printf(RED" '%s'"RESET"=%u ->", iterator->key, HASH_ITERATOR_VALUE); \
             if (iterator->next) \
-                iterator = map->arena->begin + iterator->next; \
+                iterator = (void *)((char *)map->arena->begin + iterator->next); \
             else { \
                 break; \
             } \
@@ -324,7 +326,7 @@ hash_##T##_expected_collisions(struct Hash##T *map) { \
     return (uint32)(roundl(result)); \
 } \
 
-#define HASH_VALUE_FIELD uint32 value;
+#define HASH_VALUE_FIELD uint32 value; uint32 unused;
 #define HASH_ITERATOR_VALUE iterator->value
 #define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
 #define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
@@ -335,7 +337,7 @@ HASH_IMPLEMENT(map)
 #undef HASH_ITERATOR_VALUE_RETURN
 
 #define HASH_VALUE_FIELD
-#define HASH_ITERATOR_VALUE 0
+#define HASH_ITERATOR_VALUE 0u
 #define HASH_ITERATOR_VALUE_ASSIGN (void)value
 #define HASH_ITERATOR_VALUE_RETURN NULL
 HASH_IMPLEMENT(set)
