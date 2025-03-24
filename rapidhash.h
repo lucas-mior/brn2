@@ -42,10 +42,20 @@
 #endif
 #endif
 
-typedef uint64_t uint64;
-typedef uint32_t uint32;
-typedef uint16_t uint16;
+#ifndef INTEGERS
+#define INTEGERS
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
 typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
+typedef size_t usize;
+typedef ssize_t isize;
+#endif
 
 #ifdef __cplusplus
 #define RAPIDHASH_NOEXCEPT noexcept
@@ -296,8 +306,8 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
     if (LIKELY(len <= 16)) {
         if (LIKELY(len >= 4)) {
             const uint8 *plast = p + len - 4;
-            a = (read32(p) << 32) | read32(plast);
             const uint64 delta = ((len & 24) >> (len >> 3));
+            a = (read32(p) << 32) | read32(plast);
             b = ((read32(p + delta) << 32) | read32(plast - delta));
         } else if (LIKELY(len > 0)) {
             a = readSmall(p, len);
