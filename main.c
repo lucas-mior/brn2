@@ -58,11 +58,12 @@ enum {
     FILES_FROM_DIR_RECURSE,
 };
 
-static File buffer;
+static File brn2_buffer;
+static char *brn2_buffer_name;
 
 static void
-delete_buffer(void) {
-    unlink(buffer.name);
+delete_brn2_buffer(void) {
+    unlink(brn2_buffer_name);
     return;
 }
 
@@ -206,11 +207,10 @@ int main(int argc, char **argv) {
         char *pointer = write_buffer;
         uint32 capacity_set;
 
-        SNPRINTF(buffer.name, "%s/%s", tempdir, "brn2.XXXXXX");
-        buffer.name[sizeof(buffer.name) - 1] = '\0';
+        brn2_buffer_name = SNPRINTF(brn2_buffer.name, "%s/%s", tempdir, "brn2.XXXXXX");
 
-        if ((buffer.fd = mkstemp(buffer.name)) < 0) {
-            error("Error opening '%s': %s\n", buffer.name, strerror(errno));
+        if ((brn2_buffer.fd = mkstemp(brn2_buffer_name)) < 0) {
+            error("Error opening '%s': %s\n", brn2_buffer_name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
                 hash = &hashes_old[i];
             }
             if ((pointer - write_buffer) >= (BUFSIZ/2)) {
-                write(buffer.fd, write_buffer, (usize)(pointer - write_buffer));
+                write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
                 pointer = write_buffer;
             }
 
@@ -247,15 +247,15 @@ int main(int argc, char **argv) {
 
         }
         close:
-        write(buffer.fd, write_buffer, (usize)(pointer - write_buffer));
-        close(buffer.fd);
-        buffer.fd = -1;
-        atexit(delete_buffer);
+        write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
+        close(brn2_buffer.fd);
+        brn2_buffer.fd = -1;
+        atexit(delete_brn2_buffer);
     }
 
     {
-        char *args_edit[] = { EDITOR, buffer.name, NULL };
-        char *args_shuf[] = { "shuf", buffer.name, "-o", buffer.name, NULL };
+        char *args_edit[] = { EDITOR, brn2_buffer_name, NULL };
+        char *args_shuf[] = { "shuf", brn2_buffer_name, "-o", brn2_buffer_name, NULL };
         (void) args_edit;
         (void) args_shuf;
 
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
-            new = brn2_list_from_lines(buffer.name, old->length);
+            new = brn2_list_from_lines(brn2_buffer_name, old->length);
 
             clock_gettime(CLOCK_MONOTONIC_RAW, &t);
             srand((uint)t.tv_nsec);
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
             break;
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);
-            new = brn2_list_from_lines(buffer.name, old->length);
+            new = brn2_list_from_lines(brn2_buffer_name, old->length);
 #endif
             if (old->length != new->length) {
                 error("You are renaming "RED"%u"RESET" file%.*s "
