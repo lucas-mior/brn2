@@ -199,46 +199,46 @@ rapid_mix(uint64 A, uint64 B) RAPIDHASH_NOEXCEPT {
 RAPIDHASH_INLINE uint64
 rapid_read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint64 v;
-    memcpy(&v, p, sizeof(uint64));
+    memcpy(&v, p, sizeof(*(&v)));
     return v;
 }
 RAPIDHASH_INLINE uint64
 rapid_read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint32 v;
-    memcpy(&v, p, sizeof(uint32));
+    memcpy(&v, p, sizeof(*(&v)));
     return v;
 }
 #elif defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
 RAPIDHASH_INLINE uint64
 rapid_read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint64 v;
-    memcpy(&v, p, sizeof(uint64));
+    memcpy(&v, p, sizeof(*(&v)));
     return __builtin_bswap64(v);
 }
 RAPIDHASH_INLINE uint64
 rapid_read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint32 v;
-    memcpy(&v, p, sizeof(uint32));
+    memcpy(&v, p, sizeof(*(&v)));
     return __builtin_bswap32(v);
 }
 #elif defined(_MSC_VER)
 RAPIDHASH_INLINE uint64
 rapid_read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint64 v;
-    memcpy(&v, p, sizeof(uint64));
+    memcpy(&v, p, sizeof(*(&v)));
     return _byteswap_uint64(v);
 }
 RAPIDHASH_INLINE uint64
 rapid_read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint32 v;
-    memcpy(&v, p, sizeof(uint32));
+    memcpy(&v, p, sizeof(*(&v)));
     return _byteswap_ulong(v);
 }
 #else
 RAPIDHASH_INLINE uint64
 rapid_read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint64 v;
-    memcpy(&v, p, 8);
+    memcpy(&v, p, sizeof(*(&v)));
     return (((v >> 56) & 0xff) | ((v >> 40) & 0xff00) | ((v >> 24) & 0xff0000) |
             ((v >> 8) & 0xff000000) | ((v << 8) & 0xff00000000) | ((v << 24) & 0xff0000000000) |
             ((v << 40) & 0xff000000000000) | ((v << 56) & 0xff00000000000000));
@@ -246,7 +246,7 @@ rapid_read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
 RAPIDHASH_INLINE uint64
 rapid_read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
     uint32 v;
-    memcpy(&v, p, 4);
+    memcpy(&v, p, sizeof(*(&v)));
     return (((v >> 24) & 0xff) | ((v >> 8) & 0xff00) | ((v << 8) & 0xff0000) |
             ((v << 24) & 0xff000000));
 }
