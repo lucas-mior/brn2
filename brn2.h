@@ -67,6 +67,11 @@
 #define BRN2_INLINE
 #endif
 
+#define SNPRINTF(BUFFER, FORMAT, ...) do { \
+    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__); \
+} while (0)
+
+
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (sizeof(*struct_object) + (usize)(array_length)*sizeof(ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
@@ -158,6 +163,7 @@ void *xrealloc(void *old, const usize size);
 void *xcalloc(const usize nmemb, const usize size);
 char *xstrdup(char *string);
 void *xmemdup(void *source, usize size);
+void *snprintf2(char *buffer, size_t size, char *format, ...);
 void util_command(const int argc, char **argv);
 void error(char *format, ...);
 
