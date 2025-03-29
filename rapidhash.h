@@ -174,8 +174,8 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
     uint64 rm1 = hb * la;
     uint64 rl = la * lb;
     uint64 t = rl + (rm0 << 32);
+    uint64 c = t < rl;
 
-    c = t < rl;
     lo = t + (rm1 << 32);
     c += lo < t;
     hi = rh + (rm0 >> 32) + (rm1 >> 32) + c;
