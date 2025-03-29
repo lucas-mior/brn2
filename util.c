@@ -119,10 +119,10 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     va_end(args);
 
     if (n >= (int)size) {
-        buffer = xmalloc(n + 1);
+        buffer = xmalloc((usize)n + 1);
         va_start(args, format);
         va_copy(args2, args);
-        n = vsnprintf(buffer, n + 1, format, args);
+        n = vsnprintf(buffer, (usize)n + 1, format, args);
         va_end(args);
     }
     if (n <= 0) {
