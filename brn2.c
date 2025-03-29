@@ -113,8 +113,8 @@ brn2_list_from_dir(char *directory) {
     list->arena = arena_old;
 
     for (int i = 0; i < number_files; i += 1) {
-        char *name = directory_list[i]->d_name;
         FileName *file = &(list->files[length]);
+        char *name = directory_list[i]->d_name;
         uint16 name_length = (uint16)strlen(name);
         uint32 size;
 
@@ -126,17 +126,19 @@ brn2_list_from_dir(char *directory) {
 
         if (directory_length) {
             file->length = directory_length + 1 + name_length;
-            size = ALIGN(file->length+2);
+            size = ALIGN(file->length + 2);
             file->name = arena_push(list->arena, size);
             BRN2_ASSUME_ALIGNED(file->name);
+
             memcpy(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy(file->name + directory_length + 1, name, name_length + 1);
         } else {
             file->length = name_length;
-            size = ALIGN(file->length+2);
+            size = ALIGN(file->length + 2);
             file->name = arena_push(list->arena, size);
             BRN2_ASSUME_ALIGNED(file->name);
+
             memcpy(file->name, name, size);
         }
         memset(&file->name[file->length], 0, size - file->length);
