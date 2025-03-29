@@ -140,10 +140,10 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
     *B = (uint64)(r >> 64);
   #endif
 #elif defined(_MSC_VER) && (defined(_WIN64) || defined(_M_HYBRID_CHPE_ARM64))
-  #if defined(_M_X64)
-    #ifdef RAPIDHASH_PROTECTED
     uint64 a;
     uint64 b;
+  #if defined(_M_X64)
+    #ifdef RAPIDHASH_PROTECTED
     a = _umul128(*A, *B, &b);
     *A ^= a;
     *B ^= b;
@@ -152,8 +152,6 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
     #endif
   #else
     #ifdef RAPIDHASH_PROTECTED
-    uint64 a;
-    uint64 b;
     b = __umulh(*A, *B);
     a = *A * *B;
     *A ^= a;
