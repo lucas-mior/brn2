@@ -54,7 +54,7 @@
     = __builtin_assume_aligned(BRN2_ASSUME_ALIGNED, BRN2_ALIGNMENT); \
     } while (0)
 #else
-#define BRN2_ASSUME_ALIGNED(ptr, alignment) do {} while (0)
+#define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) do {} while (0)
 #endif
 
 #ifndef BRN2_DEBUG

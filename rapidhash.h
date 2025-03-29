@@ -58,50 +58,50 @@ typedef ssize_t isize;
 #endif
 
 #ifdef __cplusplus
-#define RAPIDHASH_NOEXCEPT noexcept
-#define RAPIDHASH_CONSTEXPR constexpr
-#ifndef RAPIDHASH_INLINE
-#define RAPIDHASH_INLINE inline
-#endif
+  #define RAPIDHASH_NOEXCEPT noexcept
+  #define RAPIDHASH_CONSTEXPR constexpr
+  #ifndef RAPIDHASH_INLINE
+    #define RAPIDHASH_INLINE inline
+  #endif
 #else
-#define RAPIDHASH_NOEXCEPT
-#define RAPIDHASH_CONSTEXPR static const
-#ifndef RAPIDHASH_INLINE
-#define RAPIDHASH_INLINE static inline
-#endif
+  #define RAPIDHASH_NOEXCEPT
+  #define RAPIDHASH_CONSTEXPR static const
+  #ifndef RAPIDHASH_INLINE
+  #define RAPIDHASH_INLINE static inline
+  #endif
 #endif
 
 #ifndef RAPIDHASH_PROTECTED
-#define RAPIDHASH_FAST
+  #define RAPIDHASH_FAST
 #elif defined(RAPIDHASH_FAST)
-#error "cannot define RAPIDHASH_PROTECTED and RAPIDHASH_FAST simultaneously."
+  #error "cannot define both RAPIDHASH_PROTECTED and RAPIDHASH_FAST."
 #endif
 
 #ifndef RAPIDHASH_COMPACT
-#define RAPIDHASH_UNROLLED
+  #define RAPIDHASH_UNROLLED
 #elif defined(RAPIDHASH_UNROLLED)
-#error "cannot define RAPIDHASH_COMPACT and RAPIDHASH_UNROLLED simultaneously."
+  #error "cannot define both RAPIDHASH_COMPACT and RAPIDHASH_UNROLLED."
 #endif
 
 #if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
-#define LIKELY(x) __builtin_expect(x, 1)
-#define UNLIKELY(x) __builtin_expect(x, 0)
+  #define LIKELY(x) __builtin_expect(x, 1)
+  #define UNLIKELY(x) __builtin_expect(x, 0)
 #else
-#define LIKELY(x) (x)
-#define UNLIKELY(x) (x)
+  #define LIKELY(x) (x)
+  #define UNLIKELY(x) (x)
 #endif
 
 #ifndef RAPIDHASH_LITTLE_ENDIAN
-#if defined(_WIN32) || defined(__LITTLE_ENDIAN__) \
-    || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
-#define RAPIDHASH_LITTLE_ENDIAN
-#elif defined(__BIG_ENDIAN__) \
-    || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-#define RAPIDHASH_BIG_ENDIAN
-#else
-#warning "could not determine endianness! Falling back to little endian."
-#define RAPIDHASH_LITTLE_ENDIAN
-#endif
+  #if defined(_WIN32) || defined(__LITTLE_ENDIAN__) \
+      || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+    #define RAPIDHASH_LITTLE_ENDIAN
+  #elif defined(__BIG_ENDIAN__) \
+      || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+    #define RAPIDHASH_BIG_ENDIAN
+  #else
+    #warning "could not determine endianness! Falling back to little endian."
+    #define RAPIDHASH_LITTLE_ENDIAN
+  #endif
 #endif
 
 RAPIDHASH_CONSTEXPR uint64 rapid_seed = 0xbdd89aa982704029ull;
