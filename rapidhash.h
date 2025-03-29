@@ -153,13 +153,13 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
   #else
     #ifdef RAPIDHASH_PROTECTED
     b = __umulh(*A, *B);
-    a = *A * *B;
+    a = (*A)*(*B);
     *A ^= a;
     *B ^= b;
     #else
     {
         uint64 c = __umulh(*A, *B);
-        *A = *A * *B;
+        *A = (*A)*(*B);
         *B = c;
     }
     #endif
@@ -171,10 +171,10 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
     uint64 lb = (uint32)*B;
     uint64 hi;
     uint64 lo;
-    uint64 rh = ha * hb;
-    uint64 rm0 = ha * lb;
-    uint64 rm1 = hb * la;
-    uint64 rl = la * lb;
+    uint64 rh = ha*hb;
+    uint64 rm0 = ha*lb;
+    uint64 rm1 = hb*la;
+    uint64 rl = la*lb;
     uint64 t = rl + (rm0 << 32);
     uint64 c = t < rl;
 
