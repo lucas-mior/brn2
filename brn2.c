@@ -105,7 +105,7 @@ brn2_list_from_dir(char *directory) {
         exit(EXIT_FAILURE);
     }
     if (number_files <= 2) {
-        error("Empty directory. Exiting.\n");
+        error("Directory '%s' is empty. Exiting.\n", directory);
         exit(EXIT_FAILURE);
     }
 
