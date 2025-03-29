@@ -75,7 +75,8 @@ void
 arena_destroy(Arena *arena) {
     if (munmap(arena, arena->size) < 0) {
         error("Error in %s:\n", __func__);
-        error("Error in munmap(%p, %zu): %s\n", arena, arena->size);
+        error("Error in munmap(%p, %zu): %s\n",
+                arena, arena->size, strerror(errno));
     }
     return;
 }
