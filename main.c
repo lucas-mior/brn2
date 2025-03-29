@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
     }
     if (optind < argc && !strcmp(argv[optind], "--"))
         optind += 1;
-    if ((argc - optind) >= 2)
+    if ((argc - optind) >= 1)
         mode = FILES_FROM_ARGS;
 
     available_threads = sysconf(_SC_NPROCESSORS_ONLN);
