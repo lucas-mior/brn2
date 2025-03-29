@@ -163,10 +163,10 @@ int main(int argc, char **argv) {
         old = brn2_list_from_args(argc - optind, &argv[optind]);
         break;
     case FILES_FROM_DIR:
-        old = brn2_list_from_dir(directory, 1);
+        old = brn2_list_from_dir(directory);
         break;
     case FILES_FROM_DIR_RECURSE:
-        old = brn2_list_from_dir(directory, INT_MAX);
+        old = brn2_list_from_dir_recurse(directory);
         break;
     default:
         error("Unexpected mode: %d\n", mode);
