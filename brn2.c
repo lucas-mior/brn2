@@ -470,6 +470,12 @@ brn2_create_hashes(FileList *list, uint32 map_capacity) {
     return hashes;
 }
 
+void
+brn2_free_hashes(uint32 *hashes, usize size) {
+    xmunmap(hashes, size);
+    return hashes;
+}
+
 uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
