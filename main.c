@@ -58,7 +58,6 @@ enum {
     FILES_FROM_DIR_RECURSE,
 };
 
-static File brn2_buffer;
 static char *brn2_buffer_name;
 
 static void
@@ -205,6 +204,7 @@ int main(int argc, char **argv) {
         char write_buffer[PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
+        static File brn2_buffer;
 
         brn2_buffer_name = SNPRINTF(brn2_buffer.name, "/tmp/%s", "brn2.XXXXXX");
 
