@@ -234,6 +234,7 @@ int main(int argc, char **argv) {
                 file = &(old->files[i]);
                 hash = &hashes_old[i];
             }
+
             if ((usize)(pointer - write_buffer) >= sizeof(write_buffer)) {
                 write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
                 pointer = write_buffer;
