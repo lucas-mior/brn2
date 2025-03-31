@@ -56,7 +56,7 @@ xmmap(const usize size) {
 void
 xmunmap(void *p, usize size) {
     if (munmap(p, size) < 0)
-        error("Error in munmap(%p, %zu): %s\n", (void *)p, strerror(errno));
+        error("Error in munmap(%p, %zu): %s\n", p, size, strerror(errno));
     return;
 }
 
