@@ -167,7 +167,7 @@ brn2_list_from_dir_recurse(char *directory) {
 
     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
     if (file_system == NULL) {
-        error("Error opening %s for traversal: %s.\n",
+        error("Error opening '%s' for traversal: %s.\n",
               directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -176,7 +176,7 @@ brn2_list_from_dir_recurse(char *directory) {
     while ((ent = fts_read(file_system))) {
         switch (ent->fts_info) {
         case FTS_ERR:
-            error("Error in fts_read('%s'): %s.\n",
+            error("Error in fts_read(%s): %s.\n",
                   directory, strerror(ent->fts_errno));
             exit(EXIT_FAILURE);
         case FTS_D:
@@ -212,7 +212,7 @@ brn2_list_from_dir_recurse(char *directory) {
     if (errno)
         error("Error in fts_read(%s): %s.\n", directory, strerror(errno));
     if (fts_close(file_system) < 0)
-        error("Error in fts_close('%s'): %s.\n", directory, strerror(errno));
+        error("Error in fts_close(%s): %s.\n", directory, strerror(errno));
 
     if (length == 0) {
         error("Empty list. Exiting.\n");
@@ -252,8 +252,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     {
         struct stat lines_stat;
         if (fstat(fd, &lines_stat) < 0) {
-            error("Error getting information from %s: %s\n",
-                  filename, strerror(errno));
+            error("Error in fstat(%s): %s\n", filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
         map_size = (uint32)lines_stat.st_size;
@@ -265,7 +264,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
-        error("Error truncating %s: %s.\n", filename, strerror(errno));
+        error("Error in ftruncate(%s): %s.\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -325,11 +324,11 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error truncating %s: %s.\n", filename, strerror(errno));
+        error("Error truncating '%s': %s.\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
-        error("Error closing %s: %s\n", filename, strerror(errno));
+        error("Error closing '%s': %s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
