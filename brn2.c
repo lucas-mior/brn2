@@ -473,7 +473,7 @@ brn2_create_hashes(FileList *list, uint32 map_capacity) {
 void
 brn2_free_hashes(uint32 *hashes, usize size) {
     xmunmap(hashes, size);
-    return hashes;
+    return;
 }
 
 uint32
@@ -546,7 +546,7 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
             repeated = true;
-            if (brn2_options_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
         }
     }
