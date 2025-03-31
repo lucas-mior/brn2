@@ -534,23 +534,28 @@ uint32 brn2_threads(int (*function)(void *),
 
 bool
 brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
-    bool repeated = false;
+    bool failed = false;
 
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
+
+        if (newfile.length >= PATH_MAX) {
+            error("Filenames must be shorter than %u bytes.\n", PATH_MAX);
+            failed = true;
+        }
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                       newfile.hash, hashes_new[i], i)) {
             fprintf(stderr, RED"'%s'"RESET " (line %u)"
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
-            repeated = true;
+            failed = true;
             if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
         }
     }
 
-    return !repeated;
+    return !failed;
 }
 
 static inline int
