@@ -308,7 +308,7 @@ int main(int argc, char **argv) {
             if (!brn2_verify(new, newlist_map, hashes_new)) {
                 brn2_free_list(new);
                 hash_map_destroy(newlist_map);
-                free(hashes_new);
+                brn2_free_hashes(hashes_new, new->length);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 getc(stdin);
