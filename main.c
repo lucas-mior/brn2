@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
     }
 
     {
-        char write_buffer[BUFSIZ];
+        char write_buffer[PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
                 file = &(old->files[i]);
                 hash = &hashes_old[i];
             }
-            if ((pointer - write_buffer) >= (BUFSIZ/2)) {
+            if ((usize)(pointer - write_buffer) >= sizeof(write_buffer)) {
                 write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
                 pointer = write_buffer;
             }
