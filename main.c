@@ -222,7 +222,13 @@ int main(int argc, char **argv) {
             uint32 *hash = &hashes_old[i];
 
             while (memchr(file->name, '\n', file->length)) {
-                error(RED"'%s'"RESET" contains new line. Removing...\n", file->name);
+                error(RED"'%s'"RESET" contains new line.", file->name);
+                if (brn2_options_fatal) {
+                    error("\n");
+                    exit(EXIT_FAILURE);
+                }
+                error(" Removing from list...\n");
+
                 old->length -= 1;
                 if (old->length <= i)
                     goto close;
@@ -235,8 +241,13 @@ int main(int argc, char **argv) {
 
             while (!hash_map_insert_pre_calc(oldlist_map, file->name,
                                              file->hash, *hash, i)) {
-                error(RED"'%s'"RESET" repeated in the buffer. Removing...\n",
-                      file->name);
+                error(RED"'%s'"RESET" repeated in the buffer.", file->name);
+                if (brn2_options_fatal) {
+                    error("\n");
+                    exit(EXIT_FAILURE);
+                }
+                error(" Removing from list...\n");
+
                 old->length -= 1;
                 if (old->length <= i)
                     goto close;
