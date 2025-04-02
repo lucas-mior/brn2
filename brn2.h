@@ -61,10 +61,10 @@
 #define BRN2_DEBUG 0
 #endif
 
-#ifdef BRN2_BENCHMARK
-#define BRN2_INLINE __attribute__ ((noinline))
+#if 0
+#define BRN2_INLINE __attribute__((noinline))
 #else
-#define BRN2_INLINE
+#define BRN2_INLINE inline __attribute__((always_inline))
 #endif
 
 #define SNPRINTF(BUFFER, FORMAT, ...) \

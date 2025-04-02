@@ -42,7 +42,7 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-uint32 BRN2_INLINE
+BRN2_INLINE uint32
 hash_function(char *key, uint32 key_size) {
     uint32 hash;
     hash = (uint32)rapidhash(key, key_size);
