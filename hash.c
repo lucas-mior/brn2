@@ -128,7 +128,8 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash = iterator->hash; \
             index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
-                                     hash, index, HASH_ITERATOR_VALUE); \
+                                       strlen(iterator->key), \
+                                       hash, index, HASH_ITERATOR_VALUE); \
         } \
 \
         while (iterator->next) { \
@@ -136,6 +137,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash = iterator->hash; \
             index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
+                                       strlen(iterator->key), \
                                      hash, index, HASH_ITERATOR_VALUE); \
 \
         } \
@@ -158,12 +160,12 @@ hash_##T##_insert(struct Hash##T *map, \
                   char *key, uint32 key_size, uint32 value) { \
     uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_normal(map, hash); \
-    return hash_##T##_insert_pre_calc(map, key, hash, index, value); \
+    return hash_##T##_insert_pre_calc(map, key, key_size, hash, index, value); \
 } \
 \
 bool \
-hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
-				         uint32 index, uint32 value) { \
+hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 key_size, \
+                           uint32 hash, uint32 index, uint32 value) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) { \
@@ -201,12 +203,12 @@ void * \
 hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_size) { \
     uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_normal(map, hash); \
-    return hash_##T##_lookup_pre_calc(map, key, hash, index); \
+    return hash_##T##_lookup_pre_calc(map, key, key_size, hash, index); \
 } \
 \
 void * \
 hash_##T##_lookup_pre_calc(struct Hash##T *map, \
-                           char *key, uint32 hash, uint32 index) { \
+                           char *key, uint32 key_size, uint32 hash, uint32 index) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) \
@@ -229,12 +231,12 @@ bool \
 hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_size) { \
     uint32 hash = hash_function(key, key_size); \
     uint32 index = hash_normal(map, hash); \
-    return hash_##T##_remove_pre_calc(map, key, hash, index); \
+    return hash_##T##_remove_pre_calc(map, key, key_size, hash, index); \
 } \
 \
 bool \
 hash_##T##_remove_pre_calc(struct Hash##T *map, \
-                           char *key, uint32 hash, uint32 index) { \
+                           char *key, uint32 key_size, uint32 hash, uint32 index) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) \
@@ -357,8 +359,10 @@ hash_expected_collisions(void *map) { \
     return (uint32)(roundl(result)); \
 }
 
-#define hash_set_insert(a, b)                hash_set_insert(a, b, 0)
-#define hash_set_insert_pre_calc(a, b, c, d) hash_set_insert_pre_calc(a, b, c, d, 0)
+#define hash_set_insert(a, b) \
+        hash_set_insert(a, b, 0)
+#define hash_set_insert_pre_calc(a, b, c, d, e) \
+        hash_set_insert_pre_calc(a, b, c, d, e, 0)
 
 #ifndef TESTING_THIS_FILE
 #define TESTING_THIS_FILE 0
