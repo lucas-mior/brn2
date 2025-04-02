@@ -221,6 +221,18 @@ int main(int argc, char **argv) {
             FileName *file = &(old->files[i]);
             uint32 *hash = &hashes_old[i];
 
+            while (memchr(file->name, '\n', file->length)) {
+                error(RED"'%s'"RESET" contains new line. Removing...\n", file->name);
+                old->length -= 1;
+                if (old->length <= i)
+                    goto close;
+
+                memmove(file, file+1, (old->length - i)*sizeof(*file));
+                memmove(hash, hash+1, (old->length - i)*sizeof(*hash));
+                file = &(old->files[i]);
+                hash = &hashes_old[i];
+            }
+
             while (!hash_map_insert_pre_calc(oldlist_map, file->name,
                                              file->hash, *hash, i)) {
                 error(RED"'%s'"RESET" repeated in the buffer. Removing...\n",
@@ -296,7 +308,11 @@ int main(int argc, char **argv) {
                       "but buffer contains "RED"%u"RESET" file name%.*s\n",
                       old->length, old->length != 1, "s",
                       new->length, new->length != 1, "s");
-                exit(EXIT_FAILURE);
+                brn2_free_list(new);
+                printf("Fix your renames. Press control-c to cancel or press"
+                       " ENTER to open the file list editor again.\n");
+                getc(stdin);
+                continue;
             }
 
             brn2_normalize_names(old, new);
