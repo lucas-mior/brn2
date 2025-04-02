@@ -261,7 +261,6 @@ int main(int argc, char **argv) {
 
         while (true) {
 #ifdef BRN2_BENCHMARK
-            struct timespec t;
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
                              "!@#$%&*()[]-=_+<>,"
@@ -269,8 +268,7 @@ int main(int argc, char **argv) {
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
             new = brn2_list_from_lines(brn2_buffer_name, old->length);
 
-            clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-            srand((uint)t.tv_nsec);
+            srand(42);
             for (uint32 i = 0; i < new->length; i += 1) {
                 float x = (float)rand() / (float)RAND_MAX;
                 uint32 length = new->files[i].length;
