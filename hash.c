@@ -111,7 +111,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
         bitmask = UINT32_MAX; \
     } \
 \
-    size = sizeof(*new_map) + capacity*sizeof(new_map->array[0]); \
+    size = sizeof(*new_map) + capacity*sizeof(*(&new_map->array[0])); \
 \
     new_map = xmmap(size); \
     new_map->arena = arena_alloc(capacity*sizeof(*(&new_map->array[0]))); \
