@@ -383,7 +383,7 @@ hash_expected_collisions(void *map) { \
 #if TESTING_THIS_FILE
 #include <assert.h>
 
-#define NSTRINGS 1000000
+#define NSTRINGS 5000000
 #define NBYTES 10*BRN2_ALIGNMENT
 
 typedef struct String {
