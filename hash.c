@@ -52,7 +52,7 @@ hash_function(char *key, uint32 key_size) {
 #define HASH_IMPLEMENT(T) \
 typedef struct Bucket##T { \
     char *key; \
-    HASH_HASH_FIELD \
+    uint32 hash; \
     HASH_VALUE_FIELD \
     uint32 next; \
 } Bucket##T; \
@@ -125,7 +125,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
         uint32 index; \
 \
         if (iterator->key) { \
-            hash = HASH_HASH_GET; \
+            hash = iterator->hash; \
             index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
@@ -133,7 +133,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
 \
         while (iterator->next) { \
             iterator = (void *)(old_map->arena->begin + iterator->next); \
-            hash = HASH_HASH_GET; \
+            hash = iterator->hash; \
             index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
                                      hash, index, HASH_ITERATOR_VALUE); \
@@ -168,7 +168,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 \
     if (iterator->key == NULL) { \
         iterator->key = key; \
-        HASH_ITERATOR_HASH_ASSIGN; \
+        iterator->hash = hash; \
         iterator->next = 0; \
         HASH_ITERATOR_VALUE_ASSIGN; \
         map->length += 1; \
@@ -176,7 +176,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     } \
 \
     while (true) { \
-        if ((HASH_EQUALS) && !strcmp(iterator->key, key)) \
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
             return false; \
 \
         if (iterator->next) \
@@ -189,7 +189,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
     iterator = (void *)(map->arena->begin + iterator->next); \
     iterator->key = key; \
-    HASH_ITERATOR_HASH_ASSIGN; \
+    iterator->hash = hash; \
     HASH_ITERATOR_VALUE_ASSIGN; \
     iterator->next = 0; \
     map->length += 1; \
@@ -213,7 +213,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, \
         return NULL; \
 \
     while (true) { \
-        if ((HASH_EQUALS) && !strcmp(iterator->key, key)) \
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
             return HASH_ITERATOR_VALUE_RETURN; \
 \
         if (iterator->next) \
@@ -240,7 +240,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, \
     if (iterator->key == NULL) \
         return false; \
 \
-    if ((HASH_EQUALS) && !strcmp(iterator->key, key)) { \
+    if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
         if (iterator->next) { \
             memmove(iterator, \
                     map->arena->begin + iterator->next, sizeof(*iterator)); \
@@ -256,7 +256,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, \
         Bucket##T *previous = iterator; \
         iterator = (void *)(map->arena->begin + iterator->next); \
 \
-        if ((HASH_EQUALS) && !strcmp(iterator->key, key)) { \
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
              previous->next = iterator->next; \
              map->length -= 1; \
              map->collisions -= 1; \
@@ -303,41 +303,25 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
 } \
 \
 
-#define HASH_HASH_FIELD
-#define HASH_VALUE_FIELD uint32 value;
+#define HASH_VALUE_FIELD uint32 value; uint32 unused;
 #define HASH_ITERATOR_VALUE iterator->value
 #define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
-#define HASH_ITERATOR_HASH_ASSIGN (void)hash
-#define HASH_HASH_GET hash_function(iterator->key, strlen(iterator->key))
 #define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
-#define HASH_EQUALS 1
 HASH_IMPLEMENT(map)
-#undef HASH_HASH_FIELD
 #undef HASH_VALUE_FIELD
 #undef HASH_ITERATOR_VALUE
 #undef HASH_ITERATOR_VALUE_ASSIGN
-#undef HASH_ITERATOR_HASH_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
-#undef HASH_HASH_GET
-#undef HASH_EQUALS
 
-#define HASH_HASH_FIELD uint32 hash;
 #define HASH_VALUE_FIELD
 #define HASH_ITERATOR_VALUE 0u
 #define HASH_ITERATOR_VALUE_ASSIGN (void)value
-#define HASH_ITERATOR_HASH_ASSIGN iterator->hash = hash
-#define HASH_HASH_GET iterator->hash
 #define HASH_ITERATOR_VALUE_RETURN NULL
-#define HASH_EQUALS hash == iterator->hash
 HASH_IMPLEMENT(set)
-#undef HASH_HASH_FIELD
 #undef HASH_VALUE_FIELD
 #undef HASH_ITERATOR_VALUE
 #undef HASH_ITERATOR_VALUE_ASSIGN
-#undef HASH_ITERATOR_HASH_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
-#undef HASH_HASH_GET
-#undef HASH_EQUALS
 
 uint32
 hash_normal(void *map, uint32 hash) {
