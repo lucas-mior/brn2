@@ -67,14 +67,6 @@
 #define BRN2_INLINE inline __attribute__((always_inline))
 #endif
 
-#if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
-  #define BRN2_LIKELY(x) __builtin_expect(x, 1)
-  #define BRN2_UNLIKELY(x) __builtin_expect(x, 0)
-#else
-  #define BRN2_LIKELY(x) (x)
-  #define BRN2_UNLIKELY(x) (x)
-#endif
-
 #define SNPRINTF(BUFFER, FORMAT, ...) \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 
