@@ -544,8 +544,8 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
             failed = true;
         }
 
-        if (!hash_map_insert_pre_calc(repeated_map,
-                                      newfile.name, newfile.length, newfile.hash,hashes_new[i], i)) {
+        if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
+                                      newfile.hash, hashes_new[i], i)) {
             fprintf(stderr, RED"'%s'"RESET " (line %u)"
                             " appears more than once in the buffer\n",
                             newfile.name, i + 1);
@@ -586,7 +586,6 @@ brn2_execute(FileList *old, FileList *new,
         char *newname = new->files[i].name;
 
         uint16 *oldlength = &(old->files[i].length);
-        uint16 newlength = new->files[i].length;
 
         uint32 newhash = new->files[i].hash;
         uint32 newindex = hashes_new[i];
@@ -599,7 +598,7 @@ brn2_execute(FileList *old, FileList *new,
                 continue;
         }
         newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
-                                                            newname, newlength,
+                                                            newname,
                                                             newhash, newindex);
         newname_exists = !access(newname, F_OK);
 #ifdef __linux__
@@ -619,10 +618,10 @@ brn2_execute(FileList *old, FileList *new,
             renamed = renameat2(AT_FDCWD, *oldname,
                                 AT_FDCWD, newname, RENAME_EXCHANGE);
             if (renamed >= 0) {
-                if (hash_set_insert_pre_calc(names_renamed, *oldname, *oldlength,
+                if (hash_set_insert_pre_calc(names_renamed, *oldname,
                                              oldhash, oldindex))
                     number_renames += 1;
-                if (hash_set_insert_pre_calc(names_renamed, newname, newlength,
+                if (hash_set_insert_pre_calc(names_renamed, newname,
                                              newhash, newindex))
                     number_renames += 1;
                 print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n",
@@ -632,14 +631,14 @@ brn2_execute(FileList *old, FileList *new,
                     uint32 next = *newname_index_on_oldlist;
                     FileName *file_j = &(old->files[next]);
 
-                    hash_map_remove_pre_calc(oldlist_map, newname, newlength,
+                    hash_map_remove_pre_calc(oldlist_map, newname,
                                              newhash, newindex);
-                    hash_map_remove_pre_calc(oldlist_map, *oldname, *oldlength,
+                    hash_map_remove_pre_calc(oldlist_map, *oldname,
                                              oldhash, oldindex);
 
-                    hash_map_insert_pre_calc(oldlist_map, newname, newlength,
+                    hash_map_insert_pre_calc(oldlist_map, newname,
                                              newhash, newindex, i);
-                    hash_map_insert_pre_calc(oldlist_map, *oldname, *oldlength,
+                    hash_map_insert_pre_calc(oldlist_map, *oldname,
                                              oldhash, oldindex, next);
 
                     SWAP(file_j->name, *oldname);
@@ -652,7 +651,7 @@ brn2_execute(FileList *old, FileList *new,
                           newname, *oldname, newname);
                     error("To disable this behaviour,"
                           " don't pass the --implict option.\n");
-                    hash_map_insert_pre_calc(oldlist_map, newname, newlength,
+                    hash_map_insert_pre_calc(oldlist_map, newname,
                                              newhash, newindex, i);
                 }
                 continue;
@@ -683,7 +682,7 @@ brn2_execute(FileList *old, FileList *new,
                 exit(EXIT_FAILURE);
             continue;
         } else {
-            if (hash_set_insert_pre_calc(names_renamed, *oldname, *oldlength,
+            if (hash_set_insert_pre_calc(names_renamed, *oldname,
                                          oldhash, oldindex))
                 number_renames += 1;
             print("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
