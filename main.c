@@ -343,9 +343,12 @@ int main(int argc, char **argv) {
         clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
         long seconds = t1.tv_sec - t0.tv_sec;
         long nanos = t1.tv_nsec - t0.tv_nsec;
+
         double total_seconds = (double)seconds + (double)nanos/1.0e9;
+        double micros_per_file = 1e6*(total_seconds/(double)old->length);
+
         printf("\ntime elapsed (%s): %gs = %gus per file\n\n",
-               __FILE__, total_seconds, 1e6*(total_seconds/(double)old->length));
+               __FILE__, total_seconds, micros_per_file);
     }
 #endif
 
