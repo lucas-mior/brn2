@@ -176,7 +176,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
     } \
 \
     while (true) { \
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
+        if ((hash == iterator->hash) && BRN2_LIKELY(!strcmp(iterator->key, key))) \
             return false; \
 \
         if (iterator->next) \
@@ -213,7 +213,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, \
         return NULL; \
 \
     while (true) { \
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) \
+        if ((hash == iterator->hash) && BRN2_LIKELY(!strcmp(iterator->key, key))) \
             return HASH_ITERATOR_VALUE_RETURN; \
 \
         if (iterator->next) \
@@ -240,7 +240,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, \
     if (iterator->key == NULL) \
         return false; \
 \
-    if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
+    if ((hash == iterator->hash) && BRN2_LIKELY(!strcmp(iterator->key, key))) { \
         if (iterator->next) { \
             memmove(iterator, \
                     map->arena->begin + iterator->next, sizeof(*iterator)); \
@@ -256,7 +256,7 @@ hash_##T##_remove_pre_calc(struct Hash##T *map, \
         Bucket##T *previous = iterator; \
         iterator = (void *)(map->arena->begin + iterator->next); \
 \
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) { \
+        if ((hash == iterator->hash) && BRN2_LIKELY(!strcmp(iterator->key, key))) { \
              previous->next = iterator->next; \
              map->length -= 1; \
              map->collisions -= 1; \
