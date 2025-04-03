@@ -76,6 +76,7 @@ void hash_set_print(HashSet *, bool);
 #define QUOTE(x) Q(x)
 #define HASH_map_PRINT_SUMMARY(MAP) hash_map_print_summary(MAP, QUOTE(MAP))
 #define HASH_set_PRINT_SUMMARY(MAP) hash_set_print_summary(MAP, QUOTE(MAP))
-#define HASH_MAP_SIZE(map) (sizeof(*map) + map->capacity*sizeof(map->array[0]))
+#define HASH_MAP_SIZE(map) \
+        (sizeof(*map) + map->capacity*sizeof(*(&map->array[0])))
 
 #endif
