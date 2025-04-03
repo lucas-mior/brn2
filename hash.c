@@ -323,7 +323,7 @@ HASH_IMPLEMENT(set)
 #undef HASH_ITERATOR_VALUE_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
 
-uint32
+BRN2_INLINE uint32
 hash_normal(void *map, uint32 hash) {
     HashMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
