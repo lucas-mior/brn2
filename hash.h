@@ -50,6 +50,7 @@ uint32 hash_expected_collisions(void *);
 
 HashMap *hash_map_create(uint32);
 HashMap *hash_map_balance(HashMap *);
+void hash_map_zero(HashMap *);
 void hash_map_destroy(HashMap *);
 bool hash_map_insert(HashMap *, char *, uint32, uint32);
 bool hash_map_insert_pre_calc(HashMap *, char *, uint32, uint32, uint32);
@@ -62,6 +63,7 @@ void hash_map_print(HashMap *, bool);
 
 HashSet *hash_set_create(uint32);
 HashSet *hash_set_balance(HashSet *);
+void hash_set_zero(HashSet *);
 void hash_set_destroy(HashSet *);
 bool hash_set_insert(HashSet *, char *, uint32, uint32);
 bool hash_set_insert_pre_calc(HashSet *, char *, uint32, uint32, uint32);
