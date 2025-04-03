@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
     FileList *new;
     uint32 *hashes_old = NULL;
     uint32 *hashes_new = NULL;
-    HashMap *oldlist_map;
-    HashMap *newlist_map;
+    HashMap *oldlist_map = NULL;
+    HashMap *newlist_map = NULL;
     long available_threads;
 
     uint32 main_capacity;
@@ -316,14 +316,19 @@ int main(int argc, char **argv) {
             }
 
             brn2_normalize_names(old, new);
-            newlist_map = hash_map_create(new->length);
-            main_capacity = hash_capacity(newlist_map);
+
+            if (newlist_map == NULL) {
+                newlist_map = hash_map_create(new->length);
+            } else {
+                hash_map_zero(newlist_map);
+            }
             if (hashes_new == NULL)
                 hashes_new = xmmap(new->length*sizeof(*hashes_new));
+
+            main_capacity = hash_capacity(newlist_map);
             brn2_create_hashes(new, hashes_new, main_capacity);
 
             if (!brn2_verify(new, newlist_map, hashes_new)) {
-                hash_map_destroy(newlist_map);
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
