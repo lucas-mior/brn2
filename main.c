@@ -78,9 +78,11 @@ int main(int argc, char **argv) {
     uint32 main_capacity;
     char *EDITOR;
     int opt;
+#ifdef BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+#endif
 
     char *directory = ".";
     char *lines = NULL;
@@ -170,21 +172,7 @@ int main(int argc, char **argv) {
         error("Unexpected mode: %d\n", mode);
         exit(EXIT_FAILURE);
     }
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     brn2_normalize_names(old, NULL);
-
-    {
-        clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-        long seconds = t1.tv_sec - t0.tv_sec;
-        long nanos = t1.tv_nsec - t0.tv_nsec;
-
-        double total_seconds = (double)seconds + (double)nanos/1.0e9;
-        double micros_per_file = 1e6*(total_seconds/(double)old->length);
-
-        printf("\ntime elapsed (%s): %gs = %gus per file\n\n",
-               __FILE__, total_seconds, micros_per_file);
-        exit(0);
-    }
 
     if (brn2_options_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
