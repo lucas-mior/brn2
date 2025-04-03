@@ -171,9 +171,6 @@ int main(int argc, char **argv) {
     }
     brn2_normalize_names(old, NULL);
 
-    if (brn2_options_sort)
-        qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
-
     for (uint32 i = 0; i < old->length; i += 1) {
         FileName *file = &(old->files[i]);
         while (file->type == TYPE_ERR) {
@@ -184,6 +181,9 @@ int main(int argc, char **argv) {
             memmove(file, file+1, (old->length - i)*sizeof(*file));
         }
     }
+
+    if (brn2_options_sort)
+        qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
     if (old->length == 0) {
         error("No files to rename.\n");
