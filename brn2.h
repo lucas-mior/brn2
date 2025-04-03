@@ -173,11 +173,11 @@ void *snprintf2(char *buffer, size_t size, char *format, ...);
 void util_command(const int argc, char **argv);
 void error(char *format, ...);
 
-Arena * arena_alloc(size_t size);
-void * arena_push(Arena *arena, uint32 size);
+Arena *arena_alloc(size_t size);
+void *arena_push(Arena *arena, uint32 size);
 uint32 arena_push_index(Arena *arena, uint32 size);
-void * arena_reset(Arena *arena);
-void * arena_reset_zero(Arena *arena);
+void *arena_reset(Arena *arena);
+void *arena_reset_zero(Arena *arena);
 void arena_destroy(Arena *arena);
 
 #endif
