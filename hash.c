@@ -456,19 +456,15 @@ int main(void) {
         uint32 expected_collisions = hash_expected_collisions(original_map);
         double ratio = (double)collisions_before / (double)expected_collisions;
         assert(ratio <= 1.2);
-        if (false) {
-            balanced_map = hash_map_balance(original_map);
+        balanced_map = hash_map_balance(original_map);
 
-            if (NSTRINGS < 10)
-                hash_map_print(balanced_map, false);
-            else
-                HASH_map_PRINT_SUMMARY(balanced_map);
+        if (NSTRINGS < 10)
+            hash_map_print(balanced_map, false);
+        else
+            HASH_map_PRINT_SUMMARY(balanced_map);
 
-            if (collisions_before > 10)
-                assert(collisions_before > hash_collisions(balanced_map));
-        } else {
-            balanced_map = original_map;
-        }
+        if (collisions_before > 10)
+            assert(collisions_before > hash_collisions(balanced_map));
     }
 
     assert(hash_length(balanced_map) == (2 + NSTRINGS));
