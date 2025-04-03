@@ -58,13 +58,13 @@ typedef ssize_t isize;
 #endif
 
 #ifdef __cplusplus
-  #define RAPIDHASH_NOEXCEPT noexcept
+  #define NOEXCEPT noexcept
   #define RAPIDHASH_CONSTEXPR constexpr
   #ifndef RAPIDHASH_INLINE
     #define RAPIDHASH_INLINE inline
   #endif
 #else
-  #define RAPIDHASH_NOEXCEPT
+  #define NOEXCEPT
   #define RAPIDHASH_CONSTEXPR static const
   #ifndef RAPIDHASH_INLINE
   #define RAPIDHASH_INLINE static inline
@@ -128,7 +128,7 @@ RAPIDHASH_CONSTEXPR uint64 rapid_secret[3] = {
  *  Xors and overwrites B contents with C's high 64 bits.
  */
 RAPIDHASH_INLINE void
-rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
+rapid_mum(uint64 *A, uint64 *B) NOEXCEPT {
 #if defined(__SIZEOF_INT128__)
     __uint128_t r = *A;
     r *= *B;
@@ -201,53 +201,53 @@ rapid_mum(uint64 *A, uint64 *B) RAPIDHASH_NOEXCEPT {
  *  Returns 64-bit xor between high and low 64 bits of C.
  */
 RAPIDHASH_INLINE uint64
-rapid_mix(uint64 A, uint64 B) RAPIDHASH_NOEXCEPT {
+rapid_mix(uint64 A, uint64 B) NOEXCEPT {
     rapid_mum(&A, &B);
     return A ^ B;
 }
 
 #ifdef RAPIDHASH_LITTLE_ENDIAN
 RAPIDHASH_INLINE uint64
-read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read64(const uint8 *p) NOEXCEPT {
     uint64 v;
     memcpy(&v, p, sizeof(*(&v)));
     return v;
 }
 RAPIDHASH_INLINE uint64
-read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read32(const uint8 *p) NOEXCEPT {
     uint32 v;
     memcpy(&v, p, sizeof(*(&v)));
     return v;
 }
 #elif defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__clang__)
 RAPIDHASH_INLINE uint64
-read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read64(const uint8 *p) NOEXCEPT {
     uint64 v;
     memcpy(&v, p, sizeof(*(&v)));
     return __builtin_bswap64(v);
 }
 RAPIDHASH_INLINE uint64
-read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read32(const uint8 *p) NOEXCEPT {
     uint32 v;
     memcpy(&v, p, sizeof(*(&v)));
     return __builtin_bswap32(v);
 }
 #elif defined(_MSC_VER)
 RAPIDHASH_INLINE uint64
-read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read64(const uint8 *p) NOEXCEPT {
     uint64 v;
     memcpy(&v, p, sizeof(*(&v)));
     return _byteswap_uint64(v);
 }
 RAPIDHASH_INLINE uint64
-read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read32(const uint8 *p) NOEXCEPT {
     uint32 v;
     memcpy(&v, p, sizeof(*(&v)));
     return _byteswap_ulong(v);
 }
 #else
 RAPIDHASH_INLINE uint64
-read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read64(const uint8 *p) NOEXCEPT {
     uint64 v;
     memcpy(&v, p, sizeof(*(&v)));
     return ((v >> 56) & 0xff)
@@ -260,7 +260,7 @@ read64(const uint8 *p) RAPIDHASH_NOEXCEPT {
          | ((v << 56) & 0xff00000000000000);
 }
 RAPIDHASH_INLINE uint64
-read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
+read32(const uint8 *p) NOEXCEPT {
     uint32 v;
     memcpy(&v, p, sizeof(*(&v)));
     return ((v >> 24) & 0xff)
@@ -282,7 +282,7 @@ read32(const uint8 *p) RAPIDHASH_NOEXCEPT {
  *  Returns a 64-bit value containing all three bytes read.
  */
 RAPIDHASH_INLINE uint64
-readSmall(const uint8 *p, size_t k) RAPIDHASH_NOEXCEPT {
+readSmall(const uint8 *p, size_t k) NOEXCEPT {
     return (((uint64)p[0]) << 56) | (((uint64)p[k >> 1]) << 32) | p[k - 1];
 }
 
@@ -298,7 +298,7 @@ readSmall(const uint8 *p, size_t k) RAPIDHASH_NOEXCEPT {
  */
 RAPIDHASH_INLINE uint64
 rapidhash_internal(const void *key, size_t len, uint64 seed,
-                   const uint64 *secret) RAPIDHASH_NOEXCEPT {
+                   const uint64 *secret) NOEXCEPT {
     const uint8 *p = (const uint8 *)key;
     const uint64 *s = secret;
     uint64 a;
@@ -367,11 +367,11 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
 }
 
 RAPIDHASH_INLINE uint64
-rapidhash_withSeed(const void *key, size_t len, uint64 seed) RAPIDHASH_NOEXCEPT {
+rapidhash_withSeed(const void *key, size_t len, uint64 seed) NOEXCEPT {
     return rapidhash_internal(key, len, seed, rapid_secret);
 }
 
 RAPIDHASH_INLINE uint64
-rapidhash(const void *key, size_t len) RAPIDHASH_NOEXCEPT {
+rapidhash(const void *key, size_t len) NOEXCEPT {
     return rapidhash_withSeed(key, len, rapid_seed);
 }
