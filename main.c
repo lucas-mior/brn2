@@ -204,7 +204,8 @@ int main(int argc, char **argv) {
         brn2_buffer_name = SNPRINTF(brn2_buffer.name, "/tmp/%s", "brn2.XXXXXX");
 
         if ((brn2_buffer.fd = mkstemp(brn2_buffer_name)) < 0) {
-            error("Error opening '%s': %s.\n", brn2_buffer_name, strerror(errno));
+            error("Error opening '%s': %s.\n",
+                  brn2_buffer_name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -217,6 +218,7 @@ int main(int argc, char **argv) {
             FileName *file = &(old->files[i]);
             uint32 *hash = &hashes_old[i];
             bool contains_newline;
+            usize written;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
                    || !hash_map_insert_pre_calc(oldlist_map, file->name,
@@ -241,8 +243,9 @@ int main(int argc, char **argv) {
                 hash = &hashes_old[i];
             }
 
-            if ((usize)(pointer - write_buffer) >= sizeof(write_buffer)) {
-                write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
+            written = (usize)(pointer - write_buffer);
+            if (written >= sizeof(write_buffer)) {
+                write(brn2_buffer.fd, write_buffer, written);
                 pointer = write_buffer;
             }
 
@@ -260,7 +263,8 @@ int main(int argc, char **argv) {
 
     {
         char *args_edit[] = { EDITOR, brn2_buffer_name, NULL };
-        char *args_shuf[] = { "shuf", brn2_buffer_name, "-o", brn2_buffer_name, NULL };
+        char *args_shuf[] = { "shuf", brn2_buffer_name,
+                              "-o", brn2_buffer_name, NULL };
         (void) args_edit;
         (void) args_shuf;
 
