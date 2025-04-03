@@ -36,7 +36,7 @@ arena_alloc(size_t size) {
                      MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
-                size = (size) + (SIZE2MB - ((size) % SIZE2MB));
+                size = BRN2_ALIGN(size, SIZE2MB);
                 break;
             }
         }
