@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
         brn2_buffer_name = SNPRINTF(brn2_buffer.name, "/tmp/%s", "brn2.XXXXXX");
 
         if ((brn2_buffer.fd = mkstemp(brn2_buffer_name)) < 0) {
-            error("Error opening '%s': %s\n", brn2_buffer_name, strerror(errno));
+            error("Error opening '%s': %s.\n", brn2_buffer_name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
