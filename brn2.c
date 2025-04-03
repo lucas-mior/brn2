@@ -232,7 +232,7 @@ brn2_free_list(FileList *list) {
 }
 
 FileList *
-brn2_list_from_lines(char *filename, uint32 capacity) {
+brn2_list_from_lines(char *filename, bool is_old) {
     FileList *list;
     char *map;
     char *begin;
@@ -241,7 +241,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
     uint32 length = 0;
     uint32 map_size;
     uint32 padding;
-    bool is_old = capacity == 0;
+    uint32 capacity;
     int fd;
 
     if ((fd = open(filename, O_RDWR)) < 0) {
@@ -268,8 +268,7 @@ brn2_list_from_lines(char *filename, uint32 capacity) {
         exit(EXIT_FAILURE);
     }
 
-    if (capacity == 0)
-        capacity = map_size/2;
+    capacity = map_size/2;
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
     if (is_old)
         list->arena = arena_old;
@@ -769,7 +768,7 @@ int main(void) {
 
     system(command);
     list1 = brn2_list_from_dir(".");
-    list2 = brn2_list_from_lines(file, 0);
+    list2 = brn2_list_from_lines(file, true);
 
     brn2_normalize_names(list1, NULL);
     brn2_normalize_names(list2, NULL);
