@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
             break;
         case 'f':
             mode = FILES_FROM_FILE;
+            brn2_options_check = true;
             if (optarg == NULL)
                 brn2_usage(stderr);
             lines = optarg;
