@@ -220,28 +220,15 @@ int main(int argc, char **argv) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
             uint32 *hash = &hashes_old[i];
+            bool contains_newline;
 
-            while (memchr(file->name, '\n', file->length)) {
-                error(RED"'%s'"RESET" contains new line.", file->name);
-                if (brn2_options_fatal) {
-                    error("\n");
-                    exit(EXIT_FAILURE);
-                }
-                error(" Removing from list...\n");
-
-                old->length -= 1;
-                if (old->length <= i)
-                    goto close;
-
-                memmove(file, file+1, (old->length - i)*sizeof(*file));
-                memmove(hash, hash+1, (old->length - i)*sizeof(*hash));
-                file = &(old->files[i]);
-                hash = &hashes_old[i];
-            }
-
-            while (!hash_map_insert_pre_calc(oldlist_map, file->name,
+            while ((contains_newline = memchr(file->name, '\n', file->length))
+                   || !hash_map_insert_pre_calc(oldlist_map, file->name,
                                              file->hash, *hash, i)) {
-                error(RED"'%s'"RESET" repeated in the buffer.", file->name);
+                if (contains_newline)
+                    error(RED"'%s'"RESET" contains new line.", file->name);
+                else
+                    error(RED"'%s'"RESET" repeated in the buffer.", file->name);
                 if (brn2_options_fatal) {
                     error("\n");
                     exit(EXIT_FAILURE);
