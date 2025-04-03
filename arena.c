@@ -26,10 +26,13 @@ Arena *
 arena_alloc(size_t size) {
     void *p;
     Arena *arena;
+    int flags = 0;
 
     size += ALIGN(sizeof(*arena));
+    if (size >= (1024*1024))
+        flags |= MAP_HUGE_2MB|MAP_HUGETLB;
     p = mmap(NULL, size,
-                   PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE,
+                   PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|flags,
                    -1, 0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%zu): %s.\n", size, strerror(errno));
