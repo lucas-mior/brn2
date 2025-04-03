@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
     if (available_threads <= 0)
         nthreads = 1; 
     else
-        nthreads = MIN((uint32)available_threads, BRN2_MAX_THREADS);
+        nthreads = 1;
 
     arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
     arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
@@ -173,6 +173,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     brn2_normalize_names(old, NULL);
+    exit(0);
 
     if (brn2_options_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
