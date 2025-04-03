@@ -398,17 +398,17 @@ brn2_threads_work_normalization(void *arg) {
             struct stat file_stat;
             if (stat(file->name, &file_stat) < 0) {
                 error("Error in stat('%s'): %s\n", file->name, strerror(errno));
-                slice->old_list->files[i].dir = false;
+                slice->old_list->files[i].type = TYPE_ERR;
                 continue;
             }
             if (S_ISDIR(file_stat.st_mode)) {
-                slice->old_list->files[i].dir = true;
+                slice->old_list->files[i].type = TYPE_DIR;
                 brn2_slash_add(file);
             } else {
-                slice->old_list->files[i].dir = false;
+                slice->old_list->files[i].type = TYPE_FILE;
             }
         } else {
-            if (slice->old_list->files[i].dir)
+            if (slice->old_list->files[i].type == TYPE_DIR)
                 brn2_slash_add(file);
         }
     }
@@ -703,7 +703,7 @@ brn2_usage(FILE *stream) {
     "\n"
     "Options:\n"
     "  -F, --fatal   : Exit on first renaming error.\n"
-    "  -c, --check   : Check if original file names exist. Implied by -f.\n"
+    "  -c, --check   : Ignored.\n"
     "  -e, --explict : Only rename files given in the list (default).\n"
     "  -h, --help    : Display this help message and exit.\n"
     "  -i, --implict : Rename files not given in the list of files to rename.\n"

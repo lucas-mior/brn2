@@ -26,7 +26,6 @@
 #include "arena.c"
 
 char *program;
-static bool brn2_options_check = false;
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
@@ -101,7 +100,6 @@ int main(int argc, char **argv) {
             break;
         case 'f':
             mode = FILES_FROM_FILE;
-            brn2_options_check = true;
             if (optarg == NULL)
                 brn2_usage(stderr);
             lines = optarg;
@@ -115,7 +113,6 @@ int main(int argc, char **argv) {
         case '?':
             brn2_usage(stderr);
         case 'c':
-            brn2_options_check = true;
             break;
         case 'e':
             brn2_options_implicit = false;
@@ -177,23 +174,20 @@ int main(int argc, char **argv) {
     if (brn2_options_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
-    if (brn2_options_check) {
-        for (uint32 i = 0; i < old->length; i += 1) {
-            FileName *file = &(old->files[i]);
-            while (access(file->name, F_OK)) {
-                error("'%s' can't be accessed: %s\n",
-                      file->name, strerror(errno));
-                old->length -= 1;
-                if (old->length <= i)
-                    break;
-                memmove(file, file+1, (old->length - i)*sizeof(*file));
-            }
+    for (uint32 i = 0; i < old->length; i += 1) {
+        FileName *file = &(old->files[i]);
+        while (file->type == TYPE_ERR) {
+            error("Removing '%s' from list.\n", file->name, strerror(errno));
+            old->length -= 1;
+            if (old->length <= i)
+                break;
+            memmove(file, file+1, (old->length - i)*sizeof(*file));
         }
+    }
 
-        if (old->length == 0) {
-            error("No files to rename.\n");
-            exit(EXIT_FAILURE);
-        }
+    if (old->length == 0) {
+        error("No files to rename.\n");
+        exit(EXIT_FAILURE);
     }
 
     if (!(EDITOR = getenv("EDITOR"))) {
