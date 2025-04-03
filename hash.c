@@ -146,7 +146,7 @@ hash_##T##_destroy(struct Hash##T *map) { \
     return; \
 } \
 \
-bool \
+BRN2_INLINE bool \
 hash_##T##_insert(struct Hash##T *map, \
                   char *key, uint32 key_length, uint32 value) { \
     uint32 hash = hash_function(key, key_length); \
@@ -190,7 +190,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, \
     return true; \
 } \
 \
-void * \
+BRN2_INLINE void * \
 hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_length) { \
     uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
@@ -218,7 +218,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, \
     return NULL; \
 } \
 \
-bool \
+BRN2_INLINE bool \
 hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_length) { \
     uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
