@@ -61,7 +61,8 @@ will take place when you save and exit.
 - If the exact number of filenames isn't provided or if some filenames are
   repeated, the user will be asked to fix the rename buffer or exit.
 - Renaming millions or billions of files can be slow. Disabling sorting
-  (`-s` option) and printing (`-q` option) might help a bit.
+  (`-s` option) and printing (`-q` option) might help a bit, but not much,
+  because the bottleneck is the filesystem.
 - If you want to filter/organize the files to rename, use command line utilities
   like `find` and output it to a file. Edit this file as you like and then
   launch brn2 with the `-f` option. See examples below.
