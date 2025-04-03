@@ -42,13 +42,6 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-BRN2_INLINE uint32
-hash_function(char *key, uint32 key_length) {
-    uint32 hash;
-    hash = (uint32)rapidhash(key, key_length);
-    return (uint32)hash;
-}
-
 #define HASH_IMPLEMENT(T) \
 typedef struct Bucket##T { \
     char *key; \
@@ -322,6 +315,13 @@ HASH_IMPLEMENT(set)
 #undef HASH_ITERATOR_VALUE
 #undef HASH_ITERATOR_VALUE_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
+
+BRN2_INLINE uint32
+hash_function(char *key, uint32 key_length) {
+    uint32 hash;
+    hash = (uint32)rapidhash(key, key_length);
+    return (uint32)hash;
+}
 
 BRN2_INLINE uint32
 hash_normal(void *map, uint32 hash) {
