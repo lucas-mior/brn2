@@ -67,7 +67,11 @@ typedef ssize_t isize;
   #define NOEXCEPT
   #define RAPIDHASH_CONSTEXPR static const
   #ifndef RAPIDHASH_INLINE
-  #define RAPIDHASH_INLINE static inline
+  #ifdef __GNUC__ 
+    #define RAPIDHASH_INLINE static inline __attribute__((always_inline))
+  #else
+    #define RAPIDHASH_INLINE static inline
+  #endif
   #endif
 #endif
 
