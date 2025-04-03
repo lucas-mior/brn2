@@ -155,8 +155,8 @@ hash_##T##_insert(struct Hash##T *map, \
 } \
 \
 bool \
-hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
-				           uint32 index, uint32 value) { \
+hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, \
+                           uint32 hash, uint32 index, uint32 value) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) { \
@@ -198,8 +198,8 @@ hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_length) { \
 } \
 \
 void * \
-hash_##T##_lookup_pre_calc(struct Hash##T *map, \
-                           char *key, uint32 hash, uint32 index) { \
+hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, \
+                           uint32 hash, uint32 index) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) \
@@ -226,8 +226,8 @@ hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_length) { \
 } \
 \
 bool \
-hash_##T##_remove_pre_calc(struct Hash##T *map, \
-                           char *key, uint32 hash, uint32 index) { \
+hash_##T##_remove_pre_calc(struct Hash##T *map, char *key, \
+                           uint32 hash, uint32 index) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) \
