@@ -408,9 +408,24 @@ random_string(Arena *arena, uint32 nbytes) {
     return string;
 }
 
+void
+print_timings(char *name, struct timespec t0, struct timespec t1) {
+    long seconds = t1.tv_sec - t0.tv_sec;
+    long nanos = t1.tv_nsec - t0.tv_nsec;
+
+    double total_seconds = (double)seconds + (double)nanos/1.0e9;
+    double micros_per_str = 1e6*(total_seconds/(double)(NSTRINGS));
+    double nanos_per_byte = 1e3*(micros_per_str/(double)(NBYTES));
+
+    printf("\ntime elapsed %s:%s\n", __FILE__, name);
+    printf("%gs = %gus per string = %gns per byte\n\n",
+           total_seconds, micros_per_str, nanos_per_byte);
+}
+
 // flags: -lm
 int main(void) {
-    struct timespec t0, t1;
+    struct timespec t0;
+    struct timespec t1;
     HashMap *original_map;
     HashMap *balanced_map;
 
@@ -445,6 +460,7 @@ int main(void) {
                                strings[i].value));
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    print_timings("insertion", t0, t1);
 
     if (NSTRINGS < 10)
         hash_map_print(original_map, false);
@@ -452,11 +468,17 @@ int main(void) {
         HASH_map_PRINT_SUMMARY(original_map);
 
     {
+        struct timespec tbalance0;
+        struct timespec tbalance1;
         uint32 collisions_before = hash_collisions(original_map);
         uint32 expected_collisions = hash_expected_collisions(original_map);
         double ratio = (double)collisions_before / (double)expected_collisions;
         assert(ratio <= 1.2);
+
+        clock_gettime(CLOCK_MONOTONIC_RAW, &tbalance0);
         balanced_map = hash_map_balance(original_map);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &tbalance1);
+        print_timings("balancing", tbalance0, tbalance1);
 
         if (NSTRINGS < 10)
             hash_map_print(balanced_map, false);
@@ -481,18 +503,6 @@ int main(void) {
 
     hash_map_destroy(balanced_map);
 
-    {
-        long seconds = t1.tv_sec - t0.tv_sec;
-        long nanos = t1.tv_nsec - t0.tv_nsec;
-
-        double total_seconds = (double)seconds + (double)nanos/1.0e9;
-        double micros_per_str = 1e6*(total_seconds/(double)(NSTRINGS));
-        double nanos_per_byte = 1e3*(micros_per_str/(double)(NBYTES));
-
-        printf("\ntime elapsed (%s):\n", __FILE__);
-        printf("%gs = %gus per string = %gns per byte\n\n",
-               total_seconds, micros_per_str, nanos_per_byte);
-    }
     exit(0);
 }
 #endif
