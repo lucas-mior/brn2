@@ -22,8 +22,6 @@
 #include "brn2.h"
 #include "util.c"
 
-#define SIZE2MB (2*1024*1024)
-
 Arena *
 arena_alloc(size_t size) {
     void *p;
