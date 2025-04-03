@@ -59,6 +59,14 @@ struct Hash##T { \
     Bucket##T array[]; \
 }; \
 \
+void \
+hash_##T##_zero(struct Hash##T *map) { \
+    map->collisions = 0; \
+    map->length = 0; \
+    arena_reset(map->arena); \
+    arena_push(map->arena, BRN2_ALIGNMENT); \
+    memset(map->array, 0, map->capacity*sizeof(*(&map->array[0]))); \
+} \
 struct Hash##T * \
 hash_##T##_create(uint32 length) { \
     struct Hash##T *map; \
