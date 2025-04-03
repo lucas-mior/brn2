@@ -69,8 +69,8 @@ delete_brn2_buffer(void) {
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
-    uint32 *hashes_old;
-    uint32 *hashes_new;
+    uint32 *hashes_old = NULL;
+    uint32 *hashes_new = NULL;
     HashMap *oldlist_map;
     HashMap *newlist_map;
     long available_threads;
@@ -318,11 +318,11 @@ int main(int argc, char **argv) {
             brn2_normalize_names(old, new);
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_capacity(newlist_map);
-            hashes_new = xmmap(new->length*sizeof(*hashes_new));
+            if (hashes_new == NULL)
+                hashes_new = xmmap(new->length*sizeof(*hashes_new));
             brn2_create_hashes(new, hashes_new, main_capacity);
 
             if (!brn2_verify(new, newlist_map, hashes_new)) {
-                xmunmap(hashes_new, new->length*sizeof(*hashes_new));
                 hash_map_destroy(newlist_map);
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
