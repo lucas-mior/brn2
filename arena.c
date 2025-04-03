@@ -32,7 +32,7 @@ arena_alloc(size_t size) {
                    PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE,
                    -1, 0);
     if (p == MAP_FAILED) {
-        error("Error in mmap(%zu): %s\n", size, strerror(errno));
+        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -75,7 +75,7 @@ void
 arena_destroy(Arena *arena) {
     if (munmap(arena, arena->size) < 0) {
         error("Error in %s:\n", __func__);
-        error("Error in munmap(%p, %zu): %s\n",
+        error("Error in munmap(%p, %zu): %s.\n",
                 arena, arena->size, strerror(errno));
     }
     return;

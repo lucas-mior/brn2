@@ -101,7 +101,7 @@ brn2_list_from_dir(char *directory) {
 
     number_files = scandir(directory, &directory_list, NULL, NULL);
     if (number_files < 0) {
-        error("Error scanning '%s': %s\n", directory, strerror(errno));
+        error("Error scanning '%s': %s.\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (number_files <= 2) {
@@ -245,14 +245,15 @@ brn2_list_from_lines(char *filename, bool is_old) {
     int fd;
 
     if ((fd = open(filename, O_RDWR)) < 0) {
-        error("Error opening file for reading: %s\n", strerror(errno));
+        error("Error opening '%s' for reading: %s.\n",
+              filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     {
         struct stat lines_stat;
         if (fstat(fd, &lines_stat) < 0) {
-            error("Error in fstat(%s): %s\n", filename, strerror(errno));
+            error("Error in fstat(%s): %s.\n", filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
         map_size = (uint32)lines_stat.st_size;
@@ -327,7 +328,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
         exit(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
-        error("Error closing '%s': %s\n", filename, strerror(errno));
+        error("Error closing '%s': %s.\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -397,7 +398,7 @@ brn2_threads_work_normalization(void *arg) {
         if (old_list) {
             struct stat file_stat;
             if (stat(file->name, &file_stat) < 0) {
-                error("Error in stat('%s'): %s\n", file->name, strerror(errno));
+                error("Error in stat('%s'): %s.\n", file->name, strerror(errno));
                 slice->old_list->files[i].type = TYPE_ERR;
                 continue;
             }
@@ -656,7 +657,7 @@ brn2_execute(FileList *old, FileList *new,
                 continue;
             } else if (errno != ENOENT) {
                 error("Error swapping "RED"'%s'"RESET
-                      " and "RED"'%s'"RESET": %s\n",
+                      " and "RED"'%s'"RESET": %s.\n",
                       *oldname, newname, strerror(errno));
                 if (brn2_options_fatal || BRN2_DEBUG)
                     exit(EXIT_FAILURE);
@@ -675,7 +676,7 @@ brn2_execute(FileList *old, FileList *new,
         renamed = rename(*oldname, newname);
         if (renamed < 0) {
             error("Error renaming "RED"'%s'"RESET
-                  " to "RED"'%s'"RESET": %s\n",
+                  " to "RED"'%s'"RESET": %s.\n",
                   *oldname, newname, strerror(errno));
             if (brn2_options_fatal || BRN2_DEBUG)
                 exit(EXIT_FAILURE);
