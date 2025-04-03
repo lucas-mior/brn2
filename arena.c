@@ -22,6 +22,8 @@
 #include "brn2.h"
 #include "util.c"
 
+#define SIZE2MB (2*1024*1024)
+
 Arena *
 arena_alloc(size_t size) {
     void *p;
@@ -30,13 +32,15 @@ arena_alloc(size_t size) {
     size += ALIGN(sizeof(*arena));
 
     do {
-        if (size >= (2*1024*1024)) {
+        if (size >= SIZE2MB) {
             p = mmap(NULL, size,
                      PROT_READ|PROT_WRITE,
                      MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
-            if (p != MAP_FAILED)
+            if (p != MAP_FAILED) {
+                size = (size) + (SIZE2MB - ((size) % SIZE2MB));
                 break;
+            }
         }
         p = mmap(NULL, size,
                  PROT_READ|PROT_WRITE,
@@ -54,6 +58,16 @@ arena_alloc(size_t size) {
     arena->size = size;
     arena->pos = arena->begin;
     return arena;
+}
+
+void
+arena_destroy(Arena *arena) {
+    if (munmap(arena, arena->size) < 0) {
+        error("Error in %s:\n", __func__);
+        error("Error in munmap(%p, %zu): %s.\n",
+              arena, arena->size, strerror(errno));
+    }
+    return;
 }
 
 void *
@@ -82,16 +96,6 @@ arena_reset_zero(Arena *arena) {
     memset(arena->begin, 0, size);
     arena->pos = arena->begin;
     return arena->begin;
-}
-
-void
-arena_destroy(Arena *arena) {
-    if (munmap(arena, arena->size) < 0) {
-        error("Error in %s:\n", __func__);
-        error("Error in munmap(%p, %zu): %s.\n",
-                arena, arena->size, strerror(errno));
-    }
-    return;
 }
 
 #endif
