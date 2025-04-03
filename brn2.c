@@ -469,17 +469,10 @@ brn2_normalize_names(FileList *old, FileList *new) {
 }
 
 uint32 *
-brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    uint32 *hashes = xmmap(list->length*sizeof(*hashes));
+brn2_create_hashes(FileList *list, uint32 *hashes, uint32 map_capacity) {
     brn2_threads(brn2_threads_work_hashes,
                  list, NULL, hashes, NULL, map_capacity);
     return hashes;
-}
-
-void
-brn2_free_hashes(uint32 *hashes, usize size) {
-    xmunmap(hashes, size);
-    return;
 }
 
 uint32
