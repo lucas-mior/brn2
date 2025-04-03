@@ -704,7 +704,7 @@ brn2_usage(FILE *stream) {
     "\n"
     "Options:\n"
     "  -F, --fatal   : Exit on first renaming error.\n"
-    "  -c, --check   : Check if original file names exist.\n"
+    "  -c, --check   : Check if original file names exist. Implied by -f.\n"
     "  -e, --explict : Only rename files given in the list (default).\n"
     "  -h, --help    : Display this help message and exit.\n"
     "  -i, --implict : Rename files not given in the list of files to rename.\n"
