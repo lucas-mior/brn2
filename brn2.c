@@ -373,6 +373,8 @@ brn2_threads_work_normalization(void *arg) {
     for (uint32 i = slice->start; i < slice->end; i += 1) {
         FileName *file = &(list->files[i]);
         uint32 j = 0;
+        char *p;
+        int32 offset = 0;
 
         while (file->name[j] != '\0') {
             while (!memcmp(&(file->name[j]), "//", 2)) {
@@ -385,6 +387,14 @@ brn2_threads_work_normalization(void *arg) {
 
         while (file->name[0] == '.' && file->name[1] == '/') {
             memmove(&file->name[0], &file->name[2], file->length - 1);
+            file->length -= 2;
+        }
+
+        while ((p = memmem(file->name + offset, file->length - offset,
+                           "/./", 3))) {
+            offset = (int32)(p - file->name);
+            memmove(&p[1], &p[3], file->length - offset - 2);
+
             file->length -= 2;
         }
 
