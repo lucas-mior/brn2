@@ -43,9 +43,9 @@
 #define RESET "\x1b[0m"
 
 BRN2_INLINE uint32
-hash_function(char *key, uint32 key_size) {
+hash_function(char *key, uint32 key_length) {
     uint32 hash;
-    hash = (uint32)rapidhash(key, key_size);
+    hash = (uint32)rapidhash(key, key_length);
     return (uint32)hash;
 }
 
@@ -155,8 +155,8 @@ hash_##T##_destroy(struct Hash##T *map) { \
 \
 bool \
 hash_##T##_insert(struct Hash##T *map, \
-                  char *key, uint32 key_size, uint32 value) { \
-    uint32 hash = hash_function(key, key_size); \
+                  char *key, uint32 key_length, uint32 value) { \
+    uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
     return hash_##T##_insert_pre_calc(map, key, hash, index, value); \
 } \
@@ -198,8 +198,8 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
 } \
 \
 void * \
-hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_size) { \
-    uint32 hash = hash_function(key, key_size); \
+hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_length) { \
+    uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
     return hash_##T##_lookup_pre_calc(map, key, hash, index); \
 } \
@@ -226,8 +226,8 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, \
 } \
 \
 bool \
-hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_size) { \
-    uint32 hash = hash_function(key, key_size); \
+hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_length) { \
+    uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
     return hash_##T##_remove_pre_calc(map, key, hash, index); \
 } \
@@ -357,8 +357,10 @@ hash_expected_collisions(void *map) { \
     return (uint32)(roundl(result)); \
 }
 
-#define hash_set_insert(a, b)                hash_set_insert(a, b, 0)
-#define hash_set_insert_pre_calc(a, b, c, d) hash_set_insert_pre_calc(a, b, c, d, 0)
+#define hash_set_insert(a, b) \
+        hash_set_insert(a, b, 0)
+#define hash_set_insert_pre_calc(a, b, c, d) \
+        hash_set_insert_pre_calc(a, b, c, d, 0)
 
 #ifndef TESTING_THIS_FILE
 #define TESTING_THIS_FILE 0
