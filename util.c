@@ -69,7 +69,7 @@ xmmap(usize size) {
 void
 xmunmap(void *p, usize size) {
     if (munmap(p, size) < 0)
-        error("Error in munmap(%p, %zu): %s\n", p, size, strerror(errno));
+        error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
     return;
 }
 
@@ -151,19 +151,19 @@ util_command(const int argc, char **argv) {
     switch (child = fork()) {
     case 0:
         if (!freopen("/dev/tty", "r", stdin))
-            error("Error reopening stdin: %s\n", strerror(errno));
+            error("Error reopening stdin: %s.\n", strerror(errno));
         execvp(argv[0], argv);
         error("Error running '%s", argv[0]);
         for (int i = 1; i < argc; i += 1)
             error(" %s", argv[i]);
-        error("': %s\n", strerror(errno));
+        error("': %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     case -1:
-        error("Error forking: %s\n", strerror(errno));
+        error("Error forking: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     default:
         if (waitpid(child, NULL, 0) < 0) {
-            error("Error waiting for the forked child: %s\n", strerror(errno));
+            error("Error waiting for the forked child: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
     }
@@ -196,7 +196,7 @@ void error(char *format, ...) {
     char *notifiers[2] = { "dunstify", "notify-send" };
     switch (fork()) {
     case -1:
-        fprintf(stderr, "Error forking: %s\n", strerror(errno));
+        fprintf(stderr, "Error forking: %s.\n", strerror(errno));
         break;
     case 0:
         for (uint i = 0; i < ARRAY_LENGTH(notifiers); i += 1) {
