@@ -114,11 +114,17 @@ typedef struct File {
     FILE *stream;
 } File;
 
+enum {
+    TYPE_DIR = 0,
+    TYPE_FILE = 1,
+    TYPE_ERR = 2,
+};
+
 typedef struct FileName {
     char *name;
     uint32 hash;
     uint16 length;
-    bool dir;
+    uint8 type;
     uint8 unused;
 } FileName;
 
