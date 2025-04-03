@@ -84,7 +84,7 @@ hash_##T##_create(uint32 length) { \
     capacity *= 2; \
     power += 1; \
 \
-    size = sizeof(*map) + capacity*sizeof(map->array[0]); \
+    size = sizeof(*map) + capacity*sizeof(*(&map->array[0])); \
 \
     map = xmmap(size); \
     map->arena = arena_alloc(capacity*sizeof(*(&map->array[0]))); \
