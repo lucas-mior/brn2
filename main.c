@@ -173,7 +173,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     brn2_normalize_names(old, NULL);
-    exit(0);
 
     if (brn2_options_sort)
         qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
