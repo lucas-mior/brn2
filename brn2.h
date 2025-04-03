@@ -47,6 +47,7 @@
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 #define MAX(a,b) (a) > (b) ? (a) : (b)
 #define ALIGN(x) ((x) + (BRN2_ALIGNMENT - ((x) % BRN2_ALIGNMENT)))
+#define SIZE2MB (2*1024*1024)
 
 #ifdef __GNUC__
 # define BRN2_ASSUME_ALIGNED(BRN2_ASSUME_ALIGNED) do { \
@@ -162,7 +163,7 @@ void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
 
 void *xmalloc(const usize size);
-void *xmmap(const usize size);
+void *xmmap(usize size);
 void xmunmap(void *p, usize size);
 void *xrealloc(void *old, const usize size);
 void *xcalloc(const usize nmemb, const usize size);
