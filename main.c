@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
                    || !hash_map_insert_pre_calc(oldlist_map, file->name,
-                                             file->hash, *hash, i)) {
+                                                file->hash, *hash, i)) {
                 if (contains_newline)
                     error(RED"'%s'"RESET" contains new line.", file->name);
                 else
@@ -254,7 +254,6 @@ int main(int argc, char **argv) {
             memcpy(pointer, file->name, file->length + 1);
             pointer += file->length + 1;
             file->name[file->length] = '\0';
-
         }
         close:
         write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
