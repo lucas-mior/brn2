@@ -398,7 +398,10 @@ brn2_threads_work_normalization(void *arg) {
         if (old_list) {
             struct stat file_stat;
             if (stat(file->name, &file_stat) < 0) {
-                error("Error in stat('%s'): %s.\n", file->name, strerror(errno));
+                if (errno != ENOENT) {
+                    error("Error in stat('%s'): %s.\n",
+                          file->name, strerror(errno));
+                }
                 slice->old_list->files[i].type = TYPE_ERR;
                 continue;
             }
