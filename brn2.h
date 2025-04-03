@@ -162,22 +162,22 @@ void brn2_free_list(FileList *list);
 void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
 
-void *xmalloc(const usize size);
+void *xmalloc(const usize);
 void *xmmap(usize size);
-void xmunmap(void *p, usize size);
-void *xrealloc(void *old, const usize size);
-void *xcalloc(const usize nmemb, const usize size);
-char *xstrdup(char *string);
-void *xmemdup(void *source, usize size);
-void *snprintf2(char *buffer, size_t size, char *format, ...);
-void util_command(const int argc, char **argv);
-void error(char *format, ...);
+void xmunmap(void *, usize);
+void *xrealloc(void *, const usize);
+void *xcalloc(const usize, const usize);
+char *xstrdup(char *);
+void *xmemdup(void *, usize);
+void *snprintf2(char *, size_t, char *, ...);
+void util_command(const int, char **);
+void error(char *, ...);
 
-Arena *arena_alloc(size_t size);
-void *arena_push(Arena *arena, uint32 size);
-uint32 arena_push_index(Arena *arena, uint32 size);
-void *arena_reset(Arena *arena);
-void *arena_reset_zero(Arena *arena);
-void arena_destroy(Arena *arena);
+Arena *arena_alloc(size_t);
+void *arena_push(Arena *, uint32);
+uint32 arena_push_index(Arena *, uint32);
+void *arena_reset(Arena *);
+void *arena_reset_zero(Arena *);
+void arena_destroy(Arena *);
 
 #endif
