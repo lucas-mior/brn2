@@ -128,7 +128,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash = iterator->hash; \
             index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
-                                     hash, index, HASH_ITERATOR_VALUE); \
+                                       hash, index, HASH_ITERATOR_VALUE); \
         } \
 \
         while (iterator->next) { \
@@ -136,7 +136,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
             hash = iterator->hash; \
             index = hash_normal(new_map, hash); \
             hash_##T##_insert_pre_calc(new_map, iterator->key, \
-                                     hash, index, HASH_ITERATOR_VALUE); \
+                                       hash, index, HASH_ITERATOR_VALUE); \
 \
         } \
     } \
@@ -163,7 +163,7 @@ hash_##T##_insert(struct Hash##T *map, \
 \
 bool \
 hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, uint32 hash, \
-				         uint32 index, uint32 value) { \
+				           uint32 index, uint32 value) { \
     Bucket##T *iterator = &(map->array[index]); \
 \
     if (iterator->key == NULL) { \
