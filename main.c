@@ -216,7 +216,8 @@ int main(int argc, char **argv) {
 
         oldlist_map = hash_map_create(old->length);
         capacity_set = hash_capacity(oldlist_map);
-        hashes_old = brn2_create_hashes(old, capacity_set);
+        hashes_old = xmmap(old->length*sizeof(*hashes_old));
+        brn2_create_hashes(old, hashes_old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
@@ -293,7 +294,8 @@ int main(int argc, char **argv) {
 
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_capacity(newlist_map);
-            hashes_new = brn2_create_hashes(new, main_capacity);
+            hashes_new = xmmap(new->length*sizeof(*hashes_new));
+            brn2_create_hashes(new, hashes_new, main_capacity);
             brn2_verify(new, newlist_map, hashes_new);
             hash_map_print_summary(newlist_map, "newlist_map");
             break;
@@ -316,10 +318,11 @@ int main(int argc, char **argv) {
             brn2_normalize_names(old, new);
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_capacity(newlist_map);
-            hashes_new = brn2_create_hashes(new, main_capacity);
+            hashes_new = xmmap(new->length*sizeof(*hashes_new));
+            brn2_create_hashes(new, hashes_new, main_capacity);
 
             if (!brn2_verify(new, newlist_map, hashes_new)) {
-                brn2_free_hashes(hashes_new, new->length*sizeof(*hashes_new));
+                xmunmap(hashes_new, new->length*sizeof(*hashes_new));
                 hash_map_destroy(newlist_map);
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
