@@ -182,8 +182,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (brn2_options_sort)
-        qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
+    if (brn2_options_sort) {
+        brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
+    }
 
     if (old->length == 0) {
         error("No files to rename.\n");
