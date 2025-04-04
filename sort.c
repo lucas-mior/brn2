@@ -198,7 +198,7 @@ compare(const void *a, const void *b) {
 
 int main(void) {
     int32 array[N];
-    int32 nsub[P];
+    uint32 nsub[P];
     if (N < P*2) {
         fprintf(stderr, "N=%d must be larger than P*2=%d*2\n", N, P);
         exit(EXIT_SUCCESS);
@@ -213,26 +213,26 @@ int main(void) {
         nsub[i] = n/p + (n % p);
     }
 
-    printf("nsub[P-1] = %d\n", nsub[P-1]);
+    printf("nsub[P-1] = %d\n", nsub[p-1]);
 
     srand(42);
-    for (int32 i = 0; i < N; i++) {
+    for (uint32 i = 0; i < n; i++) {
         array[i] = rand() % MAXI;
     }
 
     {
-        int32 offset = 0;
-        for (int32 i = 0; i < P; i += 1) {
+        uint32 offset = 0;
+        for (uint32 i = 0; i < p; i += 1) {
             qsort(&array[offset], nsub[i], sizeof(*array), compare);
             offset += nsub[i];
         }
     }
 
     {
-        int32 index = 0;
-        for (int32 i = 0; i < P; i++) {
+        uint32 index = 0;
+        for (uint32 i = 0; i < p; i++) {
             printf("nsub[%d] = %d\n", i, nsub[i]);
-            for (int32 j = 0; j < nsub[i]; j++, index++) {
+            for (uint32 j = 0; j < nsub[i]; j++, index++) {
                 printf("array[%d]: %d\n", index, array[index]);
             }
             printf("\n");
@@ -241,10 +241,10 @@ int main(void) {
 
     int32 dummy = INT_MAX;
 
-    merge_sorted_subarrays(array, N, P, sizeof(int32), &dummy, compare);
+    merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare);
 
-    for (int32 i = 0; i < N; i++) {
-        printf("%d ", array[i]);
+    for (uint32 i = 0; i < n; i++) {
+        printf("%u ", array[i]);
         if ((i + 1) % 10 == 0) {
             printf("\n");
         }
@@ -252,7 +252,7 @@ int main(void) {
     printf("\n");
 
     assert(array[0] == 12);
-    assert(array[N-1] == 940);
+    assert(array[n-1] == 940);
 }
 
 #endif
