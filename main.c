@@ -184,10 +184,28 @@ int main(int argc, char **argv) {
         }
     }
 
+    struct timespec t0;
+    struct timespec t1;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+
     if (brn2_options_sort) {
         if (!brn2_options_quiet)
             printf("Sorting filenames...\n");
         brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+
+    {
+        long seconds = t1.tv_sec - t0.tv_sec;
+        long nanos = t1.tv_nsec - t0.tv_nsec;
+
+        double total_seconds = (double)seconds + (double)nanos/1.0e9;
+        double micros_per_str = 1e6*(total_seconds/(double)(old->length));
+
+        printf("\ntime elapsed %s:%s\n", __FILE__, "sort");
+        printf("%gs = %gus per string.\n\n", total_seconds, micros_per_str);
+        exit(0);
     }
 
     if (old->length == 0) {
