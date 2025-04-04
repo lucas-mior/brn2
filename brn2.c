@@ -476,18 +476,7 @@ brn2_timings(char *name, struct timespec t0, struct timespec t1, uint length) {
 
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-#define NORMALIZE_BENCHMARK 0
-#if NORMALIZE_BENCHMARK
-    struct timespec t0;
-    struct timespec t1;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-#endif
     brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, 0);
-#if NORMALIZE_BENCHMARK
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    brn2_timings("normalizing", t0, t1, old->length);
-    exit(0);
-#endif
     return;
 }
 
