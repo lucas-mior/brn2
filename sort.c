@@ -178,9 +178,9 @@ sort(FileList *old) {
 
 #if TESTING_THIS_FILE
 
-#define N 10
-#define P 3
-#define MAXI 100
+#define N 17
+#define P 16
+#define MAXI 1000
 
 int
 compare(const void *a, const void *b) {
@@ -190,6 +190,10 @@ compare(const void *a, const void *b) {
 int main(void) {
     int array[N];
     int nsub[P];
+    if (N < P) {
+        fprintf(stderr, "N=%d must be larger than P=%d\n", N, P);
+        exit(EXIT_SUCCESS);
+    }
 
     for (int i = 0; i < (P-1); i += 1) {
         nsub[i] = N/P;
@@ -224,6 +228,7 @@ int main(void) {
             printf("\n");
         }
     }
+    printf("\n");
 
     return 0;
 }
