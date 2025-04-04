@@ -130,6 +130,11 @@ sort(FileList *old) {
     nthreads = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
     qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
+    if (old->length < nthreads*2) {
+        error("N=%d must be larger than P*2=%d*2\n", old->length, nthreads);
+        return;
+    }
+
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     FileName dummy = {
         .name = "\077\077",
@@ -178,7 +183,7 @@ sort(FileList *old) {
 
 #if TESTING_THIS_FILE
 
-#define N 17
+#define N 34
 #define P 16
 #define MAXI 1000
 
@@ -190,8 +195,8 @@ compare(const void *a, const void *b) {
 int main(void) {
     int array[N];
     int nsub[P];
-    if (N < P) {
-        fprintf(stderr, "N=%d must be larger than P=%d\n", N, P);
+    if (N < P*2) {
+        fprintf(stderr, "N=%d must be larger than P*2=%d*2\n", N, P);
         exit(EXIT_SUCCESS);
     }
 
@@ -199,6 +204,7 @@ int main(void) {
         nsub[i] = N/P;
     }
     nsub[P-1] = nsub[0]+N%nsub[0];
+    printf("nsub[P-1] = %d\n", nsub[P-1]);
 
     for (int i = 0; i < N; i++) {
         array[i] = rand() % MAXI;
@@ -212,6 +218,7 @@ int main(void) {
 
     int index = 0;
     for (int i = 0; i < P; i++) {
+        /* printf("nsub[%d] = %d\n", i, nsub[i]); */
         for (int j = 0; j < nsub[i]; j++, index++) {
             printf("array[%d]: %d\n", index, array[index]);
         }
