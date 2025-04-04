@@ -43,6 +43,7 @@
 #define RESET "\x1b[0m"
 
 #define BRN2_MAX_THREADS 64
+#define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 #define MAX(a,b) (a) > (b) ? (a) : (b)
