@@ -93,7 +93,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         heap[i].element_index = 0;
     }
 
-    for (int32 i = p / 2 - 1; i >= 0; i--)
+    for (int32 i = p / 2 - 1; i >= 0; i -= 1)
         heapify(heap, p, (uint32)i, compare);
 
     for (uint32 i = 0; i < n; i += 1) {
