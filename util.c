@@ -40,27 +40,27 @@ xmalloc(const usize size) {
 }
 
 void *
-xmmap(usize size) {
+xmmap(usize *size) {
     void *p;
 
     do {
-        if (size >= SIZE2MB) {
-            p = mmap(NULL, size,
+        if (*size >= SIZE2MB) {
+            p = mmap(NULL, *size,
                      PROT_READ|PROT_WRITE,
                      MAP_ANONYMOUS|MAP_POPULATE|MAP_PRIVATE
                      |MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
-                size = BRN2_ALIGN(size, SIZE2MB);
+                *size = BRN2_ALIGN(*size, SIZE2MB);
                 break;
             }
         }
-        p = mmap(NULL, size,
+        p = mmap(NULL, *size,
                  PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_POPULATE,
                  -1, 0);
     } while (0);
     if (p == MAP_FAILED) {
-        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
+        error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
