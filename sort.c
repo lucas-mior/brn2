@@ -198,7 +198,7 @@ compare(const void *a, const void *b) {
 }
 static int32 dummy = INT_MAX;
 
-static const uint32 possibleN[] = {32};
+static const uint32 possibleN[] = {32, 33, 34, 35, 100, 200};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int main(void) {
