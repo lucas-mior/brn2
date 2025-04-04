@@ -181,7 +181,7 @@ sort(FileList *old) {
 #define MAXI 1000
 
 static int32
-compare(const void *a, const void *b) {
+compare_int(const void *a, const void *b) {
     const int32 *aa = a;
     const int32 *bb = b;
     return *aa - *bb;
@@ -219,12 +219,12 @@ int main(void) {
         {
             uint32 offset = 0;
             for (uint32 i = 0; i < p; i += 1) {
-                qsort(&array[offset], nsub[i], sizeof(*array), compare);
+                qsort(&array[offset], nsub[i], sizeof(*array), compare_int);
                 offset += nsub[i];
             }
         }
 
-        merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare);
+        merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
         switch (n) {
         case 32:
