@@ -100,7 +100,10 @@ mergesort(void *base, size_t nitems, size_t size,
     mergesort(left, mid, size, compar);
     mergesort(right, nitems - mid, size, compar);
 
-    size_t i = 0, j = 0, k = 0;
+    usize i = 0;
+    usize j = 0;
+    usize k = 0;
+
     while (i < mid && j < nitems - mid) {
         if (compar((char *)left + i*size, (char *)right + j*size) <= 0)
             memcpy((char *)base + (k++)*size, (char *)left + (i++)*size, size);
