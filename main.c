@@ -172,27 +172,28 @@ int main(int argc, char **argv) {
         error("Unexpected mode: %d\n", mode);
         exit(EXIT_FAILURE);
     }
-    /* if (!brn2_options_quiet) */
-    /*     printf("Normalizing filenames...\n"); */
-    /* brn2_normalize_names(old, NULL); */
+    if (!brn2_options_quiet)
+        printf("Normalizing filenames...\n");
+    brn2_normalize_names(old, NULL);
 
-    /* for (uint32 i = 0; i < old->length; i += 1) { */
-    /*     FileName *file = &(old->files[i]); */
-    /*     while (file->type == TYPE_ERR) { */
-    /*         error("Removing '%s' from list.\n", file->name, strerror(errno)); */
-    /*         old->length -= 1; */
-    /*         if (old->length <= i) */
-    /*             break; */
-    /*         memmove(file, file+1, (old->length - i)*sizeof(*file)); */
-    /*     } */
-    /* } */
+    for (uint32 i = 0; i < old->length; i += 1) {
+        FileName *file = &(old->files[i]);
+        while (file->type == TYPE_ERR) {
+            error("Removing '%s' from list.\n", file->name, strerror(errno));
+            old->length -= 1;
+            if (old->length <= i)
+                break;
+            memmove(file, file+1, (old->length - i)*sizeof(*file));
+        }
+    }
 
     if (old->length == 0) {
         error("No files to rename.\n");
         exit(EXIT_FAILURE);
     }
 
-    sort(old);
+    if (brn2_options_sort)
+        sort(old);
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
