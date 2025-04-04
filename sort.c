@@ -206,8 +206,8 @@ int main(void) {
         fprintf(stderr, "N=%d must be larger than P*2=%d*2\n", N, P);
         exit(EXIT_SUCCESS);
     }
-    uint32 n = N;
-    uint32 p = P;
+    const uint32 n = N;
+    const uint32 p = P;
     bool isvalidN = false;
 
     for (uint32 i = 0; i < LENGTH(possibleN); i += 1) {
