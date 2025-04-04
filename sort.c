@@ -75,7 +75,6 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
         nsub[i] = n/p;
     }
     nsub[p - 1] = nsub[0] + (n % p);
-    printf("nsub[p-1] = %d\n", nsub[p-1]);
 
     int offsets[p];
     offsets[0] = 0;
@@ -146,9 +145,6 @@ sort(FileList *old) {
         .unused = 0,
     };
 
-    printf("N = %u\n", old->length);
-    printf("P = %u\n", nthreads);
-
     merge_sorted_subarrays(old->files, old->length, nthreads,
                            sizeof(*(old->files)),
                            &dummy, brn2_compare);
@@ -157,11 +153,12 @@ sort(FileList *old) {
 
     if (memcmp(copy, old, lsize)) {
         error("copy is different than old!\n");
+        for (uint32 i = 0; i < old->length; i += 1) {
+            error("[%u] = %s != %s\n",
+                  i, old->files[i].name, copy->files[i].name);
+        }
     } else {
         error("copy is EQUAL TO old!\n");
-    }
-    for (uint32 i = 0; i < old->length; i += 1) {
-        printf("[%u] = %s != %s\n", i, old->files[i].name, copy->files[i].name);
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
