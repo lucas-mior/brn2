@@ -73,7 +73,6 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
     int indices[p];
     memset(indices, 0, p*sizeof(*indices));
 
-
     for (int i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
         memcpy(heap[i].value, &array2[i*nsub*size], size);
@@ -128,6 +127,9 @@ sort(FileList *old) {
         .unused = 0,
     };
 
+    printf("N = %u\n", old->length);
+    printf("P = %u\n", nthreads);
+
     merge_sorted_subarrays(old->files, old->length, nthreads,
                            sizeof(*(old->files)),
                            &dummy, brn2_compare);
@@ -165,7 +167,7 @@ sort(FileList *old) {
 #if TESTING_THIS_FILE
 
 #define N 20
-#define P 4
+#define P 16
 
 int
 compare(const void *a, const void *b) {
