@@ -240,7 +240,7 @@ int main(void) {
     }
     printf("\n");
 
-    EXIT(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
 
 #endif
