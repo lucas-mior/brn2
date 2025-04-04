@@ -130,9 +130,9 @@ typedef struct FileName {
 } FileName;
 
 typedef struct FileList {
+    Arena *arena;
     uint32 length;
     uint32 unused;
-    Arena *arena;
     FileName files[];
 } FileList;
 
@@ -167,7 +167,7 @@ void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
 
 void *xmalloc(const usize);
-void *xmmap(usize size);
+void *xmmap(usize *);
 void xmunmap(void *, usize);
 void *xrealloc(void *, const usize);
 void *xcalloc(const usize, const usize);

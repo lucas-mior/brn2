@@ -70,7 +70,8 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     uint32 nsub[BRN2_MAX_THREADS];
     uint32 indices[BRN2_MAX_THREADS] = {0};
     uint32 offsets[BRN2_MAX_THREADS];
-    char *output = xmmap(size*n);
+    usize memory_size = size*n;
+    char *output = xmmap(&memory_size);
     char *array2 = array;
 
     for (uint32 i = 0; i < (p - 1); i += 1) {
@@ -110,17 +111,17 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     memcpy(array2, output, n*size);
-    xmunmap(output, n*size);
+    xmunmap(output, memory_size);
     return;
 }
 
 #define SORT_CHECK 0
 
-void
+static void
 sort(FileList *old) {
     struct timespec t0;
     struct timespec t1;
-    int32 nthreads;
+    uint32 p;
     FileName dummy = {
         .name = "\077\077",
         .hash = 0,
@@ -138,13 +139,13 @@ sort(FileList *old) {
 #endif
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-    nthreads = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
+    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
 
-    if (nthreads == 1)
+    if (p == 1)
         return;
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    merge_sorted_subarrays(old->files, old->length, nthreads,
+    merge_sorted_subarrays(old->files, old->length, p,
                            sizeof(*(old->files)),
                            &dummy, brn2_compare);
 
