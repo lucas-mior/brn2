@@ -157,8 +157,11 @@ sort(FileList *old) {
     if (memcmp(copy, old, list_size)) {
         error("copy is different than old!\n");
         for (uint32 i = 0; i < old->length; i += 1) {
-            error("[%u] = %s != %s\n",
-                  i, old->files[i].name, copy->files[i].name);
+            char *name1 = old->files[i].name;
+            char *name2 = copy->files[i].name;
+            if (strcmp(name1, name2)) {
+                error("[%u] = %s != %s\n", i, name1, name2);
+            }
         }
     } else {
         error("copy is EQUAL TO old!\n");

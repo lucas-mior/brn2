@@ -45,8 +45,8 @@
 #define BRN2_MAX_THREADS 64
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
-#define MIN(a,b) (a) < (b) ? (a) : (b)
-#define MAX(a,b) (a) > (b) ? (a) : (b)
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
 #define BRN2_ALIGN(x,alignment) ((x) + ((alignment) - ((x) % (alignment))))
 #define SIZE2MB (2*1024*1024)
