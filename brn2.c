@@ -49,12 +49,6 @@ int
 brn2_compare(const void *a, const void *b) {
     const FileName *file_a = a;
     const FileName *file_b = b;
-    if (file_b->name == NULL) {
-        return INT_MIN;
-    }
-    if (file_a->name == NULL) {
-        return INT_MAX;
-    }
     return strcmp(file_a->name, file_b->name);
 }
 
