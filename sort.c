@@ -225,26 +225,7 @@ int main(void) {
             }
         }
 
-        {
-            uint32 index = 0;
-            for (uint32 i = 0; i < p; i++) {
-                printf("nsub[%u] = %u\n", i, nsub[i]);
-                for (uint32 j = 0; j < nsub[i]; j++, index++) {
-                    printf("array[%u]: %d\n", index, array[index]);
-                }
-                printf("\n");
-            }
-        }
-
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare);
-
-        for (uint32 i = 0; i < n; i++) {
-            printf("%d ", array[i]);
-            if ((i + 1) % 10 == 0) {
-                printf("\n");
-            }
-        }
-        printf("\n");
 
         switch (n) {
             case 32:
