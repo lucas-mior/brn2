@@ -66,24 +66,22 @@ heapify(HeapNode *heap, int n, int i,
 static void
 merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
                        int (*compare)(const void *a, const void *b)) {
+    HeapNode heap[BRN2_MAX_THREADS];
+    int nsub[BRN2_MAX_THREADS];
+    int indices[BRN2_MAX_THREADS] = {0};
+    int offsets[BRN2_MAX_THREADS];
     char *output = xmalloc(size*n);
-    HeapNode heap[p];
     char *array2 = array;
-    int nsub[p];
 
     for (int i = 0; i < (p - 1); i += 1) {
         nsub[i] = n/p;
     }
     nsub[p - 1] = nsub[0] + (n % p);
 
-    int offsets[p];
     offsets[0] = 0;
     for (int i = 1; i < p; i++) {
         offsets[i] = offsets[i - 1] + nsub[i - 1];
     }
-
-    int indices[p];
-    memset(indices, 0, p*sizeof(*indices));
 
     for (int i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
