@@ -71,6 +71,8 @@ int main(int argc, char **argv) {
     FileList *new;
     uint32 *indexes_old = NULL;
     uint32 *indexes_new = NULL;
+    usize indexes_old_size = 0;
+    usize indexes_new_size = 0;
     HashMap *oldlist_map = NULL;
     HashMap *newlist_map = NULL;
     long available_threads;
@@ -213,7 +215,8 @@ int main(int argc, char **argv) {
 
         oldlist_map = hash_map_create(old->length);
         capacity_set = hash_capacity(oldlist_map);
-        indexes_old = xmmap(old->length*sizeof(*indexes_old));
+        indexes_old_size = old->length*sizeof(*indexes_old);
+        indexes_old = xmmap(&indexes_old_size);
         brn2_create_hashes(old, indexes_old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
@@ -294,7 +297,8 @@ int main(int argc, char **argv) {
 
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_capacity(newlist_map);
-            indexes_new = xmmap(new->length*sizeof(*indexes_new));
+            indexes_new_size = new->length*sizeof(*indexes_new);
+            indexes_new = xmmap(&indexes_new_size);
             brn2_create_hashes(new, indexes_new, main_capacity);
             brn2_verify(new, newlist_map, indexes_new);
             hash_map_print_summary(newlist_map, "newlist_map");
@@ -322,8 +326,10 @@ int main(int argc, char **argv) {
             } else {
                 hash_map_zero(newlist_map);
             }
-            if (indexes_new == NULL)
-                indexes_new = xmmap(new->length*sizeof(*indexes_new));
+            if (indexes_new == NULL) {
+                indexes_new_size = new->length*sizeof(*indexes_new);
+                indexes_new = xmmap(&indexes_new_size);
+            }
 
             main_capacity = hash_capacity(newlist_map);
             brn2_create_hashes(new, indexes_new, main_capacity);
@@ -375,8 +381,8 @@ int main(int argc, char **argv) {
 #endif
 
     if (BRN2_DEBUG) {
-        xmunmap(indexes_old, old->length*sizeof(*indexes_old));
-        xmunmap(indexes_new, new->length*sizeof(*indexes_new));
+        xmunmap(indexes_old, indexes_old_size);
+        xmunmap(indexes_new, indexes_new_size);
         brn2_free_list(old);
         brn2_free_list(new);
         hash_map_destroy(oldlist_map);

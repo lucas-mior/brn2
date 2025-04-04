@@ -51,11 +51,12 @@ typedef struct Bucket##T { \
 } Bucket##T; \
 \
 struct Hash##T { \
+    Arena *arena; \
+    usize size; \
     uint32 capacity; \
     uint32 bitmask; \
     uint32 collisions; \
     uint32 length; \
-    Arena *arena; \
     Bucket##T array[]; \
 }; \
 \
@@ -86,11 +87,12 @@ hash_##T##_create(uint32 length) { \
 \
     size = sizeof(*map) + capacity*sizeof(*(&map->array[0])); \
 \
-    map = xmmap(size); \
+    map = xmmap(&size); \
     map->arena = arena_alloc(capacity*sizeof(*(&map->array[0]))); \
     arena_push(map->arena, BRN2_ALIGNMENT); \
     map->capacity = capacity; \
     map->bitmask = (1 << power) - 1; \
+    map->size = size; \
     return map; \
 } \
 \
@@ -114,11 +116,12 @@ hash_##T##_balance(struct Hash##T *old_map) { \
 \
     size = sizeof(*new_map) + capacity*sizeof(*(&new_map->array[0])); \
 \
-    new_map = xmmap(size); \
+    new_map = xmmap(&size); \
     new_map->arena = arena_alloc(capacity*sizeof(*(&new_map->array[0]))); \
     arena_push(new_map->arena, BRN2_ALIGNMENT); \
     new_map->capacity = capacity; \
     new_map->bitmask = bitmask; \
+    new_map->size = size; \
 \
     for (uint32 i = 0; i < old_map->capacity; i += 1) { \
         Bucket##T *iterator = &(old_map->array[i]); \
