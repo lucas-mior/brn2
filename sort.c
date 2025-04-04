@@ -15,7 +15,7 @@
 
 static void
 shuffle(void *array, usize n, usize size) {
-    char tmp[size];
+    char *tmp = xmalloc(size);
     char *arr = array;
     usize stride = size*sizeof(char);
 
@@ -46,11 +46,11 @@ swap(HeapNode *a, HeapNode *b) {
 }
 
 static void
-heapify(HeapNode *heap, int32 n, int32 i,
+heapify(HeapNode *heap, uint32 n, uint32 i,
         int32 (*compare)(const void *a, const void *b)) {
-    int32 smallest = i;
-    int32 left = 2*i + 1;
-    int32 right = 2*i + 2;
+    uint32 smallest = i;
+    uint32 left = 2*i + 1;
+    uint32 right = 2*i + 2;
 
     if (left < n && compare(heap[left].value, heap[smallest].value) < 0)
         smallest = left;
@@ -64,12 +64,12 @@ heapify(HeapNode *heap, int32 n, int32 i,
 }
 
 static void
-merge_sorted_subarrays(void *array, int32 n, int32 p, usize size, void *dummy,
+merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
                        int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
-    int32 nsub[BRN2_MAX_THREADS];
+    uint32 nsub[BRN2_MAX_THREADS];
     int32 indices[BRN2_MAX_THREADS] = {0};
-    int32 offsets[BRN2_MAX_THREADS];
+    uint32 offsets[BRN2_MAX_THREADS];
     char *output = xmalloc(size*n);
     char *array2 = array;
 
@@ -120,6 +120,13 @@ void
 sort(FileList *old) {
     struct timespec t0;
     struct timespec t1;
+    FileName dummy = {
+        .name = "\077\077",
+        .hash = 0,
+        .length = 0,
+        .type = 0,
+        .unused = 0,
+    };
 
 #if SORT_CHECK
     usize lsize = STRUCT_ARRAY_SIZE(old, FileName, old->length);
@@ -136,14 +143,6 @@ sort(FileList *old) {
 
     if (nthreads == 1)
         return;
-
-    FileName dummy = {
-        .name = "\077\077",
-        .hash = 0,
-        .length = 0,
-        .type = 0,
-        .unused = 0,
-    };
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, nthreads,
