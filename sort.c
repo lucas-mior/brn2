@@ -164,8 +164,8 @@ sort(FileList *old) {
 
 #if TESTING_THIS_FILE
 
-#define SIZE 20
-#define SUB_SIZE (SIZE / 4)
+#define N 20
+#define P 4
 
 int
 compare(const void *a, const void *b) {
@@ -173,21 +173,22 @@ compare(const void *a, const void *b) {
 }
 
 int main(void) {
-    int array[SIZE];
+    int array[N];
+    int nsub = N/P;
 
-    for (int i = 0; i < SIZE; i++) {
+    for (int i = 0; i < N; i++) {
         array[i] = rand() % 1000;
     }
 
-    for (int i = 0; i < SIZE; i += SUB_SIZE) {
-        qsort(&array[i], SUB_SIZE, sizeof(int), compare);
+    for (int i = 0; i < N; i += nsub) {
+        qsort(&array[i], nsub, sizeof(int), compare);
     }
 
     int dummy = INT_MAX;
 
-    merge_sorted_subarrays(array, SIZE, 4, sizeof(int), &dummy, compare);
+    merge_sorted_subarrays(array, N, P, sizeof(int), &dummy, compare);
 
-    for (int i = 0; i < SIZE; i++) {
+    for (int i = 0; i < N; i++) {
         printf("%d ", array[i]);
         if ((i + 1) % 10 == 0) {
             printf("\n");
