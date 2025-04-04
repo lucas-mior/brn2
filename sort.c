@@ -116,22 +116,25 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
     return;
 }
 
+#define SORT_CHECK 0
+
 void
 sort(FileList *old) {
     struct timespec t0;
     struct timespec t1;
 
-    /* usize lsize = STRUCT_ARRAY_SIZE(old, FileName, old->length); */
-    /* FileList *copy = xmalloc(lsize); */
+#if SORT_CHECK
+    usize lsize = STRUCT_ARRAY_SIZE(old, FileName, old->length);
+    FileList *copy = xmalloc(lsize);
 
-    /* shuffle(old->files, old->length, sizeof(*(old->files))); */
-    /* memcpy(copy, old, lsize); */
+    shuffle(old->files, old->length, sizeof(*(old->files)));
+    memcpy(copy, old, lsize);
+#endif
 
     int nthreads;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     nthreads = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
-    qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
 
     if (nthreads == 1)
         return;
@@ -144,21 +147,23 @@ sort(FileList *old) {
         .unused = 0,
     };
 
-    /* qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare); */
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, nthreads,
                            sizeof(*(old->files)),
                            &dummy, brn2_compare);
 
-    /* if (memcmp(copy, old, lsize)) { */
-    /*     error("copy is different than old!\n"); */
-    /*     for (uint32 i = 0; i < old->length; i += 1) { */
-    /*         error("[%u] = %s != %s\n", */
-    /*               i, old->files[i].name, copy->files[i].name); */
-    /*     } */
-    /* } else { */
-    /*     error("copy is EQUAL TO old!\n"); */
-    /* } */
+#if SORT_CHECK
+    qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
+    if (memcmp(copy, old, lsize)) {
+        error("copy is different than old!\n");
+        for (uint32 i = 0; i < old->length; i += 1) {
+            error("[%u] = %s != %s\n",
+                  i, old->files[i].name, copy->files[i].name);
+        }
+    } else {
+        error("copy is EQUAL TO old!\n");
+    }
+#endif
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
 
