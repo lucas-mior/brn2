@@ -212,19 +212,23 @@ int main(void) {
         array[i] = rand() % MAXI;
     }
 
-    int32 offset = 0;
-    for (int32 i = 0; i < P; i += 1) {
-        qsort(&array[offset], nsub[i], sizeof(int32), compare);
-        offset += nsub[i];
+    {
+        int32 offset = 0;
+        for (int32 i = 0; i < P; i += 1) {
+            qsort(&array[offset], nsub[i], sizeof(*array), compare);
+            offset += nsub[i];
+        }
     }
 
-    int32 index = 0;
-    for (int32 i = 0; i < P; i++) {
-        printf("nsub[%d] = %d\n", i, nsub[i]);
-        for (int32 j = 0; j < nsub[i]; j++, index++) {
-            printf("array[%d]: %d\n", index, array[index]);
+    {
+        int32 index = 0;
+        for (int32 i = 0; i < P; i++) {
+            printf("nsub[%d] = %d\n", i, nsub[i]);
+            for (int32 j = 0; j < nsub[i]; j++, index++) {
+                printf("array[%d]: %d\n", index, array[index]);
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 
     int32 dummy = INT_MAX;
