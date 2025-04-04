@@ -155,6 +155,7 @@ sort(FileList *old) {
                            &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
     if (memcmp(copy, old, list_size)) {
         error("copy is different than old!\n");
@@ -169,7 +170,6 @@ sort(FileList *old) {
         error("copy is EQUAL TO old!\n");
     }
     free(copy);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     brn2_timings("sorting", t0, t1, old->length);
     exit(0);
 #endif
