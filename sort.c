@@ -118,12 +118,10 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     return;
 }
 
-#define SORT_CHECK 0
+#define SORT_BENCHMARK 0
 
 static void
 sort(FileList *old) {
-    struct timespec t0;
-    struct timespec t1;
     uint32 p;
     FileName dummy_last = {
         .name = "\077\077",
@@ -133,15 +131,17 @@ sort(FileList *old) {
         .unused = 0,
     };
 
-#if SORT_CHECK
+#if SORT_BENCHMARK
+    struct timespec t0;
+    struct timespec t1;
     usize list_size = STRUCT_ARRAY_SIZE(old, FileName, old->length);
     FileList *copy = xmalloc(list_size);
 
     shuffle(old->files, old->length, sizeof(*(old->files)));
     memcpy(copy, old, list_size);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
 
     if (p == 1)
@@ -152,7 +152,7 @@ sort(FileList *old) {
                            sizeof(*(old->files)),
                            &dummy_last, brn2_compare);
 
-#if SORT_CHECK
+#if SORT_BENCHMARK
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
     if (memcmp(copy, old, list_size)) {
         error("copy is different than old!\n");
@@ -164,8 +164,6 @@ sort(FileList *old) {
         error("copy is EQUAL TO old!\n");
     }
     free(copy);
-#endif
-
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
 
     {
@@ -179,6 +177,7 @@ sort(FileList *old) {
         printf("%gs = %gus per string.\n\n", total_seconds, micros_per_str);
         exit(0);
     }
+#endif
     return;
 }
 
