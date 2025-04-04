@@ -183,7 +183,7 @@ sort(FileList *old) {
 #if TESTING_THIS_FILE
 
 #define P 16u
-#define MAXI 1000
+#define MAXI 10000
 
 static int32
 compare_int(const void *a, const void *b) {
@@ -193,7 +193,7 @@ compare_int(const void *a, const void *b) {
 }
 static int32 dummy = INT32_MAX;
 
-static const uint32 possibleN[] = {32, 33, 34, 35};
+static const uint32 possibleN[] = {32, 33, 34, 35, 100, 6174};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
@@ -235,42 +235,16 @@ main(void) {
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
-        if (false) {
-            printf("array[0] = %d\n", array[0]);
-            printf("array[n-1] = %d\n", array[n-1]);
-        } else {
-            for (uint32 i = 0; i < n; i += 1) {
-                printf("%d ", array[i]);
-                if ((i+1) % 10 == 0)
-                    printf("\n");
+        for (uint32 i = 0; i < n; i += 1) {
+            printf("%d ", array[i]);
+            if ((i+1) % 10 == 0)
+                printf("\n");
+
+            if (i < (n-1)) {
+                assert(array[i] <= array[i + 1]);
             }
         }
         printf("\n");
-
-        switch (n) {
-        case 32:
-        case 33:
-        case 34:
-        case 35:
-            assert(array[0] == 12);
-            assert(array[n-1] == 940);
-            break;
-        case 100:
-            assert(array[0] == 12);
-            assert(array[n-1] == 995);
-            break;
-        case 200:
-            assert(array[0] == 7);
-            assert(array[n-1] == 995);
-            break;
-        case 6174:
-            assert(array[0] == 0);
-            assert(array[n-1] == 999);
-            break;
-        default:
-            error("Invalid N=%u value.\n", n);
-            exit(EXIT_FAILURE);
-        }
     }
 }
 
