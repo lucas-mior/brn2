@@ -141,15 +141,15 @@ sort(FileList *old) {
 #endif
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-    /* p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0); */
+    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
 
-    /* if (p == 1) */
-    /*     return; */
+    if (p == 1)
+        return;
 
-    qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
-    /* merge_sorted_subarrays(old->files, old->length, p, */
-    /*                        sizeof(*(old->files)), */
-    /*                        &dummy, brn2_compare); */
+    /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
+    merge_sorted_subarrays(old->files, old->length, p,
+                           sizeof(*(old->files)),
+                           &dummy, brn2_compare);
 
 #if SORT_CHECK
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
