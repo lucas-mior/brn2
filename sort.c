@@ -118,7 +118,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     return;
 }
 
-#define SORT_BENCHMARK 0
+#define SORT_BENCHMARK 1
 
 static void
 sort(FileList *old) {
@@ -147,6 +147,8 @@ sort(FileList *old) {
     if (p == 1)
         return;
 
+    printf("p == %u, n = %u\n", p, old->length);
+
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, p,
                            sizeof(*(old->files)),
@@ -156,7 +158,7 @@ sort(FileList *old) {
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
     if (memcmp(copy, old, list_size)) {
         error("copy is different than old!\n");
-        for (int32 i = 0; i < old->length; i += 1) {
+        for (uint32 i = 0; i < old->length; i += 1) {
             error("[%u] = %s != %s\n",
                   i, old->files[i].name, copy->files[i].name);
         }
@@ -165,18 +167,8 @@ sort(FileList *old) {
     }
     free(copy);
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-
-    {
-        long seconds = t1.tv_sec - t0.tv_sec;
-        long nanos = t1.tv_nsec - t0.tv_nsec;
-
-        double total_seconds = (double)seconds + (double)nanos/1.0e9;
-        double micros_per_str = 1e6*(total_seconds/(double)(old->length));
-
-        printf("\ntime elapsed %s:%s\n", __FILE__, "sort");
-        printf("%gs = %gus per string.\n\n", total_seconds, micros_per_str);
-        exit(0);
-    }
+    brn2_timings("sorting", t0, t1, old->length);
+    exit(0);
 #endif
     return;
 }
