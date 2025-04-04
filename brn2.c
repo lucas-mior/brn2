@@ -462,8 +462,29 @@ int brn2_threads_work_changes(void *arg) {
 }
 
 void
+brn2_timings(char *name, struct timespec t0, struct timespec t1, uint length) {
+    long seconds = t1.tv_sec - t0.tv_sec;
+    long nanos = t1.tv_nsec - t0.tv_nsec;
+
+    double total_seconds = (double)seconds + (double)nanos/1.0e9;
+    double micros_per_str = 1e6*(total_seconds/(double)(length));
+
+    printf("\ntime elapsed %s\n", name);
+    printf("%gs = %gus per file.\n\n", total_seconds, micros_per_str);
+    return;
+}
+
+void
 brn2_normalize_names(FileList *old, FileList *new) {
+#ifdef NORMALIZE_BENCHMARK
+    struct timespec t0;
+    struct timespec t1;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+#endif
     brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, 0);
+#ifdef NORMALIZE_BENCHMARK
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+#endif
     return;
 }
 
@@ -501,6 +522,8 @@ brn2_threads(int (*function)(void *),
     }
 
     if (nthreads*2 >= length)
+        nthreads = 1;
+    if (length <= BRN2_MAX_THREADS)
         nthreads = 1;
 
     range = length / nthreads;
