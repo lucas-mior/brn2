@@ -159,6 +159,7 @@ sort(FileList *old) {
     } else {
         error("copy is EQUAL TO old!\n");
     }
+    free(copy);
 #endif
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
