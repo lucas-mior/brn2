@@ -65,7 +65,7 @@
 #if 0
 #define BRN2_INLINE __attribute__((noinline))
 #else
-#define BRN2_INLINE inline __attribute__((always_inline))
+#define BRN2_INLINE static inline __attribute__((always_inline))
 #endif
 
 #define SNPRINTF(BUFFER, FORMAT, ...) \
