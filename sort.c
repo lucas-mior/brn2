@@ -81,9 +81,8 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     offsets[0] = 0;
-    for (uint32 i = 1; i < p; i++) {
+    for (uint32 i = 1; i < p; i++)
         offsets[i] = offsets[i - 1] + nsub[i - 1];
-    }
 
     for (uint32 i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
@@ -92,9 +91,8 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
         heap[i].element_index = 0;
     }
 
-    for (int32 i = p / 2 - 1; i >= 0; i--) {
+    for (int32 i = p / 2 - 1; i >= 0; i--)
         heapify(heap, p, i, compare);
-    }
 
     for (uint32 i = 0; i < n; i++) {
         uint32 arr_idx = heap[0].array_index;
