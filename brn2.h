@@ -164,6 +164,7 @@ uint32 brn2_threads(int (*)(void *),
                     uint32 *, uint32 *, uint32);
 int brn2_threads_work_sort(void *arg);
 void brn2_timings(char *, struct timespec, struct timespec, uint);
+void brn2_print_list(FileList *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
