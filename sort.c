@@ -112,6 +112,8 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
 
     memcpy(array2, output, n*size);
     xmunmap(output, memory_size);
+    for (uint32 i = 0; i < p; i += 1)
+        free(heap[i].value);
     return;
 }
 
