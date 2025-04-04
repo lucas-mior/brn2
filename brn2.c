@@ -47,10 +47,8 @@ static inline bool brn2_is_invalid_name(char *);
 
 int
 brn2_compare(const void *a, const void *b) {
-    FileName *file_a = a;
-    FileName *file_b = b;
-    BRN2_ASSUME_ALIGNED(file_a->name);
-    BRN2_ASSUME_ALIGNED(file_b->name);
+    const FileName *file_a = a;
+    const FileName *file_b = b;
     return strcmp(file_a->name, file_b->name);
 }
 
