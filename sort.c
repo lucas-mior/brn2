@@ -68,14 +68,19 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
     char *output = xmalloc(size*n);
     HeapNode heap[p];
     char *array2 = array;
-    int nsub = n / p;
+    int nsub[p];
+
+    for (int i = 0; i < (p-1); i += 1) {
+        nsub[i] = n/p;
+    }
+    nsub[p-1] = nsub[0]+n%nsub[0];
 
     int indices[p];
     memset(indices, 0, p*sizeof(*indices));
 
     for (int i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
-        memcpy(heap[i].value, &array2[i*nsub*size], size);
+        memcpy(heap[i].value, &array2[i*nsub[i]*size], size);
         heap[i].array_index = i;
         heap[i].element_index = 0;
     }
@@ -89,8 +94,8 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
         int arr_idx = heap[0].array_index;
         int elem_idx = ++indices[arr_idx];
 
-        if (elem_idx < nsub) {
-            memcpy(heap[0].value, &array2[(arr_idx*nsub + elem_idx)*size], size);
+        if (elem_idx < nsub[i%p]) {
+            memcpy(heap[0].value, &array2[(arr_idx*nsub[i%p] + elem_idx)*size], size);
             heap[0].element_index = elem_idx;
         } else {
             memcpy(heap[0].value, dummy, size);
@@ -167,7 +172,7 @@ sort(FileList *old) {
 #if TESTING_THIS_FILE
 
 #define N 20
-#define P 16
+#define P 6
 
 int
 compare(const void *a, const void *b) {
@@ -176,14 +181,19 @@ compare(const void *a, const void *b) {
 
 int main(void) {
     int array[N];
-    int nsub = N/P;
+    int nsub[P];
+
+    for (int i = 0; i < (P-1); i += 1) {
+        nsub[i] = N/P;
+    }
+    nsub[P-1] = nsub[0]+N%nsub[0];
 
     for (int i = 0; i < N; i++) {
         array[i] = rand() % 1000;
     }
 
-    for (int i = 0; i < N; i += nsub) {
-        qsort(&array[i], nsub, sizeof(int), compare);
+    for (int i = 0; i < N; i += nsub[i%P]) {
+        qsort(&array[i], nsub[i%P], sizeof(int), compare);
     }
 
     int dummy = INT_MAX;
