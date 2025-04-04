@@ -124,7 +124,9 @@ static void
 sort(FileList *old) {
     uint32 p;
     FileName dummy_last = {
-        .name = NULL,
+        .name = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
         .hash = 0,
         .length = 0,
         .type = 0,
@@ -189,7 +191,6 @@ static int32
 compare_int(const void *a, const void *b) {
     const int32 *aa = a;
     const int32 *bb = b;
-    printf("comparing %d with %d\n", *aa, *bb);
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
