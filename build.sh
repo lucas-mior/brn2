@@ -85,7 +85,7 @@ main="main.c"
 program="brn2"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
-CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros "
+CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros -Wno-unused-function"
 LDFLAGS="$LDFLAGS -lm "
 
 CC=${CC:-cc}
