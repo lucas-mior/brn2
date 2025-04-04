@@ -199,11 +199,16 @@ int main(void) {
         fprintf(stderr, "N=%d must be larger than P*2=%d*2\n", N, P);
         exit(EXIT_SUCCESS);
     }
+    uint32 n = N;
+    uint32 p = P;
 
-    for (int32 i = 0; i < (P-1); i += 1) {
-        nsub[i] = N/P;
+    for (uint32 i = 0; i < (p - 1); i += 1) {
+        nsub[i] = n/p;
+    }{
+        uint32 i = p - 1;
+        nsub[i] = n/p + (n % p);
     }
-    nsub[P-1] = nsub[0]+N%P;
+
     printf("nsub[P-1] = %d\n", nsub[P-1]);
 
     srand(42);
