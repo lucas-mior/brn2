@@ -60,6 +60,7 @@ heapify(HeapNode *heap, int n, int i,
         swap(&heap[i], &heap[smallest]);
         heapify(heap, n, smallest, compare);
     }
+    return;
 }
 
 static void
@@ -176,6 +177,7 @@ sort(FileList *old) {
         printf("%gs = %gus per string.\n\n", total_seconds, micros_per_str);
         exit(0);
     }
+    return;
 }
 
 #ifndef TESTING_THIS_FILE
@@ -238,7 +240,7 @@ int main(void) {
     }
     printf("\n");
 
-    return 0;
+    EXIT(EXIT_SUCCESS);
 }
 
 #endif
