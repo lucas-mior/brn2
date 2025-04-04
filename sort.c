@@ -70,17 +70,23 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
     char *array2 = array;
     int nsub[p];
 
-    for (int i = 0; i < (p-1); i += 1) {
+    for (int i = 0; i < (p - 1); i += 1) {
         nsub[i] = n/p;
     }
-    nsub[p-1] = nsub[0]+n%nsub[0];
+    nsub[p - 1] = nsub[0] + (n % nsub[0]);
+
+    int offsets[p];
+    offsets[0] = 0;
+    for (int i = 1; i < p; i++) {
+        offsets[i] = offsets[i - 1] + nsub[i - 1];
+    }
 
     int indices[p];
     memset(indices, 0, p*sizeof(*indices));
 
     for (int i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
-        memcpy(heap[i].value, &array2[i*nsub[i]*size], size);
+        memcpy(heap[i].value, &array2[offsets[i]*size], size);
         heap[i].array_index = i;
         heap[i].element_index = 0;
     }
@@ -91,11 +97,12 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
 
     for (int i = 0; i < n; i++) {
         memcpy(&output[i*size], heap[0].value, size);
+
         int arr_idx = heap[0].array_index;
         int elem_idx = ++indices[arr_idx];
 
-        if (elem_idx < nsub[i%p]) {
-            memcpy(heap[0].value, &array2[(arr_idx*nsub[i%p] + elem_idx)*size], size);
+        if (elem_idx < nsub[arr_idx]) {
+            memcpy(heap[0].value, &array2[(offsets[arr_idx] + elem_idx)*size], size);
             heap[0].element_index = elem_idx;
         } else {
             memcpy(heap[0].value, dummy, size);
