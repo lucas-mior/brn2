@@ -81,11 +81,11 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     offsets[0] = 0;
-    for (int32 i = 1; i < p; i++) {
+    for (uint32 i = 1; i < p; i++) {
         offsets[i] = offsets[i - 1] + nsub[i - 1];
     }
 
-    for (int32 i = 0; i < p; i++) {
+    for (uint32 i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
         memcpy(heap[i].value, &array2[offsets[i]*size], size);
         heap[i].array_index = i;
