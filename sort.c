@@ -228,24 +228,24 @@ int main(void) {
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare);
 
         switch (n) {
-            case 32:
-            case 33:
-            case 34:
-            case 35:
-                assert(array[0] == 12);
-                assert(array[n-1] == 940);
-                break;
-            case 100:
-                assert(array[0] == 12);
-                assert(array[n-1] == 995);
-                break;
-            case 200:
-                assert(array[0] == 7);
-                assert(array[n-1] == 995);
-                break;
-            default:
-                error("Invalid N=%u value.\n", n);
-                exit(EXIT_FAILURE);
+        case 32:
+        case 33:
+        case 34:
+        case 35:
+            assert(array[0] == 12);
+            assert(array[n-1] == 940);
+            break;
+        case 100:
+            assert(array[0] == 12);
+            assert(array[n-1] == 995);
+            break;
+        case 200:
+            assert(array[0] == 7);
+            assert(array[n-1] == 995);
+            break;
+        default:
+            error("Invalid N=%u value.\n", n);
+            exit(EXIT_FAILURE);
         }
     }
 }
