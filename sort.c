@@ -34,8 +34,8 @@ shuffle(void *array, usize n, usize size) {
 
 typedef struct {
     void *value;
-    int array_index;
-    int element_index;
+    int32 array_index;
+    int32 element_index;
 } HeapNode;
 
 static void
@@ -46,11 +46,11 @@ swap(HeapNode *a, HeapNode *b) {
 }
 
 static void
-heapify(HeapNode *heap, int n, int i,
-        int (*compare)(const void *a, const void *b)) {
-    int smallest = i;
-    int left = 2*i + 1;
-    int right = 2*i + 2;
+heapify(HeapNode *heap, int32 n, int32 i,
+        int32 (*compare)(const void *a, const void *b)) {
+    int32 smallest = i;
+    int32 left = 2*i + 1;
+    int32 right = 2*i + 2;
 
     if (left < n && compare(heap[left].value, heap[smallest].value) < 0)
         smallest = left;
@@ -64,41 +64,41 @@ heapify(HeapNode *heap, int n, int i,
 }
 
 static void
-merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
-                       int (*compare)(const void *a, const void *b)) {
+merge_sorted_subarrays(void *array, int32 n, int32 p, usize size, void *dummy,
+                       int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
-    int nsub[BRN2_MAX_THREADS];
-    int indices[BRN2_MAX_THREADS] = {0};
-    int offsets[BRN2_MAX_THREADS];
+    int32 nsub[BRN2_MAX_THREADS];
+    int32 indices[BRN2_MAX_THREADS] = {0};
+    int32 offsets[BRN2_MAX_THREADS];
     char *output = xmalloc(size*n);
     char *array2 = array;
 
-    for (int i = 0; i < (p - 1); i += 1) {
+    for (int32 i = 0; i < (p - 1); i += 1) {
         nsub[i] = n/p;
     }
     nsub[p - 1] = nsub[0] + (n % p);
 
     offsets[0] = 0;
-    for (int i = 1; i < p; i++) {
+    for (int32 i = 1; i < p; i++) {
         offsets[i] = offsets[i - 1] + nsub[i - 1];
     }
 
-    for (int i = 0; i < p; i++) {
+    for (int32 i = 0; i < p; i++) {
         heap[i].value = xmalloc(size);
         memcpy(heap[i].value, &array2[offsets[i]*size], size);
         heap[i].array_index = i;
         heap[i].element_index = 0;
     }
 
-    for (int i = p / 2 - 1; i >= 0; i--) {
+    for (int32 i = p / 2 - 1; i >= 0; i--) {
         heapify(heap, p, i, compare);
     }
 
-    for (int i = 0; i < n; i++) {
+    for (int32 i = 0; i < n; i++) {
         memcpy(&output[i*size], heap[0].value, size);
 
-        int arr_idx = heap[0].array_index;
-        int elem_idx = ++indices[arr_idx];
+        int32 arr_idx = heap[0].array_index;
+        int32 elem_idx = ++indices[arr_idx];
 
         if (elem_idx < nsub[arr_idx]) {
             memcpy(heap[0].value, &array2[(offsets[arr_idx] + elem_idx)*size], size);
@@ -129,7 +129,7 @@ sort(FileList *old) {
     memcpy(copy, old, lsize);
 #endif
 
-    int nthreads;
+    int32 nthreads;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     nthreads = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
@@ -154,7 +154,7 @@ sort(FileList *old) {
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
     if (memcmp(copy, old, lsize)) {
         error("copy is different than old!\n");
-        for (uint32 i = 0; i < old->length; i += 1) {
+        for (int32 i = 0; i < old->length; i += 1) {
             error("[%u] = %s != %s\n",
                   i, old->files[i].name, copy->files[i].name);
         }
@@ -189,49 +189,49 @@ sort(FileList *old) {
 #define P 16
 #define MAXI 1000
 
-int
+int32
 compare(const void *a, const void *b) {
-    return (*(int*)a - *(int*)b);
+    return (*(int32*)a - *(int32*)b);
 }
 
 int main(void) {
-    int array[N];
-    int nsub[P];
+    int32 array[N];
+    int32 nsub[P];
     if (N < P*2) {
         fprintf(stderr, "N=%d must be larger than P*2=%d*2\n", N, P);
         exit(EXIT_SUCCESS);
     }
 
-    for (int i = 0; i < (P-1); i += 1) {
+    for (int32 i = 0; i < (P-1); i += 1) {
         nsub[i] = N/P;
     }
     nsub[P-1] = nsub[0]+N%P;
     printf("nsub[P-1] = %d\n", nsub[P-1]);
 
-    for (int i = 0; i < N; i++) {
+    for (int32 i = 0; i < N; i++) {
         array[i] = rand() % MAXI;
     }
 
-    int offset = 0;
-    for (int i = 0; i < P; i += 1) {
-        qsort(&array[offset], nsub[i], sizeof(int), compare);
+    int32 offset = 0;
+    for (int32 i = 0; i < P; i += 1) {
+        qsort(&array[offset], nsub[i], sizeof(int32), compare);
         offset += nsub[i];
     }
 
-    int index = 0;
-    for (int i = 0; i < P; i++) {
+    int32 index = 0;
+    for (int32 i = 0; i < P; i++) {
         printf("nsub[%d] = %d\n", i, nsub[i]);
-        for (int j = 0; j < nsub[i]; j++, index++) {
+        for (int32 j = 0; j < nsub[i]; j++, index++) {
             printf("array[%d]: %d\n", index, array[index]);
         }
         printf("\n");
     }
 
-    int dummy = INT_MAX;
+    int32 dummy = INT_MAX;
 
-    merge_sorted_subarrays(array, N, P, sizeof(int), &dummy, compare);
+    merge_sorted_subarrays(array, N, P, sizeof(int32), &dummy, compare);
 
-    for (int i = 0; i < N; i++) {
+    for (int32 i = 0; i < N; i++) {
         printf("%d ", array[i]);
         if ((i + 1) % 10 == 0) {
             printf("\n");
