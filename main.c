@@ -176,16 +176,16 @@ int main(int argc, char **argv) {
     /*     printf("Normalizing filenames...\n"); */
     /* brn2_normalize_names(old, NULL); */
 
-    for (uint32 i = 0; i < old->length; i += 1) {
-        FileName *file = &(old->files[i]);
-        while (file->type == TYPE_ERR) {
-            error("Removing '%s' from list.\n", file->name, strerror(errno));
-            old->length -= 1;
-            if (old->length <= i)
-                break;
-            memmove(file, file+1, (old->length - i)*sizeof(*file));
-        }
-    }
+    /* for (uint32 i = 0; i < old->length; i += 1) { */
+    /*     FileName *file = &(old->files[i]); */
+    /*     while (file->type == TYPE_ERR) { */
+    /*         error("Removing '%s' from list.\n", file->name, strerror(errno)); */
+    /*         old->length -= 1; */
+    /*         if (old->length <= i) */
+    /*             break; */
+    /*         memmove(file, file+1, (old->length - i)*sizeof(*file)); */
+    /*     } */
+    /* } */
 
     if (old->length == 0) {
         error("No files to rename.\n");
