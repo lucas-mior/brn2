@@ -46,27 +46,25 @@ swap(HeapNode *a, HeapNode *b) {
 }
 
 static void
-heapify(HeapNode *heap, uint32 n, uint32 i,
-        int32 (*compare)(const void *a, const void *b)) {
+heapify(HeapNode *heap, uint32 n, uint32 i) {
     uint32 smallest = i;
     uint32 left = 2*i + 1;
     uint32 right = 2*i + 2;
 
-    if ((left < n) && compare(heap[left].value, heap[smallest].value) < 0)
+    if ((left < n) && brn2_compare(heap[left].value, heap[smallest].value) < 0)
         smallest = left;
-    if ((right < n) && compare(heap[right].value, heap[smallest].value) < 0)
+    if ((right < n) && brn2_compare(heap[right].value, heap[smallest].value) < 0)
         smallest = right;
     if (smallest != i) {
         swap(&heap[i], &heap[smallest]);
-        heapify(heap, n, smallest, compare);
+        heapify(heap, n, smallest);
     }
     return;
 }
 
 static void
 merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
-                       void *dummy_last,
-                       int32 (*compare)(const void *a, const void *b)) {
+                       void *dummy_last) {
     HeapNode heap[BRN2_MAX_THREADS];
     uint32 nsub[BRN2_MAX_THREADS];
     uint32 indices[BRN2_MAX_THREADS] = {0};
@@ -94,7 +92,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     }
 
     for (int32 i = p / 2 - 1; i >= 0; i -= 1)
-        heapify(heap, p, (uint32)i, compare);
+        heapify(heap, p, (uint32)i);
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 arr_idx = heap[0].array_index;
@@ -108,7 +106,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
             memcpy(heap[0].value, dummy_last, size);
         }
 
-        heapify(heap, p, 0, compare);
+        heapify(heap, p, 0);
     }
 
     memcpy(array2, output, n*size);
@@ -152,7 +150,7 @@ sort(FileList *old) {
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, p,
                            sizeof(*(old->files)),
-                           &dummy_last, brn2_compare);
+                           &dummy_last);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
