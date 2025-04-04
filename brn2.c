@@ -526,7 +526,7 @@ brn2_threads(int (*function)(void *),
 
     if (nthreads*2 >= length)
         nthreads = 1;
-    if (length <= BRN2_MAX_THREADS)
+    if (length <= BRN2_MIN_PARALLEL)
         nthreads = 1;
 
     range = length / nthreads;
