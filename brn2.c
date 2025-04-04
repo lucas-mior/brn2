@@ -500,7 +500,7 @@ brn2_threads(int (*function)(void *),
         length = new->length;
     }
 
-    if (nthreads >= length)
+    if (nthreads*2 >= length)
         nthreads = 1;
 
     range = length / nthreads;
