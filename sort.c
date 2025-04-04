@@ -134,11 +134,11 @@ sort(FileList *old) {
     };
 
 #if SORT_CHECK
-    usize lsize = STRUCT_ARRAY_SIZE(old, FileName, old->length);
-    FileList *copy = xmalloc(lsize);
+    usize list_size = STRUCT_ARRAY_SIZE(old, FileName, old->length);
+    FileList *copy = xmalloc(list_size);
 
     shuffle(old->files, old->length, sizeof(*(old->files)));
-    memcpy(copy, old, lsize);
+    memcpy(copy, old, list_size);
 #endif
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
@@ -154,7 +154,7 @@ sort(FileList *old) {
 
 #if SORT_CHECK
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
-    if (memcmp(copy, old, lsize)) {
+    if (memcmp(copy, old, list_size)) {
         error("copy is different than old!\n");
         for (int32 i = 0; i < old->length; i += 1) {
             error("[%u] = %s != %s\n",
