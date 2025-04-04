@@ -97,10 +97,9 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     for (uint32 i = 0; i < n; i++) {
-        memcpy(&output[i*size], heap[0].value, size);
-
         uint32 arr_idx = heap[0].array_index;
         uint32 elem_idx = ++indices[arr_idx];
+        memcpy(&output[i*size], heap[0].value, size);
 
         if (elem_idx < nsub[arr_idx]) {
             memcpy(heap[0].value, &array2[(offsets[arr_idx] + elem_idx)*size], size);
