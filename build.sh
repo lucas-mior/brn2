@@ -96,6 +96,9 @@ if [ $CC = "clang" ]; then
 fi
 
 case "$target" in
+    "assembly")
+        CFLAGS="$CFLAGS -S"
+        CPPFLAGS="$CPPFLAGS" ;;
     "debug")
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
@@ -137,6 +140,9 @@ case "$target" in
         set -x
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+        ;;
+    "assembly")
+        $CC $CPPFLAGS $CFLAGS -o ${program}.S "$main" $LDFLAGS
         ;;
     "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check")
         set -x
