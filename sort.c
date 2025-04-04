@@ -147,6 +147,8 @@ sort(FileList *old) {
     if (p == 1)
         return;
 
+    printf("n=%u, p=%u\n", old->length, p);
+
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, p,
                            sizeof(*(old->files)),
@@ -191,7 +193,7 @@ compare_int(const void *a, const void *b) {
 }
 static int32 dummy = INT32_MAX;
 
-static const uint32 possibleN[] = {32, 33, 34, 35, 100, 200};
+static const uint32 possibleN[] = {32, 33, 34, 35, 100, 200, 6174};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
@@ -217,8 +219,11 @@ main(void) {
         printf("nsub[P-1] = %u\n", nsub[p-1]);
 
         srand(42);
-        for (uint32 i = 0; i < n; i += 1)
+        for (uint32 i = 0; i < n; i += 1) {
             array[i] = rand() % MAXI;
+            if (i < 5 || (n - i) < 5)
+                printf("array[%u] = %d\n", i, array[i]);
+        }
 
         {
             uint32 offset = 0;
@@ -229,6 +234,9 @@ main(void) {
         }
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
+
+        printf("array[0] = %d\n", array[0]);
+        printf("array[n-1] = %d\n", array[n-1]);
 
         switch (n) {
         case 32:
@@ -245,6 +253,10 @@ main(void) {
         case 200:
             assert(array[0] == 7);
             assert(array[n-1] == 995);
+            break;
+        case 6174:
+            assert(array[0] == 0);
+            assert(array[n-1] == 999);
             break;
         default:
             error("Invalid N=%u value.\n", n);
