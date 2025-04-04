@@ -91,30 +91,31 @@ mergesort(void *base, size_t nitems, size_t size,
         return;
 
     size_t mid = nitems / 2;
-    void *left = xmalloc(mid * size);
-    void *right = xmalloc((nitems - mid) * size);
+    void *left = xmalloc(mid*size);
+    void *right = xmalloc((nitems - mid)*size);
 
-    memcpy(left, base, mid * size);
-    memcpy(right, (char *)base + mid * size, (nitems - mid) * size);
+    memcpy(left, base, mid*size);
+    memcpy(right, (char *)base + mid*size, (nitems - mid)*size);
 
     mergesort(left, mid, size, compar);
     mergesort(right, nitems - mid, size, compar);
 
     size_t i = 0, j = 0, k = 0;
     while (i < mid && j < nitems - mid) {
-        if (compar((char *)left + i * size, (char *)right + j * size) <= 0)
-            memcpy((char *)base + (k++) * size, (char *)left + (i++) * size, size);
+        if (compar((char *)left + i*size, (char *)right + j*size) <= 0)
+            memcpy((char *)base + (k++)*size, (char *)left + (i++)*size, size);
         else
-            memcpy((char *)base + (k++) * size, (char *)right + (j++) * size, size);
+            memcpy((char *)base + (k++)*size, (char *)right + (j++)*size, size);
     }
 
     while (i < mid)
-        memcpy((char *)base + (k++) * size, (char *)left + (i++) * size, size);
+        memcpy((char *)base + (k++)*size, (char *)left + (i++)*size, size);
     while (j < nitems - mid)
-        memcpy((char *)base + (k++) * size, (char *)right + (j++) * size, size);
+        memcpy((char *)base + (k++)*size, (char *)right + (j++)*size, size);
 
     free(left);
     free(right);
+    return;
 }
 
 int main(int argc, char **argv) {
