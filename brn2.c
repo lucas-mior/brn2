@@ -41,13 +41,9 @@
 #pragma pop_macro("TESTING_THIS_FILE")
 
 static int brn2_threads_work_hashes(void *);
-static int brn2_threads_work_sort(void *);
 static int brn2_threads_work_normalization(void *);
 static int brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
-static uint32 brn2_threads(int (*)(void *),
-                           FileList *, FileList *,
-                           uint32 *, uint32 *, uint32);
 
 int
 brn2_compare(const void *a, const void *b) {
