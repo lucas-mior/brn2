@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
     if (brn2_options_sort) {
         if (!brn2_options_quiet)
             printf("Sorting filenames...\n");
-        qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
+        brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
     }
 
     if (old->length == 0) {
