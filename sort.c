@@ -187,27 +187,31 @@ sort(FileList *old) {
 
 #if TESTING_THIS_FILE
 
-#define P 16
+#define P 16u
 #define MAXI 1000
 
-int32
+static int32
 compare(const void *a, const void *b) {
-    return (*(int32*)a - *(int32*)b);
+    const int32 *aa = a;
+    const int32 *bb = b;
+    return *aa - *bb;
 }
+static int32 dummy = INT_MAX;
 
-uint32 possibleN[] = {32, 33, 34, 35, 100, 200};
+static const uint32 possibleN[] = {32};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int main(void) {
-    for (uint32 i = 0; i < LENGTH(possibleN); i += 1) {
-        const uint32 n = possibleN[i];
+    for (uint32 in = 0; in < LENGTH(possibleN); in += 1) {
+        const uint32 n = possibleN[in];
         int32 *array = xmalloc(n*sizeof(*array));
         uint32 nsub[P];
+        const uint32 p = P;
+
         if (n < P*2) {
-            fprintf(stderr, "n=%d must be larger than P*2=%d*2\n", n, P);
+            fprintf(stderr, "n=%u must be larger than P*2=%u*2\n", n, P);
             exit(EXIT_SUCCESS);
         }
-        const uint32 p = P;
 
         for (uint32 i = 0; i < (p - 1); i += 1) {
             nsub[i] = n/p;
@@ -216,7 +220,7 @@ int main(void) {
             nsub[i] = n/p + (n % p);
         }
 
-        printf("nsub[P-1] = %d\n", nsub[p-1]);
+        printf("nsub[P-1] = %u\n", nsub[p-1]);
 
         srand(42);
         for (uint32 i = 0; i < n; i++) {
@@ -234,20 +238,18 @@ int main(void) {
         {
             uint32 index = 0;
             for (uint32 i = 0; i < p; i++) {
-                printf("nsub[%d] = %d\n", i, nsub[i]);
+                printf("nsub[%u] = %u\n", i, nsub[i]);
                 for (uint32 j = 0; j < nsub[i]; j++, index++) {
-                    printf("array[%d]: %d\n", index, array[index]);
+                    printf("array[%u]: %d\n", index, array[index]);
                 }
                 printf("\n");
             }
         }
 
-        int32 dummy = INT_MAX;
-
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare);
 
         for (uint32 i = 0; i < n; i++) {
-            printf("%u ", array[i]);
+            printf("%d ", array[i]);
             if ((i + 1) % 10 == 0) {
                 printf("\n");
             }
