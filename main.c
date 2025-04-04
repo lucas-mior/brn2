@@ -319,7 +319,7 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            brn2_normalize_names(old, new);
+            /* brn2_normalize_names(old, new); */
 
             if (newlist_map == NULL) {
                 newlist_map = hash_map_create(new->length);

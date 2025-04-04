@@ -174,7 +174,7 @@ sort(FileList *old) {
 
         printf("\ntime elapsed %s:%s\n", __FILE__, "sort");
         printf("%gs = %gus per string.\n\n", total_seconds, micros_per_str);
-        exit(0);
+        /* exit(0); */
     }
     return;
 }
