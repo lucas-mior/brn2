@@ -187,7 +187,7 @@ sort(FileList *old) {
 
 #if TESTING_THIS_FILE
 
-#define N 34
+#define N 200
 #define P 16
 #define MAXI 1000
 
@@ -195,6 +195,9 @@ int32
 compare(const void *a, const void *b) {
     return (*(int32*)a - *(int32*)b);
 }
+
+uint32 possibleN[] = {32, 33, 34, 35, 100, 200};
+#define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int main(void) {
     int32 array[N];
@@ -205,6 +208,21 @@ int main(void) {
     }
     uint32 n = N;
     uint32 p = P;
+    bool isvalidN = false;
+
+    for (uint32 i = 0; i < LENGTH(possibleN); i += 1) {
+        if (possibleN[i] == n) {
+            isvalidN = true;
+            break;
+        }
+    }
+    if (!isvalidN) {
+        error("Invalid N. Must be one of:\n");
+        for (uint32 i = 0; i < LENGTH(possibleN); i += 1) {
+            error("%d ", possibleN[i]);
+        }
+        exit(EXIT_FAILURE);
+    }
 
     for (uint32 i = 0; i < (p - 1); i += 1) {
         nsub[i] = n/p;
@@ -251,8 +269,26 @@ int main(void) {
     }
     printf("\n");
 
-    assert(array[0] == 12);
-    assert(array[n-1] == 940);
+    switch (N) {
+        case 32:
+        case 33:
+        case 34:
+        case 35:
+            assert(array[0] == 12);
+            assert(array[n-1] == 940);
+            break;
+        case 100:
+            assert(array[0] == 12);
+            assert(array[n-1] == 995);
+            break;
+        case 200:
+            assert(array[0] == 7);
+            assert(array[n-1] == 995);
+            break;
+        default:
+            error("Invalid N=%u value.\n", n);
+            exit(EXIT_FAILURE);
+    }
 }
 
 #endif
