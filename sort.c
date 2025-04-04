@@ -121,6 +121,7 @@ void
 sort(FileList *old) {
     struct timespec t0;
     struct timespec t1;
+    int32 nthreads;
     FileName dummy = {
         .name = "\077\077",
         .hash = 0,
@@ -136,8 +137,6 @@ sort(FileList *old) {
     shuffle(old->files, old->length, sizeof(*(old->files)));
     memcpy(copy, old, lsize);
 #endif
-
-    int32 nthreads;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     nthreads = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
@@ -208,6 +207,7 @@ int main(void) {
     nsub[P-1] = nsub[0]+N%P;
     printf("nsub[P-1] = %d\n", nsub[P-1]);
 
+    srand(42);
     for (int32 i = 0; i < N; i++) {
         array[i] = rand() % MAXI;
     }
@@ -243,7 +243,7 @@ int main(void) {
     }
     printf("\n");
 
-    exit(EXIT_SUCCESS);
+    assert(array[N-1] == 940);
 }
 
 #endif
