@@ -87,37 +87,6 @@ shuffle(void *array, size_t n, size_t size) {
 void
 mergesort(void *base, size_t nitems, size_t size,
           int (*compar)(const void *, const void *)) {
-    if (nitems < 2)
-        return;
-
-    size_t mid = nitems / 2;
-    void *left = xmalloc(mid*size);
-    void *right = xmalloc((nitems - mid)*size);
-
-    memcpy(left, base, mid*size);
-    memcpy(right, (char *)base + mid*size, (nitems - mid)*size);
-
-    mergesort(left, mid, size, compar);
-    mergesort(right, nitems - mid, size, compar);
-
-    usize i = 0;
-    usize j = 0;
-    usize k = 0;
-
-    while (i < mid && j < nitems - mid) {
-        if (compar((char *)left + i*size, (char *)right + j*size) <= 0)
-            memcpy((char *)base + (k++)*size, (char *)left + (i++)*size, size);
-        else
-            memcpy((char *)base + (k++)*size, (char *)right + (j++)*size, size);
-    }
-
-    while (i < mid)
-        memcpy((char *)base + (k++)*size, (char *)left + (i++)*size, size);
-    while (j < nitems - mid)
-        memcpy((char *)base + (k++)*size, (char *)right + (j++)*size, size);
-
-    free(left);
-    free(right);
     return;
 }
 
