@@ -485,10 +485,10 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     return total;
 }
 
-uint32 brn2_threads(int (*function)(void *),
-                    FileList *old, FileList *new,
-                    uint32 *hashes, uint32 *numbers,
-                    uint32 map_size) {
+uint32
+brn2_threads(int (*function)(void *),
+             FileList *old, FileList *new,
+             uint32 *hashes, uint32 *numbers, uint32 map_size) {
     thrd_t threads[BRN2_MAX_THREADS];
     Slice slices[BRN2_MAX_THREADS];
     uint32 range;
