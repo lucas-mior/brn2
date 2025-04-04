@@ -116,7 +116,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     return;
 }
 
-#define SORT_CHECK 0
+#define SORT_CHECK 1
 
 void
 sort(FileList *old) {
