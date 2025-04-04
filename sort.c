@@ -21,7 +21,7 @@ shuffle(void *array, usize n, usize size) {
 
     if (n > 1) {
         usize i;
-        for (i = 0; i < n - 1; ++i) {
+        for (i = 0; i < n - 1; i += 1) {
             usize rnd = (usize) rand();
             usize j = i + rnd / (RAND_MAX / (n - i) + 1);
 
