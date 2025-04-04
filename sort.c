@@ -64,7 +64,8 @@ heapify(HeapNode *heap, uint32 n, uint32 i,
 }
 
 static void
-merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
+merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
+                       void *dummy_last,
                        int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
     uint32 nsub[BRN2_MAX_THREADS];
@@ -104,7 +105,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
             memcpy(heap[0].value, &array2[(offsets[arr_idx] + elem_idx)*size], size);
             heap[0].element_index = elem_idx;
         } else {
-            memcpy(heap[0].value, dummy, size);
+            memcpy(heap[0].value, dummy_last, size);
         }
 
         heapify(heap, p, 0, compare);
@@ -124,7 +125,7 @@ sort(FileList *old) {
     struct timespec t0;
     struct timespec t1;
     uint32 p;
-    FileName dummy = {
+    FileName dummy_last = {
         .name = "\077\077",
         .hash = 0,
         .length = 0,
@@ -149,7 +150,7 @@ sort(FileList *old) {
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, p,
                            sizeof(*(old->files)),
-                           &dummy, brn2_compare);
+                           &dummy_last, brn2_compare);
 
 #if SORT_CHECK
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
