@@ -171,8 +171,9 @@ sort(FileList *old) {
 
 #if TESTING_THIS_FILE
 
-#define N 20
-#define P 6
+#define N 10
+#define P 3
+#define MAXI 100
 
 int
 compare(const void *a, const void *b) {
@@ -189,7 +190,7 @@ int main(void) {
     nsub[P-1] = nsub[0]+N%nsub[0];
 
     for (int i = 0; i < N; i++) {
-        array[i] = rand() % 1000;
+        array[i] = rand() % MAXI;
     }
 
     int offset = 0;
