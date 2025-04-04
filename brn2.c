@@ -476,7 +476,7 @@ brn2_timings(char *name, struct timespec t0, struct timespec t1, uint length) {
 
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-#define NORMALIZE_BENCHMARK 1
+#define NORMALIZE_BENCHMARK 0
 #if NORMALIZE_BENCHMARK
     struct timespec t0;
     struct timespec t1;
