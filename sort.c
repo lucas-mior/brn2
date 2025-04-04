@@ -3,6 +3,8 @@
 
 #include "brn2.h"
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static void
 shuffle(void *array, size_t n, size_t size) {
@@ -71,5 +73,104 @@ sort(FileList *old) {
         exit(0);
     }
 }
+
+typedef struct {
+    int value;
+    int array_index;
+    int element_index;
+} HeapNode;
+
+void swap(HeapNode *a, HeapNode *b) {
+    HeapNode temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void heapify(HeapNode *heap, int n, int i,
+             int (*compare)(const void *a, const void *b)) {
+    int smallest = i;
+    int left = 2*i + 1;
+    int right = 2*i + 2;
+
+    if (left < n && compare(&heap[left].value, &heap[smallest].value) < 0)
+        smallest = left;
+    if (right < n && compare(&heap[right].value, &heap[smallest].value) < 0)
+        smallest = right;
+    if (smallest != i) {
+        swap(&heap[i], &heap[smallest]);
+        heapify(heap, n, smallest, compare);
+    }
+}
+
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+void merge_sorted_subarrays(int array[], int n, int nsub,
+                            int (*compare)(const void *a, const void *b)) {
+    int output[n];
+    HeapNode heap[4];
+
+    int indices[4] = {0, 0, 0, 0};
+
+    for (int i = 0; i < 4; i++) {
+        heap[i].value = array[i*nsub];
+        heap[i].array_index = i;
+        heap[i].element_index = 0;
+    }
+
+    for (int i = 4 / 2 - 1; i >= 0; i--) {
+        heapify(heap, 4, i, compare);
+    }
+
+    for (int i = 0; i < n; i++) {
+        output[i] = heap[0].value;
+        int arr_idx = heap[0].array_index;
+        int elem_idx = ++indices[arr_idx];
+
+        if (elem_idx < nsub) {
+            heap[0].value = array[arr_idx*nsub + elem_idx];
+            heap[0].element_index = elem_idx;
+        } else {
+            heap[0].value = __INT_MAX__;
+        }
+
+        heapify(heap, 4, 0, compare);
+    }
+
+    for (int i = 0; i < n; i++) {
+        array[i] = output[i];
+    }
+}
+
+#if TESTING_THIS_FILE
+
+#define SIZE 100
+#define SUB_SIZE (SIZE / 4)
+
+int main(void) {
+    int array[SIZE];
+
+    for (int i = 0; i < SIZE; i++) {
+        array[i] = rand() % 1000;
+    }
+
+    for (int i = 0; i < SIZE; i += SUB_SIZE) {
+        qsort(&array[i], SUB_SIZE, sizeof(int), compare);
+    }
+
+    merge_sorted_subarrays(array, SIZE, SUB_SIZE, compare);
+
+    for (int i = 0; i < SIZE; i++) {
+        printf("%d ", array[i]);
+        if ((i + 1) % 10 == 0) {
+            printf("\n");
+        }
+    }
+
+    return 0;
+}
+
+#endif
 
 #endif
