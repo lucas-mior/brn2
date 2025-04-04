@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     if (available_threads <= 0)
         nthreads = 1; 
     else
-        nthreads = 1;
+        nthreads = MIN((uint32)available_threads, BRN2_MAX_THREADS);
 
     arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
     arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
@@ -169,6 +169,8 @@ int main(int argc, char **argv) {
         error("Unexpected mode: %d\n", mode);
         exit(EXIT_FAILURE);
     }
+    if (!brn2_options_quiet)
+        printf("Normalizing filenames...\n");
     brn2_normalize_names(old, NULL);
 
     for (uint32 i = 0; i < old->length; i += 1) {
