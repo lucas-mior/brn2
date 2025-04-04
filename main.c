@@ -65,6 +65,44 @@ delete_brn2_buffer(void) {
     return;
 }
 
+void
+mergesort(void *base, size_t nitems, size_t size,
+          int (*compar)(const void *, const void *)) {
+    if (nitems < 2) return;  // Base case: already sorted
+
+    size_t mid = nitems / 2;
+    void *left = malloc(mid * size);
+    void *right = malloc((nitems - mid) * size);
+
+    if (!left || !right) {
+        free(left);
+        free(right);
+        return;  // Memory allocation failure
+    }
+
+    memcpy(left, base, mid * size);
+    memcpy(right, (char *)base + mid * size, (nitems - mid) * size);
+
+    mergesort(left, mid, size, compar);
+    mergesort(right, nitems - mid, size, compar);
+
+    size_t i = 0, j = 0, k = 0;
+    while (i < mid && j < nitems - mid) {
+        if (compar((char *)left + i * size, (char *)right + j * size) <= 0)
+            memcpy((char *)base + (k++) * size, (char *)left + (i++) * size, size);
+        else
+            memcpy((char *)base + (k++) * size, (char *)right + (j++) * size, size);
+    }
+
+    while (i < mid)
+        memcpy((char *)base + (k++) * size, (char *)left + (i++) * size, size);
+    while (j < nitems - mid)
+        memcpy((char *)base + (k++) * size, (char *)right + (j++) * size, size);
+
+    free(left);
+    free(right);
+}
+
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
@@ -192,6 +230,7 @@ int main(int argc, char **argv) {
         if (!brn2_options_quiet)
             printf("Sorting filenames...\n");
         brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
+        mergesort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
