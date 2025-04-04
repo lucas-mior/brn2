@@ -147,8 +147,6 @@ sort(FileList *old) {
     if (p == 1)
         return;
 
-    printf("p == %u, n = %u\n", p, old->length);
-
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     merge_sorted_subarrays(old->files, old->length, p,
                            sizeof(*(old->files)),
