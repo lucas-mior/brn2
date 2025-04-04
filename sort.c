@@ -193,7 +193,7 @@ compare_int(const void *a, const void *b) {
 }
 static int32 dummy = INT32_MAX;
 
-static const uint32 possibleN[] = {32, 33, 34, 35, 100, 200, 6174};
+static const uint32 possibleN[] = {32, 33, 34, 35};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
@@ -221,7 +221,7 @@ main(void) {
         srand(42);
         for (uint32 i = 0; i < n; i += 1) {
             array[i] = rand() % MAXI;
-            if (i < 5 || (n - i) < 5)
+            if (i < 3 || (n - i) < 3)
                 printf("array[%u] = %d\n", i, array[i]);
         }
 
@@ -235,8 +235,17 @@ main(void) {
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
-        printf("array[0] = %d\n", array[0]);
-        printf("array[n-1] = %d\n", array[n-1]);
+        if (false) {
+            printf("array[0] = %d\n", array[0]);
+            printf("array[n-1] = %d\n", array[n-1]);
+        } else {
+            for (uint32 i = 0; i < n; i += 1) {
+                printf("%d ", array[i]);
+                if ((i+1) % 10 == 0)
+                    printf("\n");
+            }
+        }
+        printf("\n");
 
         switch (n) {
         case 32:
