@@ -192,8 +192,18 @@ int main(void) {
         array[i] = rand() % 1000;
     }
 
-    for (int i = 0; i < N; i += nsub[i%P]) {
-        qsort(&array[i], nsub[i%P], sizeof(int), compare);
+    int offset = 0;
+    for (int i = 0; i < P; i += 1) {
+        qsort(&array[offset], nsub[i], sizeof(int), compare);
+        offset += nsub[i];
+    }
+
+    int index = 0;
+    for (int i = 0; i < P; i++) {
+        for (int j = 0; j < nsub[i]; j++, index++) {
+            printf("array[%d]: %d\n", index, array[index]);
+        }
+        printf("\n");
     }
 
     int dummy = INT_MAX;
