@@ -158,6 +158,10 @@ uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, HashMap *, uint32 *, uint32 *);
 void brn2_slash_add(FileName *);
 void brn2_free_list(FileList *);
+uint32 brn2_threads(int (*)(void *),
+                    FileList *, FileList *,
+                    uint32 *, uint32 *, uint32);
+int brn2_threads_work_sort(void *arg);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
 void error(char *, ...);
