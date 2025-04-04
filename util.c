@@ -192,7 +192,7 @@ void error(char *format, ...) {
         fprintf(stderr, ".\n");
     }
 
-#if BRN2_DEBUG
+#if 0
     char *notifiers[2] = { "dunstify", "notify-send" };
     switch (fork()) {
     case -1:
