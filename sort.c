@@ -68,7 +68,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
                        int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
     uint32 nsub[BRN2_MAX_THREADS];
-    int32 indices[BRN2_MAX_THREADS] = {0};
+    uint32 indices[BRN2_MAX_THREADS] = {0};
     uint32 offsets[BRN2_MAX_THREADS];
     char *output = xmalloc(size*n);
     char *array2 = array;
@@ -92,7 +92,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     for (int32 i = p / 2 - 1; i >= 0; i--)
-        heapify(heap, p, i, compare);
+        heapify(heap, p, (uint32)i, compare);
 
     for (uint32 i = 0; i < n; i++) {
         uint32 arr_idx = heap[0].array_index;
