@@ -186,12 +186,13 @@ compare_int(const void *a, const void *b) {
     const int32 *bb = b;
     return *aa - *bb;
 }
-static int32 dummy = INT_MAX;
+static int32 dummy = INT32_MAX;
 
 static const uint32 possibleN[] = {32, 33, 34, 35, 100, 200};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
-int main(void) {
+int
+main(void) {
     for (uint32 in = 0; in < LENGTH(possibleN); in += 1) {
         const uint32 n = possibleN[in];
         int32 *array = xmalloc(n*sizeof(*array));
