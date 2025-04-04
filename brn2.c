@@ -49,7 +49,20 @@ int
 brn2_compare(const void *a, const void *b) {
     const FileName *file_a = a;
     const FileName *file_b = b;
+    if (file_b->name == NULL) {
+        return INT_MIN;
+    }
+    if (file_a->name == NULL) {
+        return INT_MAX;
+    }
     return strcmp(file_a->name, file_b->name);
+}
+
+void
+brn2_print_list(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1) {
+        printf("[%u] = %s\n", i, list->files[i].name);
+    }
 }
 
 FileList *

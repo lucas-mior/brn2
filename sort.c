@@ -72,7 +72,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     uint32 indices[BRN2_MAX_THREADS] = {0};
     uint32 offsets[BRN2_MAX_THREADS];
     usize memory_size = size*n;
-    char *output = xmmap(&memory_size);
+    char *output = xmalloc(memory_size);
     char *array2 = array;
 
     for (uint32 i = 0; i < (p - 1); i += 1) {
@@ -112,7 +112,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     }
 
     memcpy(array2, output, n*size);
-    xmunmap(output, memory_size);
+    free(output);
     for (uint32 i = 0; i < p; i += 1)
         free(heap[i].value);
     return;
@@ -124,7 +124,7 @@ static void
 sort(FileList *old) {
     uint32 p;
     FileName dummy_last = {
-        .name = "\077\077",
+        .name = NULL,
         .hash = 0,
         .length = 0,
         .type = 0,
@@ -189,11 +189,12 @@ static int32
 compare_int(const void *a, const void *b) {
     const int32 *aa = a;
     const int32 *bb = b;
+    printf("comparing %d with %d\n", *aa, *bb);
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
 
-static const uint32 possibleN[] = {32, 33, 34, 35, 100, 6174};
+static const uint32 possibleN[] = {32, 33, 34, 35, 100};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
