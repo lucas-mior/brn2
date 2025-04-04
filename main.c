@@ -249,12 +249,22 @@ int main(int argc, char **argv) {
     /*         printf("Sorting filenames...\n"); */
     /*     brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0); */
     /* } */
+    usize lsize = STRUCT_ARRAY_SIZE(old, FileName, old->length);
     shuffle(old->files, old->length, sizeof(*(old->files)));
+    FileList *copy = xmalloc(lsize);
+    memcpy(copy, old, lsize);
+
     mergesort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
-    /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    for (uint32 i = 0; i < old->length; i += 1) {
-        printf("[%u] = %s\n", i, old->files[i].name);
+    qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
+
+    if (memcmp(copy, old, lsize)) {
+        error("copy is different than old!\n");
+    } else {
+        error("copy is EQUAL TO old!\n");
     }
+    /* for (uint32 i = 0; i < old->length; i += 1) { */
+    /*     printf("[%u] = %s\n", i, old->files[i].name); */
+    /* } */
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
 
