@@ -73,10 +73,10 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     char *output = xmalloc(size*n);
     char *array2 = array;
 
-    for (int32 i = 0; i < (p - 1); i += 1) {
+    for (uint32 i = 0; i < (p - 1); i += 1) {
         nsub[i] = n/p;
     }{
-        int32 i = p - 1;
+        uint32 i = p - 1;
         nsub[i] = n/p + (n % p);
     }
 
