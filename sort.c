@@ -110,6 +110,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     memcpy(array2, output, n*size);
+    free(output);
     return;
 }
 
