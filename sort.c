@@ -73,7 +73,8 @@ merge_sorted_subarrays(void *array, int n, int p, usize size, void *dummy,
     for (int i = 0; i < (p - 1); i += 1) {
         nsub[i] = n/p;
     }
-    nsub[p - 1] = nsub[0] + (n % nsub[0]);
+    nsub[p - 1] = nsub[0] + (n % p);
+    printf("nsub[p-1] = %d\n", nsub[p-1]);
 
     int offsets[p];
     offsets[0] = 0;
@@ -203,7 +204,7 @@ int main(void) {
     for (int i = 0; i < (P-1); i += 1) {
         nsub[i] = N/P;
     }
-    nsub[P-1] = nsub[0]+N%nsub[0];
+    nsub[P-1] = nsub[0]+N%P;
     printf("nsub[P-1] = %d\n", nsub[P-1]);
 
     for (int i = 0; i < N; i++) {
@@ -218,7 +219,7 @@ int main(void) {
 
     int index = 0;
     for (int i = 0; i < P; i++) {
-        /* printf("nsub[%d] = %d\n", i, nsub[i]); */
+        printf("nsub[%d] = %d\n", i, nsub[i]);
         for (int j = 0; j < nsub[i]; j++, index++) {
             printf("array[%d]: %d\n", index, array[index]);
         }
