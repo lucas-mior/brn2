@@ -32,7 +32,7 @@ shuffle(void *array, usize n, usize size) {
     }
 }
 
-typedef struct {
+typedef struct HeapNode {
     void *value;
     int32 array_index;
     int32 element_index;
