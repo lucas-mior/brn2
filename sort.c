@@ -243,6 +243,7 @@ int main(void) {
     }
     printf("\n");
 
+    assert(array[0] == 12);
     assert(array[N-1] == 940);
 }
 
