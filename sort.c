@@ -70,7 +70,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     uint32 nsub[BRN2_MAX_THREADS];
     uint32 indices[BRN2_MAX_THREADS] = {0};
     uint32 offsets[BRN2_MAX_THREADS];
-    char *output = xmalloc(size*n);
+    char *output = xmmap(size*n);
     char *array2 = array;
 
     for (uint32 i = 0; i < (p - 1); i += 1) {
@@ -110,7 +110,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size, void *dummy,
     }
 
     memcpy(array2, output, n*size);
-    free(output);
+    xmunmap(output, n*size);
     return;
 }
 
