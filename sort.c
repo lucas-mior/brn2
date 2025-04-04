@@ -6,6 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#pragma push_macro("TESTING_THIS_FILE")
+#define TESTING_THIS_FILE 0
+
+#include "util.c"
+
+#pragma pop_macro("TESTING_THIS_FILE")
+
 static void
 shuffle(void *array, size_t n, size_t size) {
     char tmp[size];
@@ -25,11 +32,11 @@ shuffle(void *array, size_t n, size_t size) {
     }
 }
 
-void
-mergesort(void *base, size_t nitems, size_t size,
-          int (*compar)(const void *, const void *)) {
-    return;
-}
+/* void */
+/* mergesort(void *base, size_t nitems, size_t size, */
+/*           int (*compar)(const void *, const void *)) { */
+/*     return; */
+/* } */
 
 void
 sort(FileList *old) {
@@ -47,7 +54,7 @@ sort(FileList *old) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 
-    mergesort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
+    /* mergesort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare); */
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
 
     if (memcmp(copy, old, lsize)) {
@@ -75,7 +82,7 @@ sort(FileList *old) {
 }
 
 typedef struct {
-    int value;
+    void *value;
     int array_index;
     int element_index;
 } HeapNode;
@@ -92,9 +99,9 @@ void heapify(HeapNode *heap, int n, int i,
     int left = 2*i + 1;
     int right = 2*i + 2;
 
-    if (left < n && compare(&heap[left].value, &heap[smallest].value) < 0)
+    if (left < n && compare(heap[left].value, heap[smallest].value) < 0)
         smallest = left;
-    if (right < n && compare(&heap[right].value, &heap[smallest].value) < 0)
+    if (right < n && compare(heap[right].value, heap[smallest].value) < 0)
         smallest = right;
     if (smallest != i) {
         swap(&heap[i], &heap[smallest]);
@@ -106,15 +113,17 @@ int compare(const void *a, const void *b) {
     return (*(int*)a - *(int*)b);
 }
 
-void merge_sorted_subarrays(int array[], int n, int nsub,
+void merge_sorted_subarrays(void *array, int n, int nsub, usize size, void *dummy,
                             int (*compare)(const void *a, const void *b)) {
-    int output[n];
+    char *output = xmalloc(size*n);
     HeapNode heap[4];
+    char *array2 = array;
 
     int indices[4] = {0, 0, 0, 0};
 
     for (int i = 0; i < 4; i++) {
-        heap[i].value = array[i*nsub];
+        heap[i].value = xmalloc(size);
+        memcpy(heap[i].value, &array2[i*nsub*size], size);
         heap[i].array_index = i;
         heap[i].element_index = 0;
     }
@@ -124,28 +133,31 @@ void merge_sorted_subarrays(int array[], int n, int nsub,
     }
 
     for (int i = 0; i < n; i++) {
-        output[i] = heap[0].value;
+        memcpy(&output[i*size], heap[0].value, size);
         int arr_idx = heap[0].array_index;
         int elem_idx = ++indices[arr_idx];
 
         if (elem_idx < nsub) {
-            heap[0].value = array[arr_idx*nsub + elem_idx];
+            memcpy(heap[0].value, &array2[(arr_idx*nsub + elem_idx)*size], size);
             heap[0].element_index = elem_idx;
         } else {
-            heap[0].value = __INT_MAX__;
+            memcpy(heap[0].value, dummy, size);
         }
 
         heapify(heap, 4, 0, compare);
     }
 
-    for (int i = 0; i < n; i++) {
-        array[i] = output[i];
-    }
+    memcpy(array2, output, n*size);
+    return;
 }
+
+#ifndef TESTING_THIS_FILE
+#define TESTING_THIS_FILE 0
+#endif
 
 #if TESTING_THIS_FILE
 
-#define SIZE 100
+#define SIZE 20
 #define SUB_SIZE (SIZE / 4)
 
 int main(void) {
@@ -159,7 +171,9 @@ int main(void) {
         qsort(&array[i], SUB_SIZE, sizeof(int), compare);
     }
 
-    merge_sorted_subarrays(array, SIZE, SUB_SIZE, compare);
+    int dummy = INT_MAX;
+
+    merge_sorted_subarrays(array, SIZE, SUB_SIZE, sizeof(int), &dummy, compare);
 
     for (int i = 0; i < SIZE; i++) {
         printf("%d ", array[i]);
