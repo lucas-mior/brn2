@@ -106,7 +106,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 p_index = heap[0].p_index;
-        uint32 a_index = ++indices[p_index];
+        uint32 a_index = (indices[p_index] += 1);
         memcpy(&output[i*size], heap[0].value, size);
 
         if (a_index < nsub[p_index]) {
