@@ -46,19 +46,19 @@ swap(HeapNode *a, HeapNode *b) {
 }
 
 static void
-heapify(HeapNode *heap, uint32 n, uint32 i,
+heapify(HeapNode *heap, uint32 p, uint32 i,
         int32 (*compare)(const void *a, const void *b)) {
     uint32 smallest = i;
     uint32 left = 2*i + 1;
     uint32 right = 2*i + 2;
 
-    if ((left < n) && compare(heap[left].value, heap[smallest].value) < 0)
+    if ((left < p) && compare(heap[left].value, heap[smallest].value) < 0)
         smallest = left;
-    if ((right < n) && compare(heap[right].value, heap[smallest].value) < 0)
+    if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
         smallest = right;
     if (smallest != i) {
         swap(&heap[i], &heap[smallest]);
-        heapify(heap, n, smallest, compare);
+        heapify(heap, p, smallest, compare);
     }
     return;
 }
