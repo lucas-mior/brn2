@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef TESTING_THIS_FILE
-#define TESTING_THIS_FILE 0
+#if defined(__GNUC__) || defined(__clang__)
+  #ifndef TESTING_THIS_FILE
+    #define TESTING_THIS_FILE 0
+  #endif
 #endif
 
 #pragma push_macro("TESTING_THIS_FILE")
@@ -129,6 +131,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
 
 #define SORT_BENCHMARK 1
 
+#if !TESTING_THIS_FILE
 static void
 sort(FileList *old) {
     uint32 p;
@@ -184,6 +187,7 @@ sort(FileList *old) {
 #endif
     return;
 }
+#endif
 
 #if TESTING_THIS_FILE
 
