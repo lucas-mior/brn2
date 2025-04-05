@@ -122,11 +122,11 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 k = heap[0].p_index;
-        uint32 a_index = (indices[k] += 1);
+        uint32 i_sub = (indices[k] += 1);
         memcpy(&output[i*size], heap[0].value, size);
 
-        if (a_index < nsub[k]) {
-            memcpy(heap[0].value, &array2[(offsets[k] + a_index)*size], size);
+        if (i_sub < nsub[k]) {
+            memcpy(heap[0].value, &array2[(offsets[k] + i_sub)*size], size);
         } else {
             memcpy(heap[0].value, dummy_last, size);
         }
