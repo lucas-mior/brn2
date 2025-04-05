@@ -247,18 +247,18 @@ main(void) {
                 offset += nsub[i];
             }
         }
-        printf("compare_count0 = %d @ %u = %d\n",
-                compare_count, n, compare_count/n);
-        compare_count = 0;
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
-        printf("compare_count = %d @ %u = %d\n",
-                compare_count, n, compare_count/n);
-
+        int digits = 1;
+        int n2 = n;
+        while (n2 > 10) {
+            n2 /= 10;
+            digits += 1;
+        }
         for (uint32 i = 0; i < n; i += 1) {
             if (i % 10 == 0)
-                printf("\n[%04u] ", i);
+                printf("\n[%.*u] ", digits, i);
             printf("%d ", array[i]);
 
             if (i < (n-1)) {
