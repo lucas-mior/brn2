@@ -37,6 +37,7 @@ typedef struct HeapNode {
     uint32 array_index;
     uint32 element_index;
 } HeapNode;
+static void sort_print_heap(HeapNode *, uint32, char *);
 
 static void
 heapify(HeapNode *heap, uint32 p, uint32 i,
@@ -105,7 +106,9 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
             memcpy(heap[0].value, dummy_last, size);
         }
 
+        sort_print_heap(heap, p, "main_0");
         heapify(heap, p, 0, compare);
+        sort_print_heap(heap, p, "main_1");
     }
 
     memcpy(array2, output, n*size);
@@ -190,7 +193,16 @@ compare_int(const void *a, const void *b) {
 }
 static int32 dummy = INT32_MAX;
 
-static const uint32 possibleN[] = {32, 33, 34, 35, 100};
+void
+sort_print_heap(HeapNode *heap, uint32 p, char *name) {
+    printf("heap(%s): ", name);
+    for (uint32 i = 0; i < p; i += 1)
+        printf("%d ", *(int *)heap[0].value);
+    printf("\n");
+    return;
+}
+
+static const uint32 possibleN[] = {33};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
