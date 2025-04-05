@@ -27,19 +27,19 @@ static void
 shuffle(void *array, usize n, usize size) {
     char *tmp = xmalloc(size);
     char *arr = array;
-    usize stride = size*sizeof(char);
 
     if (n > 1) {
-        usize i;
-        for (i = 0; i < n - 1; i += 1) {
+        for (usize i = 0; i < n - 1; i += 1) {
             usize rnd = (usize) rand();
             usize j = i + rnd / (RAND_MAX / (n - i) + 1);
 
-            memcpy(tmp, arr + j*stride, size);
-            memcpy(arr + j*stride, arr + i*stride, size);
-            memcpy(arr + i*stride, tmp, size);
+            memcpy(tmp, arr + j*size, size);
+            memcpy(arr + j*size, arr + i*size, size);
+            memcpy(arr + i*size, tmp, size);
         }
     }
+
+    free(tmp);
 }
 
 #if TESTING_THIS_FILE
