@@ -58,7 +58,6 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
             heapify(heap, p, smallest, compare);
         }
     }
-    sort_print_heap(heap, p, i, "fy");
     return;
 }
 
@@ -92,7 +91,6 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         heap[i].element_index = 0;
     }
 
-    sort_print_heap(heap, p, UINT32_MAX, "00");
     for (int32 i = p / 2 - 1; i >= 0; i -= 1) {
         heapify(heap, p, (uint32)i, compare);
     }
@@ -109,9 +107,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
             memcpy(heap[0].value, dummy_last, size);
         }
 
-        /* sort_print_heap(heap, p, "1"); */
         heapify(heap, p, 0, compare);
-        /* sort_print_heap(heap, p, "2"); */
     }
 
     memcpy(array2, output, n*size);
@@ -188,11 +184,12 @@ sort(FileList *old) {
 #define P 16u
 #define MAXI 10000
 
+static int32 compare_count = 0;
 static int32
 compare_int(const void *a, const void *b) {
     const int32 *aa = a;
     const int32 *bb = b;
-    printf("%s %d <> %d\n", __func__, *aa, *bb);
+    compare_count += 1;
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
@@ -211,7 +208,7 @@ sort_print_heap(HeapNode *heap, uint32 p, uint32 a, char *name) {
     return;
 }
 
-static const uint32 possibleN[] = {33};
+static const uint32 possibleN[] = {100000};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
@@ -250,13 +247,19 @@ main(void) {
                 offset += nsub[i];
             }
         }
+        printf("compare_count0 = %d @ %u = %d\n",
+                compare_count, n, compare_count/n);
+        compare_count = 0;
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
+        printf("compare_count = %d @ %u = %d\n",
+                compare_count, n, compare_count/n);
+
         for (uint32 i = 0; i < n; i += 1) {
+            if (i % 10 == 0)
+                printf("\n[%04u] ", i);
             printf("%d ", array[i]);
-            if ((i+1) % 10 == 0)
-                printf("\n");
 
             if (i < (n-1)) {
                 assert(array[i] <= array[i + 1]);
