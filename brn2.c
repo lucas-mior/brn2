@@ -419,7 +419,7 @@ brn2_threads_work_normalization(void *arg) {
                 brn2_slash_add(file);
         }
     }
-    thrd_exit(0);
+    return 0;
 }
 
 void
@@ -437,7 +437,7 @@ brn2_threads_work_sort(void *arg) {
     Slice *slice = arg;
     FileName *files = &(slice->old_list->files[slice->start]);
     qsort(files, slice->end - slice->start, sizeof (*files), brn2_compare);
-    thrd_exit(0);
+    return 0;
 }
 
 int
@@ -450,7 +450,7 @@ brn2_threads_work_hashes(void *arg) {
         newfile->hash = hash_function(newfile->name, newfile->length);
         slice->hashes[i] = newfile->hash % slice->map_capacity;
     }
-    thrd_exit(0);
+    return 0;
 }
 
 int brn2_threads_work_changes(void *arg) {
@@ -465,7 +465,7 @@ int brn2_threads_work_changes(void *arg) {
         }
         *(slice->partial) += 1;
     }
-    thrd_exit(0);
+    return 0;
 }
 
 void
