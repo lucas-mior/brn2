@@ -424,6 +424,7 @@ print_timings(char *name, struct timespec t0, struct timespec t1) {
     printf("\ntime elapsed %s:%s\n", __FILE__, name);
     printf("%gs = %gus per string = %gns per byte.\n\n",
            total_seconds, micros_per_str, nanos_per_byte);
+    return;
 }
 
 // flags: -lm
