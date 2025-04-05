@@ -49,9 +49,6 @@ int
 brn2_compare(const void *a, const void *b) {
     const FileName *file_a = a;
     const FileName *file_b = b;
-    if (!memcmp(file_a, &dummy_last, sizeof(FileName))) {
-        dummy_comparisons += 1;
-    }
     return strcmp(file_a->name, file_b->name);
 }
 

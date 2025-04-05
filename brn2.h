@@ -130,18 +130,6 @@ typedef struct FileName {
     uint8 unused;
 } FileName;
 
-FileName dummy_last = {
-    .name = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-            "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-            "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
-    .hash = 0,
-    .length = 0,
-    .type = 0,
-    .unused = 0,
-};
-
-extern int dummy_comparisons;
-
 typedef struct FileList {
     Arena *arena;
     uint32 length;
