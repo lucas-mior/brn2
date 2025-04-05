@@ -20,6 +20,7 @@
 typedef struct HeapNode {
     void *value;
     uint32 p_index;
+    uint32 unused;
 } HeapNode;
 
 static void
