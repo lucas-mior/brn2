@@ -52,10 +52,12 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
     uint32 left = 2*i + 1;
     uint32 right = 2*i + 2;
 
-    if ((left < p) && compare(heap[left].value, heap[smallest].value) < 0)
-        smallest = left;
-    if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
-        smallest = right;
+    if (left < p) {
+        if (compare(heap[left].value, heap[smallest].value) < 0)
+            smallest = left;
+        if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
+            smallest = right;
+    }
     if (smallest != i) {
         swap(&heap[i], &heap[smallest]);
         heapify(heap, p, smallest, compare);
