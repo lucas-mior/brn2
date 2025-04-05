@@ -33,8 +33,6 @@ bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
 uint32 nthreads;
 
-int dummy_comparisons;
-
 Arena *arena_old;
 Arena *arena_new;
 
@@ -196,10 +194,6 @@ int main(int argc, char **argv) {
 
     if (brn2_options_sort)
         sort(old);
-
-    printf("dummy_comparisons: %d @ %d = %d\n",
-            dummy_comparisons, old->length, dummy_comparisons / old->length);
-    exit(0);
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
