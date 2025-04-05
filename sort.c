@@ -24,7 +24,7 @@ typedef struct HeapNode {
 } HeapNode;
 
 static void
-shuffle(void *array, usize n, usize size) {
+sort_shuffle(void *array, usize n, usize size) {
     char *tmp = xmalloc(size);
     char *arr = array;
 
@@ -41,10 +41,6 @@ shuffle(void *array, usize n, usize size) {
 
     free(tmp);
 }
-
-#if TESTING_THIS_FILE
-static void sort_print_heap(HeapNode *, uint32, uint32, char *);
-#endif
 
 static void
 heapify(HeapNode *heap, uint32 p, uint32 i,
@@ -149,7 +145,7 @@ sort(FileList *old) {
     usize list_size = STRUCT_ARRAY_SIZE(old, FileName, old->length);
     FileList *copy = xmalloc(list_size);
 
-    shuffle(old->files, old->length, sizeof(*(old->files)));
+    sort_shuffle(old->files, old->length, sizeof(*(old->files)));
     memcpy(copy, old, list_size);
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
@@ -202,20 +198,6 @@ compare_int(const void *a, const void *b) {
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
-
-void
-sort_print_heap(HeapNode *heap, uint32 p, uint32 a, char *name) {
-    printf("heap(%s): ", name);
-    for (uint32 i = 0; i < p; i += 1) {
-        if (a == i)
-            printf("<");
-        printf("%d ", *(int *)heap[i].value);
-        if (a == i)
-            printf(">");
-    }
-    printf("\n");
-    return;
-}
 
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
