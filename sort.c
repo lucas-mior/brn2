@@ -55,7 +55,7 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
         uint32 right = 2*i + 2;
 
         if (left >= p)
-            return;
+            break;
 
         if (compare(heap[left].value, heap[smallest].value) < 0)
             smallest = left;
@@ -63,7 +63,7 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
             smallest = right;
 
         if (smallest == i)
-            return;
+            break;
 
         {
             HeapNode temp = heap[i];
