@@ -20,7 +20,6 @@
 typedef struct HeapNode {
     void *value;
     uint32 p_index;
-    uint32 element_index;
 } HeapNode;
 
 static void
@@ -97,7 +96,6 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         heap[p_index].value = xmalloc(size);
         memcpy(heap[p_index].value, &array2[offsets[p_index]*size], size);
         heap[p_index].p_index = p_index;
-        heap[p_index].element_index = 0;
     }
 
     for (int32 p_index = p / 2 - 1; p_index >= 0; p_index -= 1)
@@ -110,7 +108,6 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
 
         if (a_index < nsub[p_index]) {
             memcpy(heap[0].value, &array2[(offsets[p_index] + a_index)*size], size);
-            heap[0].element_index = a_index;
         } else {
             memcpy(heap[0].value, dummy_last, size);
         }
