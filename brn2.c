@@ -46,7 +46,7 @@ static int brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 
-int
+BRN2_INLINE int
 brn2_compare(const void *a, const void *b) {
     const FileName *file_a = a;
     const FileName *file_b = b;
