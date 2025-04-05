@@ -564,6 +564,8 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
         if (newfile.length >= PATH_MAX) {
             error("Filenames must be shorter than %u bytes.\n", PATH_MAX);
             failed = true;
+            if (brn2_options_fatal)
+                exit(EXIT_FAILURE);
         }
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
