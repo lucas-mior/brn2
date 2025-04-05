@@ -183,6 +183,7 @@ sort(FileList *old) {
 
 #define P 16u
 #define MAXI 10000
+static const uint32 possibleN[] = {100};
 
 static int32 compare_count = 0;
 static int32
@@ -208,7 +209,6 @@ sort_print_heap(HeapNode *heap, uint32 p, uint32 a, char *name) {
     return;
 }
 
-static const uint32 possibleN[] = {100000};
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 int
@@ -250,16 +250,22 @@ main(void) {
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
-        int digits = 1;
+        int digits_i = 1;
         int n2 = n;
         while (n2 > 10) {
             n2 /= 10;
-            digits += 1;
+            digits_i += 1;
+        }
+        int digits_a = 1;
+        int max = MAXI;
+        while (max > 10) {
+            max /= 10;
+            digits_a += 1;
         }
         for (uint32 i = 0; i < n; i += 1) {
             if (i % 10 == 0)
-                printf("\n[%.*u] ", digits, i);
-            printf("%d ", array[i]);
+                printf("\n[%.*u] ", digits_i, i);
+            printf("%.*d ", digits_a, array[i]);
 
             if (i < (n-1)) {
                 assert(array[i] <= array[i + 1]);
