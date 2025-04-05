@@ -129,7 +129,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     return;
 }
 
-#define SORT_BENCHMARK 1
+#define SORT_BENCHMARK 0
 
 #if !TESTING_THIS_FILE
 static void
