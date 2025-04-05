@@ -37,7 +37,7 @@ typedef struct HeapNode {
     uint32 array_index;
     uint32 element_index;
 } HeapNode;
-static void sort_print_heap(HeapNode *, uint32, char *);
+static void sort_print_heap(HeapNode *, uint32, uint32, char *);
 
 static void
 heapify(HeapNode *heap, uint32 p, uint32 i,
@@ -58,6 +58,7 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
             heapify(heap, p, smallest, compare);
         }
     }
+    sort_print_heap(heap, p, i, "fy");
     return;
 }
 
@@ -91,8 +92,10 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         heap[i].element_index = 0;
     }
 
-    for (int32 i = p / 2 - 1; i >= 0; i -= 1)
+    sort_print_heap(heap, p, UINT32_MAX, "00");
+    for (int32 i = p / 2 - 1; i >= 0; i -= 1) {
         heapify(heap, p, (uint32)i, compare);
+    }
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 arr_idx = heap[0].array_index;
@@ -106,9 +109,9 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
             memcpy(heap[0].value, dummy_last, size);
         }
 
-        sort_print_heap(heap, p, "main_0");
+        /* sort_print_heap(heap, p, "1"); */
         heapify(heap, p, 0, compare);
-        sort_print_heap(heap, p, "main_1");
+        /* sort_print_heap(heap, p, "2"); */
     }
 
     memcpy(array2, output, n*size);
@@ -189,15 +192,21 @@ static int32
 compare_int(const void *a, const void *b) {
     const int32 *aa = a;
     const int32 *bb = b;
+    printf("%s %d <> %d\n", __func__, *aa, *bb);
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
 
 void
-sort_print_heap(HeapNode *heap, uint32 p, char *name) {
+sort_print_heap(HeapNode *heap, uint32 p, uint32 a, char *name) {
     printf("heap(%s): ", name);
-    for (uint32 i = 0; i < p; i += 1)
-        printf("%d ", *(int *)heap[0].value);
+    for (uint32 i = 0; i < p; i += 1) {
+        if (a == i)
+            printf("<");
+        printf("%d ", *(int *)heap[i].value);
+        if (a == i)
+            printf(">");
+    }
     printf("\n");
     return;
 }
