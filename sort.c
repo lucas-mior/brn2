@@ -64,10 +64,12 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
         if (smallest == i)
             return;
 
-        HeapNode temp = heap[i];
-        heap[i] = heap[smallest];
-        heap[smallest] = temp;
-        i = smallest;
+        {
+            HeapNode temp = heap[i];
+            heap[i] = heap[smallest];
+            heap[smallest] = temp;
+            i = smallest;
+        }
     }
     return;
 }
