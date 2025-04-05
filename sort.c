@@ -158,7 +158,7 @@ sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
     if (memcmp(copy, old, list_size)) {
-        error("copy is different than old!\n");
+        error("Error in sorting.\n");
         for (uint32 i = 0; i < old->length; i += 1) {
             char *name1 = old->files[i].name;
             char *name2 = copy->files[i].name;
@@ -167,7 +167,7 @@ sort(FileList *old) {
             }
         }
     } else {
-        error("copy is EQUAL TO old!\n");
+        error("Sorting successful.\n");
     }
     free(copy);
     brn2_timings("sorting", t0, t1, old->length);
