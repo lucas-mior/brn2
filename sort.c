@@ -43,7 +43,7 @@ sort_shuffle(void *array, usize n, usize size) {
 }
 
 static void
-heapify(HeapNode *heap, uint32 p, uint32 i,
+sort_heapify(HeapNode *heap, uint32 p, uint32 i,
         int32 (*compare)(const void *a, const void *b)) {
     while (true) {
         uint32 smallest = i;
@@ -101,7 +101,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     }
 
     for (int32 p_index = p / 2 - 1; p_index >= 0; p_index -= 1)
-        heapify(heap, p, (uint32)p_index, compare);
+        sort_heapify(heap, p, (uint32)p_index, compare);
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 p_index = heap[0].p_index;
@@ -113,7 +113,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         } else {
             memcpy(heap[0].value, dummy_last, size);
         }
-        heapify(heap, p, 0, compare);
+        sort_heapify(heap, p, 0, compare);
     }
 
     memcpy(array2, output, n*size);
