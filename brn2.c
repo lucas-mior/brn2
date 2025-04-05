@@ -44,6 +44,7 @@ static int brn2_threads_work_hashes(void *);
 static int brn2_threads_work_normalization(void *);
 static int brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
+static void brn2_slash_add(FileName *);
 
 int
 brn2_compare(const void *a, const void *b) {
