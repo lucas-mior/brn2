@@ -6,10 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(__GNUC__) || defined(__clang__)
-  #ifndef TESTING_THIS_FILE
-    #define TESTING_THIS_FILE 0
-  #endif
+#ifndef TESTING_THIS_FILE
+  #define TESTING_THIS_FILE 0
 #endif
 
 #pragma push_macro("TESTING_THIS_FILE")
