@@ -58,6 +58,7 @@ brn2_print_list(FileList *list) {
     for (uint32 i = 0; i < list->length; i += 1) {
         printf("[%u] = %s\n", i, list->files[i].name);
     }
+    return;
 }
 
 FileList *
