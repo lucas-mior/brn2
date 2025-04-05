@@ -4,7 +4,7 @@
 
 dir="$(realpath "$(dirname "$0")")"
 testing () {
-    for src in sort.c; do
+    for src in *.c; do
         [ "$src" = "$main" ] && continue
         printf "Testing $src...\n"
 
