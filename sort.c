@@ -256,28 +256,32 @@ main(void) {
 
         merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
 
-        int digits_i = 1;
-        int n2 = n;
-        while (n2 > 10) {
-            n2 /= 10;
-            digits_i += 1;
-        }
-        int digits_a = 1;
-        int max = MAXI;
-        while (max > 10) {
-            max /= 10;
-            digits_a += 1;
-        }
-        for (uint32 i = 0; i < n; i += 1) {
-            if (i % 10 == 0)
-                printf("\n[%.*u] ", digits_i, i);
-            printf("%.*d ", digits_a, array[i]);
+        {
+            uint32 digits_i = 1;
+            uint32 n2 = n;
+            int digits_a = 1;
+            int max = MAXI;
 
-            if (i < (n-1)) {
-                assert(array[i] <= array[i + 1]);
+            while (n2 > 10) {
+                n2 /= 10;
+                digits_i += 1;
             }
+            while (max > 10) {
+                max /= 10;
+                digits_a += 1;
+            }
+
+            for (uint32 i = 0; i < n; i += 1) {
+                if (i % 10 == 0)
+                    printf("\n[%.*u] ", digits_i, i);
+                printf("%.*d ", digits_a, array[i]);
+
+                if (i < (n-1)) {
+                    assert(array[i] <= array[i + 1]);
+                }
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 }
 
