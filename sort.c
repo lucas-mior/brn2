@@ -127,7 +127,7 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     return;
 }
 
-#define SORT_BENCHMARK 0
+#define SORT_BENCHMARK 1
 
 #if !TESTING_THIS_FILE
 static void
@@ -154,7 +154,8 @@ sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
+    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0, 16);
+    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0, 8);
 
     if (p == 1)
         return;
