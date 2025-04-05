@@ -82,22 +82,22 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
     char *output = xmalloc(memory_size);
     char *array2 = array;
 
-    for (uint32 i = 0; i < (p - 1); i += 1) {
-        nsub[i] = n/p;
+    for (uint32 p_index = 0; p_index < (p - 1); p_index += 1) {
+        nsub[p_index] = n/p;
     }{
-        uint32 i = p - 1;
-        nsub[i] = n/p + (n % p);
+        uint32 p_index = p - 1;
+        nsub[p_index] = n/p + (n % p);
     }
 
     offsets[0] = 0;
-    for (uint32 i = 1; i < p; i += 1)
-        offsets[i] = offsets[i - 1] + nsub[i - 1];
+    for (uint32 p_index = 1; p_index < p; p_index += 1)
+        offsets[p_index] = offsets[p_index - 1] + nsub[p_index - 1];
 
-    for (uint32 i = 0; i < p; i += 1) {
-        heap[i].value = xmalloc(size);
-        memcpy(heap[i].value, &array2[offsets[i]*size], size);
-        heap[i].p_index = i;
-        heap[i].element_index = 0;
+    for (uint32 p_index = 0; p_index < p; p_index += 1) {
+        heap[p_index].value = xmalloc(size);
+        memcpy(heap[p_index].value, &array2[offsets[p_index]*size], size);
+        heap[p_index].p_index = p_index;
+        heap[p_index].element_index = 0;
     }
 
     for (int32 i = p / 2 - 1; i >= 0; i -= 1)
