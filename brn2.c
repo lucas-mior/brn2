@@ -483,14 +483,14 @@ brn2_timings(char *name, struct timespec t0, struct timespec t1, uint length) {
 
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-    brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, 0, 16);
+    brn2_threads(brn2_threads_work_normalization, old, new, NULL, NULL, 0);
     return;
 }
 
 uint32 *
 brn2_create_hashes(FileList *list, uint32 *hashes, uint32 map_capacity) {
     brn2_threads(brn2_threads_work_hashes,
-                 list, NULL, hashes, NULL, map_capacity, 16);
+                 list, NULL, hashes, NULL, map_capacity);
     return hashes;
 }
 
@@ -498,7 +498,7 @@ uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
     uint32 numbers[BRN2_MAX_THREADS] = {0};
-    brn2_threads(brn2_threads_work_changes, old, new, NULL, numbers, 0, 16);
+    brn2_threads(brn2_threads_work_changes, old, new, NULL, numbers, 0);
 
     for (uint32 i = 0; i < BRN2_MAX_THREADS; i += 1)
         total += numbers[i];
@@ -508,7 +508,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 uint32
 brn2_threads(int (*function)(void *),
              FileList *old, FileList *new,
-             uint32 *hashes, uint32 *numbers, uint32 map_size, uint32 p) {
+             uint32 *hashes, uint32 *numbers, uint32 map_size) {
     thrd_t threads[BRN2_MAX_THREADS];
     Slice slices[BRN2_MAX_THREADS];
     uint32 range;
@@ -524,9 +524,6 @@ brn2_threads(int (*function)(void *),
         nthreads = 1;
     if (length <= BRN2_MIN_PARALLEL)
         nthreads = 1;
-
-    if (nthreads != 1)
-        nthreads = p;
 
     range = length / nthreads;
 
