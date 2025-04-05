@@ -72,7 +72,7 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
 }
 
 static void
-merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
+sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
                        void *dummy_last,
                        int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
@@ -156,7 +156,7 @@ sort(FileList *old) {
         return;
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    merge_sorted_subarrays(old->files, old->length, p,
+    sort_merge_subsorted(old->files, old->length, p,
                            sizeof(*(old->files)),
                            &dummy_last, brn2_compare);
 
@@ -238,7 +238,7 @@ main(void) {
             }
         }
 
-        merge_sorted_subarrays(array, n, p, sizeof(int32), &dummy, compare_int);
+        sort_merge_subsorted(array, n, p, sizeof(int32), &dummy, compare_int);
 
         {
             uint32 digits_i = 1;
