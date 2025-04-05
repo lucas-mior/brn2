@@ -48,23 +48,26 @@ static void sort_print_heap(HeapNode *, uint32, uint32, char *);
 static void
 heapify(HeapNode *heap, uint32 p, uint32 i,
         int32 (*compare)(const void *a, const void *b)) {
-    uint32 smallest = i;
-    uint32 left = 2*i + 1;
-    uint32 right = 2*i + 2;
+    while (true) {
+        uint32 smallest = i;
+        uint32 left = 2*i + 1;
+        uint32 right = 2*i + 2;
 
-    if (left >= p)
-        return;
+        if (left >= p)
+            return;
 
-    if (compare(heap[left].value, heap[smallest].value) < 0)
-        smallest = left;
-    if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
-        smallest = right;
+        if (compare(heap[left].value, heap[smallest].value) < 0)
+            smallest = left;
+        if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
+            smallest = right;
 
-    if (smallest != i) {
+        if (smallest == i)
+            return;
+
         HeapNode temp = heap[i];
         heap[i] = heap[smallest];
         heap[smallest] = temp;
-        heapify(heap, p, smallest, compare);
+        i = smallest;
     }
     return;
 }
@@ -111,7 +114,6 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         } else {
             memcpy(heap[0].value, dummy_last, size);
         }
-
         heapify(heap, p, 0, compare);
     }
 
