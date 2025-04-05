@@ -13,6 +13,8 @@
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
+#define SORT_BENCHMARK 1
+
 static void
 shuffle(void *array, usize n, usize size) {
     char *tmp = xmalloc(size);
@@ -111,14 +113,21 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
         heapify(heap, p, 0, compare);
     }
 
+#if SORT_BENCHMARK
+    struct timespec t0;
+    struct timespec t1;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+#endif
     memcpy(array2, output, n*size);
     free(output);
+#if SORT_BENCHMARK
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    brn2_timings("memcpy array2, output", t0, t1, n);
+#endif
     for (uint32 i = 0; i < p; i += 1)
         free(heap[i].value);
     return;
 }
-
-#define SORT_BENCHMARK 1
 
 static void
 sort(FileList *old) {
