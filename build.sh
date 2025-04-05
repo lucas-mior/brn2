@@ -142,7 +142,7 @@ case "$target" in
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         ;;
     "assembly")
-        $CC $CPPFLAGS $CFLAGS -o ${program}.S "$main" $LDFLAGS
+        $CC $CPPFLAGS $CFLAGS -o ${program}_$CC.S "$main" $LDFLAGS
         ;;
     "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check")
         set -x
