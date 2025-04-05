@@ -147,7 +147,7 @@ extern uint32 nthreads;
 extern Arena *arena_old;
 extern Arena *arena_new;
 
-int brn2_compare(const void *, const void *);
+// int brn2_compare(const void *, const void *);
 FileList *brn2_list_from_dir(char *);
 FileList *brn2_list_from_dir_recurse(char *);
 FileList *brn2_list_from_lines(char *, bool);
