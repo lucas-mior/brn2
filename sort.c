@@ -93,7 +93,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
                        void *dummy_last,
                        int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
-    uint32 nsub[BRN2_MAX_THREADS];
+    uint32 n_sub[BRN2_MAX_THREADS];
     uint32 indices[BRN2_MAX_THREADS] = {0};
     uint32 offsets[BRN2_MAX_THREADS];
     usize memory_size = size*n;
@@ -101,15 +101,15 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     char *array2 = array;
 
     for (uint32 k = 0; k < (p - 1); k += 1) {
-        nsub[k] = n/p;
+        n_sub[k] = n/p;
     }{
         uint32 k = p - 1;
-        nsub[k] = n/p + (n % p);
+        n_sub[k] = n/p + (n % p);
     }
 
     offsets[0] = 0;
     for (uint32 k = 1; k < p; k += 1)
-        offsets[k] = offsets[k - 1] + nsub[k - 1];
+        offsets[k] = offsets[k - 1] + n_sub[k - 1];
 
     for (uint32 k = 0; k < p; k += 1) {
         heap[k].value = xmalloc(size);
@@ -125,7 +125,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
         uint32 i_sub = (indices[k] += 1);
         memcpy(&output[i*size], heap[0].value, size);
 
-        if (i_sub < nsub[k]) {
+        if (i_sub < n_sub[k]) {
             memcpy(heap[0].value, &array2[(offsets[k] + i_sub)*size], size);
         } else {
             memcpy(heap[0].value, dummy_last, size);
@@ -191,7 +191,7 @@ main(void) {
     for (uint32 in = 0; in < LENGTH(possibleN); in += 1) {
         const uint32 n = possibleN[in];
         int32 *array = xmalloc(n*sizeof(*array));
-        uint32 nsub[P];
+        uint32 n_sub[P];
         const uint32 p = P;
 
         if (n < P*2) {
@@ -200,13 +200,13 @@ main(void) {
         }
 
         for (uint32 i = 0; i < (p - 1); i += 1) {
-            nsub[i] = n/p;
+            n_sub[i] = n/p;
         }{
             uint32 i = p - 1;
-            nsub[i] = n/p + (n % p);
+            n_sub[i] = n/p + (n % p);
         }
 
-        printf("nsub[P-1] = %u\n", nsub[p-1]);
+        printf("n_sub[P-1] = %u\n", n_sub[p-1]);
 
         srand(42);
         for (uint32 i = 0; i < n; i += 1) {
@@ -218,8 +218,8 @@ main(void) {
         {
             uint32 offset = 0;
             for (uint32 i = 0; i < p; i += 1) {
-                qsort(&array[offset], nsub[i], sizeof(*array), compare_int);
-                offset += nsub[i];
+                qsort(&array[offset], n_sub[i], sizeof(*array), compare_int);
+                offset += n_sub[i];
             }
         }
 
