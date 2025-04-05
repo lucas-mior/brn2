@@ -105,12 +105,12 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 p_index = heap[0].p_index;
-        uint32 elem_idx = ++indices[p_index];
+        uint32 a_index = ++indices[p_index];
         memcpy(&output[i*size], heap[0].value, size);
 
-        if (elem_idx < nsub[p_index]) {
-            memcpy(heap[0].value, &array2[(offsets[p_index] + elem_idx)*size], size);
-            heap[0].element_index = elem_idx;
+        if (a_index < nsub[p_index]) {
+            memcpy(heap[0].value, &array2[(offsets[p_index] + a_index)*size], size);
+            heap[0].element_index = a_index;
         } else {
             memcpy(heap[0].value, dummy_last, size);
         }
