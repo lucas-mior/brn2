@@ -782,11 +782,12 @@ contains_filename(FileList *list, FileName file, bool verbose) {
 int main(void) {
     FileList *list1;
     FileList *list2;
-    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
-    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
 
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
+
+    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
 
     system(command);
     list1 = brn2_list_from_dir(".");
