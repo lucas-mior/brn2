@@ -130,6 +130,16 @@ merge_sorted_subarrays(void *array, uint32 n, uint32 p, usize size,
 static void
 sort(FileList *old) {
     uint32 p;
+    FileName dummy_last = {
+        .name = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
+        .hash = 0,
+        .length = 0,
+        .type = 0,
+        .unused = 0,
+    };
+
 #if SORT_BENCHMARK
     struct timespec t0;
     struct timespec t1;
@@ -168,6 +178,7 @@ sort(FileList *old) {
     }
     free(copy);
     brn2_timings("sorting", t0, t1, old->length);
+    exit(0);
 #endif
     return;
 }
