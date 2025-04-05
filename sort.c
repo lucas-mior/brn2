@@ -6,12 +6,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef TESTING_THIS_FILE
+#define TESTING_THIS_FILE 0
+#endif
+
 #pragma push_macro("TESTING_THIS_FILE")
 #define TESTING_THIS_FILE 0
 
 #include "util.c"
 
 #pragma pop_macro("TESTING_THIS_FILE")
+
+typedef struct HeapNode {
+    void *value;
+    uint32 array_index;
+    uint32 element_index;
+} HeapNode;
 
 static void
 shuffle(void *array, usize n, usize size) {
@@ -32,12 +42,9 @@ shuffle(void *array, usize n, usize size) {
     }
 }
 
-typedef struct HeapNode {
-    void *value;
-    uint32 array_index;
-    uint32 element_index;
-} HeapNode;
+#if TESTING_THIS_FILE
 static void sort_print_heap(HeapNode *, uint32, uint32, char *);
+#endif
 
 static void
 heapify(HeapNode *heap, uint32 p, uint32 i,
@@ -174,10 +181,6 @@ sort(FileList *old) {
 #endif
     return;
 }
-
-#ifndef TESTING_THIS_FILE
-#define TESTING_THIS_FILE 0
-#endif
 
 #if TESTING_THIS_FILE
 
