@@ -562,7 +562,8 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
         FileName newfile = new->files[i];
 
         if (newfile.length >= PATH_MAX) {
-            error("Filenames must be shorter than %u bytes.\n", PATH_MAX);
+            error("Error: filename on line %u is longer than %u bytes",
+                  i, PATH_MAX);
             failed = true;
             if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
