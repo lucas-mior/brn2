@@ -385,33 +385,33 @@ hash_expected_collisions(void *map) { \
 
 typedef struct String {
     char *s;
-    int length;
-    int value;
+    uint32 length;
+    uint32 value;
 } String;
 
 static String
 random_string(Arena *arena, uint32 nbytes) {
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     String string;
-    int size;
-    int length;
+    uint32 size;
+    uint32 length;
 
-    length = nbytes + rand() % 16;
+    length = nbytes + (uint32)rand() % 16u;
     size = length + 1;
     string.s = arena_push(arena, size);
 
-    for (int i = 0; i < length; i += 1) {
-        int c = rand() % ((int)sizeof(characters) - 1);
+    for (uint32 i = 0; i < length; i += 1) {
+        uint32 c = (uint32)rand() % ((int)sizeof(characters) - 1);
         string.s[i] = characters[c];
     }
     string.s[length] = '\0';
     string.length = length;
-    string.value = rand();
+    string.value = (uint32)rand();
 
     return string;
 }
 
-void
+static void
 print_timings(char *name, struct timespec t0, struct timespec t1) {
     long seconds = t1.tv_sec - t0.tv_sec;
     long nanos = t1.tv_nsec - t0.tv_nsec;
@@ -431,21 +431,26 @@ int main(void) {
     struct timespec t1;
     HashMap *original_map;
     HashMap *balanced_map;
+    Arena *arena;
+    String string1 = { .s = "aaaaaaaaaaaaaaaa", .value = 0};
+    String string2 = { .s = "bbbbbbbbbbbbbbbb", .value = 1};
+    String string3 = { .s = "cccccccccccccccc", .value = 2};
+    String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_map_create(NSTRINGS);
-    Arena *arena = arena_alloc((usize)4096*NSTRINGS);
+    arena = arena_alloc((usize)4096*NSTRINGS);
     arena_push(arena, BRN2_ALIGNMENT); // in order to set [0] as invalid
+
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);
 
-    char *string1 = "aaaaaaaaaaaaaaaa";
-    char *string2 = "bbbbbbbbbbbbbbbb";
-    char *string3 = "cccccccccccccccc";
-    String *strings = xmalloc(NSTRINGS*sizeof(*strings));
+    string1.length = (uint32)strlen(string1.s);
+    string2.length = (uint32)strlen(string2.s);
+    string3.length = (uint32)strlen(string3.s);
 
-    assert(hash_map_insert(original_map, string1, strlen(string1), 0));
-    assert(!hash_map_insert(original_map, string1, strlen(string1), 1));
-    assert(hash_map_insert(original_map, string2, strlen(string2), 2));
+    assert(hash_map_insert(original_map, string1.s, string1.length, string1.value));
+    assert(!hash_map_insert(original_map, string1.s, string1.length, 1));
+    assert(hash_map_insert(original_map, string2.s, string2.length, string2.value));
 
     assert(hash_length(original_map) == 2);
     hash_map_print(original_map, false);
@@ -493,16 +498,18 @@ int main(void) {
     }
 
     assert(hash_length(balanced_map) == (2 + NSTRINGS));
-    uint32 *value = hash_map_lookup(balanced_map, string1, strlen(string1));
-    assert(*value == 0);
-    assert(!hash_map_lookup(balanced_map, string3, strlen(string3)));
+    {
+        uint32 *value = hash_map_lookup(balanced_map, string1.s, string1.length);
+        assert(*value == 0);
+    }
+    assert(!hash_map_lookup(balanced_map, string3.s, string3.length));
 
-    assert(!hash_map_remove(balanced_map, string3, strlen(string3)));
-    assert(hash_map_remove(balanced_map, string2, strlen(string2)));
+    assert(!hash_map_remove(balanced_map, string3.s, string3.length));
+    assert(hash_map_remove(balanced_map, string2.s, string2.length));
 
     assert(hash_length(balanced_map) == (1 + NSTRINGS));
 
-    assert(hash_map_remove(balanced_map, string1, strlen(string1)));
+    assert(hash_map_remove(balanced_map, string1.s, string1.length));
 
     hash_map_destroy(balanced_map);
 
