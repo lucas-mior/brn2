@@ -67,7 +67,7 @@ sort_shuffle(void *array, usize n, usize size) {
 
 static void
 sort_heapify(HeapNode *heap, uint32 p, uint32 i,
-        int32 (*compare)(const void *a, const void *b)) {
+             int32 (*compare)(const void *a, const void *b)) {
     while (true) {
         uint32 smallest = i;
         uint32 left = 2*i + 1;
@@ -96,8 +96,8 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
 
 static void
 sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
-                       void *dummy_last,
-                       int32 (*compare)(const void *a, const void *b)) {
+                     void *dummy_last,
+                     int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
     uint32 n_sub[BRN2_MAX_THREADS];
     uint32 indices[BRN2_MAX_THREADS] = {0};
