@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
             }
 
             written = (usize)(pointer - write_buffer);
-            if (written >= sizeof(write_buffer)) {
+            if (written >= (sizeof(write_buffer)/2)) {
                 write(brn2_buffer.fd, write_buffer, written);
                 pointer = write_buffer;
             }
