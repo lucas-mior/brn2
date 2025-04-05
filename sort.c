@@ -39,13 +39,6 @@ typedef struct HeapNode {
 } HeapNode;
 
 static void
-swap(HeapNode *a, HeapNode *b) {
-    HeapNode temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-static void
 heapify(HeapNode *heap, uint32 p, uint32 i,
         int32 (*compare)(const void *a, const void *b)) {
     uint32 smallest = i;
@@ -58,7 +51,9 @@ heapify(HeapNode *heap, uint32 p, uint32 i,
         if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
             smallest = right;
         if (smallest != i) {
-            swap(&heap[i], &heap[smallest]);
+            HeapNode temp = heap[i];
+            heap[i] = heap[smallest];
+            heap[smallest] = temp;
             heapify(heap, p, smallest, compare);
         }
     }
