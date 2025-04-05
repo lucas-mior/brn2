@@ -34,6 +34,12 @@
 
 #pragma pop_macro("TESTING_THIS_FILE")
 
+#if TESTING_THIS_FILE
+  #define COMPARE(A,B) compare(A,B)
+#else
+  #define COMPARE(A,B) brn2_compare(A,B)
+#endif
+
 typedef struct HeapNode {
     void *value;
     uint32 p_index;
@@ -70,9 +76,9 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
         if (left >= p)
             break;
 
-        if (compare(heap[left].value, heap[smallest].value) < 0)
+        if (COMPARE(heap[left].value, heap[smallest].value) < 0)
             smallest = left;
-        if ((right < p) && compare(heap[right].value, heap[smallest].value) < 0)
+        if ((right < p) && COMPARE(heap[right].value, heap[smallest].value) < 0)
             smallest = right;
 
         if (smallest == i)
