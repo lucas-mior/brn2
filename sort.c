@@ -100,33 +100,33 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     char *output = xmalloc(memory_size);
     char *array2 = array;
 
-    for (uint32 p_index = 0; p_index < (p - 1); p_index += 1) {
-        nsub[p_index] = n/p;
+    for (uint32 k = 0; k < (p - 1); k += 1) {
+        nsub[k] = n/p;
     }{
-        uint32 p_index = p - 1;
-        nsub[p_index] = n/p + (n % p);
+        uint32 k = p - 1;
+        nsub[k] = n/p + (n % p);
     }
 
     offsets[0] = 0;
-    for (uint32 p_index = 1; p_index < p; p_index += 1)
-        offsets[p_index] = offsets[p_index - 1] + nsub[p_index - 1];
+    for (uint32 k = 1; k < p; k += 1)
+        offsets[k] = offsets[k - 1] + nsub[k - 1];
 
-    for (uint32 p_index = 0; p_index < p; p_index += 1) {
-        heap[p_index].value = xmalloc(size);
-        memcpy(heap[p_index].value, &array2[offsets[p_index]*size], size);
-        heap[p_index].p_index = p_index;
+    for (uint32 k = 0; k < p; k += 1) {
+        heap[k].value = xmalloc(size);
+        memcpy(heap[k].value, &array2[offsets[k]*size], size);
+        heap[k].p_index = k;
     }
 
-    for (int32 p_index = p / 2 - 1; p_index >= 0; p_index -= 1)
-        sort_heapify(heap, p, (uint32)p_index, compare);
+    for (int32 k = p / 2 - 1; k >= 0; k -= 1)
+        sort_heapify(heap, p, (uint32)k, compare);
 
     for (uint32 i = 0; i < n; i += 1) {
-        uint32 p_index = heap[0].p_index;
-        uint32 a_index = (indices[p_index] += 1);
+        uint32 k = heap[0].p_index;
+        uint32 a_index = (indices[k] += 1);
         memcpy(&output[i*size], heap[0].value, size);
 
-        if (a_index < nsub[p_index]) {
-            memcpy(heap[0].value, &array2[(offsets[p_index] + a_index)*size], size);
+        if (a_index < nsub[k]) {
+            memcpy(heap[0].value, &array2[(offsets[k] + a_index)*size], size);
         } else {
             memcpy(heap[0].value, dummy_last, size);
         }
