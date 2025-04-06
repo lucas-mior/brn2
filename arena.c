@@ -26,6 +26,8 @@ arena_alloc(char *name, size_t size) {
     void *p;
     Arena *arena;
 
+    error("inside arena_alloc\n");
+
     size += ALIGN(sizeof(*arena));
 
 #ifdef __linux__

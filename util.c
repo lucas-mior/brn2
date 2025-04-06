@@ -26,6 +26,35 @@
 
 #include "brn2.h"
 
+#ifndef __WIN32__
+void error(char *format, ...) {
+    int n;
+    ssize_t w;
+    va_list args;
+    char buffer[BUFSIZ];
+
+    va_start(args, format);
+    n = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
+    va_end(args);
+
+    if (n < 0) {
+        fprintf(stderr, "Error in vsnprintf()\n");
+        exit(EXIT_FAILURE);
+    }
+
+    buffer[n] = '\0';
+    if ((w = write2(STDERR_FILENO, buffer, (usize)n)) < n) {
+        fprintf(stderr, "Error writing to STDERR_FILENO");
+        if (w < 0)
+            fprintf(stderr, ": %s", strerror(errno));
+        fprintf(stderr, ".\n");
+    }
+    return;
+}
+#else
+#define error(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
 void *
 xmalloc(const usize size) {
     void *p;
@@ -153,18 +182,27 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 
 #ifdef __WIN32__
 void util_command(const int argc, char **argv) {
-    // Build the command line string
-    size_t len = 0;
-    for (int i = 0; i < argc; ++i)
+    error("util_command\n");
+
+    if (argc == 0 || argv == NULL) {
+        error("Invalid arguments.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    size_t len = 1; // for null terminator
+    for (int i = 0; i < argc - 1; ++i)
         len += strlen(argv[i]) + 3; // space + quotes
+                                    //
+    error("len =%zu\n", len);
+
     char *cmdline = malloc(len);
     if (!cmdline) {
-        error("Memory allocation failed.\n");
+        error("Out of memory.\n");
         exit(EXIT_FAILURE);
     }
 
     cmdline[0] = '\0';
-    for (int i = 0; i < argc; ++i) {
+    for (int i = 0; i < argc - 1; ++i) {
         strcat(cmdline, "\"");
         strcat(cmdline, argv[i]);
         strcat(cmdline, "\"");
@@ -172,7 +210,8 @@ void util_command(const int argc, char **argv) {
             strcat(cmdline, " ");
     }
 
-    // Reopen stdin to CONIN$ (equivalent to /dev/tty)
+    error("cmdline =%s\n", cmdline);
+
     FILE *tty = freopen("CONIN$", "r", stdin);
     if (!tty) {
         error("Error reopening stdin: %s.\n", strerror(errno));
@@ -184,37 +223,36 @@ void util_command(const int argc, char **argv) {
     PROCESS_INFORMATION pi;
 
     BOOL success = CreateProcessA(
-        NULL,           // app name (use NULL when passing full command line)
-        cmdline,        // command line
-        NULL,           // process security
-        NULL,           // thread security
-        TRUE,           // inherit handles (so it uses parent's stdin)
-        0,              // creation flags
-        NULL,           // environment
-        NULL,           // current directory
-        &si,            // startup info
-        &pi             // process info
+        NULL,
+        cmdline,
+        NULL,
+        NULL,
+        TRUE,
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi
     );
 
     if (!success) {
         error("Error running '%s", argv[0]);
-        for (int i = 1; i < argc; i += 1)
+        for (int i = 1; i < argc; i++)
             error(" %s", argv[i]);
         error("': %lu.\n", GetLastError());
         free(cmdline);
         exit(EXIT_FAILURE);
     }
 
-    // Wait for process to finish
     WaitForSingleObject(pi.hProcess, INFINITE);
 
-    // Optionally check exit code
     DWORD exit_code = 0;
     GetExitCodeProcess(pi.hProcess, &exit_code);
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     free(cmdline);
+    error("after command.\n");
 }
 #else
 void
@@ -240,35 +278,6 @@ util_command(const int argc, char **argv) {
         }
     }
 }
-#endif
-
-#ifndef __WIN32__
-void error(char *format, ...) {
-    int n;
-    ssize_t w;
-    va_list args;
-    char buffer[BUFSIZ];
-
-    va_start(args, format);
-    n = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
-    va_end(args);
-
-    if (n < 0) {
-        fprintf(stderr, "Error in vsnprintf()\n");
-        exit(EXIT_FAILURE);
-    }
-
-    buffer[n] = '\0';
-    if ((w = write(STDERR_FILENO, buffer, (usize)n)) < n) {
-        fprintf(stderr, "Error writing to STDERR_FILENO");
-        if (w < 0)
-            fprintf(stderr, ": %s", strerror(errno));
-        fprintf(stderr, ".\n");
-    }
-    return;
-}
-#else
-#define error(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
 #ifdef TESTING_util
