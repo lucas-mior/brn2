@@ -471,15 +471,16 @@ int brn2_threads_work_changes(void *arg) {
 }
 
 void
-brn2_timings(char *name, struct timespec t0, struct timespec t1, uint length) {
+brn2_timings(char *name,
+             struct timespec t0, struct timespec t1, uint32 length) {
     long seconds = t1.tv_sec - t0.tv_sec;
     long nanos = t1.tv_nsec - t0.tv_nsec;
 
     double total_seconds = (double)seconds + (double)nanos/1.0e9;
-    double micros_per_str = 1e6*(total_seconds/(double)(length));
+    double micros_per_item = 1e6*(total_seconds/(double)(length));
 
     printf("\ntime elapsed %s\n", name);
-    printf("%gs = %gus per file.\n\n", total_seconds, micros_per_str);
+    printf("%gs = %gus per item.\n\n", total_seconds, micros_per_item);
     return;
 }
 
