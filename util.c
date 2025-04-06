@@ -48,6 +48,16 @@ void error(char *, ...);
 #define error(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
+static void *xmalloc(const size_t);
+static void *xmmap_commit(size_t *);
+static void xmunmap(void *, size_t);
+static void *xrealloc(void *, const size_t);
+static void *xcalloc(const size_t, const size_t);
+static char *xstrdup(char *);
+static void *xmemdup(void *, size_t);
+static void *snprintf2(char *, size_t, char *, ...);
+static void util_command(const int, char **);
+
 #ifndef __WIN32__
 void error(char *format, ...) {
     int n;

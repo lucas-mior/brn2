@@ -75,7 +75,6 @@ int main(int argc, char **argv) {
     HashMap *oldlist_map = NULL;
     HashMap *newlist_map = NULL;
     long available_threads;
-    (void) available_threads;
 
     uint32 main_capacity;
     char *EDITOR;
@@ -90,6 +89,7 @@ int main(int argc, char **argv) {
     char *directory = ".";
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
+    (void) available_threads;
 
     program = basename(argv[0]);
     error("parsing\n");
