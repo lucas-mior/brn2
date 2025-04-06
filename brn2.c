@@ -86,8 +86,7 @@ brn2_list_from_args(int argc, char **argv) {
 
 #ifdef __WIN32__
 int scandir(const char *dir, struct dirent ***namelist,
-            int (*filter)(const struct dirent *),
-            int (*compar)(const struct dirent **, const struct dirent **)) {
+            void *filter, void *compar) {
     WIN32_FIND_DATAA find_data;
     HANDLE hFind;
     char path[MAX_PATH];
@@ -109,17 +108,13 @@ int scandir(const char *dir, struct dirent ***namelist,
         if (!ent) break;
 
         strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
-        if (!filter || filter(ent)) {
-            if (count >= capacity) {
-                capacity *= 2;
-                struct dirent **tmp = realloc(list, capacity * sizeof(struct dirent *));
-                if (!tmp) break;
-                list = tmp;
-            }
-            list[count++] = ent;
-        } else {
-            free(ent);
+        if (count >= capacity) {
+            capacity *= 2;
+            struct dirent **tmp = realloc(list, capacity * sizeof(struct dirent *));
+            if (!tmp) break;
+            list = tmp;
         }
+        list[count++] = ent;
     } while (FindNextFileA(hFind, &find_data));
     FindClose(hFind);
 
