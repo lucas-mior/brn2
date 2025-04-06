@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
     HashMap *oldlist_map = NULL;
     HashMap *newlist_map = NULL;
     long available_threads;
+    (void) available_threads;
 
     uint32 main_capacity;
     char *EDITOR;

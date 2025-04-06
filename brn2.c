@@ -86,15 +86,16 @@ brn2_list_from_args(int argc, char **argv) {
 
 #ifdef __WIN32__
 int scandir(const char *dir, struct dirent ***namelist,
-            int (*filter)(const struct dirent *),
-            int (*compar)(const struct dirent **, const struct dirent **)) {
+            void *filter, void *compar) {
     WIN32_FIND_DATAA find_data;
     HANDLE hFind;
     char path[MAX_PATH];
     size_t count = 0;
     size_t capacity = 16;
+    (void) filter;
+    (void) compar;
 
-    struct dirent **list = xmalloc(capacity * sizeof(struct dirent *));
+    struct dirent **list = xmalloc(capacity*sizeof(struct dirent *));
     if (!list) return -1;
 
     snprintf(path, MAX_PATH, "%s\\*", dir);
@@ -106,20 +107,13 @@ int scandir(const char *dir, struct dirent ***namelist,
 
     do {
         struct dirent *ent = xmalloc(sizeof(struct dirent));
-        if (!ent) break;
 
         strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
-        if (!filter || filter(ent)) {
-            if (count >= capacity) {
-                capacity *= 2;
-                struct dirent **tmp = realloc(list, capacity * sizeof(struct dirent *));
-                if (!tmp) break;
-                list = tmp;
-            }
-            list[count++] = ent;
-        } else {
-            free(ent);
+        if (count >= capacity) {
+            capacity *= 2;
+            list = xrealloc(list, capacity*sizeof(struct dirent *));
         }
+        list[count++] = ent;
     } while (FindNextFileA(hFind, &find_data));
     FindClose(hFind);
 
@@ -507,6 +501,7 @@ brn2_threads_work_normalization(void *arg) {
 #else
 int
 brn2_threads_work_normalization(void *arg) {
+    (void) arg;
     return 0;
 }
 #endif
@@ -806,6 +801,8 @@ brn2_execute(FileList *old, FileList *new,
             }
         }
 #else
+        (void) oldlength;
+        (void) newname_index_on_oldlist;
         if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
