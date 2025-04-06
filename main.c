@@ -84,6 +84,8 @@ int main(int argc, char **argv) {
     char *EDITOR;
     int opt;
 
+    error("main\n");
+
 #ifdef BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
@@ -95,6 +97,7 @@ int main(int argc, char **argv) {
     int mode = FILES_FROM_DIR;
 
     program = basename(argv[0]);
+    error("parsing\n");
 
     while ((opt = getopt_long(argc, argv,
                               "d:f:r:ceFhiqsv", options, NULL)) != -1) {
@@ -272,7 +275,7 @@ int main(int argc, char **argv) {
 
             written = (usize)(pointer - write_buffer);
             if (written >= (sizeof(write_buffer)/2)) {
-                write2(brn2_buffer.fd, write_buffer, written);
+                write(brn2_buffer.fd, write_buffer, written);
                 pointer = write_buffer;
             }
 
@@ -280,12 +283,16 @@ int main(int argc, char **argv) {
             memcpy(pointer, file->name, file->length + 1);
             pointer += file->length + 1;
             file->name[file->length] = '\0';
+            error("writed file n %u = %s\n", i, file->name);
         }
         close:
-        write2(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
-        close(brn2_buffer.fd);
+        write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
+        if (close(brn2_buffer.fd) < 0) {
+            error("Error closing:%s\n", strerror(errno));
+        }
         brn2_buffer.fd = -1;
-        atexit(delete_brn2_buffer);
+        /* atexit(delete_brn2_buffer); */
+        error("buffername: %s\n", brn2_buffer_name);
     }
 
     {
@@ -344,17 +351,21 @@ int main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_map == NULL) {
+                error("newlist_map == NULL\n");
                 newlist_map = hash_map_create(new->length);
             } else {
                 hash_map_zero(newlist_map);
             }
             if (indexes_new == NULL) {
+                error("indexes_new == NULL\n");
                 indexes_new_size = new->length*sizeof(*indexes_new);
                 indexes_new = xmmap_commit(&indexes_new_size);
             }
 
             main_capacity = hash_capacity(newlist_map);
             brn2_create_hashes(new, indexes_new, main_capacity);
+            error("newlist:\n");
+            brn2_print_list(new);
 
             if (!brn2_verify(new, newlist_map, indexes_new)) {
                 brn2_free_list(new);
