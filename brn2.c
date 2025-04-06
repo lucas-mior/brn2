@@ -406,7 +406,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
 
         length = strcspn(buffer, "\n");
         buffer[length] = '\0';
-        list->files[length].name = arena_push(arena, length + 1);
+        list->files[length].name = arena_push(list->arena, length + 1);
         list->files[length].length = length;
         memcpy(list->files[length].name, buffer, length + 1);
         length += 1;
