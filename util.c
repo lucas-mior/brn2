@@ -102,7 +102,7 @@ void *
 xmmap_commit(size_t *size) {
     void *p;
 
-    p = VirtualAlloc(NULL, size,
+    p = VirtualAlloc(NULL, *size,
                            MEM_COMMIT|MEM_RESERVE,
                            PAGE_READWRITE);
     if (p == NULL) {
