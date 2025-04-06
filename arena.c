@@ -23,7 +23,7 @@
 #include "util.c"
 
 Arena *
-arena_alloc(size_t size) {
+arena_alloc(char *name, size_t size) {
     void *p;
     Arena *arena;
 
@@ -52,6 +52,7 @@ arena_alloc(size_t size) {
     }
 
     arena = p;
+    arena->name = name;
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
@@ -61,7 +62,7 @@ arena_alloc(size_t size) {
 void
 arena_destroy(Arena *arena) {
     if (munmap(arena, arena->size) < 0) {
-        error("Error in %s:\n", __func__);
+        error("Error destroying arena %s:\n", arena->name);
         error("Error in munmap(%p, %zu): %s.\n",
               arena, arena->size, strerror(errno));
     }

@@ -791,8 +791,8 @@ int main(void) {
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
 
-    arena_new = arena_alloc(PATH_MAX*UINT32_MAX);
-    arena_old = arena_alloc(PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc("arena for old filenames", PATH_MAX*UINT32_MAX);
+    arena_new = arena_alloc("arena for new filenames", PATH_MAX*UINT32_MAX);
 
     system(command);
     list1 = brn2_list_from_dir(".");
