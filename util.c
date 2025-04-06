@@ -23,8 +23,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <sys/mman.h>
 
 #include "brn2.h"
 
@@ -42,6 +40,7 @@ void *
 xmmap(usize *size) {
     void *p;
 
+#ifdef __linux__
     do {
         if (*size >= SIZE2MB) {
             p = mmap(NULL, *size,
@@ -62,13 +61,21 @@ xmmap(usize *size) {
         error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
         exit(EXIT_FAILURE);
     }
+#else
+    p = xmalloc(*size);
+#endif
     return p;
 }
 
 void
 xmunmap(void *p, usize size) {
+#ifdef __linux__
     if (munmap(p, size) < 0)
         error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
+#else
+    (void) size;
+    free(p);
+#endif
     return;
 }
 
@@ -144,6 +151,72 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     return buffer;
 }
 
+#ifdef __WIN32__
+void util_command(const int argc, char **argv) {
+    // Build the command line string
+    size_t len = 0;
+    for (int i = 0; i < argc; ++i)
+        len += strlen(argv[i]) + 3; // space + quotes
+    char *cmdline = malloc(len);
+    if (!cmdline) {
+        error("Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    cmdline[0] = '\0';
+    for (int i = 0; i < argc; ++i) {
+        strcat(cmdline, "\"");
+        strcat(cmdline, argv[i]);
+        strcat(cmdline, "\"");
+        if (i < argc - 1)
+            strcat(cmdline, " ");
+    }
+
+    // Reopen stdin to CONIN$ (equivalent to /dev/tty)
+    FILE *tty = freopen("CONIN$", "r", stdin);
+    if (!tty) {
+        error("Error reopening stdin: %s.\n", strerror(errno));
+        free(cmdline);
+        exit(EXIT_FAILURE);
+    }
+
+    STARTUPINFO si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+
+    BOOL success = CreateProcessA(
+        NULL,           // app name (use NULL when passing full command line)
+        cmdline,        // command line
+        NULL,           // process security
+        NULL,           // thread security
+        TRUE,           // inherit handles (so it uses parent's stdin)
+        0,              // creation flags
+        NULL,           // environment
+        NULL,           // current directory
+        &si,            // startup info
+        &pi             // process info
+    );
+
+    if (!success) {
+        error("Error running '%s", argv[0]);
+        for (int i = 1; i < argc; i += 1)
+            error(" %s", argv[i]);
+        error("': %lu.\n", GetLastError());
+        free(cmdline);
+        exit(EXIT_FAILURE);
+    }
+
+    // Wait for process to finish
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Optionally check exit code
+    DWORD exit_code = 0;
+    GetExitCodeProcess(pi.hProcess, &exit_code);
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    free(cmdline);
+}
+#else
 void
 util_command(const int argc, char **argv) {
     pid_t child;
@@ -167,6 +240,7 @@ util_command(const int argc, char **argv) {
         }
     }
 }
+#endif
 
 void error(char *format, ...) {
     int n;
