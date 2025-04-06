@@ -32,6 +32,7 @@
 #include "rapidhash.h"
 
 #include "arena.c"
+#include "util.c"
 
 #if !defined(INLINE)
 #define INLINE
