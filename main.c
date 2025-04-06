@@ -80,8 +80,6 @@ int main(int argc, char **argv) {
     char *EDITOR;
     int opt;
 
-    error("main\n");
-
 #ifdef BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
