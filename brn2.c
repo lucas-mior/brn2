@@ -123,9 +123,6 @@ int scandir(const char *dir, struct dirent ***namelist,
     } while (FindNextFileA(hFind, &find_data));
     FindClose(hFind);
 
-    if (compar)
-        qsort(list, count, sizeof(struct dirent *), (int (*)(const void *, const void *))compar);
-
     *namelist = list;
     return (int)count;
 }
@@ -149,12 +146,12 @@ brn2_list_from_dir(char *directory) {
         error("Error scanning '%s': %s.\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    if (number_files <= 2) {
-        error("Directory '%s' is empty. Exiting.\n", directory);
-        exit(EXIT_FAILURE);
-    }
+    /* if (number_files <= 2) { */
+    /*     error("Directory '%s' is empty. Exiting.\n", directory); */
+    /*     exit(EXIT_FAILURE); */
+    /* } */
 
-    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files - 2));
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files));
     list->arena = arena_old;
 
     for (int i = 0; i < number_files; i += 1) {
@@ -278,7 +275,7 @@ brn2_free_list(FileList *list) {
     return;
 }
 
-#ifndef __WIN32__
+#ifdef __linux__
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
     FileList *list;
@@ -369,11 +366,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
     }
     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
-#ifdef __linux__
     munmap(map, map_size);
-#else
-    free(map);
-#endif
 
     if (ftruncate(fd, map_size - padding) < 0) {
         error("Error truncating '%s': %s.\n", filename, strerror(errno));
@@ -389,6 +382,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
 #else
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
+    error("%s @ %s:%d\n", __func__, __FILE__, __LINE__);
     FILE *file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Could not open file %s\n", filename);
@@ -418,6 +412,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
     }
     fclose(file);
     list->length = len;
+    error("%s @ %s:%d\n", __func__, __FILE__, __LINE__);
     return list;
 }
 #endif
@@ -679,6 +674,7 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
 
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
+        error("name: %s\n", newfile.name);
 
         if (newfile.length >= PATH_MAX) {
             error("Error: filename on line %u is longer than %u bytes",

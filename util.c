@@ -43,7 +43,7 @@ void error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    if ((w = write2(STDERR_FILENO, buffer, (usize)n)) < n) {
+    if ((w = write(STDERR_FILENO, buffer, (usize)n)) < n) {
         fprintf(stderr, "Error writing to STDERR_FILENO");
         if (w < 0)
             fprintf(stderr, ": %s", strerror(errno));
@@ -144,6 +144,7 @@ void *
 xmmap_commit(usize *size) {
     void *p;
     p = xmalloc(*size);
+    memset(p, 0, *size);
     return p;
 }
 #endif
