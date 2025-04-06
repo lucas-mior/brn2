@@ -96,7 +96,6 @@ int scandir(const char *dir, struct dirent ***namelist,
     (void) compar;
 
     struct dirent **list = xmalloc(capacity*sizeof(struct dirent *));
-    if (!list) return -1;
 
     snprintf(path, MAX_PATH, "%s\\*", dir);
     hFind = FindFirstFileA(path, &find_data);
@@ -140,10 +139,6 @@ brn2_list_from_dir(char *directory) {
         error("Error scanning '%s': %s.\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    /* if (number_files <= 2) { */
-    /*     error("Directory '%s' is empty. Exiting.\n", directory); */
-    /*     exit(EXIT_FAILURE); */
-    /* } */
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files));
     list->arena = arena_old;
