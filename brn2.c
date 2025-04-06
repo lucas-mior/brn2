@@ -389,8 +389,36 @@ brn2_list_from_lines(char *filename, bool is_old) {
 #else
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
-    error("List from lines is not implemented on windows.\n");
-    exit(EXIT_FAILURE);
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "Could not open file %s\n", filename);
+        exit(1);
+    }
+
+    uint32 cap = 128;
+
+    FileList *list;
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap));
+
+    char buffer[PATH_MAX];
+    size_t len = 0;
+    while (!feof(file)) {
+        if (len >= cap) {
+            cap *= 2;
+            list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap));
+        }
+
+        if (!fgets(buffer, sizeof(buffer), file))
+            continue;
+
+        buffer[strcspn(buffer, "\n")] = '\0';
+        list->files[len].name = strdup(buffer);
+        list->files[len].length = strlen(buffer);
+        len += 1;
+    }
+    fclose(file);
+    list->length = len;
+    return list;
 }
 #endif
 
