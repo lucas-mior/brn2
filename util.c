@@ -242,6 +242,7 @@ util_command(const int argc, char **argv) {
 }
 #endif
 
+#ifndef __WIN32__
 void error(char *format, ...) {
     int n;
     ssize_t w;
@@ -266,6 +267,9 @@ void error(char *format, ...) {
     }
     return;
 }
+#else
+#define error(...) fprintf(stderr, __VA_ARGS__)
+#endif
 
 #ifdef TESTING_util
 #include <assert.h>

@@ -84,6 +84,7 @@ DESTDIR="${DESTDIR:-/}"
 
 main="main.c"
 program="brn2"
+exe="$program"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros -Wno-unused-function"
@@ -99,6 +100,7 @@ fi
 if [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -target x86_64-windows-gnu"
     CPPFLAGS="$CPPFLAGS"
+    exe="$program.exe"
 fi
 
 case "$target" in
@@ -154,7 +156,7 @@ case "$target" in
         set -x
         ctags --kinds-C=+l+d *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
-        $CC $CPPFLAGS $CFLAGS -o ${program} "$main" $LDFLAGS
+        $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
         ;;
     *)
         echo "usage: $0 [ uninstall / test / install / build / debug ]"

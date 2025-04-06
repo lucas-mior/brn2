@@ -162,7 +162,9 @@ extern Arena *arena_new;
 
 int brn2_compare(const void *, const void *);
 FileList *brn2_list_from_dir(char *);
+#ifndef __WIN32__
 FileList *brn2_list_from_dir_recurse(char *);
+#endif
 FileList *brn2_list_from_lines(char *, bool);
 FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *, FileList *);
@@ -179,7 +181,9 @@ void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
+#ifndef __WIN32__
 void error(char *, ...);
+#endif
 
 void *xmalloc(const usize);
 void *xmmap(usize *);
