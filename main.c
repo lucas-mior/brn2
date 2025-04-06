@@ -374,7 +374,8 @@ int main(int argc, char **argv) {
 #ifndef __WIN32__
                 getc(stdin);
 #else
-                getchar();
+                sleep(5);
+                continue;
 #endif
                 continue;
             } else {
