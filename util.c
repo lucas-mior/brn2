@@ -106,7 +106,7 @@ xmmap_commit(usize *size) {
                            PAGE_READWRITE);
     if (p == NULL) {
         fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
-                        size, GetLastError());
+                        *size, GetLastError());
         exit(EXIT_FAILURE);
     }
     return p;
