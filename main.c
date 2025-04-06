@@ -363,8 +363,6 @@ int main(int argc, char **argv) {
 
             main_capacity = hash_capacity(newlist_map);
             brn2_create_hashes(new, indexes_new, main_capacity);
-            error("newlist:\n");
-            brn2_print_list(new);
 
             if (!brn2_verify(new, newlist_map, indexes_new)) {
                 brn2_free_list(new);
