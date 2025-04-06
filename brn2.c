@@ -382,15 +382,17 @@ brn2_list_from_lines(char *filename, bool is_old) {
 #else
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        fprintf(stderr, "Could not open file %s\n", filename);
-        exit(1);
+    size_t length = 0;
+    char buffer[PATH_MAX];
+    FileList *list;
+    uint32 cap = 128;
+    FILE *file;
+    
+    if ((file = fopen(filename, "r")) == NULL) {
+        error("Error opening '%s': %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
     }
 
-    uint32 cap = 128;
-
-    FileList *list;
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap));
 
     if (is_old)
@@ -398,10 +400,8 @@ brn2_list_from_lines(char *filename, bool is_old) {
     else
         list->arena = arena_new;
 
-    char buffer[PATH_MAX];
-    size_t len = 0;
     while (!feof(file)) {
-        if (len >= cap) {
+        if (length >= cap) {
             cap *= 2;
             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap));
         }
@@ -410,12 +410,12 @@ brn2_list_from_lines(char *filename, bool is_old) {
             continue;
 
         buffer[strcspn(buffer, "\n")] = '\0';
-        list->files[len].name = strdup(buffer);
-        list->files[len].length = strlen(buffer);
-        len += 1;
+        list->files[length].name = strdup(buffer);
+        list->files[length].length = strlen(buffer);
+        length += 1;
     }
     fclose(file);
-    list->length = len;
+    list->length = length;
     error("%s @ %s:%d\n", __func__, __FILE__, __LINE__);
     return list;
 }
