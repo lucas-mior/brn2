@@ -30,6 +30,7 @@
 #ifdef __WIN32__
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
+  #define basename(X) X
 #else
   #define BRN2_MAX_THREADS 64
   #include <threads.h>
