@@ -26,12 +26,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "hash.h"
 #include "rapidhash.h"
 
 #include "util.c"
 #include "arena.c"
+
+#if !defined(INLINE)
+#define INLINE
+#endif
 
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -59,7 +64,7 @@ hash_##T##_zero(struct Hash##T *map) { \
     map->collisions = 0; \
     map->length = 0; \
     arena_reset(map->arena); \
-    arena_push(map->arena, BRN2_ALIGNMENT); \
+    arena_push(map->arena, ALIGNMENT); \
     memset(map->array, 0, map->capacity*sizeof(*(&map->array[0]))); \
     return; \
 } \
@@ -85,7 +90,7 @@ hash_##T##_create(uint32 length) { \
     map = xmmap_commit(&size); \
     map->arena = arena_alloc("arena for hash map", \
                              capacity*sizeof(*(&map->array[0]))); \
-    arena_push(map->arena, BRN2_ALIGNMENT); \
+    arena_push(map->arena, ALIGNMENT); \
     map->capacity = capacity; \
     map->bitmask = (1 << power) - 1; \
     map->size = size; \
@@ -115,7 +120,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
     new_map = xmmap_commit(&size); \
     new_map->arena = arena_alloc("arena for balanced hash map", \
                                  capacity*sizeof(*(&new_map->array[0]))); \
-    arena_push(new_map->arena, BRN2_ALIGNMENT); \
+    arena_push(new_map->arena, ALIGNMENT); \
     new_map->capacity = capacity; \
     new_map->bitmask = bitmask; \
     new_map->size = size; \
@@ -154,7 +159,7 @@ hash_##T##_destroy(struct Hash##T *map) { \
     return; \
 } \
 \
-BRN2_INLINE bool \
+INLINE bool \
 hash_##T##_insert(struct Hash##T *map, \
                   char *key, uint32 key_length, uint32 value) { \
     uint32 hash = hash_function(key, key_length); \
@@ -198,7 +203,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, \
     return true; \
 } \
 \
-BRN2_INLINE void * \
+INLINE void * \
 hash_##T##_lookup(struct Hash##T *map, char *key, uint32 key_length) { \
     uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
@@ -226,7 +231,7 @@ hash_##T##_lookup_pre_calc(struct Hash##T *map, char *key, \
     return NULL; \
 } \
 \
-BRN2_INLINE bool \
+INLINE bool \
 hash_##T##_remove(struct Hash##T *map, char *key, uint32 key_length) { \
     uint32 hash = hash_function(key, key_length); \
     uint32 index = hash_normal(map, hash); \
@@ -290,7 +295,7 @@ hash_##T##_print(struct Hash##T *map, bool verbose) { \
             printf("\n%03u:", i); \
 \
         while (iterator->key) { \
-            printf(RED" '%s'"RESET"=%u ->", \
+            printf("'%s'=%u ->", \
                    iterator->key, HASH_ITERATOR_VALUE); \
             if (iterator->next) \
                 iterator = (void *)(map->arena->begin + iterator->next); \
@@ -324,14 +329,14 @@ HASH_IMPLEMENT(set)
 #undef HASH_ITERATOR_VALUE_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
 
-BRN2_INLINE uint32
+INLINE uint32
 hash_function(char *key, uint32 key_length) {
     uint32 hash;
     hash = (uint32)rapidhash(key, key_length);
     return (uint32)hash;
 }
 
-BRN2_INLINE uint32
+INLINE uint32
 hash_normal(void *map, uint32 hash) {
     HashMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
@@ -374,7 +379,7 @@ hash_expected_collisions(void *map) { \
 #include <assert.h>
 
 #define NSTRINGS 500000
-#define NBYTES 10*BRN2_ALIGNMENT
+#define NBYTES 10*ALIGNMENT
 
 typedef struct String {
     char *s;
@@ -433,7 +438,7 @@ int main(void) {
 
     original_map = hash_map_create(NSTRINGS);
     arena = arena_alloc("arena for random strings", (usize)4096*NSTRINGS);
-    arena_push(arena, BRN2_ALIGNMENT); // in order to set [0] as invalid
+    arena_push(arena, ALIGNMENT); // in order to set [0] as invalid
 
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);

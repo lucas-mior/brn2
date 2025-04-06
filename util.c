@@ -24,8 +24,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
+
+#ifdef __WIN32__
+  #include <windows.h>
+#else
+  #include <sys/mman.h>
+#endif
 
 #define SIZE2MB (2u*1024u*1024u)
+
+#define UTIL_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
+#if !defined(ALIGNMENT)
+  #define ALIGNMENT 16
+#endif
+#if !defined(ALIGN)
+  #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
+#endif
 
 #ifndef __WIN32__
 void error(char *format, ...) {
@@ -77,7 +92,7 @@ xmmap_commit(size_t *size) {
                      |MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = BRN2_ALIGN(*size, SIZE2MB);
+                *size = UTIL_ALIGN(*size, SIZE2MB);
                 break;
             }
         }

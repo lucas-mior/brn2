@@ -78,6 +78,8 @@
 #define BRN2_INLINE static inline __attribute__((always_inline))
 #endif
 
+#define INLINE BRN2_INLINE
+
 #define SNPRINTF(BUFFER, FORMAT, ...) \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 
