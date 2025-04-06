@@ -186,11 +186,4 @@ void *xmemdup(void *, usize);
 void *snprintf2(char *, size_t, char *, ...);
 void util_command(const int, char **);
 
-Arena *arena_alloc(char *, size_t);
-void *arena_push(Arena *, uint32);
-uint32 arena_push_index(Arena *, uint32);
-void *arena_reset(Arena *);
-void *arena_reset_zero(Arena *);
-void arena_destroy(Arena *);
-
 #endif

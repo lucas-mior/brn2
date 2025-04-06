@@ -36,12 +36,6 @@ typedef struct Arena {
     size_t size;
 } Arena;
 
-Arena *arena_alloc(char *, size_t);
-void *arena_push(Arena *, uint32);
-void *arena_reset(Arena *);
-void *arena_reset_zero(Arena *);
-void arena_destroy(Arena *);
-
 #define SIZE2MB (2u*1024u*1024u)
 #define SIZE4GB (1u*1024u*1024u*1024u)
 
@@ -86,6 +80,13 @@ arena_malloc(size_t size) {
         exit(EXIT_FAILURE);
     }
     return p;
+}
+void
+arena_destroy(Arena *arena) {
+    if (munmap(arena, arena->size) < 0)
+        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
+                        arena, arena->size, strerror(errno));
+    return;
 }
 #else 
 void *
@@ -134,10 +135,18 @@ arena_push(Arena *arena, uint32 size) {
 }
 
 uint32
+arena_push_index32(Arena *arena, uint32 size) {
+    void *before = arena->pos;
+    arena->pos = (char *)arena->pos + size;
+    assert(arena->size < UINT32_MAX);
+    return (uint32)((char *)before - (char *)arena->begin);
+}
+
+int64
 arena_push_index(Arena *arena, uint32 size) {
     void *before = arena->pos;
     arena->pos = (char *)arena->pos + size;
-    return (uint32)((char *)before - (char *)arena->begin);
+    return (int64)((char *)before - (char *)arena->begin);
 }
 
 void *
