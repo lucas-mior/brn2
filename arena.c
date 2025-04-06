@@ -50,7 +50,7 @@ arena_malloc(usize size) {
 
     if (p == MAP_FAILED) {
         fprintf(stderr, "Error in mmap(%zu): %s.\n",
-                        size, strfprintf(stderr, errno));
+                        size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
@@ -65,7 +65,7 @@ arena_malloc(usize size) {
                            PAGE_READWRITE);
     if (p == NULL) {
         fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
-                        size, GetLastfprintf(stderr, ));
+                        size, GetLastError());
         exit(EXIT_FAILURE);
     }
     return p;
