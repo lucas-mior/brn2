@@ -100,8 +100,15 @@ xmunmap(void *p, usize size) {
 void *
 xmmap_commit(usize *size) {
     void *p;
-    p = xmalloc(*size);
-    memset(p, 0, *size);
+
+    p = VirtualAlloc(NULL, size,
+                           MEM_COMMIT|MEM_RESERVE,
+                           PAGE_READWRITE);
+    if (p == NULL) {
+        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
+                        size, GetLastError());
+        exit(EXIT_FAILURE);
+    }
     return p;
 }
 void
