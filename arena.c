@@ -26,6 +26,21 @@
 
 #include "string.h"
 #include "stdio.h"
+#include "errno.h"
+#include "stdlib.h"
+
+typedef struct Arena {
+    char *name;
+    char *begin;
+    void *pos;
+    size_t size;
+} Arena;
+
+Arena *arena_alloc(char *, size_t);
+void *arena_push(Arena *, uint32);
+void *arena_reset(Arena *);
+void *arena_reset_zero(Arena *);
+void arena_destroy(Arena *);
 
 #define SIZE2MB (2u*1024u*1024u)
 #define SIZE4GB (1u*1024u*1024u*1024u)
