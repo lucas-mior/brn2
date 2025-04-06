@@ -125,13 +125,13 @@ void *
 snprintf2(char *buffer, size_t size, char *format, ...) {
     int n;
     va_list args;
-    va_list args2;
 
     va_start(args, format);
     n = vsnprintf(buffer, size, format, args);
     va_end(args);
 
     if (n >= (int)size) {
+        va_list args2;
         buffer = xmalloc((usize)n + 1);
         va_start(args, format);
         va_copy(args2, args);
