@@ -22,14 +22,20 @@
 #include "util.c"
 
 #ifdef __linux__
+  #define TRY_HUGE_PAGES 1
+#else
+  #define TRY_HUGE_PAGES 0
+#endif
+
+#ifndef __WIN32__
 void *
 arena_malloc(usize size) {
     void *p;
     do {
-        if (size >= SIZE2MB) {
+        if ((size >= SIZE2MB) && TRY_HUGE_PAGES) {
             p = mmap(NULL, size,
                      PROT_READ|PROT_WRITE,
-                     MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
+                     MAP_ANON|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
                 size = BRN2_ALIGN(size, SIZE2MB);
@@ -38,7 +44,7 @@ arena_malloc(usize size) {
         }
         p = mmap(NULL, size,
                  PROT_READ|PROT_WRITE,
-                 MAP_ANONYMOUS|MAP_PRIVATE,
+                 MAP_ANON|MAP_PRIVATE,
                  -1, 0);
     } while (0);
 
