@@ -31,14 +31,15 @@
 #include <time.h>
 #include <fts.h>
 
-#pragma push_macro("TESTING_THIS_FILE")
-#define TESTING_THIS_FILE 0
-
 #include "hash.c"
 #include "util.c"
 #include "arena.c"
 
-#pragma pop_macro("TESTING_THIS_FILE")
+#ifdef TESTING_brn2
+  #define TESTING_THIS_FILE 1
+#else
+  #define TESTING_THIS_FILE 0
+#endif
 
 static int brn2_threads_work_hashes(void *);
 static int brn2_threads_work_normalization(void *);
