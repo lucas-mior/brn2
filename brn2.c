@@ -394,6 +394,11 @@ brn2_list_from_lines(char *filename, bool is_old) {
     FileList *list;
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap));
 
+    if (is_old)
+        list->arena = arena_old;
+    else
+        list->arena = arena_new;
+
     char buffer[PATH_MAX];
     size_t len = 0;
     while (!feof(file)) {
