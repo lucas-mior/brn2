@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #ifdef __WIN32__
   #include <windows.h>
@@ -41,6 +42,8 @@
 #if !defined(ALIGN)
   #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
+
+typedef uint32_t uint32;
 
 #ifndef __WIN32__
 void error(char *, ...);
