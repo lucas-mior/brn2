@@ -30,13 +30,7 @@
 #ifdef __WIN32__
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
-#define write2(fd, buf, count) do { \
-    FILE *filexxx = fdopen(fd, "a"); \
-    fwrite(buf, 1, count, filexxx); \
-    fclose(filexxx); \
-} while (0)
 #else
-#define write2(fd, buf, count) write(fd, buf, count)
   #define BRN2_MAX_THREADS 64
   #include <threads.h>
   #include <sys/mman.h>
