@@ -674,7 +674,6 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
 
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
-        error("name: %s\n", newfile.name);
 
         if (newfile.length >= PATH_MAX) {
             error("Error: filename on line %u is longer than %u bytes",
