@@ -283,7 +283,6 @@ int main(int argc, char **argv) {
             memcpy(pointer, file->name, file->length + 1);
             pointer += file->length + 1;
             file->name[file->length] = '\0';
-            error("writed file n %u = %s\n", i, file->name);
         }
         close:
         write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
@@ -291,8 +290,7 @@ int main(int argc, char **argv) {
             error("Error closing:%s\n", strerror(errno));
         }
         brn2_buffer.fd = -1;
-        /* atexit(delete_brn2_buffer); */
-        error("buffername: %s\n", brn2_buffer_name);
+        atexit(delete_brn2_buffer);
     }
 
     {
