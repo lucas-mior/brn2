@@ -92,7 +92,6 @@ int main(int argc, char **argv) {
     (void) available_threads;
 
     program = basename(argv[0]);
-    error("parsing\n");
 
     while ((opt = getopt_long(argc, argv,
                               "d:f:r:ceFhiqsv", options, NULL)) != -1) {
