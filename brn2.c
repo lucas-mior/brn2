@@ -501,6 +501,7 @@ brn2_threads_work_normalization(void *arg) {
 #else
 int
 brn2_threads_work_normalization(void *arg) {
+    (void) arg;
     return 0;
 }
 #endif
