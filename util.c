@@ -275,7 +275,7 @@ void util_command(const int argc, char **argv) {
 
     if (!success) {
         error("Error running '%s", argv[0]);
-        for (int i = 1; i < argc; i++)
+        for (int i = 1; i < argc; i += 1)
             error(" %s", argv[i]);
         error("': %lu.\n", GetLastError());
         free(cmdline);
