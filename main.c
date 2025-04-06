@@ -65,6 +65,10 @@ delete_brn2_buffer(void) {
     return;
 }
 
+#ifdef __WIN32__
+#define basename(X) X
+#endif
+
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
@@ -75,6 +79,8 @@ int main(int argc, char **argv) {
     HashMap *oldlist_map = NULL;
     HashMap *newlist_map = NULL;
     long available_threads;
+
+    printf("main().\n");
 
     uint32 main_capacity;
     char *EDITOR;
@@ -146,14 +152,20 @@ int main(int argc, char **argv) {
     if ((argc - optind) >= 1)
         mode = FILES_FROM_ARGS;
 
+    printf("mode=%d.\n", mode);
+
+#ifndef __WIN32__
     available_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if (available_threads <= 0)
         nthreads = 1; 
     else
         nthreads = MIN((uint32)available_threads, BRN2_MAX_THREADS);
+#endif
 
     arena_old = arena_alloc("arena for old filenames", PATH_MAX*UINT32_MAX);
     arena_new = arena_alloc("arena for new filenames", PATH_MAX*UINT32_MAX);
+
+    printf("allocated arenas.\n");
 
     switch (mode) {
     case FILES_FROM_FILE:
@@ -166,7 +178,12 @@ int main(int argc, char **argv) {
         old = brn2_list_from_dir(directory);
         break;
     case FILES_FROM_DIR_RECURSE:
+#ifdef __WIN32__
+        error("Finding files recursively is not on windows.\n");
+        exit(EXIT_FAILURE);
+#else
         old = brn2_list_from_dir_recurse(directory);
+#endif
         break;
     default:
         error("Unexpected mode: %d\n", mode);
