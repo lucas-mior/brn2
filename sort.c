@@ -181,8 +181,8 @@ sort(FileList *old) {
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
     sort_merge_subsorted(old->files, old->length, p,
-                           sizeof(*(old->files)),
-                           &dummy_last, brn2_compare);
+                         sizeof(*(old->files)),
+                         &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
