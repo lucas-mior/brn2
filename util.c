@@ -43,7 +43,10 @@
   #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
+#ifndef INTEGERS
+#define INTEGERS
 typedef uint32_t uint32;
+#endif
 
 #ifndef __WIN32__
 void error(char *, ...);
