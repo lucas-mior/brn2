@@ -108,7 +108,7 @@ void
 xmunmap(void *p, usize size) {
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
         fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
-                        arena, GetLastError());
+                        p, GetLastError());
     }
     return;
 }
