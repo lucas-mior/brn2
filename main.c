@@ -80,9 +80,6 @@ int main(int argc, char **argv) {
     HashMap *newlist_map = NULL;
     long available_threads;
 
-    printf("main().\n");
-    error("main() error!\n");
-
     uint32 main_capacity;
     char *EDITOR;
     int opt;
@@ -153,8 +150,6 @@ int main(int argc, char **argv) {
     if ((argc - optind) >= 1)
         mode = FILES_FROM_ARGS;
 
-    printf("mode=%d.\n", mode);
-
 #ifndef __WIN32__
     available_threads = sysconf(_SC_NPROCESSORS_ONLN);
     if (available_threads <= 0)
@@ -165,8 +160,6 @@ int main(int argc, char **argv) {
 
     arena_old = arena_alloc("arena for old filenames", PATH_MAX*UINT32_MAX);
     arena_new = arena_alloc("arena for new filenames", PATH_MAX*UINT32_MAX);
-
-    printf("allocated arenas.\n");
 
     switch (mode) {
     case FILES_FROM_FILE:
@@ -180,14 +173,14 @@ int main(int argc, char **argv) {
         break;
     case FILES_FROM_DIR_RECURSE:
 #ifdef __WIN32__
-        error("Finding files recursively is not on windows.\n");
+        error("Finding files recursively is not implemented on windows.\n");
         exit(EXIT_FAILURE);
 #else
         old = brn2_list_from_dir_recurse(directory);
 #endif
         break;
     default:
-        error("Unexpected mode: %d\n", mode);
+        error("Unexpected mode: %d.\n", mode);
         exit(EXIT_FAILURE);
     }
     if (!brn2_options_quiet)
@@ -245,7 +238,7 @@ int main(int argc, char **argv) {
         oldlist_map = hash_map_create(old->length);
         capacity_set = hash_capacity(oldlist_map);
         indexes_old_size = old->length*sizeof(*indexes_old);
-        indexes_old = xmmap(&indexes_old_size);
+        indexes_old = xmmap_commit(&indexes_old_size);
         brn2_create_hashes(old, indexes_old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
@@ -295,8 +288,6 @@ int main(int argc, char **argv) {
         atexit(delete_brn2_buffer);
     }
 
-    error("after creating buffer");
-
     {
         char *args_edit[] = { EDITOR, brn2_buffer_name, NULL };
         char *args_shuf[] = { "shuf", brn2_buffer_name,
@@ -329,7 +320,7 @@ int main(int argc, char **argv) {
             newlist_map = hash_map_create(new->length);
             main_capacity = hash_capacity(newlist_map);
             indexes_new_size = new->length*sizeof(*indexes_new);
-            indexes_new = xmmap(&indexes_new_size);
+            indexes_new = xmmap_commit(&indexes_new_size);
             brn2_create_hashes(new, indexes_new, main_capacity);
             brn2_verify(new, newlist_map, indexes_new);
             hash_map_print_summary(newlist_map, "newlist_map");
@@ -359,7 +350,7 @@ int main(int argc, char **argv) {
             }
             if (indexes_new == NULL) {
                 indexes_new_size = new->length*sizeof(*indexes_new);
-                indexes_new = xmmap(&indexes_new_size);
+                indexes_new = xmmap_commit(&indexes_new_size);
             }
 
             main_capacity = hash_capacity(newlist_map);

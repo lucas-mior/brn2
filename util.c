@@ -51,8 +51,55 @@ void error(char *format, ...) {
     }
     return;
 }
+#endif
+
+void
+util_free_huge(void *p, usize size) {
+#ifdef __linux__
+    if (munmap(p, size) < 0)
+        error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
 #else
-#define error(...) fprintf(stderr, __VA_ARGS__)
+    (void) size;
+    free(p);
+#endif
+    return;
+}
+
+#ifdef __linux__
+void *
+util_alloc_huge(usize size) {
+    void *p;
+    do {
+        if (size >= SIZE2MB) {
+            p = mmap(NULL, size,
+                     PROT_READ|PROT_WRITE,
+                     MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
+                     -1, 0);
+            if (p != MAP_FAILED) {
+                size = BRN2_ALIGN(size, SIZE2MB);
+                break;
+            }
+        }
+        p = mmap(NULL, size,
+                 PROT_READ|PROT_WRITE,
+                 MAP_ANONYMOUS|MAP_PRIVATE,
+                 -1, 0);
+    } while (0);
+
+    if (p == MAP_FAILED) {
+        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+#else 
+void *
+util_alloc_huge(usize size) {
+    void *p;
+    size = MIN(SIZE4GB, size);
+    p = xmalloc(size);
+    return p;
+}
 #endif
 
 void *
@@ -65,11 +112,11 @@ xmalloc(const usize size) {
     return p;
 }
 
+#ifdef __linux__
 void *
-xmmap(usize *size) {
+xmmap_commit(usize *size) {
     void *p;
 
-#ifdef __linux__
     do {
         if (*size >= SIZE2MB) {
             p = mmap(NULL, *size,
@@ -90,11 +137,16 @@ xmmap(usize *size) {
         error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
         exit(EXIT_FAILURE);
     }
-#else
-    p = xmalloc(*size);
-#endif
     return p;
 }
+#else
+void *
+xmmap_commit(usize *size) {
+    void *p;
+    p = xmalloc(*size);
+    return p;
+}
+#endif
 
 void
 xmunmap(void *p, usize size) {
@@ -182,24 +234,15 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 
 #ifdef __WIN32__
 void util_command(const int argc, char **argv) {
-    error("util_command\n");
-
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
         exit(EXIT_FAILURE);
     }
 
-    size_t len = 1; // for null terminator
+    size_t len = 1;
     for (int i = 0; i < argc - 1; ++i)
-        len += strlen(argv[i]) + 3; // space + quotes
-                                    //
-    error("len =%zu\n", len);
-
-    char *cmdline = malloc(len);
-    if (!cmdline) {
-        error("Out of memory.\n");
-        exit(EXIT_FAILURE);
-    }
+        len += strlen(argv[i]) + 3;
+    char *cmdline = xmalloc(len);
 
     cmdline[0] = '\0';
     for (int i = 0; i < argc - 1; ++i) {
@@ -209,8 +252,6 @@ void util_command(const int argc, char **argv) {
         if (i < argc - 1)
             strcat(cmdline, " ");
     }
-
-    error("cmdline =%s\n", cmdline);
 
     FILE *tty = freopen("CONIN$", "r", stdin);
     if (!tty) {
@@ -252,7 +293,7 @@ void util_command(const int argc, char **argv) {
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     free(cmdline);
-    error("after command.\n");
+    return;
 }
 #else
 void

@@ -194,7 +194,7 @@ void error(char *, ...);
 #endif
 
 void *xmalloc(const usize);
-void *xmmap(usize *);
+void *xmmap_commit(usize *);
 void xmunmap(void *, usize);
 void *xrealloc(void *, const usize);
 void *xcalloc(const usize, const usize);

@@ -26,36 +26,9 @@ arena_alloc(char *name, size_t size) {
     void *p;
     Arena *arena;
 
-    error("inside arena_alloc\n");
-
     size += ALIGN(sizeof(*arena));
 
-#ifdef __linux__
-    do {
-        if (size >= SIZE2MB) {
-            p = mmap(NULL, size,
-                     PROT_READ|PROT_WRITE,
-                     MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
-                     -1, 0);
-            if (p != MAP_FAILED) {
-                size = BRN2_ALIGN(size, SIZE2MB);
-                break;
-            }
-        }
-        p = mmap(NULL, size,
-                 PROT_READ|PROT_WRITE,
-                 MAP_ANONYMOUS|MAP_PRIVATE,
-                 -1, 0);
-    } while (0);
-
-    if (p == MAP_FAILED) {
-        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-#else 
-    size = MIN(SIZE4GB, size);
-    p = xmalloc(size);
-#endif
+    p = util_alloc_huge(size);
 
     arena = p;
     arena->name = name;
@@ -67,15 +40,7 @@ arena_alloc(char *name, size_t size) {
 
 void
 arena_destroy(Arena *arena) {
-#ifdef __linux__
-    if (munmap(arena, arena->size) < 0) {
-        error("Error destroying arena %s:\n", arena->name);
-        error("Error in munmap(%p, %zu): %s.\n",
-              arena, arena->size, strerror(errno));
-    }
-#else
-    free(arena);
-#endif
+    util_free_huge(arena, arena->size);
     return;
 }
 
