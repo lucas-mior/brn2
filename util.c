@@ -24,8 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "brn2.h"
-
 #ifndef __WIN32__
 void error(char *format, ...) {
     int n;
