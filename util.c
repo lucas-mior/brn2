@@ -218,23 +218,24 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 
 #ifdef __WIN32__
 void util_command(const int argc, char **argv) {
+    char *cmdline;
+    uint32 len = 1;
+
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
         exit(EXIT_FAILURE);
     }
 
-    size_t len = 1;
     for (int i = 0; i < argc - 1; ++i)
         len += strlen(argv[i]) + 3;
-    char *cmdline = xmalloc(len);
+    cmdline = xmalloc(len);
 
     cmdline[0] = '\0';
-    for (int i = 0; i < argc - 1; ++i) {
+    for (int i = 0; i < (argc - 1); i += 1) {
         strcat(cmdline, "\"");
         strcat(cmdline, argv[i]);
         strcat(cmdline, "\"");
-        if (i < argc - 1)
-            strcat(cmdline, " ");
+        strcat(cmdline, " ");
     }
 
     FILE *tty = freopen("CONIN$", "r", stdin);
