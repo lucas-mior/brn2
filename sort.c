@@ -63,6 +63,7 @@ sort_shuffle(void *array, usize n, usize size) {
     }
 
     free(tmp);
+    return;
 }
 
 static void
@@ -291,6 +292,7 @@ main(void) {
             printf("\n");
         }
     }
+    exit(EXIT_SUCCESS);
 }
 
 #endif
