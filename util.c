@@ -135,6 +135,7 @@ xmmap_commit(size_t *size) {
 }
 void
 xmunmap(void *p, size_t size) {
+    (void) size;
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
         fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
                         p, GetLastError());
