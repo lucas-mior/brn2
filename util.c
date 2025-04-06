@@ -90,6 +90,12 @@ xmmap_commit(usize *size) {
     }
     return p;
 }
+void
+xmunmap(void *p, usize size) {
+    if (munmap(p, size) < 0)
+        error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
+    return;
+}
 #else
 void *
 xmmap_commit(usize *size) {
@@ -98,19 +104,15 @@ xmmap_commit(usize *size) {
     memset(p, 0, *size);
     return p;
 }
-#endif
-
 void
 xmunmap(void *p, usize size) {
-#ifdef __linux__
-    if (munmap(p, size) < 0)
-        error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
-#else
-    (void) size;
-    free(p);
-#endif
+    if (!VirtualFree(p, 0, MEM_RELEASE)) {
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
+                        arena, GetLastError());
+    }
     return;
 }
+#endif
 
 void *
 xrealloc(void *old, const usize size) {
