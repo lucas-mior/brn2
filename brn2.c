@@ -411,7 +411,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
         memcpy(file->name, buffer, length + 1);
         length += 1;
     }
-    fclose(file);
+    fclose(lines);
     list->length = length;
     return list;
 }
