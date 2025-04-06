@@ -371,7 +371,11 @@ int main(int argc, char **argv) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
+#ifndef __WIN32__
                 getc(stdin);
+#else
+                getch();
+#endif
                 continue;
             } else {
                 break;
