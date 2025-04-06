@@ -67,14 +67,14 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 #endif
 
-static void *arena_malloc(size_t size);
-static void arena_destroy(Arena *arena);
-static Arena *arena_alloc(char *name, size_t size);
-static void *arena_push(Arena *arena, uint32 size);
-static uint32 arena_push_index32(Arena *arena, uint32 size);
-static int64 arena_push_index(Arena *arena, uint32 size);
-static void *arena_reset(Arena *arena);
-static void *arena_reset_zero(Arena *arena);
+static void *arena_malloc(size_t);
+static void arena_destroy(Arena *);
+static Arena *arena_alloc(char *, size_t);
+static void *arena_push(Arena *, uint32);
+static uint32 arena_push_index32(Arena *, uint32);
+static int64 arena_push_index(Arena *, uint32);
+static void *arena_reset(Arena *);
+static void *arena_reset_zero(Arena *);
 
 #ifndef __WIN32__
 void *
