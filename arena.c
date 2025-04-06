@@ -58,9 +58,14 @@ arena_malloc(usize size) {
 void *
 arena_malloc(usize size) {
     void *p;
-    size = MIN(SIZE4GB, size);
-    p = xmalloc(size);
-    memset(p, 0, size);
+
+    p = VirtualAlloc(NULL, size,
+                           MEM_COMMIT|MEM_RESERVE,
+                           PAGE_READWRITE);
+    if (p == NULL) {
+        error("Error in VirtualAlloc(%zu): %lu.\n", size, GetLastError());
+        exit(EXIT_FAILURE);
+    }
     return p;
 }
 void
