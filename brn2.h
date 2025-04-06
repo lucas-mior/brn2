@@ -29,9 +29,13 @@
 
 #ifdef __WIN32__
   #define BRN2_MAX_THREADS 1
+  #include <windows.h>
 #else
   #define BRN2_MAX_THREADS 64
   #include <threads.h>
+  #include <sys/mman.h>
+  #include <sys/wait.h>
+  #include <fts.h>
 #endif
 
 #include <assert.h>
@@ -56,7 +60,8 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
 #define BRN2_ALIGN(x,alignment) ((x) + ((alignment) - ((x) % (alignment))))
-#define SIZE2MB (2*1024*1024)
+#define SIZE2MB (2u*1024u*1024u)
+#define SIZE4GB (4u*1024u*1024u*1024u)
 
 #ifdef __GNUC__
 # define BRN2_ASSUME_ALIGNED(X) do { \
@@ -170,7 +175,7 @@ uint32 brn2_threads(int (*)(void *),
                     FileList *, FileList *,
                     uint32 *, uint32 *, uint32);
 int brn2_threads_work_sort(void *arg);
-void brn2_timings(char *, struct timespec, struct timespec, uint);
+void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));

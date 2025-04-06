@@ -96,6 +96,11 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
 fi
 
+if [ "$CC" = "zig cc" ]; then
+    CFLAGS="$CFLAGS -target x86_64-windows-gnu"
+    CPPFLAGS="$CPPFLAGS"
+fi
+
 case "$target" in
     "assembly")
         CFLAGS="$CFLAGS -S"
