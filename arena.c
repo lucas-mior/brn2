@@ -105,7 +105,10 @@ arena_malloc(size_t size) {
 }
 void
 arena_destroy(Arena *arena) {
-    free(arena);
+    if (!VirtualFree(arena, 0, MEM_RELEASE)) {
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
+                        arena, GetLastError());
+    }
     return;
 }
 #endif
