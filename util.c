@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #ifdef __WIN32__
   #include <windows.h>
@@ -42,6 +43,11 @@
   #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
+#ifndef INTEGERS
+#define INTEGERS
+typedef uint32_t uint32;
+#endif
+
 #ifndef __WIN32__
 void error(char *, ...);
 #else
@@ -57,6 +63,22 @@ static char *xstrdup(char *);
 static void *xmemdup(void *, size_t);
 static void *snprintf2(char *, size_t, char *, ...);
 static void util_command(const int, char **);
+static uint32 util_nthreads(void);
+
+#ifdef __WIN32__
+uint32
+util_nthreads(void) {
+    SYSTEM_INFO sysinfo;
+    memset(&sysinfo, 0, sizeof(sysinfo));
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+}
+#else
+uint32
+util_nthreads(void) {
+    return (uint32)sysconf(_SC_NPROCESSORS_ONLN);
+}
+#endif
 
 #ifndef __WIN32__
 void error(char *format, ...) {

@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     usize indexes_new_size = 0;
     HashMap *oldlist_map = NULL;
     HashMap *newlist_map = NULL;
-    long available_threads;
+    uint32 available_threads;
 
     uint32 main_capacity;
     char *EDITOR;
@@ -89,7 +89,6 @@ int main(int argc, char **argv) {
     char *directory = ".";
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
-    (void) available_threads;
 
     program = basename(argv[0]);
 
@@ -147,13 +146,11 @@ int main(int argc, char **argv) {
     if ((argc - optind) >= 1)
         mode = FILES_FROM_ARGS;
 
-#ifndef __WIN32__
-    available_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    available_threads = util_nthreads();
     if (available_threads <= 0)
         nthreads = 1; 
     else
-        nthreads = MIN((uint32)available_threads, BRN2_MAX_THREADS);
-#endif
+        nthreads = MIN(available_threads, BRN2_MAX_THREADS);
 
     arena_old = arena_alloc("arena for old filenames", PATH_MAX*UINT32_MAX);
     arena_new = arena_alloc("arena for new filenames", PATH_MAX*UINT32_MAX);
