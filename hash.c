@@ -31,7 +31,6 @@
 #include "hash.h"
 #include "rapidhash.h"
 
-#include "util.c"
 #include "arena.c"
 
 #if !defined(INLINE)
