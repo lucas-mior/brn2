@@ -395,6 +395,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
         list->arena = arena_new;
 
     while (!feof(file)) {
+        uint32 length;
         if (length >= cap) {
             cap *= 2;
             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap));
@@ -403,9 +404,11 @@ brn2_list_from_lines(char *filename, bool is_old) {
         if (!fgets(buffer, sizeof(buffer), file))
             continue;
 
-        buffer[strcspn(buffer, "\n")] = '\0';
-        list->files[length].name = strdup(buffer);
-        list->files[length].length = strlen(buffer);
+        length = strcspn(buffer, "\n");
+        buffer[length] = '\0';
+        list->files[length].name = arena_push(arena, length + 1);
+        list->files[length].length = length;
+        memcpy(list->files[length].name, buffer, length + 1);
         length += 1;
     }
     fclose(file);
