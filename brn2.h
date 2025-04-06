@@ -30,7 +30,13 @@
 #ifdef __WIN32__
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
+#define write2(fd, buf, count) do { \
+    FILE *filexxx = fdopen(fd, "a"); \
+    fwrite(buf, 1, count, filexxx); \
+    fclose(filexxx); \
+} while (0)
 #else
+#define write2(fd, buf, count) write(fd, buf, count)
   #define BRN2_MAX_THREADS 64
   #include <threads.h>
   #include <sys/mman.h>
@@ -61,7 +67,7 @@
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
 #define BRN2_ALIGN(x,alignment) ((x) + ((alignment) - ((x) % (alignment))))
 #define SIZE2MB (2u*1024u*1024u)
-#define SIZE4GB (4u*1024u*1024u*1024u)
+#define SIZE4GB (1u*1024u*1024u*1024u)
 
 #ifdef __GNUC__
 # define BRN2_ASSUME_ALIGNED(X) do { \
@@ -183,10 +189,12 @@ void brn2_print_list(FileList *);
 void brn2_usage(FILE *) __attribute__((noreturn));
 #ifndef __WIN32__
 void error(char *, ...);
+#else
+#define error(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
 void *xmalloc(const usize);
-void *xmmap(usize *);
+void *xmmap_commit(usize *);
 void xmunmap(void *, usize);
 void *xrealloc(void *, const usize);
 void *xcalloc(const usize, const usize);
@@ -194,7 +202,6 @@ char *xstrdup(char *);
 void *xmemdup(void *, usize);
 void *snprintf2(char *, size_t, char *, ...);
 void util_command(const int, char **);
-void error(char *, ...);
 
 Arena *arena_alloc(char *, size_t);
 void *arena_push(Arena *, uint32);

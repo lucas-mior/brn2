@@ -82,7 +82,7 @@ hash_##T##_create(uint32 length) { \
 \
     size = sizeof(*map) + capacity*sizeof(*(&map->array[0])); \
 \
-    map = xmmap(&size); \
+    map = xmmap_commit(&size); \
     map->arena = arena_alloc("arena for hash map", \
                              capacity*sizeof(*(&map->array[0]))); \
     arena_push(map->arena, BRN2_ALIGNMENT); \
@@ -112,7 +112,7 @@ hash_##T##_balance(struct Hash##T *old_map) { \
 \
     size = sizeof(*new_map) + capacity*sizeof(*(&new_map->array[0])); \
 \
-    new_map = xmmap(&size); \
+    new_map = xmmap_commit(&size); \
     new_map->arena = arena_alloc("arena for balanced hash map", \
                                  capacity*sizeof(*(&new_map->array[0]))); \
     arena_push(new_map->arena, BRN2_ALIGNMENT); \
