@@ -187,7 +187,7 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, \
     } \
 \
     map->collisions += 1; \
-    iterator->next = arena_push_index(map->arena, sizeof(*iterator)); \
+    iterator->next = arena_push_index32(map->arena, sizeof(*iterator)); \
     iterator = (void *)(map->arena->begin + iterator->next); \
     iterator->key = key; \
     iterator->hash = hash; \

@@ -52,8 +52,6 @@
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
-#define SIZE2MB (2u*1024u*1024u)
-#define SIZE4GB (1u*1024u*1024u*1024u)
 
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
@@ -185,12 +183,5 @@ char *xstrdup(char *);
 void *xmemdup(void *, usize);
 void *snprintf2(char *, size_t, char *, ...);
 void util_command(const int, char **);
-
-Arena *arena_alloc(char *, size_t);
-void *arena_push(Arena *, uint32);
-uint32 arena_push_index(Arena *, uint32);
-void *arena_reset(Arena *);
-void *arena_reset_zero(Arena *);
-void arena_destroy(Arena *);
 
 #endif
