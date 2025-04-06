@@ -255,7 +255,7 @@ void util_command(const int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    STARTUPINFO si = { sizeof(si) };
+    STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
     BOOL success = CreateProcessA(
