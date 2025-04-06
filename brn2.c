@@ -84,6 +84,53 @@ brn2_list_from_args(int argc, char **argv) {
     return list;
 }
 
+#ifdef __WIN32__
+int scandir(const char *dir, struct dirent ***namelist,
+            int (*filter)(const struct dirent *),
+            int (*compar)(const struct dirent **, const struct dirent **)) {
+    WIN32_FIND_DATAA find_data;
+    HANDLE hFind;
+    char path[MAX_PATH];
+    size_t count = 0;
+    size_t capacity = 16;
+
+    struct dirent **list = malloc(capacity * sizeof(struct dirent *));
+    if (!list) return -1;
+
+    snprintf(path, MAX_PATH, "%s\\*", dir);
+    hFind = FindFirstFileA(path, &find_data);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        free(list);
+        return -1;
+    }
+
+    do {
+        struct dirent *ent = malloc(sizeof(struct dirent));
+        if (!ent) break;
+
+        strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
+        if (!filter || filter(ent)) {
+            if (count >= capacity) {
+                capacity *= 2;
+                struct dirent **tmp = realloc(list, capacity * sizeof(struct dirent *));
+                if (!tmp) break;
+                list = tmp;
+            }
+            list[count++] = ent;
+        } else {
+            free(ent);
+        }
+    } while (FindNextFileA(hFind, &find_data));
+    FindClose(hFind);
+
+    if (compar)
+        qsort(list, count, sizeof(struct dirent *), (int (*)(const void *, const void *))compar);
+
+    *namelist = list;
+    return (int)count;
+}
+#endif
+
 FileList *
 brn2_list_from_dir(char *directory) {
     FileList *list;
@@ -150,6 +197,7 @@ brn2_list_from_dir(char *directory) {
     return list;
 }
 
+#ifndef __WIN32__
 FileList *
 brn2_list_from_dir_recurse(char *directory) {
     FileList *list;
@@ -221,6 +269,7 @@ brn2_list_from_dir_recurse(char *directory) {
     list->length = length;
     return list;
 }
+#endif
 
 void
 brn2_free_list(FileList *list) {
@@ -229,6 +278,7 @@ brn2_free_list(FileList *list) {
     return;
 }
 
+#ifndef __WIN32__
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
     FileList *list;
@@ -336,6 +386,13 @@ brn2_list_from_lines(char *filename, bool is_old) {
 
     return list;
 }
+#else
+FileList *
+brn2_list_from_lines(char *filename, bool is_old) {
+    error("List from lines is not implemented on windows.\n");
+    exit(EXIT_FAILURE);
+}
+#endif
 
 bool
 brn2_is_invalid_name(char *filename) {
@@ -358,6 +415,7 @@ typedef struct Slice {
     uint32 *partial;
 } Slice;
 
+#ifndef __WIN32__
 int
 brn2_threads_work_normalization(void *arg) {
     Slice *slice = arg;
@@ -420,6 +478,12 @@ brn2_threads_work_normalization(void *arg) {
     }
     return 0;
 }
+#else
+int
+brn2_threads_work_normalization(void *arg) {
+    return 0;
+}
+#endif
 
 void
 brn2_slash_add(FileName *file) {
@@ -505,6 +569,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     return total;
 }
 
+#ifndef __WIN32__
 uint32
 brn2_threads(int (*function)(void *),
              FileList *old, FileList *new,
@@ -552,6 +617,33 @@ brn2_threads(int (*function)(void *),
         thrd_join(threads[i], NULL);
     return nthreads;
 }
+#else
+uint32
+brn2_threads(int (*function)(void *),
+             FileList *old, FileList *new,
+             uint32 *hashes, uint32 *numbers, uint32 map_size) {
+    Slice slices[1];
+    uint32 length;
+
+    if (old) {
+        length = old->length;
+    } else {
+        length = new->length;
+    }
+
+    uint32 i = 0;
+    slices[i].start = i*length;
+    slices[i].end = length;
+    slices[i].old_list = old;
+    slices[i].new_list = new;
+    slices[i].hashes = hashes;
+    slices[i].partial = numbers ? &numbers[i] : NULL;
+    slices[i].map_capacity = map_size;
+    function((void *)&slices[i]);
+
+    return 1;
+}
+#endif
 
 bool
 brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
@@ -688,7 +780,6 @@ brn2_execute(FileList *old, FileList *new,
             }
         }
 #else
-        (void) newlength;
         if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
