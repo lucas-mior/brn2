@@ -367,7 +367,7 @@ int main(int argc, char **argv) {
             brn2_print_list(new);
 
             if (!brn2_verify(new, newlist_map, indexes_new)) {
-                /* brn2_free_list(new); */
+                brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
 #ifndef __WIN32__
