@@ -80,6 +80,7 @@ int main(int argc, char **argv) {
     uint32 main_capacity;
     char *EDITOR;
     int opt;
+
 #ifdef BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
