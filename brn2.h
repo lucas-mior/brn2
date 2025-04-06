@@ -54,6 +54,8 @@
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
+#define SIZE2MB (2u*1024u*1024u)
+#define SIZE4GB (1u*1024u*1024u*1024u)
 
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
