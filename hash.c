@@ -31,13 +31,14 @@
 #include "hash.h"
 #include "rapidhash.h"
 
-#pragma push_macro("TESTING_THIS_FILE")
-#define TESTING_THIS_FILE 0
-
 #include "util.c"
 #include "arena.c"
 
-#pragma pop_macro("TESTING_THIS_FILE")
+#ifdef TESTING_brn2
+  #define TESTING_THIS_FILE 1
+#else
+  #define TESTING_THIS_FILE 0
+#endif
 
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -375,10 +376,6 @@ hash_expected_collisions(void *map) { \
         hash_set_insert(a, b, 0)
 #define hash_set_insert_pre_calc(a, b, c, d) \
         hash_set_insert_pre_calc(a, b, c, d, 0)
-
-#ifndef TESTING_THIS_FILE
-#define TESTING_THIS_FILE 0
-#endif
 
 #if TESTING_THIS_FILE
 #include <assert.h>
