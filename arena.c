@@ -18,7 +18,6 @@
 #ifndef ARENA_C
 #define ARENA_C
 
-#include <sys/mman.h>
 #include "brn2.h"
 #include "util.c"
 
@@ -29,6 +28,7 @@ arena_alloc(char *name, size_t size) {
 
     size += ALIGN(sizeof(*arena));
 
+#ifdef __linux__
     do {
         if (size >= SIZE2MB) {
             p = mmap(NULL, size,
@@ -50,6 +50,10 @@ arena_alloc(char *name, size_t size) {
         error("Error in mmap(%zu): %s.\n", size, strerror(errno));
         exit(EXIT_FAILURE);
     }
+#else 
+    size = MIN(SIZE4GB, size);
+    p = xmalloc(size);
+#endif
 
     arena = p;
     arena->name = name;
@@ -61,11 +65,15 @@ arena_alloc(char *name, size_t size) {
 
 void
 arena_destroy(Arena *arena) {
+#ifdef __linux__
     if (munmap(arena, arena->size) < 0) {
         error("Error destroying arena %s:\n", arena->name);
         error("Error in munmap(%p, %zu): %s.\n",
               arena, arena->size, strerror(errno));
     }
+#else
+    free(arena);
+#endif
     return;
 }
 

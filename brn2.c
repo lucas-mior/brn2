@@ -26,10 +26,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <fts.h>
 
 #include "hash.c"
 #include "util.c"
@@ -321,7 +319,11 @@ brn2_list_from_lines(char *filename, bool is_old) {
     }
     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
+#ifdef __linux__
     munmap(map, map_size);
+#else
+    free(map);
+#endif
 
     if (ftruncate(fd, map_size - padding) < 0) {
         error("Error truncating '%s': %s.\n", filename, strerror(errno));
