@@ -261,16 +261,16 @@ void util_command(const int argc, char **argv) {
     PROCESS_INFORMATION pi = {0};
 
     BOOL success = CreateProcessA(
-        .lpApplicationName = NULL,
-        .lpCommandLine = cmdline,
-        .lpProcessAttributes = NULL,
-        .lpThreadAttributes = NULL,
-        .bInheritHandles = TRUE,
-        .dwCreationFlags = 0,
-        .lpEnvironment = NULL,
-        .lpCurrentDirectory = NULL,
-        .lpStartupInfo = &si,
-        .lpProcessInformation = &pi
+        NULL,
+        cmdline,
+        NULL,
+        NULL,
+        TRUE,
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi
     );
 
     if (!success) {
