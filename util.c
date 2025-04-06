@@ -257,6 +257,7 @@ void util_command(const int argc, char **argv) {
 
     STARTUPINFO si = {
         .cb = sizeof(si),
+        0, 0, 0, 0, 0, 0, 0,
     };
     PROCESS_INFORMATION pi;
 
