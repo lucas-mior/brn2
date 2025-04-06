@@ -27,6 +27,13 @@
   #define PATH_MAX 4096
 #endif
 
+#ifdef __WIN32__
+  #define BRN2_MAX_THREADS 1
+#else
+  #define BRN2_MAX_THREADS 64
+  #include <threads.h>
+#endif
+
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -35,7 +42,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <threads.h>
 #include <unistd.h>
 
 #include "hash.h"
@@ -44,7 +50,6 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-#define BRN2_MAX_THREADS 64
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
