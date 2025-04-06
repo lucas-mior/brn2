@@ -301,6 +301,7 @@ int main(int argc, char **argv) {
         (void) args_shuf;
 
         while (true) {
+            error("while loop\n");
 #ifdef BRN2_BENCHMARK
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
@@ -369,12 +370,7 @@ int main(int argc, char **argv) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
-#ifndef __WIN32__
                 getc(stdin);
-#else
-                sleep(5);
-                continue;
-#endif
                 continue;
             } else {
                 break;
