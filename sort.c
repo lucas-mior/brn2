@@ -215,12 +215,10 @@ sort(FileList *old) {
 #define MAXI 10000
 static const uint32 possibleN[] = {100};
 
-static int32 compare_count = 0;
 static int32
 compare_int(const void *a, const void *b) {
     const int32 *aa = a;
     const int32 *bb = b;
-    compare_count += 1;
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
