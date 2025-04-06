@@ -23,20 +23,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef TESTING_THIS_FILE
-  #define TESTING_THIS_FILE 0
-#endif
-
-#pragma push_macro("TESTING_THIS_FILE")
-#define TESTING_THIS_FILE 0
-
 #include "util.c"
 
-#pragma pop_macro("TESTING_THIS_FILE")
-
-#if TESTING_THIS_FILE
+#ifdef TESTING_sort
+  #define TESTING_THIS_FILE 1
   #define COMPARE(A,B) compare(A,B)
 #else
+  #define TESTING_THIS_FILE 0
   #define COMPARE(A,B) brn2_compare(A,B)
 #endif
 
