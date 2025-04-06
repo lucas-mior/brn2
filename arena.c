@@ -49,7 +49,8 @@ arena_malloc(usize size) {
     } while (0);
 
     if (p == MAP_FAILED) {
-        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
+        fprintf(stderr, "Error in mmap(%zu): %s.\n",
+                        size, strfprintf(stderr, errno));
         exit(EXIT_FAILURE);
     }
     return p;
@@ -63,7 +64,8 @@ arena_malloc(usize size) {
                            MEM_COMMIT|MEM_RESERVE,
                            PAGE_READWRITE);
     if (p == NULL) {
-        error("Error in VirtualAlloc(%zu): %lu.\n", size, GetLastError());
+        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
+                        size, GetLastfprintf(stderr, ));
         exit(EXIT_FAILURE);
     }
     return p;
