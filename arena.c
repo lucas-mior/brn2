@@ -19,6 +19,7 @@
 #define ARENA_C
 
 #include "brn2.h"
+#include "util.c"
 
 #ifdef __linux__
   #define TRY_HUGE_PAGES 1
