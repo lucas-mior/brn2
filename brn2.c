@@ -92,8 +92,10 @@ int scandir(const char *dir, struct dirent ***namelist,
     char path[MAX_PATH];
     size_t count = 0;
     size_t capacity = 16;
+    (void) filter;
+    (void) compar;
 
-    struct dirent **list = xmalloc(capacity * sizeof(struct dirent *));
+    struct dirent **list = xmalloc(capacity*sizeof(struct dirent *));
     if (!list) return -1;
 
     snprintf(path, MAX_PATH, "%s\\*", dir);
@@ -105,13 +107,11 @@ int scandir(const char *dir, struct dirent ***namelist,
 
     do {
         struct dirent *ent = xmalloc(sizeof(struct dirent));
-        if (!ent) break;
 
         strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
         if (count >= capacity) {
             capacity *= 2;
-            struct dirent **tmp = realloc(list, capacity * sizeof(struct dirent *));
-            if (!tmp) break;
+            list = xrealloc(list, capacity * sizeof(struct dirent *));
             list = tmp;
         }
         list[count++] = ent;
