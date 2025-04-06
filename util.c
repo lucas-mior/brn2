@@ -57,6 +57,22 @@ static char *xstrdup(char *);
 static void *xmemdup(void *, size_t);
 static void *snprintf2(char *, size_t, char *, ...);
 static void util_command(const int, char **);
+static uint32 util_nthreads(void);
+
+#ifdef __WIN32__
+uint32
+util_nthreads(void) {
+    SYSTEM_INFO sysinfo;
+    memset(&sysinfo, 0, sizeof(sysinfo));
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+}
+#else
+uint32
+util_nthreads(void) {
+    return (uint32)sysconf(_SC_NPROCESSORS_ONLN);
+}
+#endif
 
 #ifndef __WIN32__
 void error(char *format, ...) {
