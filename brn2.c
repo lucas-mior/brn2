@@ -800,6 +800,8 @@ brn2_execute(FileList *old, FileList *new,
             }
         }
 #else
+        (void) oldlength;
+        (void) newname_index_on_oldlist;
         if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
