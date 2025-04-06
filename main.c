@@ -295,7 +295,6 @@ int main(int argc, char **argv) {
         (void) args_shuf;
 
         while (true) {
-            error("while loop\n");
 #ifdef BRN2_BENCHMARK
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
