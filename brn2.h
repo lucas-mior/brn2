@@ -170,20 +170,5 @@ void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
-#ifndef __WIN32__
-void error(char *, ...);
-#else
-#define error(...) fprintf(stderr, __VA_ARGS__)
-#endif
-
-void *xmalloc(const usize);
-void *xmmap_commit(usize *);
-void xmunmap(void *, usize);
-void *xrealloc(void *, const usize);
-void *xcalloc(const usize, const usize);
-char *xstrdup(char *);
-void *xmemdup(void *, usize);
-void *snprintf2(char *, size_t, char *, ...);
-void util_command(const int, char **);
 
 #endif

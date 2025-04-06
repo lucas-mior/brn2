@@ -43,6 +43,12 @@
 #endif
 
 #ifndef __WIN32__
+void error(char *, ...);
+#else
+#define error(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
+#ifndef __WIN32__
 void error(char *format, ...) {
     int n;
     ssize_t w;
