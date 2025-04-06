@@ -112,7 +112,6 @@ int scandir(const char *dir, struct dirent ***namelist,
         if (count >= capacity) {
             capacity *= 2;
             list = xrealloc(list, capacity * sizeof(struct dirent *));
-            list = tmp;
         }
         list[count++] = ent;
     } while (FindNextFileA(hFind, &find_data));
