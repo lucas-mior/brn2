@@ -67,6 +67,15 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 #endif
 
+void *arena_malloc(size_t size);
+void arena_destroy(Arena *arena);
+Arena *arena_alloc(char *name, size_t size);
+void *arena_push(Arena *arena, uint32 size);
+uint32 arena_push_index32(Arena *arena, uint32 size);
+int64 arena_push_index(Arena *arena, uint32 size);
+void * arena_reset(Arena *arena);
+void * arena_reset_zero(Arena *arena);
+
 #ifndef __WIN32__
 void *
 arena_malloc(size_t size) {
@@ -99,7 +108,7 @@ void
 arena_destroy(Arena *arena) {
     if (munmap(arena, arena->size) < 0)
         fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
-                        arena, arena->size, strerror(errno));
+                        (void *)arena, arena->size, strerror(errno));
     return;
 }
 #else 
