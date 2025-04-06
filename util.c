@@ -257,7 +257,23 @@ void util_command(const int argc, char **argv) {
 
     STARTUPINFO si = {
         .cb = sizeof(si),
-        0, 0, 0, 0, 0, 0, 0,
+        .lpReserved = 0,
+        .lpDesktop = 0,
+        .lpTitle = 0,
+        .dwX = 0,
+        .dwY = 0,
+        .dwXSize = 0,
+        .dwYSize = 0,
+        .dwXCountChars = 0,
+        .dwYCountChars = 0,
+        .dwFillAttribute = 0,
+        .dwFlags = 0,
+        .wShowWindow = 0,
+        .cbReserved2 = 0,
+        .lpReserved2 = 0,
+        .hStdInput = 0,
+        .hStdOutput = 0,
+        .hStdError = 0,
     };
     PROCESS_INFORMATION pi;
 
