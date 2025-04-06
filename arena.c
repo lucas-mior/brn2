@@ -18,8 +18,16 @@
 #ifndef ARENA_C
 #define ARENA_C
 
-#include "brn2.h"
-#include "util.c"
+#ifdef __WIN32__
+#include <windows.h>
+#else
+#include <sys/mman.h>
+#endif
+
+#include "string.h"
+
+#define SIZE2MB (2u*1024u*1024u)
+#define SIZE4GB (1u*1024u*1024u*1024u)
 
 #ifdef __linux__
   #define TRY_HUGE_PAGES 1
@@ -29,7 +37,7 @@
 
 #ifndef __WIN32__
 void *
-arena_malloc(usize size) {
+arena_malloc(size_t size) {
     void *p;
     do {
         if ((size >= SIZE2MB) && TRY_HUGE_PAGES) {
@@ -57,7 +65,7 @@ arena_malloc(usize size) {
 }
 #else 
 void *
-arena_malloc(usize size) {
+arena_malloc(size_t size) {
     void *p;
 
     p = VirtualAlloc(NULL, size,
