@@ -73,8 +73,8 @@ static Arena *arena_alloc(char *name, size_t size);
 static void *arena_push(Arena *arena, uint32 size);
 static uint32 arena_push_index32(Arena *arena, uint32 size);
 static int64 arena_push_index(Arena *arena, uint32 size);
-static void * arena_reset(Arena *arena);
-static void * arena_reset_zero(Arena *arena);
+static void *arena_reset(Arena *arena);
+static void *arena_reset_zero(Arena *arena);
 
 #ifndef __WIN32__
 void *
