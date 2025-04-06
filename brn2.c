@@ -380,9 +380,9 @@ brn2_list_from_lines(char *filename, bool is_old) {
     char buffer[PATH_MAX];
     FileList *list;
     uint32 cap = 128;
-    FILE *file;
+    FILE *lines;
     
-    if ((file = fopen(filename, "r")) == NULL) {
+    if ((lines = fopen(filename, "r")) == NULL) {
         error("Error opening '%s': %s.\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -394,21 +394,24 @@ brn2_list_from_lines(char *filename, bool is_old) {
     else
         list->arena = arena_new;
 
-    while (!feof(file)) {
+    while (!feof(lines)) {
+        FileName *file;
         if (length >= cap) {
             cap *= 2;
             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap));
         }
+        file = &(list->files[length]);
 
-        if (!fgets(buffer, sizeof(buffer), file))
+        if (!fgets(buffer, sizeof(buffer), lines))
             continue;
 
-        buffer[strcspn(buffer, "\n")] = '\0';
-        list->files[length].name = strdup(buffer);
-        list->files[length].length = strlen(buffer);
+        file->length = strcspn(buffer, "\n");
+        buffer[file->length] = '\0';
+        file->name = arena_push(list->arena, file->length + 1);
+        memcpy(file->name, buffer, file->length + 1);
         length += 1;
     }
-    fclose(file);
+    fclose(lines);
     list->length = length;
     return list;
 }
