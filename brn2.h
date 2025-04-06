@@ -49,8 +49,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "hash.h"
-
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -111,18 +109,8 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
-typedef struct Arena {
-    char *name;
-    char *begin;
-    void *pos;
-    size_t size;
-} Arena;
-
-Arena *arena_alloc(char *, size_t);
-void *arena_push(Arena *, uint32);
-void *arena_reset(Arena *);
-void *arena_reset_zero(Arena *);
-void arena_destroy(Arena *);
+#include "hash.h"
+#include "arena.c"
 
 typedef struct File {
     char name[20];
