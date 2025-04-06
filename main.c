@@ -178,8 +178,9 @@ int main(int argc, char **argv) {
 #ifdef __WIN32__
         error("Finding files recursively is not implemented on windows.\n");
         exit(EXIT_FAILURE);
-#endif
+#else
         old = brn2_list_from_dir_recurse(directory);
+#endif
         break;
     default:
         error("Unexpected mode: %d.\n", mode);
