@@ -166,12 +166,10 @@ bool \
 hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, \
                            uint32 hash, uint32 index, uint32 value) { \
     Bucket##T *iterator = &(map->array[index]); \
-    error("inserting %p key %s = %d\n", key, key, value); \
 \
     if (iterator->key == NULL) { \
         iterator->key = key; \
         iterator->hash = hash; \
-        error("inserted %p key %s = %d\n", \
                iterator->key, iterator->key, value); \
         iterator->next = 0; \
         HASH_ITERATOR_VALUE_ASSIGN; \
