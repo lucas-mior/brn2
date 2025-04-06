@@ -346,13 +346,11 @@ int main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_map == NULL) {
-                error("newlist_map == NULL\n");
                 newlist_map = hash_map_create(new->length);
             } else {
                 hash_map_zero(newlist_map);
             }
             if (indexes_new == NULL) {
-                error("indexes_new == NULL\n");
                 indexes_new_size = new->length*sizeof(*indexes_new);
                 indexes_new = xmmap_commit(&indexes_new_size);
             }
