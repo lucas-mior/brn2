@@ -65,10 +65,6 @@ delete_brn2_buffer(void) {
     return;
 }
 
-#ifdef __WIN32__
-#define basename(X) X
-#endif
-
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;

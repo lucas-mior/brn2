@@ -53,18 +53,6 @@ void error(char *format, ...) {
 }
 #endif
 
-void
-util_free_huge(void *p, usize size) {
-#ifdef __linux__
-    if (munmap(p, size) < 0)
-        error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
-#else
-    (void) size;
-    free(p);
-#endif
-    return;
-}
-
 void *
 xmalloc(const usize size) {
     void *p;
