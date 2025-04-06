@@ -139,10 +139,6 @@ brn2_list_from_dir(char *directory) {
         error("Error scanning '%s': %s.\n", directory, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    /* if (number_files <= 2) { */
-    /*     error("Directory '%s' is empty. Exiting.\n", directory); */
-    /*     exit(EXIT_FAILURE); */
-    /* } */
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files));
     list->arena = arena_old;
