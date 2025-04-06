@@ -61,8 +61,6 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
 #define BRN2_ALIGN(x,alignment) ((x) + ((alignment) - ((x) % (alignment))))
-#define SIZE2MB (2u*1024u*1024u)
-#define SIZE4GB (1u*1024u*1024u*1024u)
 
 #ifdef __GNUC__
 # define BRN2_ASSUME_ALIGNED(X) do { \
