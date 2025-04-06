@@ -23,8 +23,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "brn2.h"
+#define SIZE2MB (2u*1024u*1024u)
 
 #ifndef __WIN32__
 void error(char *format, ...) {
@@ -43,7 +44,7 @@ void error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    if ((w = write(STDERR_FILENO, buffer, (usize)n)) < n) {
+    if ((w = write(STDERR_FILENO, buffer, (size_t)n)) < n) {
         fprintf(stderr, "Error writing to STDERR_FILENO");
         if (w < 0)
             fprintf(stderr, ": %s", strerror(errno));
@@ -54,7 +55,7 @@ void error(char *format, ...) {
 #endif
 
 void *
-xmalloc(const usize size) {
+xmalloc(const size_t size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         error("Failed to allocate %zu bytes.\n", size);
@@ -65,7 +66,7 @@ xmalloc(const usize size) {
 
 #ifdef __linux__
 void *
-xmmap_commit(usize *size) {
+xmmap_commit(size_t *size) {
     void *p;
 
     do {
@@ -90,30 +91,39 @@ xmmap_commit(usize *size) {
     }
     return p;
 }
-#else
-void *
-xmmap_commit(usize *size) {
-    void *p;
-    p = xmalloc(*size);
-    memset(p, 0, *size);
-    return p;
-}
-#endif
-
 void
-xmunmap(void *p, usize size) {
-#ifdef __linux__
+xmunmap(void *p, size_t size) {
     if (munmap(p, size) < 0)
         error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
-#else
-    (void) size;
-    free(p);
-#endif
     return;
 }
+#else
+void *
+xmmap_commit(size_t *size) {
+    void *p;
+
+    p = VirtualAlloc(NULL, *size,
+                           MEM_COMMIT|MEM_RESERVE,
+                           PAGE_READWRITE);
+    if (p == NULL) {
+        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
+                        *size, GetLastError());
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+void
+xmunmap(void *p, size_t size) {
+    if (!VirtualFree(p, 0, MEM_RELEASE)) {
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
+                        p, GetLastError());
+    }
+    return;
+}
+#endif
 
 void *
-xrealloc(void *old, const usize size) {
+xrealloc(void *old, const size_t size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
         error("Failed to reallocate %zu bytes.\n", size);
@@ -124,7 +134,7 @@ xrealloc(void *old, const usize size) {
 }
 
 void *
-xcalloc(const usize nmemb, const usize size) {
+xcalloc(const size_t nmemb, const size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
         error("Error allocating %zu members of %zu bytes each.\n", nmemb, size);
@@ -150,7 +160,7 @@ xstrdup(char *string) {
 }
 
 void *
-xmemdup(void *source, usize size) {
+xmemdup(void *source, size_t size) {
     void *p;
     if ((p = malloc(size)) == NULL) {
         error("Error reallocating %zu bytes.\n", size);
@@ -171,10 +181,10 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 
     if (n >= (int)size) {
         va_list args2;
-        buffer = xmalloc((usize)n + 1);
+        buffer = xmalloc((size_t)n + 1);
         va_start(args, format);
         va_copy(args2, args);
-        n = vsnprintf(buffer, (usize)n + 1, format, args);
+        n = vsnprintf(buffer, (size_t)n + 1, format, args);
         va_end(args);
     }
     if (n <= 0) {
