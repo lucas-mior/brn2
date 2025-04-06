@@ -86,15 +86,6 @@ int main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    EDITOR = mmap(
-        .addr=NULL,
-        .size=4096,
-        .prot=PROT_READ,
-        .flags=MAP_PRIVATE,
-        .fd=-1,
-        .offset=0
-    );
-
     char *directory = ".";
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
