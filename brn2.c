@@ -416,7 +416,6 @@ brn2_list_from_lines(char *filename, bool is_old) {
     }
     fclose(file);
     list->length = length;
-    error("%s @ %s:%d\n", __func__, __FILE__, __LINE__);
     return list;
 }
 #endif
