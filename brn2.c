@@ -382,7 +382,6 @@ brn2_list_from_lines(char *filename, bool is_old) {
 #else
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
-    error("%s @ %s:%d\n", __func__, __FILE__, __LINE__);
     FILE *file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Could not open file %s\n", filename);
