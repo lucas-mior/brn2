@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
     for (uint32 i = 0; i < old->length; i += 1) {
         FileName *file = &(old->files[i]);
         while (file->type == TYPE_ERR) {
-            error("Removing '%s' from list.\n", file->name, strerror(errno));
+            error("Removing '%s' from list.\n", file->name);
             old->length -= 1;
             if (old->length <= i)
                 break;
