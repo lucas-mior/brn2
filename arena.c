@@ -21,6 +21,49 @@
 #include "brn2.h"
 #include "util.c"
 
+#ifdef __linux__
+void *
+arena_malloc(usize size) {
+    void *p;
+    do {
+        if (size >= SIZE2MB) {
+            p = mmap(NULL, size,
+                     PROT_READ|PROT_WRITE,
+                     MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
+                     -1, 0);
+            if (p != MAP_FAILED) {
+                size = BRN2_ALIGN(size, SIZE2MB);
+                break;
+            }
+        }
+        p = mmap(NULL, size,
+                 PROT_READ|PROT_WRITE,
+                 MAP_ANONYMOUS|MAP_PRIVATE,
+                 -1, 0);
+    } while (0);
+
+    if (p == MAP_FAILED) {
+        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+#else 
+void *
+arena_malloc(usize size) {
+    void *p;
+    size = MIN(SIZE4GB, size);
+    p = xmalloc(size);
+    memset(p, 0, size);
+    return p;
+}
+void
+arena_destroy(Arena *arena) {
+    free(arena);
+    return;
+}
+#endif
+
 Arena *
 arena_alloc(char *name, size_t size) {
     void *p;
@@ -28,7 +71,7 @@ arena_alloc(char *name, size_t size) {
 
     size += ALIGN(sizeof(*arena));
 
-    p = util_alloc_huge(size);
+    p = arena_malloc(size);
 
     arena = p;
     arena->name = name;
@@ -36,12 +79,6 @@ arena_alloc(char *name, size_t size) {
     arena->size = size;
     arena->pos = arena->begin;
     return arena;
-}
-
-void
-arena_destroy(Arena *arena) {
-    util_free_huge(arena, arena->size);
-    return;
 }
 
 void *

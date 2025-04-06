@@ -65,43 +65,6 @@ util_free_huge(void *p, usize size) {
     return;
 }
 
-#ifdef __linux__
-void *
-util_alloc_huge(usize size) {
-    void *p;
-    do {
-        if (size >= SIZE2MB) {
-            p = mmap(NULL, size,
-                     PROT_READ|PROT_WRITE,
-                     MAP_ANONYMOUS|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
-                     -1, 0);
-            if (p != MAP_FAILED) {
-                size = BRN2_ALIGN(size, SIZE2MB);
-                break;
-            }
-        }
-        p = mmap(NULL, size,
-                 PROT_READ|PROT_WRITE,
-                 MAP_ANONYMOUS|MAP_PRIVATE,
-                 -1, 0);
-    } while (0);
-
-    if (p == MAP_FAILED) {
-        error("Error in mmap(%zu): %s.\n", size, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    return p;
-}
-#else 
-void *
-util_alloc_huge(usize size) {
-    void *p;
-    size = MIN(SIZE4GB, size);
-    p = xmalloc(size);
-    return p;
-}
-#endif
-
 void *
 xmalloc(const usize size) {
     void *p;

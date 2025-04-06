@@ -170,7 +170,6 @@ hash_##T##_insert_pre_calc(struct Hash##T *map, char *key, \
     if (iterator->key == NULL) { \
         iterator->key = key; \
         iterator->hash = hash; \
-               iterator->key, iterator->key, value); \
         iterator->next = 0; \
         HASH_ITERATOR_VALUE_ASSIGN; \
         map->length += 1; \
