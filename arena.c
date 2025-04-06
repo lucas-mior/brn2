@@ -97,4 +97,11 @@ arena_reset_zero(Arena *arena) {
     return arena->begin;
 }
 
+#ifdef TESTING_arena
+int
+main(void) {
+    exit(EXIT_SUCCESS);
+}
+#endif
+
 #endif

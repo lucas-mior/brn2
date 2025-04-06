@@ -7,10 +7,11 @@ testing () {
     for src in *.c; do
         [ "$src" = "$main" ] && continue
         printf "Testing $src...\n"
+        name="$(echo "$src" | sed 's/\.c//g')"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
         cmdline="$CC $CPPFLAGS $CFLAGS"
-        cmdline="$cmdline -D TESTING_THIS_FILE=1 $src -o /tmp/$src.exe $flags"
+        cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
         set -x
         if $cmdline; then
             /tmp/$src.exe || gdb /tmp/$src.exe

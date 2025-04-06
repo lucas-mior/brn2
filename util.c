@@ -29,12 +29,6 @@
 
 #include "brn2.h"
 
-#ifdef TESTING_brn2
-  #define TESTING_THIS_FILE 1
-#else
-  #define TESTING_THIS_FILE 0
-#endif
-
 void *
 xmalloc(const usize size) {
     void *p;
@@ -200,11 +194,7 @@ void error(char *format, ...) {
     return;
 }
 
-#ifndef TESTING_THIS_FILE
-#define TESTING_THIS_FILE 0
-#endif
-
-#if TESTING_THIS_FILE
+#ifdef TESTING_util
 #include <assert.h>
 
 int main(void) {

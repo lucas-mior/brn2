@@ -34,12 +34,6 @@
 #include "util.c"
 #include "arena.c"
 
-#ifdef TESTING_brn2
-  #define TESTING_THIS_FILE 1
-#else
-  #define TESTING_THIS_FILE 0
-#endif
-
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
@@ -377,7 +371,7 @@ hash_expected_collisions(void *map) { \
 #define hash_set_insert_pre_calc(a, b, c, d) \
         hash_set_insert_pre_calc(a, b, c, d, 0)
 
-#if TESTING_THIS_FILE
+#ifdef TESTING_hash
 #include <assert.h>
 
 #define NSTRINGS 500000

@@ -35,12 +35,6 @@
 #include "util.c"
 #include "arena.c"
 
-#ifdef TESTING_brn2
-  #define TESTING_THIS_FILE 1
-#else
-  #define TESTING_THIS_FILE 0
-#endif
-
 static int brn2_threads_work_hashes(void *);
 static int brn2_threads_work_normalization(void *);
 static int brn2_threads_work_changes(void *);
@@ -749,11 +743,7 @@ brn2_usage(FILE *stream) {
     exit((int)(stream != stdout));
 }
 
-#ifndef TESTING_THIS_FILE
-#define TESTING_THIS_FILE 0
-#endif
-
-#if TESTING_THIS_FILE
+#ifdef TESTING_brn2
 #include <assert.h>
 
 bool brn2_options_fatal = false;
