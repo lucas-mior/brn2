@@ -372,9 +372,9 @@ int main(int argc, char **argv) {
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
 #ifndef __WIN32__
-                getchar();
+                getc(stdin);
 #else
-                getch();
+                getchar();
 #endif
                 continue;
             } else {
