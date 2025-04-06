@@ -408,7 +408,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
         file->length = strcspn(buffer, "\n");
         buffer[file->length] = '\0';
         file->name = arena_push(list->arena, file->length + 1);
-        memcpy(file->name, buffer, length + 1);
+        memcpy(file->name, buffer, file->length + 1);
         length += 1;
     }
     fclose(lines);
