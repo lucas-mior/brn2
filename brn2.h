@@ -113,7 +113,7 @@ typedef ssize_t isize;
 #include "arena.c"
 
 typedef struct File {
-    char name[20];
+    char name[124];
     int fd;
     FILE *stream;
 } File;
