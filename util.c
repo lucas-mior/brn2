@@ -24,12 +24,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/wait.h>
 
 #ifdef __WIN32__
   #include <windows.h>
 #else
   #include <sys/mman.h>
+  #include <sys/wait.h>
 #endif
 
 #define SIZE2MB (2u*1024u*1024u)
