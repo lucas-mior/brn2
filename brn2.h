@@ -21,14 +21,16 @@
 #define BRN2_H
 
 #ifdef __linux__
-#define _GNU_SOURCE
+  #include <linux/limits.h>
+  #define _GNU_SOURCE
+#else
+  #define PATH_MAX 4096
 #endif
 
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>
-#include <linux/limits.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
