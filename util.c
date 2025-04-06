@@ -352,7 +352,7 @@ int main(void) {
     memset(p2, 0, 1024*1024*1024);
     p3 = xstrdup(p1);
     error("%s == %s is working? %b\n", string, p3, !strcmp(string, p3));
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 #endif
