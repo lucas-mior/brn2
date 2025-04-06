@@ -25,9 +25,18 @@
 #endif
 
 #include "string.h"
+#include "stdio.h"
 
 #define SIZE2MB (2u*1024u*1024u)
 #define SIZE4GB (1u*1024u*1024u*1024u)
+
+#define ARENA_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
+#if !defined(ALIGNMENT)
+  #define ALIGNMENT 16
+#endif
+#if !defined(ALIGN)
+  #define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)
+#endif
 
 #ifdef __linux__
   #define TRY_HUGE_PAGES 1
@@ -46,7 +55,7 @@ arena_malloc(size_t size) {
                      MAP_ANON|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
-                size = BRN2_ALIGN(size, SIZE2MB);
+                size = ARENA_ALIGN(size, SIZE2MB);
                 break;
             }
         }
