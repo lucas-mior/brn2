@@ -26,10 +26,8 @@
 #include "util.c"
 
 #ifdef TESTING_sort
-  #define TESTING_THIS_FILE 1
   #define COMPARE(A,B) compare(A,B)
 #else
-  #define TESTING_THIS_FILE 0
   #define COMPARE(A,B) brn2_compare(A,B)
 #endif
 
@@ -143,7 +141,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
 #define SORT_BENCHMARK 0
 
-#if !TESTING_THIS_FILE
+#ifndef TESTING_sort
 static void
 sort(FileList *old) {
     uint32 p;
@@ -202,7 +200,7 @@ sort(FileList *old) {
 }
 #endif
 
-#if TESTING_THIS_FILE
+#ifdef TESTING_sort
 
 #define P 16u
 #define MAXI 10000
