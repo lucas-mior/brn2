@@ -89,7 +89,8 @@ hash_##T##_create(uint32 length) { \
     size = sizeof(*map) + capacity*sizeof(*(&map->array[0])); \
 \
     map = xmmap(&size); \
-    map->arena = arena_alloc(capacity*sizeof(*(&map->array[0]))); \
+    map->arena = arena_alloc("arena for hash map", \
+                             capacity*sizeof(*(&map->array[0]))); \
     arena_push(map->arena, BRN2_ALIGNMENT); \
     map->capacity = capacity; \
     map->bitmask = (1 << power) - 1; \
@@ -118,7 +119,8 @@ hash_##T##_balance(struct Hash##T *old_map) { \
     size = sizeof(*new_map) + capacity*sizeof(*(&new_map->array[0])); \
 \
     new_map = xmmap(&size); \
-    new_map->arena = arena_alloc(capacity*sizeof(*(&new_map->array[0]))); \
+    new_map->arena = arena_alloc("arena for balanced hash map", \
+                                 capacity*sizeof(*(&new_map->array[0]))); \
     arena_push(new_map->arena, BRN2_ALIGNMENT); \
     new_map->capacity = capacity; \
     new_map->bitmask = bitmask; \
@@ -440,7 +442,7 @@ int main(void) {
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_map_create(NSTRINGS);
-    arena = arena_alloc((usize)4096*NSTRINGS);
+    arena = arena_alloc("arena for random strings", (usize)4096*NSTRINGS);
     arena_push(arena, BRN2_ALIGNMENT); // in order to set [0] as invalid
 
     assert(original_map);

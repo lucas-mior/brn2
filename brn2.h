@@ -99,12 +99,13 @@ typedef ssize_t isize;
 #endif
 
 typedef struct Arena {
+    char *name;
     char *begin;
     void *pos;
     size_t size;
 } Arena;
 
-Arena *arena_alloc(size_t);
+Arena *arena_alloc(char *, size_t);
 void *arena_push(Arena *, uint32);
 void *arena_reset(Arena *);
 void *arena_reset_zero(Arena *);
@@ -179,7 +180,7 @@ void *snprintf2(char *, size_t, char *, ...);
 void util_command(const int, char **);
 void error(char *, ...);
 
-Arena *arena_alloc(size_t);
+Arena *arena_alloc(char *, size_t);
 void *arena_push(Arena *, uint32);
 uint32 arena_push_index(Arena *, uint32);
 void *arena_reset(Arena *);
