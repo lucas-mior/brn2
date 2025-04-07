@@ -180,8 +180,7 @@ void *
 xrealloc(void *old, const size_t size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
-        error("Failed to reallocate %zu bytes.\n", size);
-        error("Reallocating from: %p\n", old);
+        error("Failed to reallocate %zu bytes from %p.\n", size, old);
         exit(EXIT_FAILURE);
     }
     return p;
