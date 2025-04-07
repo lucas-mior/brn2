@@ -60,7 +60,6 @@ static void *xmalloc(const size_t);
 static void *xrealloc(void *, const size_t);
 static void *xcalloc(const size_t, const size_t);
 static char *xstrdup(char *);
-static void *xmemdup(void *, size_t);
 static void *snprintf2(char *, size_t, char *, ...);
 static void util_command(const int, char **);
 static uint32 util_nthreads(void);
@@ -209,17 +208,6 @@ xstrdup(char *string) {
     }
 
     memcpy(p, string, length);
-    return p;
-}
-
-void *
-xmemdup(void *source, size_t size) {
-    void *p;
-    if ((p = malloc(size)) == NULL) {
-        error("Error reallocating %zu bytes.\n", size);
-        exit(EXIT_FAILURE);
-    }
-    memcpy(p, source, size);
     return p;
 }
 
