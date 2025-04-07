@@ -204,7 +204,8 @@ sort(FileList *old) {
 
 #define P 16u
 #define MAXI 10000
-static const uint32 possibleN[] = {100};
+static const uint32 possibleN[] = {31, 32, 33, 50};
+static const uint32 possibleP[] = {1, 2, 3, 8};
 
 static int32
 compare_int(const void *a, const void *b) {
@@ -216,70 +217,73 @@ static int32 dummy = INT32_MAX;
 
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
+void
+test_sorting(uint32 n, uint32 p) {
+    int32 *array = xmalloc(n*sizeof(*array));
+    uint32 *n_sub = xmalloc(p*sizeof(*n_sub));
+
+    if (n < p*2) {
+        fprintf(stderr, "n=%u must be larger than P*2=%u*2\n", n, P);
+        exit(EXIT_SUCCESS);
+    }
+
+    for (uint32 i = 0; i < (p - 1); i += 1) {
+        n_sub[i] = n/p;
+    }{
+        uint32 i = p - 1;
+        n_sub[i] = n/p + (n % p);
+    }
+
+    printf("n_sub[P-1] = %u\n", n_sub[p-1]);
+
+    srand(42);
+    for (uint32 i = 0; i < n; i += 1)
+        array[i] = rand() % MAXI;
+
+    {
+        uint32 offset = 0;
+        for (uint32 i = 0; i < p; i += 1) {
+            qsort(&array[offset], n_sub[i], sizeof(*array), compare_int);
+            offset += n_sub[i];
+        }
+    }
+
+    sort_merge_subsorted(array, n, p, sizeof(int32), &dummy, compare_int);
+
+    {
+        uint32 digits_i = 1;
+        uint32 n2 = n;
+        int digits_a = 1;
+        int max = MAXI;
+
+        while (n2 > 10) {
+            n2 /= 10;
+            digits_i += 1;
+        }
+        while (max > 10) {
+            max /= 10;
+            digits_a += 1;
+        }
+
+        for (uint32 i = 0; i < n; i += 1) {
+            if (i % 10 == 0)
+                printf("\n[%.*u] ", digits_i, i);
+            printf("%.*d ", digits_a, array[i]);
+
+            if (i < (n-1)) {
+                assert(array[i] <= array[i + 1]);
+            }
+        }
+        printf("\n");
+    }
+    return;
+}
+
 int
 main(void) {
     for (uint32 in = 0; in < LENGTH(possibleN); in += 1) {
-        const uint32 n = possibleN[in];
-        int32 *array = xmalloc(n*sizeof(*array));
-        uint32 n_sub[P];
-        const uint32 p = P;
-
-        if (n < P*2) {
-            fprintf(stderr, "n=%u must be larger than P*2=%u*2\n", n, P);
-            exit(EXIT_SUCCESS);
-        }
-
-        for (uint32 i = 0; i < (p - 1); i += 1) {
-            n_sub[i] = n/p;
-        }{
-            uint32 i = p - 1;
-            n_sub[i] = n/p + (n % p);
-        }
-
-        printf("n_sub[P-1] = %u\n", n_sub[p-1]);
-
-        srand(42);
-        for (uint32 i = 0; i < n; i += 1) {
-            array[i] = rand() % MAXI;
-            if (i < 3 || (n - i) < 3)
-                printf("array[%u] = %d\n", i, array[i]);
-        }
-
-        {
-            uint32 offset = 0;
-            for (uint32 i = 0; i < p; i += 1) {
-                qsort(&array[offset], n_sub[i], sizeof(*array), compare_int);
-                offset += n_sub[i];
-            }
-        }
-
-        sort_merge_subsorted(array, n, p, sizeof(int32), &dummy, compare_int);
-
-        {
-            uint32 digits_i = 1;
-            uint32 n2 = n;
-            int digits_a = 1;
-            int max = MAXI;
-
-            while (n2 > 10) {
-                n2 /= 10;
-                digits_i += 1;
-            }
-            while (max > 10) {
-                max /= 10;
-                digits_a += 1;
-            }
-
-            for (uint32 i = 0; i < n; i += 1) {
-                if (i % 10 == 0)
-                    printf("\n[%.*u] ", digits_i, i);
-                printf("%.*d ", digits_a, array[i]);
-
-                if (i < (n-1)) {
-                    assert(array[i] <= array[i + 1]);
-                }
-            }
-            printf("\n");
+        for (uint32 ip = 0; ip < LENGTH(possibleP); ip += 1) {
+            test_sorting(possibleN[in], possibleP[ip]);
         }
     }
     exit(EXIT_SUCCESS);
