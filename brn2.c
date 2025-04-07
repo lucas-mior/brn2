@@ -818,8 +818,9 @@ brn2_execute(FileList *old, FileList *new,
             continue;
         } else {
             if (hash_set_insert_pre_calc(names_renamed,
-                                         *oldname, oldhash, oldindex))
+                                         *oldname, oldhash, oldindex)) {
                 number_renames += 1;
+            }
             print("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
     }
