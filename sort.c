@@ -217,7 +217,7 @@ static int32 dummy = INT32_MAX;
 
 #define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
-void
+static void
 test_sorting(uint32 n, uint32 p) {
     int32 *array = xmalloc(n*sizeof(*array));
     uint32 *n_sub = xmalloc(p*sizeof(*n_sub));
