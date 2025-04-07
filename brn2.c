@@ -89,7 +89,8 @@ int scandir(const char *dir, struct dirent ***namelist,
             void *filter, void *compar) {
     WIN32_FIND_DATAA find_data;
     HANDLE hFind;
-    char path[MAX_PATH];
+    char buffer[MAX_PATH];
+    char *path;
     size_t count = 0;
     size_t capacity = 16;
     (void) filter;
@@ -97,7 +98,7 @@ int scandir(const char *dir, struct dirent ***namelist,
 
     struct dirent **list = xmalloc(capacity*sizeof(struct dirent *));
 
-    snprintf(path, MAX_PATH, "%s\\*", dir);
+    path = SNPRINTF(path, "%s/*", dir);
     hFind = FindFirstFileA(path, &find_data);
     if (hFind == INVALID_HANDLE_VALUE) {
         free(list);
