@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     usize indexes_old_size = 0;
     usize indexes_new_size = 0;
     HashMap *oldlist_map = NULL;
-    HashMap *newlist_map = NULL;
+    HashSet *newlist_set = NULL;
     uint32 available_threads;
 
     uint32 main_capacity;
@@ -313,13 +313,13 @@ int main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            newlist_map = hash_map_create(new->length);
-            main_capacity = hash_capacity(newlist_map);
+            newlist_set = hash_set_create(new->length);
+            main_capacity = hash_capacity(newlist_set);
             indexes_new_size = new->length*sizeof(*indexes_new);
             indexes_new = xmmap_commit(&indexes_new_size);
             brn2_create_hashes(new, indexes_new, main_capacity);
-            brn2_verify(new, newlist_map, indexes_new);
-            hash_map_print_summary(newlist_map, "newlist_map");
+            brn2_verify(new, newlist_set, indexes_new);
+            hash_map_print_summary(newlist_set, "newlist_set");
             break;
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);
@@ -339,20 +339,20 @@ int main(int argc, char **argv) {
 
             brn2_normalize_names(old, new);
 
-            if (newlist_map == NULL) {
-                newlist_map = hash_map_create(new->length);
+            if (newlist_set == NULL) {
+                newlist_set = hash_set_create(new->length);
             } else {
-                hash_map_zero(newlist_map);
+                hash_set_zero(newlist_set);
             }
             if (indexes_new == NULL) {
                 indexes_new_size = new->length*sizeof(*indexes_new);
                 indexes_new = xmmap_commit(&indexes_new_size);
             }
 
-            main_capacity = hash_capacity(newlist_map);
+            main_capacity = hash_capacity(newlist_set);
             brn2_create_hashes(new, indexes_new, main_capacity);
 
-            if (!brn2_verify(new, newlist_map, indexes_new)) {
+            if (!brn2_verify(new, newlist_set, indexes_new)) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
@@ -395,7 +395,7 @@ int main(int argc, char **argv) {
         brn2_free_list(old);
         brn2_free_list(new);
         hash_map_destroy(oldlist_map);
-        hash_map_destroy(newlist_map);
+        hash_set_destroy(newlist_set);
         arena_destroy(arena_old);
         arena_destroy(arena_new);
     }
