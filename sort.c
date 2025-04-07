@@ -204,7 +204,7 @@ sort(FileList *old) {
 
 #define P 16u
 #define MAXI 10000
-static const uint32 possibleN[] = {100};
+static const uint32 possibleN[] = {31, 32, 33, 50};
 static const uint32 possibleP[] = {1, 2, 3, 8};
 
 static int32
@@ -237,11 +237,8 @@ test_sorting(uint32 n, uint32 p) {
     printf("n_sub[P-1] = %u\n", n_sub[p-1]);
 
     srand(42);
-    for (uint32 i = 0; i < n; i += 1) {
+    for (uint32 i = 0; i < n; i += 1)
         array[i] = rand() % MAXI;
-        if (i < 3 || (n - i) < 3)
-            printf("array[%u] = %d\n", i, array[i]);
-    }
 
     {
         uint32 offset = 0;
