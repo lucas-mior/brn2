@@ -21,10 +21,7 @@
 #define BRN2_H
 
 #ifdef __linux__
-  #include <linux/limits.h>
   #define _GNU_SOURCE
-#else
-  #define PATH_MAX 4096
 #endif
 
 #ifdef __WIN32__
@@ -53,6 +50,7 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
+#define BRN2_PATH_MAX 4096
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
 #define MIN(a,b) ((a) < (b) ? (a) : (b))

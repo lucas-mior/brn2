@@ -373,7 +373,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
 FileList *
 brn2_list_from_lines(char *filename, bool is_old) {
     size_t length = 0;
-    char buffer[PATH_MAX];
+    char buffer[BRN2_PATH_MAX];
     FileList *list;
     uint32 cap = 128;
     FILE *lines;
@@ -672,9 +672,9 @@ brn2_verify(FileList *new, HashSet *repeated_set, uint32 *hashes_new) {
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName newfile = new->files[i];
 
-        if (newfile.length >= PATH_MAX) {
+        if (newfile.length >= BRN2_PATH_MAX) {
             error("Error: filename on line %u is longer than %u bytes",
-                  i + 1, (uint32)PATH_MAX);
+                  i + 1, BRN2_PATH_MAX);
             failed = true;
             if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
@@ -898,8 +898,8 @@ int main(void) {
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
 
-    arena_old = arena_alloc("arena for old filenames", PATH_MAX*UINT32_MAX);
-    arena_new = arena_alloc("arena for new filenames", PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc("arena for old names", BRN2_PATH_MAX*UINT32_MAX);
+    arena_new = arena_alloc("arena for new names", BRN2_PATH_MAX*UINT32_MAX);
 
     system(command);
     list1 = brn2_list_from_dir(".");
