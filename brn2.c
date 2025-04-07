@@ -752,11 +752,11 @@ brn2_execute(FileList *old, FileList *new,
             renamed = renameat2(AT_FDCWD, *oldname,
                                 AT_FDCWD, newname, RENAME_EXCHANGE);
             if (renamed >= 0) {
-                if (hash_set_insert_pre_calc(names_renamed, *oldname,
-                                             oldhash, oldindex))
+                if (hash_set_insert_pre_calc(names_renamed,
+                                             *oldname, oldhash, oldindex))
                     number_renames += 1;
-                if (hash_set_insert_pre_calc(names_renamed, newname,
-                                             newhash, newindex))
+                if (hash_set_insert_pre_calc(names_renamed,
+                                             newname, newhash, newindex))
                     number_renames += 1;
                 print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n",
                       *oldname, newname);
@@ -765,15 +765,15 @@ brn2_execute(FileList *old, FileList *new,
                     uint32 next = *newname_index_on_oldlist;
                     FileName *file_j = &(old->files[next]);
 
-                    hash_map_remove_pre_calc(oldlist_map, newname,
-                                             newhash, newindex);
-                    hash_map_remove_pre_calc(oldlist_map, *oldname,
-                                             oldhash, oldindex);
+                    hash_map_remove_pre_calc(oldlist_map,
+                                             newname, newhash, newindex);
+                    hash_map_remove_pre_calc(oldlist_map,
+                                             *oldname, oldhash, oldindex);
 
-                    hash_map_insert_pre_calc(oldlist_map, newname,
-                                             newhash, newindex, i);
-                    hash_map_insert_pre_calc(oldlist_map, *oldname,
-                                             oldhash, oldindex, next);
+                    hash_map_insert_pre_calc(oldlist_map,
+                                             newname, newhash, newindex, i);
+                    hash_map_insert_pre_calc(oldlist_map,
+                                             *oldname, oldhash, oldindex, next);
 
                     SWAP(file_j->name, *oldname);
                     SWAP(file_j->length, *oldlength);
@@ -785,8 +785,8 @@ brn2_execute(FileList *old, FileList *new,
                           newname, *oldname, newname);
                     error("To disable this behaviour,"
                           " don't pass the --implict option.\n");
-                    hash_map_insert_pre_calc(oldlist_map, newname,
-                                             newhash, newindex, i);
+                    hash_map_insert_pre_calc(oldlist_map,
+                                             newname, newhash, newindex, i);
                 }
                 continue;
             } else if (errno != ENOENT) {
@@ -817,8 +817,8 @@ brn2_execute(FileList *old, FileList *new,
                 exit(EXIT_FAILURE);
             continue;
         } else {
-            if (hash_set_insert_pre_calc(names_renamed, *oldname,
-                                         oldhash, oldindex))
+            if (hash_set_insert_pre_calc(names_renamed,
+                                         *oldname, oldhash, oldindex))
                 number_renames += 1;
             print("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
         }
