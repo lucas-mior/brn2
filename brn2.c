@@ -292,7 +292,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
         }
         map_size = (uint32)lines_stat.st_size;
         if (map_size <= 0) {
-            error("map_size: %zu\n", map_size);
+            error("map_size: %u\n", map_size);
             exit(EXIT_FAILURE);
         }
     }
@@ -673,7 +673,7 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
 
         if (newfile.length >= PATH_MAX) {
             error("Error: filename on line %u is longer than %u bytes",
-                  i + 1, PATH_MAX);
+                  i + 1, (uint32)PATH_MAX);
             failed = true;
             if (brn2_options_fatal)
                 exit(EXIT_FAILURE);

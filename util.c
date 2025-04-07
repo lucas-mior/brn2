@@ -48,11 +48,7 @@
 typedef uint32_t uint32;
 #endif
 
-#ifndef __WIN32__
-void error(char *, ...);
-#else
 #define error(...) fprintf(stderr, __VA_ARGS__)
-#endif
 
 static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
@@ -76,33 +72,6 @@ util_nthreads(void) {
 uint32
 util_nthreads(void) {
     return (uint32)sysconf(_SC_NPROCESSORS_ONLN);
-}
-#endif
-
-#ifndef __WIN32__
-void error(char *format, ...) {
-    int n;
-    ssize_t w;
-    va_list args;
-    char buffer[BUFSIZ];
-
-    va_start(args, format);
-    n = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
-    va_end(args);
-
-    if (n < 0) {
-        fprintf(stderr, "Error in vsnprintf()\n");
-        exit(EXIT_FAILURE);
-    }
-
-    buffer[n] = '\0';
-    if ((w = write(STDERR_FILENO, buffer, (size_t)n)) < n) {
-        fprintf(stderr, "Error writing to STDERR_FILENO");
-        if (w < 0)
-            fprintf(stderr, ": %s", strerror(errno));
-        fprintf(stderr, ".\n");
-    }
-    return;
 }
 #endif
 
