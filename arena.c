@@ -192,6 +192,10 @@ arena_reset_zero(Arena *arena) {
 #ifdef TESTING_arena
 int
 main(void) {
+    Arena *arena;
+    assert((arena = arena_alloc("name", 4096*UINT32_MAX)));
+    assert(arena_push(arena, 4095*UINT32_MAX));
+    arena_destroy(arena);
     exit(EXIT_SUCCESS);
 }
 #endif
