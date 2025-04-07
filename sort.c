@@ -202,7 +202,6 @@ sort(FileList *old) {
 
 #ifdef TESTING_sort
 
-#define P 16u
 #define MAXI 10000
 static const uint32 possibleN[] = {31, 32, 33, 50};
 static const uint32 possibleP[] = {1, 2, 3, 8};
@@ -223,7 +222,7 @@ test_sorting(uint32 n, uint32 p) {
     uint32 *n_sub = xmalloc(p*sizeof(*n_sub));
 
     if (n < p*2) {
-        fprintf(stderr, "n=%u must be larger than P*2=%u*2\n", n, P);
+        fprintf(stderr, "n=%u must be larger than p*2=%u*2\n", n, p);
         exit(EXIT_SUCCESS);
     }
 
