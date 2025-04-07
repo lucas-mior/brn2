@@ -98,7 +98,7 @@ int scandir(const char *dir, struct dirent ***namelist,
 
     struct dirent **list = xmalloc(capacity*sizeof(struct dirent *));
 
-    path = SNPRINTF(path, "%s/*", dir);
+    path = SNPRINTF(buffer, "%s/*", dir);
     hFind = FindFirstFileA(path, &find_data);
     if (hFind == INVALID_HANDLE_VALUE) {
         free(list);
