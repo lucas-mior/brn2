@@ -665,7 +665,7 @@ brn2_threads(int (*function)(void *),
 #endif
 
 bool
-brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
+brn2_verify(FileList *new, HashSet *repeated_set, uint32 *hashes_new) {
     bool failed = false;
 
     for (uint32 i = 0; i < new->length; i += 1) {
@@ -679,8 +679,8 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
                 exit(EXIT_FAILURE);
         }
 
-        if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
-                                      newfile.hash, hashes_new[i], i)) {
+        if (!hash_set_insert_pre_calc(repeated_set, newfile.name,
+                                      newfile.hash, hashes_new[i])) {
             error("Error: "RED"'%s'"RESET " repeats on line %u.\n",
                   newfile.name, i + 1);
             failed = true;

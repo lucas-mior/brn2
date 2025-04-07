@@ -158,7 +158,7 @@ FileList *brn2_list_from_lines(char *, bool);
 FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *, FileList *);
 uint32 *brn2_create_hashes(FileList *, uint32 *, uint32);
-bool brn2_verify(FileList *, HashMap *, uint32 *);
+bool brn2_verify(FileList *, HashSet *, uint32 *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, HashMap *, uint32 *, uint32 *);
 void brn2_free_list(FileList *);
