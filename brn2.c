@@ -681,9 +681,8 @@ brn2_verify(FileList *new, HashMap *repeated_map, uint32 *hashes_new) {
 
         if (!hash_map_insert_pre_calc(repeated_map, newfile.name,
                                       newfile.hash, hashes_new[i], i)) {
-            fprintf(stderr, RED"'%s'"RESET " (line %u)"
-                            " appears more than once in the buffer\n",
-                            newfile.name, i + 1);
+            error("Error: "RED"'%s'"RESET " repeats on line %u.\n",
+                  newfile.name, i + 1);
             failed = true;
             if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
