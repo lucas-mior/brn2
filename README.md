@@ -41,7 +41,7 @@ will take place when you save and exit.
 ### Notes
 - By default it uses `$EDITOR` and if that is not set, it defaults to `vim`.
 - It will not work for more than 2^32 renames at once.
-- It will not work for filenames longer than PATH_MAX (typically 4096) bytes.
+- It will not work for filenames longer than 4096 bytes.
 - Newlines in filenames are not allowed.
 - Filenames that contain only dots and slashes are ignored.
 - Filenames are normalized:
