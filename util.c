@@ -189,6 +189,10 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     n = vsnprintf(buffer, size, format, args);
     va_end(args);
 
+    if (size <= 8) {
+        error("%s: wrong buffer size = %zu.\n", __func__, size);
+        exit(EXIT_FAILURE);
+    }
     if (n >= (int)size) {
         va_list args2;
         buffer = xmalloc((size_t)n + 1);
