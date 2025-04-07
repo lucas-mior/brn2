@@ -180,8 +180,7 @@ void *
 xrealloc(void *old, const size_t size) {
     void *p;
     if ((p = realloc(old, size)) == NULL) {
-        error("Failed to reallocate %zu bytes.\n", size);
-        error("Reallocating from: %p\n", old);
+        error("Failed to reallocate %zu bytes from %p.\n", size, old);
         exit(EXIT_FAILURE);
     }
     return p;
@@ -204,8 +203,8 @@ xstrdup(char *string) {
 
     length = strlen(string) + 1;
     if ((p = malloc(length)) == NULL) {
-        error("Error allocating %zi bytes to duplicate \"%s\".\n",
-               length, string);
+        error("Error allocating %zu bytes to duplicate '%s': %s\n",
+              length, string, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
