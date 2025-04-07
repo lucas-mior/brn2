@@ -203,8 +203,8 @@ xstrdup(char *string) {
 
     length = strlen(string) + 1;
     if ((p = malloc(length)) == NULL) {
-        error("Error allocating %zi bytes to duplicate \"%s\".\n",
-               length, string);
+        error("Error allocating %zu bytes to duplicate '%s': %s\n",
+              length, string, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
