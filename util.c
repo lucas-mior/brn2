@@ -54,9 +54,9 @@ void error(char *, ...);
 #define error(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
-static void *xmalloc(const size_t);
 static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
+static void *xmalloc(const size_t);
 static void *xrealloc(void *, const size_t);
 static void *xcalloc(const size_t, const size_t);
 static char *xstrdup(char *);
@@ -106,16 +106,6 @@ void error(char *format, ...) {
     return;
 }
 #endif
-
-void *
-xmalloc(const size_t size) {
-    void *p;
-    if ((p = malloc(size)) == NULL) {
-        error("Failed to allocate %zu bytes.\n", size);
-        exit(EXIT_FAILURE);
-    }
-    return p;
-}
 
 #ifdef __linux__
 void *
@@ -175,6 +165,16 @@ xmunmap(void *p, size_t size) {
     return;
 }
 #endif
+
+void *
+xmalloc(const size_t size) {
+    void *p;
+    if ((p = malloc(size)) == NULL) {
+        error("Failed to allocate %zu bytes.\n", size);
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
 
 void *
 xrealloc(void *old, const size_t size) {
