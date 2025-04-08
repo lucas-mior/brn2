@@ -68,10 +68,6 @@ delete_brn2_buffer(void) {
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
-    uint32 *indexes_old = NULL;
-    uint32 *indexes_new = NULL;
-    usize indexes_old_size = 0;
-    usize indexes_new_size = 0;
     HashMap *oldlist_map = NULL;
     HashSet *newlist_set = NULL;
     uint32 available_threads;
@@ -231,13 +227,13 @@ int main(int argc, char **argv) {
 
         oldlist_map = hash_map_create(old->length);
         capacity_set = hash_capacity(oldlist_map);
-        indexes_old_size = old->length*sizeof(*indexes_old);
-        indexes_old = xmmap_commit(&indexes_old_size);
-        brn2_create_hashes(old, indexes_old, capacity_set);
+        old->indexes_size = old->length*sizeof(*(old->indexes));
+        old->indexes = xmmap_commit(&(old->indexes_size));
+        brn2_create_hashes(old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = &(old->files[i]);
-            uint32 *index = &indexes_old[i];
+            uint32 *index = &(old->indexes[i]);
             bool contains_newline;
             usize written;
 
@@ -261,7 +257,7 @@ int main(int argc, char **argv) {
                 memmove(file, file+1, (old->length - i)*sizeof(*file));
                 memmove(index, index+1, (old->length - i)*sizeof(*index));
                 file = &(old->files[i]);
-                index = &indexes_old[i];
+                index = &(old->indexes[i]);
             }
 
             written = (usize)(pointer - write_buffer);
@@ -315,10 +311,10 @@ int main(int argc, char **argv) {
 
             newlist_set = hash_set_create(new->length);
             main_capacity = hash_capacity(newlist_set);
-            indexes_new_size = new->length*sizeof(*indexes_new);
-            indexes_new = xmmap_commit(&indexes_new_size);
-            brn2_create_hashes(new, indexes_new, main_capacity);
-            brn2_verify(new, newlist_set, indexes_new);
+            new->indexes_size = new->length*sizeof(*(new->indexes));
+            new->indexes = xmmap_commit(&(new->indexes_size));
+            brn2_create_hashes(new, main_capacity);
+            brn2_verify(new, newlist_set, new->indexes);
             hash_map_print_summary(newlist_set, "newlist_set");
             break;
 #else
@@ -344,15 +340,15 @@ int main(int argc, char **argv) {
             } else {
                 hash_set_zero(newlist_set);
             }
-            if (indexes_new == NULL) {
-                indexes_new_size = new->length*sizeof(*indexes_new);
-                indexes_new = xmmap_commit(&indexes_new_size);
+            if (new->indexes == NULL) {
+                new->indexes_size = new->length*sizeof(*(new->indexes));
+                new->indexes = xmmap_commit(&(new->indexes_size));
             }
 
             main_capacity = hash_capacity(newlist_set);
-            brn2_create_hashes(new, indexes_new, main_capacity);
+            brn2_create_hashes(new, main_capacity);
 
-            if (!brn2_verify(new, newlist_set, indexes_new)) {
+            if (!brn2_verify(new, newlist_set, new->indexes)) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
@@ -371,7 +367,7 @@ int main(int argc, char **argv) {
         if (number_changes)
             number_renames = brn2_execute(old, new,
                                           oldlist_map,
-                                          indexes_old, indexes_new);
+                                          old->indexes, new->indexes);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
@@ -390,8 +386,8 @@ int main(int argc, char **argv) {
 #endif
 
     if (BRN2_DEBUG) {
-        xmunmap(indexes_old, indexes_old_size);
-        xmunmap(indexes_new, indexes_new_size);
+        xmunmap(old->indexes, old->indexes_size);
+        xmunmap(new->indexes, new->indexes_size);
         brn2_free_list(old);
         brn2_free_list(new);
         hash_map_destroy(oldlist_map);
