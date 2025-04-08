@@ -96,7 +96,7 @@ int scandir(const char *dir, struct dirent ***namelist,
     (void) filter;
     (void) compar;
 
-    struct dirent **list = xmalloc(capacity*sizeof(struct dirent *));
+    struct dirent **list = xmalloc(capacity*sizeof(*list));
 
     path = SNPRINTF(buffer, "%s/*", dir);
     hFind = FindFirstFileA(path, &find_data);
@@ -106,12 +106,12 @@ int scandir(const char *dir, struct dirent ***namelist,
     }
 
     do {
-        struct dirent *ent = xmalloc(sizeof(struct dirent));
+        struct dirent *ent = xmalloc(sizeof(*ent));
 
         strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
         if (count >= capacity) {
             capacity *= 2;
-            list = xrealloc(list, capacity*sizeof(struct dirent *));
+            list = xrealloc(list, capacity*sizeof(*list));
         }
         list[count++] = ent;
     } while (FindNextFileA(hFind, &find_data));
