@@ -873,6 +873,8 @@ contains_filename(FileList *list, FileName file, bool verbose) {
 }
 // flags: -lm
 
+int (*print)(const char *, ...);
+
 int main(void) {
     FileList *list1;
     FileList *list2;
