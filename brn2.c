@@ -880,8 +880,8 @@ int main(void) {
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
 
-    arena_old = arena_alloc("arena for old names", BRN2_PATH_MAX*UINT32_MAX);
-    arena_new = arena_alloc("arena for new names", BRN2_PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc("arena for old names", BRN2_ARENA_SIZE);
+    arena_new = arena_alloc("arena for new names", BRN2_ARENA_SIZE);
 
     system(command);
     list1 = brn2_list_from_dir(".");
