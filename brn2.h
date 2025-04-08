@@ -51,6 +51,7 @@
 #define RESET "\x1b[0m"
 
 #define BRN2_PATH_MAX 4096u
+#define BRN2_ARENA_SIZE (16ul*1024ul*1024ul*1024ul)
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16
 #define MIN(a,b) ((a) < (b) ? (a) : (b))

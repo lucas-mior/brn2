@@ -68,7 +68,7 @@ typedef uint64_t uint64;
 #endif
 
 static Arena *arena_alloc(char *, size_t);
-static void *arena_malloc(size_t);
+static void *arena_malloc(size_t *);
 static void arena_destroy(Arena *);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
@@ -83,7 +83,7 @@ arena_alloc(char *name, size_t size) {
 
     size += ALIGN(sizeof(*arena));
 
-    p = arena_malloc(size);
+    p = arena_malloc(&size);
 
     arena = p;
     arena->name = name;
@@ -95,20 +95,20 @@ arena_alloc(char *name, size_t size) {
 
 #ifndef __WIN32__
 void *
-arena_malloc(size_t size) {
+arena_malloc(size_t *size) {
     void *p;
     do {
-        if ((size >= SIZE2MB) && TRY_HUGE_PAGES) {
-            p = mmap(NULL, size,
+        if ((*size >= SIZE2MB) && TRY_HUGE_PAGES) {
+            p = mmap(NULL, *size,
                      PROT_READ|PROT_WRITE,
                      MAP_ANON|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
-                size = ARENA_ALIGN(size, SIZE2MB);
+                *size = ARENA_ALIGN(*size, SIZE2MB);
                 break;
             }
         }
-        p = mmap(NULL, size,
+        p = mmap(NULL, *size,
                  PROT_READ|PROT_WRITE,
                  MAP_ANON|MAP_PRIVATE,
                  -1, 0);
@@ -116,7 +116,7 @@ arena_malloc(size_t size) {
 
     if (p == MAP_FAILED) {
         fprintf(stderr, "Error in mmap(%zu): %s.\n",
-                        size, strerror(errno));
+                        *size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;

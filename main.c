@@ -150,8 +150,8 @@ int main(int argc, char **argv) {
     else
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
 
-    arena_old = arena_alloc("arena for old names", BRN2_PATH_MAX*UINT32_MAX);
-    arena_new = arena_alloc("arena for new names", BRN2_PATH_MAX*UINT32_MAX);
+    arena_old = arena_alloc("arena for old names", BRN2_ARENA_SIZE);
+    arena_new = arena_alloc("arena for new names", BRN2_ARENA_SIZE);
 
     switch (mode) {
     case FILES_FROM_FILE:
