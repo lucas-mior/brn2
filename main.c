@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
             new->indexes = xmmap_commit(&(new->indexes_size));
             brn2_create_hashes(new, main_capacity);
             brn2_verify(new, newlist_set, new->indexes);
-            hash_map_print_summary(newlist_set, "newlist_set");
+            hash_set_print_summary(newlist_set, "newlist_set");
             break;
 #else
             util_command(ARRAY_LENGTH(args_edit), args_edit);
