@@ -814,24 +814,6 @@ brn2_execute2(FileList *old, FileList *new,
     return;
 }
 
-uint32
-brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
-    uint32 number_renames = 0;
-    HashSet *names_renamed = hash_set_create(old->length);
-
-    if (brn2_options_quiet)
-        print = noop;
-    else
-        print = printf;
-
-    for (uint32 i = 0; i < old->length; i += 1) {
-        brn2_execute2(old, new, oldlist_map, names_renamed, i, &number_renames);
-    }
-    if (BRN2_DEBUG)
-        hash_set_destroy(names_renamed);
-    return number_renames;
-}
-
 void
 brn2_usage(FILE *stream) {
     fprintf(stream,
