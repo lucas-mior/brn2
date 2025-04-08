@@ -26,7 +26,7 @@
 #include "sort.c"
 
 char *program;
-bool brn2_options_fatal = false;
+bool brn2_options_fatal = BRN2_DEBUG;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
