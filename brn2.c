@@ -794,7 +794,7 @@ brn2_execute2(FileList *old, FileList *new,
               " File already exists.\n", *oldname, newname);
         if (brn2_options_fatal)
             exit(EXIT_FAILURE);
-        continue;
+        return;
     }
 #endif
     renamed = rename(*oldname, newname);
