@@ -365,9 +365,7 @@ int main(int argc, char **argv) {
         uint32 number_renames = 0;
 
         if (number_changes)
-            number_renames = brn2_execute(old, new,
-                                          oldlist_map,
-                                          old->indexes, new->indexes);
+            number_renames = brn2_execute(old, new, oldlist_map);
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
