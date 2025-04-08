@@ -648,7 +648,7 @@ brn2_threads(int (*function)(void *),
         length = new->length;
     }
 
-    slices[0].start = i*length;
+    slices[0].start = 0;
     slices[0].end = length;
     slices[0].old_list = old;
     slices[0].new_list = new;
