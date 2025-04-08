@@ -697,9 +697,7 @@ noop(const char *unused, ...) {
 }
 
 uint32
-brn2_execute(FileList *old, FileList *new,
-             HashMap *oldlist_map,
-             uint32 *hashes_old, uint32 *hashes_new) {
+brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
     uint32 number_renames = 0;
     int (*print)(const char *, ...);
     HashSet *names_renamed = hash_set_create(old->length);
@@ -719,10 +717,10 @@ brn2_execute(FileList *old, FileList *new,
         uint16 *oldlength = &(old->files[i].length);
 
         uint32 newhash = new->files[i].hash;
-        uint32 newindex = hashes_new[i];
+        uint32 newindex = new->indexes[i];
 
         uint32 oldhash = old->files[i].hash;
-        uint32 oldindex = hashes_old[i];
+        uint32 oldindex = old->indexes[i];
 
         if (newhash == oldhash) {
             if (!strcmp(*oldname, newname))
@@ -777,7 +775,7 @@ brn2_execute(FileList *old, FileList *new,
                     SWAP(file_j->name, *oldname);
                     SWAP(file_j->length, *oldlength);
                     SWAP(file_j->hash, old->files[i].hash);
-                    SWAP(hashes_old[i], hashes_old[next]);
+                    SWAP(old->indexes[i], old->indexes[next]);
                 } else {
                     error("Warning: '%s' was swapped with '%s', even though"
                           " '%s' was not in the list of files to rename.\n",
