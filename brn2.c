@@ -648,14 +648,13 @@ brn2_threads(int (*function)(void *),
         length = new->length;
     }
 
-    uint32 i = 0;
-    slices[i].start = i*length;
-    slices[i].end = length;
-    slices[i].old_list = old;
-    slices[i].new_list = new;
-    slices[i].partial = numbers ? &numbers[i] : NULL;
-    slices[i].map_capacity = map_size;
-    function((void *)&slices[i]);
+    slices[0].start = i*length;
+    slices[0].end = length;
+    slices[0].old_list = old;
+    slices[0].new_list = new;
+    slices[0].partial = numbers ? &numbers[0] : NULL;
+    slices[0].map_capacity = map_size;
+    function((void *)&slices[0]);
 
     return 1;
 }
