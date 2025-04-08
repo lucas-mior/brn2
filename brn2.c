@@ -694,10 +694,129 @@ noop(const char *unused, ...) {
     return 0;
 }
 
+int (*print)(const char *, ...);
+
+void
+brn2_execute2(FileList *old, FileList *new,
+              HashMap *oldlist_map, HashSet *names_renamed,
+              uint32 i, uint32 *number_renames) {
+    int renamed;
+    uint32 *newname_index_on_oldlist;
+    bool newname_exists;
+    char **oldname = &(old->files[i].name);
+    char *newname = new->files[i].name;
+
+    uint16 *oldlength = &(old->files[i].length);
+
+    uint32 newhash = new->files[i].hash;
+    uint32 newindex = new->indexes[i];
+
+    uint32 oldhash = old->files[i].hash;
+    uint32 oldindex = old->indexes[i];
+
+    if (newhash == oldhash) {
+        if (!strcmp(*oldname, newname))
+            return;
+    }
+    newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
+                                                        newname,
+                                                        newhash, newindex);
+    newname_exists = !access(newname, F_OK);
+#ifdef __linux__
+    if (newname_exists
+        && !newname_index_on_oldlist
+        && !brn2_options_implicit) {
+        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
+              *oldname, newname);
+        error(RED"'%s'"RESET" already exists,"
+              " but it was not given in the list of"
+              " files to rename, and --implict option is off.\n", newname);
+        if (brn2_options_fatal)
+            exit(EXIT_FAILURE);
+        return;
+    }
+    if (newname_exists) {
+        renamed = renameat2(AT_FDCWD, *oldname,
+                            AT_FDCWD, newname, RENAME_EXCHANGE);
+        if (renamed >= 0) {
+            if (hash_set_insert_pre_calc(names_renamed,
+                                         *oldname, oldhash, oldindex)) {
+                *number_renames += 1;
+            }
+            if (hash_set_insert_pre_calc(names_renamed,
+                                         newname, newhash, newindex)) {
+                *number_renames += 1;
+            }
+            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n",
+                  *oldname, newname);
+
+            if (newname_index_on_oldlist) {
+                uint32 next = *newname_index_on_oldlist;
+                FileName *file_j = &(old->files[next]);
+
+                hash_map_remove_pre_calc(oldlist_map,
+                                         newname, newhash, newindex);
+                hash_map_remove_pre_calc(oldlist_map,
+                                         *oldname, oldhash, oldindex);
+
+                hash_map_insert_pre_calc(oldlist_map,
+                                         newname, newhash, newindex, i);
+                hash_map_insert_pre_calc(oldlist_map,
+                                         *oldname, oldhash, oldindex, next);
+
+                SWAP(file_j->name, *oldname);
+                SWAP(file_j->length, *oldlength);
+                SWAP(file_j->hash, old->files[i].hash);
+                SWAP(old->indexes[i], old->indexes[next]);
+            } else {
+                error("Warning: '%s' was swapped with '%s', even though"
+                      " '%s' was not in the list of files to rename.\n",
+                      newname, *oldname, newname);
+                error("To disable this behaviour,"
+                      " don't pass the --implict option.\n");
+                hash_map_insert_pre_calc(oldlist_map,
+                                         newname, newhash, newindex, i);
+            }
+            return;
+        } else if (errno != ENOENT) {
+            error("Error swapping "RED"'%s'"RESET
+                  " and "RED"'%s'"RESET": %s.\n",
+                  *oldname, newname, strerror(errno));
+            if (brn2_options_fatal)
+                exit(EXIT_FAILURE);
+        }
+    }
+#else
+    (void) oldlength;
+    (void) newname_index_on_oldlist;
+    if (newname_exists) {
+        error("Error renaming "RED"'%s'"RESET" to '%s':"
+              " File already exists.\n", *oldname, newname);
+        if (brn2_options_fatal)
+            exit(EXIT_FAILURE);
+        continue;
+    }
+#endif
+    renamed = rename(*oldname, newname);
+    if (renamed < 0) {
+        error("Error renaming "RED"'%s'"RESET " to "RED"'%s'"RESET": %s.\n",
+              *oldname, newname, strerror(errno));
+        if (brn2_options_fatal)
+            exit(EXIT_FAILURE);
+        return;
+    } else {
+        if (hash_set_insert_pre_calc(names_renamed,
+                                     *oldname, oldhash, oldindex)) {
+            *number_renames += 1;
+        }
+        print("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
+    }
+    return;
+}
+
 uint32
 brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
     uint32 number_renames = 0;
-    int (*print)(const char *, ...);
     HashSet *names_renamed = hash_set_create(old->length);
 
     if (brn2_options_quiet)
@@ -706,117 +825,7 @@ brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
         print = printf;
 
     for (uint32 i = 0; i < old->length; i += 1) {
-        int renamed;
-        uint32 *newname_index_on_oldlist;
-        bool newname_exists;
-        char **oldname = &(old->files[i].name);
-        char *newname = new->files[i].name;
-
-        uint16 *oldlength = &(old->files[i].length);
-
-        uint32 newhash = new->files[i].hash;
-        uint32 newindex = new->indexes[i];
-
-        uint32 oldhash = old->files[i].hash;
-        uint32 oldindex = old->indexes[i];
-
-        if (newhash == oldhash) {
-            if (!strcmp(*oldname, newname))
-                continue;
-        }
-        newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map,
-                                                            newname,
-                                                            newhash, newindex);
-        newname_exists = !access(newname, F_OK);
-#ifdef __linux__
-        if (newname_exists
-            && !newname_index_on_oldlist
-            && !brn2_options_implicit) {
-            error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
-                  *oldname, newname);
-            error(RED"'%s'"RESET" already exists,"
-                  " but it was not given in the list of"
-                  " files to rename, and --implict option is off.\n", newname);
-            if (brn2_options_fatal)
-                exit(EXIT_FAILURE);
-            continue;
-        }
-        if (newname_exists) {
-            renamed = renameat2(AT_FDCWD, *oldname,
-                                AT_FDCWD, newname, RENAME_EXCHANGE);
-            if (renamed >= 0) {
-                if (hash_set_insert_pre_calc(names_renamed,
-                                             *oldname, oldhash, oldindex)) {
-                    number_renames += 1;
-                }
-                if (hash_set_insert_pre_calc(names_renamed,
-                                             newname, newhash, newindex)) {
-                    number_renames += 1;
-                }
-                print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n",
-                      *oldname, newname);
-
-                if (newname_index_on_oldlist) {
-                    uint32 next = *newname_index_on_oldlist;
-                    FileName *file_j = &(old->files[next]);
-
-                    hash_map_remove_pre_calc(oldlist_map,
-                                             newname, newhash, newindex);
-                    hash_map_remove_pre_calc(oldlist_map,
-                                             *oldname, oldhash, oldindex);
-
-                    hash_map_insert_pre_calc(oldlist_map,
-                                             newname, newhash, newindex, i);
-                    hash_map_insert_pre_calc(oldlist_map,
-                                             *oldname, oldhash, oldindex, next);
-
-                    SWAP(file_j->name, *oldname);
-                    SWAP(file_j->length, *oldlength);
-                    SWAP(file_j->hash, old->files[i].hash);
-                    SWAP(old->indexes[i], old->indexes[next]);
-                } else {
-                    error("Warning: '%s' was swapped with '%s', even though"
-                          " '%s' was not in the list of files to rename.\n",
-                          newname, *oldname, newname);
-                    error("To disable this behaviour,"
-                          " don't pass the --implict option.\n");
-                    hash_map_insert_pre_calc(oldlist_map,
-                                             newname, newhash, newindex, i);
-                }
-                continue;
-            } else if (errno != ENOENT) {
-                error("Error swapping "RED"'%s'"RESET
-                      " and "RED"'%s'"RESET": %s.\n",
-                      *oldname, newname, strerror(errno));
-                if (brn2_options_fatal)
-                    exit(EXIT_FAILURE);
-            }
-        }
-#else
-        (void) oldlength;
-        (void) newname_index_on_oldlist;
-        if (newname_exists) {
-            error("Error renaming "RED"'%s'"RESET" to '%s':"
-                  " File already exists.\n", *oldname, newname);
-            if (brn2_options_fatal)
-                exit(EXIT_FAILURE);
-            continue;
-        }
-#endif
-        renamed = rename(*oldname, newname);
-        if (renamed < 0) {
-            error("Error renaming "RED"'%s'"RESET " to "RED"'%s'"RESET": %s.\n",
-                  *oldname, newname, strerror(errno));
-            if (brn2_options_fatal)
-                exit(EXIT_FAILURE);
-            continue;
-        } else {
-            if (hash_set_insert_pre_calc(names_renamed,
-                                         *oldname, oldhash, oldindex)) {
-                number_renames += 1;
-            }
-            print("%s -> "GREEN"%s"RESET"\n", *oldname, newname);
-        }
+        brn2_execute2(old, new, oldlist_map, names_renamed, i, &number_renames);
     }
     if (BRN2_DEBUG)
         hash_set_destroy(names_renamed);
