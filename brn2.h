@@ -160,7 +160,7 @@ void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, HashSet *, uint32 *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
-uint32 brn2_execute(FileList *, FileList *, HashMap *, uint32 *, uint32 *);
+uint32 brn2_execute(FileList *, FileList *, HashMap *);
 void brn2_free_list(FileList *);
 uint32 brn2_threads(int (*)(void *),
                     FileList *, FileList *, uint32 *, uint32);
