@@ -653,7 +653,6 @@ brn2_threads(int (*function)(void *),
     slices[i].end = length;
     slices[i].old_list = old;
     slices[i].new_list = new;
-    slices[i].hashes = hashes;
     slices[i].partial = numbers ? &numbers[i] : NULL;
     slices[i].map_capacity = map_size;
     function((void *)&slices[i]);
