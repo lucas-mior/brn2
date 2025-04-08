@@ -78,15 +78,15 @@ int main(int argc, char **argv) {
     char *EDITOR;
     int opt;
 
+    char *directory = ".";
+    char *lines = NULL;
+    int mode = FILES_FROM_DIR;
+
 #ifdef BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
-
-    char *directory = ".";
-    char *lines = NULL;
-    int mode = FILES_FROM_DIR;
 
     program = basename(argv[0]);
 
