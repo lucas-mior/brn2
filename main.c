@@ -364,8 +364,22 @@ int main(int argc, char **argv) {
         uint32 number_changes = brn2_get_number_changes(old, new);
         uint32 number_renames = 0;
 
-        if (number_changes)
-            number_renames = brn2_execute(old, new, oldlist_map);
+        if (number_changes) {
+            HashSet *names_renamed = hash_set_create(old->length);
+
+            if (brn2_options_quiet)
+                print = noop;
+            else
+                print = printf;
+
+            for (uint32 i = 0; i < old->length; i += 1) {
+                brn2_execute2(old, new, oldlist_map, names_renamed,
+                              i, &number_renames);
+                printf("number_nenames:%d\n", number_renames);
+            }
+            if (BRN2_DEBUG)
+                hash_set_destroy(names_renamed);
+        }
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
