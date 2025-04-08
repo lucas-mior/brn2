@@ -704,7 +704,6 @@ brn2_execute(FileList *old, FileList *new,
              HashMap *oldlist_map,
              uint32 *hashes_old, uint32 *hashes_new) {
     uint32 number_renames = 0;
-    uint32 length = old->length;
     int (*print)(const char *, ...);
     HashSet *names_renamed = hash_set_create(old->length);
 
@@ -713,7 +712,7 @@ brn2_execute(FileList *old, FileList *new,
     else
         print = printf;
 
-    for (uint32 i = 0; i < length; i += 1) {
+    for (uint32 i = 0; i < old->length; i += 1) {
         int renamed;
         uint32 *newname_index_on_oldlist;
         bool newname_exists;
