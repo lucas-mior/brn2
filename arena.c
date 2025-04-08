@@ -112,6 +112,7 @@ arena_malloc(size_t *size) {
                  PROT_READ|PROT_WRITE,
                  MAP_ANON|MAP_PRIVATE,
                  -1, 0);
+        *size = ARENA_ALIGN(*size, 4096);
     } while (0);
 
     if (p == MAP_FAILED) {
@@ -130,17 +131,18 @@ arena_destroy(Arena *arena) {
 }
 #else 
 void *
-arena_malloc(size_t size) {
+arena_malloc(size_t *size) {
     void *p;
 
-    p = VirtualAlloc(NULL, size,
+    p = VirtualAlloc(NULL, *size,
                            MEM_COMMIT|MEM_RESERVE,
                            PAGE_READWRITE);
     if (p == NULL) {
         fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
-                        size, GetLastError());
+                        *size, GetLastError());
         exit(EXIT_FAILURE);
     }
+    *size = ARENA_ALIGN(*size, 4096);
     return p;
 }
 void
