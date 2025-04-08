@@ -67,6 +67,12 @@ delete_brn2_buffer(void) {
     return;
 }
 
+static void
+handler_segv(int unused) {
+    error("%s: Memory error. Please file a bug report.\n", program);
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv) {
     FileList *old;
     FileList *new;
@@ -89,6 +95,8 @@ int main(int argc, char **argv) {
 #endif
 
     program = basename(argv[0]);
+
+    signal(SIGSEGV, handler_segv);
 
     while ((opt = getopt_long(argc, argv,
                               "d:f:r:ceFhiqsv", options, NULL)) != -1) {
