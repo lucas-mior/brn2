@@ -754,11 +754,13 @@ brn2_execute(FileList *old, FileList *new,
                                 AT_FDCWD, newname, RENAME_EXCHANGE);
             if (renamed >= 0) {
                 if (hash_set_insert_pre_calc(names_renamed,
-                                             *oldname, oldhash, oldindex))
+                                             *oldname, oldhash, oldindex)) {
                     number_renames += 1;
+                }
                 if (hash_set_insert_pre_calc(names_renamed,
-                                             newname, newhash, newindex))
+                                             newname, newhash, newindex)) {
                     number_renames += 1;
+                }
                 print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n",
                       *oldname, newname);
 
