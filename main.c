@@ -62,7 +62,8 @@ static char *brn2_buffer_name;
 
 static void
 delete_brn2_buffer(void) {
-    unlink(brn2_buffer_name);
+    if (!BRN2_DEBUG)
+        unlink(brn2_buffer_name);
     return;
 }
 
