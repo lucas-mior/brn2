@@ -375,7 +375,6 @@ int main(int argc, char **argv) {
             for (uint32 i = 0; i < old->length; i += 1) {
                 brn2_execute2(old, new, oldlist_map, names_renamed,
                               i, &number_renames);
-                printf("number_nenames:%d\n", number_renames);
             }
             if (BRN2_DEBUG)
                 hash_set_destroy(names_renamed);
