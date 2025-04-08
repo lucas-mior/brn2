@@ -738,7 +738,7 @@ brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
             error(RED"'%s'"RESET" already exists,"
                   " but it was not given in the list of"
                   " files to rename, and --implict option is off.\n", newname);
-            if (brn2_options_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
             continue;
         }
@@ -789,7 +789,7 @@ brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
                 error("Error swapping "RED"'%s'"RESET
                       " and "RED"'%s'"RESET": %s.\n",
                       *oldname, newname, strerror(errno));
-                if (brn2_options_fatal || BRN2_DEBUG)
+                if (brn2_options_fatal)
                     exit(EXIT_FAILURE);
             }
         }
@@ -799,7 +799,7 @@ brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
         if (newname_exists) {
             error("Error renaming "RED"'%s'"RESET" to '%s':"
                   " File already exists.\n", *oldname, newname);
-            if (brn2_options_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
             continue;
         }
@@ -808,7 +808,7 @@ brn2_execute(FileList *old, FileList *new, HashMap *oldlist_map) {
         if (renamed < 0) {
             error("Error renaming "RED"'%s'"RESET " to "RED"'%s'"RESET": %s.\n",
                   *oldname, newname, strerror(errno));
-            if (brn2_options_fatal || BRN2_DEBUG)
+            if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
             continue;
         } else {
