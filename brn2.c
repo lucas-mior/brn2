@@ -694,8 +694,6 @@ noop(const char *unused, ...) {
     return 0;
 }
 
-int (*print)(const char *, ...);
-
 void
 brn2_execute2(FileList *old, FileList *new,
               HashMap *oldlist_map, HashSet *names_renamed,

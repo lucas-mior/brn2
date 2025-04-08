@@ -31,6 +31,7 @@ bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
 uint32 nthreads;
+int (*print)(const char *, ...);
 
 Arena *arena_old;
 Arena *arena_new;

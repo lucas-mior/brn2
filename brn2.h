@@ -148,6 +148,7 @@ extern uint32 nthreads;
 
 extern Arena *arena_old;
 extern Arena *arena_new;
+extern int (*print)(const char *, ...);
 
 int brn2_compare(const void *, const void *);
 FileList *brn2_list_from_dir(char *);
