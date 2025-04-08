@@ -116,8 +116,7 @@ arena_malloc(size_t *size) {
     } while (0);
 
     if (p == MAP_FAILED) {
-        fprintf(stderr, "Error in mmap(%zu): %s.\n",
-                        *size, strerror(errno));
+        fprintf(stderr, "Error in mmap(%zu): %s.\n", *size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
