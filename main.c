@@ -373,8 +373,8 @@ int main(int argc, char **argv) {
                   number_renames, number_renames != 1, "s");
             exit(EXIT_FAILURE);
         } else {
-            fprintf(stdout, "%u file%.*s renamed\n",
-                            number_renames, number_renames != 1, "s");
+            printf("%u file%.*s renamed\n",
+                   number_renames, number_renames != 1, "s");
         }
     }
 
