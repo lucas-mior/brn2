@@ -123,7 +123,7 @@ case "$target" in
         CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize -pg"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
-        CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
+        CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
         CPPFLAGS="$CPPFLAGS " ;;
     "check") 
         CC=gcc
