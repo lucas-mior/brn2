@@ -132,6 +132,8 @@ typedef struct FileName {
 
 typedef struct FileList {
     Arena *arena;
+    uint32 *indexes;
+    usize indexes_size;
     uint32 length;
     uint32 unused;
     FileName files[];
@@ -155,14 +157,13 @@ FileList *brn2_list_from_dir_recurse(char *);
 FileList *brn2_list_from_lines(char *, bool);
 FileList *brn2_list_from_args(int, char **);
 void brn2_normalize_names(FileList *, FileList *);
-uint32 *brn2_create_hashes(FileList *, uint32 *, uint32);
+void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, HashSet *, uint32 *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 uint32 brn2_execute(FileList *, FileList *, HashMap *, uint32 *, uint32 *);
 void brn2_free_list(FileList *);
 uint32 brn2_threads(int (*)(void *),
-                    FileList *, FileList *,
-                    uint32 *, uint32 *, uint32);
+                    FileList *, FileList *, uint32 *, uint32);
 int brn2_threads_work_sort(void *arg);
 void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);

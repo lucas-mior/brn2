@@ -166,7 +166,7 @@ sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, NULL, 0);
+    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, 0);
     if (p == 1)
         return;
 
