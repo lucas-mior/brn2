@@ -33,7 +33,17 @@
   #include <sys/wait.h>
 #endif
 
-#define SIZE2MB (2u*1024u*1024u)
+#define SIZEKB(X) ((size_t)(X)*1024ul)
+#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
+#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+
+#ifdef __linux__
+  #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2M
+  #define FLAG_POPULATE MAP_POPULATE
+#else
+  #define FLAGS_HUGE_PAGES 0
+  #define FLAG_POPULATE 0
+#endif
 
 #define UTIL_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
 #if !defined(ALIGNMENT)
@@ -75,26 +85,26 @@ util_nthreads(void) {
 }
 #endif
 
-#ifdef __linux__
+#ifndef __WIN32__
 void *
 xmmap_commit(size_t *size) {
     void *p;
 
     do {
-        if (*size >= SIZE2MB) {
+        if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
             p = mmap(NULL, *size,
                      PROT_READ|PROT_WRITE,
-                     MAP_ANONYMOUS|MAP_POPULATE|MAP_PRIVATE
-                     |MAP_HUGETLB|MAP_HUGE_2MB,
+                     MAP_ANONYMOUS|MAP_PRIVATE|FLAG_POPULATE|FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = UTIL_ALIGN(*size, SIZE2MB);
+                *size = UTIL_ALIGN(*size, SIZEMB(2));
                 break;
             }
         }
         p = mmap(NULL, *size,
-                 PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_POPULATE,
+                 PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|FLAG_POPULATE,
                  -1, 0);
+        *size = UTIL_ALIGN(*size, SIZEKB(4));
     } while (0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
