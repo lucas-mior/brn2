@@ -138,9 +138,11 @@ arena_malloc(size_t *size) {
 }
 void
 arena_destroy(Arena *arena) {
-    if (munmap(arena, arena->size) < 0)
+    if (munmap(arena, arena->size) < 0) {
         fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
                         (void *)arena, arena->size, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     return;
 }
 #else 
