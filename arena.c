@@ -88,7 +88,6 @@ arena_alloc(size_t size) {
     void *p;
     Arena *arena;
 
-    size += ALIGN(sizeof(*arena));
     p = arena_malloc(&size);
 
     arena = p;
@@ -191,7 +190,7 @@ arena_push(Arena *arena, uint32 size) {
 
     while ((char *)arena->pos >= ((char *)arena + arena->size - (size_t)size)) {
         if (!arena->next)
-            arena->next = arena_alloc(arena->size - ALIGN(sizeof(*arena)));
+            arena->next = arena_alloc(arena->size);
 
         arena = arena->next;
     }
