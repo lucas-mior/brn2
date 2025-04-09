@@ -90,6 +90,8 @@ arena_alloc(char *name, size_t size) {
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
+    arena_push(arena, ALIGNMENT);
+
     return arena;
 }
 
