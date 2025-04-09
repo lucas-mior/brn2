@@ -97,7 +97,9 @@ int main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
+#ifndef __WIN32__
     signal(SIGSEGV, handler_segv);
+#endif
 
     while ((opt = getopt_long(argc, argv,
                               "d:f:r:ceFhiqsv", options, NULL)) != -1) {
