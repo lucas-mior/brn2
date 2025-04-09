@@ -88,7 +88,7 @@ exe="$program"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros -Wno-unused-function"
-LDFLAGS="$LDFLAGS -lm "
+LDFLAGS="$LDFLAGS -lm -lpthread "
 
 CC=${CC:-cc}
 if [ "$CC" = "clang" ]; then
@@ -110,6 +110,14 @@ if [ "$CC" = "zig cc" ]; then
             exe="$program" ;;
         "mac-x86")
             CFLAGS="$CFLAGS -target x86_64-macos"
+            CPPFLAGS="$CPPFLAGS"
+            exe="$program" ;;
+        "openbsd")
+            CFLAGS="$CFLAGS -target x86_64-openbsd-gnu "
+            CPPFLAGS="$CPPFLAGS"
+            exe="$program" ;;
+        "freebsd")
+            CFLAGS="$CFLAGS -v -target x86_64-freebsd-gnu -isysroot $dir/freebsd"
             CPPFLAGS="$CPPFLAGS"
             exe="$program" ;;
         *)
@@ -170,8 +178,8 @@ case "$target" in
     "assembly")
         $CC $CPPFLAGS $CFLAGS -o ${program}_$CC.S "$main" $LDFLAGS
         ;;
-    "build"|"debug"|"benchmark"|"callgrind"|"valgrind"\
-        |"profile"|"check"|"windows"|"mac-arm"|"mac-x86")
+    "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check"\
+        |"windows"|"mac-arm"|"mac-x86"|"openbsd"|"freebsd")
         set -x
         ctags --kinds-C=+l+d *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
