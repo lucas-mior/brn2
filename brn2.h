@@ -64,7 +64,7 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
-#define BRN2_ALIGN(x,alignment) ((x) + ((alignment) - ((x) % (alignment))))
+#define BRN2_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 
 #ifdef __GNUC__
 # define BRN2_ASSUME_ALIGNED(X) do { \
