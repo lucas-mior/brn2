@@ -31,6 +31,7 @@
 #include "assert.h"
 #include "stdbool.h"
 #include "stdint.h"
+#include "unistd.h"
 
 typedef struct Arena {
     char *name;
@@ -44,7 +45,7 @@ typedef struct Arena {
 #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
 #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 
-#define ARENA_ALIGN(S, alignment) (((S) + ((alignment) - 1)) & ~((alignment) - 1))
+#define ARENA_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 #if !defined(ALIGNMENT)
   #define ALIGNMENT 16lu
 #endif
@@ -78,10 +79,19 @@ static uint32 arena_push_index32(Arena *, uint32);
 static void *arena_reset(Arena *);
 static void *arena_reset_zero(Arena *);
 
+static size_t page_size = 0;
+
 Arena *
 arena_alloc(char *name, size_t size) {
     void *p;
     Arena *arena;
+
+    if (page_size == 0) {
+        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
+            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
 
     size += ALIGN(sizeof(*arena));
 
@@ -117,7 +127,7 @@ arena_malloc(size_t *size) {
                  PROT_READ|PROT_WRITE,
                  MAP_ANON|MAP_PRIVATE,
                  -1, 0);
-        *size = ARENA_ALIGN(*size, SIZEKB(4));
+        *size = ARENA_ALIGN(*size, page_size);
     } while (0);
 
     if (p == MAP_FAILED) {
