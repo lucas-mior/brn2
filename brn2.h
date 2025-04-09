@@ -60,7 +60,7 @@
 #define BRN2_PATH_MAX 4096u
 #define BRN2_ARENA_SIZE SIZEGB(1)
 #define BRN2_MIN_PARALLEL 64
-#define BRN2_ALIGNMENT 16
+#define BRN2_ALIGNMENT 16ul
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
