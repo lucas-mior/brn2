@@ -4,7 +4,7 @@
 
 dir="$(realpath "$(dirname "$0")")"
 testing () {
-    for src in arena.c; do
+    for src in *.c; do
         [ "$src" = "$main" ] && continue
         printf "Testing ${RED}${src}${RES} ...\n"
         name="$(echo "$src" | sed 's/\.c//g')"

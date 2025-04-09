@@ -76,6 +76,7 @@ typedef uint64_t uint64;
 static Arena *arena_alloc(size_t);
 static void *arena_malloc(size_t *);
 static void arena_destroy(Arena *);
+static void arena_free(Arena *);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
 static void *arena_reset(Arena *);
@@ -139,19 +140,12 @@ arena_malloc(size_t *size) {
     return p;
 }
 void
-arena_destroy(Arena *arena) {
-    Arena *next;
-
-    do {
-        next = arena->next;
-        if (munmap(arena, arena->size) < 0) {
-            fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
-                            (void *)arena, arena->size, strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        arena = next;
-    } while (arena);
-
+arena_free(Arena *arena) {
+    if (munmap(arena, arena->size) < 0) {
+        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
+                        (void *)arena, arena->size, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     return;
 }
 #else 
@@ -181,7 +175,7 @@ arena_malloc(size_t *size) {
     return p;
 }
 void
-arena_destroy(Arena *arena) {
+arena_free(Arena *arena) {
     if (!VirtualFree(arena, 0, MEM_RELEASE)) {
         fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
                         arena, GetLastError());
@@ -190,6 +184,19 @@ arena_destroy(Arena *arena) {
     return;
 }
 #endif
+
+void
+arena_destroy(Arena *arena) {
+    Arena *next;
+
+    do {
+        next = arena->next;
+        arena_free(arena);
+        arena = next;
+    } while (arena);
+
+    return;
+}
 
 void *
 arena_push(Arena *arena, uint32 size) {
