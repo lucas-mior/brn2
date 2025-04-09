@@ -169,13 +169,6 @@ arena_push_index32(Arena *arena, uint32 size) {
     return (uint32)((char *)before - (char *)arena->begin);
 }
 
-int64
-arena_push_index(Arena *arena, uint32 size) {
-    void *before = arena->pos;
-    arena->pos = (char *)arena->pos + size;
-    return (int64)((char *)before - (char *)arena->begin);
-}
-
 void *
 arena_reset(Arena *arena) {
     arena->pos = arena->begin;
