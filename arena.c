@@ -223,8 +223,16 @@ arena_push_index32(Arena *arena, uint32 size) {
 
 void *
 arena_reset(Arena *arena) {
-    arena->pos = arena->begin;
-    return arena->begin;
+    Arena *next;
+    Arena *first = arena;
+
+    do {
+        next = arena->next;
+        arena->pos = arena->begin;
+        arena = next;
+    } while (arena);
+
+    return first->begin;
 }
 
 void *
@@ -241,10 +249,15 @@ int
 main(void) {
     Arena *arena;
     assert((arena = arena_alloc(SIZEMB(1))));
+    void *begin = arena->begin;
     assert(arena_push(arena, 10));
     assert(arena_push(arena, 100));
     assert(arena_push(arena, 1000));
     assert(arena_push(arena, 10000));
+
+    assert(arena_reset(arena));
+    assert(arena->begin == begin);
+
     assert(arena_push(arena, 100000));
     assert(arena_push(arena, 1000000));
     arena_reset(arena);
