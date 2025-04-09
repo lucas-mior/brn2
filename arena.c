@@ -49,7 +49,7 @@ typedef struct Arena {
 
 #define ARENA_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 #if !defined(ALIGNMENT)
-  #define ALIGNMENT 16lu
+  #define ALIGNMENT 16ul
 #endif
 #if !defined(ALIGN)
   #define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)

@@ -47,7 +47,7 @@
 
 #define UTIL_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
 #if !defined(ALIGNMENT)
-  #define ALIGNMENT 16
+  #define ALIGNMENT 16ul
 #endif
 #if !defined(ALIGN)
   #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
