@@ -188,9 +188,9 @@ void *
 arena_push(Arena *arena, uint32 size) {
     void *before;
 
-    if (size > (arena->size - sizeof(*arena))) {
+    if (size > (arena->size - ALIGN(sizeof(*arena)))) {
         fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n",
-                        size, arena->size - sizeof(*arena));
+                        size, arena->size - ALIGN(sizeof(*arena)));
         exit(EXIT_FAILURE);
     }
 
@@ -241,7 +241,7 @@ main(void) {
     assert(arena_push(arena, 100000));
     assert(arena_push(arena, 1000000));
     arena_reset(arena);
-    assert(arena_push(arena, SIZEMB(1) - sizeof(*arena)));
+    assert(arena_push(arena, SIZEMB(1) - ALIGN(sizeof(*arena))));
     arena_destroy(arena);
     exit(EXIT_SUCCESS);
 }
