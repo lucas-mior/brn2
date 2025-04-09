@@ -71,7 +71,7 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 #endif
 
-static Arena *arena_alloc(char *, size_t);
+static Arena *arena_alloc(size_t);
 static void *arena_malloc(size_t *);
 static void arena_destroy(Arena *);
 static void *arena_push(Arena *, uint32);
@@ -82,7 +82,7 @@ static void *arena_reset_zero(Arena *);
 static size_t page_size = 0;
 
 Arena *
-arena_alloc(char *name, size_t size) {
+arena_alloc(size_t size) {
     void *p;
     Arena *arena;
 
@@ -90,7 +90,6 @@ arena_alloc(char *name, size_t size) {
     p = arena_malloc(&size);
 
     arena = p;
-    arena->name = name;
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
@@ -187,7 +186,7 @@ arena_push(Arena *arena, uint32 size) {
 
     while ((char *)arena->pos >= ((char *)arena + arena->size - (size_t)size)) {
         if (!arena->next)
-            arena->next = arena_alloc("extra", SIZEMB(2));
+            arena->next = arena_alloc(arena->size - ALIGN(sizeof(*arena)));
 
         arena = arena->next;
     }
@@ -223,8 +222,8 @@ arena_reset_zero(Arena *arena) {
 int
 main(void) {
     Arena *arena;
-    assert((arena = arena_alloc("name", 4096*UINT32_MAX)));
-    assert(arena_push(arena, 4095*UINT32_MAX));
+    assert((arena = arena_alloc(UINT32_MAX)));
+    assert(arena_push(arena, UINT32_MAX - 1));
     arena_destroy(arena);
     exit(EXIT_SUCCESS);
 }
