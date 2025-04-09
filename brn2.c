@@ -173,7 +173,7 @@ brn2_list_from_dir(char *directory) {
             file->name = arena_push(list->arena, size);
             BRN2_ASSUME_ALIGNED(file->name);
 
-            memcpy(file->name, name, size);
+            memcpy(file->name, name, file->length + 1);
         }
         memset(&file->name[file->length], 0, size - file->length);
 
@@ -903,6 +903,9 @@ int main(void) {
         printf(RED"%u / %u\n"RESET, i+1, list1->length);
         assert(contains_filename(list2, list1->files[i], list1->length < 9999));
     }
+
+    brn2_free_list(list1);
+    brn2_free_list(list2);
 
     unlink(file);
     exit(0);
