@@ -69,6 +69,7 @@ delete_brn2_buffer(void) {
 
 static void
 handler_segv(int unused) {
+    (void) unused;
     error("%s: Memory error. Please file a bug report.\n", program);
     exit(EXIT_FAILURE);
 }
