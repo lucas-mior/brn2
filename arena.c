@@ -41,9 +41,11 @@ typedef struct Arena {
     struct Arena *next;
 } Arena;
 
-#define SIZEKB(X) ((size_t)(X)*1024ul)
-#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
-#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+#if !defined(SIZEKB)
+  #define SIZEKB(X) ((size_t)(X)*1024ul)
+  #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
+  #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+#endif
 
 #define ARENA_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 #if !defined(ALIGNMENT)
