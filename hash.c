@@ -426,9 +426,9 @@ int main(void) {
     HashMap *original_map;
     HashMap *balanced_map;
     Arena *arena;
-    String string1 = { .s = "aaaaaaaaaaaaaaaa", .value = 0};
-    String string2 = { .s = "bbbbbbbbbbbbbbbb", .value = 1};
-    String string3 = { .s = "cccccccccccccccc", .value = 2};
+    String str1 = { .s = "aaaaaaaaaaaaaaaa", .value = 0};
+    String str2 = { .s = "bbbbbbbbbbbbbbbb", .value = 1};
+    String str3 = { .s = "cccccccccccccccc", .value = 2};
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_map_create(NSTRINGS);
@@ -437,13 +437,13 @@ int main(void) {
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);
 
-    string1.length = (uint32)strlen(string1.s);
-    string2.length = (uint32)strlen(string2.s);
-    string3.length = (uint32)strlen(string3.s);
+    str1.length = (uint32)strlen(str1.s);
+    str2.length = (uint32)strlen(str2.s);
+    str3.length = (uint32)strlen(str3.s);
 
-    assert(hash_map_insert(original_map, string1.s, string1.length, string1.value));
-    assert(!hash_map_insert(original_map, string1.s, string1.length, 1));
-    assert(hash_map_insert(original_map, string2.s, string2.length, string2.value));
+    assert(hash_map_insert(original_map, str1.s, str1.length, str1.value));
+    assert(!hash_map_insert(original_map, str1.s, str1.length, 1));
+    assert(hash_map_insert(original_map, str2.s, str2.length, str2.value));
 
     assert(hash_length(original_map) == 2);
     hash_map_print(original_map, false);
@@ -492,17 +492,17 @@ int main(void) {
 
     assert(hash_length(balanced_map) == (2 + NSTRINGS));
     {
-        uint32 *value = hash_map_lookup(balanced_map, string1.s, string1.length);
+        uint32 *value = hash_map_lookup(balanced_map, str1.s, str1.length);
         assert(*value == 0);
     }
-    assert(!hash_map_lookup(balanced_map, string3.s, string3.length));
+    assert(!hash_map_lookup(balanced_map, str3.s, str3.length));
 
-    assert(!hash_map_remove(balanced_map, string3.s, string3.length));
-    assert(hash_map_remove(balanced_map, string2.s, string2.length));
+    assert(!hash_map_remove(balanced_map, str3.s, str3.length));
+    assert(hash_map_remove(balanced_map, str2.s, str2.length));
 
     assert(hash_length(balanced_map) == (1 + NSTRINGS));
 
-    assert(hash_map_remove(balanced_map, string1.s, string1.length));
+    assert(hash_map_remove(balanced_map, str1.s, str1.length));
 
     hash_map_destroy(balanced_map);
     free(strings);
