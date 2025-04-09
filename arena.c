@@ -29,6 +29,7 @@
 #include "errno.h"
 #include "stdlib.h"
 #include "assert.h"
+#include "stdbool.h"
 #include "stdint.h"
 
 typedef struct Arena {
@@ -36,6 +37,7 @@ typedef struct Arena {
     char *begin;
     void *pos;
     size_t size;
+    struct Arena *next;
 } Arena;
 
 #define SIZE2MB (2u*1024u*1024u)
@@ -90,6 +92,7 @@ arena_alloc(char *name, size_t size) {
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
+    arena->next = NULL;
     arena_push(arena, ALIGNMENT);
 
     return arena;
@@ -158,7 +161,19 @@ arena_destroy(Arena *arena) {
 
 void *
 arena_push(Arena *arena, uint32 size) {
-    void *before = arena->pos;
+    void *before;
+
+    do {
+        if ((char *)arena->pos < ((char *)arena + arena->size + size))
+            break;
+
+        if (!arena->next)
+            arena->next = arena_alloc("extra", SIZE4GB);
+
+        arena = arena->next;
+    } while (true);
+
+    before = arena->pos;
     arena->pos = (char *)arena->pos + size;
     return before;
 }
