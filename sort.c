@@ -60,6 +60,7 @@ sort_shuffle(void *array, usize n, usize size) {
 static void
 sort_heapify(HeapNode *heap, uint32 p, uint32 i,
              int32 (*compare)(const void *a, const void *b)) {
+    (void) compare;
     while (true) {
         uint32 smallest = i;
         uint32 left = 2*i + 1;
