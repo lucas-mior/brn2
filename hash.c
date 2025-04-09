@@ -505,8 +505,9 @@ int main(void) {
     assert(hash_map_remove(balanced_map, string1.s, string1.length));
 
     hash_map_destroy(balanced_map);
+    free(strings);
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 #endif
 
