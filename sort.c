@@ -276,6 +276,9 @@ test_sorting(uint32 n, uint32 p) {
         }
         printf("\n");
     }
+
+    free(array);
+    free(n_sub);
     return;
 }
 
