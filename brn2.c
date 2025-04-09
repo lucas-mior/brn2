@@ -412,6 +412,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
         length += 1;
     }
     fclose(lines);
+    list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
     list->length = length;
     return list;
 }
