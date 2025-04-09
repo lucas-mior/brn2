@@ -98,9 +98,19 @@ if [ "$CC" = "clang" ]; then
 fi
 
 if [ "$CC" = "zig cc" ]; then
-    CFLAGS="$CFLAGS -target x86_64-windows-gnu"
-    CPPFLAGS="$CPPFLAGS"
-    exe="$program.exe"
+    case "$target" in
+        "windows")
+            CFLAGS="$CFLAGS -target x86_64-windows-gnu"
+            CPPFLAGS="$CPPFLAGS"
+            exe="$program.exe" ;;
+        "mac")
+            CFLAGS="$CFLAGS -target x86_64-macos"
+            CPPFLAGS="$CPPFLAGS"
+            exe="$program.exe" ;;
+        *)
+            echo "Invalid target for zig cc: $target"
+            exit 1 ;;
+    esac
 fi
 
 case "$target" in
@@ -124,6 +134,9 @@ case "$target" in
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
         CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
+        CPPFLAGS="$CPPFLAGS " ;;
+    "mac") 
+        CFLAGS="$CFLAGS -fno-lto"
         CPPFLAGS="$CPPFLAGS " ;;
     "check") 
         CC=gcc
@@ -152,7 +165,7 @@ case "$target" in
     "assembly")
         $CC $CPPFLAGS $CFLAGS -o ${program}_$CC.S "$main" $LDFLAGS
         ;;
-    "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check")
+    "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check"|"windows"|"mac")
         set -x
         ctags --kinds-C=+l+d *.h *.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
