@@ -90,12 +90,17 @@ arena_alloc(size_t size) {
 
     p = arena_malloc(&size);
 
+    static int alloced = 0;
+
+    alloced += 1;
     arena = p;
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
     arena->next = NULL;
     arena_push(arena, ALIGNMENT);
+
+    printf("alloced = %d\n", alloced);
 
     return arena;
 }
@@ -140,11 +145,21 @@ arena_malloc(size_t *size) {
 }
 void
 arena_destroy(Arena *arena) {
-    if (munmap(arena, arena->size) < 0) {
-        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
-                        (void *)arena, arena->size, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+    Arena *next;
+    int frred = 0;
+
+    do {
+        next = arena->next;
+        if (munmap(arena, arena->size) < 0) {
+            fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
+                            (void *)arena, arena->size, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        frred += 1;
+        arena = next;
+    } while (arena);
+
+    printf("frred = %d\n", frred);
     return;
 }
 #else 
@@ -242,6 +257,8 @@ main(void) {
     assert(arena_push(arena, 1000000));
     arena_reset(arena);
     assert(arena_push(arena, SIZEMB(1) - ALIGN(sizeof(*arena))));
+    for (int i = 0; i < 10; i += 1)
+        assert(arena_push(arena, 1000000));
     arena_destroy(arena);
     exit(EXIT_SUCCESS);
 }
