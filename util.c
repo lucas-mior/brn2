@@ -37,12 +37,14 @@
 #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
 #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 
-#ifdef __linux__
+#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
   #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
-  #define FLAG_POPULATE MAP_POPULATE
 #else
   #define FLAGS_HUGE_PAGES 0
-  #define FLAG_POPULATE 0
+#endif
+
+#if !defined(MAP_POPULATE)
+  #define MAP_POPULATE 0
 #endif
 
 #define UTIL_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
@@ -105,7 +107,7 @@ xmmap_commit(size_t *size) {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
             p = mmap(NULL, *size,
                      PROT_READ|PROT_WRITE,
-                     MAP_ANONYMOUS|MAP_PRIVATE|FLAG_POPULATE|FLAGS_HUGE_PAGES,
+                     MAP_ANONYMOUS|MAP_PRIVATE|MAP_POPULATE|FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
                 *size = UTIL_ALIGN(*size, SIZEMB(2));
@@ -113,7 +115,7 @@ xmmap_commit(size_t *size) {
             }
         }
         p = mmap(NULL, *size,
-                 PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|FLAG_POPULATE,
+                 PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_POPULATE,
                  -1, 0);
         *size = UTIL_ALIGN(*size, SIZEKB(4));
     } while (0);
