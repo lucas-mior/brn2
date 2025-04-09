@@ -33,9 +33,9 @@
 #include "util.c"
 #include "arena.c"
 
-static int brn2_threads_work_hashes(void *);
-static int brn2_threads_work_normalization(void *);
-static int brn2_threads_work_changes(void *);
+static void *brn2_threads_work_hashes(void *);
+static void *brn2_threads_work_normalization(void *);
+static void *brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 
@@ -434,7 +434,7 @@ typedef struct Slice {
 } Slice;
 
 #ifndef __WIN32__
-int
+void *
 brn2_threads_work_normalization(void *arg) {
     Slice *slice = arg;
     FileList *list;
@@ -497,7 +497,7 @@ brn2_threads_work_normalization(void *arg) {
     return 0;
 }
 #else
-int
+void *
 brn2_threads_work_normalization(void *arg) {
     (void) arg;
     return 0;
@@ -514,7 +514,7 @@ brn2_slash_add(FileName *file) {
     return;
 }
 
-int
+void *
 brn2_threads_work_sort(void *arg) {
     Slice *slice = arg;
     FileName *files = &(slice->old_list->files[slice->start]);
@@ -522,7 +522,7 @@ brn2_threads_work_sort(void *arg) {
     return 0;
 }
 
-int
+void *
 brn2_threads_work_hashes(void *arg) {
     Slice *slice = arg;
 
@@ -535,7 +535,8 @@ brn2_threads_work_hashes(void *arg) {
     return 0;
 }
 
-int brn2_threads_work_changes(void *arg) {
+void *
+brn2_threads_work_changes(void *arg) {
     Slice *slice = arg;
 
     for (uint32 i = slice->start; i < slice->end; i += 1) {
@@ -590,10 +591,10 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 
 #ifndef __WIN32__
 uint32
-brn2_threads(int (*function)(void *),
+brn2_threads(void *(*function)(void *),
              FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
-    thrd_t threads[BRN2_MAX_THREADS];
+    pthread_t threads[BRN2_MAX_THREADS];
     Slice slices[BRN2_MAX_THREADS];
     uint32 range;
     uint32 length;
@@ -618,7 +619,7 @@ brn2_threads(int (*function)(void *),
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        thrd_create(&threads[i], function, (void *)&slices[i]);
+        pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
@@ -627,11 +628,11 @@ brn2_threads(int (*function)(void *),
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        thrd_create(&threads[i], function, (void *)&slices[i]);
+        pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
     }
 
     for (uint32 i = 0; i < nthreads; i += 1)
-        thrd_join(threads[i], NULL);
+        pthread_join(threads[i], NULL);
     return nthreads;
 }
 #else
