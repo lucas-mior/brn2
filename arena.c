@@ -223,14 +223,11 @@ arena_push_index32(Arena *arena, uint32 size) {
 
 void *
 arena_reset(Arena *arena) {
-    Arena *next;
     Arena *first = arena;
 
     do {
-        next = arena->next;
         arena->pos = arena->begin;
-        arena = next;
-    } while (arena);
+    } while ((arena = arena->next));
 
     return first->begin;
 }
