@@ -117,7 +117,7 @@ xmmap_commit(size_t *size) {
         p = mmap(NULL, *size,
                  PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_POPULATE,
                  -1, 0);
-        *size = UTIL_ALIGN(*size, SIZEKB(4));
+        *size = UTIL_ALIGN(*size, util_page_size);
     } while (0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
