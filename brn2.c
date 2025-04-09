@@ -637,7 +637,7 @@ brn2_threads(void *(*function)(void *),
 }
 #else
 uint32
-brn2_threads(int (*function)(void *),
+brn2_threads(void *(*function)(void *),
              FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
     Slice slices[1];

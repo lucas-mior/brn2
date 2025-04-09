@@ -70,7 +70,7 @@ hash_##T##_zero(struct Hash##T *map) { \
 struct Hash##T * \
 hash_##T##_create(uint32 length) { \
     struct Hash##T *map; \
-    uint64 size; \
+    size_t size; \
     uint32 capacity = 1; \
     uint32 power = 0; \
 \
