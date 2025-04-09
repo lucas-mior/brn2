@@ -337,14 +337,21 @@ util_command(const int argc, char **argv) {
 #include <assert.h>
 
 int main(void) {
-    void *p1 = xmalloc(1024*1024*1024);
-    void *p2 = xcalloc(1024, 1024*1024);
+    void *p1 = xmalloc(SIZEMB(1));
+    void *p2 = xcalloc(10, SIZEMB(1));
     char *p3;
     char *string = __FILE__;
+
+    memset(p1, 0, SIZEMB(1));
     memcpy(p1, string, strlen(string));
-    memset(p2, 0, 1024*1024*1024);
+    memset(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
+
     error("%s == %s is working? %b\n", string, p3, !strcmp(string, p3));
+
+    free(p1);
+    free(p2);
+    free(p3);
     exit(EXIT_SUCCESS);
 }
 
