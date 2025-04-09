@@ -70,6 +70,8 @@ static void *snprintf2(char *, size_t, char *, ...);
 static void util_command(const int, char **);
 static uint32 util_nthreads(void);
 
+static size_t util_page_size = 0;
+
 #ifdef __WIN32__
 uint32
 util_nthreads(void) {
@@ -89,6 +91,15 @@ util_nthreads(void) {
 void *
 xmmap_commit(size_t *size) {
     void *p;
+
+    if (util_page_size == 0) {
+        long aux;
+        if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
+            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        util_page_size = (size_t)aux;
+    }
 
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
@@ -122,6 +133,16 @@ xmunmap(void *p, size_t size) {
 void *
 xmmap_commit(size_t *size) {
     void *p;
+
+    if (util_page_size == 0) {
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        util_page_size = si.dwPageSize;
+        if (util_page_size <= 0) {
+            fprintf(stderr, "Error getting page size.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 
     p = VirtualAlloc(NULL, *size,
                            MEM_COMMIT|MEM_RESERVE,

@@ -81,7 +81,7 @@ static uint32 arena_push_index32(Arena *, uint32);
 static void *arena_reset(Arena *);
 static void *arena_reset_zero(Arena *);
 
-static size_t page_size = 0;
+static size_t arena_page_size = 0;
 
 Arena *
 arena_alloc(size_t size) {
@@ -106,13 +106,13 @@ void *
 arena_malloc(size_t *size) {
     void *p;
 
-    if (page_size == 0) {
+    if (arena_page_size == 0) {
         long aux;
         if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
             fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        page_size = (size_t)aux;
+        arena_page_size = (size_t)aux;
     }
 
     do {
@@ -130,7 +130,7 @@ arena_malloc(size_t *size) {
                  PROT_READ|PROT_WRITE,
                  MAP_ANON|MAP_PRIVATE,
                  -1, 0);
-        *size = ARENA_ALIGN(*size, page_size);
+        *size = ARENA_ALIGN(*size, arena_page_size);
     } while (0);
 
     if (p == MAP_FAILED) {
@@ -153,11 +153,11 @@ void *
 arena_malloc(size_t *size) {
     void *p;
 
-    if (page_size == 0) {
+    if (arena_page_size == 0) {
         SYSTEM_INFO si;
         GetSystemInfo(&si);
-        page_size = si.dwPageSize;
-        if (page_size <= 0) {
+        arena_page_size = si.dwPageSize;
+        if (arena_page_size <= 0) {
             fprintf(stderr, "Error getting page size.\n");
             exit(EXIT_FAILURE);
         }
@@ -171,7 +171,7 @@ arena_malloc(size_t *size) {
                         *size, GetLastError());
         exit(EXIT_FAILURE);
     }
-    *size = ARENA_ALIGN(*size, page_size);
+    *size = ARENA_ALIGN(*size, arena_page_size);
     return p;
 }
 void
