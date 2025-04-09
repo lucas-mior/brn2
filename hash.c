@@ -434,7 +434,7 @@ int main(void) {
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_map_create(NSTRINGS);
-    arena = arena_alloc("arena for random strings", (usize)4096*NSTRINGS);
+    arena = arena_alloc("arena for random strings", (usize)4096);
 
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);

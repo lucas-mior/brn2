@@ -40,12 +40,13 @@ typedef struct Arena {
     struct Arena *next;
 } Arena;
 
-#define SIZE2MB (2u*1024u*1024u)
-#define SIZE4GB (1u*1024u*1024u*1024u)
+#define SIZEKB(X) ((size_t)(X)*1024ul)
+#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
+#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 
-#define ARENA_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
+#define ARENA_ALIGN(S, alignment) (((S) + ((alignment) - 1)) & ~((alignment) - 1))
 #if !defined(ALIGNMENT)
-  #define ALIGNMENT 16
+  #define ALIGNMENT 16lu
 #endif
 #if !defined(ALIGN)
   #define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)
@@ -74,7 +75,6 @@ static void *arena_malloc(size_t *);
 static void arena_destroy(Arena *);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
-static int64 arena_push_index(Arena *, uint32);
 static void *arena_reset(Arena *);
 static void *arena_reset_zero(Arena *);
 
@@ -103,13 +103,13 @@ void *
 arena_malloc(size_t *size) {
     void *p;
     do {
-        if ((*size >= SIZE2MB) && TRY_HUGE_PAGES) {
+        if ((*size >= SIZEMB(2)) && TRY_HUGE_PAGES) {
             p = mmap(NULL, *size,
                      PROT_READ|PROT_WRITE,
                      MAP_ANON|MAP_PRIVATE|MAP_HUGETLB|MAP_HUGE_2MB,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = ARENA_ALIGN(*size, SIZE2MB);
+                *size = ARENA_ALIGN(*size, SIZEMB(2));
                 break;
             }
         }
@@ -117,7 +117,7 @@ arena_malloc(size_t *size) {
                  PROT_READ|PROT_WRITE,
                  MAP_ANON|MAP_PRIVATE,
                  -1, 0);
-        *size = ARENA_ALIGN(*size, 4096);
+        *size = ARENA_ALIGN(*size, SIZEKB(4));
     } while (0);
 
     if (p == MAP_FAILED) {
@@ -163,15 +163,12 @@ void *
 arena_push(Arena *arena, uint32 size) {
     void *before;
 
-    do {
-        if ((char *)arena->pos < ((char *)arena + arena->size + size))
-            break;
-
+    while ((char *)arena->pos >= ((char *)arena + arena->size - (size_t)size)) {
         if (!arena->next)
-            arena->next = arena_alloc("extra", SIZE4GB);
+            arena->next = arena_alloc("extra", SIZEMB(2));
 
         arena = arena->next;
-    } while (true);
+    }
 
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
