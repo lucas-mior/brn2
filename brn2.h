@@ -172,10 +172,10 @@ uint32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
 uint32 brn2_threads(void *(*)(void *),
                     FileList *, FileList *, uint32 *, uint32);
-void *brn2_threads_work_sort(void *arg);
+void *brn2_threads_work_sort(void *);
 void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
-void brn2_execute2(FileList *, FileList *new,
+void brn2_execute2(FileList *, FileList *,
                    HashMap *, HashSet *,
                    uint32, uint32 *);
 
