@@ -60,6 +60,7 @@ brn2_list_from_args(int argc, char **argv) {
     uint32 length = 0;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, argc));
+    memset(list, 0, sizeof(*list));
     list->arena = arena_old;
 
     for (int i = 0; i < argc; i += 1) {
@@ -142,6 +143,7 @@ brn2_list_from_dir(char *directory) {
     }
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files));
+    memset(list, 0, sizeof(*list));
     list->arena = arena_old;
 
     for (int i = 0; i < number_files; i += 1) {
@@ -196,6 +198,7 @@ brn2_list_from_dir_recurse(char *directory) {
     uint32 size;
 
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    memset(list, 0, sizeof(*list));
     list->arena = arena_old;
 
     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
@@ -306,6 +309,7 @@ brn2_list_from_lines(char *filename, bool is_old) {
 
     capacity = map_size/2;
     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity));
+    memset(list, 0, sizeof(*list));
     if (is_old)
         list->arena = arena_old;
     else
