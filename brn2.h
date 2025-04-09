@@ -30,7 +30,7 @@
   #define basename(X) X
 #else
   #define BRN2_MAX_THREADS 64
-  #include <threads.h>
+  #include <pthread.h>
   #include <sys/mman.h>
   #include <sys/wait.h>
   #include <fts.h>
@@ -167,9 +167,9 @@ void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, HashSet *, uint32 *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
-uint32 brn2_threads(int (*)(void *),
+uint32 brn2_threads(void *(*)(void *),
                     FileList *, FileList *, uint32 *, uint32);
-int brn2_threads_work_sort(void *arg);
+void *brn2_threads_work_sort(void *arg);
 void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 void brn2_execute2(FileList *, FileList *new,

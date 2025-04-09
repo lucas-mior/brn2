@@ -107,10 +107,12 @@ arena_malloc(size_t *size) {
     void *p;
 
     if (page_size == 0) {
-        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
+        long aux;
+        if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
             fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
+        page_size = (size_t)aux;
     }
 
     do {
