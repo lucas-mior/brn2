@@ -47,7 +47,7 @@
   #define MAP_POPULATE 0
 #endif
 
-#define UTIL_ALIGN(x, alignment) ((x) + ((alignment) - ((x) % (alignment))))
+#define UTIL_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 #if !defined(ALIGNMENT)
   #define ALIGNMENT 16ul
 #endif
