@@ -578,8 +578,7 @@ brn2_normalize_names(FileList *old, FileList *new) {
 
 void
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    brn2_threads(brn2_threads_work_hashes,
-                 list, NULL, NULL, map_capacity);
+    brn2_threads(brn2_threads_work_hashes, list, NULL, NULL, map_capacity);
     return;
 }
 
