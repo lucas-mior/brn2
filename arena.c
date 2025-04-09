@@ -188,7 +188,13 @@ void *
 arena_push(Arena *arena, uint32 size) {
     void *before;
 
-    while ((char *)arena->pos >= ((char *)arena + arena->size - (size_t)size)) {
+    if (size > (arena->size - sizeof(*arena))) {
+        fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n",
+                        size, arena->size - sizeof(*arena));
+        exit(EXIT_FAILURE);
+    }
+
+    while ((char *)arena->pos >= (arena->begin + arena->size - size)) {
         if (!arena->next)
             arena->next = arena_alloc(arena->size);
 
@@ -223,11 +229,19 @@ arena_reset_zero(Arena *arena) {
 }
 
 #ifdef TESTING_arena
+#include "assert.h"
 int
 main(void) {
     Arena *arena;
-    assert((arena = arena_alloc(UINT32_MAX)));
-    assert(arena_push(arena, UINT32_MAX - 1));
+    assert((arena = arena_alloc(SIZEMB(1))));
+    assert(arena_push(arena, 10));
+    assert(arena_push(arena, 100));
+    assert(arena_push(arena, 1000));
+    assert(arena_push(arena, 10000));
+    assert(arena_push(arena, 100000));
+    assert(arena_push(arena, 1000000));
+    arena_reset(arena);
+    assert(arena_push(arena, SIZEMB(1) - sizeof(*arena)));
     arena_destroy(arena);
     exit(EXIT_SUCCESS);
 }
