@@ -56,9 +56,9 @@ typedef struct Arena {
 #endif
 
 #ifdef __linux__
-  #define HUGE_PAGE_FLAGS MAP_HUGETLB|MAP_HUGE_2M
+  #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
 #else
-  #define HUGE_PAGE_FLAGS 0
+  #define FLAGS_HUGE_PAGES 0
 #endif
 
 #ifndef INTEGERS
@@ -116,10 +116,10 @@ arena_malloc(size_t *size) {
     }
 
     do {
-        if ((*size >= SIZEMB(2)) && HUGE_PAGE_FLAGS) {
+        if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
             p = mmap(NULL, *size,
                      PROT_READ|PROT_WRITE,
-                     MAP_ANON|MAP_PRIVATE|HUGE_PAGE_FLAGS,
+                     MAP_ANON|MAP_PRIVATE|FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
                 *size = ARENA_ALIGN(*size, SIZEMB(2));

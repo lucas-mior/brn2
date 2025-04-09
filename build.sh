@@ -95,6 +95,7 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
+    CFLAGS="$CFLAGS -Wno-constant-logical-operand "
 fi
 
 if [ "$CC" = "zig cc" ]; then

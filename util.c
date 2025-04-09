@@ -38,7 +38,7 @@
 #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 
 #ifdef __linux__
-  #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2M
+  #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
   #define FLAG_POPULATE MAP_POPULATE
 #else
   #define FLAGS_HUGE_PAGES 0
