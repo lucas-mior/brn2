@@ -22,6 +22,7 @@
 #include <windows.h>
 #else
 #include <sys/mman.h>
+#include "unistd.h"
 #endif
 
 #include "string.h"
@@ -31,7 +32,6 @@
 #include "assert.h"
 #include "stdbool.h"
 #include "stdint.h"
-#include "unistd.h"
 
 typedef struct Arena {
     char *name;
@@ -86,15 +86,7 @@ arena_alloc(char *name, size_t size) {
     void *p;
     Arena *arena;
 
-    if (page_size == 0) {
-        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
-            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-    }
-
     size += ALIGN(sizeof(*arena));
-
     p = arena_malloc(&size);
 
     arena = p;
@@ -112,6 +104,14 @@ arena_alloc(char *name, size_t size) {
 void *
 arena_malloc(size_t *size) {
     void *p;
+
+    if (page_size == 0) {
+        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
+            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
+
     do {
         if ((*size >= SIZEMB(2)) && TRY_HUGE_PAGES) {
             p = mmap(NULL, *size,
@@ -148,6 +148,16 @@ void *
 arena_malloc(size_t *size) {
     void *p;
 
+    if (page_size == 0) {
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        page_size = si.dwPageSize;
+        if (page_size <= 0) {
+            fprintf(stderr, "Error getting page size.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
     p = VirtualAlloc(NULL, *size,
                            MEM_COMMIT|MEM_RESERVE,
                            PAGE_READWRITE);
@@ -156,7 +166,7 @@ arena_malloc(size_t *size) {
                         *size, GetLastError());
         exit(EXIT_FAILURE);
     }
-    *size = ARENA_ALIGN(*size, 4096);
+    *size = ARENA_ALIGN(*size, page_size);
     return p;
 }
 void
