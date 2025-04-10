@@ -117,7 +117,9 @@ if [ "$CC" = "zig cc" ]; then
             CPPFLAGS="$CPPFLAGS"
             exe="$program" ;;
         "freebsd")
-            CFLAGS="$CFLAGS -v -target x86_64-freebsd-gnu -isysroot $dir/freebsd"
+            CFLAGS="$CFLAGS -v -target x86_64-freebsd "
+            CFLAGS="$CFLAGS -isystem $dir/freebsd/usr/include "
+            CFLAGS="$CFLAGS -isysroot $dir/freebsd/ --sysroot $dir/freebsd"
             CPPFLAGS="$CPPFLAGS"
             exe="$program" ;;
         *)
