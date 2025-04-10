@@ -10,6 +10,7 @@ test
 build
 debug
 benchmark
+perf
 valgrind
 check
 cross x86_64-windows-gnu
@@ -42,9 +43,10 @@ case "$target" in
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
     ;;
-"benchmark")
+"benchmark"|"perf")
     CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+    exe="${program}_benchmark"
     ;;
 "valgrind") 
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
@@ -145,17 +147,21 @@ case "$target" in
     ;;
 esac
 
-case "$target" in
-"benchmark") 
+tempfiles() {
     tmpdir="/tmp/brn2"
     rm -rf "$tmpdir"
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
     seq -w 500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+}
+
+case "$target" in
+"benchmark") 
+    tempfiles
 
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
-    $dir/brn2 -s -q -d .
+    $dir/$exe -s -q -d .
     exit
     ;;
 "valgrind") 
@@ -167,6 +173,12 @@ case "$target" in
     valgrind $vg_flags $dir/brn2 -r .
     valgrind $vg_flags $dir/brn2 -d .
     valgrind $vg_flags $dir/brn2 -f rename
+    exit
+    ;;
+"perf")
+    tempfiles
+
+    perf record -o $dir/perf.data $dir/$exe -s -q -d .
     exit
     ;;
 "check")
