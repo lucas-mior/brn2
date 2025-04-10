@@ -4,16 +4,17 @@
 
 targets='
 test
-build
-debug
-benchmark
-valgrind
-check
+cross x86_64-windows-gnu
+cross x86_64-macos
+cross aarch64-macos
 '
 
 dir="$(realpath "$(dirname "$0")")"
 
 target="${1:-build}"
+cross="$2"
+
+printf "$RED $0 $1 $2 $RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
@@ -24,49 +25,28 @@ exe="$program"
 CFLAGS="$CFLAGS -std=c99"
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros -Wno-unused-function"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
-LDFLAGS="$LDFLAGS -lm -lpthread "
+LDFLAGS="$LDFLAGS -lm"
 
 CC=${CC:-cc}
+
+if [ "$target" = "cross" ]; then
+    CC="zig cc"
+    CFLAGS="$CFLAGS -target $cross"
+
+    if [ "$cross" = "x86_64-windows-gnu" ]; then
+        exe="$program.exe"
+    else
+        LDFLAGS="$LDFLAGS -lpthread"
+    fi
+else
+    LDFLAGS="$LDFLAGS -lpthread"
+fi
+
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
     CFLAGS="$CFLAGS -Wno-constant-logical-operand "
-fi
-
-if [ "$CC" = "zig cc" ]; then
-    case "$target" in
-        "windows")
-            CFLAGS="$CFLAGS -target x86_64-windows-gnu"
-            CPPFLAGS="$CPPFLAGS "
-            exe="$program.exe"
-            ;;
-        "mac-arm")
-            CFLAGS="$CFLAGS -target aarch64-macos"
-            CPPFLAGS="$CPPFLAGS "
-            exe="$program"
-            ;;
-        "mac-x86")
-            CFLAGS="$CFLAGS -target x86_64-macos"
-            CPPFLAGS="$CPPFLAGS "
-            exe="$program"
-            ;;
-        "openbsd")
-            CFLAGS="$CFLAGS -target x86_64-openbsd-gnu "
-            CPPFLAGS="$CPPFLAGS "
-            exe="$program"
-            ;;
-        "freebsd")
-            CFLAGS="$CFLAGS -v -target x86_64-freebsd "
-            CFLAGS="$CFLAGS -isystem $dir/freebsd/usr/include "
-            CFLAGS="$CFLAGS -isysroot $dir/freebsd/ --sysroot $dir/freebsd"
-            CPPFLAGS="$CPPFLAGS "
-            exe="$program"
-            ;;
-        *)
-            echo "Invalid target for zig cc: $target"
-            exit 1 ;;
-    esac
 fi
 
 case "$target" in
@@ -178,7 +158,7 @@ esac
 
 set +x
 if [ "$target" = "test_all" ]; then
-    for t in $targets; do
+    printf '%s\n' "$targets" | while IFS= read -r t; do
         $0 $t || exit 1
     done
 fi
