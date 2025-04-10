@@ -192,8 +192,7 @@ arena_destroy(Arena *arena) {
     do {
         next = arena->next;
         arena_free(arena);
-        arena = next;
-    } while (arena);
+    } while ((arena = next));
 
     return;
 }
@@ -267,10 +266,12 @@ main(void) {
 
     assert(arena_push(arena, 100000));
     assert(arena_push(arena, 1000000));
+
     arena_reset(arena);
     assert(arena_push(arena, SIZEMB(1) - ALIGN(sizeof(*arena))));
     for (int i = 0; i < 10; i += 1)
         assert(arena_push(arena, 1000000));
+
     arena_destroy(arena);
     exit(EXIT_SUCCESS);
 }
