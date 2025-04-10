@@ -2,6 +2,9 @@
 
 # shellcheck disable=SC2086
 
+alias trace_on='set -x'
+alias trace_off='{ set +x; } 2>/dev/null'
+
 targets='
 test
 build
@@ -19,7 +22,7 @@ dir="$(realpath "$(dirname "$0")")"
 target="${1:-build}"
 cross="$2"
 
-printf "${0} ${RED}${1} ${2}$RES\n"
+printf "\n${0} ${RED}${1} ${2}$RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
@@ -95,19 +98,20 @@ fi
 
 case "$target" in
     "uninstall")
-        set -x
+        trace_on
         rm -f ${DESTDIR}${PREFIX}/bin/${program}
         rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
         exit
         ;;
     "install")
         [ ! -f $program ] && $0 build
-        set -x
+        trace_on
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
         exit
         ;;
     "assembly")
+        trace_on
         $CC $CPPFLAGS $CFLAGS -S -o ${program}_$CC.S "$main" $LDFLAGS
         exit
         ;;
@@ -116,29 +120,31 @@ case "$target" in
             if [ "$src" = "$main" ]; then
                 continue
             fi
-            printf "Testing ${RED}${src}${RES} ...\n"
+            printf "\nTesting ${RED}${src}${RES} ...\n"
             name="$(echo "$src" | sed 's/\.c//g')"
 
             flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
             cmdline="$CC $CPPFLAGS $CFLAGS"
             cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
-            set -x
+
+            trace_on
             if $cmdline; then
                 /tmp/$src.exe || gdb /tmp/$src.exe
             else
-                printf "Failed to compile ${RED} $src ${RES}.\n"
+                trace_off
                 exit 1
             fi
+            trace_off
 
-            set +x 
         done
         exit
         ;;
     *)
-        set -x
+        trace_on
         ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
+        trace_off
         ;;
 esac
 
@@ -172,7 +178,7 @@ case "$target" in
         ;;
 esac
 
-set +x
+trace_off
 if [ "$target" = "test_all" ]; then
     printf '%s\n' "$targets" | while IFS= read -r t; do
         echo "$t" | grep -q "^# " && continue
