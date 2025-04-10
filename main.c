@@ -304,8 +304,8 @@ int main(int argc, char **argv) {
         (void) args_edit;
         (void) args_shuf;
 
-        while (true) {
 #ifdef BRN2_BENCHMARK
+        {
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
                              "!@#$%&*()[]-=_+<>,"
@@ -333,11 +333,12 @@ int main(int argc, char **argv) {
             brn2_create_hashes(new, main_capacity);
             brn2_verify(new, newlist_set, new->indexes);
             hash_set_print_summary(newlist_set, "newlist_set");
-            break;
+        }
 #else
+        while (true) {
             util_command(ARRAY_LENGTH(args_edit), args_edit);
             new = brn2_list_from_lines(brn2_buffer_name, false);
-#endif
+
             if (old->length != new->length) {
                 error("You are renaming "RED"%u"RESET" file%.*s "
                       "but buffer contains "RED"%u"RESET" file name%.*s\n",
@@ -375,6 +376,7 @@ int main(int argc, char **argv) {
                 break;
             }
         }
+#endif
     }
 
     {
