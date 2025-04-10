@@ -276,11 +276,15 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
             error("Error in fstat(%s): %s.\n", filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
-        map_size = (uint32)lines_stat.st_size;
-        if (map_size <= 0) {
-            error("map_size: %u\n", map_size);
+        if (lines_stat.st_size <= 0) {
+            error("Error: File size = %ld.\n", lines_stat.st_size);
             exit(EXIT_FAILURE);
         }
+        if (lines_stat.st_size >= UINT32_MAX) {
+            error("Error: File size = %ld.\n", lines_stat.st_size);
+            exit(EXIT_FAILURE);
+        }
+        map_size = (uint32)lines_stat.st_size;
     }
     padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
     map_size += padding;
