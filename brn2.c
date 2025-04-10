@@ -258,9 +258,6 @@ brn2_free_list(FileList *list) {
 void
 brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     char *map;
-    char *begin;
-    char *pointer;
-    size_t left;
     uint32 length = 0;
     uint32 map_size;
     uint32 padding;
@@ -303,39 +300,42 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         exit(EXIT_FAILURE);
     }
 
-    begin = pointer = map;
-    left = map_size - padding;
-
     list->files = xmalloc(capacity*sizeof(*(list->files)));
 
-    while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
-        FileName **file_pointer = &(list->files[length]);
-        FileName *file;
-        uint32 size;
-        uint16 name_length;
+    {
+        char *begin = map;
+        char *pointer = map;
+        size_t left = map_size - padding;
 
-        *pointer = '\0';
-        if (is_old && brn2_is_invalid_name(begin)) {
+        while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
+            FileName **file_pointer = &(list->files[length]);
+            FileName *file;
+            uint32 size;
+            uint16 name_length;
+
+            *pointer = '\0';
+            if (is_old && brn2_is_invalid_name(begin)) {
+                begin = pointer + 1;
+                continue;
+            }
+            if (begin == pointer) {
+                error("Empty line in file. Exiting.\n");
+                exit(EXIT_FAILURE);
+            }
+
+            name_length = (uint16)(pointer - begin);
+            size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
+            *file_pointer = arena_push(list->arena, ALIGN(size));
+
+            file = *file_pointer;
+            file->length = name_length;
+            memcpy(file->name, begin, name_length + 1);
+
             begin = pointer + 1;
-            continue;
+            pointer += 1;
+            length += 1;
+            left -= (file->length + 1);
         }
-        if (begin == pointer) {
-            error("Empty line in file. Exiting.\n");
-            exit(EXIT_FAILURE);
-        }
-
-        name_length = (uint16)(pointer - begin);
-        size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
-        *file_pointer = arena_push(list->arena, ALIGN(size));
-
-        file = *file_pointer;
-        file->length = name_length;
-        memcpy(file->name, begin, name_length + 1);
-
-        begin = pointer + 1;
-        pointer += 1;
-        length += 1;
-        left -= (file->length + 1);
     }
 
     if (length == 0) {
