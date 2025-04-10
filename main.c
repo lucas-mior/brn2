@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
     struct sigaction signal_segment_violation;
 
     signal_segment_violation.sa_handler = handler_segv;
+    signal_segment_violation.sa_flags = 0;
     sigemptyset(&(signal_segment_violation.sa_mask));
     sigaction(SIGSEGV, &signal_segment_violation, NULL);
 #endif
