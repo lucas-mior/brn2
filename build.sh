@@ -1,8 +1,6 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # shellcheck disable=SC2086
-
-set -e
 
 targets='
 test
@@ -129,7 +127,7 @@ case "$target" in
                 /tmp/$src.exe || gdb /tmp/$src.exe
             else
                 printf "Failed to compile ${RED} $src ${RES}.\n"
-                exit
+                exit 1
             fi
 
             set +x 
