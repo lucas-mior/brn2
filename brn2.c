@@ -842,12 +842,12 @@ Arena *arena_old;
 Arena *arena_new;
 
 static bool
-contains_filename(FileList *list, FileName file, bool verbose) {
+contains_filename(FileList *list, FileName *file, bool verbose) {
     for (uint32 i = 0; i < list->length; i += 1) {
-        if (list->files[i].length != file.length)
+        if (list->files[i]->length != file->length)
             continue;
-        if (!memcmp(list->files[i].name, file.name, file.length)) {
-            printf(GREEN "%s == %s\n" RESET, file.name, list->files[i].name);
+        if (!memcmp(list->files[i]->name, file->name, file->length)) {
+            printf(GREEN "%s == %s\n" RESET, file->name, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove(&list->files[i], &list->files[i+1],
@@ -857,7 +857,7 @@ contains_filename(FileList *list, FileName file, bool verbose) {
         }
         if (verbose) {
             printf("%u / %u | %s != %s \n",
-                   i+1, list->length, list->files[i].name, file.name);
+                   i+1, list->length, list->files[i]->name, file->name);
         }
     }
     return false;
@@ -869,16 +869,20 @@ int (*print)(const char *, ...);
 int main(void) {
     FileList *list1;
     FileList *list2;
+    FileList list1_stack = {0};
+    FileList list2_stack = {0};
+    list1 = &list1_stack;
+    list2 = &list2_stack;
 
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
 
-    arena_old = arena_alloc(BRN2_ARENA_SIZE);
-    arena_new = arena_alloc(BRN2_ARENA_SIZE);
+    list1->arena = arena_alloc(BRN2_ARENA_SIZE);
+    list2->arena = arena_alloc(BRN2_ARENA_SIZE);
 
     system(command);
-    brn2_list_from_dir(".");
-    brn2_list_from_lines(file, true);
+    brn2_list_from_dir(list1, ".");
+    brn2_list_from_lines(list2, file, true);
 
     brn2_normalize_names(list1, NULL);
     brn2_normalize_names(list2, NULL);
