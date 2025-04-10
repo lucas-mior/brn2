@@ -4,6 +4,11 @@
 
 targets='
 test
+build
+debug
+benchmark
+valgrind
+check
 cross x86_64-windows-gnu
 cross x86_64-macos
 cross aarch64-macos
@@ -29,26 +34,6 @@ LDFLAGS="$LDFLAGS -lm"
 
 CC=${CC:-cc}
 
-if [ "$target" = "cross" ]; then
-    CC="zig cc"
-    CFLAGS="$CFLAGS -target $cross"
-
-    if [ "$cross" = "x86_64-windows-gnu" ]; then
-        exe="$program.exe"
-    else
-        LDFLAGS="$LDFLAGS -lpthread"
-    fi
-else
-    LDFLAGS="$LDFLAGS -lpthread"
-fi
-
-if [ "$CC" = "clang" ]; then
-    CFLAGS="$CFLAGS -Weverything "
-    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
-    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
-    CFLAGS="$CFLAGS -Wno-constant-logical-operand "
-fi
-
 case "$target" in
     "debug")
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
@@ -66,10 +51,6 @@ case "$target" in
         CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
         CPPFLAGS="$CPPFLAGS "
         ;;
-    "mac-x86"|"mac-arm") 
-        CFLAGS="$CFLAGS -fno-lto"
-        CPPFLAGS="$CPPFLAGS "
-        ;;
     "check") 
         CC=gcc
         CFLAGS="$CFLAGS -fanalyzer"
@@ -80,6 +61,33 @@ case "$target" in
         CPPFLAGS="$CPPFLAGS "
         ;;
 esac
+
+if [ "$target" = "cross" ]; then
+    CC="zig cc"
+    CFLAGS="$CFLAGS -target $cross"
+
+    case $cross in
+    "x86_64-macos"|"aarch64-macos")
+        CFLAGS="$CFLAGS -fno-lto"
+        LDFLAGS="$LDFLAGS -lpthread"
+        ;;
+    "x86_64-windows-gnu")
+        exe="$program.exe"
+        ;;
+    *)
+        LDFLAGS="$LDFLAGS -lpthread"
+        ;;
+    esac
+else
+    LDFLAGS="$LDFLAGS -lpthread"
+fi
+
+if [ "$CC" = "clang" ]; then
+    CFLAGS="$CFLAGS -Weverything "
+    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
+    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
+    CFLAGS="$CFLAGS -Wno-constant-logical-operand "
+fi
 
 case "$target" in
     "uninstall")
