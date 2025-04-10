@@ -38,35 +38,33 @@ LDFLAGS="$LDFLAGS -lm"
 CC=${CC:-cc}
 
 case "$target" in
-    "debug")
-        CFLAGS="$CFLAGS -g -fsanitize=undefined"
-        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
-        ;;
-    "benchmark")
-        CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
-        ;;
-    "valgrind") 
-        CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
-        ;;
-    "test") 
-        CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
-        CPPFLAGS="$CPPFLAGS "
-        ;;
-    "check") 
-        CC=gcc
-        CFLAGS="$CFLAGS -fanalyzer"
-        CPPFLAGS="$CPPFLAGS "
-        ;;
-    "build") 
-        CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS "
-        ;;
-    *)
-        CFLAGS="$CFLAGS -O2 "
-        CPPFLAGS="$CPPFLAGS "
-        ;;
+"debug")
+    CFLAGS="$CFLAGS -g -fsanitize=undefined"
+    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
+    ;;
+"benchmark")
+    CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+    ;;
+"valgrind") 
+    CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
+    ;;
+"test") 
+    CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
+    ;;
+"check") 
+    CC=gcc
+    CFLAGS="$CFLAGS -fanalyzer"
+    ;;
+"build") 
+    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    ;;
+"test_all")
+    ;;
+*)
+    CFLAGS="$CFLAGS -O2"
+    ;;
 esac
 
 if [ "$target" = "cross" ]; then
@@ -90,92 +88,91 @@ else
 fi
 
 if [ "$CC" = "clang" ]; then
-    CFLAGS="$CFLAGS -Weverything "
-    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "
-    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion "
-    CFLAGS="$CFLAGS -Wno-constant-logical-operand "
+    CFLAGS="$CFLAGS -Weverything"
+    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral"
+    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion -Wno-constant-logical-operand"
 fi
 
 case "$target" in
-    "uninstall")
-        trace_on
-        rm -f ${DESTDIR}${PREFIX}/bin/${program}
-        rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
-        exit
-        ;;
-    "install")
-        [ ! -f $program ] && $0 build
-        trace_on
-        install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
-        install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
-        exit
-        ;;
-    "assembly")
-        trace_on
-        $CC $CPPFLAGS $CFLAGS -S -o ${program}_$CC.S "$main" $LDFLAGS
-        exit
-        ;;
-    "test")
-        for src in *.c; do
-            if [ "$src" = "$main" ]; then
-                continue
-            fi
-            printf "\nTesting ${RED}${src}${RES} ...\n"
-            name="$(echo "$src" | sed 's/\.c//g')"
+"uninstall")
+    trace_on
+    rm -f ${DESTDIR}${PREFIX}/bin/${program}
+    rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    exit
+    ;;
+"install")
+    [ ! -f $program ] && $0 build
+    trace_on
+    install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
+    install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    exit
+    ;;
+"assembly")
+    trace_on
+    $CC $CPPFLAGS $CFLAGS -S -o ${program}_$CC.S "$main" $LDFLAGS
+    exit
+    ;;
+"test")
+    for src in *.c; do
+        if [ "$src" = "$main" ]; then
+            continue
+        fi
+        printf "\nTesting ${RED}${src}${RES} ...\n"
+        name="$(echo "$src" | sed 's/\.c//g')"
 
-            flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-            cmdline="$CC $CPPFLAGS $CFLAGS"
-            cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
+        flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
+        cmdline="$CC $CPPFLAGS $CFLAGS"
+        cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
 
-            trace_on
-            if $cmdline; then
-                /tmp/$src.exe || gdb /tmp/$src.exe
-            else
-                trace_off
-                exit 1
-            fi
+        trace_on
+        if $cmdline; then
+            /tmp/$src.exe || gdb /tmp/$src.exe
+        else
             trace_off
-
-        done
-        exit
-        ;;
-    *)
-        trace_on
-        ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
-        vtags.sed tags > .tags.vim 2> /dev/null || true
-        $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
+            exit 1
+        fi
         trace_off
-        ;;
+
+    done
+    exit
+    ;;
+*)
+    trace_on
+    ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
+    vtags.sed tags > .tags.vim 2> /dev/null || true
+    $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
+    trace_off
+    ;;
 esac
 
 case "$target" in
-    "benchmark") 
-        tmpdir="/tmp/brn2"
-        rm -rf "$tmpdir"
-        mkdir -p "$tmpdir"
-        cd "$tmpdir" || exit
+"benchmark") 
+    tmpdir="/tmp/brn2"
+    rm -rf "$tmpdir"
+    mkdir -p "$tmpdir"
+    cd "$tmpdir" || exit
 
-        seq -w 500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 
-        # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
-        $dir/brn2 -s -q -d .
-        exit
-        ;;
-    "valgrind") 
-        ls > rename
+    # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
+    $dir/brn2 -s -q -d .
+    exit
+    ;;
+"valgrind") 
+    ls > rename
 
-        vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
-        vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
+    vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
+    vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
-        valgrind $vg_flags $dir/brn2 -r .
-        valgrind $vg_flags $dir/brn2 -d .
-        valgrind $vg_flags $dir/brn2 -f rename
-        exit
-        ;;
-    "check")
-        scan-build --view -analyze-headers --status-bugs ./build.sh
-        exit
-        ;;
+    valgrind $vg_flags $dir/brn2 -r .
+    valgrind $vg_flags $dir/brn2 -d .
+    valgrind $vg_flags $dir/brn2 -f rename
+    exit
+    ;;
+"check")
+    scan-build --view -analyze-headers --status-bugs ./build.sh
+    exit
+    ;;
 esac
 
 trace_off
