@@ -60,8 +60,6 @@ case "$target" in
 "build") 
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
-"test_all")
-    ;;
 *)
     CFLAGS="$CFLAGS -O2"
     ;;
@@ -136,6 +134,8 @@ case "$target" in
     done
     exit
     ;;
+"test_all")
+    ;;
 *)
     trace_on
     ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
@@ -178,7 +178,7 @@ esac
 trace_off
 if [ "$target" = "test_all" ]; then
     printf '%s\n' "$targets" | while IFS= read -r t; do
-        echo "$t" | grep -q "^# " && continue
+        echo "$t" | grep -Eq "^(# |$)" && continue
         $0 $t
     done
 fi
