@@ -357,43 +357,50 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     return;
 }
 #else
-/* FileList * */
-/* brn2_list_from_lines(char *filename, bool is_old) { */
-/*     size_t length = 0; */
-/*     char buffer[BRN2_PATH_MAX]; */
-/*     FileList *list; */
-/*     uint32 cap = 128; */
-/*     FILE *lines; */
+void
+brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
+    size_t length = 0;
+    char buffer[BRN2_PATH_MAX];
+    uint32 cap = 128;
+    FILE *lines;
     
-/*     if ((lines = fopen(filename, "r")) == NULL) { */
-/*         error("Error opening '%s': %s.\n", filename, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+    if ((lines = fopen(filename, "r")) == NULL) {
+        error("Error opening '%s': %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-/*     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap)); */
+    list->files = xmalloc(cap*sizeof(*(list->files)));
 
-/*     while (!feof(lines)) { */
-/*         FileName *file; */
-/*         if (length >= cap) { */
-/*             cap *= 2; */
-/*             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap)); */
-/*         } */
-/*         file = &(list->files[length]); */
+    while (!feof(lines)) {
+        FileName **file_pointer = &(list->files[length]);
+        FileName *file;
+        uint16 name_length;
+        uint32 size;
 
-/*         if (!fgets(buffer, sizeof(buffer), lines)) */
-/*             continue; */
+        if (length >= cap) {
+            cap *= 2;
+            list->files = xrealloc(list->files, cap*sizeof(*(list->files)));
+        }
+        if (!fgets(buffer, sizeof(buffer), lines))
+            continue;
 
-/*         file->length = strcspn(buffer, "\n"); */
-/*         buffer[file->length] = '\0'; */
-/*         file->name = arena_push(list->arena, file->length + 1); */
-/*         memcpy(file->name, buffer, file->length + 1); */
-/*         length += 1; */
-/*     } */
-/*     fclose(lines); */
-/*     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length)); */
-/*     list->length = length; */
-/*     return list; */
-/* } */
+        name_length = strcspn(buffer, "\n");
+        buffer[name_length] = '\0';
+        size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
+
+        *file_pointer = arena_push(list->arena, ALIGN(size));
+        file = *file_pointer;
+
+        file->length = name_length;
+        memcpy(file->name, buffer, file->length + 1);
+
+        length += 1;
+    }
+    fclose(lines);
+    list->files = xrealloc(list->files, length*sizeof(*(list->files)));
+    list->length = length;
+    return;
+}
 #endif
 
 bool
