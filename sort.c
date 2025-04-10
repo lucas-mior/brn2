@@ -146,12 +146,13 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 static void
 sort(FileList *old) {
     uint32 p;
-    char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    uint32 last_length = (uint32)strlen(last);
 
+    char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
+    uint32 last_length = (uint32)strlen(last);
     FileName *dummy_last;
+
     dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length));
     memset(dummy_last, 0, sizeof(*dummy_last));
     memcpy(dummy_last, last, last_length + 1);
@@ -168,8 +169,10 @@ sort(FileList *old) {
 #endif
 
     p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, 0);
-    if (p == 1)
+    if (p == 1) {
+        free(dummy_last);
         return;
+    }
 
     qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
     sort_merge_subsorted(old->files, old->length, p,
@@ -197,6 +200,7 @@ sort(FileList *old) {
     exit(0);
 #endif
 
+    free(dummy_last);
     return;
 }
 #endif
