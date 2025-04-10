@@ -387,7 +387,7 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    {
+    if (false) {
         uint32 number_changes = brn2_get_number_changes(old, new);
         uint32 number_renames = 0;
 
