@@ -255,7 +255,6 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 void
 brn2_free_list(FileList *list) {
     arena_reset(list->arena);
-    free(list);
     return;
 }
 
@@ -428,76 +427,76 @@ typedef struct Slice {
     uint32 *partial;
 } Slice;
 
-/* #ifndef __WIN32__ */
-/* void * */
-/* brn2_threads_work_normalization(void *arg) { */
-/*     Slice *slice = arg; */
-/*     FileList *list; */
-/*     bool old_list; */
+#ifndef __WIN32__
+void *
+brn2_threads_work_normalization(void *arg) {
+    Slice *slice = arg;
+    FileList *list;
+    bool old_list;
 
-/*     if (slice->new_list) { */
-/*         list = slice->new_list; */
-/*         old_list = false; */
-/*     } else { */
-/*         list = slice->old_list; */
-/*         old_list = true; */
-/*     } */
+    if (slice->new_list) {
+        list = slice->new_list;
+        old_list = false;
+    } else {
+        list = slice->old_list;
+        old_list = true;
+    }
 
-/*     for (uint32 i = slice->start; i < slice->end; i += 1) { */
-/*         FileName *file = &(list->files[i]); */
-/*         char *p; */
-/*         uint32 off = 0; */
+    for (uint32 i = slice->start; i < slice->end; i += 1) {
+        FileName *file = list->files[i];
+        char *p;
+        uint32 off = 0;
 
-/*         while ((p = memmem(file->name + off, file->length - off, "//", 2))) { */
-/*             off = (uint32)(p - file->name); */
+        while ((p = memmem(file->name + off, file->length - off, "//", 2))) {
+            off = (uint32)(p - file->name);
 
-/*             memmove(&p[0], &p[1], file->length - off); */
-/*             file->length -= 1; */
-/*         } */
+            memmove(&p[0], &p[1], file->length - off);
+            file->length -= 1;
+        }
 
-/*         while (file->name[0] == '.' && file->name[1] == '/') { */
-/*             memmove(&file->name[0], &file->name[2], file->length - 1); */
-/*             file->length -= 2; */
-/*         } */
+        while (file->name[0] == '.' && file->name[1] == '/') {
+            memmove(&file->name[0], &file->name[2], file->length - 1);
+            file->length -= 2;
+        }
 
-/*         off = 0; */
-/*         while ((p = memmem(file->name + off, file->length - off, "/./", 3))) { */
-/*             off = (uint32)(p - file->name); */
+        off = 0;
+        while ((p = memmem(file->name + off, file->length - off, "/./", 3))) {
+            off = (uint32)(p - file->name);
 
-/*             memmove(&p[1], &p[3], file->length - off - 2); */
-/*             file->length -= 2; */
-/*         } */
+            memmove(&p[1], &p[3], file->length - off - 2);
+            file->length -= 2;
+        }
 
-/*         if (old_list) { */
-/*             struct stat file_stat; */
-/*             if (stat(file->name, &file_stat) < 0) { */
-/*                 if (errno != ENOENT) { */
-/*                     error("Error in stat('%s'): %s.\n", */
-/*                           file->name, strerror(errno)); */
-/*                 } */
-/*                 slice->old_list->files[i].type = TYPE_ERR; */
-/*                 continue; */
-/*             } */
-/*             if (S_ISDIR(file_stat.st_mode)) { */
-/*                 slice->old_list->files[i].type = TYPE_DIR; */
-/*                 brn2_slash_add(file); */
-/*             } else { */
-/*                 slice->old_list->files[i].type = TYPE_FILE; */
-/*             } */
-/*         } else { */
-/*             if (slice->old_list->files[i].type == TYPE_DIR) */
-/*                 brn2_slash_add(file); */
-/*         } */
-/*     } */
-/*     return 0; */
-/* } */
-/* #else */
-/* void * */
-/* brn2_threads_work_normalization(void *arg) { */
-/*     (void) arg; */
-/*     return 0; */
-/* } */
-/* #endif */
+        if (old_list) {
+            struct stat file_stat;
+            if (stat(file->name, &file_stat) < 0) {
+                if (errno != ENOENT) {
+                    error("Error in stat('%s'): %s.\n",
+                          file->name, strerror(errno));
+                }
+                slice->old_list->files[i]->type = TYPE_ERR;
+                continue;
+            }
+            if (S_ISDIR(file_stat.st_mode)) {
+                slice->old_list->files[i]->type = TYPE_DIR;
+                brn2_slash_add(file);
+            } else {
+                slice->old_list->files[i]->type = TYPE_FILE;
+            }
+        } else {
+            if (slice->old_list->files[i]->type == TYPE_DIR)
+                brn2_slash_add(file);
+        }
+    }
+    return 0;
+}
+#else
+void *
+brn2_threads_work_normalization(void *arg) {
+    (void) arg;
+    return 0;
+}
+#endif
 
 void
 brn2_slash_add(FileName *file) {
@@ -560,11 +559,11 @@ brn2_timings(char *name,
     return;
 }
 
-/* void */
-/* brn2_normalize_names(FileList *old, FileList *new) { */
-/*     brn2_threads(brn2_threads_work_normalization, old, new, NULL, 0); */
-/*     return; */
-/* } */
+void
+brn2_normalize_names(FileList *old, FileList *new) {
+    brn2_threads(brn2_threads_work_normalization, old, new, NULL, 0);
+    return;
+}
 
 void
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
