@@ -8,34 +8,10 @@ build
 debug
 benchmark
 valgrind
-profile
 check
-windows
-mac-arm
-mac-x86
 '
 
 dir="$(realpath "$(dirname "$0")")"
-testing () {
-    for src in *.c; do
-        [ "$src" = "$main" ] && continue
-        printf "Testing ${RED}${src}${RES} ...\n"
-        name="$(echo "$src" | sed 's/\.c//g')"
-
-        flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        cmdline="$CC $CPPFLAGS $CFLAGS"
-        cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
-        set -x
-        if $cmdline; then
-            /tmp/$src.exe || gdb /tmp/$src.exe
-        else
-            printf "Failed to compile ${RED} $src ${RES}, is main() defined?\n"
-            exit
-        fi
-
-        set +x 
-    done
-}
 
 NFILES=500000
 d="/tmp/brn2"
@@ -65,16 +41,6 @@ valgrind2() {
     valgrind $vg_flags $dir/brn2 -r . || exit
     valgrind $vg_flags $dir/brn2 -d . || exit
     valgrind $vg_flags $dir/brn2 -f rename || exit
-}
-
-profile() {
-    create_files
-    cd "$d" || exit
-
-    $dir/brn2 -s -q -r .
-    gprof $dir/brn2 | tee "$dir/profile_$1.gprof"
-
-    cd "$dir" || exit
 }
 
 target="${1:-build}"
@@ -133,37 +99,27 @@ if [ "$CC" = "zig cc" ]; then
 fi
 
 case "$target" in
-    "assembly")
-        CFLAGS="$CFLAGS -S"
-        # CPPFLAGS="$CPPFLAGS"
-        ;;
     "debug")
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
     "benchmark")
         CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
-    "callgrind") 
-        CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "valgrind") 
         CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG" ;;
-    "profile") 
-        CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize -pg"
-        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
         CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
-        # CPPFLAGS="$CPPFLAGS "
+        CPPFLAGS="$CPPFLAGS "
         ;;
     "mac-x86"|"mac-arm") 
         CFLAGS="$CFLAGS -fno-lto"
-        # CPPFLAGS="$CPPFLAGS "
+        CPPFLAGS="$CPPFLAGS "
         ;;
     "check") 
         CC=gcc
         CFLAGS="$CFLAGS -fanalyzer"
-        # CPPFLAGS="$CPPFLAGS "
+        CPPFLAGS="$CPPFLAGS "
         ;;
     *) 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
@@ -175,23 +131,45 @@ case "$target" in
         set -x
         rm -f ${DESTDIR}${PREFIX}/bin/${program}
         rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
-        ;;
-    "test")
-        testing
+        exit
         ;;
     "install")
         [ ! -f $program ] && $0 build
         set -x
         install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
         install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+        exit
         ;;
     "assembly")
-        $CC $CPPFLAGS $CFLAGS -o ${program}_$CC.S "$main" $LDFLAGS
+        $CC $CPPFLAGS $CFLAGS -S -o ${program}_$CC.S "$main" $LDFLAGS
+        exit
         ;;
-    "build"|"debug"|"benchmark"|"callgrind"|"valgrind"|"profile"|"check"\
-        |"windows"|"mac-arm"|"mac-x86"|"openbsd"|"freebsd")
+    "test")
+        for src in *.c; do
+            if [ "$src" = "$main" ]; then
+                continue
+            fi
+            printf "Testing ${RED}${src}${RES} ...\n"
+            name="$(echo "$src" | sed 's/\.c//g')"
+
+            flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
+            cmdline="$CC $CPPFLAGS $CFLAGS"
+            cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
+            set -x
+            if $cmdline; then
+                /tmp/$src.exe || gdb /tmp/$src.exe
+            else
+                printf "Failed to compile ${RED} $src ${RES}.\n"
+                exit
+            fi
+
+            set +x 
+        done
+        exit
+        ;;
+    *)
         set -x
-        ctags --kinds-C=+l+d *.h *.c 2> /dev/null || true
+        ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
         vtags.sed tags > .tags.vim 2> /dev/null || true
         $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
         ;;
@@ -205,6 +183,7 @@ case "$target" in
     "check") scan-build --view -analyze-headers ./build.sh ;;
 esac
 
+set +x
 if [ "$target" = "test_all" ]; then
     for t in $targets; do
         $0 $t
