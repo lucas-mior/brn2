@@ -158,7 +158,7 @@ case "$target" in
 
         # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
         $dir/brn2 -s -q -d .
-        cd "$dir" || exit
+        exit
         ;;
     "valgrind") 
         ls > rename
@@ -166,17 +166,20 @@ case "$target" in
         vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
         vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
-        valgrind $vg_flags $dir/brn2 -r . || exit
-        valgrind $vg_flags $dir/brn2 -d . || exit
-        valgrind $vg_flags $dir/brn2 -f rename || exit
+        valgrind $vg_flags $dir/brn2 -r . || exit 1
+        valgrind $vg_flags $dir/brn2 -d . || exit 1
+        valgrind $vg_flags $dir/brn2 -f rename || exit 1
+        exit
         ;;
-    "profile") profile "$2" ;;
-    "check") scan-build --view -analyze-headers ./build.sh ;;
+    "check")
+        scan-build --view -analyze-headers --status-bugs ./build.sh || exit 1
+        exit
+        ;;
 esac
 
 set +x
 if [ "$target" = "test_all" ]; then
     for t in $targets; do
-        $0 $t
+        $0 $t || exit 1
     done
 fi
