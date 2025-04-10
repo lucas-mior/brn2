@@ -56,8 +56,12 @@ case "$target" in
         CFLAGS="$CFLAGS -fanalyzer"
         CPPFLAGS="$CPPFLAGS "
         ;;
-    *) 
+    "build") 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+        CPPFLAGS="$CPPFLAGS "
+        ;;
+    *)
+        CFLAGS="$CFLAGS -O2 "
         CPPFLAGS="$CPPFLAGS "
         ;;
 esac
