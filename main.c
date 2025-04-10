@@ -75,6 +75,8 @@ handler_segv(int unused) {
 }
 
 int main(int argc, char **argv) {
+    FileList old_stack = {0};
+    FileList new_stack = {0};
     FileList *old;
     FileList *new;
     HashMap *oldlist_map = NULL;
@@ -96,14 +98,22 @@ int main(int argc, char **argv) {
 #endif
 
 #ifndef __WIN32__
-    struct sigaction signal_segment_violation;
+    /* struct sigaction signal_segment_violation; */
 
-    signal_segment_violation.sa_handler = handler_segv;
-    signal_segment_violation.sa_flags = 0;
-    sigemptyset(&(signal_segment_violation.sa_mask));
-    sigaction(SIGSEGV, &signal_segment_violation, NULL);
+    /* signal_segment_violation.sa_handler = handler_segv; */
+    /* signal_segment_violation.sa_flags = 0; */
+    /* sigemptyset(&(signal_segment_violation.sa_mask)); */
+    /* sigaction(SIGSEGV, &signal_segment_violation, NULL); */
 #endif
 
+    old = &old_stack;
+    new = &new_stack;
+
+    arena_old = arena_alloc(BRN2_ARENA_SIZE);
+    arena_new = arena_alloc(BRN2_ARENA_SIZE);
+
+    old->arena = arena_old;
+    new->arena = arena_new;
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv,
@@ -166,43 +176,40 @@ int main(int argc, char **argv) {
     else
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
 
-    arena_old = arena_alloc(BRN2_ARENA_SIZE);
-    arena_new = arena_alloc(BRN2_ARENA_SIZE);
-
     switch (mode) {
-    case FILES_FROM_FILE:
-        old = brn2_list_from_lines(lines, true);
-        break;
+    /* case FILES_FROM_FILE: */
+    /*     old = brn2_list_from_lines(lines, true); */
+    /*     break; */
     case FILES_FROM_ARGS:
-        old = brn2_list_from_args(argc - optind, &argv[optind]);
+        brn2_list_from_args(old, argc - optind, &argv[optind]);
         break;
-    case FILES_FROM_DIR:
-        old = brn2_list_from_dir(directory);
-        break;
-    case FILES_FROM_DIR_RECURSE:
-#ifdef __WIN32__
-        error("Finding files recursively is not implemented on windows.\n");
-        exit(EXIT_FAILURE);
-#else
-        old = brn2_list_from_dir_recurse(directory);
-#endif
-        break;
+    /* case FILES_FROM_DIR: */
+    /*     old = brn2_list_from_dir(directory); */
+    /*     break; */
+    /* case FILES_FROM_DIR_RECURSE: */
+/* #ifdef __WIN32__ */
+    /*     error("Finding files recursively is not implemented on windows.\n"); */
+    /*     exit(EXIT_FAILURE); */
+/* #else */
+    /*     old = brn2_list_from_dir_recurse(directory); */
+/* #endif */
+    /*     break; */
     default:
         error("Unexpected mode: %d.\n", mode);
         exit(EXIT_FAILURE);
     }
-    if (!brn2_options_quiet)
-        printf("Normalizing filenames...\n");
-    brn2_normalize_names(old, NULL);
+    /* if (!brn2_options_quiet) */
+    /*     printf("Normalizing filenames...\n"); */
+    /* brn2_normalize_names(old, NULL); */
 
     for (uint32 i = 0; i < old->length; i += 1) {
-        FileName *file = &(old->files[i]);
-        while (file->type == TYPE_ERR) {
-            error("Removing '%s' from list.\n", file->name);
+        FileName **file = &(old->files[i]);
+        while ((*file)->type == TYPE_ERR) {
+            error("Removing '%s' from list.\n", (*file)->name);
             old->length -= 1;
             if (old->length <= i)
                 break;
-            memmove(file, file+1, (old->length - i)*sizeof(*file));
+            memmove((*file), (*file)+1, (old->length - i)*sizeof(*file));
         }
     }
 
@@ -211,8 +218,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if (brn2_options_sort)
-        sort(old);
+    /* if (brn2_options_sort) */
+    /*     sort(old); */
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
@@ -250,7 +257,8 @@ int main(int argc, char **argv) {
         brn2_create_hashes(old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
-            FileName *file = &(old->files[i]);
+            FileName **filep = &(old->files[i]);
+            FileName *file = *filep;
             uint32 *index = &(old->indexes[i]);
             bool contains_newline;
             usize written;
@@ -272,9 +280,9 @@ int main(int argc, char **argv) {
                 if (old->length <= i)
                     goto close;
 
-                memmove(file, file+1, (old->length - i)*sizeof(*file));
+                memmove(*filep, *filep+1, (old->length - i)*sizeof(*filep));
                 memmove(index, index+1, (old->length - i)*sizeof(*index));
-                file = &(old->files[i]);
+                filep = &(old->files[i]);
                 index = &(old->indexes[i]);
             }
 
@@ -295,8 +303,8 @@ int main(int argc, char **argv) {
             error("Error closing:%s\n", strerror(errno));
         }
         brn2_buffer.fd = -1;
-        atexit(delete_brn2_buffer);
     }
+    exit(0);
 
     {
         char *args_edit[] = { EDITOR, brn2_buffer_name, NULL };
@@ -312,7 +320,7 @@ int main(int argc, char **argv) {
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
             util_command(ARRAY_LENGTH(args_shuf), args_shuf);
-            new = brn2_list_from_lines(brn2_buffer_name, false);
+            /* new = brn2_list_from_lines(brn2_buffer_name, false); */
 
             srand(42);
             for (uint32 i = 0; i < new->length; i += 1) {
@@ -338,7 +346,7 @@ int main(int argc, char **argv) {
 #else
         while (true) {
             util_command(ARRAY_LENGTH(args_edit), args_edit);
-            new = brn2_list_from_lines(brn2_buffer_name, false);
+            /* new = brn2_list_from_lines(brn2_buffer_name, false); */
 
             if (old->length != new->length) {
                 error("You are renaming "RED"%u"RESET" file%.*s "

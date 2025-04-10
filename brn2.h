@@ -94,7 +94,7 @@
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
-    (sizeof(*struct_object) + (usize)(array_length)*sizeof(ArrayType))
+    (sizeof(*(struct_object)) + (usize)(array_length)*sizeof(ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 #define ARRAY_LENGTH(ARRAY_LENGTH) \
     (sizeof(ARRAY_LENGTH) / sizeof(*ARRAY_LENGTH))
@@ -135,11 +135,11 @@ enum {
 };
 
 typedef struct FileName {
-    char *name;
     uint32 hash;
     uint16 length;
     uint8 type;
     uint8 unused;
+    char name[];
 } FileName;
 
 typedef struct FileList {
@@ -148,7 +148,7 @@ typedef struct FileList {
     usize indexes_size;
     uint32 length;
     uint32 unused;
-    FileName files[];
+    FileName **files;
 } FileList;
 
 extern char *program;
@@ -167,8 +167,8 @@ FileList *brn2_list_from_dir(char *);
 #ifndef __WIN32__
 FileList *brn2_list_from_dir_recurse(char *);
 #endif
-FileList *brn2_list_from_lines(char *, bool);
-FileList *brn2_list_from_args(int, char **);
+// FileList *brn2_list_from_lines(char *, bool);
+void brn2_list_from_args(FileList *, int, char **);
 void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, HashSet *, uint32 *);
@@ -176,7 +176,7 @@ uint32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
 uint32 brn2_threads(void *(*)(void *),
                     FileList *, FileList *, uint32 *, uint32);
-void *brn2_threads_work_sort(void *);
+// void *brn2_threads_work_sort(void *);
 void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 void brn2_execute2(FileList *, FileList *,
