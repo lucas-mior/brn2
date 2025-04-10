@@ -49,7 +49,7 @@ case "$target" in
     exe="${program}_benchmark"
     ;;
 "perf")
-    CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -g3 -Og -flto"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
     exe="${program}_perf"
     ;;
