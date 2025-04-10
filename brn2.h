@@ -76,7 +76,9 @@
 #define BRN2_ASSUME_ALIGNED(X) do {} while (0)
 #endif
 
-#ifndef BRN2_DEBUG
+#ifdef BRN2_DEBUG
+#define BRN2_DEBUG 1
+#else
 #define BRN2_DEBUG 0
 #endif
 

@@ -24,8 +24,9 @@ main="main.c"
 program="brn2"
 exe="$program"
 
-CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
+CFLAGS="$CFLAGS -std=c99"
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros -Wno-unused-function"
+CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm -lpthread "
 
 CC=${CC:-cc}
@@ -74,7 +75,7 @@ fi
 case "$target" in
     "debug")
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
-        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
+        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG" ;;
     "benchmark")
         CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
@@ -96,7 +97,7 @@ case "$target" in
         ;;
     *) 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
+        CPPFLAGS="$CPPFLAGS " ;;
 esac
 
 case "$target" in
