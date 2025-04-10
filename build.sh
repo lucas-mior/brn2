@@ -16,28 +16,6 @@ dir="$(realpath "$(dirname "$0")")"
 NFILES=500000
 tmpdir="/tmp/brn2"
 
-benchmark() {
-    rm -rf "$tmpdir"
-    mkdir -p "$tmpdir"
-    cd "$tmpdir" || exit
-    seq -w $NFILES | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
-
-    # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
-    $dir/brn2 -s -q -d .
-    cd "$dir" || exit
-}
-
-valgrind2() {
-    ls > rename
-
-    vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
-    vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
-
-    valgrind $vg_flags $dir/brn2 -r . || exit
-    valgrind $vg_flags $dir/brn2 -d . || exit
-    valgrind $vg_flags $dir/brn2 -f rename || exit
-}
-
 target="${1:-build}"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -171,9 +149,26 @@ case "$target" in
 esac
 
 case "$target" in
-    "benchmark") benchmark "$2" ;;
-    "callgrind") callgrind "$2" ;;
-    "valgrind") valgrind2 "$2" ;;
+    "benchmark") 
+        rm -rf "$tmpdir"
+        mkdir -p "$tmpdir"
+        cd "$tmpdir" || exit
+        seq -w $NFILES | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+
+        # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
+        $dir/brn2 -s -q -d .
+        cd "$dir" || exit
+        ;;
+    "valgrind") 
+        ls > rename
+
+        vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
+        vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
+
+        valgrind $vg_flags $dir/brn2 -r . || exit
+        valgrind $vg_flags $dir/brn2 -d . || exit
+        valgrind $vg_flags $dir/brn2 -f rename || exit
+        ;;
     "profile") profile "$2" ;;
     "check") scan-build --view -analyze-headers ./build.sh ;;
 esac
