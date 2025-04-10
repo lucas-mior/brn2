@@ -2,6 +2,8 @@
 
 # shellcheck disable=SC2086
 
+set -e
+
 targets='
 test
 build
@@ -161,13 +163,13 @@ case "$target" in
         vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
         vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
-        valgrind $vg_flags $dir/brn2 -r . || exit 1
-        valgrind $vg_flags $dir/brn2 -d . || exit 1
-        valgrind $vg_flags $dir/brn2 -f rename || exit 1
+        valgrind $vg_flags $dir/brn2 -r .
+        valgrind $vg_flags $dir/brn2 -d .
+        valgrind $vg_flags $dir/brn2 -f rename
         exit
         ;;
     "check")
-        scan-build --view -analyze-headers --status-bugs ./build.sh || exit 1
+        scan-build --view -analyze-headers --status-bugs ./build.sh
         exit
         ;;
 esac
@@ -176,6 +178,6 @@ set +x
 if [ "$target" = "test_all" ]; then
     printf '%s\n' "$targets" | while IFS= read -r t; do
         echo "$t" | grep -q "^# " && continue
-        $0 $t || exit 1
+        $0 $t
     done
 fi
