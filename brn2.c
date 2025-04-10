@@ -68,7 +68,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         file = *filep;
 
         file->length = (uint16)strlen(name);
-        memcpy(file->name, name, name_length+1);
+        memcpy(file->name, name, name_length + 1);
 
         length += 1;
     }
@@ -177,80 +177,79 @@ brn2_list_from_dir(FileList *list, char *directory) {
     return;
 }
 
-/* #ifndef __WIN32__ */
-/* FileList * */
-/* brn2_list_from_dir_recurse(char *directory) { */
-/*     FileList *list; */
-/*     char* const paths[] = { directory, NULL }; */
-/*     FTS *file_system = NULL; */
-/*     FTSENT *ent = NULL; */
-/*     uint32 length = 0; */
-/*     uint32 capacity = 64; */
-/*     uint32 size; */
+#ifndef __WIN32__
+void
+brn2_list_from_dir_recurse(FileList *list, char *directory) {
+    char* const paths[] = { directory, NULL };
+    FTS *file_system = NULL;
+    FTSENT *ent = NULL;
+    uint32 length = 0;
+    uint32 capacity = 64;
+    uint32 size;
 
-/*     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity)); */
-/*     memset(list, 0, sizeof(*list)); */
-/*     list->arena = arena_old; */
+    list->files = xmalloc(capacity*sizeof(*(list->files)));
 
-/*     file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL); */
-/*     if (file_system == NULL) { */
-/*         error("Error opening '%s' for traversal: %s.\n", */
-/*               directory, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
-/*     errno = 0; */
+    file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
+    if (file_system == NULL) {
+        error("Error opening '%s' for traversal: %s.\n",
+              directory, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    errno = 0;
 
-/*     while ((ent = fts_read(file_system))) { */
-/*         switch (ent->fts_info) { */
-/*         case FTS_ERR: */
-/*             error("Error in fts_read(%s): %s.\n", */
-/*                   directory, strerror(ent->fts_errno)); */
-/*             exit(EXIT_FAILURE); */
-/*         case FTS_D: */
-/*             // fallthrough */
-/*         case FTS_NSOK: { */
-/*             char *name = ent->fts_path; */
-/*             FileName *file; */
+    while ((ent = fts_read(file_system))) {
+        switch (ent->fts_info) {
+        case FTS_ERR:
+            error("Error in fts_read(%s): %s.\n",
+                  directory, strerror(ent->fts_errno));
+            exit(EXIT_FAILURE);
+        case FTS_D:
+            // fallthrough
+        case FTS_NSOK: {
+            char *name = ent->fts_path;
+            FileName **filep;
+            FileName *file;
 
-/*             if (brn2_is_invalid_name(name)) */
-/*                 continue; */
+            if (brn2_is_invalid_name(name))
+                continue;
 
-/*             if (length >= capacity) { */
-/*                 capacity *= 2; */
-/*                 list = xrealloc(list, */
-/*                                 STRUCT_ARRAY_SIZE(list, FileName, capacity)); */
-/*             } */
+            if (length >= capacity) {
+                capacity *= 2;
+                list->files = xrealloc(list->files,
+                                       capacity*sizeof(*(list->files)));
+            }
 
-/*             file = &(list->files[length]); */
-/*             file->length = ent->fts_pathlen; */
-/*             size = ALIGN(file->length+2); */
-/*             file->name = arena_push(list->arena, size); */
-/*             BRN2_ASSUME_ALIGNED(file->name); */
-/*             memcpy(file->name, name, size); */
-/*             memset(&file->name[file->length], 0, size - file->length); */
+            filep = &(list->files[length]);
+            size = STRUCT_ARRAY_SIZE(*filep, char, ent->fts_pathlen + 2);
+            size = ALIGN(size);
+            *filep = arena_push(list->arena, size);
+            file = *filep;
 
-/*             length += 1; */
-/*             break; */
-/*         } */
-/*         default: */
-/*             break; */
-/*         } */
-/*     } */
-/*     if (errno) */
-/*         error("Error in fts_read(%s): %s.\n", directory, strerror(errno)); */
-/*     if (fts_close(file_system) < 0) */
-/*         error("Error in fts_close(%s): %s.\n", directory, strerror(errno)); */
+            file->length = ent->fts_pathlen;
+            memcpy(file->name, name, file->length + 1);
 
-/*     if (length == 0) { */
-/*         error("Empty list. Exiting.\n"); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+            length += 1;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    if (errno)
+        error("Error in fts_read(%s): %s.\n", directory, strerror(errno));
+    if (fts_close(file_system) < 0)
+        error("Error in fts_close(%s): %s.\n", directory, strerror(errno));
 
-/*     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length)); */
-/*     list->length = length; */
-/*     return list; */
-/* } */
-/* #endif */
+    if (length == 0) {
+        error("Empty list. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    list->files = xrealloc(list->files, length*sizeof(*(list->files)));
+    list->length = length;
+    return;
+}
+#endif
 
 void
 brn2_free_list(FileList *list) {
