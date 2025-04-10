@@ -63,8 +63,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
             continue;
 
         size = STRUCT_ARRAY_SIZE(*filep, char, name_length+2);
-        size = ALIGN(size);
-        *filep = arena_push(list->arena, size);
+        *filep = arena_push(list->arena, ALIGN(size));
         file = *filep;
 
         file->length = (uint16)strlen(name);
@@ -150,8 +149,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         if (directory_length) {
             size = STRUCT_ARRAY_SIZE(*filep, char,
                                      directory_length + 1 + name_length + 2);
-            size = ALIGN(size);
-            *filep = arena_push(list->arena, size);
+            *filep = arena_push(list->arena, ALIGN(size));
             file = *filep;
 
             file->length = directory_length + 1 + name_length;
@@ -160,8 +158,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             memcpy(file->name + directory_length + 1, name, name_length + 1);
         } else {
             size = STRUCT_ARRAY_SIZE(*filep, char, name_length + 2);
-            size = ALIGN(size);
-            *filep = arena_push(list->arena, size);
+            *filep = arena_push(list->arena, ALIGN(size));
             file = *filep;
 
             file->length = name_length;
@@ -221,8 +218,7 @@ brn2_list_from_dir_recurse(FileList *list, char *directory) {
 
             filep = &(list->files[length]);
             size = STRUCT_ARRAY_SIZE(*filep, char, ent->fts_pathlen + 2);
-            size = ALIGN(size);
-            *filep = arena_push(list->arena, size);
+            *filep = arena_push(list->arena, ALIGN(size));
             file = *filep;
 
             file->length = ent->fts_pathlen;
@@ -329,8 +325,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         name_length = (uint16)(pointer - begin);
         size = STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
-        size = ALIGN(size);
-        *filep = arena_push(list->arena, size);
+        *filep = arena_push(list->arena, ALIGN(size));
 
         file = *filep;
         file->length = name_length;
