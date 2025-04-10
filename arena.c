@@ -252,8 +252,11 @@ arena_reset_zero(Arena *arena) {
 int
 main(void) {
     Arena *arena;
+    void *begin;
+
     assert((arena = arena_alloc(SIZEMB(1))));
-    void *begin = arena->begin;
+    begin = arena->begin;
+
     assert(arena_push(arena, 10));
     assert(arena_push(arena, 100));
     assert(arena_push(arena, 1000));
