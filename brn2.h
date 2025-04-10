@@ -165,7 +165,7 @@ extern int (*print)(const char *, ...);
 int brn2_compare(const void *, const void *);
 void brn2_list_from_dir(FileList *, char *);
 #ifndef __WIN32__
-FileList *brn2_list_from_dir_recurse(char *);
+void brn2_list_from_dir_recurse(FileList *, char *);
 #endif
 void brn2_list_from_lines(FileList *, char *, bool);
 void brn2_list_from_args(FileList *, int, char **);

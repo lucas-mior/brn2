@@ -186,14 +186,14 @@ int main(int argc, char **argv) {
     case FILES_FROM_DIR:
         brn2_list_from_dir(old, directory);
         break;
-    /* case FILES_FROM_DIR_RECURSE: */
-/* #ifdef __WIN32__ */
-    /*     error("Finding files recursively is not implemented on windows.\n"); */
-    /*     exit(EXIT_FAILURE); */
-/* #else */
-    /*     old = brn2_list_from_dir_recurse(directory); */
-/* #endif */
-    /*     break; */
+    case FILES_FROM_DIR_RECURSE:
+#ifdef __WIN32__
+        error("Finding files recursively is not implemented on windows.\n");
+        exit(EXIT_FAILURE);
+#else
+        brn2_list_from_dir_recurse(old, directory);
+#endif
+        break;
     default:
         error("Unexpected mode: %d.\n", mode);
         exit(EXIT_FAILURE);
