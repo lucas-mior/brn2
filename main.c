@@ -33,9 +33,6 @@ bool brn2_options_sort = true;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
-Arena *arena_old;
-Arena *arena_new;
-
 static struct option options[] = {
     {"dir",     required_argument, NULL, 'd'},
     {"file",    required_argument, NULL, 'f'},
@@ -109,11 +106,8 @@ int main(int argc, char **argv) {
     old = &old_stack;
     new = &new_stack;
 
-    arena_old = arena_alloc(BRN2_ARENA_SIZE);
-    arena_new = arena_alloc(BRN2_ARENA_SIZE);
-
-    old->arena = arena_old;
-    new->arena = arena_new;
+    old->arena = arena_alloc(BRN2_ARENA_SIZE);
+    new->arena = arena_alloc(BRN2_ARENA_SIZE);
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv,
@@ -430,8 +424,8 @@ int main(int argc, char **argv) {
         brn2_free_list(new);
         hash_map_destroy(oldlist_map);
         hash_set_destroy(newlist_set);
-        arena_destroy(arena_old);
-        arena_destroy(arena_new);
+        arena_destroy(old->arena);
+        arena_destroy(new->arena);
     }
     exit(EXIT_SUCCESS);
 }

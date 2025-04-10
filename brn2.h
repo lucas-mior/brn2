@@ -158,8 +158,6 @@ extern bool brn2_options_quiet;
 extern bool brn2_options_sort;
 extern uint32 nthreads;
 
-extern Arena *arena_old;
-extern Arena *arena_new;
 extern int (*print)(const char *, ...);
 
 int brn2_compare(const void *, const void *);

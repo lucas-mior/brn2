@@ -362,48 +362,43 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     return;
 }
 #else
-FileList *
-brn2_list_from_lines(char *filename, bool is_old) {
-    size_t length = 0;
-    char buffer[BRN2_PATH_MAX];
-    FileList *list;
-    uint32 cap = 128;
-    FILE *lines;
+/* FileList * */
+/* brn2_list_from_lines(char *filename, bool is_old) { */
+/*     size_t length = 0; */
+/*     char buffer[BRN2_PATH_MAX]; */
+/*     FileList *list; */
+/*     uint32 cap = 128; */
+/*     FILE *lines; */
     
-    if ((lines = fopen(filename, "r")) == NULL) {
-        error("Error opening '%s': %s.\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+/*     if ((lines = fopen(filename, "r")) == NULL) { */
+/*         error("Error opening '%s': %s.\n", filename, strerror(errno)); */
+/*         exit(EXIT_FAILURE); */
+/*     } */
 
-    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap));
+/*     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap)); */
 
-    if (is_old)
-        list->arena = arena_old;
-    else
-        list->arena = arena_new;
+/*     while (!feof(lines)) { */
+/*         FileName *file; */
+/*         if (length >= cap) { */
+/*             cap *= 2; */
+/*             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap)); */
+/*         } */
+/*         file = &(list->files[length]); */
 
-    while (!feof(lines)) {
-        FileName *file;
-        if (length >= cap) {
-            cap *= 2;
-            list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap));
-        }
-        file = &(list->files[length]);
+/*         if (!fgets(buffer, sizeof(buffer), lines)) */
+/*             continue; */
 
-        if (!fgets(buffer, sizeof(buffer), lines))
-            continue;
-
-        file->length = strcspn(buffer, "\n");
-        buffer[file->length] = '\0';
-        file->name = arena_push(list->arena, file->length + 1);
-        memcpy(file->name, buffer, file->length + 1);
-        length += 1;
-    }
-    fclose(lines);
-    list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
-    list->length = length;
-    return list;
-}
+/*         file->length = strcspn(buffer, "\n"); */
+/*         buffer[file->length] = '\0'; */
+/*         file->name = arena_push(list->arena, file->length + 1); */
+/*         memcpy(file->name, buffer, file->length + 1); */
+/*         length += 1; */
+/*     } */
+/*     fclose(lines); */
+/*     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length)); */
+/*     list->length = length; */
+/*     return list; */
+/* } */
 #endif
 
 bool
@@ -838,8 +833,6 @@ bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 uint32 nthreads = 1;
-Arena *arena_old;
-Arena *arena_new;
 
 static bool
 contains_filename(FileList *list, FileName *file, bool verbose) {
