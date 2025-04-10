@@ -80,7 +80,6 @@ static void arena_free(Arena *);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
 static void *arena_reset(Arena *);
-static void *arena_reset_zero(Arena *);
 
 static size_t arena_page_size = 0;
 
@@ -236,14 +235,6 @@ arena_reset(Arena *arena) {
     } while ((arena = arena->next));
 
     return first->begin;
-}
-
-void *
-arena_reset_zero(Arena *arena) {
-    size_t size = (size_t)((char *)arena->pos - (char *)arena->begin);
-    memset(arena->begin, 0, size);
-    arena->pos = arena->begin;
-    return arena->begin;
 }
 
 #ifdef TESTING_arena
