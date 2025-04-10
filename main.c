@@ -95,8 +95,6 @@ int main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    program = basename(argv[0]);
-
 #ifndef __WIN32__
     struct sigaction signal_segment_violation;
 
@@ -104,6 +102,8 @@ int main(int argc, char **argv) {
     sigemptyset(&(signal_segment_violation.sa_mask));
     sigaction(SIGSEGV, &signal_segment_violation, NULL);
 #endif
+
+    program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv,
                               "d:f:r:ceFhiqsv", options, NULL)) != -1) {
