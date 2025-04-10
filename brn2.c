@@ -55,16 +55,16 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
         uint16 name_length = (uint16)strlen(name);
-        FileName **filep = &(list->files[length]);
+        FileName **file_pointer = &(list->files[length]);
         FileName *file;
         uint32 size;
 
         if (brn2_is_invalid_name(name))
             continue;
 
-        size = STRUCT_ARRAY_SIZE(*filep, char, name_length+2);
-        *filep = arena_push(list->arena, ALIGN(size));
-        file = *filep;
+        size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length+2);
+        *file_pointer = arena_push(list->arena, ALIGN(size));
+        file = *file_pointer;
 
         file->length = (uint16)strlen(name);
         memcpy(file->name, name, name_length + 1);
@@ -134,7 +134,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
     list->files = xmalloc((usize)number_files*sizeof(*(list->files)));
 
     for (int i = 0; i < number_files; i += 1) {
-        FileName **filep = &(list->files[length]);
+        FileName **file_pointer = &(list->files[length]);
         FileName *file;
         char *name = directory_list[i]->d_name;
         uint16 name_length = (uint16)strlen(name);
@@ -147,19 +147,19 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
 
         if (directory_length) {
-            size = STRUCT_ARRAY_SIZE(*filep, char,
+            size = STRUCT_ARRAY_SIZE(*file_pointer, char,
                                      directory_length + 1 + name_length + 2);
-            *filep = arena_push(list->arena, ALIGN(size));
-            file = *filep;
+            *file_pointer = arena_push(list->arena, ALIGN(size));
+            file = *file_pointer;
 
             file->length = directory_length + 1 + name_length;
             memcpy(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy(file->name + directory_length + 1, name, name_length + 1);
         } else {
-            size = STRUCT_ARRAY_SIZE(*filep, char, name_length + 2);
-            *filep = arena_push(list->arena, ALIGN(size));
-            file = *filep;
+            size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
+            *file_pointer = arena_push(list->arena, ALIGN(size));
+            file = *file_pointer;
 
             file->length = name_length;
             memcpy(file->name, name, file->length + 1);
@@ -204,7 +204,7 @@ brn2_list_from_dir_recurse(FileList *list, char *directory) {
             // fallthrough
         case FTS_NSOK: {
             char *name = ent->fts_path;
-            FileName **filep;
+            FileName **file_pointer;
             FileName *file;
 
             if (brn2_is_invalid_name(name))
@@ -216,10 +216,10 @@ brn2_list_from_dir_recurse(FileList *list, char *directory) {
                                        capacity*sizeof(*(list->files)));
             }
 
-            filep = &(list->files[length]);
-            size = STRUCT_ARRAY_SIZE(*filep, char, ent->fts_pathlen + 2);
-            *filep = arena_push(list->arena, ALIGN(size));
-            file = *filep;
+            file_pointer = &(list->files[length]);
+            size = STRUCT_ARRAY_SIZE(*file_pointer, char, ent->fts_pathlen + 2);
+            *file_pointer = arena_push(list->arena, ALIGN(size));
+            file = *file_pointer;
 
             file->length = ent->fts_pathlen;
             memcpy(file->name, name, file->length + 1);
@@ -308,7 +308,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     list->files = xmalloc(capacity*sizeof(*(list->files)));
 
     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
-        FileName **filep = &(list->files[length]);
+        FileName **file_pointer = &(list->files[length]);
         FileName *file;
         uint32 size;
         uint16 name_length;
@@ -324,10 +324,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
 
         name_length = (uint16)(pointer - begin);
-        size = STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
-        *filep = arena_push(list->arena, ALIGN(size));
+        size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
+        *file_pointer = arena_push(list->arena, ALIGN(size));
 
-        file = *filep;
+        file = *file_pointer;
         file->length = name_length;
         memcpy(file->name, begin, name_length + 1);
 
