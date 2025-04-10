@@ -361,7 +361,7 @@ void
 brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     size_t length = 0;
     char buffer[BRN2_PATH_MAX];
-    uint32 cap = 128;
+    uint32 capacity = 128;
     FILE *lines;
     
     if ((lines = fopen(filename, "r")) == NULL) {
@@ -369,7 +369,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         exit(EXIT_FAILURE);
     }
 
-    list->files = xmalloc(cap*sizeof(*(list->files)));
+    list->files = xmalloc(capacity*sizeof(*(list->files)));
 
     while (!feof(lines)) {
         FileName **file_pointer = &(list->files[length]);
@@ -377,9 +377,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         uint16 name_length;
         uint32 size;
 
-        if (length >= cap) {
-            cap *= 2;
-            list->files = xrealloc(list->files, cap*sizeof(*(list->files)));
+        if (length >= capacity) {
+            capacity *= 2;
+            list->files = xrealloc(list->files,
+                                   capacity*sizeof(*(list->files)));
         }
         if (!fgets(buffer, sizeof(buffer), lines))
             continue;
