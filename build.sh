@@ -43,10 +43,15 @@ case "$target" in
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
     ;;
-"benchmark"|"perf")
-    CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
+"benchmark")
+    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
     exe="${program}_benchmark"
+    ;;
+"perf")
+    CFLAGS="$CFLAGS -g -O2 -flto -march=native -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+    exe="${program}_perf"
     ;;
 "valgrind") 
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
@@ -153,7 +158,7 @@ tempfiles() {
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
-    seq -w 500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 1500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
 case "$target" in
@@ -178,7 +183,10 @@ case "$target" in
 "perf")
     tempfiles
 
-    perf record -o $dir/perf.data $dir/$exe -s -q -d .
+    perf record -b -o $dir/perf.data $dir/$exe -s -q -d .
+    perf annotate -d $dir/$exe
+    cd "$dir"
+    perf report
     exit
     ;;
 "check")
