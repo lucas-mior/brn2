@@ -2,6 +2,19 @@
 
 # shellcheck disable=SC2086
 
+targets='
+test
+build
+debug
+benchmark
+valgrind
+profile
+check
+windows
+mac-arm
+mac-x86
+'
+
 dir="$(realpath "$(dirname "$0")")"
 testing () {
     for src in *.c; do
@@ -41,20 +54,6 @@ benchmark() {
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
     $dir/brn2 -s -q -d .
     cd "$dir" || exit
-}
-
-callgrind() {
-    create_files
-    cd "$d" || exit
-
-    valgrind --tool=callgrind \
-        --collect-systime=msec \
-        --dump-instr=yes \
-        --callgrind-out-file=$dir/brn2_$1.out \
-        $dir/brn2 -q -r .
-
-    cd "$dir" || exit
-    setsid -f kcachegrind "$dir/brn2_$1.out" > /dev/null 2>&1
 }
 
 valgrind2() {
@@ -102,26 +101,31 @@ if [ "$CC" = "zig cc" ]; then
     case "$target" in
         "windows")
             CFLAGS="$CFLAGS -target x86_64-windows-gnu"
-            CPPFLAGS="$CPPFLAGS"
-            exe="$program.exe" ;;
+            CPPFLAGS="$CPPFLAGS "
+            exe="$program.exe"
+            ;;
         "mac-arm")
             CFLAGS="$CFLAGS -target aarch64-macos"
-            CPPFLAGS="$CPPFLAGS"
-            exe="$program" ;;
+            CPPFLAGS="$CPPFLAGS "
+            exe="$program"
+            ;;
         "mac-x86")
             CFLAGS="$CFLAGS -target x86_64-macos"
-            CPPFLAGS="$CPPFLAGS"
-            exe="$program" ;;
+            CPPFLAGS="$CPPFLAGS "
+            exe="$program"
+            ;;
         "openbsd")
             CFLAGS="$CFLAGS -target x86_64-openbsd-gnu "
-            CPPFLAGS="$CPPFLAGS"
-            exe="$program" ;;
+            CPPFLAGS="$CPPFLAGS "
+            exe="$program"
+            ;;
         "freebsd")
             CFLAGS="$CFLAGS -v -target x86_64-freebsd "
             CFLAGS="$CFLAGS -isystem $dir/freebsd/usr/include "
             CFLAGS="$CFLAGS -isysroot $dir/freebsd/ --sysroot $dir/freebsd"
-            CPPFLAGS="$CPPFLAGS"
-            exe="$program" ;;
+            CPPFLAGS="$CPPFLAGS "
+            exe="$program"
+            ;;
         *)
             echo "Invalid target for zig cc: $target"
             exit 1 ;;
@@ -131,7 +135,8 @@ fi
 case "$target" in
     "assembly")
         CFLAGS="$CFLAGS -S"
-        CPPFLAGS="$CPPFLAGS" ;;
+        # CPPFLAGS="$CPPFLAGS"
+        ;;
     "debug")
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=1" ;;
@@ -149,14 +154,17 @@ case "$target" in
         CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
     "test") 
         CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
-        CPPFLAGS="$CPPFLAGS " ;;
+        # CPPFLAGS="$CPPFLAGS "
+        ;;
     "mac-x86"|"mac-arm") 
         CFLAGS="$CFLAGS -fno-lto"
-        CPPFLAGS="$CPPFLAGS " ;;
+        # CPPFLAGS="$CPPFLAGS "
+        ;;
     "check") 
         CC=gcc
         CFLAGS="$CFLAGS -fanalyzer"
-        CPPFLAGS="$CPPFLAGS " ;;
+        # CPPFLAGS="$CPPFLAGS "
+        ;;
     *) 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
         CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG=0" ;;
@@ -187,9 +195,6 @@ case "$target" in
         vtags.sed tags > .tags.vim 2> /dev/null || true
         $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
         ;;
-    *)
-        echo "usage: $0 [ uninstall / test / install / build / debug ]"
-        ;;
 esac
 
 case "$target" in
@@ -199,3 +204,9 @@ case "$target" in
     "profile") profile "$2" ;;
     "check") scan-build --view -analyze-headers ./build.sh ;;
 esac
+
+if [ "$target" = "test_all" ]; then
+    for t in $targets; do
+        $0 $t
+    done
+fi
