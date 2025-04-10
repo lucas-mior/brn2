@@ -259,155 +259,154 @@ brn2_free_list(FileList *list) {
     return;
 }
 
-/* #ifdef __linux__ */
-/* FileList * */
-/* brn2_list_from_lines(char *filename, bool is_old) { */
-/*     FileList *list; */
-/*     char *map; */
-/*     char *begin; */
-/*     char *pointer; */
-/*     size_t left; */
-/*     uint32 length = 0; */
-/*     uint32 map_size; */
-/*     uint32 padding; */
-/*     uint32 capacity; */
-/*     int fd; */
+#ifdef __linux__
+void
+brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
+    char *map;
+    char *begin;
+    char *pointer;
+    size_t left;
+    uint32 length = 0;
+    uint32 map_size;
+    uint32 padding;
+    uint32 capacity;
+    int fd;
 
-/*     if ((fd = open(filename, O_RDWR)) < 0) { */
-/*         error("Error opening '%s' for reading: %s.\n", */
-/*               filename, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+    if ((fd = open(filename, O_RDWR)) < 0) {
+        error("Error opening '%s' for reading: %s.\n",
+              filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-/*     { */
-/*         struct stat lines_stat; */
-/*         if (fstat(fd, &lines_stat) < 0) { */
-/*             error("Error in fstat(%s): %s.\n", filename, strerror(errno)); */
-/*             exit(EXIT_FAILURE); */
-/*         } */
-/*         map_size = (uint32)lines_stat.st_size; */
-/*         if (map_size <= 0) { */
-/*             error("map_size: %u\n", map_size); */
-/*             exit(EXIT_FAILURE); */
-/*         } */
-/*     } */
-/*     padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT); */
-/*     map_size += padding; */
-/*     if (ftruncate(fd, map_size) < 0) { */
-/*         error("Error in ftruncate(%s): %s.\n", filename, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+    {
+        struct stat lines_stat;
+        if (fstat(fd, &lines_stat) < 0) {
+            error("Error in fstat(%s): %s.\n", filename, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        map_size = (uint32)lines_stat.st_size;
+        if (map_size <= 0) {
+            error("map_size: %u\n", map_size);
+            exit(EXIT_FAILURE);
+        }
+    }
+    padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
+    map_size += padding;
+    if (ftruncate(fd, map_size) < 0) {
+        error("Error in ftruncate(%s): %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-/*     capacity = map_size/2; */
-/*     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, capacity)); */
-/*     memset(list, 0, sizeof(*list)); */
-/*     if (is_old) */
-/*         list->arena = arena_old; */
-/*     else */
-/*         list->arena = arena_new; */
+    capacity = map_size/2;
 
-/*     map = mmap(NULL, map_size, */
-/*                      PROT_READ | PROT_WRITE, MAP_PRIVATE, */
-/*                      fd, 0); */
+    map = mmap(NULL, map_size,
+                     PROT_READ | PROT_WRITE, MAP_PRIVATE,
+                     fd, 0);
 
-/*     if (map == MAP_FAILED) { */
-/*         error("Error mapping history file to memory: %s.\n", strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+    if (map == MAP_FAILED) {
+        error("Error mapping history file to memory: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-/*     begin = pointer = map; */
-/*     left = map_size - padding; */
+    begin = pointer = map;
+    left = map_size - padding;
 
-/*     while ((left > 0) && (pointer = memchr(pointer, '\n', left))) { */
-/*         FileName *file = &(list->files[length]); */
-/*         uint32 size; */
+    list->files = xmalloc(capacity*sizeof(*(list->files)));
 
-/*         *pointer = '\0'; */
-/*         if (is_old && brn2_is_invalid_name(begin)) { */
-/*             begin = pointer + 1; */
-/*             continue; */
-/*         } */
-/*         if (begin == pointer) { */
-/*             error("Empty line in file. Exiting.\n"); */
-/*             exit(EXIT_FAILURE); */
-/*         } */
+    while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
+        FileName **filep = &(list->files[length]);
+        FileName *file;
+        uint32 size;
+        uint16 name_length;
 
-/*         file->length = (uint16)(pointer - begin); */
-/*         size = ALIGN(file->length+2); */
-/*         file->name = arena_push(list->arena, size); */
-/*         BRN2_ASSUME_ALIGNED(file->name); */
-/*         memcpy(file->name, begin, size); */
-/*         memset(&file->name[file->length], 0, size - file->length); */
+        *pointer = '\0';
+        if (is_old && brn2_is_invalid_name(begin)) {
+            begin = pointer + 1;
+            continue;
+        }
+        if (begin == pointer) {
+            error("Empty line in file. Exiting.\n");
+            exit(EXIT_FAILURE);
+        }
 
-/*         begin = pointer + 1; */
-/*         pointer += 1; */
-/*         length += 1; */
-/*         left -= (file->length + 1); */
-/*     } */
+        name_length = (uint16)(pointer - begin);
+        size = STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
+        size = ALIGN(size);
+        *filep = arena_push(list->arena, size);
 
-/*     if (length == 0) { */
-/*         error("Empty list. Exiting.\n"); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
-/*     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length)); */
-/*     list->length = length; */
-/*     munmap(map, map_size); */
+        file = *filep;
+        file->length = name_length;
+        memcpy(file->name, begin, name_length + 1);
 
-/*     if (ftruncate(fd, map_size - padding) < 0) { */
-/*         error("Error truncating '%s': %s.\n", filename, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
-/*     if (close(fd) < 0) { */
-/*         error("Error closing '%s': %s.\n", filename, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+        begin = pointer + 1;
+        pointer += 1;
+        length += 1;
+        left -= (file->length + 1);
+    }
 
-/*     return list; */
-/* } */
-/* #else */
-/* FileList * */
-/* brn2_list_from_lines(char *filename, bool is_old) { */
-/*     size_t length = 0; */
-/*     char buffer[BRN2_PATH_MAX]; */
-/*     FileList *list; */
-/*     uint32 cap = 128; */
-/*     FILE *lines; */
+    if (length == 0) {
+        error("Empty list. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }
+    list->files = xrealloc(list->files, length*sizeof(*(list->files)));
+    list->length = length;
+    munmap(map, map_size);
+
+    if (ftruncate(fd, map_size - padding) < 0) {
+        error("Error truncating '%s': %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    if (close(fd) < 0) {
+        error("Error closing '%s': %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    return;
+}
+#else
+FileList *
+brn2_list_from_lines(char *filename, bool is_old) {
+    size_t length = 0;
+    char buffer[BRN2_PATH_MAX];
+    FileList *list;
+    uint32 cap = 128;
+    FILE *lines;
     
-/*     if ((lines = fopen(filename, "r")) == NULL) { */
-/*         error("Error opening '%s': %s.\n", filename, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+    if ((lines = fopen(filename, "r")) == NULL) {
+        error("Error opening '%s': %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-/*     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap)); */
+    list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, cap));
 
-/*     if (is_old) */
-/*         list->arena = arena_old; */
-/*     else */
-/*         list->arena = arena_new; */
+    if (is_old)
+        list->arena = arena_old;
+    else
+        list->arena = arena_new;
 
-/*     while (!feof(lines)) { */
-/*         FileName *file; */
-/*         if (length >= cap) { */
-/*             cap *= 2; */
-/*             list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap)); */
-/*         } */
-/*         file = &(list->files[length]); */
+    while (!feof(lines)) {
+        FileName *file;
+        if (length >= cap) {
+            cap *= 2;
+            list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, cap));
+        }
+        file = &(list->files[length]);
 
-/*         if (!fgets(buffer, sizeof(buffer), lines)) */
-/*             continue; */
+        if (!fgets(buffer, sizeof(buffer), lines))
+            continue;
 
-/*         file->length = strcspn(buffer, "\n"); */
-/*         buffer[file->length] = '\0'; */
-/*         file->name = arena_push(list->arena, file->length + 1); */
-/*         memcpy(file->name, buffer, file->length + 1); */
-/*         length += 1; */
-/*     } */
-/*     fclose(lines); */
-/*     list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length)); */
-/*     list->length = length; */
-/*     return list; */
-/* } */
-/* #endif */
+        file->length = strcspn(buffer, "\n");
+        buffer[file->length] = '\0';
+        file->name = arena_push(list->arena, file->length + 1);
+        memcpy(file->name, buffer, file->length + 1);
+        length += 1;
+    }
+    fclose(lines);
+    list = xrealloc(list, STRUCT_ARRAY_SIZE(list, FileName, length));
+    list->length = length;
+    return list;
+}
+#endif
 
 bool
 brn2_is_invalid_name(char *filename) {
