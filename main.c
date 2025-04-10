@@ -198,9 +198,9 @@ int main(int argc, char **argv) {
         error("Unexpected mode: %d.\n", mode);
         exit(EXIT_FAILURE);
     }
-    /* if (!brn2_options_quiet) */
-    /*     printf("Normalizing filenames...\n"); */
-    /* brn2_normalize_names(old, NULL); */
+    if (!brn2_options_quiet)
+        printf("Normalizing filenames...\n");
+    brn2_normalize_names(old, NULL);
 
     for (uint32 i = 0; i < old->length; i += 1) {
         FileName **file = &(old->files[i]);
@@ -304,7 +304,6 @@ int main(int argc, char **argv) {
         }
         brn2_buffer.fd = -1;
     }
-    exit(0);
 
     {
         char *args_edit[] = { EDITOR, brn2_buffer_name, NULL };
