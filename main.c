@@ -183,9 +183,9 @@ int main(int argc, char **argv) {
     case FILES_FROM_ARGS:
         brn2_list_from_args(old, argc - optind, &argv[optind]);
         break;
-    /* case FILES_FROM_DIR: */
-    /*     old = brn2_list_from_dir(directory); */
-    /*     break; */
+    case FILES_FROM_DIR:
+        brn2_list_from_dir(old, directory);
+        break;
     /* case FILES_FROM_DIR_RECURSE: */
 /* #ifdef __WIN32__ */
     /*     error("Finding files recursively is not implemented on windows.\n"); */
@@ -218,8 +218,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    /* if (brn2_options_sort) */
-    /*     sort(old); */
+    if (brn2_options_sort)
+        sort(old);
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";

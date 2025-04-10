@@ -41,16 +41,16 @@ static void brn2_slash_add(FileName *);
 
 int
 brn2_compare(const void *a, const void *b) {
-    const FileName *file_a = a;
-    const FileName *file_b = b;
-    return strcmp(file_a->name, file_b->name);
+    FileName *const *file_a = a;
+    FileName *const *file_b = b;
+    return strcmp((*file_a)->name, (*file_b)->name);
 }
 
 void
 brn2_list_from_args(FileList *list, int argc, char **argv) {
     uint32 length = 0;
 
-    list->files = xmalloc(argc*sizeof(*(list->files)));
+    list->files = xmalloc((size_t)argc*sizeof(*(list->files)));
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -62,7 +62,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         if (brn2_is_invalid_name(name))
             continue;
 
-        size = STRUCT_ARRAY_SIZE(*filep, char, name_length+2);
+        size = (uint32)STRUCT_ARRAY_SIZE(*filep, char, name_length+2);
         size = ALIGN(size);
         *filep = arena_push(list->arena, size);
         file = *filep;
@@ -77,105 +77,105 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     return;
 }
 
-/* #ifdef __WIN32__ */
-/* int scandir(const char *dir, struct dirent ***namelist, */
-/*             void *filter, void *compar) { */
-/*     WIN32_FIND_DATAA find_data; */
-/*     HANDLE hFind; */
-/*     char buffer[MAX_PATH]; */
-/*     char *path; */
-/*     struct dirent **list; */
-/*     size_t count = 0; */
-/*     size_t capacity = 16; */
-/*     (void) filter; */
-/*     (void) compar; */
+#ifdef __WIN32__
+int scandir(const char *dir, struct dirent ***namelist,
+            void *filter, void *compar) {
+    WIN32_FIND_DATAA find_data;
+    HANDLE hFind;
+    char buffer[MAX_PATH];
+    char *path;
+    struct dirent **list;
+    size_t count = 0;
+    size_t capacity = 16;
+    (void) filter;
+    (void) compar;
 
-/*     path = SNPRINTF(buffer, "%s/*", dir); */
+    path = SNPRINTF(buffer, "%s/*", dir);
 
-/*     hFind = FindFirstFileA(path, &find_data); */
-/*     if (hFind == INVALID_HANDLE_VALUE) */
-/*         return -1; */
+    hFind = FindFirstFileA(path, &find_data);
+    if (hFind == INVALID_HANDLE_VALUE)
+        return -1;
 
-/*     list = xmalloc(capacity*sizeof(*list)); */
-/*     do { */
-/*         struct dirent *ent = xmalloc(sizeof(*ent)); */
+    list = xmalloc(capacity*sizeof(*list));
+    do {
+        struct dirent *ent = xmalloc(sizeof(*ent));
 
-/*         strncpy(ent->d_name, find_data.cFileName, MAX_PATH); */
-/*         if (count >= capacity) { */
-/*             capacity *= 2; */
-/*             list = xrealloc(list, capacity*sizeof(*list)); */
-/*         } */
-/*         list[count++] = ent; */
-/*     } while (FindNextFileA(hFind, &find_data)); */
-/*     FindClose(hFind); */
+        strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
+        if (count >= capacity) {
+            capacity *= 2;
+            list = xrealloc(list, capacity*sizeof(*list));
+        }
+        list[count++] = ent;
+    } while (FindNextFileA(hFind, &find_data));
+    FindClose(hFind);
 
-/*     *namelist = list; */
-/*     return (int)count; */
-/* } */
-/* #endif */
+    *namelist = list;
+    return (int)count;
+}
+#endif
 
-/* FileList * */
-/* brn2_list_from_dir(char *directory) { */
-/*     FileList *list; */
-/*     struct dirent **directory_list; */
-/*     uint32 length = 0; */
-/*     uint16 directory_length; */
-/*     int number_files; */
+void
+brn2_list_from_dir(FileList *list, char *directory) {
+    struct dirent **directory_list;
+    uint32 length = 0;
+    uint16 directory_length;
+    int number_files;
 
-/*     if (strcmp(directory, ".")) */
-/*        directory_length = (uint16)strlen(directory); */
-/*     else */
-/*        directory_length = 0; */
+    if (strcmp(directory, "."))
+       directory_length = (uint16)strlen(directory);
+    else
+       directory_length = 0;
 
-/*     number_files = scandir(directory, &directory_list, NULL, NULL); */
-/*     if (number_files < 0) { */
-/*         error("Error scanning '%s': %s.\n", directory, strerror(errno)); */
-/*         exit(EXIT_FAILURE); */
-/*     } */
+    number_files = scandir(directory, &directory_list, NULL, NULL);
+    if (number_files < 0) {
+        error("Error scanning '%s': %s.\n", directory, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-/*     list = xmalloc(STRUCT_ARRAY_SIZE(list, FileName, number_files)); */
-/*     memset(list, 0, sizeof(*list)); */
-/*     list->arena = arena_old; */
+    list->files = xmalloc((usize)number_files*sizeof(*(list->files)));
 
-/*     for (int i = 0; i < number_files; i += 1) { */
-/*         FileName *file = &(list->files[length]); */
-/*         char *name = directory_list[i]->d_name; */
-/*         uint16 name_length = (uint16)strlen(name); */
-/*         uint32 size; */
+    for (int i = 0; i < number_files; i += 1) {
+        FileName **filep = &(list->files[length]);
+        FileName *file;
+        char *name = directory_list[i]->d_name;
+        uint16 name_length = (uint16)strlen(name);
+        uint32 size;
 
-/*         if (brn2_is_invalid_name(name)) { */
-/*             if (BRN2_DEBUG) */
-/*                 free(directory_list[i]); */
-/*             continue; */
-/*         } */
+        if (brn2_is_invalid_name(name)) {
+            if (BRN2_DEBUG)
+                free(directory_list[i]);
+            continue;
+        }
 
-/*         if (directory_length) { */
-/*             file->length = directory_length + 1 + name_length; */
-/*             size = ALIGN(file->length + 2); */
-/*             file->name = arena_push(list->arena, size); */
-/*             BRN2_ASSUME_ALIGNED(file->name); */
+        if (directory_length) {
+            size = STRUCT_ARRAY_SIZE(*filep, char,
+                                     directory_length + 1 + name_length + 2);
+            size = ALIGN(size);
+            *filep = arena_push(list->arena, size);
+            file = *filep;
 
-/*             memcpy(file->name, directory, directory_length); */
-/*             file->name[directory_length] = '/'; */
-/*             memcpy(file->name + directory_length + 1, name, name_length + 1); */
-/*         } else { */
-/*             file->length = name_length; */
-/*             size = ALIGN(file->length + 2); */
-/*             file->name = arena_push(list->arena, size); */
-/*             BRN2_ASSUME_ALIGNED(file->name); */
+            file->length = directory_length + 1 + name_length;
+            memcpy(file->name, directory, directory_length);
+            file->name[directory_length] = '/';
+            memcpy(file->name + directory_length + 1, name, name_length + 1);
+        } else {
+            size = STRUCT_ARRAY_SIZE(*filep, char, name_length + 2);
+            size = ALIGN(size);
+            *filep = arena_push(list->arena, size);
+            file = *filep;
 
-/*             memcpy(file->name, name, file->length + 1); */
-/*         } */
-/*         memset(&file->name[file->length], 0, size - file->length); */
+            file->length = name_length;
+            memcpy(file->name, name, file->length + 1);
+        }
 
-/*         if (BRN2_DEBUG) */
-/*             free(directory_list[i]); */
-/*         length += 1; */
-/*     } */
-/*     free(directory_list); */
-/*     list->length = length; */
-/*     return list; */
-/* } */
+        if (BRN2_DEBUG)
+            free(directory_list[i]);
+        length += 1;
+    }
+    free(directory_list);
+    list->length = length;
+    return;
+}
 
 /* #ifndef __WIN32__ */
 /* FileList * */
@@ -329,7 +329,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
 
         name_length = (uint16)(pointer - begin);
-        size = STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
+        size = (uint32)STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
         size = ALIGN(size);
         *filep = arena_push(list->arena, size);
 
@@ -508,13 +508,13 @@ brn2_slash_add(FileName *file) {
     return;
 }
 
-/* void * */
-/* brn2_threads_work_sort(void *arg) { */
-/*     Slice *slice = arg; */
-/*     FileName *files = &(slice->old_list->files[slice->start]); */
-/*     qsort(files, slice->end - slice->start, sizeof (*files), brn2_compare); */
-/*     return 0; */
-/* } */
+void *
+brn2_threads_work_sort(void *arg) {
+    Slice *slice = arg;
+    FileName **files = &(slice->old_list->files[slice->start]);
+    qsort(files, slice->end - slice->start, sizeof (*files), brn2_compare);
+    return 0;
+}
 
 void *
 brn2_threads_work_hashes(void *arg) {
@@ -878,8 +878,8 @@ int main(void) {
     arena_new = arena_alloc(BRN2_ARENA_SIZE);
 
     system(command);
-    list1 = brn2_list_from_dir(".");
-    list2 = brn2_list_from_lines(file, true);
+    brn2_list_from_dir(".");
+    brn2_list_from_lines(file, true);
 
     brn2_normalize_names(list1, NULL);
     brn2_normalize_names(list2, NULL);

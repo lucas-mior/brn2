@@ -149,7 +149,7 @@ sort(FileList *old) {
     char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    char last_length = strlen(last);
+    uint32 last_length = (uint32)strlen(last);
 
     FileName *dummy_last;
     dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length));
@@ -167,14 +167,14 @@ sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    /* p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, 0); */
-    /* if (p == 1) */
-    /*     return; */
+    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, 0);
+    if (p == 1)
+        return;
 
-    /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    /* sort_merge_subsorted(old->files, old->length, p, */
-    /*                      sizeof(*(old->files)), */
-    /*                      &dummy_last, brn2_compare); */
+    qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare);
+    sort_merge_subsorted(old->files, old->length, p,
+                         sizeof(*(old->files)),
+                         &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
