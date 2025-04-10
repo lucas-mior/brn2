@@ -146,15 +146,15 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 static void
 sort(FileList *old) {
     uint32 p;
-    FileName dummy_last = {
-        .name = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+    char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
-        .hash = 0,
-        .length = 0,
-        .type = 0,
-        .unused = 0,
-    };
+                "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
+    char last_length = strlen(last);
+
+    FileName *dummy_last;
+    dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length));
+    memset(dummy_last, 0, sizeof(*dummy_last));
+    memcpy(dummy_last, last, last_length + 1);
 
 #if SORT_BENCHMARK
     struct timespec t0;
@@ -167,14 +167,14 @@ sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, 0);
-    if (p == 1)
-        return;
+    /* p = brn2_threads(brn2_threads_work_sort, old, NULL, NULL, 0); */
+    /* if (p == 1) */
+    /*     return; */
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    sort_merge_subsorted(old->files, old->length, p,
-                         sizeof(*(old->files)),
-                         &dummy_last, brn2_compare);
+    /* sort_merge_subsorted(old->files, old->length, p, */
+    /*                      sizeof(*(old->files)), */
+    /*                      &dummy_last, brn2_compare); */
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
