@@ -92,20 +92,19 @@ int scandir(const char *dir, struct dirent ***namelist,
     HANDLE hFind;
     char buffer[MAX_PATH];
     char *path;
+    struct dirent **list;
     size_t count = 0;
     size_t capacity = 16;
     (void) filter;
     (void) compar;
 
-    struct dirent **list = xmalloc(capacity*sizeof(*list));
-
     path = SNPRINTF(buffer, "%s/*", dir);
-    hFind = FindFirstFileA(path, &find_data);
-    if (hFind == INVALID_HANDLE_VALUE) {
-        free(list);
-        return -1;
-    }
 
+    hFind = FindFirstFileA(path, &find_data);
+    if (hFind == INVALID_HANDLE_VALUE)
+        return -1;
+
+    list = xmalloc(capacity*sizeof(*list));
     do {
         struct dirent *ent = xmalloc(sizeof(*ent));
 
