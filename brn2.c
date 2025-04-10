@@ -261,7 +261,6 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     uint32 length = 0;
     uint32 map_size;
     uint32 padding;
-    uint32 capacity;
     int fd;
 
     if ((fd = open(filename, O_RDWR)) < 0) {
@@ -293,8 +292,6 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         exit(EXIT_FAILURE);
     }
 
-    capacity = map_size/2;
-
     map = mmap(NULL, map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
@@ -304,7 +301,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         exit(EXIT_FAILURE);
     }
 
-    list->files = xmalloc(capacity*sizeof(*(list->files)));
+    {
+        uint32 capacity = map_size/2;
+        list->files = xmalloc(capacity*sizeof(*(list->files)));
+    }
 
     {
         char *begin = map;
