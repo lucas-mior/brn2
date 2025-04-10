@@ -35,12 +35,13 @@
   #include <fts.h>
 #endif
 
-#if defined(__WIN32__) || defined(__APPLE__)
+#ifndef __linux__
   #define basename(X) X
 #endif
 
 #include <assert.h>
 #include <dirent.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>

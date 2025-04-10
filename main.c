@@ -98,7 +98,11 @@ int main(int argc, char **argv) {
     program = basename(argv[0]);
 
 #ifndef __WIN32__
-    signal(SIGSEGV, handler_segv);
+    struct sigaction signal_segment_violation;
+
+    signal_segment_violation.sa_handler = handler_segv;
+    sigemptyset(&(signal_segment_violation.sa_mask));
+    sigaction(SIGSEGV, &signal_segment_violation, NULL);
 #endif
 
     while ((opt = getopt_long(argc, argv,
