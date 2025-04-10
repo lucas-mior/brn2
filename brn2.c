@@ -249,6 +249,7 @@ brn2_list_from_dir_recurse(FileList *list, char *directory) {
 
 void
 brn2_free_list(FileList *list) {
+    free(list->files);
     arena_reset(list->arena);
     return;
 }
