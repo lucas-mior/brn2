@@ -14,19 +14,14 @@ check
 dir="$(realpath "$(dirname "$0")")"
 
 NFILES=500000
-d="/tmp/brn2"
-
-create_files() {
-    rm -rf "$d"
-    mkdir -p "$d"
-    cd "$d" || exit
-    seq -w $NFILES | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
-    cd "$dir" || exit
-}
+tmpdir="/tmp/brn2"
 
 benchmark() {
-    create_files
-    cd "$d" || exit
+    rm -rf "$tmpdir"
+    mkdir -p "$tmpdir"
+    cd "$tmpdir" || exit
+    seq -w $NFILES | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
     $dir/brn2 -s -q -d .
     cd "$dir" || exit
