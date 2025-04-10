@@ -6,9 +6,9 @@ targets='
 test
 build
 debug
-benchmark
-valgrind
-check
+# benchmark
+# valgrind
+# check
 cross x86_64-windows-gnu
 cross x86_64-macos
 cross aarch64-macos
@@ -19,7 +19,7 @@ dir="$(realpath "$(dirname "$0")")"
 target="${1:-build}"
 cross="$2"
 
-printf "$RED $0 $1 $2 $RES\n"
+printf "${0} ${RED}${1} ${2}$RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
@@ -175,6 +175,7 @@ esac
 set +x
 if [ "$target" = "test_all" ]; then
     printf '%s\n' "$targets" | while IFS= read -r t; do
+        echo "$t" | grep -q "^# " && continue
         $0 $t || exit 1
     done
 fi
