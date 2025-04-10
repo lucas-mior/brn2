@@ -62,7 +62,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         if (brn2_is_invalid_name(name))
             continue;
 
-        size = (uint32)STRUCT_ARRAY_SIZE(*filep, char, name_length+2);
+        size = STRUCT_ARRAY_SIZE(*filep, char, name_length+2);
         size = ALIGN(size);
         *filep = arena_push(list->arena, size);
         file = *filep;
@@ -328,7 +328,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
 
         name_length = (uint16)(pointer - begin);
-        size = (uint32)STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
+        size = STRUCT_ARRAY_SIZE(filep, char, name_length + 2);
         size = ALIGN(size);
         *filep = arena_push(list->arena, size);
 
