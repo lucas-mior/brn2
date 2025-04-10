@@ -9,9 +9,9 @@ targets='
 test
 build
 debug
-# benchmark
-# valgrind
-# check
+benchmark
+valgrind
+check
 cross x86_64-windows-gnu
 cross x86_64-macos
 cross aarch64-macos
