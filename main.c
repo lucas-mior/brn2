@@ -324,11 +324,11 @@ int main(int argc, char **argv) {
             srand(42);
             for (uint32 i = 0; i < new->length; i += 1) {
                 float x = (float)rand() / (float)RAND_MAX;
-                uint32 length = new->files[i].length;
+                uint32 length = new->files[i]->length;
                 if (x < 0.4f) {
                     for (uint32 j = 0; j < length; j += 1) {
                         char c = allowed[(usize)rand() % (sizeof(allowed) - 1)];
-                        new->files[i].name[j] = c;
+                        new->files[i]->name[j] = c;
                     }
                 }
             }
