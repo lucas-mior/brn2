@@ -860,12 +860,10 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
 int (*print)(const char *, ...);
 
 int main(void) {
-    FileList *list1;
-    FileList *list2;
     FileList list1_stack = {0};
     FileList list2_stack = {0};
-    list1 = &list1_stack;
-    list2 = &list2_stack;
+    FileList *list1 = &list1_stack;
+    FileList *list2 = &list2_stack;
 
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
