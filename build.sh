@@ -52,13 +52,16 @@ fi
 case "$target" in
     "debug")
         CFLAGS="$CFLAGS -g -fsanitize=undefined"
-        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG" ;;
+        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
+        ;;
     "benchmark")
         CFLAGS="$CFLAGS    -O2 -flto -march=native -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK" ;;
+        CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+        ;;
     "valgrind") 
         CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG" ;;
+        CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
+        ;;
     "test") 
         CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
         CPPFLAGS="$CPPFLAGS "
@@ -74,7 +77,8 @@ case "$target" in
         ;;
     *) 
         CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-        CPPFLAGS="$CPPFLAGS " ;;
+        CPPFLAGS="$CPPFLAGS "
+        ;;
 esac
 
 case "$target" in
