@@ -160,11 +160,13 @@ sort(FileList *old) {
 #if SORT_BENCHMARK
     struct timespec t0;
     struct timespec t1;
-    usize list_size = STRUCT_ARRAY_SIZE(old, FileName, old->length);
-    FileList *copy = xmalloc(list_size);
 
+    FileList copy = {0};
     sort_shuffle(old->files, old->length, sizeof(*(old->files)));
-    memcpy(copy, old, list_size);
+
+    memcpy(&copy, old, sizeof(*old));
+    copy.files = xmalloc(copy.length*sizeof(*(old->files)));
+    memcpy(copy.files, old->files, copy.length*sizeof(*(old->files)));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
@@ -181,12 +183,12 @@ sort(FileList *old) {
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    qsort(copy->files, copy->length, sizeof(*(copy->files)), brn2_compare);
-    if (memcmp(copy, old, list_size)) {
+    qsort(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
+    if (memcmp(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
         error("Error in sorting.\n");
         for (uint32 i = 0; i < old->length; i += 1) {
             char *name1 = old->files[i]->name;
-            char *name2 = copy->files[i]->name;
+            char *name2 = copy.files[i]->name;
             if (strcmp(name1, name2)) {
                 error("[%u] = %s != %s\n", i, name1, name2);
             }
@@ -195,7 +197,6 @@ sort(FileList *old) {
     } else {
         error("Sorting successful.\n");
     }
-    free(copy);
     brn2_timings("sorting", t0, t1, old->length);
     exit(0);
 #endif
