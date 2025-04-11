@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
             old->length -= 1;
             if (old->length <= i)
                 break;
-            memmove((*file), (*file)+1, (old->length - i)*sizeof(*file));
+            memmove(file, file+1, (old->length - i)*sizeof(*file));
         }
     }
 
