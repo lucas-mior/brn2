@@ -140,7 +140,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     return;
 }
 
-#define SORT_BENCHMARK 0
+#define SORT_BENCHMARK 1
 
 #ifndef TESTING_sort
 static void
@@ -185,8 +185,8 @@ sort(FileList *old) {
     if (memcmp(copy, old, list_size)) {
         error("Error in sorting.\n");
         for (uint32 i = 0; i < old->length; i += 1) {
-            char *name1 = old->files[i].name;
-            char *name2 = copy->files[i].name;
+            char *name1 = old->files[i]->name;
+            char *name2 = copy->files[i]->name;
             if (strcmp(name1, name2)) {
                 error("[%u] = %s != %s\n", i, name1, name2);
             }
