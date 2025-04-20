@@ -635,8 +635,13 @@ brn2_threads(void *(*function)(void *),
         }
     }
 
-    for (uint32 i = 0; i < nthreads; i += 1)
-        pthread_join(threads[i], NULL);
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        err = pthread_join(threads[i], NULL);
+        if (err) {
+            error("Error joining thread %u: %s.\n", i, strerror(err));
+            exit(EXIT_FAILURE);
+        }
+    }
     return nthreads;
 }
 #else
