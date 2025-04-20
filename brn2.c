@@ -585,6 +585,16 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 }
 
 #ifndef __WIN32__
+static void
+brn2_thread_create(pthread_t *thread, void *(*function)(void *), void *args) {
+    int err = pthread_create(thread, NULL, function, args);
+    if (err) {
+        error("Error creating thread: %s.\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    return;
+}
+
 uint32
 brn2_threads(void *(*function)(void *),
              FileList *old, FileList *new,
@@ -615,11 +625,7 @@ brn2_threads(void *(*function)(void *),
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        err = pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
-        if (err) {
-            error("Error creating thread %u: %s.\n", i, strerror(err));
-            exit(EXIT_FAILURE);
-        }
+        brn2_thread_create(&threads[i], function, (void *)&slices[i]);
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
@@ -628,11 +634,7 @@ brn2_threads(void *(*function)(void *),
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        err = pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
-        if (err) {
-            error("Error creating thread %u: %s.\n", i, strerror(err));
-            exit(EXIT_FAILURE);
-        }
+        brn2_thread_create(&threads[i], function, (void *)&slices[i]);
     }
 
     for (uint32 i = 0; i < nthreads; i += 1) {
