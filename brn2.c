@@ -593,6 +593,7 @@ brn2_threads(void *(*function)(void *),
     Slice slices[BRN2_MAX_THREADS];
     uint32 range;
     uint32 length;
+    int err;
 
     if (old) {
         length = old->length;
@@ -614,7 +615,11 @@ brn2_threads(void *(*function)(void *),
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
+        err = pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
+        if (err) {
+            error("Error creating thread %u: %s.\n", i, strerror(err));
+            exit(EXIT_FAILURE);
+        }
     }{
         uint32 i = nthreads - 1;
         slices[i].start = i*range;
@@ -623,7 +628,11 @@ brn2_threads(void *(*function)(void *),
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
+        err = pthread_create(&threads[i], NULL, function, (void *)&slices[i]);
+        if (err) {
+            error("Error creating thread %u: %s.\n", i, strerror(err));
+            exit(EXIT_FAILURE);
+        }
     }
 
     for (uint32 i = 0; i < nthreads; i += 1)
