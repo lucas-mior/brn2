@@ -297,6 +297,7 @@ int main(int argc, char **argv) {
             error("Error closing:%s\n", strerror(errno));
         }
         brn2_buffer.fd = -1;
+        atexit(delete_brn2_buffer);
     }
 
     {
