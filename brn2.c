@@ -690,8 +690,23 @@ brn2_verify(FileList *new, FileList *old,
 
         if (!hash_set_insert_pre_calc(repeated_set, newfile->name,
                                       newfile->hash, hashes_new[i])) {
-            error("Error: "RED"'%s'"RESET " repeats on line %u.\n",
+            FileName *oldfile = old->files[i];
+            char *diff[] = {
+                "/usr/bin/diff",
+                "-q",
+                newfile->name,
+                oldfile->name,
+                NULL,
+            };
+            error("Error: "RED"'%s'"RESET " repeats on line %u. ",
                   newfile->name, i + 1);
+
+            if (util_command(ARRAY_LENGTH(diff), diff) == 0) {
+                error("Old and new name point to the same file.\n");
+            } else {
+                error("\n");
+            }
+
             failed = true;
             if (brn2_options_fatal)
                 exit(EXIT_FAILURE);
