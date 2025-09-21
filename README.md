@@ -20,6 +20,7 @@ Options:
   -q, --quiet   : Quiet mode; suppress output messages.
   -s, --sort    : Disable sorting of original list.
   -v, --verbose : Verbose mode (default); output messages.
+  -a, --autosolve : Auto solve name conflicts for equal files.
 
 Arguments:
   No arguments              : Rename files of current working directory.
