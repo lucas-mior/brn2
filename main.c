@@ -38,7 +38,6 @@ static struct option options[] = {
     {"dir",     required_argument, NULL, 'd'},
     {"file",    required_argument, NULL, 'f'},
     {"recurse", required_argument, NULL, 'r'},
-    {"check",   no_argument,       NULL, 'c'},
     {"explict", no_argument,       NULL, 'e'},
     {"fatal",   no_argument,       NULL, 'F'},
     {"help",    no_argument,       NULL, 'h'},
