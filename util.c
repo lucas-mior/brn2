@@ -69,7 +69,7 @@ static void *xrealloc(void *, const size_t);
 static void *xcalloc(const size_t, const size_t);
 static char *xstrdup(char *);
 static void *snprintf2(char *, size_t, char *, ...);
-static void util_command(const int, char **);
+static int util_command(const int, char **);
 static uint32 util_nthreads(void);
 
 static size_t util_page_size = 0;
@@ -242,7 +242,8 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 }
 
 #ifdef __WIN32__
-void util_command(const int argc, char **argv) {
+int
+util_command(const int argc, char **argv) {
     char *cmdline;
     uint32 len = 1;
 
@@ -308,9 +309,11 @@ void util_command(const int argc, char **argv) {
     return;
 }
 #else
-void
+int
 util_command(const int argc, char **argv) {
     pid_t child;
+    int status;
+
     switch (child = fork()) {
     case 0:
         if (!freopen("/dev/tty", "r", stdin))
@@ -325,10 +328,15 @@ util_command(const int argc, char **argv) {
         error("Error forking: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     default:
-        if (waitpid(child, NULL, 0) < 0) {
+        if (waitpid(child, &status, 0) < 0) {
             error("Error waiting for the forked child: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
+        if (!WIFEXITED(status)) {
+            error("Command exited abnormally.\n");
+            exit(EXIT_FAILURE);
+        }
+        return WEXITSTATUS(status);
     }
 }
 #endif
