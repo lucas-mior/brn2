@@ -334,7 +334,7 @@ int main(int argc, char **argv) {
             new->indexes_size = new->length*sizeof(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             brn2_create_hashes(new, main_capacity);
-            brn2_verify(new, newlist_set, new->indexes);
+            brn2_verify(new, old, newlist_set, new->indexes);
             hash_set_print_summary(newlist_set, "newlist_set");
         }
 #else
@@ -369,7 +369,7 @@ int main(int argc, char **argv) {
             main_capacity = hash_capacity(newlist_set);
             brn2_create_hashes(new, main_capacity);
 
-            if (!brn2_verify(new, newlist_set, new->indexes)) {
+            if (!brn2_verify(new, old, newlist_set, new->indexes)) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");

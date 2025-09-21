@@ -673,7 +673,8 @@ brn2_threads(void *(*function)(void *),
 #endif
 
 bool
-brn2_verify(FileList *new, HashSet *repeated_set, uint32 *hashes_new) {
+brn2_verify(FileList *new, FileList *old,
+            HashSet *repeated_set, uint32 *hashes_new) {
     bool failed = false;
 
     for (uint32 i = 0; i < new->length; i += 1) {
