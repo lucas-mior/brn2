@@ -866,6 +866,7 @@ brn2_usage(FILE *stream) {
     "  -q, --quiet   : Quiet mode; suppress output messages.\n"
     "  -s, --sort    : Disable sorting of original list.\n"
     "  -v, --verbose : Verbose mode (default); output messages.\n"
+    "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
     "\n"
     "Arguments:\n"
     "  No arguments              : Rename files of current working directory.\n"
