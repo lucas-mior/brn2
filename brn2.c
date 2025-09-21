@@ -709,7 +709,8 @@ brn2_verify(FileList *new, FileList *old,
                         newfile->name,
                         NULL,
                     };
-                    error("Deleting old file...\n");
+                    error("brn2_options_autosolve is enabled:"
+                          " Deleting old file...\n");
                     util_command(ARRAY_LENGTH(rm), rm);
                     continue;
                 }
