@@ -703,6 +703,16 @@ brn2_verify(FileList *new, FileList *old,
 
             if (util_command(ARRAY_LENGTH(diff), diff) == 0) {
                 error("Old and new name point to the same file.\n");
+                if (brn2_options_autosolve) {
+                    char *rm[] = {
+                        "/usr/bin/rm",
+                        newfile->name,
+                        NULL,
+                    };
+                    error("Deleting old file...\n");
+                    util_command(ARRAY_LENGTH(rm), rm);
+                    continue;
+                }
             } else {
                 error("\n");
             }

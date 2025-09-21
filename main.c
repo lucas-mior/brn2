@@ -30,6 +30,7 @@ bool brn2_options_fatal = BRN2_DEBUG;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
+bool brn2_options_autosolve = false;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
@@ -45,6 +46,7 @@ static struct option options[] = {
     {"quiet",   no_argument,       NULL, 'q'},
     {"sort",    no_argument,       NULL, 's'},
     {"verbose", no_argument,       NULL, 'v'},
+    {"autosave", no_argument,      NULL, 'a'},
     {NULL, 0, NULL, 0}
 };
 
@@ -111,7 +113,7 @@ int main(int argc, char **argv) {
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv,
-                              "d:f:r:ceFhiqsv", options, NULL)) != -1) {
+                              "d:f:r:ceFhiqsva", options, NULL)) != -1) {
         switch (opt) {
         case 'd':
             mode = FILES_FROM_DIR;
@@ -154,6 +156,9 @@ int main(int argc, char **argv) {
             break;
         case 'v':
             brn2_options_quiet = false;
+            break;
+        case 'a':
+            brn2_options_autosolve = true;
             break;
         default:
             brn2_usage(stderr);
