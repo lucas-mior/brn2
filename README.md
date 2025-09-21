@@ -13,7 +13,6 @@ Rename filenames based on provided arguments.
 
 Options:
   -F, --fatal   : Exit on first renaming error.
-  -c, --check   : Ignored.
   -e, --explict : Only rename files given in the list (default).
   -h, --help    : Display this help message and exit.
   -i, --implict : Rename files not given in the list of files to rename.
@@ -67,9 +66,6 @@ will take place when you save and exit.
 - If you want to filter/organize the files to rename, use command line utilities
   like `find` and output it to a file. Edit this file as you like and then
   launch brn2 with the `-f` option. See examples below.
-- Filenames listed in `<filename>` or given as arguments which
-  do not correpond to existing files will generate errors while renaming,
-  so you might want to enable `--check` option.
 
 #### Be careful when renaming in depth
 If you supply the files:
@@ -133,11 +129,10 @@ $ brn2 --quiet --file rename
   modification date (using
   [`find(1)`](https://man7.org/linux/man-pages/man1/find.1.html),
   [`sort(1)`](https://man7.org/linux/man-pages/man1/sort.1.html), and
-  [`cut(1)`](https://man7.org/linux/man-pages/man1/cut.1.html)) Also check if
-  each line correspond to an existing file (`--check` option).
+  [`cut(1)`](https://man7.org/linux/man-pages/man1/cut.1.html)).
 ```
 $ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- > rename
-$ brn2 --check --file rename
+$ brn2 --file rename
 ```
  
 ## Changes over original brn
@@ -146,7 +141,7 @@ $ brn2 --check --file rename
 - Option to recursively find files.
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
-- Option to check if original files exist.
+- Check if original files exist.
  
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
