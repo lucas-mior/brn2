@@ -114,8 +114,27 @@ int scandir(const char *dir, struct dirent ***namelist,
 #endif
 
 void
+brn2_free(struct dirent ***pointer) {
+    error("brn2_free %p...\n", *pointer);
+    if (BRN2_DEBUG)
+        free(*pointer);
+    return;
+}
+
+#define BRN2_FREE(T, NAME) \
+    T NAME __attribute__((cleanup(brn2_free)))
+
+/* #define ARRAY_STRING(BUFFER, SEP, ARRAY, ARRAY_LENGTH) \ */
+/* _Generic((ARRAY), \ */
+/* int *: array_string(BUFFER, sizeof(BUFFER), SEP, "%d", ARRAY, ARRAY_LENGTH), \ */
+/* float *: array_string(BUFFER, sizeof(BUFFER), SEP, "%f", ARRAY, ARRAY_LENGTH), \ */
+/* double *: array_string(BUFFER, sizeof(BUFFER), SEP, "%f", ARRAY, ARRAY_LENGTH), \ */
+/* char **: array_string(BUFFER, sizeof(BUFFER), SEP, "%s", ARRAY, ARRAY_LENGTH) \ */
+/* ) */
+
+void
 brn2_list_from_dir(FileList *list, char *directory) {
-    struct dirent **directory_list;
+    BRN2_FREE(struct dirent **, directory_list);
     uint32 length = 0;
     uint16 directory_length;
     int number_files;
@@ -169,7 +188,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             free(directory_list[i]);
         length += 1;
     }
-    free(directory_list);
+    error("Freeing %p...\n", directory_list);
     list->length = length;
     return;
 }
