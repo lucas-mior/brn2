@@ -710,7 +710,10 @@ brn2_verify(FileList *new, FileList *old,
                         NULL,
                     };
                     error("--autosolve is enabled: Deleting old file...\n");
-                    util_command(ARRAY_LENGTH(rm), rm);
+                    if (!util_command(ARRAY_LENGTH(rm), rm)) {
+                        error("Error deleting old file.\n");
+                        exit(EXIT_FAILURE);
+                    }
                     continue;
                 }
             } else {
