@@ -16,10 +16,10 @@ Options:
   -e, --explict : Only rename files given in the list (default).
   -h, --help    : Display this help message and exit.
   -i, --implict : Rename files not given in the list of files to rename.
+  -a, --autosolve : Auto solve name conflicts for equal files.
   -q, --quiet   : Quiet mode; suppress output messages.
   -s, --sort    : Disable sorting of original list.
   -v, --verbose : Verbose mode (default); output messages.
-  -a, --autosolve : Auto solve name conflicts for equal files.
 
 Arguments:
   No arguments              : Rename files of current working directory.
@@ -58,6 +58,11 @@ will take place when you save and exit.
     the rename list, this rename won't happen. Supply the `--implict` command
     line option to force this swap, then `a` will become `b` and `b` will become
     `a`.
+  * New file names that match existing files will be compared agains the
+    current name. If they have the same content, it will be reported.
+    + If the option `--autosolve` is suplied, then the existing file will be
+      removed, making the rename work correctly. Otherwise, the user will be
+      prompted to fix the rename list.
 - If the exact number of filenames isn't provided or if some filenames are
   repeated, the user will be asked to fix the rename buffer or exit.
 - Renaming millions or billions of files can be slow. Disabling sorting
