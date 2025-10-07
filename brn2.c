@@ -883,6 +883,7 @@ brn2_usage(FILE *stream) {
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
+bool brn2_options_autosolve = false;
 uint32 nthreads = 1;
 
 static bool
