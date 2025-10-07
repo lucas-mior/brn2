@@ -704,14 +704,10 @@ brn2_verify(FileList *new, FileList *old,
             if (util_command(ARRAY_LENGTH(diff), diff) == 0) {
                 error("Old and new name have exactly the same content.\n");
                 if (brn2_options_autosolve) {
-                    char *rm[] = {
-                        "/usr/bin/rm",
-                        newfile->name,
-                        NULL,
-                    };
                     error("--autosolve is enabled: Deleting old file...\n");
-                    if (!util_command(ARRAY_LENGTH(rm), rm)) {
-                        error("Error deleting old file.\n");
+                    if (unlink(newfile->name) < 0) {
+                        error("Error deleting %s: %s.\n",
+                              newfile->name, strerror(errno));
                         exit(EXIT_FAILURE);
                     }
                     continue;
