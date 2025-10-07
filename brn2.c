@@ -702,7 +702,7 @@ brn2_verify(FileList *new, FileList *old,
                   newfile->name, i + 1);
 
             if (util_command(ARRAY_LENGTH(diff), diff) == 0) {
-                error("Old and new name point to the same file.\n");
+                error("Old and new name have exactly the same content.\n");
                 if (brn2_options_autosolve) {
                     char *rm[] = {
                         "/usr/bin/rm",
