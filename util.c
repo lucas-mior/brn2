@@ -60,8 +60,6 @@
 typedef uint32_t uint32;
 #endif
 
-#define error(...) fprintf(stderr, __VA_ARGS__)
-
 static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
 static void *xmalloc(const size_t);
@@ -340,6 +338,28 @@ util_command(const int argc, char **argv) {
     }
 }
 #endif
+
+void
+error(char *format, ...) {
+    char buffer[BUFSIZ];
+    va_list args;
+    int32 n;
+
+    va_start(args, format);
+    n = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
+    va_end(args);
+
+    if (n < 0 || n > (int32)sizeof(buffer)) {
+        fprintf(stderr, "Error in vsnprintf()\n");
+        exit(EXIT_FAILURE);
+    }
+
+    buffer[n] = '\0';
+    write(STDERR_FILENO, buffer, (usize)n);
+    fsync(STDERR_FILENO);
+    fsync(STDOUT_FILENO);
+    return;
+}
 
 #ifdef TESTING_util
 #include <assert.h>
