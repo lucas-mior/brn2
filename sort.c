@@ -153,7 +153,7 @@ sort(FileList *old) {
     uint32 last_length = (uint32)strlen(last);
     FileName *dummy_last;
 
-    dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length));
+    dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1));
     memset(dummy_last, 0, sizeof(*dummy_last));
     memcpy(dummy_last, last, last_length + 1);
 
