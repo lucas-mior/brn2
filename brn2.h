@@ -184,4 +184,6 @@ void brn2_execute2(FileList *, FileList *,
 
 void brn2_usage(FILE *) __attribute__((noreturn));
 
+void error(char *, ...);
+
 #endif
