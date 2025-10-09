@@ -198,7 +198,7 @@ sort(FileList *old) {
         error("Sorting successful.\n");
     }
     brn2_timings("sorting", t0, t1, old->length);
-    exit(0);
+    exit(EXIT_SUCCESS);
 #endif
 
     free(dummy_last);
