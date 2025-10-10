@@ -514,7 +514,7 @@ void *
 brn2_threads_work_sort(void *arg) {
     Slice *slice = arg;
     FileName **files = &(slice->old_list->files[slice->start]);
-    qsort(files, slice->end - slice->start, sizeof (*files), brn2_compare);
+    qsort(files, slice->end - slice->start, sizeof(*files), brn2_compare);
     return 0;
 }
 
@@ -895,7 +895,7 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove(&list->files[i], &list->files[i+1],
-                        (list->length - i)*sizeof (*(list->files)));
+                        (list->length - i)*sizeof(*(list->files)));
             }
             return true;
         }
