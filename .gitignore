@@ -6,8 +6,12 @@ test
 .clang-format
 compile_commands.json
 brn2
+brn2_perf
+brn2_benchmark
 tags
 *.o
 *.tags.vim
 .cache
+*.pdb
 *.exe
+*.data
