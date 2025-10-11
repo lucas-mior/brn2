@@ -82,16 +82,15 @@ int scandir(const char *dir, struct dirent ***namelist,
     WIN32_FIND_DATAA find_data;
     HANDLE hFind;
     char buffer[MAX_PATH];
-    char *path;
     struct dirent **list;
     size_t count = 0;
     size_t capacity = 16;
     (void) filter;
     (void) compar;
 
-    path = SNPRINTF(buffer, "%s/*", dir);
+    SNPRINTF(buffer, "%s/*", dir);
 
-    hFind = FindFirstFileA(path, &find_data);
+    hFind = FindFirstFileA(buffer, &find_data);
     if (hFind == INVALID_HANDLE_VALUE)
         return -1;
 
@@ -701,7 +700,7 @@ brn2_verify(FileList *new, FileList *old,
             error("Error: "RED"'%s'"RESET " repeats on line %u. ",
                   newfile->name, i + 1);
 
-            if (util_command(ARRAY_LENGTH(diff), diff) == 0) {
+            if (util_command(LENGTH(diff), diff) == 0) {
                 error("Old and new name have exactly the same content.\n");
                 if (brn2_options_autosolve) {
                     error("--autosolve is enabled: Deleting old file...\n");

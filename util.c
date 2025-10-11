@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
 
@@ -36,6 +37,14 @@
 #define SIZEKB(X) ((size_t)(X)*1024ul)
 #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
 #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+
+#ifndef LENGTH
+#define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
+#endif
+#ifndef SNPRINTF
+#define SNPRINTF(BUFFER, FORMAT, ...) \
+    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
+#endif
 
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
   #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
@@ -57,18 +66,48 @@
 
 #ifndef INTEGERS
 #define INTEGERS
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ulonglong;
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
 typedef uint32_t uint32;
+typedef uint64_t uint64;
+
+typedef size_t usize;
+typedef ssize_t isize;
 #endif
 
-static void *xmmap_commit(size_t *);
-static void xmunmap(void *, size_t);
-static void *xmalloc(const size_t);
-static void *xrealloc(void *, const size_t);
-static void *xcalloc(const size_t, const size_t);
+static char *notifiers[2] = { "dunstify", "notify-send" };
+
 static char *xstrdup(char *);
-static void *snprintf2(char *, size_t, char *, ...);
 static int util_command(const int, char **);
+static int32 snprintf2(char *, size_t, char *, ...);
+static int32 util_copy_file(const char *, const char *);
+static int32 util_string_int32(int32 *, const char *);
 static uint32 util_nthreads(void);
+static uint32 util_nthreads(void);
+static void *xcalloc(const size_t, const size_t);
+static void *xrealloc(void *old, const size_t);
+static void *util_memdup(const void *, const usize);
+static void *xcalloc(const size_t, const size_t);
+static void *xmalloc(const size_t);
+static void *xmalloc(const size_t);
+static void *xmmap_commit(size_t *);
+static void *xmmap_commit(size_t *);
+static void *xrealloc(void *, const size_t);
+static void error(char *, ...);
+static void util_die_notify(const char *, ...) __attribute__((noreturn));
+static void util_segv_handler(int32) __attribute__((noreturn));
+static void xmunmap(void *, size_t);
+static void array_string(char *, int32, char *, char *, char **, int32);
 
 static size_t util_page_size = 0;
 
@@ -211,7 +250,7 @@ xstrdup(char *string) {
     return p;
 }
 
-void *
+int32
 snprintf2(char *buffer, size_t size, char *format, ...) {
     int n;
     va_list args;
@@ -224,19 +263,15 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
         error("%s: wrong buffer size = %zu.\n", __func__, size);
         exit(EXIT_FAILURE);
     }
-    if (n >= (int)size) {
-        va_list args2;
-        buffer = xmalloc((size_t)n + 1);
-        va_start(args, format);
-        va_copy(args2, args);
-        n = vsnprintf(buffer, (size_t)n + 1, format, args);
-        va_end(args);
-    }
     if (n <= 0) {
         error("Error in snprintf.\n");
         exit(EXIT_FAILURE);
     }
-    return buffer;
+    if (n >= (int)size) {
+        error("%s: wrong buffer size = %zu.\n", __func__, size);
+        exit(EXIT_FAILURE);
+    }
+    return n;
 }
 
 #ifdef __WIN32__
@@ -339,6 +374,41 @@ util_command(const int argc, char **argv) {
 }
 #endif
 
+void array_string(char *buffer, int32 size,
+                  char *sep, char *formatter,
+                  char **array, int32 array_length) {
+    char format_string[16];
+    int32 n = 0;
+    SNPRINTF(format_string, "%s%%s", formatter);
+
+    for (int32 i = 0; i < (array_length-1); i += 1) {
+        int32 space = size - n;
+        int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
+        if (m <= 0) {
+            error("Error in snprintf().\n");
+            exit(EXIT_FAILURE);
+        }
+        if (m > space) {
+            error("Error printing full command, not enough space.\n");
+            exit(EXIT_FAILURE);
+        }
+        n += m;
+    }{
+        int32 i = array_length - 1;
+        int32 space = size - n;
+        int32 m = snprintf(buffer + n, (ulong)space, "%s", array[i]);
+        if (m <= 0) {
+            error("Error in snprintf().\n");
+            exit(EXIT_FAILURE);
+        }
+        if (m > space) {
+            error("Error printing full command, not enough space.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    return;
+}
+
 void
 error(char *format, ...) {
     char buffer[BUFSIZ];
@@ -355,10 +425,123 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write(STDERR_FILENO, buffer, (usize)n);
+    write(STDERR_FILENO, buffer, (size_t)n);
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
     return;
+}
+
+void
+util_segv_handler(int32 unused) {
+    char *message = "Memory error. Please send a bug report.\n";
+    (void)unused;
+
+    (void)write(STDERR_FILENO, message, strlen(message));
+    for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+        execlp(notifiers[i], notifiers[i], "-u", "critical",
+                             "clipsim", message, NULL);
+    }
+    _exit(EXIT_FAILURE);
+}
+
+int32
+util_string_int32(int32 *number, const char *string) {
+    char *endptr;
+    long x;
+    errno = 0;
+    x = strtol(string, &endptr, 10);
+    if ((errno != 0) || (string == endptr) || (*endptr != 0)) {
+        return -1;
+    } else if ((x > INT32_MAX) || (x < INT32_MIN)) {
+        return -1;
+    } else {
+        *number = (int32)x;
+        return 0;
+    }
+}
+
+void
+util_die_notify(const char *format, ...) {
+    int32 n;
+    va_list args;
+    char buffer[BUFSIZ];
+
+    va_start(args, format);
+    n = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    if (n < 0)
+        exit(EXIT_FAILURE);
+
+    if (n >= (int32)sizeof(buffer))
+        exit(EXIT_FAILURE);
+
+    buffer[n] = '\0';
+    (void)write(STDERR_FILENO, buffer, (usize) n + 1);
+    for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+        execlp(notifiers[i], notifiers[i], "-u", "critical",
+                             "clipsim", buffer, NULL);
+    }
+    exit(EXIT_FAILURE);
+}
+
+void *
+util_memdup(const void *source, const usize size) {
+    void *p;
+    if ((p = malloc(size)) == NULL) {
+        error("Error allocating %zu bytes.\n", size);
+         exit(EXIT_FAILURE);
+     }
+     memcpy(p, source, size);
+     return p;
+}
+
+int32
+util_copy_file(const char *destination, const char *source) {
+    int32 source_fd;
+    int32 destination_fd;
+    char buffer[BUFSIZ];
+    isize r = 0;
+    isize w = 0;
+
+    if ((source_fd = open(source, O_RDONLY)) < 0) {
+        error("Error opening %s for reading: %s.\n", source, strerror(errno));
+        return -1;
+    }
+
+    if ((destination_fd = open(destination, O_WRONLY | O_CREAT | O_TRUNC,
+                                            S_IRUSR | S_IWUSR)) < 0) {
+        error("Error opening %s for writing: %s.\n",
+              destination, strerror(errno));
+        close(source_fd);
+        return -1;
+    }
+
+    errno = 0;
+    while ((r = read(source_fd, buffer, BUFSIZ)) > 0) {
+        w = write(destination_fd, buffer, (usize)r);
+        if (w != r) {
+            fprintf(stderr, "Error writing data to %s", destination);
+            if (errno)
+                fprintf(stderr, ": %s", strerror(errno));
+            fprintf(stderr, ".\n");
+
+            close(source_fd);
+            close(destination_fd);
+            return -1;
+        }
+    }
+
+    if (r < 0) {
+        error("Error reading data from %s: %s.\n", source, strerror(errno));
+        close(source_fd);
+        close(destination_fd);
+        return -1;
+    }
+
+    close(source_fd);
+    close(destination_fd);
+    return 0;
 }
 
 #ifdef TESTING_util
