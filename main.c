@@ -56,12 +56,12 @@ enum {
     FILES_FROM_DIR_RECURSE,
 };
 
-static char *brn2_buffer_name;
+static File brn2_buffer;
 
 static void
 delete_brn2_buffer(void) {
     if (!BRN2_DEBUG)
-        unlink(brn2_buffer_name);
+        unlink(brn2_buffer.name);
     return;
 }
 
@@ -228,7 +228,6 @@ int main(int argc, char **argv) {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
-        static File brn2_buffer;
 #ifndef __WIN32__
         char *temp = "/tmp";
 #else
@@ -239,12 +238,11 @@ int main(int argc, char **argv) {
         }
 #endif
 
-        brn2_buffer_name = SNPRINTF(brn2_buffer.name,
-                                    "%s/%s", temp, "brn2.XXXXXX");
+        SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.XXXXXX");
 
-        if ((brn2_buffer.fd = mkstemp(brn2_buffer_name)) < 0) {
+        if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
             error("Error opening '%s': %s.\n",
-                  brn2_buffer_name, strerror(errno));
+                  brn2_buffer.name, strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -305,9 +303,9 @@ int main(int argc, char **argv) {
     }
 
     {
-        char *args_edit[] = { EDITOR, brn2_buffer_name, NULL };
-        char *args_shuf[] = { "shuf", brn2_buffer_name,
-                              "-o", brn2_buffer_name, NULL };
+        char *args_edit[] = { EDITOR, brn2_buffer.name, NULL };
+        char *args_shuf[] = { "shuf", brn2_buffer.name,
+                              "-o", brn2_buffer.name, NULL };
         (void) args_edit;
         (void) args_shuf;
 
@@ -317,8 +315,8 @@ int main(int argc, char **argv) {
                              "abcdefghijklmnopqrstuvwxyz"
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
-            util_command(ARRAY_LENGTH(args_shuf), args_shuf);
-            brn2_list_from_lines(new, brn2_buffer_name, false);
+            util_command(LENGTH(args_shuf), args_shuf);
+            brn2_list_from_lines(new, brn2_buffer.name, false);
 
             srand(42);
             for (uint32 i = 0; i < new->length; i += 1) {
@@ -343,8 +341,8 @@ int main(int argc, char **argv) {
         }
 #else
         while (true) {
-            util_command(ARRAY_LENGTH(args_edit), args_edit);
-            brn2_list_from_lines(new, brn2_buffer_name, false);
+            util_command(LENGTH(args_edit), args_edit);
+            brn2_list_from_lines(new, brn2_buffer.name, false);
 
             if (old->length != new->length) {
                 error("You are renaming "RED"%u"RESET" file%.*s "

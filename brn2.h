@@ -90,14 +90,15 @@
 
 #define INLINE BRN2_INLINE
 
+#ifndef LENGTH
+#define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
+#endif
 #define SNPRINTF(BUFFER, FORMAT, ...) \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (uint32)(sizeof(*(struct_object)) + (usize)(array_length)*sizeof(ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
-#define ARRAY_LENGTH(ARRAY_LENGTH) \
-    (sizeof(ARRAY_LENGTH) / sizeof(*ARRAY_LENGTH))
 
 #ifndef INTEGERS
 #define INTEGERS
@@ -183,7 +184,5 @@ void brn2_execute2(FileList *, FileList *,
                    uint32, uint32 *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
-
-void error(char *, ...);
 
 #endif

@@ -31,6 +31,10 @@
   #define COMPARE(A,B) brn2_compare(A,B)
 #endif
 
+#ifndef LENGTH
+#define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
+#endif
+
 typedef struct HeapNode {
     void *value;
     uint32 p_index;
@@ -219,8 +223,6 @@ compare_int(const void *a, const void *b) {
     return *aa - *bb;
 }
 static int32 dummy = INT32_MAX;
-
-#define LENGTH(X) (uint32)(sizeof(X) / sizeof(*X))
 
 static void
 test_sorting(uint32 n, uint32 p) {
