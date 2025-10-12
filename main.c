@@ -37,7 +37,6 @@ int (*print)(const char *, ...);
 static struct option options[] = {
     {"dir",     required_argument, NULL, 'd'},
     {"file",    required_argument, NULL, 'f'},
-    {"recurse", required_argument, NULL, 'r'},
     {"explict", no_argument,       NULL, 'e'},
     {"fatal",   no_argument,       NULL, 'F'},
     {"help",    no_argument,       NULL, 'h'},
@@ -53,7 +52,6 @@ enum {
     FILES_FROM_FILE,
     FILES_FROM_ARGS,
     FILES_FROM_DIR,
-    FILES_FROM_DIR_RECURSE,
 };
 
 static File brn2_buffer;
@@ -112,7 +110,7 @@ int main(int argc, char **argv) {
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv,
-                              "d:f:r:ceFhiqsva", options, NULL)) != -1) {
+                              "d:f:ceFhiqsva", options, NULL)) != -1) {
         switch (opt) {
         case 'd':
             mode = FILES_FROM_DIR;
@@ -125,12 +123,6 @@ int main(int argc, char **argv) {
             if (optarg == NULL)
                 brn2_usage(stderr);
             lines = optarg;
-            break;
-        case 'r':
-            mode = FILES_FROM_DIR_RECURSE;
-            if (optarg == NULL)
-                brn2_usage(stderr);
-            directory = optarg;
             break;
         case '?':
             brn2_usage(stderr);
@@ -183,14 +175,6 @@ int main(int argc, char **argv) {
         break;
     case FILES_FROM_DIR:
         brn2_list_from_dir(old, directory);
-        break;
-    case FILES_FROM_DIR_RECURSE:
-#ifdef __WIN32__
-        error("Finding files recursively is not implemented on windows.\n");
-        exit(EXIT_FAILURE);
-#else
-        brn2_list_from_dir_recurse(old, directory);
-#endif
         break;
     default:
         error("Unexpected mode: %d.\n", mode);
