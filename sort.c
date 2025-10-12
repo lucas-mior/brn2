@@ -273,15 +273,10 @@ test_sorting(uint32 n, uint32 p) {
         }
 
         for (uint32 i = 0; i < n; i += 1) {
-            if (i % 10 == 0)
-                printf("\n[%.*u] ", digits_i, i);
-            printf("%.*d ", digits_a, array[i]);
-
             if (i < (n-1)) {
                 assert(array[i] <= array[i + 1]);
             }
         }
-        printf("\n");
     }
 
     free(array);
