@@ -814,7 +814,6 @@ brn2_usage(FILE *stream) {
     "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
     "usage: brn2 [OPTIONS] -f <filename>\n"
     "usage: brn2 [OPTIONS] -d <dir>\n"
-    "usage: brn2 [OPTIONS] -r <dir>\n"
     "Rename filenames based on provided arguments.\n"
     "\n"
     "Options:\n"
