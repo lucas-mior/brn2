@@ -255,7 +255,7 @@ brn2_free_list(FileList *list) {
 
 #ifdef __linux__
 void
-brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
+brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     char *map;
     uint32 length = 0;
     uint32 map_size;
@@ -370,7 +370,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 }
 #else
 void
-brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
+brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     size_t length = 0;
     char buffer[BRN2_PATH_MAX];
     uint32 capacity = 128;
@@ -936,7 +936,7 @@ int main(void) {
 
     system(command);
     brn2_list_from_dir(list1, ".");
-    brn2_list_from_lines(list2, file, true);
+    brn2_list_from_file(list2, file, true);
 
     brn2_normalize_names(list1, NULL);
     brn2_normalize_names(list2, NULL);

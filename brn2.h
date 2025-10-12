@@ -167,7 +167,7 @@ void brn2_list_from_dir(FileList *, char *);
 #ifndef __WIN32__
 void brn2_list_from_dir_recurse(FileList *, char *);
 #endif
-void brn2_list_from_lines(FileList *, char *, bool);
+void brn2_list_from_file(FileList *, char *, bool);
 void brn2_list_from_args(FileList *, int, char **);
 void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);

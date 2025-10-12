@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 
     switch (mode) {
     case FILES_FROM_FILE:
-        brn2_list_from_lines(old, lines, true);
+        brn2_list_from_file(old, lines, true);
         break;
     case FILES_FROM_ARGS:
         brn2_list_from_args(old, argc - optind, &argv[optind]);
@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
             util_command(LENGTH(args_shuf), args_shuf);
-            brn2_list_from_lines(new, brn2_buffer.name, false);
+            brn2_list_from_file(new, brn2_buffer.name, false);
 
             srand(42);
             for (uint32 i = 0; i < new->length; i += 1) {
@@ -342,7 +342,7 @@ int main(int argc, char **argv) {
 #else
         while (true) {
             util_command(LENGTH(args_edit), args_edit);
-            brn2_list_from_lines(new, brn2_buffer.name, false);
+            brn2_list_from_file(new, brn2_buffer.name, false);
 
             if (old->length != new->length) {
                 error("You are renaming "RED"%u"RESET" file%.*s "
