@@ -374,7 +374,7 @@ void array_string(char *buffer, int32 size,
     int32 n = 0;
     SNPRINTF(format_string, "%s%%s", formatter);
 
-    for (int32 i = 0; i < (array_length-1); i += 1) {
+    for (int32 i = 0; i < (array_length - 1); i += 1) {
         int32 space = size - n;
         int32 m = snprintf(buffer + n, (ulong)space, "%s%s", array[i], sep);
         if (m <= 0) {
