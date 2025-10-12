@@ -274,6 +274,14 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
             error("Error in fstat(%s): %s.\n", filename, strerror(errno));
             exit(EXIT_FAILURE);
         }
+        if (lseek(fd, 0, SEEK_CUR) < 0 && errno == ESPIPE) {
+            error("File is not seekable.\n");
+            exit(EXIT_FAILURE);
+        }
+        if (!S_ISREG(lines_stat.st_mode)) {
+            error("Not a regular file.\n");
+            exit(EXIT_FAILURE);
+        }
         if (lines_stat.st_size <= 0) {
             error("Error: File size = %ld.\n", lines_stat.st_size);
             exit(EXIT_FAILURE);
