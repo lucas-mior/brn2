@@ -174,79 +174,6 @@ brn2_list_from_dir(FileList *list, char *directory) {
     return;
 }
 
-#ifndef __WIN32__
-void
-brn2_list_from_dir_recurse(FileList *list, char *directory) {
-    char* const paths[] = { directory, NULL };
-    FTS *file_system = NULL;
-    FTSENT *ent = NULL;
-    uint32 length = 0;
-    uint32 capacity = 64;
-    uint32 size;
-
-    list->files = xmalloc(capacity*sizeof(*(list->files)));
-
-    file_system = fts_open(paths, FTS_PHYSICAL|FTS_NOSTAT, NULL);
-    if (file_system == NULL) {
-        error("Error opening '%s' for traversal: %s.\n",
-              directory, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    errno = 0;
-
-    while ((ent = fts_read(file_system))) {
-        switch (ent->fts_info) {
-        case FTS_ERR:
-            error("Error in fts_read(%s): %s.\n",
-                  directory, strerror(ent->fts_errno));
-            exit(EXIT_FAILURE);
-        case FTS_D:
-            // fallthrough
-        case FTS_NSOK: {
-            char *name = ent->fts_path;
-            FileName **file_pointer;
-            FileName *file;
-
-            if (brn2_is_invalid_name(name))
-                continue;
-
-            if (length >= capacity) {
-                capacity *= 2;
-                list->files = xrealloc(list->files,
-                                       capacity*sizeof(*(list->files)));
-            }
-
-            file_pointer = &(list->files[length]);
-            size = STRUCT_ARRAY_SIZE(*file_pointer, char, ent->fts_pathlen + 2);
-            *file_pointer = arena_push(list->arena, ALIGN(size));
-            file = *file_pointer;
-
-            file->length = ent->fts_pathlen;
-            memcpy(file->name, name, file->length + 1);
-
-            length += 1;
-            break;
-        }
-        default:
-            break;
-        }
-    }
-    if (errno)
-        error("Error in fts_read(%s): %s.\n", directory, strerror(errno));
-    if (fts_close(file_system) < 0)
-        error("Error in fts_close(%s): %s.\n", directory, strerror(errno));
-
-    if (length == 0) {
-        error("Empty list. Exiting.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    list->files = xrealloc(list->files, length*sizeof(*(list->files)));
-    list->length = length;
-    return;
-}
-#endif
-
 void
 brn2_free_list(FileList *list) {
     free(list->files);
@@ -901,11 +828,10 @@ brn2_usage(FILE *stream) {
     "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
     "\n"
     "Arguments:\n"
-    "  No arguments              : Rename files of current working directory.\n"
-    "  1 or more arguments       : Rename filenames passed as arguments.\n"
-    "  -d <dir>, --dir=<dir>     : Rename files in directory.\n"
-    "  -f <file>, --file=<file>  : Rename filenames listed in this argument.\n"
-    "  -r <dir>, --recurse=<dir> : Recursively find files to rename.\n");
+    "  No arguments             : Rename files of current working directory.\n"
+    "  1 or more arguments      : Rename filenames passed as arguments.\n"
+    "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
+    "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
     exit((int)(stream != stdout));
 }
 
