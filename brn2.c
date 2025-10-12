@@ -38,6 +38,7 @@ static void *brn2_threads_work_normalization(void *);
 static void *brn2_threads_work_changes(void *);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
+static void brn2_list_from_lines(FileList *, char *, bool);
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -253,7 +254,7 @@ brn2_free_list(FileList *list) {
     return;
 }
 
-#ifdef __linux__
+#if 0
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     char *map;
@@ -262,6 +263,11 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     uint32 padding;
     int fd;
 
+    if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
+        error("Reading from stdin0...\n");
+        brn2_list_from_lines(list, filename, is_old);
+        return;
+    }
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening '%s' for reading: %s.\n",
               filename, strerror(errno));
@@ -371,21 +377,32 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 #else
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
+    brn2_list_from_lines(list, filename, is_old);
+    return;
+}
+#endif
+
+void
+brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     size_t length = 0;
     char buffer[BRN2_PATH_MAX];
     uint32 capacity = 128;
     FILE *lines;
     
-    if ((lines = fopen(filename, "r")) == NULL) {
-        error("Error opening '%s': %s.\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
+    if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
+        error("Reading from stdin...\n");
+        lines = stdin;
+    } else {
+        if ((lines = fopen(filename, "r")) == NULL) {
+            error("Error opening '%s': %s.\n", filename, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
     }
 
     list->files = xmalloc(capacity*sizeof(*(list->files)));
 
     errno = 0;
     while (fgets(buffer, sizeof(buffer), lines)) {
-        error("buffer=%s\n", buffer);
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         uint16 name_length;
@@ -406,6 +423,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
         file->length = name_length;
         memcpy(file->name, buffer, file->length + 1);
+        error("[%d]=%s\n", length, file->name);
 
         length += 1;
         errno = 0;
@@ -414,12 +432,12 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         error("Error reading from file: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-    fclose(lines);
+    /* if (lines != stdin) */
+    /*     fclose(lines); */
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
     return;
 }
-#endif
 
 bool
 brn2_is_invalid_name(char *filename) {
