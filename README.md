@@ -8,7 +8,6 @@ $ brn2 --help
 usage: brn2 [OPTIONS] -- <file1> <file2> ...
 usage: brn2 [OPTIONS] -f <filename>
 usage: brn2 [OPTIONS] -d <dir>
-usage: brn2 [OPTIONS] -r <dir>
 Rename filenames based on provided arguments.
 
 Options:
@@ -26,7 +25,6 @@ Arguments:
   1 or more arguments       : Rename filenames passed as arguments.
   -d <dir>, --dir=<dir>     : Rename files in directory.
   -f <file>, --file=<file>  : Rename filenames listed in this argument.
-  -r <dir>, --recurse=<dir> : Recursively find files to rename.
 ```
 
 brn2 will open the filenames in your text editor of choice.
@@ -34,8 +32,8 @@ You can then edit the filenames in the buffer and the changes
 will take place when you save and exit.
 - No arguments: filenames in current working directory
 - Argument supplied to `-f`: filenames listed in this argument
+  * Use - or /dev/stdin to read standard input
 - Argument supplied to `-d`: filenames of this dir
-- Argument supplied to `-r`: filenames recursively found on this dir
 - 2 or more arguments: filenames passed as arguments
 
 ### Notes
@@ -121,14 +119,15 @@ $ brn2 *.jpg
 ```
 $ brn2 -i a b c
 ```
-- Find and rename files (recursively):
+- Find and rename files:
 ```
-$ brn2 -r .
+$ find . | brn2 -f -
 ```
-- Find and rename jpg files in quiet mode (recursively, using `find`):
+- Find files, edit the rename buffer manually and then rename jpg files:
 ```
 $ find . -iname "*.jpg" > rename
-$ brn2 --quiet --file rename
+$ vim rename
+$ brn2 --file rename
 ```
 - Find and rename only regular files recursively while sorting them by
   modification date (using
@@ -136,8 +135,7 @@ $ brn2 --quiet --file rename
   [`sort(1)`](https://man7.org/linux/man-pages/man1/sort.1.html), and
   [`cut(1)`](https://man7.org/linux/man-pages/man1/cut.1.html)).
 ```
-$ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- > rename
-$ brn2 --file rename
+$ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -f -
 ```
  
 ## Changes over original brn
