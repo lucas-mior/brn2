@@ -408,14 +408,17 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         uint16 name_length;
         uint32 size;
 
+        name_length = strcspn(buffer, "\n");
+        buffer[name_length] = '\0';
+        if (brn2_is_invalid_name(buffer))
+            continue;
+
         if (length >= capacity) {
             capacity *= 2;
             list->files = xrealloc(list->files,
                                    capacity*sizeof(*(list->files)));
         }
 
-        name_length = strcspn(buffer, "\n");
-        buffer[name_length] = '\0';
         size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
 
         file_pointer = &(list->files[length]);
