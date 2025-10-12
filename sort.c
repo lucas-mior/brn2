@@ -241,7 +241,7 @@ test_sorting(uint32 n, uint32 p) {
         n_sub[i] = n/p + (n % p);
     }
 
-    printf("n_sub[P-1] = %u\n", n_sub[p-1]);
+    printf("n_sub[P - 1] = %u\n", n_sub[p - 1]);
 
     srand(42);
     for (uint32 i = 0; i < n; i += 1)
@@ -273,7 +273,7 @@ test_sorting(uint32 n, uint32 p) {
         }
 
         for (uint32 i = 0; i < n; i += 1) {
-            if (i < (n-1)) {
+            if (i < (n - 1)) {
                 assert(array[i] <= array[i + 1]);
             }
         }
