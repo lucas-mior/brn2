@@ -383,7 +383,9 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
     list->files = xmalloc(capacity*sizeof(*(list->files)));
 
-    while (!feof(lines)) {
+    errno = 0;
+    while (fgets(buffer, sizeof(buffer), lines)) {
+        error("buffer=%s\n", buffer);
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         uint16 name_length;
@@ -394,8 +396,6 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
             list->files = xrealloc(list->files,
                                    capacity*sizeof(*(list->files)));
         }
-        if (!fgets(buffer, sizeof(buffer), lines))
-            continue;
 
         name_length = strcspn(buffer, "\n");
         buffer[name_length] = '\0';
@@ -408,6 +408,11 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         memcpy(file->name, buffer, file->length + 1);
 
         length += 1;
+        errno = 0;
+    }
+    if (errno) {
+        error("Error reading from file: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     fclose(lines);
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
