@@ -63,7 +63,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         if (brn2_is_invalid_name(name))
             continue;
 
-        size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length+2);
+        size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
         *file_pointer = arena_push(list->arena, ALIGN(size));
         file = *file_pointer;
 
@@ -538,7 +538,7 @@ void
 brn2_slash_add(FileName *file) {
     if (file->name[file->length - 1] != '/') {
         file->name[file->length] = '/';
-        file->name[file->length+1] = '\0';
+        file->name[file->length + 1] = '\0';
         file->length += 1;
     }
     return;
@@ -927,14 +927,14 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
             printf(GREEN "%s == %s\n" RESET, file->name, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
-                memmove(&list->files[i], &list->files[i+1],
+                memmove(&list->files[i], &list->files[i + 1],
                         (list->length - i)*sizeof(*(list->files)));
             }
             return true;
         }
         if (verbose) {
             printf("%u / %u | %s != %s \n",
-                   i+1, list->length, list->files[i]->name, file->name);
+                   i + 1, list->length, list->files[i]->name, file->name);
         }
     }
     return false;
@@ -965,7 +965,7 @@ int main(void) {
     assert(list1->length == list2->length);
 
     for (uint32 i = 0; i < list1->length; i += 1) {
-        printf(RED"%u / %u\n"RESET, i+1, list1->length);
+        printf(RED"%u / %u\n"RESET, i + 1, list1->length);
         assert(contains_filename(list2, list1->files[i], list1->length < 9999));
     }
 

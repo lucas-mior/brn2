@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
             old->length -= 1;
             if (old->length <= i)
                 break;
-            memmove(file, file+1, (old->length - i)*sizeof(*file));
+            memmove(file, file + 1, (old->length - i)*sizeof(*file));
         }
     }
 
@@ -276,8 +276,8 @@ int main(int argc, char **argv) {
                 if (old->length <= i)
                     goto close;
 
-                memmove(*filep, *filep+1, (old->length - i)*sizeof(*filep));
-                memmove(index, index+1, (old->length - i)*sizeof(*index));
+                memmove(*filep, *filep + 1, (old->length - i)*sizeof(*filep));
+                memmove(index, index + 1, (old->length - i)*sizeof(*index));
                 filep = &(old->files[i]);
                 index = &(old->indexes[i]);
             }

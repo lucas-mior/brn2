@@ -278,7 +278,7 @@ util_command(const int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < argc - 1; ++i)
+    for (int i = 0; i < argc - 1; i += 1)
         len += strlen(argv[i]) + 3;
     cmdline = xmalloc(len);
 
