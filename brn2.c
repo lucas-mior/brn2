@@ -403,7 +403,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
     errno = 0;
     while (fgets(buffer, sizeof(buffer), lines)) {
-        FileName **file_pointer = &(list->files[length]);
+        FileName **file_pointer;
         FileName *file;
         uint16 name_length;
         uint32 size;
@@ -418,6 +418,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         buffer[name_length] = '\0';
         size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
 
+        file_pointer = &(list->files[length]);
         *file_pointer = arena_push(list->arena, ALIGN(size));
         file = *file_pointer;
 
@@ -432,8 +433,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("Error reading from file: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-    /* if (lines != stdin) */
-    /*     fclose(lines); */
+    if (lines != stdin)
+        fclose(lines);
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
     return;
