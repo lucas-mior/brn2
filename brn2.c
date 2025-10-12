@@ -254,7 +254,7 @@ brn2_free_list(FileList *list) {
     return;
 }
 
-#if 0
+#ifdef __linux__
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     char *map;
