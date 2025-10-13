@@ -322,8 +322,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     
     if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
         error("Reading from stdin...\n");
-        int fd = dup(STDIN_FILENO);
-        lines = fdopen(fd, "r");
+        lines = stdin;
     } else {
         if ((lines = fopen(filename, "r")) == NULL) {
             error("Error opening '%s': %s.\n", filename, strerror(errno));
@@ -371,7 +370,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("No files to rename.\n");
         exit(EXIT_FAILURE);
     }
-    fclose(lines);
+    if (lines != stdin)
+        fclose(lines);
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
     return;
