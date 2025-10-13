@@ -143,37 +143,36 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             right_ptr = hi - size;
 
             /* Here's the famous ``collapse the walls'' section of quicksort.
-            Gotta like those tight inner loops!  They are the main reason
-            that this algorithm runs much faster than others. */
+             * Gotta like those tight inner loops!  They are the main reason
+             * that this algorithm runs much faster than others. */
             do {
                 while (COMPARE((void *) left_ptr, (void *) mid) < 0)
-                left_ptr += size;
+                    left_ptr += size;
 
                 while (COMPARE((void *) mid, (void *) right_ptr) < 0)
-                right_ptr -= size;
+                    right_ptr -= size;
 
-                if (left_ptr < right_ptr)
-                {
-                SWAP_BYTES (left_ptr, right_ptr, size);
-                if (mid == left_ptr)
-                mid = right_ptr;
-                else if (mid == right_ptr)
-                mid = left_ptr;
-                left_ptr += size;
-                right_ptr -= size;
-                }
-                else if (left_ptr == right_ptr)
-                {
-                left_ptr += size;
-                right_ptr -= size;
-                break;
+                if (left_ptr < right_ptr) {
+                    SWAP_BYTES (left_ptr, right_ptr, size);
+
+                    if (mid == left_ptr)
+                        mid = right_ptr;
+                    else if (mid == right_ptr)
+                        mid = left_ptr;
+
+                    left_ptr += size;
+                    right_ptr -= size;
+                } else if (left_ptr == right_ptr) {
+                    left_ptr += size;
+                    right_ptr -= size;
+                    break;
                 }
             } while (left_ptr <= right_ptr);
 
             /* Set up pointers for next iteration.  First determine whether
-            left and right partitions are below the threshold size.  If so,
-            ignore one or both.  Otherwise, push the larger partition's
-            bounds on the stack and continue sorting the smaller one. */
+             * left and right partitions are below the threshold size.  If so,
+             * ignore one or both.  Otherwise, push the larger partition's
+             * bounds on the stack and continue sorting the smaller one. */
 
             if ((size_t) (right_ptr - lo) <= max_thresh) {
                 if ((size_t) (hi - left_ptr) <= max_thresh)
@@ -198,10 +197,10 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
     }
 
     /* Once the BASE_PTR array is partially sorted by quicksort the rest
-    is completely sorted using insertion sort, since this is efficient
-    for partitions below MAX_THRESH size. BASE_PTR points to the beginning
-    of the array to sort, and END_PTR points at the very last element in
-    the array (*not* one beyond it!). */
+     * is completely sorted using insertion sort, since this is efficient
+     * for partitions below MAX_THRESH size. BASE_PTR points to the beginning
+     * of the array to sort, and END_PTR points at the very last element in
+     * the array (*not* one beyond it!). */
     {
         char *const end_ptr = &base_ptr[size*(total_elems - 1)];
         char *tmp_ptr = base_ptr;
