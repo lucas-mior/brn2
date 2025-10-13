@@ -192,7 +192,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     int fd;
 
     if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
-        error("Reading from stdin0...\n");
+        error("Reading from stdin...\n");
         brn2_list_from_lines(list, filename, is_old);
         return;
     }
@@ -364,6 +364,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     }
     if (errno) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    if (length == 0) {
+        error("No files to rename.\n");
         exit(EXIT_FAILURE);
     }
     if (lines != stdin)
