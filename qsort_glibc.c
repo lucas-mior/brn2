@@ -129,13 +129,13 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 
             do {
                 if (COMPARE((void *)mid, (void *)lo) < 0)
-                    SWAP_BYTES (mid, lo, size);
+                    SWAP_BYTES(mid, lo, size);
                 if (COMPARE((void *)hi, (void *)mid) < 0)
-                    SWAP_BYTES (mid, hi, size);
+                    SWAP_BYTES(mid, hi, size);
                 else
                     break;
                 if (COMPARE((void *)mid, (void *)lo) < 0)
-                    SWAP_BYTES (mid, lo, size);
+                    SWAP_BYTES(mid, lo, size);
             } while (0);
 
             left_ptr  = lo + size;
@@ -152,7 +152,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
                     right_ptr -= size;
 
                 if (left_ptr < right_ptr) {
-                    SWAP_BYTES (left_ptr, right_ptr, size);
+                    SWAP_BYTES(left_ptr, right_ptr, size);
 
                     if (mid == left_ptr)
                         mid = right_ptr;
@@ -216,7 +216,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         }
 
         if (tmp_ptr != base_ptr)
-            SWAP_BYTES (tmp_ptr, base_ptr, size);
+            SWAP_BYTES(tmp_ptr, base_ptr, size);
 
         /* Insertion sort, running from left-hand-side up to right-hand-side. */
 
