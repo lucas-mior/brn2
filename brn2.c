@@ -238,7 +238,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     map = mmap(NULL, map_size,
                      PROT_READ | PROT_WRITE, MAP_PRIVATE,
                      fd, 0);
-
     if (map == MAP_FAILED) {
         error("Error mapping history file to memory: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
