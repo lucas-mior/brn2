@@ -27,9 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "brn2.h"
-#include "util.c"
-
 #ifndef COMPARE
 #define COMPARE compare_func 
 #endif
@@ -248,6 +245,9 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 }
 
 #ifdef TESTING_qsort_glibc
+
+#include "brn2.h"
+#include "util.c"
 
 #define MAXI 10000
 
