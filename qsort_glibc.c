@@ -125,7 +125,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
              * skips a comparison for both the left and right in
              * the while loops. */
 
-            char *mid = lo + size*((hi - lo) / size >> 1);
+            char *mid = lo + size*((size_t)(hi - lo) / size >> 1);
 
             do {
                 if (COMPARE((void *)mid, (void *)lo) < 0)
