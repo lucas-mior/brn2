@@ -432,7 +432,7 @@ brn2_threads_work_normalization(void *arg) {
 
         if (old_list) {
             struct stat file_stat;
-            if (stat(file->name, &file_stat) < 0) {
+            if (lstat(file->name, &file_stat) < 0) {
                 if (errno != ENOENT) {
                     error("Error in stat('%s'): %s.\n",
                           file->name, strerror(errno));
