@@ -115,7 +115,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         stack_node stack[STACK_SIZE];
         stack_node *top = stack;
 
-        PUSH (NULL, NULL);
+        PUSH(NULL, NULL);
 
         while (STACK_NOT_EMPTY) {
             char *left_ptr;
@@ -187,11 +187,11 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
                 hi = right_ptr;
             } else if ((right_ptr - lo) > (hi - left_ptr)) {
                 /* Push larger left partition indices. */
-                PUSH (lo, right_ptr);
+                PUSH(lo, right_ptr);
                 lo = left_ptr;
             } else {
                 /* Push larger right partition indices. */
-                PUSH (left_ptr, hi);
+                PUSH(left_ptr, hi);
                 hi = right_ptr;
             }
         }
