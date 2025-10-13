@@ -10,7 +10,7 @@ test
 build
 debug
 benchmark
-perf
+# perf
 valgrind
 check
 cross x86_64-windows-gnu
@@ -183,12 +183,12 @@ case "$target" in
     create_temp_files
 
     cd /tmp/brn2 || exit
-    set -x
+    trace_on
     perf record -b -o $dir/perf.data $dir/$exe -s -q -d .
     cd "$dir"
     perf annotate $dir/$exe
     perf report -v perf.data
-    set +x
+    trace_off
     exit
     ;;
 "check")
