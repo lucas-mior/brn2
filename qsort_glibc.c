@@ -62,8 +62,8 @@ typedef struct {
 /* The stack needs log (total_elements) entries (we could even subtract
    log(MAX_THRESH)).  Since total_elements has type size_t, we get as
    upper bound for log (total_elements):
-   bits per byte (CHAR_BIT) * sizeof(size_t).  */
-#define STACK_SIZE      (CHAR_BIT * sizeof (size_t))
+   bits per byte (CHAR_BIT)*sizeof(size_t).  */
+#define STACK_SIZE      (CHAR_BIT*sizeof(size_t))
 #define PUSH(low, high) ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
 #define POP(low, high)  ((void) (--top, (low = top->lo), (high = top->hi)))
 #define STACK_NOT_EMPTY (stack < top)
@@ -76,7 +76,7 @@ typedef struct {
       next array partition to sort.  To save time, this maximum amount
       of space required to store an array of SIZE_MAX is allocated on the
       stack.  Assuming a 32-bit (64 bit) integer for size_t, this needs
-      only 32 * sizeof(stack_node) == 256 bytes (for 64 bit: 1024 bytes).
+      only 32*sizeof(stack_node) == 256 bytes (for 64 bit: 1024 bytes).
       Pretty cheap, actually.
 
    2. Chose the pivot element using a median-of-three decision tree.
@@ -96,13 +96,13 @@ typedef struct {
 #include <stdlib.h>
 typedef int (*__compar_d_fn_t2) (const void *, const void *);
 
-void
+static void
 qsort_glibc(void *const pbase, size_t total_elems, size_t size,
            __compar_d_fn_t2 compare_func) {
     (void) compare_func;
-    char *base_ptr = (char *) pbase;
+    char *base_ptr = pbase;
 
-    const size_t max_thresh = MAX_THRESH * size;
+    const size_t max_thresh = MAX_THRESH*size;
 
     if (total_elems == 0) {
         /* Avoid lossage with unsigned arithmetic below.  */
@@ -111,7 +111,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 
     if (total_elems > MAX_THRESH) {
         char *lo = base_ptr;
-        char *hi = &lo[size * (total_elems - 1)];
+        char *hi = &lo[size*(total_elems - 1)];
         stack_node stack[STACK_SIZE];
         stack_node *top = stack;
 
@@ -127,7 +127,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             skips a comparison for both the LEFT_PTR and RIGHT_PTR in
             the while loops. */
 
-            char *mid = lo + size * ((hi - lo) / size >> 1);
+            char *mid = lo + size*((hi - lo) / size >> 1);
 
             if (COMPARE((void *) mid, (void *) lo) < 0)
                 SWAP_BYTES (mid, lo, size);
@@ -203,7 +203,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
     of the array to sort, and END_PTR points at the very last element in
     the array (*not* one beyond it!). */
     {
-        char *const end_ptr = &base_ptr[size * (total_elems - 1)];
+        char *const end_ptr = &base_ptr[size*(total_elems - 1)];
         char *tmp_ptr = base_ptr;
         char *thresh = min(end_ptr, base_ptr + max_thresh);
         char *run_ptr;
