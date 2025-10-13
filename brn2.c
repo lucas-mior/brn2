@@ -230,7 +230,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
-        error("Error in ftruncate(%s): %s.\n", filename, strerror(errno));
+        error("Error in ftruncate(%s, %zu): %s.\n",
+              filename, strerror(errno), map_size);
         exit(EXIT_FAILURE);
     }
 
@@ -293,7 +294,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error truncating '%s': %s.\n", filename, strerror(errno));
+        error("Error in ftruncate(%s, %s): %s.\n",
+              filename, strerror(errno), map_size - padding);
         exit(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
