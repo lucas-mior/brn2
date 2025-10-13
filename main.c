@@ -280,7 +280,8 @@ int main(int argc, char **argv) {
         close:
         write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
         if (close(brn2_buffer.fd) < 0) {
-            error("Error closing:%s\n", strerror(errno));
+            error("Error closing buffer: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
         }
         brn2_buffer.fd = -1;
         atexit(delete_brn2_buffer);
