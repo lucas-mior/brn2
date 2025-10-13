@@ -208,8 +208,8 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         char *run_ptr;
 
         /* Find smallest element in first threshold and place it at the
-        array's beginning.  This is the smallest array element,
-        and the operation speeds up insertion sort's inner loop. */
+         * array's beginning.  This is the smallest array element,
+         * and the operation speeds up insertion sort's inner loop. */
 
         for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
             if (COMPARE((void *) run_ptr, (void *) tmp_ptr) < 0)
@@ -219,7 +219,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         if (tmp_ptr != base_ptr)
             SWAP_BYTES (tmp_ptr, base_ptr, size);
 
-        /* Insertion sort, running from left-hand-side up to right-hand-side.  */
+        /* Insertion sort, running from left-hand-side up to right-hand-side. */
 
         run_ptr = base_ptr + size;
         while ((run_ptr += size) <= end_ptr) {
