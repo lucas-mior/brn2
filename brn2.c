@@ -486,7 +486,7 @@ void *
 brn2_threads_work_sort(void *arg) {
     Slice *slice = arg;
     FileName **files = &(slice->old_list->files[slice->start]);
-    qsort(files, slice->end - slice->start, sizeof(*files), brn2_compare);
+    qsort_glibc(files, slice->end - slice->start, sizeof(*files), brn2_compare);
     return 0;
 }
 
