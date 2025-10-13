@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "qsort_glibc.c"
 #include "util.c"
 
 #ifdef TESTING_sort

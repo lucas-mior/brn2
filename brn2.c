@@ -32,6 +32,7 @@
 #include "hash.c"
 #include "util.c"
 #include "arena.c"
+#include "qsort_glibc.c"
 
 static void *brn2_threads_work_hashes(void *);
 static void *brn2_threads_work_normalization(void *);
