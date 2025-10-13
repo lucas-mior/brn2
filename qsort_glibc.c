@@ -130,10 +130,12 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             do {
                 if (COMPARE((void *)mid, (void *)lo) < 0)
                     SWAP_BYTES(mid, lo, size);
+
                 if (COMPARE((void *)hi, (void *)mid) < 0)
                     SWAP_BYTES(mid, hi, size);
                 else
                     break;
+
                 if (COMPARE((void *)mid, (void *)lo) < 0)
                     SWAP_BYTES(mid, lo, size);
             } while (0);
