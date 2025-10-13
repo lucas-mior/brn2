@@ -39,13 +39,13 @@
 /* Byte-wise swap two items of size SIZE. */
 #define SWAP_BYTES(a, b, size)                    \
     do {                                    \
-        size_t __size = (size);             \
-        char *__a = (a), *__b = (b);        \
+        size_t SWAPsize = (size);             \
+        char *SWAPa = (a), *SWAPb = (b);        \
         do {                                \
-            char __tmp = *__a;              \
-            *__a++ = *__b;                  \
-            *__b++ = __tmp;                 \
-        } while (--__size > 0);             \
+            char SWAPtmp = *SWAPa;              \
+            *SWAPa++ = *SWAPb;                  \
+            *SWAPb++ = SWAPtmp;                 \
+        } while (--SWAPsize > 0);             \
     } while (0)
 
 /* Discontinue quicksort algorithm when partition gets below this size.
@@ -94,15 +94,14 @@ typedef struct {
       stack size is needed (actually O(1) in this case)!  */
 
 #include <stdlib.h>
-typedef int (*__compar_d_fn_t2) (const void *, const void *);
+typedef int (*compar_d_fn_t2) (const void *, const void *);
 
 static void
 qsort_glibc(void *const pbase, size_t total_elems, size_t size,
-           __compar_d_fn_t2 compare_func) {
-    (void) compare_func;
+           compar_d_fn_t2 compare_func) {
     char *base_ptr = pbase;
-
     const size_t max_thresh = MAX_THRESH*size;
+    (void) compare_func;
 
     if (total_elems == 0) {
         /* Avoid lossage with unsigned arithmetic below.  */
@@ -129,15 +128,16 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 
             char *mid = lo + size*((hi - lo) / size >> 1);
 
-            if (COMPARE((void *)mid, (void *)lo) < 0)
-                SWAP_BYTES (mid, lo, size);
-            if (COMPARE((void *)hi, (void *)mid) < 0)
-                SWAP_BYTES (mid, hi, size);
-            else
-                goto jump_over;
-            if (COMPARE((void *)mid, (void *)lo) < 0)
-                SWAP_BYTES (mid, lo, size);
-            jump_over:;
+            do {
+                if (COMPARE((void *)mid, (void *)lo) < 0)
+                    SWAP_BYTES (mid, lo, size);
+                if (COMPARE((void *)hi, (void *)mid) < 0)
+                    SWAP_BYTES (mid, hi, size);
+                else
+                    break;
+                if (COMPARE((void *)mid, (void *)lo) < 0)
+                    SWAP_BYTES (mid, lo, size);
+            } while (0);
 
             left_ptr  = lo + size;
             right_ptr = hi - size;
