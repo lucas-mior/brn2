@@ -32,6 +32,8 @@
 #include "hash.c"
 #include "util.c"
 #include "arena.c"
+
+#define COMPARE(A,B) brn2_compare(A,B)
 #include "qsort_glibc.c"
 
 static void *brn2_threads_work_hashes(void *);
