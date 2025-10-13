@@ -56,8 +56,6 @@
   )
 #endif
 
-
-
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
   #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
 #else

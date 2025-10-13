@@ -20,7 +20,6 @@
 
 #include "brn2.h"
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "util.c"
