@@ -131,7 +131,7 @@ case "$target" in
 
         trace_on
         if $cmdline; then
-            /tmp/$src.exe || gdb /tmp/$src.exe
+            /tmp/$src.exe || gdb /tmp/$src.exe -ex run
         else
             trace_off
             exit 1
