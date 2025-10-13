@@ -37,6 +37,7 @@ CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm"
 
 CC=${CC:-cc}
+CC=clang
 
 case "$target" in
 "debug")
