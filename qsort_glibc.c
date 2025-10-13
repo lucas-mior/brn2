@@ -121,10 +121,10 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             char *right_ptr;
 
             /* Select median value from among LO, MID, and HI. Rearrange
-            LO and HI so the three values are sorted. This lowers the
-            probability of picking a pathological pivot value and
-            skips a comparison for both the LEFT_PTR and RIGHT_PTR in
-            the while loops. */
+             * LO and HI so the three values are sorted. This lowers the
+             * probability of picking a pathological pivot value and
+             * skips a comparison for both the LEFT_PTR and RIGHT_PTR in
+             * the while loops. */
 
             char *mid = lo + size*((hi - lo) / size >> 1);
 
