@@ -66,7 +66,6 @@ typedef struct {
 #define STACK_SIZE      (CHAR_BIT*sizeof(size_t))
 #define PUSH(low, high) ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
 #define POP(low, high)  ((void) (--top, (low = top->lo), (high = top->hi)))
-#define STACK_NOT_EMPTY (stack < top)
 
 
 /* Order size using quicksort.  This implementation incorporates
@@ -116,7 +115,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 
         PUSH(NULL, NULL);
 
-        while (STACK_NOT_EMPTY) {
+        while (stack < top) {
             char *left_ptr;
             char *right_ptr;
 
