@@ -6,13 +6,13 @@ alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 targets='
-# test
-# build
-# debug
-# benchmark
-# perf
-# valgrind
-# check
+test
+build
+debug
+benchmark
+perf
+valgrind
+check
 cross x86_64-windows-gnu
 cross x86_64-macos
 cross aarch64-macos
@@ -152,7 +152,7 @@ case "$target" in
     ;;
 esac
 
-tempfiles() {
+create_temp_files() {
     tmpdir="/tmp/brn2"
     rm -rf "$tmpdir"
     mkdir -p "$tmpdir"
@@ -163,7 +163,7 @@ tempfiles() {
 
 case "$target" in
 "benchmark") 
-    tempfiles
+    create_temp_files
 
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
     $dir/$exe -s -q -d .
@@ -180,12 +180,12 @@ case "$target" in
     exit
     ;;
 "perf")
-    tempfiles
+    create_temp_files
 
     perf record -b -o $dir/perf.data $dir/$exe -s -q -d .
     perf annotate -d $dir/$exe
     cd "$dir"
-    perf report
+    perf report -v perf.data
     exit
     ;;
 "check")
@@ -198,6 +198,6 @@ trace_off
 if [ "$target" = "test_all" ]; then
     printf '%s\n' "$targets" | while IFS= read -r t; do
         echo "$t" | grep -Eq "^(# |$)" && continue
-        $0 $t
+        $0 $t || exit
     done
 fi
