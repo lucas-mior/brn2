@@ -116,13 +116,13 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         PUSH(NULL, NULL);
 
         while (stack < top) {
-            char *left_ptr;
-            char *right_ptr;
+            char *left;
+            char *right;
 
             /* Select median value from among LO, MID, and HI. Rearrange
              * LO and HI so the three values are sorted. This lowers the
              * probability of picking a pathological pivot value and
-             * skips a comparison for both the LEFT_PTR and RIGHT_PTR in
+             * skips a comparison for both the left and right in
              * the while loops. */
 
             char *mid = lo + size*((hi - lo) / size >> 1);
@@ -140,59 +140,59 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
                     SWAP_BYTES(mid, lo, size);
             } while (0);
 
-            left_ptr  = lo + size;
-            right_ptr = hi - size;
+            left  = lo + size;
+            right = hi - size;
 
             /* Here's the famous ``collapse the walls'' section of quicksort.
              * Gotta like those tight inner loops!  They are the main reason
              * that this algorithm runs much faster than others. */
             do {
-                while (COMPARE((void *)left_ptr, (void *)mid) < 0)
-                    left_ptr += size;
+                while (COMPARE((void *)left, (void *)mid) < 0)
+                    left += size;
 
-                while (COMPARE((void *)mid, (void *)right_ptr) < 0)
-                    right_ptr -= size;
+                while (COMPARE((void *)mid, (void *)right) < 0)
+                    right -= size;
 
-                if (left_ptr < right_ptr) {
-                    SWAP_BYTES(left_ptr, right_ptr, size);
+                if (left < right) {
+                    SWAP_BYTES(left, right, size);
 
-                    if (mid == left_ptr)
-                        mid = right_ptr;
-                    else if (mid == right_ptr)
-                        mid = left_ptr;
+                    if (mid == left)
+                        mid = right;
+                    else if (mid == right)
+                        mid = left;
 
-                    left_ptr += size;
-                    right_ptr -= size;
-                } else if (left_ptr == right_ptr) {
-                    left_ptr += size;
-                    right_ptr -= size;
+                    left += size;
+                    right -= size;
+                } else if (left == right) {
+                    left += size;
+                    right -= size;
                     break;
                 }
-            } while (left_ptr <= right_ptr);
+            } while (left <= right);
 
             /* Set up pointers for next iteration.  First determine whether
              * left and right partitions are below the threshold size.  If so,
              * ignore one or both.  Otherwise, push the larger partition's
              * bounds on the stack and continue sorting the smaller one. */
 
-            if ((size_t) (right_ptr - lo) <= max_thresh) {
-                if ((size_t) (hi - left_ptr) <= max_thresh)
+            if ((size_t) (right - lo) <= max_thresh) {
+                if ((size_t) (hi - left) <= max_thresh)
                 /* Ignore both small partitions. */
                 POP(lo, hi);
                 else
                 /* Ignore small left partition. */
-                lo = left_ptr;
-            } else if ((size_t) (hi - left_ptr) <= max_thresh) {
+                lo = left;
+            } else if ((size_t) (hi - left) <= max_thresh) {
                 /* Ignore small right partition. */
-                hi = right_ptr;
-            } else if ((right_ptr - lo) > (hi - left_ptr)) {
+                hi = right;
+            } else if ((right - lo) > (hi - left)) {
                 /* Push larger left partition indices. */
-                PUSH(lo, right_ptr);
-                lo = left_ptr;
+                PUSH(lo, right);
+                lo = left;
             } else {
                 /* Push larger right partition indices. */
-                PUSH(left_ptr, hi);
-                hi = right_ptr;
+                PUSH(left, hi);
+                hi = right;
             }
         }
     }
