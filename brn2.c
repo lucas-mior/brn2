@@ -323,14 +323,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
         int stdin_dup;
         error("Reading from stdin...\n");
-        if ((stdin_dup = dup(STDIN_FILENO)) < 0) {
-            error("Error duplicating STDIN_FILENO: %s.\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        if ((lines = fdopen(stdin_dup, "r")) == NULL) {
-            error("Error opening duplicated stdin: %s.\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
+        stdin_dup = dup(STDIN_FILENO);
+        lines = fdopen(stdin_dup, "r");
     } else {
         if ((lines = fopen(filename, "r")) == NULL) {
             error("Error opening '%s': %s.\n", filename, strerror(errno));
