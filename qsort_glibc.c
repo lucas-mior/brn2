@@ -129,13 +129,13 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 
             char *mid = lo + size*((hi - lo) / size >> 1);
 
-            if (COMPARE((void *) mid, (void *) lo) < 0)
+            if (COMPARE((void *)mid, (void *)lo) < 0)
                 SWAP_BYTES (mid, lo, size);
-            if (COMPARE((void *) hi, (void *) mid) < 0)
+            if (COMPARE((void *)hi, (void *)mid) < 0)
                 SWAP_BYTES (mid, hi, size);
             else
                 goto jump_over;
-            if (COMPARE((void *) mid, (void *) lo) < 0)
+            if (COMPARE((void *)mid, (void *)lo) < 0)
                 SWAP_BYTES (mid, lo, size);
             jump_over:;
 
@@ -146,10 +146,10 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
              * Gotta like those tight inner loops!  They are the main reason
              * that this algorithm runs much faster than others. */
             do {
-                while (COMPARE((void *) left_ptr, (void *) mid) < 0)
+                while (COMPARE((void *)left_ptr, (void *)mid) < 0)
                     left_ptr += size;
 
-                while (COMPARE((void *) mid, (void *) right_ptr) < 0)
+                while (COMPARE((void *)mid, (void *)right_ptr) < 0)
                     right_ptr -= size;
 
                 if (left_ptr < right_ptr) {
@@ -212,7 +212,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
          * and the operation speeds up insertion sort's inner loop. */
 
         for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
-            if (COMPARE((void *) run_ptr, (void *) tmp_ptr) < 0)
+            if (COMPARE((void *)run_ptr, (void *)tmp_ptr) < 0)
                 tmp_ptr = run_ptr;
         }
 
@@ -224,7 +224,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         run_ptr = base_ptr + size;
         while ((run_ptr += size) <= end_ptr) {
             tmp_ptr = run_ptr - size;
-            while (COMPARE((void *) run_ptr, (void *) tmp_ptr) < 0)
+            while (COMPARE((void *)run_ptr, (void *)tmp_ptr) < 0)
                 tmp_ptr -= size;
 
             tmp_ptr += size;
