@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <time.h>
 
 #ifdef __WIN32__
   #include <windows.h>
@@ -115,6 +116,7 @@ static void util_die_notify(const char *, ...) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
 static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
+static long atoi2(char *);
 static size_t util_page_size = 0;
 
 #ifdef __WIN32__
@@ -654,10 +656,16 @@ itoa2(long num, char *str) {
     return str;
 }
 
+long
+atoi2(char *str) {
+    return atoi(str);
+}
+
 #ifdef TESTING_util
 #include <assert.h>
 
 int main(void) {
+    char buffer[32];
     void *p1 = xmalloc(SIZEMB(1));
     void *p2 = xcalloc(10, SIZEMB(1));
     char *p3;
@@ -669,6 +677,12 @@ int main(void) {
     p3 = xstrdup(p1);
 
     error("%s == %s is working? %b\n", string, p3, !strcmp(string, p3));
+
+    srand(time(NULL));
+    for (int i = 0; i < 10; i += 1) {
+        int n = rand() - RAND_MAX/2;
+        assert(atoi2(itoa2(n, buffer)) == n);
+    }
 
     free(p1);
     free(p2);
