@@ -312,7 +312,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
 void
 brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
-    size_t length = 0;
+    uint32 length = 0;
     char buffer[BRN2_PATH_MAX];
     uint32 capacity = 128;
     FILE *lines;
@@ -336,7 +336,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         uint16 name_length;
         uint32 size;
 
-        name_length = strcspn(buffer, "\n");
+        name_length = (uint16)strcspn(buffer, "\n");
         buffer[name_length] = '\0';
         if (brn2_is_invalid_name(buffer))
             continue;
@@ -355,7 +355,6 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         file->length = name_length;
         memcpy(file->name, buffer, file->length + 1);
-        error("[%d]=%s\n", length, file->name);
 
         length += 1;
         errno = 0;
