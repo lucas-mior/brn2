@@ -341,7 +341,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         name_length = (uint16)strcspn(buffer, "\n");
         buffer[name_length] = '\0';
-        if (brn2_is_invalid_name(buffer))
+        if (is_old && brn2_is_invalid_name(buffer))
             continue;
 
         if (length >= capacity) {
