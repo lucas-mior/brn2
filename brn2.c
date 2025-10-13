@@ -321,9 +321,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     FILE *lines;
     
     if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
+        int stdin_dup;
         error("Reading from stdin...\n");
-        int fd = dup(STDIN_FILENO);
-        lines = fdopen(fd, "r");
+        stdin_dup = dup(STDIN_FILENO);
+        lines = fdopen(stdin_dup, "r");
     } else {
         if ((lines = fopen(filename, "r")) == NULL) {
             error("Error opening '%s': %s.\n", filename, strerror(errno));
