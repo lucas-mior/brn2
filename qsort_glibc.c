@@ -243,6 +243,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             }
         }
     }
+    return;
 }
 
 #ifdef TESTING_qsort_glibc
