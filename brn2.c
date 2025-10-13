@@ -363,7 +363,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         errno = 0;
     }
     if (errno) {
-        error("Error reading from file: %s.\n", strerror(errno));
+        error("Error reading from %s: %s.\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (lines != stdin)
