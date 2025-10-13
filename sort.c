@@ -30,7 +30,9 @@
   #define COMPARE(A,B) brn2_compare(A,B)
 #endif
 
+#ifndef __WIN32__
 #include "qsort_glibc.c"
+#endif
 
 #ifndef LENGTH
 #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))

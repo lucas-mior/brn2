@@ -33,8 +33,10 @@
 #include "util.c"
 #include "arena.c"
 
+#ifndef __WIN32__
 #define COMPARE(A,B) brn2_compare(A,B)
 #include "qsort_glibc.c"
+#endif
 
 static void *brn2_threads_work_hashes(void *);
 static void *brn2_threads_work_normalization(void *);
@@ -108,7 +110,7 @@ int scandir(const char *dir, struct dirent ***namelist,
             list = xrealloc(list, capacity*sizeof(*list));
         }
         list[count] = ent;
-        count += 1
+        count += 1;
     } while (FindNextFileA(hFind, &find_data));
     FindClose(hFind);
 
@@ -792,6 +794,7 @@ brn2_execute2(FileList *old, FileList *new,
     }
 #else
     (void) newname_index_on_oldlist;
+    (void) oldfile;
     if (newname_exists) {
         error("Error renaming "RED"'%s'"RESET" to '%s': File already exists.\n",
               oldname, newname);

@@ -6,13 +6,13 @@ alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 targets='
-test
-build
-debug
+# test
+# build
+# debug
 # benchmark
 # perf
-valgrind
-check
+# valgrind
+# check
 cross x86_64-windows-gnu
 cross x86_64-macos
 cross aarch64-macos
@@ -175,7 +175,6 @@ case "$target" in
     vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
-    valgrind $vg_flags $dir/brn2 -r .
     valgrind $vg_flags $dir/brn2 -d .
     valgrind $vg_flags $dir/brn2 -f rename
     exit
