@@ -177,7 +177,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             if ((size_t) (right_ptr - lo) <= max_thresh) {
                 if ((size_t) (hi - left_ptr) <= max_thresh)
                 /* Ignore both small partitions. */
-                POP (lo, hi);
+                POP(lo, hi);
                 else
                 /* Ignore small left partition. */
                 lo = left_ptr;
