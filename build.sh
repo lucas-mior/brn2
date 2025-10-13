@@ -182,10 +182,13 @@ case "$target" in
 "perf")
     create_temp_files
 
+    cd /tmp/brn2 || exit
+    set -x
     perf record -b -o $dir/perf.data $dir/$exe -s -q -d .
-    perf annotate -d $dir/$exe
     cd "$dir"
+    perf annotate $dir/$exe
     perf report -v perf.data
+    set +x
     exit
     ;;
 "check")
