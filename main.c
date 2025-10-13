@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
             FileName *file = *filep;
             uint32 *index = &(old->indexes[i]);
             bool contains_newline;
-            usize written;
+            usize buffered;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
                    || !hash_map_insert_pre_calc(oldlist_map, file->name,
@@ -266,9 +266,9 @@ int main(int argc, char **argv) {
                 index = &(old->indexes[i]);
             }
 
-            written = (usize)(pointer - write_buffer);
-            if (written >= BRN2_PATH_MAX) {
-                write(brn2_buffer.fd, write_buffer, written);
+            buffered = (usize)(pointer - write_buffer);
+            if (buffered >= BRN2_PATH_MAX) {
+                write(brn2_buffer.fd, write_buffer, buffered);
                 pointer = write_buffer;
             }
 
