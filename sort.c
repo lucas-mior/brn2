@@ -22,14 +22,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "qsort_glibc.c"
 #include "util.c"
 
 #ifdef TESTING_sort
-  #define COMPARE(A,B) compare(A,B)
+  #define COMPARE(A,B) compare_func(A,B)
 #else
   #define COMPARE(A,B) brn2_compare(A,B)
 #endif
+
+#include "qsort_glibc.c"
 
 #ifndef LENGTH
 #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
@@ -63,8 +64,8 @@ sort_shuffle(void *array, usize n, usize size) {
 
 static void
 sort_heapify(HeapNode *heap, uint32 p, uint32 i,
-             int32 (*compare)(const void *a, const void *b)) {
-    (void) compare;
+             int32 (*compare_func)(const void *a, const void *b)) {
+    (void) compare_func;
     while (true) {
         uint32 smallest = i;
         uint32 left = 2*i + 1;

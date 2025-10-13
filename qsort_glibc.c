@@ -30,6 +30,10 @@
 #include "brn2.h"
 #include "util.c"
 
+#ifndef COMPARE
+#define COMPARE compare_func 
+#endif
+
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
 /* Byte-wise swap two items of size SIZE. */
@@ -94,7 +98,8 @@ typedef int (*__compar_d_fn_t2) (const void *, const void *);
 
 void
 qsort_glibc(void *const pbase, size_t total_elems, size_t size,
-           __compar_d_fn_t2 cmp) {
+           __compar_d_fn_t2 compare_func) {
+    (void) compare_func;
     char *base_ptr = (char *) pbase;
 
     const size_t max_thresh = MAX_THRESH * size;
@@ -124,13 +129,13 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
 
             char *mid = lo + size * ((hi - lo) / size >> 1);
 
-            if ((*cmp) ((void *) mid, (void *) lo) < 0)
+            if (COMPARE((void *) mid, (void *) lo) < 0)
                 SWAP_BYTES (mid, lo, size);
-            if ((*cmp) ((void *) hi, (void *) mid) < 0)
+            if (COMPARE((void *) hi, (void *) mid) < 0)
                 SWAP_BYTES (mid, hi, size);
             else
                 goto jump_over;
-            if ((*cmp) ((void *) mid, (void *) lo) < 0)
+            if (COMPARE((void *) mid, (void *) lo) < 0)
                 SWAP_BYTES (mid, lo, size);
             jump_over:;
 
@@ -141,10 +146,10 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             Gotta like those tight inner loops!  They are the main reason
             that this algorithm runs much faster than others. */
             do {
-                while ((*cmp) ((void *) left_ptr, (void *) mid) < 0)
+                while (COMPARE((void *) left_ptr, (void *) mid) < 0)
                 left_ptr += size;
 
-                while ((*cmp) ((void *) mid, (void *) right_ptr) < 0)
+                while (COMPARE((void *) mid, (void *) right_ptr) < 0)
                 right_ptr -= size;
 
                 if (left_ptr < right_ptr)
@@ -208,7 +213,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         and the operation speeds up insertion sort's inner loop. */
 
         for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
-            if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0)
+            if (COMPARE((void *) run_ptr, (void *) tmp_ptr) < 0)
                 tmp_ptr = run_ptr;
         }
 
@@ -220,7 +225,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
         run_ptr = base_ptr + size;
         while ((run_ptr += size) <= end_ptr) {
             tmp_ptr = run_ptr - size;
-            while ((*cmp) ((void *) run_ptr, (void *) tmp_ptr) < 0)
+            while (COMPARE((void *) run_ptr, (void *) tmp_ptr) < 0)
                 tmp_ptr -= size;
 
             tmp_ptr += size;
@@ -261,7 +266,7 @@ main(void) {
     for (int32 i = 0; i < n; i += 1)
         array[i] = rand() % MAXI;
 
-    qsort(array, n, sizeof(*array), compare_int);
+    qsort_glibc(array, n, sizeof(*array), compare_int);
 
     for (int32 i = 0; i < (n - 1); i += 1) {
         assert(array[i] <= array[i + 1]);
