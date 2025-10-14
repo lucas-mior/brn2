@@ -688,7 +688,7 @@ brn2_verify(FileList *new, FileList *old,
                     continue;
                 }
             } else {
-                error("\n");
+                error(".\n");
             }
 
             failed = true;
