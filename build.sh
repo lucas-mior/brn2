@@ -41,7 +41,7 @@ CC=${CC:-cc}
 case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
+    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG -DDEBUGGING"
     ;;
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"

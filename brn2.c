@@ -137,7 +137,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
     number_files = scandir(directory, &directory_list, NULL, NULL);
     if (number_files < 0) {
         error("Error scanning '%s': %s.\n", directory, strerror(errno));
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
 
     list->files = xmalloc((usize)number_files*sizeof(*(list->files)));
@@ -207,31 +207,31 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening '%s' for reading: %s.\n",
               filename, strerror(errno));
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
 
     {
         struct stat lines_stat;
         if (fstat(fd, &lines_stat) < 0) {
             error("Error in fstat(%s): %s.\n", filename, strerror(errno));
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
         if (lseek(fd, 0, SEEK_CUR) < 0 && errno == ESPIPE) {
             error("Error getting file names: File is not seekable.\n");
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
         if (!S_ISREG(lines_stat.st_mode)) {
             error("Error getting file names: Not a regular file.\n");
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
         if (lines_stat.st_size <= 0) {
             error("Error getting file names: File size = %ld.\n",
                   lines_stat.st_size);
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
         if (lines_stat.st_size >= UINT32_MAX) {
             error("Error: File size = %ld.\n", lines_stat.st_size);
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
         map_size = (uint32)lines_stat.st_size;
     }
@@ -240,7 +240,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     if (ftruncate(fd, map_size) < 0) {
         error("Error in ftruncate(%s, %zu): %s.\n",
               filename, strerror(errno), map_size);
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
 
     map = mmap(NULL, map_size,
@@ -248,7 +248,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                      fd, 0);
     if (map == MAP_FAILED) {
         error("Error mapping history file to memory: %s.\n", strerror(errno));
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
 
     {
@@ -274,7 +274,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             }
             if (begin == pointer) {
                 error("Empty line in file. Exiting.\n");
-                exit(EXIT_FAILURE);
+                fatal(EXIT_FAILURE);
             }
 
             name_length = (uint16)(pointer - begin);
@@ -294,7 +294,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
     if (length == 0) {
         error("Empty list. Exiting.\n");
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
@@ -303,11 +303,11 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     if (ftruncate(fd, map_size - padding) < 0) {
         error("Error in ftruncate(%s, %s): %s.\n",
               filename, strerror(errno), map_size - padding);
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
         error("Error closing '%s': %s.\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
 
     return;
@@ -333,7 +333,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     } else {
         if ((lines = fopen(filename, "r")) == NULL) {
             error("Error opening '%s': %s.\n", filename, strerror(errno));
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
     }
 
@@ -371,11 +371,11 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     }
     if (errno) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
     if (length == 0) {
         error("No files to rename.\n");
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
     if (lines != stdin)
         fclose(lines);
@@ -565,7 +565,7 @@ brn2_thread_create(pthread_t *thread, void *(*function)(void *), void *args) {
     int err = pthread_create(thread, NULL, function, args);
     if (err) {
         error("Error creating thread: %s.\n", strerror(err));
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
     return;
 }
@@ -616,7 +616,7 @@ brn2_threads(void *(*function)(void *),
         err = pthread_join(threads[i], NULL);
         if (err) {
             error("Error joining thread %u: %s.\n", i, strerror(err));
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
     }
     return nthreads;
@@ -660,7 +660,7 @@ brn2_verify(FileList *new, FileList *old,
                   i + 1, BRN2_PATH_MAX);
             failed = true;
             if (brn2_options_fatal)
-                exit(EXIT_FAILURE);
+                fatal(EXIT_FAILURE);
         }
 
         if (!hash_set_insert_pre_calc(repeated_set, newfile->name,
@@ -683,7 +683,7 @@ brn2_verify(FileList *new, FileList *old,
                     if (unlink(newfile->name) < 0) {
                         error("Error deleting %s: %s.\n",
                               newfile->name, strerror(errno));
-                        exit(EXIT_FAILURE);
+                        fatal(EXIT_FAILURE);
                     }
                     continue;
                 }
@@ -693,7 +693,7 @@ brn2_verify(FileList *new, FileList *old,
 
             failed = true;
             if (brn2_options_fatal)
-                exit(EXIT_FAILURE);
+                fatal(EXIT_FAILURE);
         }
     }
 
@@ -743,7 +743,7 @@ brn2_execute2(FileList *old, FileList *new,
               " but it was not given in the list of"
               " files to rename, and --implict option is off.\n", newname);
         if (brn2_options_fatal)
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         return;
     }
     if (newname_exists) {
@@ -792,7 +792,7 @@ brn2_execute2(FileList *old, FileList *new,
                   " and "RED"'%s'"RESET": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal)
-                exit(EXIT_FAILURE);
+                fatal(EXIT_FAILURE);
         }
     }
 #else
@@ -802,7 +802,7 @@ brn2_execute2(FileList *old, FileList *new,
         error("Error renaming "RED"'%s'"RESET" to '%s': File already exists.\n",
               oldname, newname);
         if (brn2_options_fatal)
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         return;
     }
 #endif
@@ -811,7 +811,7 @@ brn2_execute2(FileList *old, FileList *new,
         error("Error renaming "RED"'%s'"RESET " to "RED"'%s'"RESET": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal)
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         return;
     } else {
         if (hash_set_insert_pre_calc(names_renamed,

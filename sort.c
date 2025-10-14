@@ -200,7 +200,7 @@ sort(FileList *old) {
                 error("[%u] = %s != %s\n", i, name1, name2);
             }
         }
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     } else {
         error("Sorting successful.\n");
     }
