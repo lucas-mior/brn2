@@ -67,7 +67,7 @@ static void __attribute__((noreturn))
 handler_segv(int unused) {
     (void) unused;
     error("%s: Memory error. Please file a bug report.\n", program);
-    exit(EXIT_FAILURE);
+    fatal(EXIT_FAILURE);
 }
 
 int main(int argc, char **argv) {
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
         break;
     default:
         error("Unexpected mode: %d.\n", mode);
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
     if (!brn2_options_quiet)
         printf("Normalizing filenames...\n");
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 
     if (old->length == 0) {
         error("No files to rename.\n");
-        exit(EXIT_FAILURE);
+        fatal(EXIT_FAILURE);
     }
 
     if (brn2_options_sort)
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
         char *temp = getenv("Temp");
         if (temp == NULL) {
             error("%%TEMP%% is not set.\n");
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
 #endif
 
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
         if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
             error("Error opening '%s': %s.\n",
                   brn2_buffer.name, strerror(errno));
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
 
         oldlist_map = hash_map_create(old->length);
@@ -252,7 +252,7 @@ int main(int argc, char **argv) {
                     error(RED"'%s'"RESET" repeated in the buffer.", file->name);
                 if (brn2_options_fatal) {
                     error("\n");
-                    exit(EXIT_FAILURE);
+                    fatal(EXIT_FAILURE);
                 }
                 error(" Removing from list...\n");
 
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
         write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
         if (close(brn2_buffer.fd) < 0) {
             error("Error closing buffer: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
         brn2_buffer.fd = -1;
         atexit(delete_brn2_buffer);
@@ -393,7 +393,7 @@ int main(int argc, char **argv) {
                   "Check your files.\n",
                   number_changes, number_changes != 1, "s",
                   number_renames, number_renames != 1, "s");
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         } else {
             printf("%u file%.*s renamed\n",
                    number_renames, number_renames != 1, "s");
