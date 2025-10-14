@@ -678,7 +678,7 @@ int main(void) {
 
     error("%s == %s is working? %b\n", string, p3, !strcmp(string, p3));
 
-    srand(time(NULL));
+    srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
         int n = rand() - RAND_MAX/2;
         assert(atoi2(itoa2(n, buffer)) == n);

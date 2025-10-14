@@ -201,6 +201,8 @@ trace_off
 if [ "$target" = "test_all" ]; then
     printf '%s\n' "$targets" | while IFS= read -r t; do
         echo "$t" | grep -Eq "^(# |$)" && continue
-        $0 $t || exit
+        for compiler in gcc tcc clang; do
+            CC=$compiler $0 $t || exit
+        done
     done
 fi

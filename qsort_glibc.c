@@ -31,6 +31,9 @@
 #define COMPARE compare_func 
 #endif
 
+typedef int (*compar_d_fn_t2) (const void *, const void *);
+static void qsort_glibc(void *const, size_t, size_t, compar_d_fn_t2);
+
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
 /* Byte-wise swap two items of size SIZE. */
@@ -90,9 +93,8 @@ typedef struct {
       stack size is needed (actually O(1) in this case)!  */
 
 #include <stdlib.h>
-typedef int (*compar_d_fn_t2) (const void *, const void *);
 
-static void
+void
 qsort_glibc(void *const pbase, size_t total_elems, size_t size,
            compar_d_fn_t2 compare_func) {
     char *base_ptr = pbase;
