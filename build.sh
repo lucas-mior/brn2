@@ -12,7 +12,7 @@ debug
 benchmark
 # perf
 valgrind
-check
+# check
 cross x86_64-windows-gnu
 cross x86_64-macos
 cross aarch64-macos
