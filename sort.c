@@ -260,25 +260,9 @@ test_sorting(uint32 n, uint32 p) {
 
     sort_merge_subsorted(array, n, p, sizeof(int32), &dummy, compare_int);
 
-    {
-        uint32 digits_i = 1;
-        uint32 n2 = n;
-        int digits_a = 1;
-        int max = MAXI;
-
-        while (n2 > 10) {
-            n2 /= 10;
-            digits_i += 1;
-        }
-        while (max > 10) {
-            max /= 10;
-            digits_a += 1;
-        }
-
-        for (uint32 i = 0; i < n; i += 1) {
-            if (i < (n - 1)) {
-                assert(array[i] <= array[i + 1]);
-            }
+    for (uint32 i = 0; i < n; i += 1) {
+        if (i < (n - 1)) {
+            assert(array[i] <= array[i + 1]);
         }
     }
 
