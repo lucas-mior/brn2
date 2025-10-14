@@ -107,6 +107,7 @@ static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
 static void error(char *, ...);
+static void fatal(int);
 static void array_string(char *, int32, char *, char *, char **, int32);
 static int32 util_copy_file(const char *, const char *);
 static int32 util_string_int32(int32 *, const char *);
@@ -435,6 +436,15 @@ error(char *format, ...) {
     fsync(STDOUT_FILENO);
 #endif
     return;
+}
+
+void
+fatal(int status) {
+#ifdef DEBUGGING
+    abort();
+#else
+    exit(status);
+#endif
 }
 
 void
