@@ -33,6 +33,7 @@ exe="$program"
 
 CFLAGS="$CFLAGS -std=c99"
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros -Wno-unused-function"
+CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm"
 
@@ -94,8 +95,9 @@ fi
 
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
-    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral"
-    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion -Wno-constant-logical-operand"
+    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
+    CFLAGS="$CFLAGS -Wno-format-nonliteral"
+    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
 fi
 
 case "$target" in
