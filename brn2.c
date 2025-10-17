@@ -88,7 +88,8 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
 #ifdef __WIN32__
 int
-scandir(const char *dir, struct dirent ***namelist, void *filter, void *compar) {
+scandir(const char *dir, struct dirent ***namelist, void *filter,
+        void *compar) {
     WIN32_FIND_DATAA find_data;
     HANDLE hFind;
     char buffer[MAX_PATH];
@@ -160,7 +161,8 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
 
         if (directory_length) {
-            size = STRUCT_ARRAY_SIZE(*file_pointer, char, directory_length + 1 + name_length + 2);
+            size = STRUCT_ARRAY_SIZE(*file_pointer, char,
+                                     directory_length + 1 + name_length + 2);
             *file_pointer = arena_push(list->arena, ALIGN(size));
             file = *file_pointer;
 
@@ -209,7 +211,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         return;
     }
     if ((fd = open(filename, O_RDWR)) < 0) {
-        error("Error opening '%s' for reading: %s.\n", filename, strerror(errno));
+        error("Error opening '%s' for reading: %s.\n", filename,
+              strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
@@ -228,7 +231,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             fatal(EXIT_FAILURE);
         }
         if (lines_stat.st_size <= 0) {
-            error("Error getting file names: File size = %ld.\n", lines_stat.st_size);
+            error("Error getting file names: File size = %ld.\n",
+                  lines_stat.st_size);
             fatal(EXIT_FAILURE);
         }
         if (lines_stat.st_size >= UINT32_MAX) {
@@ -240,7 +244,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
-        error("Error in ftruncate(%s, %zu): %s.\n", filename, strerror(errno), map_size);
+        error("Error in ftruncate(%s, %zu): %s.\n", filename, strerror(errno),
+              map_size);
         fatal(EXIT_FAILURE);
     }
 
@@ -300,7 +305,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error in ftruncate(%s, %s): %s.\n", filename, strerror(errno), map_size - padding);
+        error("Error in ftruncate(%s, %s): %s.\n", filename, strerror(errno),
+              map_size - padding);
         fatal(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
@@ -352,7 +358,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         if (length >= capacity) {
             capacity *= 2;
-            list->files = xrealloc(list->files, capacity*sizeof(*(list->files)));
+            list->files
+                = xrealloc(list->files, capacity*sizeof(*(list->files)));
         }
 
         size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
@@ -448,7 +455,8 @@ brn2_threads_work_normalization(void *arg) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
                 if (errno != ENOENT) {
-                    error("Error in stat('%s'): %s.\n", file->name, strerror(errno));
+                    error("Error in stat('%s'): %s.\n", file->name,
+                          strerror(errno));
                 }
                 slice->old_list->files[i]->type = TYPE_ERR;
                 continue;
@@ -524,7 +532,8 @@ brn2_threads_work_changes(void *arg) {
 }
 
 void
-brn2_timings(char *name, struct timespec t0, struct timespec t1, uint32 length) {
+brn2_timings(char *name, struct timespec t0, struct timespec t1,
+             uint32 length) {
     long seconds = t1.tv_sec - t0.tv_sec;
     long nanos = t1.tv_nsec - t0.tv_nsec;
 
@@ -572,8 +581,8 @@ brn2_thread_create(pthread_t *thread, void *(*function)(void *), void *args) {
 }
 
 uint32
-brn2_threads(void *(*function)(void *), FileList *old, FileList *new, uint32 *numbers,
-             uint32 map_size) {
+brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
+             uint32 *numbers, uint32 map_size) {
     pthread_t threads[BRN2_MAX_THREADS];
     Slice slices[BRN2_MAX_THREADS];
     uint32 range;
@@ -626,8 +635,8 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new, uint32 *nu
 }
 #else
 uint32
-brn2_threads(void *(*function)(void *), FileList *old, FileList *new, uint32 *numbers,
-             uint32 map_size) {
+brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
+             uint32 *numbers, uint32 map_size) {
     Slice slices[1];
     uint32 length;
 
@@ -650,33 +659,38 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new, uint32 *nu
 #endif
 
 bool
-brn2_verify(FileList *new, FileList *old, HashSet *repeated_set, uint32 *hashes_new) {
+brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
+            uint32 *hashes_new) {
     bool failed = false;
 
     for (uint32 i = 0; i < new->length; i += 1) {
         FileName *newfile = new->files[i];
 
         if (newfile->length >= BRN2_PATH_MAX) {
-            error("Error: filename on line %u is longer than %u bytes", i + 1, BRN2_PATH_MAX);
+            error("Error: filename on line %u is longer than %u bytes", i + 1,
+                  BRN2_PATH_MAX);
             failed = true;
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
             }
         }
 
-        if (!hash_set_insert_pre_calc(repeated_set, newfile->name, newfile->hash, hashes_new[i])) {
+        if (!hash_set_insert_pre_calc(repeated_set, newfile->name,
+                                      newfile->hash, hashes_new[i])) {
             FileName *oldfile = old->files[i];
             char *diff[] = {
                 "/usr/bin/diff", "-q", newfile->name, oldfile->name, NULL,
             };
-            error("Error: " RED "'%s'" RESET " repeats on line %u. ", newfile->name, i + 1);
+            error("Error: " RED "'%s'" RESET " repeats on line %u. ",
+                  newfile->name, i + 1);
 
             if (util_command(LENGTH(diff), diff) == 0) {
                 error("Old and new name have exactly the same content.\n");
                 if (brn2_options_autosolve) {
                     error("--autosolve is enabled: Deleting old file...\n");
                     if (unlink(newfile->name) < 0) {
-                        error("Error deleting %s: %s.\n", newfile->name, strerror(errno));
+                        error("Error deleting %s: %s.\n", newfile->name,
+                              strerror(errno));
                         fatal(EXIT_FAILURE);
                     }
                     continue;
@@ -702,8 +716,8 @@ noop(const char *unused, ...) {
 }
 
 void
-brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names_renamed, uint32 i,
-              uint32 *number_renames) {
+brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
+              HashSet *names_renamed, uint32 i, uint32 *number_renames) {
     int renamed;
     uint32 *newname_index_on_oldlist;
     bool newname_exists;
@@ -724,11 +738,13 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names
             return;
         }
     }
-    newname_index_on_oldlist = hash_map_lookup_pre_calc(oldlist_map, newname, newhash, newindex);
+    newname_index_on_oldlist
+        = hash_map_lookup_pre_calc(oldlist_map, newname, newhash, newindex);
     newname_exists = !access(newname, F_OK);
 #ifdef __linux__
     if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
-        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ":\n", oldname, newname);
+        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ":\n",
+              oldname, newname);
         error(RED "'%s'" RESET " already exists,"
                   " but it was not given in the list of"
                   " files to rename, and --implict option is off.\n",
@@ -739,25 +755,33 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names
         return;
     }
     if (newname_exists) {
-        renamed = renameat2(AT_FDCWD, oldname, AT_FDCWD, newname, RENAME_EXCHANGE);
+        renamed
+            = renameat2(AT_FDCWD, oldname, AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_set_insert_pre_calc(names_renamed, oldname, oldhash, oldindex)) {
+            if (hash_set_insert_pre_calc(names_renamed, oldname, oldhash,
+                                         oldindex)) {
                 *number_renames += 1;
             }
-            if (hash_set_insert_pre_calc(names_renamed, newname, newhash, newindex)) {
+            if (hash_set_insert_pre_calc(names_renamed, newname, newhash,
+                                         newindex)) {
                 *number_renames += 1;
             }
-            print(GREEN "%s" RESET " <-> " GREEN "%s" RESET "\n", oldname, newname);
+            print(GREEN "%s" RESET " <-> " GREEN "%s" RESET "\n", oldname,
+                  newname);
 
             if (newname_index_on_oldlist) {
                 uint32 next = *newname_index_on_oldlist;
                 FileName **file_j = &(old->files[next]);
 
-                hash_map_remove_pre_calc(oldlist_map, newname, newhash, newindex);
-                hash_map_remove_pre_calc(oldlist_map, oldname, oldhash, oldindex);
+                hash_map_remove_pre_calc(oldlist_map, newname, newhash,
+                                         newindex);
+                hash_map_remove_pre_calc(oldlist_map, oldname, oldhash,
+                                         oldindex);
 
-                hash_map_insert_pre_calc(oldlist_map, newname, newhash, newindex, i);
-                hash_map_insert_pre_calc(oldlist_map, oldname, oldhash, oldindex, next);
+                hash_map_insert_pre_calc(oldlist_map, newname, newhash,
+                                         newindex, i);
+                hash_map_insert_pre_calc(oldlist_map, oldname, oldhash,
+                                         oldindex, next);
 
                 SWAP(*file_j, *oldfile);
                 SWAP(old->indexes[i], old->indexes[next]);
@@ -767,12 +791,14 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names
                       newname, oldname, newname);
                 error("To disable this behaviour,"
                       " don't pass the --implict option.\n");
-                hash_map_insert_pre_calc(oldlist_map, newname, newhash, newindex, i);
+                hash_map_insert_pre_calc(oldlist_map, newname, newhash,
+                                         newindex, i);
             }
             return;
         } else if (errno != ENOENT) {
-            error("Error swapping " RED "'%s'" RESET " and " RED "'%s'" RESET ": %s.\n", oldname,
-                  newname, strerror(errno));
+            error("Error swapping " RED "'%s'" RESET " and " RED "'%s'" RESET
+                  ": %s.\n",
+                  oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
             }
@@ -782,8 +808,9 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names
     (void)newname_index_on_oldlist;
     (void)oldfile;
     if (newname_exists) {
-        error("Error renaming " RED "'%s'" RESET " to '%s': File already exists.\n", oldname,
-              newname);
+        error("Error renaming " RED "'%s'" RESET
+              " to '%s': File already exists.\n",
+              oldname, newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
         }
@@ -792,14 +819,16 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names
 #endif
     renamed = rename(oldname, newname);
     if (renamed < 0) {
-        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ": %s.\n", oldname,
-              newname, strerror(errno));
+        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET
+              ": %s.\n",
+              oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
         }
         return;
     } else {
-        if (hash_set_insert_pre_calc(names_renamed, oldname, oldhash, oldindex)) {
+        if (hash_set_insert_pre_calc(names_renamed, oldname, oldhash,
+                                     oldindex)) {
             *number_renames += 1;
         }
         print("%s -> " GREEN "%s" RESET "\n", oldname, newname);
@@ -809,26 +838,31 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map, HashSet *names
 
 void
 brn2_usage(FILE *stream) {
-    fprintf(stream, "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
-                    "usage: brn2 [OPTIONS] -f <filename>\n"
-                    "usage: brn2 [OPTIONS] -d <dir>\n"
-                    "Rename filenames based on provided arguments.\n"
-                    "\n"
-                    "Options:\n"
-                    "  -F, --fatal   : Exit on first renaming error.\n"
-                    "  -e, --explict : Only rename files given in the list (default).\n"
-                    "  -h, --help    : Display this help message and exit.\n"
-                    "  -i, --implict : Rename files not given in the list of files to rename.\n"
-                    "  -q, --quiet   : Quiet mode; suppress output messages.\n"
-                    "  -s, --sort    : Disable sorting of original list.\n"
-                    "  -v, --verbose : Verbose mode (default); output messages.\n"
-                    "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
-                    "\n"
-                    "Arguments:\n"
-                    "  No arguments             : Rename files of current working directory.\n"
-                    "  1 or more arguments      : Rename filenames passed as arguments.\n"
-                    "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
-                    "  -f <file>, --file=<file> : Rename filenames listed in this argument.\n");
+    fprintf(
+        stream,
+        "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
+        "usage: brn2 [OPTIONS] -f <filename>\n"
+        "usage: brn2 [OPTIONS] -d <dir>\n"
+        "Rename filenames based on provided arguments.\n"
+        "\n"
+        "Options:\n"
+        "  -F, --fatal   : Exit on first renaming error.\n"
+        "  -e, --explict : Only rename files given in the list (default).\n"
+        "  -h, --help    : Display this help message and exit.\n"
+        "  -i, --implict : Rename files not given in the list of files to "
+        "rename.\n"
+        "  -q, --quiet   : Quiet mode; suppress output messages.\n"
+        "  -s, --sort    : Disable sorting of original list.\n"
+        "  -v, --verbose : Verbose mode (default); output messages.\n"
+        "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
+        "\n"
+        "Arguments:\n"
+        "  No arguments             : Rename files of current working "
+        "directory.\n"
+        "  1 or more arguments      : Rename filenames passed as arguments.\n"
+        "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
+        "  -f <file>, --file=<file> : Rename filenames listed in this "
+        "argument.\n");
     exit((int)(stream != stdout));
 }
 
@@ -857,7 +891,8 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
             return true;
         }
         if (verbose) {
-            printf("%u / %u | %s != %s \n", i + 1, list->length, list->files[i]->name, file->name);
+            printf("%u / %u | %s != %s \n", i + 1, list->length,
+                   list->files[i]->name, file->name);
         }
     }
     return false;

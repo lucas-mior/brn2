@@ -37,15 +37,15 @@ static void qsort_glibc(void *const, size_t, size_t, compar_d_fn_t2);
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
 /* Byte-wise swap two items of size SIZE. */
-#define SWAP_BYTES(a, b, size)                                                                     \
-    do {                                                                                           \
-        size_t SWAPsize = (size);                                                                  \
-        char *SWAPa = (a), *SWAPb = (b);                                                           \
-        do {                                                                                       \
-            char SWAPtmp = *SWAPa;                                                                 \
-            *SWAPa++ = *SWAPb;                                                                     \
-            *SWAPb++ = SWAPtmp;                                                                    \
-        } while (--SWAPsize > 0);                                                                  \
+#define SWAP_BYTES(a, b, size)                                                 \
+    do {                                                                       \
+        size_t SWAPsize = (size);                                              \
+        char *SWAPa = (a), *SWAPb = (b);                                       \
+        do {                                                                   \
+            char SWAPtmp = *SWAPa;                                             \
+            *SWAPa++ = *SWAPb;                                                 \
+            *SWAPb++ = SWAPtmp;                                                \
+        } while (--SWAPsize > 0);                                              \
     } while (0)
 
 /* Discontinue quicksort algorithm when partition gets below this size.
@@ -94,7 +94,8 @@ typedef struct {
 #include <stdlib.h>
 
 void
-qsort_glibc(void *const pbase, size_t total_elems, size_t size, compar_d_fn_t2 compare_func) {
+qsort_glibc(void *const pbase, size_t total_elems, size_t size,
+            compar_d_fn_t2 compare_func) {
     char *base_ptr = pbase;
     const size_t max_thresh = MAX_THRESH*size;
     (void)compare_func;
