@@ -38,8 +38,8 @@
 
 #ifndef SIZEKB
 #define SIZEKB(X) ((size_t)(X)*1024ul)
-#define SIZEMB(X) ((size_t)(X)*1024ul * 1024ul)
-#define SIZEGB(X) ((size_t)(X)*1024ul * 1024ul*1024ul)
+#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
+#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 #endif
 
 #ifndef LENGTH
