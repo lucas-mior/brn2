@@ -54,10 +54,10 @@ static void qsort_glibc(void *const, size_t, size_t, compar_d_fn_t2);
 #define MAX_THRESH 4
 
 /* Stack node declarations used to store unfulfilled partition obligations. */
-typedef struct {
+typedef struct StackNode {
     char *lo;
     char *hi;
-} stack_node;
+} StackNode;
 
 /* The next 4 #defines implement a very fast in-line stack abstraction. */
 /* The stack needs log (total_elements) entries (we could even subtract
@@ -75,7 +75,7 @@ typedef struct {
       next array partition to sort.  To save time, this maximum amount
       of space required to store an array of SIZE_MAX is allocated on the
       stack.  Assuming a 32-bit (64 bit) integer for size_t, this needs
-      only 32*sizeof(stack_node) == 256 bytes (for 64 bit: 1024 bytes).
+      only 32*sizeof(StackNode) == 256 bytes (for 64 bit: 1024 bytes).
       Pretty cheap, actually.
 
    2. Chose the pivot element using a median-of-three decision tree.
@@ -109,8 +109,8 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
     if (total_elems > MAX_THRESH) {
         char *lo = base_ptr;
         char *hi = &lo[size*(total_elems - 1)];
-        stack_node stack[STACK_SIZE];
-        stack_node *top = stack;
+        StackNode stack[STACK_SIZE];
+        StackNode *top = stack;
 
         PUSH(NULL, NULL);
 
