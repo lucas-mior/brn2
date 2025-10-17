@@ -40,7 +40,8 @@ static void qsort_glibc(void *const, size_t, size_t, compar_d_fn_t2);
 #define SWAP_BYTES(a, b, size)                                                 \
     do {                                                                       \
         size_t SWAPsize = (size);                                              \
-        char *SWAPa = (a), *SWAPb = (b);                                       \
+        char *SWAPa = (a);                                                     \
+        char *SWAPb = (b);                                                     \
         do {                                                                   \
             char SWAPtmp = *SWAPa;                                             \
             *SWAPa++ = *SWAPb;                                                 \
