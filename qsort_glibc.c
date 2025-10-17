@@ -28,24 +28,24 @@
 #include <string.h>
 
 #ifndef COMPARE
-#define COMPARE compare_func 
+#define COMPARE compare_func
 #endif
 
-typedef int (*compar_d_fn_t2) (const void *, const void *);
+typedef int (*compar_d_fn_t2)(const void *, const void *);
 static void qsort_glibc(void *const, size_t, size_t, compar_d_fn_t2);
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
 /* Byte-wise swap two items of size SIZE. */
-#define SWAP_BYTES(a, b, size)                    \
-    do {                                    \
-        size_t SWAPsize = (size);             \
-        char *SWAPa = (a), *SWAPb = (b);        \
-        do {                                \
-            char SWAPtmp = *SWAPa;              \
-            *SWAPa++ = *SWAPb;                  \
-            *SWAPb++ = SWAPtmp;                 \
-        } while (--SWAPsize > 0);             \
+#define SWAP_BYTES(a, b, size)                                                                     \
+    do {                                                                                           \
+        size_t SWAPsize = (size);                                                                  \
+        char *SWAPa = (a), *SWAPb = (b);                                                           \
+        do {                                                                                       \
+            char SWAPtmp = *SWAPa;                                                                 \
+            *SWAPa++ = *SWAPb;                                                                     \
+            *SWAPb++ = SWAPtmp;                                                                    \
+        } while (--SWAPsize > 0);                                                                  \
     } while (0)
 
 /* Discontinue quicksort algorithm when partition gets below this size.
@@ -63,10 +63,9 @@ typedef struct {
    log(MAX_THRESH)).  Since total_elements has type size_t, we get as
    upper bound for log (total_elements):
    bits per byte (CHAR_BIT)*sizeof(size_t).  */
-#define STACK_SIZE      (CHAR_BIT*sizeof(size_t))
-#define PUSH(low, high) ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
-#define POP(low, high)  ((void) (--top, (low = top->lo), (high = top->hi)))
-
+#define STACK_SIZE (CHAR_BIT*sizeof(size_t))
+#define PUSH(low, high) ((void)((top->lo = (low)), (top->hi = (high)), ++top))
+#define POP(low, high) ((void)(--top, (low = top->lo), (high = top->hi)))
 
 /* Order size using quicksort.  This implementation incorporates
    four optimizations discussed in Sedgewick:
@@ -95,11 +94,10 @@ typedef struct {
 #include <stdlib.h>
 
 void
-qsort_glibc(void *const pbase, size_t total_elems, size_t size,
-           compar_d_fn_t2 compare_func) {
+qsort_glibc(void *const pbase, size_t total_elems, size_t size, compar_d_fn_t2 compare_func) {
     char *base_ptr = pbase;
     const size_t max_thresh = MAX_THRESH*size;
-    (void) compare_func;
+    (void)compare_func;
 
     if (total_elems == 0) {
         /* Avoid lossage with unsigned arithmetic below.  */
@@ -127,38 +125,44 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
             char *mid = lo + size*((size_t)(hi - lo) / size >> 1);
 
             do {
-                if (COMPARE((void *)mid, (void *)lo) < 0)
+                if (COMPARE((void *)mid, (void *)lo) < 0) {
                     SWAP_BYTES(mid, lo, size);
+                }
 
-                if (COMPARE((void *)hi, (void *)mid) < 0)
+                if (COMPARE((void *)hi, (void *)mid) < 0) {
                     SWAP_BYTES(mid, hi, size);
-                else
+                } else {
                     break;
+                }
 
-                if (COMPARE((void *)mid, (void *)lo) < 0)
+                if (COMPARE((void *)mid, (void *)lo) < 0) {
                     SWAP_BYTES(mid, lo, size);
+                }
             } while (0);
 
-            left  = lo + size;
+            left = lo + size;
             right = hi - size;
 
             /* Here's the famous ``collapse the walls'' section of quicksort.
              * Gotta like those tight inner loops!  They are the main reason
              * that this algorithm runs much faster than others. */
             do {
-                while (COMPARE((void *)left, (void *)mid) < 0)
+                while (COMPARE((void *)left, (void *)mid) < 0) {
                     left += size;
+                }
 
-                while (COMPARE((void *)mid, (void *)right) < 0)
+                while (COMPARE((void *)mid, (void *)right) < 0) {
                     right -= size;
+                }
 
                 if (left < right) {
                     SWAP_BYTES(left, right, size);
 
-                    if (mid == left)
+                    if (mid == left) {
                         mid = right;
-                    else if (mid == right)
+                    } else if (mid == right) {
                         mid = left;
+                    }
 
                     left += size;
                     right -= size;
@@ -174,14 +178,15 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
              * ignore one or both.  Otherwise, push the larger partition's
              * bounds on the stack and continue sorting the smaller one. */
 
-            if ((size_t) (right - lo) <= max_thresh) {
-                if ((size_t) (hi - left) <= max_thresh)
-                /* Ignore both small partitions. */
-                POP(lo, hi);
-                else
-                /* Ignore small left partition. */
-                lo = left;
-            } else if ((size_t) (hi - left) <= max_thresh) {
+            if ((size_t)(right - lo) <= max_thresh) {
+                if ((size_t)(hi - left) <= max_thresh) {
+                    /* Ignore both small partitions. */
+                    POP(lo, hi);
+                } else {
+                    /* Ignore small left partition. */
+                    lo = left;
+                }
+            } else if ((size_t)(hi - left) <= max_thresh) {
                 /* Ignore small right partition. */
                 hi = right;
             } else if ((right - lo) > (hi - left)) {
@@ -212,20 +217,23 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
          * and the operation speeds up insertion sort's inner loop. */
 
         for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size) {
-            if (COMPARE((void *)run_ptr, (void *)tmp_ptr) < 0)
+            if (COMPARE((void *)run_ptr, (void *)tmp_ptr) < 0) {
                 tmp_ptr = run_ptr;
+            }
         }
 
-        if (tmp_ptr != base_ptr)
+        if (tmp_ptr != base_ptr) {
             SWAP_BYTES(tmp_ptr, base_ptr, size);
+        }
 
         /* Insertion sort, running from left-hand-side up to right-hand-side. */
 
         run_ptr = base_ptr + size;
         while ((run_ptr += size) <= end_ptr) {
             tmp_ptr = run_ptr - size;
-            while (COMPARE((void *)run_ptr, (void *)tmp_ptr) < 0)
+            while (COMPARE((void *)run_ptr, (void *)tmp_ptr) < 0) {
                 tmp_ptr -= size;
+            }
 
             tmp_ptr += size;
             if (tmp_ptr != run_ptr) {
@@ -236,8 +244,9 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
                     char c = *trav;
                     char *hi, *lo;
 
-                    for (hi = lo = trav; (lo -= size) >= tmp_ptr; hi = lo)
-                    *hi = *lo;
+                    for (hi = lo = trav; (lo -= size) >= tmp_ptr; hi = lo) {
+                        *hi = *lo;
+                    }
                     *hi = c;
                 }
             }
@@ -266,8 +275,9 @@ main(void) {
     int32 *array = xmalloc(n*sizeof(*array));
 
     srand(42);
-    for (int32 i = 0; i < n; i += 1)
+    for (int32 i = 0; i < n; i += 1) {
         array[i] = rand() % MAXI;
+    }
 
     qsort_glibc(array, n, sizeof(*array), compare_int);
 
