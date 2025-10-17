@@ -116,14 +116,15 @@ arena_malloc(size_t *size) {
 
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
-            p = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE | FLAGS_HUGE_PAGES,
-                     -1, 0);
+            p = mmap(NULL, *size, PROT_READ | PROT_WRITE,
+                     MAP_ANON | MAP_PRIVATE | FLAGS_HUGE_PAGES, -1, 0);
             if (p != MAP_FAILED) {
                 *size = ARENA_ALIGN(*size, SIZEMB(2));
                 break;
             }
         }
-        p = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+        p = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE,
+                 -1, 0);
         *size = ARENA_ALIGN(*size, arena_page_size);
     } while (0);
 
@@ -136,8 +137,8 @@ arena_malloc(size_t *size) {
 void
 arena_free(Arena *arena) {
     if (munmap(arena, arena->size) < 0) {
-        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n", (void *)arena, arena->size,
-                strerror(errno));
+        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n", (void *)arena,
+                arena->size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return;
@@ -159,7 +160,8 @@ arena_malloc(size_t *size) {
 
     p = VirtualAlloc(NULL, *size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n", *size, GetLastError());
+        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n", *size,
+                GetLastError());
         exit(EXIT_FAILURE);
     }
     *size = ARENA_ALIGN(*size, arena_page_size);
@@ -168,7 +170,8 @@ arena_malloc(size_t *size) {
 void
 arena_free(Arena *arena) {
     if (!VirtualFree(arena, 0, MEM_RELEASE)) {
-        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", arena, GetLastError());
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", arena,
+                GetLastError());
         exit(EXIT_FAILURE);
     }
     return;
@@ -192,8 +195,8 @@ arena_push(Arena *arena, uint32 size) {
     void *before;
 
     if (size > (arena->size - ALIGN(sizeof(*arena)))) {
-        fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n", size,
-                arena->size - ALIGN(sizeof(*arena)));
+        fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n",
+                size, arena->size - ALIGN(sizeof(*arena)));
         exit(EXIT_FAILURE);
     }
 

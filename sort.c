@@ -80,7 +80,8 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
         if (COMPARE(heap[left].value, heap[smallest].value) < 0) {
             smallest = left;
         }
-        if ((right < p) && COMPARE(heap[right].value, heap[smallest].value) < 0) {
+        if ((right < p)
+            && COMPARE(heap[right].value, heap[smallest].value) < 0) {
             smallest = right;
         }
 
@@ -99,7 +100,8 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
 }
 
 static void
-sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size, void *dummy_last,
+sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
+                     void *dummy_last,
                      int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
     uint32 n_sub[BRN2_MAX_THREADS];
@@ -191,8 +193,8 @@ sort(FileList *old) {
     }
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)), &dummy_last,
-                         brn2_compare);
+    sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
+                         &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);

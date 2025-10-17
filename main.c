@@ -109,7 +109,8 @@ main(int argc, char **argv) {
     new->arena = arena_alloc(BRN2_ARENA_SIZE);
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL))
+           != -1) {
         switch (opt) {
         case 'd':
             mode = FILES_FROM_DIR;
@@ -232,7 +233,8 @@ main(int argc, char **argv) {
         SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.XXXXXX");
 
         if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
-            error("Error opening '%s': %s.\n", brn2_buffer.name, strerror(errno));
+            error("Error opening '%s': %s.\n", brn2_buffer.name,
+                  strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
@@ -250,11 +252,13 @@ main(int argc, char **argv) {
             usize buffered;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
-                   || !hash_map_insert_pre_calc(oldlist_map, file->name, file->hash, *index, i)) {
+                   || !hash_map_insert_pre_calc(oldlist_map, file->name,
+                                                file->hash, *index, i)) {
                 if (contains_newline) {
                     error(RED "'%s'" RESET " contains new line.", file->name);
                 } else {
-                    error(RED "'%s'" RESET " repeated in the buffer.", file->name);
+                    error(RED "'%s'" RESET " repeated in the buffer.",
+                          file->name);
                 }
                 if (brn2_options_fatal) {
                     error("\n");
@@ -296,7 +300,8 @@ main(int argc, char **argv) {
 
     {
         char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
-        char *args_shuf[] = {"shuf", brn2_buffer.name, "-o", brn2_buffer.name, NULL};
+        char *args_shuf[]
+            = {"shuf", brn2_buffer.name, "-o", brn2_buffer.name, NULL};
         (void)args_edit;
         (void)args_shuf;
 
@@ -338,7 +343,8 @@ main(int argc, char **argv) {
             if (old->length != new->length) {
                 error("You are renaming " RED "%u" RESET " file%.*s "
                       "but buffer contains " RED "%u" RESET " file name%.*s\n",
-                      old->length, old->length != 1, "s", new->length, new->length != 1, "s");
+                      old->length, old->length != 1, "s", new->length,
+                      new->length != 1, "s");
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
@@ -388,7 +394,8 @@ main(int argc, char **argv) {
             }
 
             for (uint32 i = 0; i < old->length; i += 1) {
-                brn2_execute2(old, new, oldlist_map, names_renamed, i, &number_renames);
+                brn2_execute2(old, new, oldlist_map, names_renamed, i,
+                              &number_renames);
             }
             if (BRN2_DEBUG) {
                 hash_set_destroy(names_renamed);
@@ -397,11 +404,12 @@ main(int argc, char **argv) {
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
-                  number_changes, number_changes != 1, "s", number_renames, number_renames != 1,
-                  "s");
+                  number_changes, number_changes != 1, "s", number_renames,
+                  number_renames != 1, "s");
             fatal(EXIT_FAILURE);
         } else {
-            printf("%u file%.*s renamed\n", number_renames, number_renames != 1, "s");
+            printf("%u file%.*s renamed\n", number_renames, number_renames != 1,
+                   "s");
         }
     }
 
