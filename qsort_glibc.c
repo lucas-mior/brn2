@@ -273,14 +273,14 @@ compare_int(const void *a, const void *b) {
 int
 main(void) {
     int32 n = 100;
-    int32 *array = xmalloc(n*sizeof(*array));
+    int32 *array = xmalloc((size_t)n*sizeof(*array));
 
     srand(42);
     for (int32 i = 0; i < n; i += 1) {
         array[i] = rand() % MAXI;
     }
 
-    qsort_glibc(array, n, sizeof(*array), compare_int);
+    qsort_glibc(array, (size_t)n, sizeof(*array), compare_int);
 
     for (int32 i = 0; i < (n - 1); i += 1) {
         assert(array[i] <= array[i + 1]);
