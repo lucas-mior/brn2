@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Mior, Lucas; 
+ * Copyright (C) 2025 Mior, Lucas;
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -42,23 +42,23 @@ typedef struct Arena {
 } Arena;
 
 #if !defined(SIZEKB)
-  #define SIZEKB(X) ((size_t)(X)*1024ul)
-  #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
-  #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+#define SIZEKB(X) ((size_t)(X)*1024ul)
+#define SIZEMB(X) ((size_t)(X)*1024ul * 1024ul)
+#define SIZEGB(X) ((size_t)(X)*1024ul * 1024ul*1024ul)
 #endif
 
 #define ARENA_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 #if !defined(ALIGNMENT)
-  #define ALIGNMENT 16ul
+#define ALIGNMENT 16ul
 #endif
 #if !defined(ALIGN)
-  #define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)
+#define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)
 #endif
 
 #ifdef __linux__
-  #define FLAGS_HUGE_PAGES MAP_HUGETLB|MAP_HUGE_2MB
+#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
 #else
-  #define FLAGS_HUGE_PAGES 0
+#define FLAGS_HUGE_PAGES 0
 #endif
 
 #ifndef INTEGERS
@@ -116,19 +116,14 @@ arena_malloc(size_t *size) {
 
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
-            p = mmap(NULL, *size,
-                     PROT_READ|PROT_WRITE,
-                     MAP_ANON|MAP_PRIVATE|FLAGS_HUGE_PAGES,
+            p = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE | FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
                 *size = ARENA_ALIGN(*size, SIZEMB(2));
                 break;
             }
         }
-        p = mmap(NULL, *size,
-                 PROT_READ|PROT_WRITE,
-                 MAP_ANON|MAP_PRIVATE,
-                 -1, 0);
+        p = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
         *size = ARENA_ALIGN(*size, arena_page_size);
     } while (0);
 
@@ -141,13 +136,13 @@ arena_malloc(size_t *size) {
 void
 arena_free(Arena *arena) {
     if (munmap(arena, arena->size) < 0) {
-        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n",
-                        (void *)arena, arena->size, strerror(errno));
+        fprintf(stderr, "Error in munmap(%p, %zu): %s.\n", (void *)arena, arena->size,
+                strerror(errno));
         exit(EXIT_FAILURE);
     }
     return;
 }
-#else 
+#else
 void *
 arena_malloc(size_t *size) {
     void *p;
@@ -162,12 +157,9 @@ arena_malloc(size_t *size) {
         }
     }
 
-    p = VirtualAlloc(NULL, *size,
-                           MEM_COMMIT|MEM_RESERVE,
-                           PAGE_READWRITE);
+    p = VirtualAlloc(NULL, *size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n",
-                        *size, GetLastError());
+        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n", *size, GetLastError());
         exit(EXIT_FAILURE);
     }
     *size = ARENA_ALIGN(*size, arena_page_size);
@@ -176,8 +168,7 @@ arena_malloc(size_t *size) {
 void
 arena_free(Arena *arena) {
     if (!VirtualFree(arena, 0, MEM_RELEASE)) {
-        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n",
-                        arena, GetLastError());
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", arena, GetLastError());
         exit(EXIT_FAILURE);
     }
     return;
@@ -201,14 +192,15 @@ arena_push(Arena *arena, uint32 size) {
     void *before;
 
     if (size > (arena->size - ALIGN(sizeof(*arena)))) {
-        fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n",
-                        size, arena->size - ALIGN(sizeof(*arena)));
+        fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n", size,
+                arena->size - ALIGN(sizeof(*arena)));
         exit(EXIT_FAILURE);
     }
 
     while ((char *)arena->pos >= (arena->begin + arena->size - size)) {
-        if (!arena->next)
+        if (!arena->next) {
             arena->next = arena_alloc(arena->size);
+        }
 
         arena = arena->next;
     }
@@ -260,8 +252,9 @@ main(void) {
 
     arena_reset(arena);
     assert(arena_push(arena, SIZEMB(1) - ALIGN(sizeof(*arena))));
-    for (int i = 0; i < 10; i += 1)
+    for (int i = 0; i < 10; i += 1) {
         assert(arena_push(arena, 1000000));
+    }
 
     arena_destroy(arena);
     exit(EXIT_SUCCESS);

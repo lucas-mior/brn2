@@ -25,9 +25,9 @@
 #include "util.c"
 
 #ifdef TESTING_sort
-  #define COMPARE(A,B) compare_func(A,B)
+#define COMPARE(A, B) compare_func(A, B)
 #else
-  #define COMPARE(A,B) brn2_compare(A,B)
+#define COMPARE(A, B) brn2_compare(A, B)
 #endif
 
 #ifndef __WIN32__
@@ -51,7 +51,7 @@ sort_shuffle(void *array, usize n, usize size) {
 
     if (n > 1) {
         for (usize i = 0; i < n - 1; i += 1) {
-            usize rnd = (usize) rand();
+            usize rnd = (usize)rand();
             usize j = i + rnd / (RAND_MAX / (n - i) + 1);
 
             memcpy(tmp, arr + j*size, size);
@@ -67,22 +67,26 @@ sort_shuffle(void *array, usize n, usize size) {
 static void
 sort_heapify(HeapNode *heap, uint32 p, uint32 i,
              int32 (*compare_func)(const void *a, const void *b)) {
-    (void) compare_func;
+    (void)compare_func;
     while (true) {
         uint32 smallest = i;
         uint32 left = 2*i + 1;
         uint32 right = 2*i + 2;
 
-        if (left >= p)
+        if (left >= p) {
             break;
+        }
 
-        if (COMPARE(heap[left].value, heap[smallest].value) < 0)
+        if (COMPARE(heap[left].value, heap[smallest].value) < 0) {
             smallest = left;
-        if ((right < p) && COMPARE(heap[right].value, heap[smallest].value) < 0)
+        }
+        if ((right < p) && COMPARE(heap[right].value, heap[smallest].value) < 0) {
             smallest = right;
+        }
 
-        if (smallest == i)
+        if (smallest == i) {
             break;
+        }
 
         {
             HeapNode temp = heap[i];
@@ -95,8 +99,7 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
 }
 
 static void
-sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
-                     void *dummy_last,
+sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size, void *dummy_last,
                      int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[BRN2_MAX_THREADS];
     uint32 n_sub[BRN2_MAX_THREADS];
@@ -107,15 +110,17 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     char *array2 = array;
 
     for (uint32 k = 0; k < (p - 1); k += 1) {
-        n_sub[k] = n/p;
-    }{
+        n_sub[k] = n / p;
+    }
+    {
         uint32 k = p - 1;
-        n_sub[k] = n/p + (n % p);
+        n_sub[k] = n / p + (n % p);
     }
 
     offsets[0] = 0;
-    for (uint32 k = 1; k < p; k += 1)
+    for (uint32 k = 1; k < p; k += 1) {
         offsets[k] = offsets[k - 1] + n_sub[k - 1];
+    }
 
     for (uint32 k = 0; k < p; k += 1) {
         heap[k].value = xmalloc(size);
@@ -123,8 +128,9 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
         heap[k].p_index = k;
     }
 
-    for (int32 k = p / 2 - 1; k >= 0; k -= 1)
+    for (int32 k = p / 2 - 1; k >= 0; k -= 1) {
         sort_heapify(heap, p, (uint32)k, compare);
+    }
 
     for (uint32 i = 0; i < n; i += 1) {
         uint32 k = heap[0].p_index;
@@ -142,8 +148,9 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
     memcpy(array2, output, n*size);
     free(output);
-    for (uint32 i = 0; i < p; i += 1)
+    for (uint32 i = 0; i < p; i += 1) {
         free(heap[i].value);
+    }
     return;
 }
 
@@ -184,9 +191,8 @@ sort(FileList *old) {
     }
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
-    sort_merge_subsorted(old->files, old->length, p,
-                         sizeof(*(old->files)),
-                         &dummy_last, brn2_compare);
+    sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)), &dummy_last,
+                         brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
@@ -238,17 +244,19 @@ test_sorting(uint32 n, uint32 p) {
     }
 
     for (uint32 i = 0; i < (p - 1); i += 1) {
-        n_sub[i] = n/p;
-    }{
+        n_sub[i] = n / p;
+    }
+    {
         uint32 i = p - 1;
-        n_sub[i] = n/p + (n % p);
+        n_sub[i] = n / p + (n % p);
     }
 
     printf("n_sub[P - 1] = %u\n", n_sub[p - 1]);
 
     srand(42);
-    for (uint32 i = 0; i < n; i += 1)
+    for (uint32 i = 0; i < n; i += 1) {
         array[i] = rand() % MAXI;
+    }
 
     {
         uint32 offset = 0;

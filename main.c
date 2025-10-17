@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2022 Patel, Nimai <nimai.m.patel@gmail.com>
  * Author: Patel, Nimai <nimai.m.patel@gmail.com>
- * Copyright (C) 2023-2025 Mior, Lucas; 
+ * Copyright (C) 2023-2025 Mior, Lucas;
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -34,19 +34,17 @@ bool brn2_options_autosolve = false;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
-static struct option options[] = {
-    {"dir",     required_argument, NULL, 'd'},
-    {"file",    required_argument, NULL, 'f'},
-    {"explict", no_argument,       NULL, 'e'},
-    {"fatal",   no_argument,       NULL, 'F'},
-    {"help",    no_argument,       NULL, 'h'},
-    {"implict", no_argument,       NULL, 'i'},
-    {"quiet",   no_argument,       NULL, 'q'},
-    {"sort",    no_argument,       NULL, 's'},
-    {"verbose", no_argument,       NULL, 'v'},
-    {"autosave", no_argument,      NULL, 'a'},
-    {NULL, 0, NULL, 0}
-};
+static struct option options[] = {{"dir", required_argument, NULL, 'd'},
+                                  {"file", required_argument, NULL, 'f'},
+                                  {"explict", no_argument, NULL, 'e'},
+                                  {"fatal", no_argument, NULL, 'F'},
+                                  {"help", no_argument, NULL, 'h'},
+                                  {"implict", no_argument, NULL, 'i'},
+                                  {"quiet", no_argument, NULL, 'q'},
+                                  {"sort", no_argument, NULL, 's'},
+                                  {"verbose", no_argument, NULL, 'v'},
+                                  {"autosave", no_argument, NULL, 'a'},
+                                  {NULL, 0, NULL, 0}};
 
 enum {
     FILES_FROM_FILE,
@@ -58,19 +56,21 @@ static File brn2_buffer;
 
 static void
 delete_brn2_buffer(void) {
-    if (!BRN2_DEBUG)
+    if (!BRN2_DEBUG) {
         unlink(brn2_buffer.name);
+    }
     return;
 }
 
 static void __attribute__((noreturn))
 handler_segv(int unused) {
-    (void) unused;
+    (void)unused;
     error("%s: Memory error. Please file a bug report.\n", program);
     fatal(EXIT_FAILURE);
 }
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv) {
     FileList old_stack = {0};
     FileList new_stack = {0};
     FileList *old;
@@ -109,19 +109,20 @@ int main(int argc, char **argv) {
     new->arena = arena_alloc(BRN2_ARENA_SIZE);
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv,
-                              "d:f:ceFhiqsva", options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL)) != -1) {
         switch (opt) {
         case 'd':
             mode = FILES_FROM_DIR;
-            if (optarg == NULL)
+            if (optarg == NULL) {
                 brn2_usage(stderr);
+            }
             directory = optarg;
             break;
         case 'f':
             mode = FILES_FROM_FILE;
-            if (optarg == NULL)
+            if (optarg == NULL) {
                 brn2_usage(stderr);
+            }
             lines = optarg;
             break;
         case '?':
@@ -155,16 +156,19 @@ int main(int argc, char **argv) {
             brn2_usage(stderr);
         }
     }
-    if (optind < argc && !strcmp(argv[optind], "--"))
+    if (optind < argc && !strcmp(argv[optind], "--")) {
         optind += 1;
-    if ((argc - optind) >= 1)
+    }
+    if ((argc - optind) >= 1) {
         mode = FILES_FROM_ARGS;
+    }
 
     available_threads = util_nthreads();
-    if (available_threads <= 0)
-        nthreads = 1; 
-    else
+    if (available_threads <= 0) {
+        nthreads = 1;
+    } else {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
+    }
 
     switch (mode) {
     case FILES_FROM_FILE:
@@ -180,8 +184,9 @@ int main(int argc, char **argv) {
         error("Unexpected mode: %d.\n", mode);
         fatal(EXIT_FAILURE);
     }
-    if (!brn2_options_quiet)
+    if (!brn2_options_quiet) {
         printf("Normalizing filenames...\n");
+    }
     brn2_normalize_names(old, NULL);
 
     for (uint32 i = 0; i < old->length; i += 1) {
@@ -189,8 +194,9 @@ int main(int argc, char **argv) {
         while ((*file)->type == TYPE_ERR) {
             error("Removing '%s' from list.\n", (*file)->name);
             old->length -= 1;
-            if (old->length <= i)
+            if (old->length <= i) {
                 break;
+            }
             memmove(file, file + 1, (old->length - i)*sizeof(*file));
         }
     }
@@ -200,8 +206,9 @@ int main(int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    if (brn2_options_sort)
+    if (brn2_options_sort) {
         sort(old);
+    }
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
@@ -225,8 +232,7 @@ int main(int argc, char **argv) {
         SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.XXXXXX");
 
         if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
-            error("Error opening '%s': %s.\n",
-                  brn2_buffer.name, strerror(errno));
+            error("Error opening '%s': %s.\n", brn2_buffer.name, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
@@ -244,12 +250,12 @@ int main(int argc, char **argv) {
             usize buffered;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
-                   || !hash_map_insert_pre_calc(oldlist_map, file->name,
-                                                file->hash, *index, i)) {
-                if (contains_newline)
-                    error(RED"'%s'"RESET" contains new line.", file->name);
-                else
-                    error(RED"'%s'"RESET" repeated in the buffer.", file->name);
+                   || !hash_map_insert_pre_calc(oldlist_map, file->name, file->hash, *index, i)) {
+                if (contains_newline) {
+                    error(RED "'%s'" RESET " contains new line.", file->name);
+                } else {
+                    error(RED "'%s'" RESET " repeated in the buffer.", file->name);
+                }
                 if (brn2_options_fatal) {
                     error("\n");
                     fatal(EXIT_FAILURE);
@@ -257,8 +263,9 @@ int main(int argc, char **argv) {
                 error(" Removing from list...\n");
 
                 old->length -= 1;
-                if (old->length <= i)
+                if (old->length <= i) {
                     goto close;
+                }
 
                 memmove(*filep, *filep + 1, (old->length - i)*sizeof(*filep));
                 memmove(index, index + 1, (old->length - i)*sizeof(*index));
@@ -277,7 +284,7 @@ int main(int argc, char **argv) {
             pointer += file->length + 1;
             file->name[file->length] = '\0';
         }
-        close:
+    close:
         write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
         if (close(brn2_buffer.fd) < 0) {
             error("Error closing buffer: %s\n", strerror(errno));
@@ -288,11 +295,10 @@ int main(int argc, char **argv) {
     }
 
     {
-        char *args_edit[] = { EDITOR, brn2_buffer.name, NULL };
-        char *args_shuf[] = { "shuf", brn2_buffer.name,
-                              "-o", brn2_buffer.name, NULL };
-        (void) args_edit;
-        (void) args_shuf;
+        char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
+        char *args_shuf[] = {"shuf", brn2_buffer.name, "-o", brn2_buffer.name, NULL};
+        (void)args_edit;
+        (void)args_shuf;
 
 #ifdef BRN2_BENCHMARK
         {
@@ -330,10 +336,9 @@ int main(int argc, char **argv) {
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             if (old->length != new->length) {
-                error("You are renaming "RED"%u"RESET" file%.*s "
-                      "but buffer contains "RED"%u"RESET" file name%.*s\n",
-                      old->length, old->length != 1, "s",
-                      new->length, new->length != 1, "s");
+                error("You are renaming " RED "%u" RESET " file%.*s "
+                      "but buffer contains " RED "%u" RESET " file name%.*s\n",
+                      old->length, old->length != 1, "s", new->length, new->length != 1, "s");
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
@@ -376,27 +381,27 @@ int main(int argc, char **argv) {
         if (number_changes) {
             HashSet *names_renamed = hash_set_create(old->length);
 
-            if (brn2_options_quiet)
+            if (brn2_options_quiet) {
                 print = noop;
-            else
+            } else {
                 print = printf;
+            }
 
             for (uint32 i = 0; i < old->length; i += 1) {
-                brn2_execute2(old, new, oldlist_map, names_renamed,
-                              i, &number_renames);
+                brn2_execute2(old, new, oldlist_map, names_renamed, i, &number_renames);
             }
-            if (BRN2_DEBUG)
+            if (BRN2_DEBUG) {
                 hash_set_destroy(names_renamed);
+            }
         }
         if (number_changes != number_renames) {
             error("%u name%.*s changed but %u file%.*s renamed. "
                   "Check your files.\n",
-                  number_changes, number_changes != 1, "s",
-                  number_renames, number_renames != 1, "s");
+                  number_changes, number_changes != 1, "s", number_renames, number_renames != 1,
+                  "s");
             fatal(EXIT_FAILURE);
         } else {
-            printf("%u file%.*s renamed\n",
-                   number_renames, number_renames != 1, "s");
+            printf("%u file%.*s renamed\n", number_renames, number_renames != 1, "s");
         }
     }
 
