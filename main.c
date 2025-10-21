@@ -26,7 +26,7 @@
 #include "sort.c"
 
 char *program;
-bool brn2_options_fatal = BRN2_DEBUG;
+bool brn2_options_fatal = DEBUGGING;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
@@ -56,7 +56,7 @@ static File brn2_buffer;
 
 static void
 delete_brn2_buffer(void) {
-    if (!BRN2_DEBUG) {
+    if (!DEBUGGING) {
         unlink(brn2_buffer.name);
     }
     return;
@@ -397,7 +397,7 @@ main(int argc, char **argv) {
                 brn2_execute2(old, new, oldlist_map, names_renamed, i,
                               &number_renames);
             }
-            if (BRN2_DEBUG) {
+            if (DEBUGGING) {
                 hash_set_destroy(names_renamed);
             }
         }
@@ -418,7 +418,7 @@ main(int argc, char **argv) {
     brn2_timings("500000 renames", t0, t1, old->length);
 #endif
 
-    if (BRN2_DEBUG) {
+    if (DEBUGGING) {
         xmunmap(old->indexes, old->indexes_size);
         xmunmap(new->indexes, new->indexes_size);
         brn2_free_list(old);

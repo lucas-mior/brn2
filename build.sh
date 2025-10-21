@@ -42,7 +42,7 @@ CC=${CC:-cc}
 case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG -DDEBUGGING"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
@@ -56,10 +56,10 @@ case "$target" in
     ;;
 "valgrind") 
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS -DBRN2_DEBUG"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 "test") 
-    CFLAGS="$CFLAGS -g -DBRN2_DEBUG"
+    CFLAGS="$CFLAGS -g -DDEBUGGING=1"
     ;;
 "check") 
     CC=gcc
