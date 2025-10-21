@@ -141,7 +141,7 @@ $ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -f -
 ## Changes over original brn
 - Option to rename files listed in file or passed as arguments.
   * By default, won't swap files which were not specified in the rename list.
-- Option to recursively find files.
+- Option to also solve rename conflicts for equal files.
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
 - Check if original files exist.
