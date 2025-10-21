@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BRN2_C
+#if !defined(BRN2_C)
 #define BRN2_C
 
 #include "brn2.h"
@@ -33,7 +33,7 @@
 #include "util.c"
 #include "arena.c"
 
-#ifndef __WIN32__
+#if !defined(__WIN32__)
 #define COMPARE(A, B) brn2_compare(A, B)
 #include "qsort_glibc.c"
 #define QSORT qsort_glibc
@@ -86,7 +86,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     return;
 }
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
 int
 scandir(const char *dir, struct dirent ***namelist, void *filter,
         void *compar) {
@@ -196,7 +196,7 @@ brn2_free_list(FileList *list) {
     return;
 }
 
-#ifdef __linux__
+#if defined(__linux__)
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     char *map;
@@ -411,7 +411,7 @@ typedef struct Slice {
     uint32 *partial;
 } Slice;
 
-#ifndef __WIN32__
+#if !defined(__WIN32__)
 void *
 brn2_threads_work_normalization(void *arg) {
     Slice *slice = arg;
@@ -569,7 +569,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     return total;
 }
 
-#ifndef __WIN32__
+#if !defined(__WIN32__)
 static void
 brn2_thread_create(pthread_t *thread, void *(*function)(void *), void *args) {
     int err = pthread_create(thread, NULL, function, args);
@@ -741,7 +741,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     newname_index_on_oldlist
         = hash_map_lookup_pre_calc(oldlist_map, newname, newhash, newindex);
     newname_exists = !access(newname, F_OK);
-#ifdef __linux__
+#if defined(__linux__)
     if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
         error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ":\n",
               oldname, newname);
@@ -866,7 +866,7 @@ brn2_usage(FILE *stream) {
     exit((int)(stream != stdout));
 }
 
-#ifdef TESTING_brn2
+#if defined(TESTING_brn2)
 #include <assert.h>
 
 bool brn2_options_fatal = false;
