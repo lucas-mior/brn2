@@ -433,7 +433,7 @@ error(char *format, ...) {
 
 void
 fatal(int status) {
-#ifdef DEBUGGING
+#if DEBUGGING
     (void)status;
     abort();
 #else
