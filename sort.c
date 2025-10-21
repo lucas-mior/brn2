@@ -24,7 +24,7 @@
 
 #include "util.c"
 
-#if defined(TESTING_sort)
+#if __INCLUDE_LEVEL__ == 0
 #define COMPARE(A, B) compare_func(A, B)
 #else
 #define COMPARE(A, B) brn2_compare(A, B)
@@ -158,7 +158,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
 #define SORT_BENCHMARK 0
 
-#if !defined(TESTING_sort)
+#if __INCLUDE_LEVEL__
 static void
 sort(FileList *old) {
     uint32 p;
@@ -221,7 +221,7 @@ sort(FileList *old) {
 }
 #endif
 
-#if defined(TESTING_sort)
+#if __INCLUDE_LEVEL__ == 0
 
 #define MAXI 10000
 static const uint32 possibleN[] = {31, 32, 33, 50};

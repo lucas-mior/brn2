@@ -866,7 +866,7 @@ brn2_usage(FILE *stream) {
     exit((int)(stream != stdout));
 }
 
-#if defined(TESTING_brn2)
+#if __INCLUDE_LEVEL__ == 0
 #include <assert.h>
 
 bool brn2_options_fatal = false;
