@@ -257,7 +257,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
     return;
 }
 
-#if defined(TESTING_qsort_glibc)
+#if __INCLUDE_LEVEL__ == 0
 
 #include "brn2.h"
 #include "util.c"

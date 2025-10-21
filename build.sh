@@ -129,7 +129,7 @@ case "$target" in
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
         cmdline="$CC $CPPFLAGS $CFLAGS"
-        cmdline="$cmdline -D TESTING_$name=1 $src -o /tmp/$src.exe $flags"
+        cmdline="$cmdline $src -o /tmp/$src.exe $flags"
 
         trace_on
         if $cmdline; then

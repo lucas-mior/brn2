@@ -232,7 +232,7 @@ arena_reset(Arena *arena) {
     return first->begin;
 }
 
-#if defined(TESTING_arena)
+#if __INCLUDE_LEVEL__ == 0
 #include "assert.h"
 int
 main(void) {

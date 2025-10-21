@@ -359,7 +359,7 @@ hash_expected_collisions(void *map) {
 #define hash_set_insert_pre_calc(a, b, c, d)                                   \
     hash_set_insert_pre_calc(a, b, c, d, 0)
 
-#if defined(TESTING_hash)
+#if __INCLUDE_LEVEL__ == 0
 #include <assert.h>
 
 #define NSTRINGS 500000
