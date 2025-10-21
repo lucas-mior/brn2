@@ -87,13 +87,13 @@ main(int argc, char **argv) {
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
 
-#ifdef BRN2_BENCHMARK
+#if defined(BRN2_BENCHMARK)
     struct timespec t0;
     struct timespec t1;
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-#ifndef __WIN32__
+#if !defined(__WIN32__)
     /* struct sigaction signal_segment_violation; */
 
     /* signal_segment_violation.sa_handler = handler_segv; */
@@ -220,7 +220,7 @@ main(int argc, char **argv) {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
-#ifndef __WIN32__
+#if !defined(__WIN32__)
         char *temp = "/tmp";
 #else
         char *temp = getenv("Temp");
@@ -305,7 +305,7 @@ main(int argc, char **argv) {
         (void)args_edit;
         (void)args_shuf;
 
-#ifdef BRN2_BENCHMARK
+#if defined(BRN2_BENCHMARK)
         {
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
@@ -413,7 +413,7 @@ main(int argc, char **argv) {
         }
     }
 
-#ifdef BRN2_BENCHMARK
+#if defined(BRN2_BENCHMARK)
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     brn2_timings("500000 renames", t0, t1, old->length);
 #endif

@@ -17,14 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BRN2_H
+#if !defined(BRN2_H)
 #define BRN2_H
 
-#ifdef __linux__
+#if defined(__linux__)
   #define _GNU_SOURCE
 #endif
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
 #else
@@ -35,7 +35,7 @@
   #include <fts.h>
 #endif
 
-#ifndef __linux__
+#if !defined(__linux__)
   #define basename(X) X
 #endif
 
@@ -68,7 +68,7 @@
 #define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
 #define BRN2_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 
-#ifdef __GNUC__
+#if defined(__GNUC__)
 # define BRN2_ASSUME_ALIGNED(X) do { \
     X = __builtin_assume_aligned(X, BRN2_ALIGNMENT); \
     } while (0)
@@ -76,7 +76,7 @@
 #define BRN2_ASSUME_ALIGNED(X) do {} while (0)
 #endif
 
-#ifndef DEBUGGING
+#if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
 
@@ -88,7 +88,7 @@
 
 #define INLINE BRN2_INLINE
 
-#ifndef LENGTH
+#if !defined(LENGTH)
 #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
 #endif
 #define SNPRINTF(BUFFER, FORMAT, ...) \
@@ -98,7 +98,7 @@
     (uint32)(sizeof(*(struct_object)) + (usize)(array_length)*sizeof(ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
-#ifndef INTEGERS
+#if !defined(INTEGERS)
 #define INTEGERS
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -162,7 +162,7 @@ extern int (*print)(const char *, ...);
 
 int brn2_compare(const void *, const void *);
 void brn2_list_from_dir(FileList *, char *);
-#ifndef __WIN32__
+#if !defined(__WIN32__)
 void brn2_list_from_dir_recurse(FileList *, char *);
 #endif
 void brn2_list_from_file(FileList *, char *, bool);

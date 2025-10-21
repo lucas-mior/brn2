@@ -42,7 +42,7 @@
 #endif
 #endif
 
-#ifndef INTEGERS
+#if !defined(INTEGERS)
 #define INTEGERS
 typedef int8_t int8;
 typedef int16_t int16;
@@ -57,17 +57,17 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
   #define NOEXCEPT noexcept
   #define RAPIDHASH_CONSTEXPR constexpr
-  #ifndef RAPIDHASH_INLINE
+  #if !defined(RAPIDHASH_INLINE)
     #define RAPIDHASH_INLINE inline
   #endif
 #else
   #define NOEXCEPT
   #define RAPIDHASH_CONSTEXPR static const
-  #ifndef RAPIDHASH_INLINE
-  #ifdef __GNUC__ 
+  #if !defined(RAPIDHASH_INLINE)
+  #if defined(__GNUC__) 
     #define RAPIDHASH_INLINE static inline __attribute__((always_inline))
   #else
     #define RAPIDHASH_INLINE static inline
@@ -75,13 +75,13 @@ typedef ssize_t isize;
   #endif
 #endif
 
-#ifndef RAPIDHASH_PROTECTED
+#if !defined(RAPIDHASH_PROTECTED)
   #define RAPIDHASH_FAST
 #elif defined(RAPIDHASH_FAST)
   #error "cannot define both RAPIDHASH_PROTECTED and RAPIDHASH_FAST."
 #endif
 
-#ifndef RAPIDHASH_COMPACT
+#if !defined(RAPIDHASH_COMPACT)
   #define RAPIDHASH_UNROLLED
 #elif defined(RAPIDHASH_UNROLLED)
   #error "cannot define both RAPIDHASH_COMPACT and RAPIDHASH_UNROLLED."
@@ -95,7 +95,7 @@ typedef ssize_t isize;
   #define UNLIKELY(x) (x)
 #endif
 
-#ifndef RAPIDHASH_LITTLE_ENDIAN
+#if !defined(RAPIDHASH_LITTLE_ENDIAN)
   #if defined(_WIN32) || defined(__LITTLE_ENDIAN__) \
       || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
     #define RAPIDHASH_LITTLE_ENDIAN
@@ -136,7 +136,7 @@ rapid_mum(uint64 *A, uint64 *B) NOEXCEPT {
 #if defined(__SIZEOF_INT128__)
     __uint128_t r = *A;
     r *= *B;
-  #ifdef RAPIDHASH_PROTECTED
+  #if defined(RAPIDHASH_PROTECTED)
     *A ^= (uint64)r;
     *B ^= (uint64)(r >> 64);
   #else
@@ -147,7 +147,7 @@ rapid_mum(uint64 *A, uint64 *B) NOEXCEPT {
     uint64 a;
     uint64 b;
   #if defined(_M_X64)
-    #ifdef RAPIDHASH_PROTECTED
+    #if defined(RAPIDHASH_PROTECTED)
     a = _umul128(*A, *B, &b);
     *A ^= a;
     *B ^= b;
@@ -155,7 +155,7 @@ rapid_mum(uint64 *A, uint64 *B) NOEXCEPT {
     *A = _umul128(*A, *B, B);
     #endif
   #else
-    #ifdef RAPIDHASH_PROTECTED
+    #if defined(RAPIDHASH_PROTECTED)
     b = __umulh(*A, *B);
     a = (*A)*(*B);
     *A ^= a;
@@ -185,7 +185,7 @@ rapid_mum(uint64 *A, uint64 *B) NOEXCEPT {
     lo = t + (rm1 << 32);
     c += lo < t;
     hi = rh + (rm0 >> 32) + (rm1 >> 32) + c;
-  #ifdef RAPIDHASH_PROTECTED
+  #if defined(RAPIDHASH_PROTECTED)
     *A ^= lo;
     *B ^= hi;
   #else
@@ -210,7 +210,7 @@ rapid_mix(uint64 A, uint64 B) NOEXCEPT {
     return A ^ B;
 }
 
-#ifdef RAPIDHASH_LITTLE_ENDIAN
+#if defined(RAPIDHASH_LITTLE_ENDIAN)
 RAPIDHASH_INLINE uint64
 read64(const uint8 *p) NOEXCEPT {
     uint64 v;
@@ -326,7 +326,7 @@ rapidhash_internal(const void *key, size_t len, uint64 seed,
         if (UNLIKELY(i > 48)) {
             uint64 see1 = seed;
             uint64 see2 = seed;
-#ifdef RAPIDHASH_UNROLLED
+#if defined(RAPIDHASH_UNROLLED)
             while (LIKELY(i >= 96)) {
                 seed = rapid_mix(read64(p) ^ s[0], read64(p + 8) ^ seed);
                 see1 = rapid_mix(read64(p + 16) ^ s[1], read64(p + 24) ^ see1);

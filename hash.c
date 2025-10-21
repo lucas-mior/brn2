@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HASH_C
+#if !defined(HASH_C)
 #define HASH_C
 
 #include <math.h>
@@ -359,7 +359,7 @@ hash_expected_collisions(void *map) {
 #define hash_set_insert_pre_calc(a, b, c, d)                                   \
     hash_set_insert_pre_calc(a, b, c, d, 0)
 
-#ifdef TESTING_hash
+#if defined(TESTING_hash)
 #include <assert.h>
 
 #define NSTRINGS 500000

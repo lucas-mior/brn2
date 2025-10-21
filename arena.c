@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ARENA_C
+#if !defined(ARENA_C)
 #define ARENA_C
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
 #include <windows.h>
 #else
 #include <sys/mman.h>
@@ -55,13 +55,13 @@ typedef struct Arena {
 #define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)
 #endif
 
-#ifdef __linux__
+#if defined(__linux__)
 #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
 #else
 #define FLAGS_HUGE_PAGES 0
 #endif
 
-#ifndef INTEGERS
+#if !defined(INTEGERS)
 #define INTEGERS
 typedef int8_t int8;
 typedef int16_t int16;
@@ -100,7 +100,7 @@ arena_alloc(size_t size) {
     return arena;
 }
 
-#ifndef __WIN32__
+#if !defined(__WIN32__)
 void *
 arena_malloc(size_t *size) {
     void *p;
@@ -232,7 +232,7 @@ arena_reset(Arena *arena) {
     return first->begin;
 }
 
-#ifdef TESTING_arena
+#if defined(TESTING_arena)
 #include "assert.h"
 int
 main(void) {

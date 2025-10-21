@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HASH_H
+#if !defined(HASH_H)
 #define HASH_H
 
 #include <stdbool.h>
@@ -26,7 +26,7 @@
 typedef struct Hashmap HashMap;
 typedef struct Hashset HashSet;
 
-#ifndef INTEGERS
+#if !defined(INTEGERS)
 #define INTEGERS
 typedef int8_t int8;
 typedef int16_t int16;

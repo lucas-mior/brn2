@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SORT_C
+#if !defined(SORT_C)
 #define SORT_C
 
 #include "brn2.h"
@@ -24,17 +24,17 @@
 
 #include "util.c"
 
-#ifdef TESTING_sort
+#if defined(TESTING_sort)
 #define COMPARE(A, B) compare_func(A, B)
 #else
 #define COMPARE(A, B) brn2_compare(A, B)
 #endif
 
-#ifndef __WIN32__
+#if !defined(__WIN32__)
 #include "qsort_glibc.c"
 #endif
 
-#ifndef LENGTH
+#if !defined(LENGTH)
 #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
 #endif
 
@@ -158,7 +158,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
 #define SORT_BENCHMARK 0
 
-#ifndef TESTING_sort
+#if !defined(TESTING_sort)
 static void
 sort(FileList *old) {
     uint32 p;
@@ -221,7 +221,7 @@ sort(FileList *old) {
 }
 #endif
 
-#ifdef TESTING_sort
+#if defined(TESTING_sort)
 
 #define MAXI 10000
 static const uint32 possibleN[] = {31, 32, 33, 50};

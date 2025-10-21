@@ -19,7 +19,7 @@
    Engineering a sort function; Jon Bentley and M. Douglas McIlroy;
    Software - Practice and Experience; Vol. 23 (11), 1249-1265, 1993.  */
 
-#ifndef QSORT_GLIBC_C
+#if !defined(QSORT_GLIBC_C)
 #define QSORT_GLIBC_C
 
 #include <alloca.h>
@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef COMPARE
+#if !defined(COMPARE)
 #define COMPARE compare_func
 #endif
 
@@ -257,7 +257,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
     return;
 }
 
-#ifdef TESTING_qsort_glibc
+#if defined(TESTING_qsort_glibc)
 
 #include "brn2.h"
 #include "util.c"
