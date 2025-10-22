@@ -41,10 +41,6 @@
 
 #if !defined(__WIN32__)
 #define COMPARE(A, B) brn2_compare(A, B)
-#include "qsort_glibc.c"
-#define QSORT qsort_glibc
-#else
-#define QSORT qsort
 #endif
 
 static void *brn2_threads_work_hashes(void *);
@@ -503,7 +499,7 @@ void *
 brn2_threads_work_sort(void *arg) {
     Slice *slice = arg;
     FileName **files = &(slice->old_list->files[slice->start]);
-    QSORT(files, slice->end - slice->start, sizeof(*files), brn2_compare);
+    qsort(files, slice->end - slice->start, sizeof(*files), brn2_compare);
     return 0;
 }
 
