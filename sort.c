@@ -152,7 +152,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     return;
 }
 
-#define SORT_BENCHMARK 0
+#define SORT_BENCHMARK 1
 
 #if !defined(__INCLUDE_LEVEL__) || __INCLUDE_LEVEL__
 static void
@@ -192,10 +192,10 @@ sort(FileList *old) {
         return;
     }
 
-    /* QSORT(old->files, old->length, sizeof(*(old->files)),
-     * brn2_compare); */
-    sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
-                         &dummy_last, brn2_compare);
+    QSORT(old->files, old->length, sizeof(*(old->files)), brn2_compare);
+    /* sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
+     */
+    /*                      &dummy_last, brn2_compare); */
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
