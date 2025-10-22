@@ -30,10 +30,6 @@
 #define COMPARE(A, B) brn2_compare(A, B)
 #endif
 
-#if !defined(__WIN32__)
-#include "qsort_glibc.c"
-#endif
-
 #if !defined(LENGTH)
 #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
 #endif
@@ -174,6 +170,10 @@ sort(FileList *old) {
     memcpy(dummy_last, last, last_length + 1);
 
 #if SORT_BENCHMARK
+#if !defined(__WIN32__)
+#include "qsort_glibc.c"
+#endif
+
     struct timespec t0;
     struct timespec t1;
 
@@ -192,14 +192,14 @@ sort(FileList *old) {
         return;
     }
 
-    /* qsort_glibc(old->files, old->length, sizeof(*(old->files)),
+    /* QSORT(old->files, old->length, sizeof(*(old->files)),
      * brn2_compare); */
     sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
                          &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    qsort_glibc(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
+    QSORT(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
     if (memcmp(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
         error("Error in sorting.\n");
         for (uint32 i = 0; i < old->length; i += 1) {
