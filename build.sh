@@ -99,6 +99,8 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
+    CFLAGS="$CFLAGS -Wno-c++-keyword"
+    CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
 fi
 
 case "$target" in
