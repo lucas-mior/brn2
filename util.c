@@ -570,8 +570,6 @@ send_signal(const char *executable, const int32 signal_number) {
         return;
     }
 
-    error("looking for %s -> %d\n", executable, signal_number);
-
     while ((process = readdir(processes))) {
         char buffer[256];
         char command[256];
