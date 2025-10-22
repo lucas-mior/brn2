@@ -27,6 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#define TESTING_qsort_glibc 1
+#elif !defined(TESTING_qsort_glibc)
+#define TESTING_qsort_glibc 0
+#endif
+
 #if !defined(COMPARE)
 #define COMPARE compare_func
 #endif
@@ -257,7 +263,7 @@ qsort_glibc(void *const pbase, size_t total_elems, size_t size,
     return;
 }
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if TESTING_qsort_glibc
 
 #include "brn2.h"
 #include "util.c"
