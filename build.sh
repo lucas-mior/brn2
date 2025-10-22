@@ -35,6 +35,7 @@ CFLAGS="$CFLAGS -std=c99"
 CFLAGS="$CFLAGS -Wextra -Wall"
 CFLAGS="$CFLAGS -Wno-unused-macros -Wno-unused-function"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
+CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm"
 
