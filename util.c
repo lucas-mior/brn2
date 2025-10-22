@@ -38,6 +38,7 @@
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_util 1
+static char *program = __FILE__;
 #elif !defined(TESTING_util)
 #define TESTING_util 0
 #endif
@@ -455,7 +456,7 @@ util_segv_handler(int32 unused) {
 
     (void)write(STDERR_FILENO, message, strlen(message));
     for (uint i = 0; i < LENGTH(notifiers); i += 1) {
-        execlp(notifiers[i], notifiers[i], "-u", "critical", "clipsim", message,
+        execlp(notifiers[i], notifiers[i], "-u", "critical", program, message,
                NULL);
     }
     _exit(EXIT_FAILURE);
