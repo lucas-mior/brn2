@@ -78,6 +78,8 @@
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
+#pragma - Wno - constant - logical - operand
+
 #if !defined(INTEGERS)
 #define INTEGERS
 typedef unsigned char uchar;
