@@ -29,6 +29,12 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#define TESTING_brn2 1
+#elif !defined(TESTING_brn2)
+#define TESTING_brn2 0
+#endif
+
 #include "hash.c"
 #include "util.c"
 #include "arena.c"
@@ -866,7 +872,7 @@ brn2_usage(FILE *stream) {
     exit((int)(stream != stdout));
 }
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if TESTING_brn2
 #include <assert.h>
 
 bool brn2_options_fatal = false;

@@ -132,7 +132,7 @@ case "$target" in
         name="$(echo "$src" | sed 's/\.c//g')"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        cmdline="$CC $CPPFLAGS $CFLAGS"
+        cmdline="$CC $CPPFLAGS $CFLAGS -DTESTING_$name=1"
         cmdline="$cmdline $src -o /tmp/$src.exe $flags"
 
         trace_on
@@ -212,9 +212,6 @@ if [ "$target" = "test_all" ]; then
             continue
         fi
         for compiler in gcc tcc clang; do
-            if [ "$compiler" = "tcc" ] && [ "$t" = "test" ]; then
-                continue
-            fi
             CC=$compiler $0 $t || exit
         done
     done

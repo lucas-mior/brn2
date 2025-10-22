@@ -38,6 +38,12 @@
 #define INLINE
 #endif
 
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#define TESTING_THIS_FILE 1
+#elif !defined(TESTING_THIS_FILE)
+#define TESTING_THIS_FILE 0
+#endif
+
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
@@ -359,7 +365,7 @@ hash_expected_collisions(void *map) {
 #define hash_set_insert_pre_calc(a, b, c, d)                                   \
     hash_set_insert_pre_calc(a, b, c, d, 0)
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if TESTING_hash
 #include <assert.h>
 
 #define NSTRINGS 500000

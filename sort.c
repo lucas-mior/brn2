@@ -222,7 +222,7 @@ sort(FileList *old) {
 }
 #endif
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if TESTING_sort
 
 #define MAXI 10000
 static const uint32 possibleN[] = {31, 32, 33, 50};
