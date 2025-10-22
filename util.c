@@ -439,7 +439,7 @@ error(char *format, ...) {
 
 void
 fatal(int status) {
-#if defined(DEBUGGING)
+#if DEBUGGING
     (void)status;
     abort();
 #else
