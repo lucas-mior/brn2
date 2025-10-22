@@ -687,7 +687,9 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
                   newfile->name, i + 1);
 
             if (util_command(LENGTH(diff), diff) == 0) {
-                error("Old and new name have exactly the same content.\n");
+                error("Old (%s) and new name (%s)"
+                      " have exactly the same content.\n",
+                      oldfile->name, newfile->name);
                 if (brn2_options_autosolve) {
                     error("--autosolve is enabled: Deleting old file...\n");
                     if (unlink(newfile->name) < 0) {
