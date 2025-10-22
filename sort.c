@@ -24,7 +24,7 @@
 
 #include "util.c"
 
-#if __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define COMPARE(A, B) compare_func(A, B)
 #else
 #define COMPARE(A, B) brn2_compare(A, B)
@@ -158,7 +158,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
 #define SORT_BENCHMARK 0
 
-#if __INCLUDE_LEVEL__
+#if !defined(__INCLUDE_LEVEL__) || __INCLUDE_LEVEL__
 static void
 sort(FileList *old) {
     uint32 p;
@@ -192,13 +192,14 @@ sort(FileList *old) {
         return;
     }
 
-    /* qsort(old->files, old->length, sizeof(*(old->files)), brn2_compare); */
+    /* qsort_glibc(old->files, old->length, sizeof(*(old->files)),
+     * brn2_compare); */
     sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
                          &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    qsort(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
+    qsort_glibc(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
     if (memcmp(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
         error("Error in sorting.\n");
         for (uint32 i = 0; i < old->length; i += 1) {
@@ -221,7 +222,7 @@ sort(FileList *old) {
 }
 #endif
 
-#if __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 
 #define MAXI 10000
 static const uint32 possibleN[] = {31, 32, 33, 50};

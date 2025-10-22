@@ -41,7 +41,6 @@
 
 #include <assert.h>
 #include <dirent.h>
-#include <signal.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>

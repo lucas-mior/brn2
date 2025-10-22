@@ -701,7 +701,7 @@ atoi2(char *str) {
     return atoi(str);
 }
 
-#if __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #include <assert.h>
 
 int
