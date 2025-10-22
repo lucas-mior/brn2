@@ -612,6 +612,7 @@ send_signal(const char *executable, const int32 signal_number) {
                 }
                 error(".\n");
             }
+            (void)r;
             close(cmdline);
             continue;
         }
