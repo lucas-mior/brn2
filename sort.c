@@ -156,7 +156,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
 #define SORT_BENCHMARK 0
 
-#if !defined(__INCLUDE_LEVEL__) || __INCLUDE_LEVEL__
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__
 static void
 sort(FileList *old) {
     uint32 p;
