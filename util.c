@@ -595,6 +595,7 @@ send_signal(const char *executable, const int32 signal_number) {
         if ((cmdline = open(buffer, O_RDONLY)) < 0) {
             if (errno != ENOENT || DEBUGGING) {
                 error("Error opening %s: %s.\n", buffer, strerror(errno));
+                continue;
             }
             if (errno != ENOENT) {
                 fatal(EXIT_FAILURE);
