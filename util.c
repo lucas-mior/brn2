@@ -439,12 +439,12 @@ error(char *format, ...) {
 
 void
 fatal(int status) {
-#if DEBUGGING
-    (void)status;
-    abort();
-#else
-    exit(status);
-#endif
+    if (DEBUGGING) {
+        (void)status;
+        abort();
+    } else {
+        exit(status);
+    }
 }
 
 void
