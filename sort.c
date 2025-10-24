@@ -26,9 +26,12 @@
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define COMPARE(A, B) compare_func(A, B)
+#define TESTING_sort 1
 #elif defined(TESTING_sort)
+#define TESTING_sort 1
 #define COMPARE(A, B) compare_func(A, B)
 #else
+#define TESTING_sort 0
 #define COMPARE(A, B) brn2_compare(A, B)
 #endif
 
