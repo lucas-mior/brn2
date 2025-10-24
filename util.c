@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <time.h>
+#include <limits.h>
 
 #if defined(__WIN32__)
 #include <windows.h>
@@ -62,6 +63,17 @@ static char *program;
     string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
 #endif
 
+#define PRINT_VAR_EVAL(FORMAT, variable) \
+    printf("%s = " FORMAT "\n", #variable, variable)
+
+#define PRINT_VAR(variable)                                        \
+    _Generic((variable), \
+         int: PRINT_VAR_EVAL("%d", variable),      \
+        float: PRINT_VAR_EVAL("%f", variable), \
+        double: PRINT_VAR_EVAL("%f", variable), \
+        default: printf("%s = (not implemented)\n", #variable) \
+    )
+
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
@@ -85,10 +97,6 @@ static char *program;
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
-
-#define PRINT_VAR(variable)                                                    \
-    _Generic((variable) int: PRINT_VAR_EVAL("%d", var),                        \
-        float: PRINT_VAR_EVAL("%f", var))
 
 #if !defined(INTEGERS)
 #define INTEGERS
@@ -722,6 +730,11 @@ main(void) {
     void *p2 = xcalloc(10, SIZEMB(1));
     char *p3;
     char *string = __FILE__;
+    int x = INT_MAX;
+    double y = 0.5;
+
+    PRINT_VAR(x);
+    PRINT_VAR(y);
 
     memset(p1, 0, SIZEMB(1));
     memcpy(p1, string, strlen(string));
