@@ -67,27 +67,27 @@ static char *program;
 #pragma clang diagnostic ignored "-Wc11-extensions"
 #pragma clang diagnostic ignored "-Wformat"
 
-#define PRINT_VAR_EVAL(FORMAT, variable) \
+#define PRINT_VAR_EVAL(FORMAT, variable)                                       \
     printf("%s = " FORMAT "\n", #variable, variable)
 
-#define PRINT_VAR(variable)                                        \
-    _Generic((variable), \
-        char:        PRINT_VAR_EVAL("%c", variable), \
-        char *:      PRINT_VAR_EVAL("%s", variable), \
-        float:       PRINT_VAR_EVAL("%f", variable), \
-        double:      PRINT_VAR_EVAL("%f", variable), \
-        long double: PRINT_VAR_EVAL("%Lf", variable), \
-        int8:        PRINT_VAR_EVAL("%d", variable), \
-        int16:       PRINT_VAR_EVAL("%d", variable), \
-        int32:       PRINT_VAR_EVAL("%d", variable), \
-        int64:       PRINT_VAR_EVAL("%ld", variable), \
-        uint8:       PRINT_VAR_EVAL("%u", variable), \
-        uint16:      PRINT_VAR_EVAL("%u", variable), \
-        uint32:      PRINT_VAR_EVAL("%u", variable), \
-        uint64:      PRINT_VAR_EVAL("%lu", variable), \
-        void *:      PRINT_VAR_EVAL("%p", variable), \
-        default:     printf("%s = ?\n", #variable) \
-    )
+#define PRINT_VAR(variable)                                                    \
+    _Generic((variable),                                                       \
+        bool: PRINT_VAR_EVAL("%b", variable), \
+        char: PRINT_VAR_EVAL("%c", variable),                                  \
+        char *: PRINT_VAR_EVAL("%s", variable),                                \
+        float: PRINT_VAR_EVAL("%f", variable),                                 \
+        double: PRINT_VAR_EVAL("%f", variable),                                \
+        long double: PRINT_VAR_EVAL("%Lf", variable),                          \
+        int8: PRINT_VAR_EVAL("%d", variable),                                  \
+        int16: PRINT_VAR_EVAL("%d", variable),                                 \
+        int32: PRINT_VAR_EVAL("%d", variable),                                 \
+        int64: PRINT_VAR_EVAL("%ld", variable),                                \
+        uint8: PRINT_VAR_EVAL("%u", variable),                                 \
+        uint16: PRINT_VAR_EVAL("%u", variable),                                \
+        uint32: PRINT_VAR_EVAL("%u", variable),                                \
+        uint64: PRINT_VAR_EVAL("%lu", variable),                               \
+        void *: PRINT_VAR_EVAL("%p", variable),                                \
+        default: printf("%s = ?\n", #variable))
 
 #endif
 
@@ -748,6 +748,7 @@ main(void) {
     char *p3;
     char *string = __FILE__;
 
+    bool var_bool = true;
     char var_char = 'c';
     char *var_string = "a nice string";
     void *var_voidptr = NULL;
@@ -764,6 +765,7 @@ main(void) {
     uint64 var_uint64 = UINT64_MAX;
     FILE *file = stdin;
 
+    PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
     PRINT_VAR(var_string);
     PRINT_VAR(var_voidptr);
