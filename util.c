@@ -31,10 +31,10 @@
 #include <limits.h>
 
 #if defined(__WIN32__)
-#include <windows.h>
+  #include <windows.h>
 #else
-#include <sys/mman.h>
-#include <sys/wait.h>
+  #include <sys/mman.h>
+  #include <sys/wait.h>
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
@@ -46,21 +46,21 @@ static char *program;
 #endif
 
 #if !defined(SIZEKB)
-#define SIZEKB(X) ((size_t)(X)*1024ul)
-#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
-#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+  #define SIZEKB(X) ((size_t)(X)*1024ul)
+  #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
+  #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 #endif
 
 #if !defined(LENGTH)
-#define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
+  #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
 #endif
 #if !defined(SNPRINTF)
-#define SNPRINTF(BUFFER, FORMAT, ...)                                          \
-    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
+  #define SNPRINTF(BUFFER, FORMAT, ...)                                          \
+      snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #endif
 #if !defined(STRING_FROM_STRINGS)
-#define STRING_FROM_STRINGS(BUFFER, SEP, ARRAY, LENGTH)                        \
-    string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
+  #define STRING_FROM_STRINGS(BUFFER, SEP, ARRAY, LENGTH)                        \
+      string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
 #endif
 
 #if DEBUGGING || TESTING_util
@@ -92,27 +92,28 @@ static char *program;
 #endif
 
 #if !defined(DEBUGGING)
-#define DEBUGGING 0
+  #define DEBUGGING 0
 #endif
 
 #if !defined(FLAGS_HUGE_PAGES)
   #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
-  #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
+    #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
   #else
-  #define FLAGS_HUGE_PAGES 0
+    #define FLAGS_HUGE_PAGES 0
   #endif
 #endif
 
 #if !defined(MAP_POPULATE)
-#define MAP_POPULATE 0
+  #define MAP_POPULATE 0
 #endif
 
 #define UTIL_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
+
 #if !defined(ALIGNMENT)
-#define ALIGNMENT 16ul
+  #define ALIGNMENT 16ul
 #endif
 #if !defined(ALIGN)
-#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
+  #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
 #if !defined(INTEGERS)
