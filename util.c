@@ -65,6 +65,7 @@ static char *program;
 
 #if DEBUGGING || TESTING_util
 #pragma clang diagnostic ignored "-Wc11-extensions"
+#pragma clang diagnostic ignored "-Wformat"
 
 #define PRINT_VAR(variable)                                        \
     _Generic((variable), \
