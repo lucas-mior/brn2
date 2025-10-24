@@ -63,16 +63,18 @@ static char *program;
     string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
 #endif
 
-#define PRINT_VAR_EVAL(FORMAT, variable) \
-    printf("%s = " FORMAT "\n", #variable, variable)
+#if DEBUGGING || TESTING_util
+#pragma clang diagnostic ignored "-Wc11-extensions"
 
 #define PRINT_VAR(variable)                                        \
     _Generic((variable), \
-         int: PRINT_VAR_EVAL("%d", variable),      \
-        float: PRINT_VAR_EVAL("%f", variable), \
-        double: PRINT_VAR_EVAL("%f", variable), \
+        int: printf("%s = %d\n", #variable, variable),      \
+        float: printf("%s = %f\n", #variable, variable),      \
+        double: printf("%s = %f\n", #variable, variable),      \
         default: printf("%s = (not implemented)\n", #variable) \
     )
+
+#endif
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
