@@ -39,10 +39,14 @@
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_util 1
-static char *program = __FILE__;
 #elif !defined(TESTING_util)
-static char *program;
 #define TESTING_util 0
+#endif
+
+#if TESTING_util
+static char *program = __FILE__;
+#else
+static char *program;
 #endif
 
 #if !defined(SIZEKB)
@@ -64,8 +68,10 @@ static char *program;
 #endif
 
 #if DEBUGGING || TESTING_util
-#pragma clang diagnostic ignored "-Wc11-extensions"
-#pragma clang diagnostic ignored "-Wformat"
+#if defined(__clang__)
+  #pragma clang diagnostic ignored "-Wc11-extensions"
+  #pragma clang diagnostic ignored "-Wformat"
+#endif
 
 #define PRINT_VAR_EVAL(FORMAT, variable)                                       \
     printf("%s = " FORMAT "\n", #variable, variable)
