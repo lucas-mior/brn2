@@ -86,11 +86,9 @@ static char *program;
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
-#define PRINT_VAR(variable) _Generic((variable) \
-    int : PRINT_VAR_EVAL("%d", var), \
-    float : PRINT_VAR_EVAL("%f", var) \
-    )
-
+#define PRINT_VAR(variable)                                                    \
+    _Generic((variable) int: PRINT_VAR_EVAL("%d", var),                        \
+        float: PRINT_VAR_EVAL("%f", var))
 
 #if !defined(INTEGERS)
 #define INTEGERS

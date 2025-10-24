@@ -149,7 +149,6 @@ typedef struct FileList {
     FileName **files;
 } FileList;
 
-extern char *program;
 extern bool brn2_options_fatal;
 extern bool brn2_options_implicit;
 extern bool brn2_options_quiet;

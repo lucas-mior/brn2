@@ -25,7 +25,6 @@
 #include "arena.c"
 #include "sort.c"
 
-char *program;
 bool brn2_options_fatal = DEBUGGING;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;

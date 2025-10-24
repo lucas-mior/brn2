@@ -39,9 +39,9 @@
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
-#define TESTING_THIS_FILE 1
-#elif !defined(TESTING_THIS_FILE)
-#define TESTING_THIS_FILE 0
+#define TESTING_hash 1
+#elif !defined(TESTING_hash)
+#define TESTING_hash 0
 #endif
 
 #define GREEN "\x1b[32m"
