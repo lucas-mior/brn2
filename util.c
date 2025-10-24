@@ -40,6 +40,7 @@
 #define TESTING_util 1
 static char *program = __FILE__;
 #elif !defined(TESTING_util)
+static char *program;
 #define TESTING_util 0
 #endif
 
@@ -84,6 +85,12 @@ static char *program = __FILE__;
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
+
+#define PRINT_VAR(variable) _Generic((variable) \
+    int : PRINT_VAR_EVAL("%d", var), \
+    float : PRINT_VAR_EVAL("%f", var) \
+    )
+
 
 #if !defined(INTEGERS)
 #define INTEGERS
