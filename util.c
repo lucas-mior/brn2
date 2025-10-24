@@ -72,10 +72,21 @@ static char *program;
 
 #define PRINT_VAR(variable)                                        \
     _Generic((variable), \
-        int: PRINT_VAR_EVAL("%d", variable),      \
-        float: PRINT_VAR_EVAL("%f", variable),      \
-        double: PRINT_VAR_EVAL("%f", variable),      \
-        default: printf("%s = (not implemented)\n", #variable) \
+        char:        PRINT_VAR_EVAL("%c", variable), \
+        char *:      PRINT_VAR_EVAL("%s", variable), \
+        float:       PRINT_VAR_EVAL("%f", variable), \
+        double:      PRINT_VAR_EVAL("%f", variable), \
+        long double: PRINT_VAR_EVAL("%Lf", variable), \
+        int8:        PRINT_VAR_EVAL("%d", variable), \
+        int16:       PRINT_VAR_EVAL("%d", variable), \
+        int32:       PRINT_VAR_EVAL("%d", variable), \
+        int64:       PRINT_VAR_EVAL("%ld", variable), \
+        uint8:       PRINT_VAR_EVAL("%u", variable), \
+        uint16:      PRINT_VAR_EVAL("%u", variable), \
+        uint32:      PRINT_VAR_EVAL("%u", variable), \
+        uint64:      PRINT_VAR_EVAL("%lu", variable), \
+        void *:      PRINT_VAR_EVAL("%p", variable), \
+        default:     printf("%s = ?\n", #variable) \
     )
 
 #endif
@@ -736,11 +747,38 @@ main(void) {
     void *p2 = xcalloc(10, SIZEMB(1));
     char *p3;
     char *string = __FILE__;
-    int x = INT_MAX;
-    double y = 0.5;
 
-    PRINT_VAR(x);
-    PRINT_VAR(y);
+    char var_char = 'c';
+    char *var_string = "a nice string";
+    void *var_voidptr = NULL;
+    float var_float = 0.5f;
+    double var_double = 0.5;
+    long double var_longdouble = 0.5;
+    int8 var_int8 = INT8_MAX;
+    int16 var_int16 = INT16_MAX;
+    int32 var_int32 = INT32_MAX;
+    int64 var_int64 = INT64_MAX;
+    uint8 var_uint8 = UINT8_MAX;
+    uint16 var_uint16 = UINT16_MAX;
+    uint32 var_uint32 = UINT32_MAX;
+    uint64 var_uint64 = UINT64_MAX;
+    FILE *file = stdin;
+
+    PRINT_VAR(var_char);
+    PRINT_VAR(var_string);
+    PRINT_VAR(var_voidptr);
+    PRINT_VAR(var_float);
+    PRINT_VAR(var_double);
+    PRINT_VAR(var_longdouble);
+    PRINT_VAR(var_int8);
+    PRINT_VAR(var_int16);
+    PRINT_VAR(var_int32);
+    PRINT_VAR(var_int64);
+    PRINT_VAR(var_uint8);
+    PRINT_VAR(var_uint16);
+    PRINT_VAR(var_uint32);
+    PRINT_VAR(var_uint64);
+    PRINT_VAR(file);
 
     memset(p1, 0, SIZEMB(1));
     memcpy(p1, string, strlen(string));
