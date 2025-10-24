@@ -67,11 +67,14 @@ static char *program;
 #pragma clang diagnostic ignored "-Wc11-extensions"
 #pragma clang diagnostic ignored "-Wformat"
 
+#define PRINT_VAR_EVAL(FORMAT, variable) \
+    printf("%s = " FORMAT "\n", #variable, variable)
+
 #define PRINT_VAR(variable)                                        \
     _Generic((variable), \
-        int: printf("%s = %d\n", #variable, variable),      \
-        float: printf("%s = %f\n", #variable, variable),      \
-        double: printf("%s = %f\n", #variable, variable),      \
+        int: PRINT_VAR_EVAL("%d", variable),      \
+        float: PRINT_VAR_EVAL("%f", variable),      \
+        double: PRINT_VAR_EVAL("%f", variable),      \
         default: printf("%s = (not implemented)\n", #variable) \
     )
 
