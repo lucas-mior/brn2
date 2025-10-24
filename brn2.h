@@ -87,12 +87,6 @@
 
 #define INLINE BRN2_INLINE
 
-#if !defined(LENGTH)
-#define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
-#endif
-#define SNPRINTF(BUFFER, FORMAT, ...) \
-    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
-
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (uint32)(sizeof(*(struct_object)) + (usize)(array_length)*sizeof(ArrayType))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
