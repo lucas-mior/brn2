@@ -72,7 +72,7 @@ static char *program;
 
 #define PRINT_VAR(variable)                                                    \
     _Generic((variable),                                                       \
-        bool: PRINT_VAR_EVAL("%b", variable), \
+        bool: PRINT_VAR_EVAL("%b", variable),                                  \
         char: PRINT_VAR_EVAL("%c", variable),                                  \
         char *: PRINT_VAR_EVAL("%s", variable),                                \
         float: PRINT_VAR_EVAL("%f", variable),                                 \
@@ -96,11 +96,11 @@ static char *program;
 #endif
 
 #if !defined(FLAGS_HUGE_PAGES)
-#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
-#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
-#else
-#define FLAGS_HUGE_PAGES 0
-#endif
+  #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
+  #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
+  #else
+  #define FLAGS_HUGE_PAGES 0
+  #endif
 #endif
 
 #if !defined(MAP_POPULATE)
