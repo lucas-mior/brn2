@@ -91,7 +91,7 @@
         size = sizeof(*map) + capacity*sizeof(*(&map->array[0]));            \
                                                                                \
         map = xmmap_commit(&size);                                             \
-        map->arena = arena_alloc(capacity*sizeof(*(&map->array[0])));        \
+        map->arena = arena_create(capacity*sizeof(*(&map->array[0])));        \
         map->capacity = capacity;                                              \
         map->bitmask = (1 << power) - 1;                                       \
         map->size = size;                                                      \
@@ -119,7 +119,7 @@
                                                                                \
         new_map = xmmap_commit(&size);                                         \
         new_map->arena                                                         \
-            = arena_alloc(capacity*sizeof(*(&new_map->array[0])));           \
+            = arena_create(capacity*sizeof(*(&new_map->array[0])));           \
         new_map->capacity = capacity;                                          \
         new_map->bitmask = bitmask;                                            \
         new_map->size = size;                                                  \
@@ -428,7 +428,7 @@ main(void) {
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_map_create(NSTRINGS);
-    arena = arena_alloc((usize)4096*NSTRINGS);
+    arena = arena_create((usize)4096*NSTRINGS);
 
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);

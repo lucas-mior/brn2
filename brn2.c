@@ -911,8 +911,8 @@ main(void) {
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
 
-    list1->arena = arena_alloc(BRN2_ARENA_SIZE);
-    list2->arena = arena_alloc(BRN2_ARENA_SIZE);
+    list1->arena = arena_create(BRN2_ARENA_SIZE);
+    list2->arena = arena_create(BRN2_ARENA_SIZE);
 
     system(command);
     brn2_list_from_dir(list1, ".");
