@@ -106,8 +106,16 @@ scandir(const char *dir, struct dirent ***namelist, void *filter,
     list = xmalloc(capacity*sizeof(*list));
     do {
         struct dirent *ent = xmalloc(sizeof(*ent));
+        int64 length = strlen(find_data.cFileName);
 
-        strncpy(ent->d_name, find_data.cFileName, MAX_PATH);
+        if (length > (SIZEOF(ent->d_name) - 1)) {
+            error("Error scanning file %s. File name is too long.\n",
+                  find_data.cFileName);
+            fatal(EXIT_FAILURE);
+        }
+
+        memcpy(ent->d_name, find_data.cFileName, length + 1);
+
         if (count >= capacity) {
             capacity *= 2;
             list = xrealloc(list, capacity*sizeof(*list));
