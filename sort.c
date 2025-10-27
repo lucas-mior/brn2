@@ -18,21 +18,25 @@
 #if !defined(SORT_C)
 #define SORT_C
 
-#include "brn2.h"
 #include <string.h>
 #include <stdlib.h>
 
 #include "util.c"
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
-  #define COMPARE(A, B) compare_func(A, B)
   #define TESTING_sort 1
 #elif defined(TESTING_sort)
   #define TESTING_sort 1
-  #define COMPARE(A, B) compare_func(A, B)
 #else
   #define TESTING_sort 0
-  #define COMPARE(A, B) brn2_compare(A, B)
+#endif
+
+#ifndef COMPARE
+  #define COMPARE(A, B) compare_func(A, B)
+#endif
+
+#ifndef MAX_NTHREADS
+  #define MAX_NTHREADS 64
 #endif
 
 #if !defined(LENGTH)
@@ -104,10 +108,10 @@ static void
 sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
                      void *dummy_last,
                      int32 (*compare)(const void *a, const void *b)) {
-    HeapNode heap[BRN2_MAX_THREADS];
-    uint32 n_sub[BRN2_MAX_THREADS];
-    uint32 indices[BRN2_MAX_THREADS] = {0};
-    uint32 offsets[BRN2_MAX_THREADS];
+    HeapNode heap[MAX_NTHREADS];
+    uint32 n_sub[MAX_NTHREADS];
+    uint32 indices[MAX_NTHREADS] = {0};
+    uint32 offsets[MAX_NTHREADS];
     usize memory_size = size*n;
     char *output = xmalloc(memory_size);
     char *array2 = array;
