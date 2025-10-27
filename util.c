@@ -71,6 +71,7 @@ static char *program;
 #if defined(__clang__)
   #pragma clang diagnostic ignored "-Wc11-extensions"
   #pragma clang diagnostic ignored "-Wformat"
+  #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
 #define PRINT_VAR_EVAL(FORMAT, variable)                                       \
@@ -761,7 +762,7 @@ main(void) {
     void *var_voidptr = NULL;
     float var_float = 0.5f;
     double var_double = 0.5;
-    long double var_longdouble = 0.5;
+    long double var_longdouble = 0.5L;
     int8 var_int8 = INT8_MAX;
     int16 var_int16 = INT16_MAX;
     int32 var_int32 = INT32_MAX;
@@ -770,7 +771,6 @@ main(void) {
     uint16 var_uint16 = UINT16_MAX;
     uint32 var_uint32 = UINT32_MAX;
     uint64 var_uint64 = UINT64_MAX;
-    FILE *file = stdin;
 
     PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
@@ -787,14 +787,13 @@ main(void) {
     PRINT_VAR(var_uint16);
     PRINT_VAR(var_uint32);
     PRINT_VAR(var_uint64);
-    PRINT_VAR(file);
 
     memset(p1, 0, SIZEMB(1));
     memcpy(p1, string, strlen(string));
     memset(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
-    error("%s == %s is working? %b\n", string, p3, !strcmp(string, p3));
+    assert(!strcmp(string, p3));
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
