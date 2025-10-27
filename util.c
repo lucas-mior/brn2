@@ -149,7 +149,7 @@ static char *notifiers[2] = {"dunstify", "notify-send"};
 static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
 static void *xcalloc(const size_t, const size_t);
-static void *xmalloc(const size_t);
+static void *xmalloc(int64);
 static void *xrealloc(void *, const size_t);
 static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
@@ -260,9 +260,13 @@ xmunmap(void *p, size_t size) {
 #endif
 
 void *
-xmalloc(const size_t size) {
+xmalloc(int64 size) {
     void *p;
-    if ((p = malloc(size)) == NULL) {
+    if (size <= 0) {
+        error("Error in xmalloc: invalid size = %ld.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %zu bytes.\n", size);
         fatal(EXIT_FAILURE);
     }
