@@ -29,15 +29,15 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "hash.c"
+#include "util.c"
+#include "arena.c"
+
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_brn2 1
 #elif !defined(TESTING_brn2)
 #define TESTING_brn2 0
 #endif
-
-#include "hash.c"
-#include "util.c"
-#include "arena.c"
 
 static void *brn2_threads_work_hashes(void *);
 static void *brn2_threads_work_normalization(void *);
