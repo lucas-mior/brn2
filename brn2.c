@@ -92,8 +92,8 @@ scandir(const char *dir, struct dirent ***namelist, void *filter,
     HANDLE hFind;
     char buffer[MAX_PATH];
     struct dirent **list;
-    size_t count = 0;
-    size_t capacity = 16;
+    int64 count = 0;
+    int64 capacity = 16;
     (void)filter;
     (void)compar;
 
