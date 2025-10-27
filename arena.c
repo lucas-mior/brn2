@@ -80,7 +80,7 @@ typedef uint64_t uint64;
 #endif
 
 static Arena *arena_create(size_t);
-static void *arena_alloc(size_t *);
+static void *arena_allocate(size_t *);
 static void arena_destroy(Arena *);
 static void arena_free(Arena *);
 static void *arena_push(Arena *, uint32);
@@ -94,7 +94,7 @@ arena_create(size_t size) {
     void *p;
     Arena *arena;
 
-    p = arena_alloc(&size);
+    p = arena_allocate(&size);
 
     arena = p;
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
@@ -108,7 +108,7 @@ arena_create(size_t size) {
 
 #if !defined(__WIN32__)
 void *
-arena_alloc(size_t *size) {
+arena_allocate(size_t *size) {
     void *p;
 
     if (arena_page_size == 0) {
@@ -151,7 +151,7 @@ arena_free(Arena *arena) {
 }
 #else
 void *
-arena_alloc(size_t *size) {
+arena_allocate(size_t *size) {
     void *p;
 
     if (arena_page_size == 0) {
