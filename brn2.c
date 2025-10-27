@@ -39,10 +39,6 @@
 #include "util.c"
 #include "arena.c"
 
-#if !defined(__WIN32__)
-#define COMPARE(A, B) brn2_compare(A, B)
-#endif
-
 static void *brn2_threads_work_hashes(void *);
 static void *brn2_threads_work_normalization(void *);
 static void *brn2_threads_work_changes(void *);

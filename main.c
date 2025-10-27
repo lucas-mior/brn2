@@ -23,6 +23,9 @@
 #include "hash.c"
 #include "util.c"
 #include "arena.c"
+
+#define MAX_THREADS BRN2_MAX_THREADS
+#define COMPARE brn2_compare
 #include "sort.c"
 
 bool brn2_options_fatal = DEBUGGING;

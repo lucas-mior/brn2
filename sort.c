@@ -31,7 +31,7 @@
   #define TESTING_sort 0
 #endif
 
-#ifndef COMPARE
+#if !defined(COMPARE)
   #define COMPARE(A, B) compare_func(A, B)
 #endif
 
@@ -229,6 +229,8 @@ sort(FileList *old) {
 #endif
 
 #if TESTING_sort
+
+#include <assert.h>
 
 #define MAXI 10000
 static const uint32 possibleN[] = {31, 32, 33, 50};
