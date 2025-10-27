@@ -99,8 +99,7 @@ scandir(const char *dir, struct dirent ***namelist, void *filter,
 
     SNPRINTF(buffer, "%s/*", dir);
 
-    hFind = FindFirstFileA(buffer, &find_data);
-    if (hFind == INVALID_HANDLE_VALUE) {
+    if ((hFind = FindFirstFileA(buffer, &find_data)) == INVALID_HANDLE_VALUE) {
         return -1;
     }
 
