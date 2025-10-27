@@ -107,8 +107,8 @@ main(int argc, char **argv) {
     old = &old_stack;
     new = &new_stack;
 
-    old->arena = arena_alloc(BRN2_ARENA_SIZE);
-    new->arena = arena_alloc(BRN2_ARENA_SIZE);
+    old->arena = arena_create(BRN2_ARENA_SIZE);
+    new->arena = arena_create(BRN2_ARENA_SIZE);
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL))
