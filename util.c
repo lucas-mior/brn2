@@ -536,7 +536,7 @@ util_die_notify(char *program_name, const char *format, ...) {
         fatal(EXIT_FAILURE);
     }
 
-    if (n >= (int32)sizeof(buffer)) {
+    if (n >= SIZEOF(buffer)) {
         fatal(EXIT_FAILURE);
     }
 
