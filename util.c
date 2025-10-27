@@ -58,7 +58,7 @@ static char *program;
 #endif
 
 #if !defined(LENGTH)
-  #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
+  #define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
 #endif
 #if !defined(SNPRINTF)
   #define SNPRINTF(BUFFER, FORMAT, ...)                                          \
