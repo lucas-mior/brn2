@@ -25,9 +25,7 @@
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
   #define TESTING_sort 1
-#elif defined(TESTING_sort)
-  #define TESTING_sort 1
-#else
+#elif !defined(TESTING_sort)
   #define TESTING_sort 0
 #endif
 
