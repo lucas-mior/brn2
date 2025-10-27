@@ -57,7 +57,7 @@ void
 brn2_list_from_args(FileList *list, int argc, char **argv) {
     uint32 length = 0;
 
-    list->files = xmalloc((size_t)argc*sizeof(*(list->files)));
+    list->files = xmalloc(argc*SIZEOF(*(list->files)));
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -142,7 +142,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         fatal(EXIT_FAILURE);
     }
 
-    list->files = xmalloc((usize)number_files*sizeof(*(list->files)));
+    list->files = xmalloc(number_files*SIZEOF(*(list->files)));
 
     for (int i = 0; i < number_files; i += 1) {
         FileName **file_pointer = &(list->files[length]);

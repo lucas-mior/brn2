@@ -41,6 +41,10 @@
 #define LENGTH(x) (isize)((sizeof(x) / sizeof(*x)))
 #endif
 
+#if !defined(SIZEOF)
+#define SIZEOF(X) (int64)sizeof(X)
+#endif
+
 typedef struct HeapNode {
     void *value;
     uint32 p_index;
@@ -48,18 +52,18 @@ typedef struct HeapNode {
 } HeapNode;
 
 static void
-sort_shuffle(void *array, usize n, usize size) {
+sort_shuffle(void *array, int64 n, int64 size) {
     char *tmp = xmalloc(size);
     char *arr = array;
 
     if (n > 1) {
-        for (usize i = 0; i < n - 1; i += 1) {
-            usize rnd = (usize)rand();
-            usize j = i + rnd / (RAND_MAX / (n - i) + 1);
+        for (int64 i = 0; i < n - 1; i += 1) {
+            int64 rnd = rand();
+            int64 j = i + rnd / (RAND_MAX / (n - i) + 1);
 
-            memcpy(tmp, arr + j*size, size);
-            memcpy(arr + j*size, arr + i*size, size);
-            memcpy(arr + i*size, tmp, size);
+            memcpy(tmp, arr + j*size, (usize)size);
+            memcpy(arr + j*size, arr + i*size, (usize)size);
+            memcpy(arr + i*size, tmp, (usize)size);
         }
     }
 
@@ -111,7 +115,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     uint32 indices[MAX_NTHREADS] = {0};
     uint32 offsets[MAX_NTHREADS];
     usize memory_size = size*n;
-    char *output = xmalloc(memory_size);
+    char *output = xmalloc((int64)memory_size);
     char *array2 = array;
 
     for (uint32 k = 0; k < (p - 1); k += 1) {
@@ -128,7 +132,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
     }
 
     for (uint32 k = 0; k < p; k += 1) {
-        heap[k].value = xmalloc(size);
+        heap[k].value = xmalloc((int64)size);
         memcpy(heap[k].value, &array2[offsets[k]*size], size);
         heap[k].p_index = k;
     }
@@ -182,7 +186,7 @@ sort(FileList *old) {
     struct timespec t1;
 
     FileList copy = {0};
-    sort_shuffle(old->files, old->length, sizeof(*(old->files)));
+    sort_shuffle(old->files, old->length, SIZEOF(*(old->files)));
 
     memcpy(&copy, old, sizeof(*old));
     copy.files = xmalloc(copy.length*sizeof(*(old->files)));
