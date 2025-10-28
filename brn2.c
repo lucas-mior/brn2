@@ -128,29 +128,12 @@ brn2_enqueue(Work *work) {
     return;
 }
 
-static Work *
-brn2_work_dequeue(void) {
-    Work *work;
-    Node *tmp;
-
-    if (work_head == NULL)
-        return NULL;
-
-    tmp = work_head;
-    work = tmp->work;
-    work_head = work_head->next;
-    if (work_head == NULL)
-        work_tail = NULL;
-
-    free(tmp);
-    return work;
-}
-
 static void *
 brn2_threads_function(void *arg) {
     (void)arg;
     while (true) {
         Work *work;
+        Node *tmp;
 
         pthread_mutex_lock(&brn2_mutex);
         while (work_head == NULL && !stop) {
@@ -161,7 +144,18 @@ brn2_threads_function(void *arg) {
             pthread_mutex_unlock(&brn2_mutex);
             pthread_exit(NULL);
         }
-        work = brn2_work_dequeue();
+
+        if (work_head == NULL)
+            return NULL;
+
+        tmp = work_head;
+        work = tmp->work;
+        work_head = work_head->next;
+        if (work_head == NULL)
+            work_tail = NULL;
+
+        free(tmp);
+
         pthread_mutex_unlock(&brn2_mutex);
 
         if (work) {
