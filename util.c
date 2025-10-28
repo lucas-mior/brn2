@@ -400,6 +400,10 @@ int
 util_command(const int argc, char **argv) {
     char *cmdline;
     uint32 len = 1;
+    FILE *tty;
+    STARTUPINFO si;
+    BOOL success;
+    PROCESS_INFORMATION pi = {0};
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
@@ -419,20 +423,17 @@ util_command(const int argc, char **argv) {
         strcat(cmdline, " ");
     }
 
-    FILE *tty = freopen("CONIN$", "r", stdin);
-    if (!tty) {
+    if ((tty = freopen("CONIN$", "r", stdin)) == NULL) {
         error("Error reopening stdin: %s.\n", strerror(errno));
         free(cmdline);
         fatal(EXIT_FAILURE);
     }
 
-    STARTUPINFO si;
     memset(&si, 0, sizeof(si));
     si.cb = sizeof(si);
-    PROCESS_INFORMATION pi = {0};
 
-    BOOL success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL,
-                                  NULL, &si, &pi);
+    success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL,
+                             NULL, &si, &pi);
 
     if (!success) {
         error("Error running '%s", argv[0]);
@@ -840,6 +841,25 @@ main(void) {
     uint32 var_uint32 = UINT32_MAX;
     uint64 var_uint64 = UINT64_MAX;
 
+    char *paths[] = {
+        "/aaaa/bbbb/cccc",
+        "/aa/bb/cc",
+        "/a/b/c",
+        "a/b/c",
+        "a/b/cccc",
+        "a/bb/cccc",
+        "aaaa/cccc",
+    };
+    char *bases[] = {
+        "cccc",
+        "cc",
+        "c",
+        "c",
+        "cccc",
+        "cccc",
+        "cccc",
+    };
+
     PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
     PRINT_VAR(var_string);
@@ -868,25 +888,6 @@ main(void) {
         int n = rand() - RAND_MAX / 2;
         assert(atoi2(itoa2(n, buffer)) == n);
     }
-
-    char *paths[] = {
-        "/aaaa/bbbb/cccc",
-        "/aa/bb/cc",
-        "/a/b/c",
-        "a/b/c",
-        "a/b/cccc",
-        "a/bb/cccc",
-        "aaaa/cccc",
-    };
-    char *bases[] = {
-        "cccc",
-        "cc",
-        "c",
-        "c",
-        "cccc",
-        "cccc",
-        "cccc",
-    };
 
     for (int64 i = 0; i < LENGTH(paths); i += 1) {
         char *path = paths[i];

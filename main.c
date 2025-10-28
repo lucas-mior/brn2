@@ -67,9 +67,7 @@ delete_brn2_buffer(void) {
 #if OS_UNIX
 static void
 destroy_threads(void) {
-    error("Destroying %u threads...\n", nthreads);
     for (uint32 i = 0; i < nthreads; i += 1) {
-        error("destroying %d...\n", i);
         pthread_cancel(thread_pool[i]);
     }
 }
