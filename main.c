@@ -36,6 +36,9 @@ bool brn2_options_autosolve = false;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
+pthread_t thread_pool[BRN2_MAX_THREADS] = {0};
+uint32 ids[BRN2_MAX_THREADS] = {0};
+
 static struct option options[] = {{"dir", required_argument, NULL, 'd'},
                                   {"file", required_argument, NULL, 'f'},
                                   {"explict", no_argument, NULL, 'e'},
@@ -172,6 +175,12 @@ main(int argc, char **argv) {
     } else {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
     }
+
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        ids[i] = i;
+        pthread_create(&thread_pool[i], NULL, brn2_threads_function, &ids[i]);
+    }
+    exit(EXIT_SUCCESS);
 
     switch (mode) {
     case FILES_FROM_FILE:
