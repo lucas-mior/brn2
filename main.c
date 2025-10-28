@@ -71,6 +71,15 @@ handler_segv(int unused) {
     fatal(EXIT_FAILURE);
 }
 
+void
+destroy_threads(void) {
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        ids[i] = i;
+        error("destroying %d...\n", i);
+        pthread_cancel(thread_pool[i]);
+    }
+}
+
 int
 main(int argc, char **argv) {
     FileList old_stack = {0};
@@ -177,6 +186,7 @@ main(int argc, char **argv) {
         ids[i] = i;
         pthread_create(&thread_pool[i], NULL, brn2_threads_function, &ids[i]);
     }
+    atexit(destroy_threads);
 
     switch (mode) {
     case FILES_FROM_FILE:
