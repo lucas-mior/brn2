@@ -52,7 +52,7 @@ static pthread_cond_t done = PTHREAD_COND_INITIALIZER;
 
 uint32 ids[BRN2_MAX_THREADS] = {0};
 pthread_t thread_pool[BRN2_MAX_THREADS];
-static uint32 pending = 0;
+static uint32 work_pending = 0;
 
 typedef struct Work {
     void *(*function)(void *);
@@ -123,7 +123,7 @@ brn2_enqueue(Work *work) {
     else
         tail->next = new_node;
     tail = new_node;
-    pending += 1;
+    work_pending += 1;
     return;
 }
 
@@ -163,8 +163,8 @@ brn2_threads_function(void *arg) {
         if (work) {
             work->function(work);
             pthread_mutex_lock(&mutex);
-            pending -= 1;
-            if (pending == 0 && head == NULL) {
+            work_pending -= 1;
+            if (work_pending == 0 && head == NULL) {
                 pthread_cond_signal(&done);
             }
             pthread_mutex_unlock(&mutex);
@@ -716,7 +716,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         pthread_mutex_unlock(&mutex);
     }
 
-    while (pending > 0 || head != NULL) {
+    while (work_pending > 0 || head != NULL) {
         pthread_cond_wait(&done, &mutex);
     }
     pthread_cond_signal(&done);
