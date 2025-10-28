@@ -18,13 +18,6 @@
 #if !defined(ARENA_C)
 #define ARENA_C
 
-#if defined(__WIN32__)
-#include <windows.h>
-#else
-#include <sys/mman.h>
-#include <unistd.h>
-#endif
-
 #if defined(__linux__)
 #define OS_LINUX 1
 #define OS_MAC 0
@@ -50,6 +43,15 @@
 #endif
 
 #define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
+
+#if OS_WINDOWS
+#include <windows.h>
+#endif
+
+#if OS_UNIX
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_arena 1
