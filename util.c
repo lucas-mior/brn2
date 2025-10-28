@@ -199,6 +199,7 @@ static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
 static long atoi2(char *);
 static size_t util_page_size = 0;
+char *basename2(char *);
 
 #if OS_WINDOWS
 uint32
@@ -221,7 +222,7 @@ util_nthreads(void) {
 
 char *
 basename2(char *path) {
-    int64 left = strlen(path);
+    int64 left = (int64)strlen(path);
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
@@ -229,9 +230,9 @@ basename2(char *path) {
     while (left > 0) {
         int64 length;
 
-        fslash = memchr(p, '/', left);
+        fslash = memchr(p, '/', (usize)left);
         if (OS_WINDOWS)
-            bslash = memchr(p, '\\', left);
+            bslash = memchr(p, '\\', (usize)left);
 
         if ((fslash == NULL) && (bslash == NULL)) {
             return p;
