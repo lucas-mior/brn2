@@ -717,7 +717,6 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
     }
 
     while (pending > 0 || head != NULL) {
-        printf("mainthread: pendind=%u\n", pending);
         pthread_cond_wait(&done, &mutex);
     }
     pthread_cond_signal(&done);
@@ -1013,6 +1012,11 @@ main(void) {
     system(command);
     brn2_list_from_dir(list1, ".");
     brn2_list_from_file(list2, file, true);
+
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        ids[i] = i;
+        pthread_create(&thread_pool[i], NULL, brn2_threads_function, &ids[i]);
+    }
 
     brn2_normalize_names(list1, NULL);
     brn2_normalize_names(list2, NULL);
