@@ -54,7 +54,6 @@ static void brn2_list_from_lines(FileList *, char *, bool);
 static pthread_mutex_t brn2_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t brn2_done_work = PTHREAD_COND_INITIALIZER;
 
-uint32 ids[BRN2_MAX_THREADS] = {0};
 pthread_t thread_pool[BRN2_MAX_THREADS];
 static uint32 work_pending = 0;
 pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
@@ -149,7 +148,7 @@ brn2_work_dequeue(void) {
 
 static void *
 brn2_threads_function(void *arg) {
-    Node *node = arg;
+    (void)arg;
     while (true) {
         Work *work;
 
@@ -948,7 +947,6 @@ main(void) {
     brn2_list_from_file(list2, file, true);
 
     for (uint32 i = 0; i < nthreads; i += 1) {
-        ids[i] = i;
         pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
     }
 
