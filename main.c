@@ -64,7 +64,7 @@ delete_brn2_buffer(void) {
     return;
 }
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 static void
 destroy_threads(void) {
     for (uint32 i = 0; i < nthreads; i += 1) {
@@ -106,7 +106,7 @@ main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-#if !defined(__WIN32__)
+#if OS_UNIX
     /* struct sigaction signal_segment_violation; */
 
     /* signal_segment_violation.sa_handler = handler_segv; */
@@ -184,7 +184,7 @@ main(int argc, char **argv) {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
     }
 
-#if !defined(__WIN32__)
+#if OS_UNIX
     for (uint32 i = 0; i < nthreads; i += 1) {
         ids[i] = i;
         pthread_create(&thread_pool[i], NULL,
@@ -242,7 +242,7 @@ main(int argc, char **argv) {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
-#if !defined(__WIN32__)
+#if OS_UNIX
         char *temp = "/tmp";
 #else
         char *temp = getenv("Temp");
