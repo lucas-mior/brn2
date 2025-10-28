@@ -621,13 +621,6 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         length = new->length;
     }
 
-    if (nthreads*2 >= length) {
-        nthreads = 1;
-    }
-    if (length <= BRN2_MIN_PARALLEL) {
-        nthreads = 1;
-    }
-
     range = length / nthreads;
 
     for (uint32 i = 0; i < (nthreads - 1); i += 1) {
