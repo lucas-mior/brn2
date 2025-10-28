@@ -638,7 +638,7 @@ util_copy_file(const char *destination, const char *source) {
     return 0;
 }
 
-#if defined(__linux__)
+#if OS_LINUX
 #include <dirent.h>
 void
 send_signal(const char *executable, const int32 signal_number) {
@@ -713,8 +713,7 @@ send_signal(const char *executable, const int32 signal_number) {
     closedir(processes);
     return;
 }
-#else
-#if !defined(__WIN32__)
+#elif OS_UNIX
 void
 send_signal(const char *executable, const int32 signal_number) {
     char signal_string[14];
@@ -740,7 +739,6 @@ send_signal(const char *executable, const int32 signal_number) {
     (void)signal_number;
     return;
 }
-#endif
 #endif
 
 char *
