@@ -496,7 +496,6 @@ brn2_threads_work_normalization(void *arg) {
             file->length -= 2;
         }
 
-#if OS_UNIX
         if (old_list) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
@@ -518,9 +517,6 @@ brn2_threads_work_normalization(void *arg) {
                 brn2_slash_add(file);
             }
         }
-#else
-    (void) old_list;
-#endif
     }
     return 0;
 }

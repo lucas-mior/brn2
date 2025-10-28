@@ -1,5 +1,11 @@
 #include <windows.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <wchar.h>
+
+#ifndef S_IFLNK
+#define S_IFLNK 0120000
+#endif
 
 int
 scandir(const char *dir, struct dirent ***namelist, void *filter,
@@ -72,4 +78,55 @@ memmem(const void *haystack, size_t hay_len,
     }
 
     return NULL;
+}
+
+static int
+lstat(const char *path, struct stat *st) {
+    if (!path || !st) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return -1;
+    }
+
+    // Convert UTF-8 to UTF-16
+    wchar_t wpath[MAX_PATH];
+    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0)
+        return -1;
+
+    WIN32_FIND_DATAW fd;
+    HANDLE h = FindFirstFileW(wpath, &fd);
+    if (h == INVALID_HANDLE_VALUE)
+        return -1;
+    FindClose(h);
+
+    memset(st, 0, sizeof(*st));
+
+    // Detect symbolic link
+    if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+        st->st_mode = S_IFLNK;
+    else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        st->st_mode = S_IFDIR;
+    else
+        st->st_mode = S_IFREG;
+
+    // File size
+    LARGE_INTEGER sz;
+    sz.HighPart = fd.nFileSizeHigh;
+    sz.LowPart = fd.nFileSizeLow;
+    st->st_size = sz.QuadPart;
+
+    // File times (convert from FILETIME)
+    ULARGE_INTEGER ull;
+    ull.LowPart = fd.ftLastWriteTime.dwLowDateTime;
+    ull.HighPart = fd.ftLastWriteTime.dwHighDateTime;
+    st->st_mtime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+
+    ull.LowPart = fd.ftCreationTime.dwLowDateTime;
+    ull.HighPart = fd.ftCreationTime.dwHighDateTime;
+    st->st_ctime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+
+    ull.LowPart = fd.ftLastAccessTime.dwLowDateTime;
+    ull.HighPart = fd.ftLastAccessTime.dwHighDateTime;
+    st->st_atime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+
+    return 0;
 }
