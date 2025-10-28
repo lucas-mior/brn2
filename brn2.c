@@ -128,7 +128,7 @@ enqueue(Work *work) {
 }
 
 static Work *
-dequeue(void) {
+brn2_work_dequeue(void) {
     Work *result;
     Node *tmp;
 
@@ -157,7 +157,7 @@ brn2_threads_function(void *arg) {
         while (head == NULL && !stop)
             pthread_cond_wait(&condition, &mutex);
 
-        work = dequeue();
+        work = brn2_work_dequeue();
         pthread_mutex_unlock(&mutex);
 
         if (work) {
