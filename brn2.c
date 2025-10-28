@@ -221,6 +221,34 @@ scandir(const char *dir, struct dirent ***namelist, void *filter,
     *namelist = list;
     return (int)count;
 }
+
+static void *
+memmem(const void *haystack, size_t hay_len,
+       const void *needle,   size_t needle_len) {
+    if (needle_len == 0)
+        return (void *)haystack;
+    if (!haystack || !needle)
+        return NULL;
+    if (hay_len < needle_len)
+        return NULL;
+
+    const uchar *h = haystack;
+    const uchar *n = needle;
+    const uchar *end = h + hay_len;
+    const uchar *limit = end - needle_len + 1;
+    unsigned char first = n[0];
+
+    while (h < limit) {
+        const unsigned char *p = memchr(h, first, (size_t)(limit - h));
+        if (!p)
+            return NULL;
+        if (memcmp(p, n, needle_len) == 0)
+            return (void *)p;
+        h = p + 1;
+    }
+
+    return NULL;
+}
 #endif
 
 void
@@ -499,7 +527,6 @@ brn2_is_invalid_name(char *filename) {
     return true;
 }
 
-#if !defined(__WIN32__)
 void *
 brn2_threads_work_normalization(void *arg) {
     Work *work = arg;
@@ -539,6 +566,7 @@ brn2_threads_work_normalization(void *arg) {
             file->length -= 2;
         }
 
+#if !defined(__WIN32__)
         if (old_list) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
@@ -560,16 +588,12 @@ brn2_threads_work_normalization(void *arg) {
                 brn2_slash_add(file);
             }
         }
+#else
+    (void) old_list;
+#endif
     }
     return 0;
 }
-#else
-void *
-brn2_threads_work_normalization(void *arg) {
-    (void)arg;
-    return 0;
-}
-#endif
 
 void
 brn2_slash_add(FileName *file) {
