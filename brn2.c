@@ -71,8 +71,8 @@ struct Work {
     uint32 *partial;
 };
 
-static Node *work_head = NULL;
-static Node *work_tail = NULL;
+static Node *work_head_g = NULL;
+static Node *work_tail_g = NULL;
 bool stop = false;
 
 int
@@ -115,33 +115,33 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
 #if OS_UNIX
 static void
-brn2_enqueue(Work *work) {
+brn2_enqueue(Node **work_head, Node **work_tail, Work *work) {
     Node *new_node = xmalloc(sizeof(*new_node));
     new_node->work = work;
     new_node->next = NULL;
 
-    if (work_tail == NULL)
-        work_head = new_node;
+    if (*work_tail == NULL)
+        *work_head = new_node;
     else
-        work_tail->next = new_node;
-    work_tail = new_node;
+        (*work_tail)->next = new_node;
+    *work_tail = new_node;
     work_pending += 1;
     return;
 }
 
 static Work *
-brn2_work_dequeue(void) {
+brn2_work_dequeue(Node **work_head, Node **work_tail) {
     Work *result;
     Node *tmp;
 
-    if (work_head == NULL)
+    if (*work_head == NULL)
         return NULL;
 
-    tmp = work_head;
+    tmp = *work_head;
     result = tmp->work;
-    work_head = work_head->next;
-    if (work_head == NULL)
-        work_tail = NULL;
+    *work_head = (*work_head)->next;
+    if (*work_head == NULL)
+        *work_tail = NULL;
 
     free(tmp);
     return result;
@@ -149,12 +149,15 @@ brn2_work_dequeue(void) {
 
 static void *
 brn2_threads_function(void *arg) {
-    Node *node = arg;
+    Node ***nodes = arg;
+    Node **work_head = nodes[0];
+    Node **work_tail = nodes[1];
+
     while (true) {
         Work *work;
 
         pthread_mutex_lock(&brn2_mutex);
-        while (work_head == NULL && !stop) {
+        while ((*work_head == NULL) && !stop) {
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
         }
 
@@ -162,14 +165,14 @@ brn2_threads_function(void *arg) {
             pthread_mutex_unlock(&brn2_mutex);
             pthread_exit(NULL);
         }
-        work = brn2_work_dequeue();
+        work = brn2_work_dequeue(work_head, work_tail);
         pthread_mutex_unlock(&brn2_mutex);
 
         if (work) {
             work->function(work);
             pthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
-            if (work_pending == 0 && work_head == NULL) {
+            if (work_pending == 0 && (*work_head == NULL)) {
                 pthread_cond_signal(&brn2_done_work);
             }
             pthread_mutex_unlock(&brn2_mutex);
@@ -630,7 +633,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].function = function;
 
         pthread_mutex_lock(&brn2_mutex);
-        brn2_enqueue(&slices[i]);
+        brn2_enqueue(&work_head_g, &work_tail_g, &slices[i]);
         pthread_cond_signal(&brn2_new_work);
         pthread_mutex_unlock(&brn2_mutex);
     }
@@ -645,12 +648,12 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].function = function;
 
         pthread_mutex_lock(&brn2_mutex);
-        brn2_enqueue(&slices[i]);
+        brn2_enqueue(&work_head_g, &work_tail_g, &slices[i]);
         pthread_cond_signal(&brn2_new_work);
         pthread_mutex_unlock(&brn2_mutex);
     }
 
-    while (work_pending > 0 || work_head != NULL) {
+    while (work_pending > 0 || work_head_g != NULL) {
         pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
     pthread_cond_signal(&brn2_done_work);
@@ -936,6 +939,10 @@ main(void) {
     FileList list2_stack = {0};
     FileList *list1 = &list1_stack;
     FileList *list2 = &list2_stack;
+    Node **nodes[] = {
+        &work_head_g,
+        &work_tail_g,
+    };
 
     char *command = "ls -a > /tmp/brn2test";
     char *file = command + 8;
@@ -949,7 +956,7 @@ main(void) {
 
     for (uint32 i = 0; i < nthreads; i += 1) {
         ids[i] = i;
-        pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
+        pthread_create(&thread_pool[i], NULL, brn2_threads_function, nodes);
     }
 
     brn2_normalize_names(list1, NULL);

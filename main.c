@@ -199,10 +199,15 @@ main(int argc, char **argv) {
         nthreads = 1;
     }
 
+    Node **nodes[] = {
+        &work_head_g,
+        &work_tail_g,
+    };
+
     for (uint32 i = 0; i < nthreads; i += 1) {
         ids[i] = i;
         pthread_create(&thread_pool[i], NULL,
-                       brn2_threads_function, &ids[i]);
+                       brn2_threads_function, nodes);
     }
 #endif
 
