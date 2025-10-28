@@ -113,7 +113,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 }
 
 static void
-enqueue(Work *work) {
+brn2_enqueue(Work *work) {
     Node *new_node = xmalloc(sizeof(*new_node));
     new_node->work = work;
     new_node->next = NULL;
@@ -696,7 +696,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].function = function;
 
         pthread_mutex_lock(&mutex);
-        enqueue(&slices[i]);
+        brn2_enqueue(&slices[i]);
         pthread_cond_signal(&condition);
         pthread_mutex_unlock(&mutex);
     }
@@ -711,7 +711,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].function = function;
 
         pthread_mutex_lock(&mutex);
-        enqueue(&slices[i]);
+        brn2_enqueue(&slices[i]);
         pthread_cond_signal(&condition);
         pthread_mutex_unlock(&mutex);
     }
