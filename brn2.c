@@ -153,21 +153,17 @@ brn2_threads_function(void *arg) {
     while (true) {
         Work *work;
 
-        printf("thread[%u] before first lock...\n", *id);
         pthread_mutex_lock(&mutex);
         while (head == NULL && !stop)
             pthread_cond_wait(&condition, &mutex);
-        printf("thread[%u] after cond wait...\n", *id);
 
         work = dequeue();
         pthread_mutex_unlock(&mutex);
 
         if (work) {
-            printf("work!!! pending=%u\n", pending);
             work->function(work);
             pthread_mutex_lock(&mutex);
             pending -= 1;
-            printf("pending=%u\n", pending);
             if (pending == 0 && head == NULL) {
                 pthread_cond_signal(&done);
             }
@@ -698,7 +694,11 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
         slices[i].function = function;
+
+        pthread_mutex_lock(&mutex);
         enqueue(&slices[i]);
+        pthread_cond_signal(&condition);
+        pthread_mutex_unlock(&mutex);
     }
     {
         uint32 i = nthreads - 1;
@@ -709,7 +709,11 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
         slices[i].function = function;
+
+        pthread_mutex_lock(&mutex);
         enqueue(&slices[i]);
+        pthread_cond_signal(&condition);
+        pthread_mutex_unlock(&mutex);
     }
 
     while (pending > 0 || head != NULL) {
