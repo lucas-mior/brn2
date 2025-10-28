@@ -132,6 +132,10 @@ case "$target" in
         name="$(echo "$src" | sed 's/\.c//g')"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
+        if [ $src = "windows_functions.c" ]; then
+            CC="zig cc"
+            CFLAGS="$CFLAGS -target x86_64-windows-gnu"
+        fi
         cmdline="$CC $CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
         cmdline="$cmdline $src -o /tmp/$src.exe $flags"
 

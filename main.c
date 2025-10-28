@@ -67,8 +67,8 @@ delete_brn2_buffer(void) {
 #if OS_UNIX
 static void
 destroy_threads(void) {
+    error("Destroying %u threads...\n", nthreads);
     for (uint32 i = 0; i < nthreads; i += 1) {
-        ids[i] = i;
         error("destroying %d...\n", i);
         pthread_cancel(thread_pool[i]);
     }
@@ -175,15 +175,6 @@ main(int argc, char **argv) {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
     }
 
-#if OS_UNIX
-    for (uint32 i = 0; i < nthreads; i += 1) {
-        ids[i] = i;
-        pthread_create(&thread_pool[i], NULL,
-                       brn2_threads_function, &ids[i]);
-    }
-    atexit(destroy_threads);
-#endif
-
     switch (mode) {
     case FILES_FROM_FILE:
         brn2_list_from_file(old, lines, true);
@@ -201,6 +192,23 @@ main(int argc, char **argv) {
     if (!brn2_options_quiet) {
         printf("Normalizing filenames...\n");
     }
+
+#if OS_UNIX
+    if (nthreads*2 >= old->length) {
+        nthreads = 1;
+    }
+    if (old->length <= BRN2_MIN_PARALLEL) {
+        nthreads = 1;
+    }
+
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        ids[i] = i;
+        pthread_create(&thread_pool[i], NULL,
+                       brn2_threads_function, &ids[i]);
+    }
+    atexit(destroy_threads);
+#endif
+
     brn2_normalize_names(old, NULL);
 
     for (uint32 i = 0; i < old->length; i += 1) {

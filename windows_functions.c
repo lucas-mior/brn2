@@ -1,10 +1,21 @@
+#if !defined(WINDOWS_FUNCTIONS_C)
+#define WINDOWS_FUNCTIONS_C
+
 #include <windows.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <wchar.h>
 
+#include "util.c"
+
 #ifndef S_IFLNK
 #define S_IFLNK 0120000
+#endif
+
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#define TESTING_windows_functions 1
+#elif !defined(TESTING_windows_functions)
+#define TESTING_windows_functions 0
 #endif
 
 int
@@ -82,25 +93,27 @@ memmem(const void *haystack, size_t hay_len,
 
 static int
 lstat(const char *path, struct stat *stat) {
+    wchar_t wpath[MAX_PATH];
+    WIN32_FIND_DATAW fd;
+    LARGE_INTEGER sz;
+    ULARGE_INTEGER ull;
+    HANDLE h;
+
     if (!path || !stat) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return -1;
     }
 
-    // Convert UTF-8 to UTF-16
-    wchar_t wpath[MAX_PATH];
     if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0)
         return -1;
 
-    WIN32_FIND_DATAW fd;
-    HANDLE h = FindFirstFileW(wpath, &fd);
+    h = FindFirstFileW(wpath, &fd);
     if (h == INVALID_HANDLE_VALUE)
         return -1;
     FindClose(h);
 
     memset(stat, 0, sizeof(*stat));
 
-    // Detect symbolic link
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
         stat->st_mode = S_IFLNK;
     else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
@@ -108,14 +121,10 @@ lstat(const char *path, struct stat *stat) {
     else
         stat->st_mode = S_IFREG;
 
-    // File size
-    LARGE_INTEGER sz;
     sz.HighPart = fd.nFileSizeHigh;
     sz.LowPart = fd.nFileSizeLow;
     stat->st_size = sz.QuadPart;
 
-    // File times (convert from FILETIME)
-    ULARGE_INTEGER ull;
     ull.LowPart = fd.ftLastWriteTime.dwLowDateTime;
     ull.HighPart = fd.ftLastWriteTime.dwHighDateTime;
     stat->st_mtime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
@@ -130,3 +139,14 @@ lstat(const char *path, struct stat *stat) {
 
     return 0;
 }
+
+#if TESTING_windows_functions
+#include <assert.h>
+int
+main(void) {
+    assert(true);
+    exit(EXIT_SUCCESS);
+}
+#endif
+
+#endif
