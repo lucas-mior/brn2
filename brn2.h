@@ -155,7 +155,7 @@ extern uint32 nthreads;
 #if OS_UNIX
 extern pthread_t thread_pool[BRN2_MAX_THREADS];
 extern uint32 ids[BRN2_MAX_THREADS];
-extern bool stop;
+extern bool stop_threads;
 extern pthread_cond_t brn2_new_work;
 #endif
 

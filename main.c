@@ -446,7 +446,7 @@ main(int argc, char **argv) {
 
 #if OS_UNIX
         pthread_mutex_lock(&brn2_mutex);
-        stop = true;
+        stop_threads = true;
         pthread_cond_broadcast(&brn2_new_work);
         pthread_mutex_unlock(&brn2_mutex);
 
