@@ -84,6 +84,14 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     return;
 }
 
+void *
+brn2_threads_function(void *arg) {
+    uint32 *id = arg;
+
+    printf("thread[%u]...\n", *id);
+    pthread_exit(NULL);
+}
+
 #if defined(__WIN32__)
 int
 scandir(const char *dir, struct dirent ***namelist, void *filter,
