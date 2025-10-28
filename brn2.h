@@ -139,6 +139,12 @@ typedef struct FileList {
     FileName **files;
 } FileList;
 
+typedef struct Work Work;
+typedef struct Node {
+    Work *work;
+    struct Node *next;
+} Node;
+
 extern bool brn2_options_fatal;
 extern bool brn2_options_implicit;
 extern bool brn2_options_quiet;

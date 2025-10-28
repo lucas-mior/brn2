@@ -60,7 +60,7 @@ static uint32 work_pending = 0;
 pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 #endif
 
-typedef struct Work {
+struct Work {
     void *(*function)(void *);
     FileList *old_list;
     FileList *new_list;
@@ -69,12 +69,7 @@ typedef struct Work {
     uint32 map_capacity;
     uint32 unused;
     uint32 *partial;
-} Work;
-
-typedef struct Node {
-    Work *work;
-    struct Node *next;
-} Node;
+};
 
 static Node *work_head = NULL;
 static Node *work_tail = NULL;
@@ -154,7 +149,7 @@ brn2_work_dequeue(void) {
 
 static void *
 brn2_threads_function(void *arg) {
-    (void) arg;
+    Node *node = arg;
     while (true) {
         Work *work;
 
@@ -954,7 +949,7 @@ main(void) {
 
     for (uint32 i = 0; i < nthreads; i += 1) {
         ids[i] = i;
-        pthread_create(&thread_pool[i], NULL, brn2_threads_function, &ids[i]);
+        pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
     }
 
     brn2_normalize_names(list1, NULL);
