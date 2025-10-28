@@ -1,4 +1,6 @@
-#if defined(__WIN32__)
+#include <windows.h>
+#include <dirent.h>
+
 int
 scandir(const char *dir, struct dirent ***namelist, void *filter,
         void *compar) {
@@ -71,4 +73,3 @@ memmem(const void *haystack, size_t hay_len,
 
     return NULL;
 }
-#endif
