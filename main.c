@@ -106,15 +106,6 @@ main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-#if OS_UNIX
-    /* struct sigaction signal_segment_violation; */
-
-    /* signal_segment_violation.sa_handler = handler_segv; */
-    /* signal_segment_violation.sa_flags = 0; */
-    /* sigemptyset(&(signal_segment_violation.sa_mask)); */
-    /* sigaction(SIGSEGV, &signal_segment_violation, NULL); */
-#endif
-
     old = &old_stack;
     new = &new_stack;
 
