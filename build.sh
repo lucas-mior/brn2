@@ -9,7 +9,7 @@ targets='
 test
 build
 debug
-benchmark
+# benchmark
 # perf
 valgrind
 # check

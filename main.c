@@ -204,7 +204,6 @@ main(int argc, char **argv) {
         pthread_create(&thread_pool[i], NULL,
                        brn2_threads_function, &ids[i]);
     }
-    atexit(destroy_threads);
 #endif
 
     brn2_normalize_names(old, NULL);
@@ -446,6 +445,18 @@ main(int argc, char **argv) {
         hash_set_destroy(newlist_set);
         arena_destroy(old->arena);
         arena_destroy(new->arena);
+
+#if OS_UNIX
+        pthread_mutex_lock(&brn2_mutex);
+        stop = true;
+        pthread_cond_broadcast(&brn2_new_work);
+        pthread_mutex_unlock(&brn2_mutex);
+
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            pthread_join(thread_pool[i], NULL);
+        }
+#endif
+
     }
 #if OS_WINDOWS
     printf("Press enter to continue.\n");
