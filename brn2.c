@@ -52,12 +52,12 @@ static void brn2_list_from_lines(FileList *, char *, bool);
 
 #if OS_UNIX
 static pthread_mutex_t brn2_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 static pthread_cond_t brn2_done_work = PTHREAD_COND_INITIALIZER;
 
 uint32 ids[BRN2_MAX_THREADS] = {0};
 pthread_t thread_pool[BRN2_MAX_THREADS];
 static uint32 work_pending = 0;
+pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 #endif
 
 typedef struct Work {
@@ -78,7 +78,7 @@ typedef struct Node {
 
 static Node *work_head = NULL;
 static Node *work_tail = NULL;
-static bool stop = false;
+bool stop = false;
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -154,16 +154,19 @@ brn2_work_dequeue(void) {
 
 static void *
 brn2_threads_function(void *arg) {
-    uint32 *id = arg;
-
-    printf("thread[%u]...\n", *id);
+    (void) arg;
     while (true) {
         Work *work;
 
         pthread_mutex_lock(&brn2_mutex);
-        while (work_head == NULL && !stop)
+        while (work_head == NULL && !stop) {
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
+        }
 
+        if (stop) {
+            pthread_mutex_unlock(&brn2_mutex);
+            pthread_exit(NULL);
+        }
         work = brn2_work_dequeue();
         pthread_mutex_unlock(&brn2_mutex);
 
@@ -177,7 +180,6 @@ brn2_threads_function(void *arg) {
             pthread_mutex_unlock(&brn2_mutex);
         }
     }
-    pthread_exit(NULL);
 }
 #endif
 
