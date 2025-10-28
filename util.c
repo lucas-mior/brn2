@@ -401,7 +401,7 @@ util_command(const int argc, char **argv) {
     char *cmdline;
     uint32 len = 1;
     FILE *tty;
-    STARTUPINFO si;
+    STARTUPINFO startup_info;
     BOOL success;
     PROCESS_INFORMATION pi = {0};
 
@@ -429,11 +429,11 @@ util_command(const int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
+    memset(&startup_info, 0, sizeof(startup_info));
+    startup_info.cb = sizeof(startup_info);
 
     success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL,
-                             NULL, &si, &pi);
+                             NULL, &startup_info, &pi);
 
     if (!success) {
         error("Error running '%s", argv[0]);
