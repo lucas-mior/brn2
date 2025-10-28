@@ -35,10 +35,6 @@
   #include <fts.h>
 #endif
 
-#if !defined(__linux__)
-  #define basename(X) X
-#endif
-
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>

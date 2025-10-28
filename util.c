@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <time.h>
+#include <libgen.h>
 #include <limits.h>
 
 #if defined(__linux__)
@@ -213,6 +214,40 @@ util_nthreads(void) {
     return (uint32)sysconf(_SC_NPROCESSORS_ONLN);
 }
 #endif
+
+#if OS_WINDOWS || OS_MAC
+#define basename basename2
+#endif
+
+char *
+basename2(char *path) {
+    int64 left = strlen(path);
+    char *fslash = NULL;
+    char *bslash = NULL;
+    char *p = path;
+
+    while (left > 0) {
+        int64 length;
+
+        fslash = memchr(p, '/', left);
+        if (OS_WINDOWS)
+            bslash = memchr(p, '\\', left);
+
+        if ((fslash == NULL) && (bslash == NULL)) {
+            return p;
+        }
+        if (fslash > bslash) {
+            length = fslash - p + 1;
+            p = fslash + 1;
+        } else {
+            length = bslash - p + 1;
+            p = bslash + 1;
+        }
+
+        left -= length;
+    }
+    return path;
+}
 
 #if OS_UNIX
 void *
@@ -831,6 +866,35 @@ main(void) {
     for (int i = 0; i < 10; i += 1) {
         int n = rand() - RAND_MAX / 2;
         assert(atoi2(itoa2(n, buffer)) == n);
+    }
+
+    char *paths[] = {
+        "/aaaa/bbbb/cccc",
+        "/aa/bb/cc",
+        "/a/b/c",
+        "a/b/c",
+        "a/b/cccc",
+        "a/bb/cccc",
+        "aaaa/cccc",
+    };
+    char *bases[] = {
+        "cccc",
+        "cc",
+        "c",
+        "c",
+        "cccc",
+        "cccc",
+        "cccc",
+    };
+
+    for (int64 i = 0; i < LENGTH(paths); i += 1) {
+        char *path = paths[i];
+        assert(!strcmp(basename2(path), bases[i]));
+    }
+
+    if (OS_WINDOWS) {
+        char *path2 = "aa\\cc";
+        assert(!strcmp(basename2(path2), "cc"));
     }
 
     free(p1);
