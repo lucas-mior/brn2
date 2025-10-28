@@ -72,7 +72,7 @@ struct Work {
 
 static Node *work_head = NULL;
 static Node *work_tail = NULL;
-bool stop = false;
+bool stop_threads = false;
 
 int
 brn2_compare(const void *a, const void *b) {
@@ -136,11 +136,11 @@ brn2_threads_function(void *arg) {
         Node *tmp;
 
         pthread_mutex_lock(&brn2_mutex);
-        while (work_head == NULL && !stop) {
+        while (work_head == NULL && !stop_threads) {
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
         }
 
-        if (stop) {
+        if (stop_threads) {
             pthread_mutex_unlock(&brn2_mutex);
             pthread_exit(NULL);
         }
