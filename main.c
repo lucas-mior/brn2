@@ -36,9 +36,6 @@ bool brn2_options_autosolve = false;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
-pthread_t thread_pool[BRN2_MAX_THREADS] = {0};
-uint32 ids[BRN2_MAX_THREADS] = {0};
-
 static struct option options[] = {{"dir", required_argument, NULL, 'd'},
                                   {"file", required_argument, NULL, 'f'},
                                   {"explict", no_argument, NULL, 'e'},
@@ -180,7 +177,6 @@ main(int argc, char **argv) {
         ids[i] = i;
         pthread_create(&thread_pool[i], NULL, brn2_threads_function, &ids[i]);
     }
-    exit(EXIT_SUCCESS);
 
     switch (mode) {
     case FILES_FROM_FILE:
@@ -199,7 +195,10 @@ main(int argc, char **argv) {
     if (!brn2_options_quiet) {
         printf("Normalizing filenames...\n");
     }
+    printf("before normalization: %s\n", old->files[0]->name);
     brn2_normalize_names(old, NULL);
+    printf("after normalization: %s\n", old->files[0]->name);
+    exit(EXIT_SUCCESS);
 
     for (uint32 i = 0; i < old->length; i += 1) {
         FileName **file = &(old->files[i]);

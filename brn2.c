@@ -46,6 +46,29 @@ static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
 
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
+
+typedef struct Work {
+    void *(*function)(void *);
+    FileList *old_list;
+    FileList *new_list;
+    uint32 start;
+    uint32 end;
+    uint32 map_capacity;
+    uint32 unused;
+    uint32 *partial;
+} Work;
+
+typedef struct Node {
+    Work *work;
+    struct Node *next;
+} Node;
+
+static Node *head = NULL;
+static Node *tail = NULL;
+static bool stop = false;
+
 int
 brn2_compare(const void *a, const void *b) {
     FileName *const *file_a = a;
@@ -84,11 +107,61 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     return;
 }
 
-void *
+static void
+enqueue(Work *work) {
+    Node *new_node = xmalloc(sizeof(*new_node));
+    new_node->work = work;
+    new_node->next = NULL;
+
+    if (tail == NULL)
+        head = new_node;
+    else
+        tail->next = new_node;
+    tail = new_node;
+}
+
+static Work *
+dequeue(void) {
+    Work *result;
+    Node *tmp;
+
+    if (head == NULL)
+        return NULL;
+
+    tmp = head;
+    result = tmp->work;
+    head = head->next;
+    if (head == NULL)
+        tail = NULL;
+
+    free(tmp);
+    return result;
+}
+
+static void *
 brn2_threads_function(void *arg) {
     uint32 *id = arg;
 
     printf("thread[%u]...\n", *id);
+    while (true) {
+        Work *work;
+
+        pthread_mutex_lock(&mutex);
+        while (head == NULL && !stop)
+            pthread_cond_wait(&condition, &mutex);
+
+        if (stop && head == NULL) {
+            pthread_mutex_unlock(&mutex);
+            break;
+        }
+
+        work = dequeue();
+        pthread_mutex_unlock(&mutex);
+
+        if (work) {
+            work->function(work);
+        }
+    }
     pthread_exit(NULL);
 }
 
@@ -414,32 +487,22 @@ brn2_is_invalid_name(char *filename) {
     return true;
 }
 
-typedef struct Slice {
-    FileList *old_list;
-    FileList *new_list;
-    uint32 start;
-    uint32 end;
-    uint32 map_capacity;
-    uint32 unused;
-    uint32 *partial;
-} Slice;
-
 #if !defined(__WIN32__)
 void *
 brn2_threads_work_normalization(void *arg) {
-    Slice *slice = arg;
+    Work *work = arg;
     FileList *list;
     bool old_list;
 
-    if (slice->new_list) {
-        list = slice->new_list;
+    if (work->new_list) {
+        list = work->new_list;
         old_list = false;
     } else {
-        list = slice->old_list;
+        list = work->old_list;
         old_list = true;
     }
 
-    for (uint32 i = slice->start; i < slice->end; i += 1) {
+    for (uint32 i = work->start; i < work->end; i += 1) {
         FileName *file = list->files[i];
         char *p;
         uint32 off = 0;
@@ -471,17 +534,17 @@ brn2_threads_work_normalization(void *arg) {
                     error("Error in stat('%s'): %s.\n", file->name,
                           strerror(errno));
                 }
-                slice->old_list->files[i]->type = TYPE_ERR;
+                work->old_list->files[i]->type = TYPE_ERR;
                 continue;
             }
             if (S_ISDIR(file_stat.st_mode)) {
-                slice->old_list->files[i]->type = TYPE_DIR;
+                work->old_list->files[i]->type = TYPE_DIR;
                 brn2_slash_add(file);
             } else {
-                slice->old_list->files[i]->type = TYPE_FILE;
+                work->old_list->files[i]->type = TYPE_FILE;
             }
         } else {
-            if (slice->old_list->files[i]->type == TYPE_DIR) {
+            if (work->old_list->files[i]->type == TYPE_DIR) {
                 brn2_slash_add(file);
             }
         }
@@ -508,38 +571,38 @@ brn2_slash_add(FileName *file) {
 
 void *
 brn2_threads_work_sort(void *arg) {
-    Slice *slice = arg;
-    FileName **files = &(slice->old_list->files[slice->start]);
-    qsort(files, slice->end - slice->start, sizeof(*files), brn2_compare);
+    Work *work = arg;
+    FileName **files = &(work->old_list->files[work->start]);
+    qsort(files, work->end - work->start, sizeof(*files), brn2_compare);
     return 0;
 }
 
 void *
 brn2_threads_work_hashes(void *arg) {
-    Slice *slice = arg;
+    Work *work = arg;
 
-    for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileList *list = slice->old_list;
+    for (uint32 i = work->start; i < work->end; i += 1) {
+        FileList *list = work->old_list;
         FileName *newfile = list->files[i];
         newfile->hash = hash_function(newfile->name, newfile->length);
-        list->indexes[i] = newfile->hash % slice->map_capacity;
+        list->indexes[i] = newfile->hash % work->map_capacity;
     }
     return 0;
 }
 
 void *
 brn2_threads_work_changes(void *arg) {
-    Slice *slice = arg;
+    Work *work = arg;
 
-    for (uint32 i = slice->start; i < slice->end; i += 1) {
-        FileName *oldfile = slice->old_list->files[i];
-        FileName *newfile = slice->new_list->files[i];
+    for (uint32 i = work->start; i < work->end; i += 1) {
+        FileName *oldfile = work->old_list->files[i];
+        FileName *newfile = work->new_list->files[i];
         if (oldfile->length == newfile->length) {
             if (!memcmp(oldfile->name, newfile->name, oldfile->length)) {
                 continue;
             }
         }
-        *(slice->partial) += 1;
+        *(work->partial) += 1;
     }
     return 0;
 }
@@ -596,8 +659,7 @@ brn2_thread_create(pthread_t *thread, void *(*function)(void *), void *args) {
 uint32
 brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
-    pthread_t threads[BRN2_MAX_THREADS];
-    Slice slices[BRN2_MAX_THREADS];
+    Work slices[BRN2_MAX_THREADS];
     uint32 range;
     uint32 length;
     int err;
@@ -624,7 +686,8 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        brn2_thread_create(&threads[i], function, (void *)&slices[i]);
+        slices[i].function = function;
+        enqueue(&slices[i]);
     }
     {
         uint32 i = nthreads - 1;
@@ -634,11 +697,17 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
-        brn2_thread_create(&threads[i], function, (void *)&slices[i]);
+        slices[i].function = function;
+        enqueue(&slices[i]);
     }
 
+    pthread_mutex_lock(&mutex);
+    stop = true;
+    pthread_cond_broadcast(&condition);
+    pthread_mutex_unlock(&mutex);
+
     for (uint32 i = 0; i < nthreads; i += 1) {
-        err = pthread_join(threads[i], NULL);
+        err = pthread_join(thread_pool[i], NULL);
         if (err) {
             error("Error joining thread %u: %s.\n", i, strerror(err));
             fatal(EXIT_FAILURE);
@@ -650,7 +719,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
 uint32
 brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
-    Slice slices[1];
+    Work slices[1];
     uint32 length;
 
     if (old) {
