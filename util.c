@@ -199,7 +199,7 @@ static char *itoa2(long, char *);
 static long atoi2(char *);
 static size_t util_page_size = 0;
 
-#if defined(__WIN32__)
+#if OS_WINDOWS
 uint32
 util_nthreads(void) {
     SYSTEM_INFO sysinfo;
@@ -214,7 +214,7 @@ util_nthreads(void) {
 }
 #endif
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 void *
 xmmap_commit(size_t *size) {
     void *p;
@@ -359,7 +359,7 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
     return n;
 }
 
-#if defined(__WIN32__)
+#if OS_WINDOWS
 int
 util_command(const int argc, char **argv) {
     char *cmdline;
@@ -504,7 +504,7 @@ error(char *format, ...) {
 
     buffer[n] = '\0';
     write(STDERR_FILENO, buffer, (size_t)n);
-#if !defined(__WIN32__)
+#if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
 #endif
