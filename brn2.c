@@ -239,9 +239,11 @@ memmem(const void *haystack, size_t hay_len,
     unsigned char first = n[0];
 
     while (h < limit) {
-        const unsigned char *p = memchr(h, first, (size_t)(limit - h));
-        if (!p)
+        const uchar *p;
+
+        if ((p = memchr(h, first, (size_t)(limit - h))) == NULL)
             return NULL;
+
         if (memcmp(p, n, needle_len) == 0)
             return (void *)p;
         h = p + 1;
