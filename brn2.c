@@ -49,6 +49,10 @@ static void brn2_list_from_lines(FileList *, char *, bool);
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
 
+uint32 ids[BRN2_MAX_THREADS] = {0};
+pthread_t thread_pool[BRN2_MAX_THREADS];
+static uint32 pending = 0;
+
 typedef struct Work {
     void *(*function)(void *);
     FileList *old_list;
@@ -118,6 +122,8 @@ enqueue(Work *work) {
     else
         tail->next = new_node;
     tail = new_node;
+    pending += 1;
+    return;
 }
 
 static Work *
@@ -159,6 +165,7 @@ brn2_threads_function(void *arg) {
         pthread_mutex_unlock(&mutex);
 
         if (work) {
+            pending -= 1;
             work->function(work);
         }
     }
