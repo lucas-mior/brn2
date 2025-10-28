@@ -130,20 +130,20 @@ brn2_enqueue(Work *work) {
 
 static Work *
 brn2_work_dequeue(void) {
-    Work *result;
+    Work *work;
     Node *tmp;
 
     if (work_head == NULL)
         return NULL;
 
     tmp = work_head;
-    result = tmp->work;
+    work = tmp->work;
     work_head = work_head->next;
     if (work_head == NULL)
         work_tail = NULL;
 
     free(tmp);
-    return result;
+    return work;
 }
 
 static void *
