@@ -81,8 +81,8 @@ memmem(const void *haystack, size_t hay_len,
 }
 
 static int
-lstat(const char *path, struct stat *st) {
-    if (!path || !st) {
+lstat(const char *path, struct stat *stat) {
+    if (!path || !stat) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return -1;
     }
@@ -98,35 +98,35 @@ lstat(const char *path, struct stat *st) {
         return -1;
     FindClose(h);
 
-    memset(st, 0, sizeof(*st));
+    memset(stat, 0, sizeof(*stat));
 
     // Detect symbolic link
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
-        st->st_mode = S_IFLNK;
+        stat->st_mode = S_IFLNK;
     else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        st->st_mode = S_IFDIR;
+        stat->st_mode = S_IFDIR;
     else
-        st->st_mode = S_IFREG;
+        stat->st_mode = S_IFREG;
 
     // File size
     LARGE_INTEGER sz;
     sz.HighPart = fd.nFileSizeHigh;
     sz.LowPart = fd.nFileSizeLow;
-    st->st_size = sz.QuadPart;
+    stat->st_size = sz.QuadPart;
 
     // File times (convert from FILETIME)
     ULARGE_INTEGER ull;
     ull.LowPart = fd.ftLastWriteTime.dwLowDateTime;
     ull.HighPart = fd.ftLastWriteTime.dwHighDateTime;
-    st->st_mtime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    stat->st_mtime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
 
     ull.LowPart = fd.ftCreationTime.dwLowDateTime;
     ull.HighPart = fd.ftCreationTime.dwHighDateTime;
-    st->st_ctime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    stat->st_ctime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
 
     ull.LowPart = fd.ftLastAccessTime.dwLowDateTime;
     ull.HighPart = fd.ftLastAccessTime.dwHighDateTime;
-    st->st_atime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    stat->st_atime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
 
     return 0;
 }
