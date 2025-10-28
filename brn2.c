@@ -48,6 +48,7 @@ static void brn2_list_from_lines(FileList *, char *, bool);
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t done = PTHREAD_COND_INITIALIZER;
 
 uint32 ids[BRN2_MAX_THREADS] = {0};
 pthread_t thread_pool[BRN2_MAX_THREADS];
@@ -152,21 +153,25 @@ brn2_threads_function(void *arg) {
     while (true) {
         Work *work;
 
+        printf("thread[%u] before first lock...\n", *id);
         pthread_mutex_lock(&mutex);
         while (head == NULL && !stop)
             pthread_cond_wait(&condition, &mutex);
-
-        if (stop && head == NULL) {
-            pthread_mutex_unlock(&mutex);
-            break;
-        }
+        printf("thread[%u] after cond wait...\n", *id);
 
         work = dequeue();
         pthread_mutex_unlock(&mutex);
 
         if (work) {
-            pending -= 1;
+            printf("work!!! pending=%u\n", pending);
             work->function(work);
+            pthread_mutex_lock(&mutex);
+            pending -= 1;
+            printf("pending=%u\n", pending);
+            if (pending == 0 && head == NULL) {
+                pthread_cond_signal(&done);
+            }
+            pthread_mutex_unlock(&mutex);
         }
     }
     pthread_exit(NULL);
@@ -669,7 +674,6 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
     Work slices[BRN2_MAX_THREADS];
     uint32 range;
     uint32 length;
-    int err;
 
     if (old) {
         length = old->length;
@@ -708,18 +712,14 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         enqueue(&slices[i]);
     }
 
-    pthread_mutex_lock(&mutex);
-    stop = true;
-    pthread_cond_broadcast(&condition);
+    while (pending > 0 || head != NULL) {
+        printf("mainthread: pendind=%u\n", pending);
+        pthread_cond_wait(&done, &mutex);
+    }
+    pthread_cond_signal(&done);
+    pthread_cond_signal(&condition);
     pthread_mutex_unlock(&mutex);
 
-    for (uint32 i = 0; i < nthreads; i += 1) {
-        err = pthread_join(thread_pool[i], NULL);
-        if (err) {
-            error("Error joining thread %u: %s.\n", i, strerror(err));
-            fatal(EXIT_FAILURE);
-        }
-    }
     return nthreads;
 }
 #else
@@ -741,6 +741,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
     slices[0].new_list = new;
     slices[0].partial = numbers ? &numbers[0] : NULL;
     slices[0].map_capacity = map_size;
+    slices[0].function = function;
     function((void *)&slices[0]);
 
     return 1;

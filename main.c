@@ -196,11 +196,11 @@ main(int argc, char **argv) {
         printf("Normalizing filenames...\n");
     }
     printf("before normalization:\n");
-    for (uint32 i = 0; i < old->length; i += 1)
+    for (uint32 i = 0; i < 2; i += 1)
         printf("%s\n", old->files[i]->name);
     brn2_normalize_names(old, NULL);
     printf("after normalization\n");
-    for (uint32 i = 0; i < old->length; i += 1)
+    for (uint32 i = 0; i < 2; i += 1)
         printf("%s\n", old->files[i]->name);
     exit(EXIT_SUCCESS);
 
