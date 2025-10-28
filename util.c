@@ -403,7 +403,7 @@ util_command(const int argc, char **argv) {
     FILE *tty;
     STARTUPINFO startup_info;
     BOOL success;
-    PROCESS_INFORMATION pi = {0};
+    PROCESS_INFORMATION proc_info = {0};
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
@@ -433,7 +433,7 @@ util_command(const int argc, char **argv) {
     startup_info.cb = sizeof(startup_info);
 
     success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL,
-                             NULL, &startup_info, &pi);
+                             NULL, &startup_info, &proc_info);
 
     if (!success) {
         error("Error running '%s", argv[0]);
@@ -445,13 +445,13 @@ util_command(const int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    WaitForSingleObject(pi.hProcess, INFINITE);
+    WaitForSingleObject(proc_info.hProcess, INFINITE);
 
     DWORD exit_code = 0;
-    GetExitCodeProcess(pi.hProcess, &exit_code);
+    GetExitCodeProcess(proc_info.hProcess, &exit_code);
 
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+    CloseHandle(proc_info.hProcess);
+    CloseHandle(proc_info.hThread);
     free(cmdline);
     return 0;
 }
