@@ -76,8 +76,8 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
-static Node *head = NULL;
-static Node *tail = NULL;
+static Node *work_head = NULL;
+static Node *work_tail = NULL;
 static bool stop = false;
 
 int
@@ -125,11 +125,11 @@ brn2_enqueue(Work *work) {
     new_node->work = work;
     new_node->next = NULL;
 
-    if (tail == NULL)
-        head = new_node;
+    if (work_tail == NULL)
+        work_head = new_node;
     else
-        tail->next = new_node;
-    tail = new_node;
+        work_tail->next = new_node;
+    work_tail = new_node;
     work_pending += 1;
     return;
 }
@@ -139,14 +139,14 @@ brn2_work_dequeue(void) {
     Work *result;
     Node *tmp;
 
-    if (head == NULL)
+    if (work_head == NULL)
         return NULL;
 
-    tmp = head;
+    tmp = work_head;
     result = tmp->work;
-    head = head->next;
-    if (head == NULL)
-        tail = NULL;
+    work_head = work_head->next;
+    if (work_head == NULL)
+        work_tail = NULL;
 
     free(tmp);
     return result;
@@ -161,7 +161,7 @@ brn2_threads_function(void *arg) {
         Work *work;
 
         pthread_mutex_lock(&brn2_mutex);
-        while (head == NULL && !stop)
+        while (work_head == NULL && !stop)
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
 
         work = brn2_work_dequeue();
@@ -171,7 +171,7 @@ brn2_threads_function(void *arg) {
             work->function(work);
             pthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
-            if (work_pending == 0 && head == NULL) {
+            if (work_pending == 0 && work_head == NULL) {
                 pthread_cond_signal(&brn2_done_work);
             }
             pthread_mutex_unlock(&brn2_mutex);
@@ -664,7 +664,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         pthread_mutex_unlock(&brn2_mutex);
     }
 
-    while (work_pending > 0 || head != NULL) {
+    while (work_pending > 0 || work_head != NULL) {
         pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
     pthread_cond_signal(&brn2_done_work);
