@@ -70,8 +70,14 @@ struct Work {
     uint32 *partial;
 };
 
-static Node *work_head = NULL;
-static Node *work_tail = NULL;
+static struct WorkQueue {
+    struct Work *items[BRN2_MAX_THREADS];
+    uint32 head;
+    uint32 tail;
+    uint32 count;
+    uint32 padding;
+} work_queue = {0};
+
 bool stop_threads = false;
 
 int
@@ -115,15 +121,13 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 #if OS_UNIX
 static void
 brn2_enqueue(Work *work) {
-    Node *new_node = xmalloc(sizeof(*new_node));
-    new_node->work = work;
-    new_node->next = NULL;
-
-    if (work_tail == NULL)
-        work_head = new_node;
-    else
-        work_tail->next = new_node;
-    work_tail = new_node;
+    if (work_queue.count >= LENGTH(work_queue.items)) {
+        error("Error: work queue is full.\n");
+        exit(EXIT_FAILURE);
+    }
+    work_queue.items[work_queue.tail] = work;
+    work_queue.tail = (work_queue.tail + 1) % LENGTH(work_queue.items);
+    work_queue.count += 1;
     work_pending += 1;
     return;
 }
@@ -133,10 +137,9 @@ brn2_threads_function(void *arg) {
     (void)arg;
     while (true) {
         Work *work;
-        Node *tmp;
 
         pthread_mutex_lock(&brn2_mutex);
-        while (work_head == NULL && !stop_threads) {
+        while (work_queue.count == 0 && !stop_threads) {
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
         }
 
@@ -145,16 +148,12 @@ brn2_threads_function(void *arg) {
             pthread_exit(NULL);
         }
 
-        if (work_head == NULL)
+        if (work_queue.count == 0)
             return NULL;
 
-        tmp = work_head;
-        work = tmp->work;
-        work_head = work_head->next;
-        if (work_head == NULL)
-            work_tail = NULL;
-
-        free(tmp);
+        work = work_queue.items[work_queue.head];
+        work_queue.head = (work_queue.head + 1) % LENGTH(work_queue.items);
+        work_queue.count -= 1;
 
         pthread_mutex_unlock(&brn2_mutex);
 
@@ -162,7 +161,7 @@ brn2_threads_function(void *arg) {
             work->function(work);
             pthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
-            if (work_pending == 0 && work_head == NULL) {
+            if (work_pending == 0 && (work_queue.count == 0)) {
                 pthread_cond_signal(&brn2_done_work);
             }
             pthread_mutex_unlock(&brn2_mutex);
@@ -643,7 +642,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         pthread_mutex_unlock(&brn2_mutex);
     }
 
-    while (work_pending > 0 || work_head != NULL) {
+    while (work_pending > 0 || (work_queue.count != 0)) {
         pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
     pthread_cond_signal(&brn2_done_work);
