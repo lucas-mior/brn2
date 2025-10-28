@@ -450,7 +450,7 @@ main(int argc, char **argv) {
         arena_destroy(old->arena);
         arena_destroy(new->arena);
     }
-#if defined(__WIN32__)
+#if OS_WINDOWS
     printf("Press enter to continue.\n");
     getc(stdin);
 #endif
