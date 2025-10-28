@@ -64,20 +64,22 @@ delete_brn2_buffer(void) {
     return;
 }
 
-static void __attribute__((noreturn))
-handler_segv(int unused) {
-    (void)unused;
-    error("%s: Memory error. Please file a bug report.\n", program);
-    fatal(EXIT_FAILURE);
-}
-
-void
+#if !defined(__WIN32__)
+static void
 destroy_threads(void) {
     for (uint32 i = 0; i < nthreads; i += 1) {
         ids[i] = i;
         error("destroying %d...\n", i);
         pthread_cancel(thread_pool[i]);
     }
+}
+#endif
+
+static void __attribute__((noreturn))
+handler_segv(int unused) {
+    (void)unused;
+    error("%s: Memory error. Please file a bug report.\n", program);
+    fatal(EXIT_FAILURE);
 }
 
 int
@@ -182,11 +184,14 @@ main(int argc, char **argv) {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
     }
 
+#if !defined(__WIN32__)
     for (uint32 i = 0; i < nthreads; i += 1) {
         ids[i] = i;
-        pthread_create(&thread_pool[i], NULL, brn2_threads_function, &ids[i]);
+        pthread_create(&thread_pool[i], NULL,
+                       brn2_threads_function, &ids[i]);
     }
     atexit(destroy_threads);
+#endif
 
     switch (mode) {
     case FILES_FROM_FILE:

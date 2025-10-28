@@ -46,6 +46,7 @@ static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
 
+#if !defined(__WIN32__)
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
 static pthread_cond_t done = PTHREAD_COND_INITIALIZER;
@@ -53,6 +54,7 @@ static pthread_cond_t done = PTHREAD_COND_INITIALIZER;
 uint32 ids[BRN2_MAX_THREADS] = {0};
 pthread_t thread_pool[BRN2_MAX_THREADS];
 static uint32 work_pending = 0;
+#endif
 
 typedef struct Work {
     void *(*function)(void *);
@@ -112,6 +114,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     return;
 }
 
+#if !defined(__WIN32__)
 static void
 brn2_enqueue(Work *work) {
     Node *new_node = xmalloc(sizeof(*new_node));
@@ -172,6 +175,7 @@ brn2_threads_function(void *arg) {
     }
     pthread_exit(NULL);
 }
+#endif
 
 #if defined(__WIN32__)
 int
@@ -654,16 +658,6 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 }
 
 #if !defined(__WIN32__)
-static void
-brn2_thread_create(pthread_t *thread, void *(*function)(void *), void *args) {
-    int err = pthread_create(thread, NULL, function, args);
-    if (err) {
-        error("Error creating thread: %s.\n", strerror(err));
-        fatal(EXIT_FAILURE);
-    }
-    return;
-}
-
 uint32
 brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
