@@ -47,9 +47,9 @@ static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
 
 #if !defined(__WIN32__)
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
-static pthread_cond_t done = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t brn2_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t brn2_done_work = PTHREAD_COND_INITIALIZER;
 
 uint32 ids[BRN2_MAX_THREADS] = {0};
 pthread_t thread_pool[BRN2_MAX_THREADS];
@@ -156,21 +156,21 @@ brn2_threads_function(void *arg) {
     while (true) {
         Work *work;
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&brn2_mutex);
         while (head == NULL && !stop)
-            pthread_cond_wait(&condition, &mutex);
+            pthread_cond_wait(&brn2_new_work, &brn2_mutex);
 
         work = brn2_work_dequeue();
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&brn2_mutex);
 
         if (work) {
             work->function(work);
-            pthread_mutex_lock(&mutex);
+            pthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
             if (work_pending == 0 && head == NULL) {
-                pthread_cond_signal(&done);
+                pthread_cond_signal(&brn2_done_work);
             }
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&brn2_mutex);
         }
     }
     pthread_exit(NULL);
@@ -689,10 +689,10 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].map_capacity = map_size;
         slices[i].function = function;
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&brn2_mutex);
         brn2_enqueue(&slices[i]);
-        pthread_cond_signal(&condition);
-        pthread_mutex_unlock(&mutex);
+        pthread_cond_signal(&brn2_new_work);
+        pthread_mutex_unlock(&brn2_mutex);
     }
     {
         uint32 i = nthreads - 1;
@@ -704,18 +704,18 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].map_capacity = map_size;
         slices[i].function = function;
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&brn2_mutex);
         brn2_enqueue(&slices[i]);
-        pthread_cond_signal(&condition);
-        pthread_mutex_unlock(&mutex);
+        pthread_cond_signal(&brn2_new_work);
+        pthread_mutex_unlock(&brn2_mutex);
     }
 
     while (work_pending > 0 || head != NULL) {
-        pthread_cond_wait(&done, &mutex);
+        pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
-    pthread_cond_signal(&done);
-    pthread_cond_signal(&condition);
-    pthread_mutex_unlock(&mutex);
+    pthread_cond_signal(&brn2_done_work);
+    pthread_cond_signal(&brn2_new_work);
+    pthread_mutex_unlock(&brn2_mutex);
 
     return nthreads;
 }
