@@ -30,9 +30,37 @@
 #include <time.h>
 #include <limits.h>
 
-#if defined(__WIN32__)
-  #include <windows.h>
+#if defined(__linux__)
+#define OS_LINUX 1
+#define OS_MAC 0
+#define OS_BSD 0
+#define OS_WINDOWS 0
+#elif defined(__APPLE__) && defined(__MACH__)
+#define OS_LINUX 0
+#define OS_MAC 1
+#define OS_BSD 0
+#define OS_WINDOWS 0
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#define OS_LINUX 0
+#define OS_MAC 0
+#define OS_BSD 1
+#define OS_WINDOWS 0
+#elif defined(_WIN32) || defined(_WIN64)
+#define OS_LINUX 0
+#define OS_MAC 0
+#define OS_BSD 0
+#define OS_WINDOWS 1
 #else
+#error "Unsupported OS.\n"
+#endif
+
+#define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
+
+#if OS_WINDOWS
+  #include <windows.h>
+#endif
+
+#if OS_UNIX
   #include <sys/mman.h>
   #include <sys/wait.h>
 #endif

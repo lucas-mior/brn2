@@ -46,7 +46,7 @@ static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 static pthread_mutex_t brn2_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 static pthread_cond_t brn2_done_work = PTHREAD_COND_INITIALIZER;
@@ -114,7 +114,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     return;
 }
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 static void
 brn2_enqueue(Work *work) {
     Node *new_node = xmalloc(sizeof(*new_node));
@@ -567,7 +567,7 @@ brn2_threads_work_normalization(void *arg) {
             file->length -= 2;
         }
 
-#if !defined(__WIN32__)
+#if OS_UNIX
         if (old_list) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
@@ -682,7 +682,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     return total;
 }
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 uint32
 brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {

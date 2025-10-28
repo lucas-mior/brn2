@@ -150,7 +150,7 @@ extern bool brn2_options_sort;
 extern bool brn2_options_autosolve;
 extern uint32 nthreads;
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 extern pthread_t thread_pool[BRN2_MAX_THREADS];
 extern uint32 ids[BRN2_MAX_THREADS];
 #endif
@@ -159,7 +159,7 @@ extern int (*print)(const char *, ...);
 
 int brn2_compare(const void *, const void *);
 void brn2_list_from_dir(FileList *, char *);
-#if !defined(__WIN32__)
+#if OS_UNIX
 void brn2_list_from_dir_recurse(FileList *, char *);
 #endif
 void brn2_list_from_file(FileList *, char *, bool);

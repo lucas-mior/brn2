@@ -25,6 +25,32 @@
 #include <unistd.h>
 #endif
 
+#if defined(__linux__)
+#define OS_LINUX 1
+#define OS_MAC 0
+#define OS_BSD 0
+#define OS_WINDOWS 0
+#elif defined(__APPLE__) && defined(__MACH__)
+#define OS_LINUX 0
+#define OS_MAC 1
+#define OS_BSD 0
+#define OS_WINDOWS 0
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#define OS_LINUX 0
+#define OS_MAC 0
+#define OS_BSD 1
+#define OS_WINDOWS 0
+#elif defined(_WIN32) || defined(_WIN64)
+#define OS_LINUX 0
+#define OS_MAC 0
+#define OS_BSD 0
+#define OS_WINDOWS 1
+#else
+#error "Unsupported OS.\n"
+#endif
+
+#define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
+
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_arena 1
 #elif !defined(TESTING_arena)
@@ -106,7 +132,7 @@ arena_create(size_t size) {
     return arena;
 }
 
-#if !defined(__WIN32__)
+#if OS_UNIX
 void *
 arena_allocate(size_t *size) {
     void *p;
