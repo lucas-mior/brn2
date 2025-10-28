@@ -225,6 +225,11 @@ scandir(const char *dir, struct dirent ***namelist, void *filter,
 static void *
 memmem(const void *haystack, size_t hay_len,
        const void *needle,   size_t needle_len) {
+    const uchar *h = haystack;
+    const uchar *n = needle;
+    const uchar *end = h + hay_len;
+    const uchar *limit = end - needle_len + 1;
+
     if (needle_len == 0)
         return (void *)haystack;
     if (!haystack || !needle)
@@ -232,16 +237,10 @@ memmem(const void *haystack, size_t hay_len,
     if (hay_len < needle_len)
         return NULL;
 
-    const uchar *h = haystack;
-    const uchar *n = needle;
-    const uchar *end = h + hay_len;
-    const uchar *limit = end - needle_len + 1;
-    unsigned char first = n[0];
-
     while (h < limit) {
         const uchar *p;
 
-        if ((p = memchr(h, first, (size_t)(limit - h))) == NULL)
+        if ((p = memchr(h, n[0], (size_t)(limit - h))) == NULL)
             return NULL;
 
         if (memcmp(p, n, needle_len) == 0)
