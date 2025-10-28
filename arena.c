@@ -87,7 +87,7 @@ typedef struct Arena {
 #define ALIGN(x) ARENA_ALIGN(x, ALIGNMENT)
 #endif
 
-#if defined(__linux__)
+#if OS_LINUX
 #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
 #else
 #define FLAGS_HUGE_PAGES 0
