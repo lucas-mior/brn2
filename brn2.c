@@ -59,7 +59,7 @@ static uint32 work_pending = 0;
 pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 #endif
 
-struct Work {
+typedef struct Work {
     void *(*function)(void *);
     FileList *old_list;
     FileList *new_list;
@@ -68,7 +68,7 @@ struct Work {
     uint32 map_capacity;
     uint32 unused;
     uint32 *partial;
-};
+} Work;
 
 static struct WorkQueue {
     struct Work *items[BRN2_MAX_THREADS];
