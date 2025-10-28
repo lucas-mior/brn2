@@ -150,6 +150,10 @@ extern bool brn2_options_sort;
 extern bool brn2_options_autosolve;
 extern uint32 nthreads;
 
+extern pthread_t thread_pool[BRN2_MAX_THREADS] = {0};
+extern uint32 ids[BRN2_MAX_THREADS] = {0};
+
+
 extern int (*print)(const char *, ...);
 
 int brn2_compare(const void *, const void *);
