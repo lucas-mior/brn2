@@ -30,36 +30,44 @@ CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm"
 
+OS=$(uname --all)
+
+if echo "$OS" | grep -q "Linux"; then
+    if echo "$OS" | grep -q "GNU"; then
+        GNUSOURCE="-D_GNU_SOURCE"
+    fi
+fi
+
 CC=${CC:-cc}
 
 case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
     exe="${program}_benchmark"
     ;;
 "perf")
     CFLAGS="$CFLAGS -g3 -Og -flto"
-    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
     exe="${program}_perf"
     ;;
 "valgrind") 
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "test") 
-    CFLAGS="$CFLAGS -g -DDEBUGGING=1"
+    CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1"
     ;;
 "check") 
     CC=gcc
-    CFLAGS="$CFLAGS -fanalyzer"
+    CFLAGS="$CFLAGS $GNUSOURCE -fanalyzer"
     ;;
 "build") 
-    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
 *)
     CFLAGS="$CFLAGS -O2"
