@@ -436,7 +436,7 @@ main(int argc, char **argv) {
         arena_destroy(old->arena);
         arena_destroy(new->arena);
 
-#if OS_UNIX && BRN2_MAX_THREADS > 1
+#if OS_UNIX && (BRN2_MAX_THREADS > 1)
         pthread_mutex_lock(&brn2_mutex);
         stop_threads = true;
         pthread_cond_broadcast(&brn2_new_work);
