@@ -760,7 +760,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
         }
     }
     newname_index_on_oldlist
-        = hash_lookup_pre_calcmap(oldlist_map, newname, newhash, newindex);
+        = hash_lookup_pre_calc_map(oldlist_map, newname, newhash, newindex);
     newname_exists = !access(newname, F_OK);
 #if defined(__linux__)
     if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
@@ -794,15 +794,15 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                 uint32 next = *newname_index_on_oldlist;
                 FileName **file_j = &(old->files[next]);
 
-                hash_remove_pre_calcmap(oldlist_map, newname, newhash,
-                                        newindex);
-                hash_remove_pre_calcmap(oldlist_map, oldname, oldhash,
-                                        oldindex);
+                hash_remove_pre_calc_map(oldlist_map, newname, newhash,
+                                         newindex);
+                hash_remove_pre_calc_map(oldlist_map, oldname, oldhash,
+                                         oldindex);
 
-                hash_insert_pre_calcmap(oldlist_map, newname, newhash, newindex,
-                                        i);
-                hash_insert_pre_calcmap(oldlist_map, oldname, oldhash, oldindex,
-                                        next);
+                hash_insert_pre_calc_map(oldlist_map, newname, newhash,
+                                         newindex, i);
+                hash_insert_pre_calc_map(oldlist_map, oldname, oldhash,
+                                         oldindex, next);
 
                 SWAP(*file_j, *oldfile);
                 SWAP(old->indexes[i], old->indexes[next]);
@@ -812,8 +812,8 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                       newname, oldname, newname);
                 error("To disable this behaviour,"
                       " don't pass the --implict option.\n");
-                hash_insert_pre_calcmap(oldlist_map, newname, newhash, newindex,
-                                        i);
+                hash_insert_pre_calc_map(oldlist_map, newname, newhash,
+                                         newindex, i);
             }
             return;
         } else if (errno != ENOENT) {
