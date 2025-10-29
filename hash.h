@@ -96,9 +96,6 @@ typedef ssize_t isize;
 
 #endif  /* HASH_H */
 
-#ifndef HASH_VALUE_FIELD
-#error HASH_VALUE_FIELD is undefined
-#endif
 #ifndef HASH_ITERATOR_VALUE
 #error HASH_ITERATOR_VALUE is undefined
 #endif
@@ -115,7 +112,9 @@ typedef ssize_t isize;
 typedef struct CAT(Bucket_, HASH_TYPE) {
     char *key;
     uint32 hash;
+#if defined(HASH_VALUE_FIELD)
     HASH_VALUE_FIELD
+#endif
     uint32 next;
 } CAT(Bucket_, HASH_TYPE);
 
