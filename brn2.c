@@ -78,6 +78,17 @@ static struct WorkQueue {
 
 bool stop_threads = false;
 
+static void *
+xarena_push(Arena *arena, uint32 size) {
+    void *p;
+
+    if ((p = arena_push(arena, size)) == NULL) {
+        error("%u bytes is too large object for arena.\n", size);
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
 int
 brn2_compare(const void *a, const void *b) {
     FileName *const *file_a = a;
@@ -103,7 +114,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         }
 
         size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
-        *file_pointer = arena_push(list->arena, ALIGN(size));
+        *file_pointer = xarena_push(list->arena, ALIGN(size));
         file = *file_pointer;
 
         file->length = (uint16)strlen(name);
@@ -208,7 +219,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         if (directory_length) {
             size = STRUCT_ARRAY_SIZE(*file_pointer, char,
                                      directory_length + 1 + name_length + 2);
-            *file_pointer = arena_push(list->arena, ALIGN(size));
+            *file_pointer = xarena_push(list->arena, ALIGN(size));
             file = *file_pointer;
 
             file->length = directory_length + 1 + name_length;
@@ -217,7 +228,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             memcpy(file->name + directory_length + 1, name, name_length + 1);
         } else {
             size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
-            *file_pointer = arena_push(list->arena, ALIGN(size));
+            *file_pointer = xarena_push(list->arena, ALIGN(size));
             file = *file_pointer;
 
             file->length = name_length;
@@ -328,7 +339,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
             name_length = (uint16)(pointer - begin);
             size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
-            *file_pointer = arena_push(list->arena, ALIGN(size));
+            *file_pointer = xarena_push(list->arena, ALIGN(size));
 
             file = *file_pointer;
             file->length = name_length;
@@ -410,7 +421,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
 
         file_pointer = &(list->files[length]);
-        *file_pointer = arena_push(list->arena, ALIGN(size));
+        *file_pointer = xarena_push(list->arena, ALIGN(size));
         file = *file_pointer;
 
         file->length = name_length;
