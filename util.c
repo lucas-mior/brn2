@@ -421,7 +421,7 @@ util_command(const int argc, char **argv) {
 
     for (int i = 0; i < argc - 1; i += 1) {
         int64 len = (int64)strlen(argv[i]);
-        if ((j + len) >= sizeof(cmdline)) {
+        if ((j + len) >= (int64)sizeof(cmdline)) {
             error("Command line is too long.\n");
             exit(EXIT_FAILURE);
         }
