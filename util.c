@@ -548,6 +548,7 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
+    write(STDERR_FILENO, buffer, n);
 #if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);

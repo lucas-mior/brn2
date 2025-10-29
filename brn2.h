@@ -28,7 +28,7 @@
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
 #else
-  #define BRN2_MAX_THREADS 64
+  #define BRN2_MAX_THREADS 1
   #include <pthread.h>
   #include <sys/mman.h>
   #include <sys/wait.h>
