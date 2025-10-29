@@ -700,7 +700,7 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
                                       newfile->hash, hashes_new[i])) {
             FileName *oldfile = old->files[i];
             char *diff[] = {
-                "/usr/bin/diff", "-q", newfile->name, oldfile->name, NULL,
+                "diff", "-q", newfile->name, oldfile->name, NULL,
             };
             error("Error: " RED "'%s'" RESET " repeats on line %u. ",
                   newfile->name, i + 1);
