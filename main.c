@@ -253,7 +253,7 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         }
 
-        oldlist_map = hash_createmap(old->length);
+        oldlist_map = hash_create_map(old->length);
         capacity_set = hash_capacity(oldlist_map);
         old->indexes_size = old->length*sizeof(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
@@ -267,8 +267,8 @@ main(int argc, char **argv) {
             usize buffered;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
-                   || !hash_insert_pre_calcmap(oldlist_map, file->name,
-                                               file->hash, *index, i)) {
+                   || !hash_insert_pre_calc_map(oldlist_map, file->name,
+                                                file->hash, *index, i)) {
                 if (contains_newline) {
                     error(RED "'%s'" RESET " contains new line.", file->name);
                 } else {
@@ -342,7 +342,7 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            newlist_set = hash_createset(new->length);
+            newlist_set = hash_create_set(new->length);
             main_capacity = hash_capacity(newlist_set);
             new->indexes_size = new->length*sizeof(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
@@ -370,9 +370,9 @@ main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_set == NULL) {
-                newlist_set = hash_createset(new->length);
+                newlist_set = hash_create_set(new->length);
             } else {
-                hash_zeroset(newlist_set);
+                hash_zero_set(newlist_set);
             }
             if (new->indexes == NULL) {
                 new->indexes_size = new->length*sizeof(*(new->indexes));
@@ -400,7 +400,7 @@ main(int argc, char **argv) {
         uint32 number_renames = 0;
 
         if (number_changes) {
-            HashSet *names_renamed = hash_createset(old->length);
+            HashSet *names_renamed = hash_create_set(old->length);
 
             if (brn2_options_quiet) {
                 print = noop;
@@ -413,7 +413,7 @@ main(int argc, char **argv) {
                               &number_renames);
             }
             if (DEBUGGING) {
-                hash_destroyset(names_renamed);
+                hash_destroy_set(names_renamed);
             }
         }
         if (number_changes != number_renames) {
@@ -438,8 +438,8 @@ main(int argc, char **argv) {
         xmunmap(new->indexes, new->indexes_size);
         brn2_free_list(old);
         brn2_free_list(new);
-        hash_destroymap(oldlist_map);
-        hash_destroyset(newlist_set);
+        hash_destroy_map(oldlist_map);
+        hash_destroy_set(newlist_set);
         arena_destroy(old->arena);
         arena_destroy(new->arena);
 
