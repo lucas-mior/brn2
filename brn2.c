@@ -68,6 +68,8 @@ typedef struct Work {
     uint32 *partial;
 } Work;
 
+static Work slices[BRN2_MAX_THREADS];
+
 static struct WorkQueue {
     struct Work *items[BRN2_MAX_THREADS];
     uint32 head;
@@ -611,7 +613,6 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 uint32
 brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
-    Work slices[BRN2_MAX_THREADS];
     uint32 range;
     uint32 length;
 
