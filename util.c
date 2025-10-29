@@ -64,6 +64,8 @@
 #if OS_UNIX
 #include <sys/mman.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <fcntl.h>
 #endif
 
 #ifndef DEBUGGING
@@ -569,7 +571,7 @@ util_segv_handler(int32 unused) {
     (void)unused;
 
     (void)write(STDERR_FILENO, message, strlen(message));
-    for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+    for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program, message,
                NULL);
     }
@@ -612,7 +614,7 @@ util_die_notify(char *program_name, const char *format, ...) {
 
     buffer[n] = '\0';
     (void)write(STDERR_FILENO, buffer, (usize)n + 1);
-    for (uint i = 0; i < LENGTH(notifiers); i += 1) {
+    for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program_name,
                buffer, NULL);
     }
@@ -630,6 +632,7 @@ util_memdup(const void *source, const usize size) {
     return p;
 }
 
+#if OS_UNIX
 int32
 util_copy_file(const char *destination, const char *source) {
     int32 source_fd;
@@ -679,6 +682,7 @@ util_copy_file(const char *destination, const char *source) {
     close(destination_fd);
     return 0;
 }
+#endif
 
 #if OS_LINUX
 #include <dirent.h>
