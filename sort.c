@@ -24,17 +24,17 @@
 #include "util.c"
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
-  #define TESTING_sort 1
+#define TESTING_sort 1
 #elif !defined(TESTING_sort)
-  #define TESTING_sort 0
+#define TESTING_sort 0
 #endif
 
 #if !defined(COMPARE)
-  #define COMPARE(A, B) compare_func(A, B)
+#define COMPARE(A, B) compare_func(A, B)
 #endif
 
 #ifndef MAX_NTHREADS
-  #define MAX_NTHREADS 64
+#define MAX_NTHREADS 64
 #endif
 
 #if !defined(LENGTH)
