@@ -762,7 +762,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     newname_index_on_oldlist
         = hash_lookup_pre_calc_map(oldlist_map, newname, newhash, newindex);
     newname_exists = !access(newname, F_OK);
-#if defined(__linux__)
+#if defined(_GNU_SOURCE)
     if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
         error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ":\n",
               oldname, newname);
