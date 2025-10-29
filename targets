@@ -2,9 +2,9 @@ targets='
 test
 build
 debug
-# benchmark
+benchmark
 # perf
-# valgrind
+valgrind
 # check
 cross x86-windows-gnu
 cross x86_64-windows-gnu
