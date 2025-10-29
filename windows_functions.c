@@ -170,11 +170,33 @@ lstat(const char *path, struct stat *statbuf) {
 
 #if TESTING_windows_functions
 #include <assert.h>
+
+bool
+contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
+    for (int32 i = 0; i < *nfiles; i += 1) {
+        char *from_scan = dirent[i]->d_name;
+
+        if (!memcmp(buffer, from_scan, length)) {
+            printf("%s == %s\n", buffer, from_scan);
+            if (i < (*nfiles - 1)) {
+                *nfiles -= 1;
+                memmove(&dirent[i], &dirent[i + 1],
+                        (*nfiles - i)*sizeof(*(dirent)));
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 int
 main(void) {
     char *string = "aaa/bbb/ccc";
     int64 length = strlen(string);
     struct stat stat;
+    struct dirent **dirent;
+    FILE *ls;
+    int32 nfiles;
 
     assert(memmem(string, length, "aaa", 3) == string);
     assert(memmem(string, length, "bbb", 3) == string + 4);
@@ -187,6 +209,20 @@ main(void) {
     assert(stat.st_mtime == 1735689600);
     assert(stat.st_ctime == 1735689600);
     error("stat.atime: %lu\n", stat.st_atime);
+
+    if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
+        error("scandir for windows failed.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((ls = popen("dir /b", "r"))) {
+        char buffer[1024];
+        while (fgets(buffer, sizeof(buffer), ls)) {
+            int64 length = strcspn(buffer, "\n");
+            buffer[length] = '\0';
+            assert(contains(buffer, length, dirent, &nfiles));
+        }
+    }
 
     exit(EXIT_SUCCESS);
 }
