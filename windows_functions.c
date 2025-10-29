@@ -138,12 +138,10 @@ lstat(const char *path, struct stat *statbuf) {
         return -1;
     }
 
-    WIN32_FIND_DATAW fd;
-    HANDLE h = FindFirstFileW(wpath, &fd);
-    if (h == INVALID_HANDLE_VALUE) {
+    WIN32_FILE_ATTRIBUTE_DATA fd;
+    if (!GetFileAttributesExW(wpath, GetFileExInfoStandard, &fd)) {
         return -1;
     }
-    FindClose(h);
 
     memset(statbuf, 0, sizeof(*statbuf));
 
@@ -185,6 +183,7 @@ main(void) {
     assert(memmem(string, length, "/", 1) == string + 3);
 
     assert(lstat(__FILE__, &stat) == 0);
+    error("stat.st_size: %ld\n", stat.st_size);
     error("stat.mtime: %lu\n", stat.st_mtime);
     error("stat.ctime: %lu\n", stat.st_ctime);
     error("stat.atime: %lu\n", stat.st_atime);
