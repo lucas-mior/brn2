@@ -181,7 +181,6 @@ sort(FileList *old) {
     memcpy(dummy_last, last, last_length + 1);
 
 #if SORT_BENCHMARK
-
     struct timespec t0;
     struct timespec t1;
 
