@@ -406,8 +406,8 @@ snprintf2(char *buffer, size_t size, char *format, ...) {
 #if OS_WINDOWS
 int
 util_command(const int argc, char **argv) {
-    char *cmdline;
-    uint32 len = 1;
+    char cmdline[1024] = {0};
+    int64 j = 0;
     FILE *tty;
     STARTUPINFO startup_info;
     BOOL success;
@@ -420,21 +420,22 @@ util_command(const int argc, char **argv) {
     }
 
     for (int i = 0; i < argc - 1; i += 1) {
-        len += strlen(argv[i]) + 3;
-    }
-    cmdline = xmalloc(len);
+        int64 len = (int64)strlen(argv[i]);
+        if ((j + len) >= sizeof(cmdline)) {
+            error("Command line is too long.\n");
+            exit(EXIT_FAILURE);
+        }
 
-    cmdline[0] = '\0';
-    for (int i = 0; i < (argc - 1); i += 1) {
-        strcat(cmdline, "\"");
-        strcat(cmdline, argv[i]);
-        strcat(cmdline, "\"");
-        strcat(cmdline, " ");
+        cmdline[j] = '"';
+        memcpy(&cmdline[j+1], argv[i], len);
+        cmdline[j+len+1] = '"';
+        cmdline[j+len+2] = ' ';
+        j += len + 3;
     }
+    cmdline[j] = '\0';
 
     if ((tty = freopen("CONIN$", "r", stdin)) == NULL) {
         error("Error reopening stdin: %s.\n", strerror(errno));
-        free(cmdline);
         fatal(EXIT_FAILURE);
     }
 
@@ -450,7 +451,6 @@ util_command(const int argc, char **argv) {
             error(" %s", argv[i]);
         }
         error("': %lu.\n", GetLastError());
-        free(cmdline);
         fatal(EXIT_FAILURE);
     }
 
@@ -460,7 +460,6 @@ util_command(const int argc, char **argv) {
 
     CloseHandle(proc_info.hProcess);
     CloseHandle(proc_info.hThread);
-    free(cmdline);
     return 0;
 }
 #else
