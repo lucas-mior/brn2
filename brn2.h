@@ -20,7 +20,7 @@
 #if !defined(BRN2_H)
 #define BRN2_H
 
-#if defined(__linux__)
+#if defined(__linux__) && defined(__GLIBC__)
   #define _GNU_SOURCE
 #endif
 
@@ -32,7 +32,6 @@
   #include <pthread.h>
   #include <sys/mman.h>
   #include <sys/wait.h>
-  #include <fts.h>
 #endif
 
 #include <assert.h>

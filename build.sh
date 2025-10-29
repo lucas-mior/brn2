@@ -5,18 +5,7 @@
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
-targets='
-test
-build
-debug
-# benchmark
-# perf
-valgrind
-# check
-cross x86_64-windows-gnu
-cross x86_64-macos
-cross aarch64-macos
-'
+. ./targets
 
 dir="$(realpath "$(dirname "$0")")"
 
@@ -37,7 +26,6 @@ CFLAGS="$CFLAGS -Wno-unused-macros -Wno-unused-function"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wfatal-errors"
-CFLAGS="$CFLAGS -Werror"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm"
