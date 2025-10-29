@@ -59,7 +59,7 @@ case "$target" in
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
-"test") 
+"test")
     CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1"
     ;;
 "check") 
