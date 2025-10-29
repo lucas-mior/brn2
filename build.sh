@@ -30,7 +30,7 @@ CFLAGS="$CFLAGS -Wfatal-errors"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 LDFLAGS="$LDFLAGS -lm"
 
-OS=$(uname --all)
+OS=$(uname -a)
 
 if echo "$OS" | grep -q "Linux"; then
     if echo "$OS" | grep -q "GNU"; then
