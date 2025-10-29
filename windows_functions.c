@@ -40,8 +40,9 @@
 #endif
 
 int
-scandir(const char *dir, struct dirent ***namelist, void *filter,
-        void *compar) {
+scandir(const char *dir, struct dirent ***namelist,
+        int (*filter)(const struct dirent *),
+        int (*compar)(const struct dirent **, const struct dirent **)) {
     WIN32_FIND_DATAA find_data;
     HANDLE hFind;
     char buffer[MAX_PATH];
