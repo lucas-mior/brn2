@@ -179,7 +179,15 @@ lstat(const char *path, struct stat *stat) {
 #include <assert.h>
 int
 main(void) {
-    assert(true);
+    char *string = "aaa/bbb/ccc";
+    int64 length = strlen(string);
+
+    assert(memmem(string, length, "aaa", 3) == string);
+    assert(memmem(string, length, "bbb", 3) == string + 4);
+    assert(memmem(string, length, "aaaa", 4) == NULL);
+    assert(memmem(string, length, "bbbb", 4) == NULL);
+    assert(memmem(string, length, "/", 1) == string + 3);
+
     exit(EXIT_SUCCESS);
 }
 #endif
