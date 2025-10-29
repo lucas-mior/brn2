@@ -18,12 +18,16 @@
 #if !defined(WINDOWS_FUNCTIONS_C)
 #define WINDOWS_FUNCTIONS_C
 
+#include "util.c"
+
+#if !OS_WINDOWS
+#error ONLY INCLUDE THIS FILE IF COMPILING FOR WINDOWS
+#endif
+
 #include <windows.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <wchar.h>
-
-#include "util.c"
 
 #ifndef S_IFLNK
 #define S_IFLNK 0120000
