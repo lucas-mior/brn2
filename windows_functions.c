@@ -217,6 +217,7 @@ main(void) {
 
     if ((ls = popen("dir /b", "r")) == NULL) {
         error("Error in popen: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     {
         char buffer[1024];
