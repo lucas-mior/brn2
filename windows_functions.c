@@ -117,60 +117,55 @@ memmem(const void *haystack, size_t hay_len, const void *needle,
     return NULL;
 }
 
-static int
-lstat(const char *path, struct stat *stat) {
-    wchar_t wpath[MAX_PATH];
-    WIN32_FIND_DATAW fd;
-    LARGE_INTEGER sz;
+static time_t
+filetime_to_time_t(const FILETIME *ft) {
     ULARGE_INTEGER ull;
-    HANDLE h;
+    ull.LowPart = ft->dwLowDateTime;
+    ull.HighPart = ft->dwHighDateTime;
+    // Convert from Windows epoch (1601) to Unix epoch (1970)
+    return (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+}
 
-    if (path == NULL) {
-        error("lstat: Invalid path.\n");
+static int
+lstat(const char *path, struct stat *statbuf) {
+    if (path == NULL || statbuf == NULL) {
+        fprintf(stderr, "lstat: Invalid argument.\n");
         return -1;
     }
-    if (stat == NULL) {
-        error("lstat: Invalid stat pointer.\n");
-        return -1;
-    }
 
+    wchar_t wpath[MAX_PATH];
     if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0) {
         return -1;
     }
 
-    if ((h = FindFirstFileW(wpath, &fd)) == INVALID_HANDLE_VALUE) {
+    WIN32_FIND_DATAW fd;
+    HANDLE h = FindFirstFileW(wpath, &fd);
+    if (h == INVALID_HANDLE_VALUE) {
         return -1;
     }
     FindClose(h);
 
-    memset(stat, 0, sizeof(*stat));
+    memset(statbuf, 0, sizeof(*statbuf));
 
+    // File type
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-        stat->st_mode = S_IFLNK;
+        statbuf->st_mode = S_IFLNK;
     } else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        stat->st_mode = S_IFDIR;
+        statbuf->st_mode = S_IFDIR;
     } else {
-        stat->st_mode = S_IFREG;
+        statbuf->st_mode = S_IFREG;
     }
 
-    sz.HighPart = fd.nFileSizeHigh;
+    // File size
+    ULARGE_INTEGER sz;
     sz.LowPart = fd.nFileSizeLow;
-    stat->st_size = sz.QuadPart;
+    sz.HighPart = fd.nFileSizeHigh;
+    statbuf->st_size = sz.QuadPart;
 
-    ull.LowPart = fd.ftLastWriteTime.dwLowDateTime;
-    ull.HighPart = fd.ftLastWriteTime.dwHighDateTime;
-    stat->st_mtime
-        = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
-
-    ull.LowPart = fd.ftCreationTime.dwLowDateTime;
-    ull.HighPart = fd.ftCreationTime.dwHighDateTime;
-    stat->st_ctime
-        = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
-
-    ull.LowPart = fd.ftLastAccessTime.dwLowDateTime;
-    ull.HighPart = fd.ftLastAccessTime.dwHighDateTime;
-    stat->st_atime
-        = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    // Convert FILETIME -> time_t
+    statbuf->st_mtime = filetime_to_time_t(&fd.ftLastWriteTime);
+    statbuf->st_ctime = filetime_to_time_t(&fd.ftCreationTime);
+    statbuf->st_atime = filetime_to_time_t(&fd.ftLastAccessTime);
 
     return 0;
 }
@@ -181,12 +176,18 @@ int
 main(void) {
     char *string = "aaa/bbb/ccc";
     int64 length = strlen(string);
+    struct stat stat;
 
     assert(memmem(string, length, "aaa", 3) == string);
     assert(memmem(string, length, "bbb", 3) == string + 4);
     assert(memmem(string, length, "aaaa", 4) == NULL);
     assert(memmem(string, length, "bbbb", 4) == NULL);
     assert(memmem(string, length, "/", 1) == string + 3);
+
+    assert(lstat(__FILE__, &stat) == 0);
+    error("stat.mtime: %lu\n", stat.st_mtime);
+    error("stat.ctime: %lu\n", stat.st_ctime);
+    error("stat.atime: %lu\n", stat.st_atime);
 
     exit(EXIT_SUCCESS);
 }
