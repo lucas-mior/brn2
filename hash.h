@@ -456,7 +456,7 @@ main(void) {
     String str3 = {.s = "cccccccccccccccc", .value = 2};
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
-    original_map = hash_map_create(NSTRINGS);
+    original_map = hash_create_map(NSTRINGS);
     arena = arena_create((usize)4096*NSTRINGS);
 
     assert(original_map);
@@ -466,12 +466,12 @@ main(void) {
     str2.length = (uint32)strlen(str2.s);
     str3.length = (uint32)strlen(str3.s);
 
-    assert(hash_map_insert(original_map, str1.s, str1.length, str1.value));
-    assert(!hash_map_insert(original_map, str1.s, str1.length, 1));
-    assert(hash_map_insert(original_map, str2.s, str2.length, str2.value));
+    assert(hash_insert_map(original_map, str1.s, str1.length, str1.value));
+    assert(!hash_insert_map(original_map, str1.s, str1.length, 1));
+    assert(hash_insert_map(original_map, str2.s, str2.length, str2.value));
 
     assert(hash_length(original_map) == 2);
-    hash_map_print(original_map, false);
+    hash_print_map(original_map, false);
 
     srand(42);
 
@@ -481,16 +481,16 @@ main(void) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     for (int i = 0; i < NSTRINGS; i += 1) {
-        assert(hash_map_insert(original_map, strings[i].s, strings[i].length,
+        assert(hash_insert_map(original_map, strings[i].s, strings[i].length,
                                strings[i].value));
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     print_timings("insertion", t0, t1);
 
     if (NSTRINGS < 10) {
-        hash_map_print(original_map, false);
+        hash_print_map(original_map, false);
     } else {
-        HASH_PRINT_SUMMARYmap(original_map);
+        HASH_PRINT_SUMMARY_map(original_map);
     }
 
     free(strings);
