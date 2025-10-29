@@ -411,6 +411,7 @@ util_command(const int argc, char **argv) {
     STARTUPINFO startup_info;
     BOOL success;
     PROCESS_INFORMATION proc_info = {0};
+    DWORD exit_code = 0;
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
@@ -454,7 +455,6 @@ util_command(const int argc, char **argv) {
 
     WaitForSingleObject(proc_info.hProcess, INFINITE);
 
-    DWORD exit_code = 0;
     GetExitCodeProcess(proc_info.hProcess, &exit_code);
 
     CloseHandle(proc_info.hProcess);
@@ -547,7 +547,6 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write(STDERR_FILENO, buffer, (size_t)n);
 #if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
