@@ -102,6 +102,9 @@ typedef struct CAT(Bucket_, HASH_TYPE) {
 #if defined(HASH_VALUE_TYPE)
     HASH_VALUE_TYPE value;
 #endif
+#if defined(HASH_PADDING_TYPE)
+    HASH_PADDING_TYPE padding;
+#endif
     uint32 next;
 } CAT(Bucket_, HASH_TYPE);
 
@@ -374,6 +377,7 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
     return;
 }
 #undef HASH_VALUE_TYPE
+#undef HASH_PADDING_TYPE
 #undef HASH_TYPE
 
 #ifndef HASH_H2
