@@ -107,8 +107,7 @@ lstat(const char *path, struct stat *stat) {
     if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0)
         return -1;
 
-    h = FindFirstFileW(wpath, &fd);
-    if (h == INVALID_HANDLE_VALUE)
+    if ((h = FindFirstFileW(wpath, &fd)) == INVALID_HANDLE_VALUE)
         return -1;
     FindClose(h);
 
