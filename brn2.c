@@ -148,12 +148,13 @@ brn2_threads_function(void *arg) {
             pthread_exit(NULL);
         }
 
-        if (work_queue.count == 0)
-            return NULL;
-
-        work = work_queue.items[work_queue.head];
-        work_queue.head = (work_queue.head + 1) % LENGTH(work_queue.items);
-        work_queue.count -= 1;
+        if (work_queue.count == 0) {
+            work = NULL;
+        } else {
+            work = work_queue.items[work_queue.head];
+            work_queue.head = (work_queue.head + 1) % LENGTH(work_queue.items);
+            work_queue.count -= 1;
+        }
 
         pthread_mutex_unlock(&brn2_mutex);
 
