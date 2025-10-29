@@ -183,9 +183,9 @@ main(void) {
     assert(memmem(string, length, "/", 1) == string + 3);
 
     assert(lstat("LICENSE", &stat) == 0);
-    error("stat.st_size: %ld\n", stat.st_size);
-    error("stat.mtime: %lu\n", stat.st_mtime);
-    error("stat.ctime: %lu\n", stat.st_ctime);
+    assert(stat.st_size == 34523);
+    assert(stat.st_mtime == 1735689600);
+    assert(stat.st_ctime == 1735689600);
     error("stat.atime: %lu\n", stat.st_atime);
 
     exit(EXIT_SUCCESS);
