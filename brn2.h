@@ -45,6 +45,22 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define HASH_VALUE_FIELD                                                       \
+    uint32 value;                                                              \
+    uint32 unused;
+#define HASH_ITERATOR_VALUE iterator->value
+#define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
+#define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
+#define HASH_TYPE map
+#include "hash.h"
+
+#define HASH_VALUE_FIELD
+#define HASH_ITERATOR_VALUE 0u
+#define HASH_ITERATOR_VALUE_ASSIGN (void)value
+#define HASH_ITERATOR_VALUE_RETURN NULL
+#define HASH_TYPE set
+#include "hash.h"
+
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -107,7 +123,6 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
-#include "hash.h"
 #include "arena.c"
 
 typedef struct File {

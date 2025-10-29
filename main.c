@@ -27,8 +27,6 @@
 #define COMPARE brn2_compare
 #include "sort.c"
 
-#include "hash.c"
-
 bool brn2_options_fatal = DEBUGGING;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
@@ -255,7 +253,7 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         }
 
-        oldlist_map = hash_map_create(old->length);
+        oldlist_map = hash_createmap(old->length);
         capacity_set = hash_capacity(oldlist_map);
         old->indexes_size = old->length*sizeof(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
@@ -269,8 +267,8 @@ main(int argc, char **argv) {
             usize buffered;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
-                   || !hash_map_insert_pre_calc(oldlist_map, file->name,
-                                                file->hash, *index, i)) {
+                   || !hash_insert_pre_calcmap(oldlist_map, file->name,
+                                               file->hash, *index, i)) {
                 if (contains_newline) {
                     error(RED "'%s'" RESET " contains new line.", file->name);
                 } else {
@@ -344,7 +342,7 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            newlist_set = hash_set_create(new->length);
+            newlist_set = hash_createset(new->length);
             main_capacity = hash_capacity(newlist_set);
             new->indexes_size = new->length*sizeof(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
@@ -372,9 +370,9 @@ main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_set == NULL) {
-                newlist_set = hash_set_create(new->length);
+                newlist_set = hash_createset(new->length);
             } else {
-                hash_set_zero(newlist_set);
+                hash_zeroset(newlist_set);
             }
             if (new->indexes == NULL) {
                 new->indexes_size = new->length*sizeof(*(new->indexes));
@@ -402,7 +400,7 @@ main(int argc, char **argv) {
         uint32 number_renames = 0;
 
         if (number_changes) {
-            HashSet *names_renamed = hash_set_create(old->length);
+            HashSet *names_renamed = hash_createset(old->length);
 
             if (brn2_options_quiet) {
                 print = noop;
@@ -415,7 +413,7 @@ main(int argc, char **argv) {
                               &number_renames);
             }
             if (DEBUGGING) {
-                hash_set_destroy(names_renamed);
+                hash_destroyset(names_renamed);
             }
         }
         if (number_changes != number_renames) {
@@ -440,8 +438,8 @@ main(int argc, char **argv) {
         xmunmap(new->indexes, new->indexes_size);
         brn2_free_list(old);
         brn2_free_list(new);
-        hash_map_destroy(oldlist_map);
-        hash_set_destroy(newlist_set);
+        hash_destroymap(oldlist_map);
+        hash_destroyset(newlist_set);
         arena_destroy(old->arena);
         arena_destroy(new->arena);
 
