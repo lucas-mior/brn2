@@ -21,7 +21,7 @@
 #include "util.c"
 
 #if !OS_WINDOWS
-#error ONLY INCLUDE THIS FILE IF COMPILING FOR WINDOWS
+#error "ONLY INCLUDE THIS FILE IF COMPILING FOR WINDOWS"
 #endif
 
 #include <windows.h>
