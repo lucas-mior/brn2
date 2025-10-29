@@ -97,7 +97,7 @@ main(int argc, char **argv) {
     char *lines = NULL;
     int mode = FILES_FROM_DIR;
 
-#if defined(BRN2_BENCHMARK)
+#if BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
@@ -320,7 +320,7 @@ main(int argc, char **argv) {
         (void)args_edit;
         (void)args_shuf;
 
-#if defined(BRN2_BENCHMARK)
+#if BRN2_BENCHMARK
         {
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
@@ -428,7 +428,7 @@ main(int argc, char **argv) {
         }
     }
 
-#if defined(BRN2_BENCHMARK)
+#if BRN2_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     brn2_timings("500000 renames", t0, t1, old->length);
 #endif
