@@ -160,7 +160,7 @@ create_temp_files() {
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
-    seq -w 1500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 100000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
 case "$target" in
@@ -168,7 +168,9 @@ case "$target" in
     create_temp_files
 
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
+    trace_on
     $dir/$exe -s -q -d .
+    trace_off
     exit
     ;;
 "valgrind") 
