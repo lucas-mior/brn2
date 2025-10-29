@@ -55,7 +55,7 @@
 #define ALIGNMENT 16
 #endif
 
-static uint32 hash_function(char *key, uint32 key_length);
+uint32 hash_function(char *key, uint32 key_length);
 uint32 hash_normal(void *map, uint32 hash);
 uint32 hash_capacity(void *map);
 uint32 hash_length(void *map);
@@ -383,7 +383,7 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
 #ifndef HASH_H2
 #define HASH_H2
 
-static uint32
+uint32
 hash_function(char *key, uint32 key_length) {
     uint32 hash;
     hash = (uint32)rapidhash(key, key_length);
