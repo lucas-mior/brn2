@@ -39,12 +39,12 @@ case "$target" in
     ;;
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="${program}_benchmark"
     ;;
 "perf")
     CFLAGS="$CFLAGS -g3 -Og -flto"
-    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK"
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="${program}_perf"
     ;;
 "valgrind") 
