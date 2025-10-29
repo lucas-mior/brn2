@@ -43,9 +43,7 @@
 #endif
 
 #if TESTING_hash
-#define HASH_VALUE_FIELD                                                       \
-    uint32 value;                                                              \
-    uint32 unused;
+#define HASH_VALUE_TYPE uint32
 #define HASH_ITERATOR_VALUE iterator->value
 #define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
 #define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
@@ -112,8 +110,8 @@ typedef ssize_t isize;
 typedef struct CAT(Bucket_, HASH_TYPE) {
     char *key;
     uint32 hash;
-#if defined(HASH_VALUE_FIELD)
-    HASH_VALUE_FIELD
+#if defined(HASH_VALUE_TYPE)
+    HASH_VALUE_TYPE value;
 #endif
     uint32 next;
 } CAT(Bucket_, HASH_TYPE);
@@ -338,7 +336,7 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, bool verbose) {
     printf("\n");
     return;
 }
-#undef HASH_VALUE_FIELD
+#undef HASH_VALUE_TYPE
 #undef HASH_ITERATOR_VALUE
 #undef HASH_ITERATOR_VALUE_ASSIGN
 #undef HASH_ITERATOR_VALUE_RETURN
