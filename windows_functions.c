@@ -212,7 +212,7 @@ main(void) {
     error("stat.atime: %lu\n", stat.st_atime);
 
     if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
-        error("scandir for windows failed.\n");
+        error("Error in scandir for windows.\n");
         exit(EXIT_FAILURE);
     }
 
