@@ -20,13 +20,14 @@
 #include "brn2.h"
 
 #include "brn2.c"
-#include "hash.c"
 #include "util.c"
 #include "arena.c"
 
 #define MAX_THREADS BRN2_MAX_THREADS
 #define COMPARE brn2_compare
 #include "sort.c"
+
+#include "hash.c"
 
 bool brn2_options_fatal = DEBUGGING;
 bool brn2_options_implicit = false;
