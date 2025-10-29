@@ -64,8 +64,6 @@
 #define BRN2_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 
 #define HASH_VALUE_TYPE uint32
-#define HASH_ITERATOR_VALUE iterator->value
-#define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
 #define HASH_TYPE map
 #include "hash.c"
 
