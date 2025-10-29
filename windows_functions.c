@@ -94,7 +94,7 @@ memmem(const void *haystack, size_t hay_len, const void *needle,
     if (needle_len == 0) {
         return (void *)haystack;
     }
-    if (!haystack || !needle) {
+    if ((haystack == NULL) || (needle == NULL)) {
         return NULL;
     }
     if (hay_len < needle_len) {
