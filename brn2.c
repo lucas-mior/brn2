@@ -596,7 +596,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     return total;
 }
 
-#if OS_UNIX
+#if OS_UNIX && BRN2_MAX_THREADS > 1
 uint32
 brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {

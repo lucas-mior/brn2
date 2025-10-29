@@ -63,15 +63,6 @@ delete_brn2_buffer(void) {
     return;
 }
 
-#if OS_UNIX
-static void
-destroy_threads(void) {
-    for (uint32 i = 0; i < nthreads; i += 1) {
-        pthread_cancel(thread_pool[i]);
-    }
-}
-#endif
-
 static void __attribute__((noreturn))
 handler_segv(int unused) {
     (void)unused;
@@ -198,9 +189,11 @@ main(int argc, char **argv) {
         nthreads = 1;
     }
 
+#if BRN2_MAX_THREADS > 1
     for (uint32 i = 0; i < nthreads; i += 1) {
         pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
     }
+#endif
 #endif
 
     brn2_normalize_names(old, NULL);
@@ -443,7 +436,7 @@ main(int argc, char **argv) {
         arena_destroy(old->arena);
         arena_destroy(new->arena);
 
-#if OS_UNIX
+#if OS_UNIX && BRN2_MAX_THREADS > 1
         pthread_mutex_lock(&brn2_mutex);
         stop_threads = true;
         pthread_cond_broadcast(&brn2_new_work);
