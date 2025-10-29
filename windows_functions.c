@@ -177,6 +177,10 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
     for (int32 i = 0; i < *nfiles; i += 1) {
         char *from_scan = dirent[i]->d_name;
 
+        if ((int64)strlen(from_scan) != length) {
+            continue;
+        }
+
         if (!memcmp(buffer, from_scan, length)) {
             printf("%s == %s\n", buffer, from_scan);
             if (i < (*nfiles - 1)) {
