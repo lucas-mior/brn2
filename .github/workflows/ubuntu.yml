@@ -1,4 +1,4 @@
-name: Linux CI
+name: Test on various platforms CI
 
 on:
   push:
@@ -6,17 +6,19 @@ on:
   pull_request:
 
 jobs:
-  build2:
-    runs-on: freebsd-latest
+  macos:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install build deps
-        run: cc --version
+        run: |
+          xcode-select --install 2>/dev/null || true
+          cc --version
 
       - name: Build and Test
         run: ./build.sh test
-  build:
+  ubuntu:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
