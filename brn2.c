@@ -135,6 +135,7 @@ brn2_enqueue(Work *work) {
 static void *
 brn2_threads_function(void *arg) {
     (void)arg;
+
     while (true) {
         Work *work;
 
