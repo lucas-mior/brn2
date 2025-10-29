@@ -99,8 +99,12 @@ lstat(const char *path, struct stat *stat) {
     ULARGE_INTEGER ull;
     HANDLE h;
 
-    if (!path || !stat) {
-        SetLastError(ERROR_INVALID_PARAMETER);
+    if (path == NULL) {
+        error("lstat: Invalid path.\n");
+        return -1;
+    }
+    if (stat == NULL) {
+        error("lstat: Invalid stat pointer.\n");
         return -1;
     }
 
