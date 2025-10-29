@@ -66,6 +66,10 @@
 #include <sys/wait.h>
 #endif
 
+#ifndef DEBUGGING
+#define DEBUGGING 0
+#endif
+
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_util 1
 #elif !defined(TESTING_util)
