@@ -229,9 +229,7 @@ arena_push(Arena *arena, uint32 size) {
     void *before;
 
     if (size > (arena->size - ALIGN(sizeof(*arena)))) {
-        fprintf(stderr, "Error pushing %u bytes into arena of size %zu.\n",
-                size, arena->size - ALIGN(sizeof(*arena)));
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     while ((char *)arena->pos >= (arena->begin + arena->size - size)) {
