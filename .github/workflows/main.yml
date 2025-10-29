@@ -1,0 +1,37 @@
+name: FreeBSD CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest   # Linux host; will run FreeBSD in VM
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install QEMU
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-arm
+
+      - name: Download FreeBSD image
+        run: |
+          curl -LO https://download.freebsd.org/.../FreeBSD-14.0-RELEASE-arm64.raw.xz
+          xz -d FreeBSD-14.0-RELEASE-arm64.raw.xz
+
+      - name: Run FreeBSD VM
+        run: |
+          qemu-system-aarch64 \
+            -m 2G -cpu cortex-a57 -M virt \
+            -nographic -drive if=none,file=FreeBSD-14.0-RELEASE-arm64.raw,id=disk \
+            -device virtio-blk-device,drive=disk \
+            -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+            -device virtio-net-device,netdev=net0 \
+            -snapshot &
+          sleep 30  # wait for VM boot
+
+      - name: Copy program to FreeBSD
+        run: scp -P 2222 ./ freebsd@localhost:/tmp/brn2
+
+      - name: Run tests
+        run: ssh -p 2222 freebsd@localhost "/tmp/brn2/build.sh"
