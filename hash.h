@@ -42,6 +42,16 @@
 #define TESTING_hash 0
 #endif
 
+#if TESTING_hash
+#define HASH_VALUE_FIELD                                                       \
+    uint32 value;                                                              \
+    uint32 unused;
+#define HASH_ITERATOR_VALUE iterator->value
+#define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
+#define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
+#define HASH_TYPE map
+#endif
+
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
