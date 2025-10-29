@@ -132,6 +132,9 @@ case "$target" in
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
         if [ $src = "windows_functions.c" ]; then
+            if ! zig --version; then
+                continue
+            fi
             cmdline="zig cc $CPPFLAGS $CFLAGS"
             cmdline="$cmdline -target x86_64-windows-gnu"
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1"
