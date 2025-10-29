@@ -15,3 +15,5 @@ tags
 *.pdb
 *.exe
 *.data
+rename
+rename.txt
