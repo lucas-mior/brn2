@@ -427,9 +427,9 @@ util_command(const int argc, char **argv) {
         }
 
         cmdline[j] = '"';
-        memcpy(&cmdline[j+1], argv[i], len);
-        cmdline[j+len+1] = '"';
-        cmdline[j+len+2] = ' ';
+        memcpy(&cmdline[j + 1], argv[i], len);
+        cmdline[j + len + 1] = '"';
+        cmdline[j + len + 2] = ' ';
         j += len + 3;
     }
     cmdline[j] = '\0';
