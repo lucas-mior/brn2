@@ -215,7 +215,10 @@ main(void) {
         exit(EXIT_FAILURE);
     }
 
-    if ((ls = popen("dir /b", "r"))) {
+    if ((ls = popen("dir /b", "r")) == NULL) {
+        error("Error in popen: %s.\n", strerror(errno));
+    }
+    {
         char buffer[1024];
         while (fgets(buffer, sizeof(buffer), ls)) {
             int64 length = strcspn(buffer, "\n");
