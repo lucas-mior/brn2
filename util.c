@@ -58,12 +58,12 @@
 #define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
 
 #if OS_WINDOWS
-  #include <windows.h>
+#include <windows.h>
 #endif
 
 #if OS_UNIX
-  #include <sys/mman.h>
-  #include <sys/wait.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
@@ -81,28 +81,28 @@ static char *program;
 #define SIZEOF(X) (int64)sizeof(X)
 
 #if !defined(SIZEKB)
-  #define SIZEKB(X) ((size_t)(X)*1024ul)
-  #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
-  #define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
+#define SIZEKB(X) ((size_t)(X)*1024ul)
+#define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
+#define SIZEGB(X) ((size_t)(X)*1024ul*1024ul*1024ul)
 #endif
 
 #if !defined(LENGTH)
-  #define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
+#define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
 #endif
 #if !defined(SNPRINTF)
-  #define SNPRINTF(BUFFER, FORMAT, ...)                                          \
-      snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
+#define SNPRINTF(BUFFER, FORMAT, ...)                                          \
+    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #endif
 #if !defined(STRING_FROM_STRINGS)
-  #define STRING_FROM_STRINGS(BUFFER, SEP, ARRAY, LENGTH)                        \
-      string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
+#define STRING_FROM_STRINGS(BUFFER, SEP, ARRAY, LENGTH)                        \
+    string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
 #endif
 
 #if DEBUGGING || TESTING_util
 #if defined(__clang__)
-  #pragma clang diagnostic ignored "-Wc11-extensions"
-  #pragma clang diagnostic ignored "-Wformat"
-  #pragma clang diagnostic ignored "-Wdouble-promotion"
+#pragma clang diagnostic ignored "-Wc11-extensions"
+#pragma clang diagnostic ignored "-Wformat"
+#pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
 #define PRINT_VAR_EVAL(FORMAT, variable)                                       \
@@ -130,28 +130,28 @@ static char *program;
 #endif
 
 #if !defined(DEBUGGING)
-  #define DEBUGGING 0
+#define DEBUGGING 0
 #endif
 
 #if !defined(FLAGS_HUGE_PAGES)
-  #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
-    #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
-  #else
-    #define FLAGS_HUGE_PAGES 0
-  #endif
+#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
+#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
+#else
+#define FLAGS_HUGE_PAGES 0
+#endif
 #endif
 
 #if !defined(MAP_POPULATE)
-  #define MAP_POPULATE 0
+#define MAP_POPULATE 0
 #endif
 
 #define UTIL_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 
 #if !defined(ALIGNMENT)
-  #define ALIGNMENT 16ul
+#define ALIGNMENT 16ul
 #endif
 #if !defined(ALIGN)
-  #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
+#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
 #if !defined(INTEGERS)
@@ -231,8 +231,9 @@ basename2(char *path) {
         int64 length;
 
         fslash = memchr(p, '/', (usize)left);
-        if (OS_WINDOWS)
+        if (OS_WINDOWS) {
             bslash = memchr(p, '\\', (usize)left);
+        }
 
         if ((fslash == NULL) && (bslash == NULL)) {
             return p;
@@ -432,8 +433,8 @@ util_command(const int argc, char **argv) {
     memset(&startup_info, 0, sizeof(startup_info));
     startup_info.cb = sizeof(startup_info);
 
-    success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL,
-                             NULL, &startup_info, &proc_info);
+    success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
+                             &startup_info, &proc_info);
 
     if (!success) {
         error("Error running '%s", argv[0]);
@@ -842,22 +843,11 @@ main(void) {
     uint64 var_uint64 = UINT64_MAX;
 
     char *paths[] = {
-        "/aaaa/bbbb/cccc",
-        "/aa/bb/cc",
-        "/a/b/c",
-        "a/b/c",
-        "a/b/cccc",
-        "a/bb/cccc",
-        "aaaa/cccc",
+        "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
+        "a/b/cccc",        "a/bb/cccc", "aaaa/cccc",
     };
     char *bases[] = {
-        "cccc",
-        "cc",
-        "c",
-        "c",
-        "cccc",
-        "cccc",
-        "cccc",
+        "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
 
     PRINT_VAR(var_bool);

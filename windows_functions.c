@@ -80,28 +80,33 @@ scandir(const char *dir, struct dirent ***namelist, void *filter,
 }
 
 static void *
-memmem(const void *haystack, size_t hay_len,
-       const void *needle,   size_t needle_len) {
+memmem(const void *haystack, size_t hay_len, const void *needle,
+       size_t needle_len) {
     const uchar *h = haystack;
     const uchar *n = needle;
     const uchar *end = h + hay_len;
     const uchar *limit = end - needle_len + 1;
 
-    if (needle_len == 0)
+    if (needle_len == 0) {
         return (void *)haystack;
-    if (!haystack || !needle)
+    }
+    if (!haystack || !needle) {
         return NULL;
-    if (hay_len < needle_len)
+    }
+    if (hay_len < needle_len) {
         return NULL;
+    }
 
     while (h < limit) {
         const uchar *p;
 
-        if ((p = memchr(h, n[0], (size_t)(limit - h))) == NULL)
+        if ((p = memchr(h, n[0], (size_t)(limit - h))) == NULL) {
             return NULL;
+        }
 
-        if (memcmp(p, n, needle_len) == 0)
+        if (memcmp(p, n, needle_len) == 0) {
             return (void *)p;
+        }
         h = p + 1;
     }
 
@@ -125,21 +130,24 @@ lstat(const char *path, struct stat *stat) {
         return -1;
     }
 
-    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0)
+    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0) {
         return -1;
+    }
 
-    if ((h = FindFirstFileW(wpath, &fd)) == INVALID_HANDLE_VALUE)
+    if ((h = FindFirstFileW(wpath, &fd)) == INVALID_HANDLE_VALUE) {
         return -1;
+    }
     FindClose(h);
 
     memset(stat, 0, sizeof(*stat));
 
-    if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+    if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
         stat->st_mode = S_IFLNK;
-    else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+    } else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         stat->st_mode = S_IFDIR;
-    else
+    } else {
         stat->st_mode = S_IFREG;
+    }
 
     sz.HighPart = fd.nFileSizeHigh;
     sz.LowPart = fd.nFileSizeLow;
@@ -147,15 +155,18 @@ lstat(const char *path, struct stat *stat) {
 
     ull.LowPart = fd.ftLastWriteTime.dwLowDateTime;
     ull.HighPart = fd.ftLastWriteTime.dwHighDateTime;
-    stat->st_mtime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    stat->st_mtime
+        = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
 
     ull.LowPart = fd.ftCreationTime.dwLowDateTime;
     ull.HighPart = fd.ftCreationTime.dwHighDateTime;
-    stat->st_ctime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    stat->st_ctime
+        = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
 
     ull.LowPart = fd.ftLastAccessTime.dwLowDateTime;
     ull.HighPart = fd.ftLastAccessTime.dwHighDateTime;
-    stat->st_atime = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    stat->st_atime
+        = (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
 
     return 0;
 }

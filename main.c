@@ -455,7 +455,6 @@ main(int argc, char **argv) {
             pthread_join(thread_pool[i], NULL);
         }
 #endif
-
     }
 #if OS_WINDOWS
     printf("Press enter to continue.\n");
