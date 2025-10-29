@@ -16,3 +16,13 @@ jobs:
 
       - name: Build and Test
         run: ./build.sh test
+  build2:
+    runs-on: freebsd-14-64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: cc --version
+
+      - name: Build and Test
+        run: ./build.sh test
