@@ -325,7 +325,10 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, bool verbose) {
             printf("\n%03u:", i);
 
         while (iterator->key) {
-            printf("'%s'=%u ->", iterator->key, HASH_ITERATOR_VALUE);
+            printf("'%s'", iterator->key);
+#ifdef HASH_ITERATOR_VALUE
+            printf("=%u ->", HASH_ITERATOR_VALUE);
+#endif
             if (iterator->next)
                 iterator = (void *)(map->arena->begin + iterator->next);
             else {
