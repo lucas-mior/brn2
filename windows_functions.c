@@ -182,7 +182,7 @@ main(void) {
     assert(memmem(string, length, "bbbb", 4) == NULL);
     assert(memmem(string, length, "/", 1) == string + 3);
 
-    assert(lstat(__FILE__, &stat) == 0);
+    assert(lstat("LICENSE", &stat) == 0);
     error("stat.st_size: %ld\n", stat.st_size);
     error("stat.mtime: %lu\n", stat.st_mtime);
     error("stat.ctime: %lu\n", stat.st_ctime);

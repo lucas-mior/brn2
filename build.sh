@@ -123,7 +123,6 @@ case "$target" in
     exit
     ;;
 "test")
-    touch LICENSE -t 202501020304.05
     for src in *.c; do
         if [ "$src" = "$main" ]; then
             continue
