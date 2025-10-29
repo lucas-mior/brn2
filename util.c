@@ -859,6 +859,7 @@ main(void) {
         "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
 
+#if defined(__clang__)
     PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
     PRINT_VAR(var_string);
@@ -874,6 +875,7 @@ main(void) {
     PRINT_VAR(var_uint16);
     PRINT_VAR(var_uint32);
     PRINT_VAR(var_uint64);
+#endif
 
     memset(p1, 0, SIZEMB(1));
     memcpy(p1, string, strlen(string));
