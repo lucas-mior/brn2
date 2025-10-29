@@ -187,13 +187,17 @@ case "$target" in
     exit
     ;;
 "valgrind") 
+    create_temp_files
     ls > rename
 
     vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
+    trace_on
     valgrind $vg_flags $dir/brn2 -d .
     valgrind $vg_flags $dir/brn2 -f rename
+    find . | valgrind $vg_flags $dir/brn2 -f -
+    trace_off
     exit
     ;;
 "perf")
