@@ -45,8 +45,6 @@
 #if TESTING_hash
 #define HASH_VALUE_TYPE uint32
 #define HASH_ITERATOR_VALUE iterator->value
-#define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
-#define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
 #define HASH_TYPE map
 #endif
 
@@ -94,9 +92,6 @@ typedef ssize_t isize;
 
 #endif  /* HASH_H */
 
-#ifndef HASH_ITERATOR_VALUE_RETURN
-#error HASH_ITERATOR_VALUE_RETURN is undefined
-#endif
 #ifndef HASH_TYPE
 #error HASH_TYPE is undefined
 #endif
@@ -270,8 +265,13 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, char *k
         return NULL;
 
     while (true) {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key))
-            return HASH_ITERATOR_VALUE_RETURN;
+        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
+#ifdef HASH_VALUE_TYPE
+            return &(iterator->value);
+#else
+            return NULL;
+#endif
+        }
 
         if (iterator->next)
             iterator = (void *)(map->arena->begin + iterator->next);
@@ -346,8 +346,8 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, bool verbose) {
 
         while (iterator->key) {
             printf("'%s'", iterator->key);
-#ifdef HASH_ITERATOR_VALUE
-            printf("=%u ->", HASH_ITERATOR_VALUE);
+#ifdef HASH_VALUE_TYPE
+            printf("=%u ->", iterator->value);
 #endif
             if (iterator->next)
                 iterator = (void *)(map->arena->begin + iterator->next);
@@ -360,9 +360,6 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, bool verbose) {
     return;
 }
 #undef HASH_VALUE_TYPE
-#undef HASH_ITERATOR_VALUE
-#undef HASH_ITERATOR_VALUE_ASSIGN
-#undef HASH_ITERATOR_VALUE_RETURN
 #undef HASH_TYPE
 
 #ifndef HASH_H2

@@ -66,11 +66,9 @@
 #define HASH_VALUE_TYPE uint32
 #define HASH_ITERATOR_VALUE iterator->value
 #define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
-#define HASH_ITERATOR_VALUE_RETURN &(iterator->value)
 #define HASH_TYPE map
 #include "hash.h"
 
-#define HASH_ITERATOR_VALUE_RETURN NULL
 #define HASH_TYPE set
 #include "hash.h"
 
