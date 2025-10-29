@@ -98,7 +98,7 @@ else
     LDFLAGS="$LDFLAGS -lpthread"
 fi
 
-if [ "$CC" = "clang" ]; then
+if [ "$target" != "test" ] && [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
@@ -132,7 +132,7 @@ case "$target" in
             continue
         fi
         printf "\nTesting ${RED}${src}${RES} ...\n"
-        name="$(echo "$src" | sed 's/.c//g')"
+        name="$(echo "$src" | sed 's/\.c//g')"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
         if [ $src = "windows_functions.c" ]; then
