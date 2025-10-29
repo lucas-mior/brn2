@@ -125,12 +125,12 @@ case "$target" in
     exit
     ;;
 "test")
-    for src in *.c hash.h; do
+    for src in *.c; do
         if [ "$src" = "$main" ]; then
             continue
         fi
         printf "\nTesting ${RED}${src}${RES} ...\n"
-        name="$(echo "$src" | sed 's/\.[ch]//g')"
+        name="$(echo "$src" | sed 's/.c//g')"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
         if [ $src = "windows_functions.c" ]; then

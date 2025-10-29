@@ -67,10 +67,10 @@
 #define HASH_ITERATOR_VALUE iterator->value
 #define HASH_ITERATOR_VALUE_ASSIGN iterator->value = value
 #define HASH_TYPE map
-#include "hash.h"
+#include "hash.c"
 
 #define HASH_TYPE set
-#include "hash.h"
+#include "hash.c"
 
 #if defined(__GNUC__)
 # define BRN2_ASSUME_ALIGNED(X) do { \
