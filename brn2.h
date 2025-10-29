@@ -20,15 +20,11 @@
 #if !defined(BRN2_H)
 #define BRN2_H
 
-#if defined(__linux__) && defined(__GLIBC__)
-  #define _GNU_SOURCE
-#endif
-
 #if defined(__WIN32__)
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
 #else
-  #define BRN2_MAX_THREADS 1
+  #define BRN2_MAX_THREADS 64
   #include <pthread.h>
   #include <sys/mman.h>
   #include <sys/wait.h>
@@ -80,6 +76,10 @@
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
+#endif
+
+#if !defined(BRN2_BENCHMARK)
+#define BRN2_BENCHMARK 0
 #endif
 
 #if 0
