@@ -70,8 +70,6 @@
 #define HASH_TYPE map
 #include "hash.h"
 
-#define HASH_ITERATOR_VALUE 0u
-#define HASH_ITERATOR_VALUE_ASSIGN (void)value
 #define HASH_ITERATOR_VALUE_RETURN NULL
 #define HASH_TYPE set
 #include "hash.h"

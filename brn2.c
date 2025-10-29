@@ -694,7 +694,7 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
             }
         }
 
-        if (!hash_set_insert_pre_calc(repeated_set, newfile->name,
+        if (!hash_insert_pre_calc_set(repeated_set, newfile->name,
                                       newfile->hash, hashes_new[i])) {
             FileName *oldfile = old->files[i];
             char *diff[] = {
@@ -779,11 +779,11 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
         renamed
             = renameat2(AT_FDCWD, oldname, AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_set_insert_pre_calc(names_renamed, oldname, oldhash,
+            if (hash_insert_pre_calc_set(names_renamed, oldname, oldhash,
                                          oldindex)) {
                 *number_renames += 1;
             }
-            if (hash_set_insert_pre_calc(names_renamed, newname, newhash,
+            if (hash_insert_pre_calc_set(names_renamed, newname, newhash,
                                          newindex)) {
                 *number_renames += 1;
             }
@@ -848,7 +848,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
         }
         return;
     } else {
-        if (hash_set_insert_pre_calc(names_renamed, oldname, oldhash,
+        if (hash_insert_pre_calc_set(names_renamed, oldname, oldhash,
                                      oldindex)) {
             *number_renames += 1;
         }

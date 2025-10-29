@@ -94,12 +94,6 @@ typedef ssize_t isize;
 
 #endif  /* HASH_H */
 
-#ifndef HASH_ITERATOR_VALUE
-#error HASH_ITERATOR_VALUE is undefined
-#endif
-#ifndef HASH_ITERATOR_VALUE_ASSIGN
-#error HASH_ITERATOR_VALUE_ASSIGN is undefined
-#endif
 #ifndef HASH_ITERATOR_VALUE_RETURN
 #error HASH_ITERATOR_VALUE_RETURN is undefined
 #endif
@@ -133,9 +127,19 @@ CAT(hash_create_, HASH_TYPE)(uint32);
 static void
 CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *);
 static bool
-CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32, uint32);
+CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32
+#ifdef HASH_VALUE_TYPE
+        , uint32
+#endif
+);
+
 static bool
-CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32, uint32, uint32);
+CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32, uint32
+#ifdef HASH_VALUE_TYPE
+        , uint32
+#endif
+);
+
 void *
 CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32);
 void *
@@ -194,21 +198,35 @@ CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map) {
 
 bool
 CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, char *key,
-                              uint32 key_length, uint32 value) {
+                              uint32 key_length
+#ifdef HASH_VALUE_TYPE
+    , uint32 value
+#endif
+) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
-    return CAT(hash_insert_pre_calc_, HASH_TYPE)(map, key, hash, index, value);
+    return CAT(hash_insert_pre_calc_, HASH_TYPE)(map, key, hash, index
+#ifdef HASH_VALUE_TYPE
+            , value
+#endif
+    );
 }
 
 bool
-CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, char *key, uint32 hash, uint32 index, uint32 value) {
+CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, char *key, uint32 hash, uint32 index
+#ifdef HASH_VALUE_TYPE
+        , HASH_VALUE_TYPE value
+#endif
+) {
     CAT(Bucket_, HASH_TYPE) *iterator = &(map->array[index]);
 
     if (iterator->key == NULL) {
         iterator->key = key;
         iterator->hash = hash;
         iterator->next = 0;
-        HASH_ITERATOR_VALUE_ASSIGN;
+#ifdef HASH_VALUE_TYPE
+        iterator->value = value;
+#endif
         map->length += 1;
         return true;
     }
@@ -228,7 +246,9 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *map, char *k
     iterator = (void *)(map->arena->begin + iterator->next);
     iterator->key = key;
     iterator->hash = hash;
-    HASH_ITERATOR_VALUE_ASSIGN;
+#ifdef HASH_VALUE_TYPE
+    iterator->value = value;
+#endif
     iterator->next = 0;
     map->length += 1;
 
@@ -388,10 +408,6 @@ hash_expected_collisions(void *map) {
     long double result = n - m*(1 - powl((m - 1) / m, n));
     return (uint32)(roundl(result));
 }
-
-#define hash_set_insert(a, b) hash_set_insert(a, b, 0)
-#define hash_set_insert_pre_calc(a, b, c, d)                                   \
-    hash_insert_pre_calc_set(a, b, c, d, 0)
 
 #endif
 
