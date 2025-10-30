@@ -388,6 +388,26 @@ xstrdup(char *string) {
     return p;
 }
 
+void
+xpthread_mutex_lock(pthread_mutex_t *mutex) {
+    int err;
+    if ((err = pthread_mutex_lock(mutex))) {
+        error("Error locking mutex %p: %s.\n", mutex, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
+void
+xpthread_mutex_unlock(pthread_mutex_t *mutex) {
+    int err;
+    if ((err = pthread_mutex_unlock(mutex))) {
+        error("Error unlocking mutex %p: %s.\n", mutex, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
 int32
 snprintf2(char *buffer, size_t size, char *format, ...) {
     int n;

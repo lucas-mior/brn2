@@ -480,10 +480,10 @@ main(int argc, char **argv) {
         arena_destroy(new->arena);
 
 #if BRN2_MAX_THREADS > 1
-        pthread_mutex_lock(&brn2_mutex);
+        xpthread_mutex_lock(&brn2_mutex);
         stop_threads = true;
         pthread_cond_broadcast(&brn2_new_work);
-        pthread_mutex_unlock(&brn2_mutex);
+        xpthread_mutex_unlock(&brn2_mutex);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             int err;
