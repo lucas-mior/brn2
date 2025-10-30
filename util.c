@@ -31,7 +31,6 @@
 #include <libgen.h>
 #include <limits.h>
 #include <sys/stat.h>
-#include <pthread.h>
 
 #if defined(__linux__)
 #define OS_LINUX 1
@@ -68,6 +67,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <pthread.h>
 #endif
 
 #ifndef DEBUGGING
