@@ -26,6 +26,7 @@ DESTDIR="${DESTDIR:-/}"
 main="main.c"
 program="brn2"
 exe="bin/$program"
+mkdir -p "$(dirname "$exe")"
 
 CFLAGS="$CFLAGS -std=c99"
 CFLAGS="$CFLAGS -Wextra -Wall"
