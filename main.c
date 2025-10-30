@@ -375,7 +375,7 @@ main(int argc, char **argv) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
-                getc(stdin);
+                fgetc(stdin);
                 continue;
             }
 
@@ -398,7 +398,7 @@ main(int argc, char **argv) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
-                getc(stdin);
+                fgetc(stdin);
                 continue;
             } else {
                 break;
@@ -468,7 +468,7 @@ main(int argc, char **argv) {
     }
 #if OS_WINDOWS
     printf("Press enter to continue.\n");
-    getc(stdin);
+    fgetc(stdin);
 #endif
     exit(EXIT_SUCCESS);
 }
