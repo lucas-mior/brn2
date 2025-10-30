@@ -389,7 +389,7 @@ xstrdup(char *string) {
     return p;
 }
 
-void
+static void
 xpthread_mutex_lock(pthread_mutex_t *mutex) {
     int err;
     if ((err = pthread_mutex_lock(mutex))) {
@@ -399,11 +399,31 @@ xpthread_mutex_lock(pthread_mutex_t *mutex) {
     return;
 }
 
-void
+static void
 xpthread_mutex_unlock(pthread_mutex_t *mutex) {
     int err;
     if ((err = pthread_mutex_unlock(mutex))) {
         error("Error unlocking mutex %p: %s.\n", mutex, strerror(err));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
+static void
+xpthread_cond_destroy(pthread_cond_t *cond) {
+    int err;
+    if ((err = pthread_cond_destroy(cond))) {
+        error("Error destroying cond %p: %s.\n", cond, strerror(err));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
+static void
+xpthread_mutex_destroy(pthread_mutex_t *mutex) {
+    int err;
+    if ((err = pthread_mutex_destroy(mutex))) {
+        error("Error destroying mutex %p: %s.\n", mutex, strerror(err));
         fatal(EXIT_FAILURE);
     }
     return;
