@@ -650,6 +650,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         brn2_enqueue(&slices[i]);
     }
 
+    pthread_mutex_lock(&brn2_mutex);
     while (work_pending > 0 || (work_queue.count != 0)) {
         pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
