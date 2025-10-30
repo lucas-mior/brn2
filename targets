@@ -4,8 +4,8 @@ build
 debug
 benchmark
 # perf
-valgrind
-# check
+# valgrind
+check
 cross x86-windows-gnu
 cross x86_64-windows-gnu
 cross aarch64-windows-gnu
