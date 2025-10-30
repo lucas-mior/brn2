@@ -190,7 +190,11 @@ main(int argc, char **argv) {
     }
 
     for (uint32 i = 0; i < nthreads; i += 1) {
-        pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
+        int err;
+        if ((err = pthread_create(&thread_pool[i], NULL, brn2_threads_function,
+                                  NULL))) {
+            error("Error joining thread %d: %s.\n", strerror(err));
+        }
     }
 #endif
 
@@ -482,7 +486,10 @@ main(int argc, char **argv) {
         pthread_mutex_unlock(&brn2_mutex);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
-            pthread_join(thread_pool[i], NULL);
+            int err;
+            if ((err = pthread_join(thread_pool[i], NULL))) {
+                error("Error joining thread %d: %s.\n", strerror(err));
+            }
         }
 #endif
     }
