@@ -225,6 +225,7 @@ main(int argc, char **argv) {
 
         old->length -= count;
     }
+    exit(EXIT_FAILURE);
 
     if (old->length == 0) {
         error("No files to rename.\n");
