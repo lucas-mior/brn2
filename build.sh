@@ -226,14 +226,14 @@ esac
 
 trace_off
 if [ "$target" = "test_all" ]; then
-    printf '%s\n' "$targets" | while IFS= read -r t; do
-        echo "$t" | grep -Eq "^(# |$)" && continue
-        if echo "$t" | grep "cross"; then
-            $0 $t
+    printf '%s\n' "$targets" | while IFS= read -r target; do
+        echo "$target" | grep -Eq "^(# |$)" && continue
+        if echo "$target" | grep "cross"; then
+            $0 $target
             continue
         fi
         for compiler in gcc tcc clang; do
-            CC=$compiler $0 $t || exit
+            CC=$compiler $0 $target || exit
         done
     done
 fi
