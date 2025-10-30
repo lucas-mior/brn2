@@ -130,7 +130,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 #if OS_UNIX
 static void
 brn2_enqueue(Work *work) {
-    pthread_mutex_lock(&brn2_mutex);
+    xpthread_mutex_lock(&brn2_mutex);
 
     if (work_queue.count >= LENGTH(work_queue.items)) {
         error("Error: work queue is full.\n");
@@ -142,7 +142,7 @@ brn2_enqueue(Work *work) {
     work_pending += 1;
 
     pthread_cond_signal(&brn2_new_work);
-    pthread_mutex_unlock(&brn2_mutex);
+    xpthread_mutex_unlock(&brn2_mutex);
     return;
 }
 
@@ -153,13 +153,13 @@ brn2_threads_function(void *arg) {
     while (true) {
         Work *work;
 
-        pthread_mutex_lock(&brn2_mutex);
+        xpthread_mutex_lock(&brn2_mutex);
         while (work_queue.count == 0 && !stop_threads) {
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
         }
 
         if (stop_threads) {
-            pthread_mutex_unlock(&brn2_mutex);
+            xpthread_mutex_unlock(&brn2_mutex);
             pthread_exit(NULL);
         }
 
@@ -171,16 +171,16 @@ brn2_threads_function(void *arg) {
             work_queue.count -= 1;
         }
 
-        pthread_mutex_unlock(&brn2_mutex);
+        xpthread_mutex_unlock(&brn2_mutex);
 
         if (work) {
             work->function(work);
-            pthread_mutex_lock(&brn2_mutex);
+            xpthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
             if (work_pending == 0 && (work_queue.count == 0)) {
                 pthread_cond_signal(&brn2_done_work);
             }
-            pthread_mutex_unlock(&brn2_mutex);
+            xpthread_mutex_unlock(&brn2_mutex);
         }
     }
 }
@@ -650,12 +650,12 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         brn2_enqueue(&slices[i]);
     }
 
-    pthread_mutex_lock(&brn2_mutex);
+    xpthread_mutex_lock(&brn2_mutex);
     while (work_pending > 0 || (work_queue.count != 0)) {
         pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
     pthread_cond_signal(&brn2_new_work);
-    pthread_mutex_unlock(&brn2_mutex);
+    xpthread_mutex_unlock(&brn2_mutex);
 
     return nthreads;
 }
