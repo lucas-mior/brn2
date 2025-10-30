@@ -188,7 +188,7 @@ static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
 static void *xcalloc(const size_t, const size_t);
 static void *xmalloc(int64);
-static void *xrealloc(void *, const size_t);
+static void *xrealloc(void *, const int64);
 static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
@@ -348,10 +348,14 @@ xmalloc(int64 size) {
 }
 
 void *
-xrealloc(void *old, const size_t size) {
+xrealloc(void *old, const int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
-    if ((p = realloc(old, size)) == NULL) {
+    if (size <= 0) {
+        error("Error in xmalloc: invalid size = %ld.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    if ((p = realloc(old, (usize)size)) == NULL) {
         error("Failed to reallocate %zu bytes from %x.\n", size, old_save);
         fatal(EXIT_FAILURE);
     }
