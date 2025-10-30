@@ -18,7 +18,7 @@ DESTDIR="${DESTDIR:-/}"
 
 main="main.c"
 program="brn2"
-exe="$program"
+exe="bin/$program"
 
 CFLAGS="$CFLAGS -std=c99"
 CFLAGS="$CFLAGS -Wextra -Wall"
@@ -52,12 +52,12 @@ case "$target" in
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
-    exe="${program}_benchmark"
+    exe="bin/${program}_benchmark"
     ;;
 "perf")
     CFLAGS="$CFLAGS -g3 -Og -flto"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
-    exe="${program}_perf"
+    exe="bin/${program}_perf"
     ;;
 "valgrind") 
     CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
@@ -89,7 +89,7 @@ if [ "$target" = "cross" ]; then
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
     *windows*)
-        exe="$program.exe"
+        exe="bin/$program.exe"
         ;;
     *)
         LDFLAGS="$LDFLAGS -lpthread"
@@ -118,8 +118,8 @@ case "$target" in
 "install")
     [ ! -f $program ] && $0 build
     trace_on
-    install -Dm755 ${program} ${DESTDIR}${PREFIX}/bin/${program}
-    install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    install -Dm755 bin/${program} ${DESTDIR}${PREFIX}/bin/${program}
+    install -Dm644 bin/${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
     exit
     ;;
 "assembly")
