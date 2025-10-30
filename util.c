@@ -31,6 +31,7 @@
 #include <libgen.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 #if defined(__linux__)
 #define OS_LINUX 1
