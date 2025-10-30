@@ -393,7 +393,7 @@ void
 xpthread_mutex_lock(pthread_mutex_t *mutex) {
     int err;
     if ((err = pthread_mutex_lock(mutex))) {
-        error("Error locking mutex %p: %s.\n", mutex, strerror(errno));
+        error("Error locking mutex %p: %s.\n", mutex, strerror(err));
         fatal(EXIT_FAILURE);
     }
     return;
@@ -403,7 +403,7 @@ void
 xpthread_mutex_unlock(pthread_mutex_t *mutex) {
     int err;
     if ((err = pthread_mutex_unlock(mutex))) {
-        error("Error unlocking mutex %p: %s.\n", mutex, strerror(errno));
+        error("Error unlocking mutex %p: %s.\n", mutex, strerror(err));
         fatal(EXIT_FAILURE);
     }
     return;
