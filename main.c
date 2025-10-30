@@ -220,11 +220,13 @@ main(int argc, char **argv) {
 
         if (end < old->length) {
             memmove(&old->files[start], &old->files[end],
-                    (old->length - end)*sizeof(old->files[0]));
+                    (old->length - end)*sizeof(*(&old->files[i])));
         }
 
         old->length -= count;
     }
+
+    old->files = xrealloc(old->files, old->length*sizeof(*(old->files)));
 
     if (old->length == 0) {
         error("No files to rename.\n");
@@ -269,8 +271,7 @@ main(int argc, char **argv) {
         brn2_create_hashes(old, capacity_set);
 
         for (uint32 i = 0; i < old->length; i += 1) {
-            FileName **filep = &(old->files[i]);
-            FileName *file = *filep;
+            FileName *file = old->files[i];
             uint32 *index = &(old->indexes[i]);
             bool contains_newline;
             usize buffered;
@@ -295,9 +296,10 @@ main(int argc, char **argv) {
                     goto close;
                 }
 
-                memmove(*filep, *filep + 1, (old->length - i)*sizeof(*filep));
+                memmove(&old->files[i], &old->files[i + 1],
+                        (old->length - i)*sizeof(*(&old->files[i])));
                 memmove(index, index + 1, (old->length - i)*sizeof(*index));
-                filep = &(old->files[i]);
+                file = old->files[i];
                 index = &(old->indexes[i]);
             }
 
