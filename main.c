@@ -346,13 +346,14 @@ main(int argc, char **argv) {
 #else
         while (true) {
             if (!isatty(fileno(stdin))) {
-                char *tty;
-                if (OS_WINDOWS)
-                    tty = "CONIN$";
-                else
-                    tty = "/dev/tty";
+                char *tty_path;
+                if (OS_WINDOWS) {
+                    tty_path = "CONIN$";
+                } else {
+                    tty_path = "/dev/tty";
+                }
 
-                if (!freopen(tty, "r", stdin)) {
+                if (!freopen(tty_path, "r", stdin)) {
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
