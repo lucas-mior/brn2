@@ -446,11 +446,7 @@ util_command(const int argc, char **argv) {
                              &startup_info, &proc_info);
 
     if (!success) {
-        error("Error running '%s", argv[0]);
-        for (int i = 1; i < (argc - 1); i += 1) {
-            error(" %s", argv[i]);
-        }
-        error("': %lu.\n", GetLastError());
+        error("Error running '%s': %d", cmdline, GetLastError());
         fatal(EXIT_FAILURE);
     }
 
