@@ -409,8 +409,6 @@ util_command(const int argc, char **argv) {
     char cmdline[1024] = {0};
     int64 j = 0;
     FILE *tty;
-    STARTUPINFO startup_info;
-    BOOL success;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
 
@@ -423,7 +421,7 @@ util_command(const int argc, char **argv) {
         int64 len = (int64)strlen(argv[i]);
         if ((j + len) >= (int64)sizeof(cmdline)) {
             error("Command line is too long.\n");
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
 
         cmdline[j] = '"';
@@ -432,22 +430,24 @@ util_command(const int argc, char **argv) {
         cmdline[j + len + 2] = ' ';
         j += len + 3;
     }
-    cmdline[j] = '\0';
+    cmdline[j - 1] = '\0';
 
     if ((tty = freopen("CONIN$", "r", stdin)) == NULL) {
         error("Error reopening stdin: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
-    memset(&startup_info, 0, sizeof(startup_info));
-    startup_info.cb = sizeof(startup_info);
+    {
+        BOOL success;
+        STARTUPINFO startup_info = {0};
+        startup_info.cb = sizeof(startup_info);
 
-    success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
-                             &startup_info, &proc_info);
-
-    if (!success) {
-        error("Error running '%s': %d", cmdline, GetLastError());
-        fatal(EXIT_FAILURE);
+        success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
+                                 &startup_info, &proc_info);
+        if (!success) {
+            error("Error running '%s': %d\n", cmdline, GetLastError());
+            return -1;
+        }
     }
 
     WaitForSingleObject(proc_info.hProcess, INFINITE);
@@ -486,7 +486,7 @@ util_command(const int argc, char **argv) {
         }
         if (!WIFEXITED(status)) {
             error("Command exited abnormally.\n");
-            fatal(EXIT_FAILURE);
+            return -1;
         }
         return WEXITSTATUS(status);
     }

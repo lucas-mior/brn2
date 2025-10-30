@@ -181,7 +181,7 @@ main(int argc, char **argv) {
         printf("Normalizing filenames...\n");
     }
 
-#if OS_UNIX
+#if BRN2_MAX_THREADS > 1
     if (nthreads*2 >= old->length) {
         nthreads = 1;
     }
@@ -189,11 +189,9 @@ main(int argc, char **argv) {
         nthreads = 1;
     }
 
-#if BRN2_MAX_THREADS > 1
     for (uint32 i = 0; i < nthreads; i += 1) {
         pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
     }
-#endif
 #endif
 
     brn2_normalize_names(old, NULL);
@@ -357,7 +355,16 @@ main(int argc, char **argv) {
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
-            util_command(LENGTH(args_edit), args_edit);
+            if (util_command(LENGTH(args_edit), args_edit) < 0) {
+                if (OS_WINDOWS) {
+                    args_edit[0] = "Notepad.exe";
+                    if (util_command(LENGTH(args_edit), args_edit) < 0) {
+                        fatal(EXIT_FAILURE);
+                    }
+                } else {
+                    fatal(EXIT_FAILURE);
+                }
+            }
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             if (old->length != new->length) {
@@ -428,8 +435,8 @@ main(int argc, char **argv) {
                   number_renames != 1, "s");
             fatal(EXIT_FAILURE);
         } else {
-            printf("%u file%.*s renamed\n", number_renames, number_renames != 1,
-                   "s");
+            printf("%u file%.*s renamed.\n", number_renames,
+                   number_renames != 1, "s");
         }
     }
 
