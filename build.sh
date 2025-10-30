@@ -48,6 +48,7 @@ case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
+    exe="bin/${program}_debug"
     ;;
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
