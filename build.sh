@@ -83,7 +83,7 @@ if [ "$target" = "cross" ]; then
         CFLAGS="$CFLAGS -fno-lto"
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
-    "x86_64-windows-gnu")
+    *windows*)
         exe="$program.exe"
         ;;
     *)
