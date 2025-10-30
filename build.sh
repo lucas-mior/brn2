@@ -38,6 +38,10 @@ if echo "$OS" | grep -q "Linux"; then
     fi
 fi
 
+option_remove() {
+    echo "$1" | sed "s/$2//g"
+}
+
 CC=${CC:-cc}
 
 case "$target" in
@@ -77,6 +81,7 @@ esac
 if [ "$target" = "cross" ]; then
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
+    CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
 
     case $cross in
     "x86_64-macos"|"aarch64-macos")
@@ -136,6 +141,7 @@ case "$target" in
                 continue
             fi
             cmdline="zig cc $CPPFLAGS $CFLAGS"
+            cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
             cmdline="$cmdline -target x86_64-windows-gnu"
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1"
             cmdline="$cmdline $src -o /tmp/$src.exe $flags"
