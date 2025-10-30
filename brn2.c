@@ -367,7 +367,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
     if (close(fd) < 0) {
         error("Error closing '%s': %s.\n", filename, strerror(errno));
-        fatal(EXIT_FAILURE);
     }
 
     return;
