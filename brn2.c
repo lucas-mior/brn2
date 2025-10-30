@@ -386,9 +386,13 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     uint32 capacity = 128;
     FILE *lines;
 
-    if ((lines = fopen(filename, "r")) == NULL) {
-        error("Error opening '%s': %s.\n", filename, strerror(errno));
-        fatal(EXIT_FAILURE);
+    if (!strcmp(filename, "-")) {
+        lines = stdin;
+    } else {
+        if ((lines = fopen(filename, "r")) == NULL) {
+            error("Error opening '%s': %s.\n", filename, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
     }
 
     list->files = xmalloc(capacity*sizeof(*(list->files)));
