@@ -345,6 +345,17 @@ main(int argc, char **argv) {
         }
 #else
         while (true) {
+            if (!isatty(fileno(stdin))) {
+                char *tty;
+                if (OS_WINDOWS)
+                    tty = "CONIN$";
+                else
+                    tty = "/dev/tty";
+
+                if (!freopen(tty, "r", stdin)) {
+                    error("Error reopening stdin: %s.\n", strerror(errno));
+                }
+            }
             util_command(LENGTH(args_edit), args_edit);
             brn2_list_from_file(new, brn2_buffer.name, false);
 

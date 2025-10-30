@@ -386,14 +386,9 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     uint32 capacity = 128;
     FILE *lines;
 
-    if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
-        error("Reading from stdin...\n");
-        lines = stdin;
-    } else {
-        if ((lines = fopen(filename, "r")) == NULL) {
-            error("Error opening '%s': %s.\n", filename, strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
+    if ((lines = fopen(filename, "r")) == NULL) {
+        error("Error opening '%s': %s.\n", filename, strerror(errno));
+        fatal(EXIT_FAILURE);
     }
 
     list->files = xmalloc(capacity*sizeof(*(list->files)));
@@ -437,9 +432,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("No files to rename.\n");
         fatal(EXIT_FAILURE);
     }
-    if (lines != stdin) {
-        fclose(lines);
-    }
+    fclose(lines);
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
     return;
