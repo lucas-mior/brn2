@@ -130,6 +130,8 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 #if OS_UNIX
 static void
 brn2_enqueue(Work *work) {
+    pthread_mutex_lock(&brn2_mutex);
+
     if (work_queue.count >= LENGTH(work_queue.items)) {
         error("Error: work queue is full.\n");
         exit(EXIT_FAILURE);
@@ -138,6 +140,9 @@ brn2_enqueue(Work *work) {
     work_queue.tail = (work_queue.tail + 1) % LENGTH(work_queue.items);
     work_queue.count += 1;
     work_pending += 1;
+
+    pthread_cond_signal(&brn2_new_work);
+    pthread_mutex_unlock(&brn2_mutex);
     return;
 }
 
@@ -628,10 +633,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].map_capacity = map_size;
         slices[i].function = function;
 
-        pthread_mutex_lock(&brn2_mutex);
         brn2_enqueue(&slices[i]);
-        pthread_cond_signal(&brn2_new_work);
-        pthread_mutex_unlock(&brn2_mutex);
     }
     {
         uint32 i = nthreads - 1;
@@ -643,10 +645,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
         slices[i].map_capacity = map_size;
         slices[i].function = function;
 
-        pthread_mutex_lock(&brn2_mutex);
         brn2_enqueue(&slices[i]);
-        pthread_cond_signal(&brn2_new_work);
-        pthread_mutex_unlock(&brn2_mutex);
     }
 
     while (work_pending > 0 || (work_queue.count != 0)) {
