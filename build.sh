@@ -199,6 +199,7 @@ case "$target" in
     trace_on
     $dir/$exe -s -q -d .
     trace_off
+    rm $dir/$exe
     exit
     ;;
 "valgrind") 
