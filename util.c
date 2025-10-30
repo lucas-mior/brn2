@@ -350,8 +350,9 @@ xmalloc(int64 size) {
 void *
 xrealloc(void *old, const size_t size) {
     void *p;
+    uint64 old_save = (uint64)old;
     if ((p = realloc(old, size)) == NULL) {
-        error("Failed to reallocate %zu bytes from %p.\n", size, old);
+        error("Failed to reallocate %zu bytes from %x.\n", size, old_save);
         fatal(EXIT_FAILURE);
     }
     return p;
