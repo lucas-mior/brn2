@@ -10,6 +10,13 @@ alias trace_off='{ set +x; } 2>/dev/null'
 dir="$(realpath "$(dirname "$0")")"
 
 target="${1:-build}"
+
+if ! grep -q "$target" targets; then
+    echo "usage: $(basename "$0") <targets>"
+    cat targets
+    exit 1
+fi
+
 cross="$2"
 
 printf "\n${0} ${RED}${1} ${2}$RES\n"
