@@ -129,7 +129,7 @@ static struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32);
 static void CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *);
 static bool CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
                                          uint32
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
                                          ,
                                          uint32
 #endif
@@ -138,7 +138,7 @@ static bool CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
 static bool CAT(hash_insert_pre_calc_,
                 HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32,
                            uint32
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
                            ,
                            uint32
 #endif
@@ -202,7 +202,7 @@ CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
 bool
 CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
                              uint32 key_length
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
                              ,
                              uint32 value
 #endif
@@ -210,7 +210,7 @@ CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_insert_pre_calc_, HASH_TYPE)(map, key, hash, index
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
                                                  ,
                                                  value
 #endif
@@ -220,7 +220,7 @@ CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 bool
 CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                       char *key, uint32 hash, uint32 index
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
                                       ,
                                       HASH_VALUE_TYPE value
 #endif
@@ -231,7 +231,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         iterator->key = key;
         iterator->hash = hash;
         iterator->next = 0;
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
         iterator->value = value;
 #endif
         map->length += 1;
@@ -255,7 +255,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     iterator = (void *)(map->arena->begin + iterator->next);
     iterator->key = key;
     iterator->hash = hash;
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
     iterator->value = value;
 #endif
     iterator->next = 0;
@@ -283,7 +283,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 
     while (true) {
         if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
             return &(iterator->value);
 #else
             return NULL;
@@ -369,7 +369,7 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
 
         while (iterator->key) {
             printf("'%s'", iterator->key);
-#ifdef HASH_VALUE_TYPE
+#if defined(HASH_VALUE_TYPE)
             printf("=%u ->", iterator->value);
 #endif
             if (iterator->next) {
