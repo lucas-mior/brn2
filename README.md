@@ -11,20 +11,20 @@ usage: brn2 [OPTIONS] -d <dir>
 Rename filenames based on provided arguments.
 
 Options:
-  -F, --fatal   : Exit on first renaming error.
-  -e, --explict : Only rename files given in the list (default).
-  -h, --help    : Display this help message and exit.
-  -i, --implict : Rename files not given in the list of files to rename.
+  -F, --fatal     : Exit on first renaming error.
   -a, --autosolve : Auto solve name conflicts for equal files.
-  -q, --quiet   : Quiet mode; suppress output messages.
-  -s, --sort    : Disable sorting of original list.
-  -v, --verbose : Verbose mode (default); output messages.
+  -e, --explict   : Only rename files given in the list (default).
+  -h, --help      : Display this help message and exit.
+  -i, --implict   : Rename files not given in the list of files to rename.
+  -q, --quiet     : Quiet mode; suppress output messages.
+  -s, --sort      : Disable sorting of original list.
+  -v, --verbose   : Verbose mode (default); output messages.
 
 Arguments:
-  No arguments              : Rename files of current working directory.
-  1 or more arguments       : Rename filenames passed as arguments.
-  -d <dir>, --dir=<dir>     : Rename files in directory.
-  -f <file>, --file=<file>  : Rename filenames listed in this argument.
+  No arguments             : Rename files of current working directory.
+  1 or more arguments      : Rename filenames passed as arguments.
+  -d <dir>, --dir=<dir>    : Rename files in directory.
+  -f <file>, --file=<file> : Rename filenames listed in this argument.
 ```
 
 brn2 will open the filenames in your text editor of choice.
