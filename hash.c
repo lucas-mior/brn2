@@ -51,7 +51,7 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
-#ifndef ALIGNMENT
+#if !defined(ALIGNMENT)
 #define ALIGNMENT 16
 #endif
 
@@ -98,7 +98,7 @@ typedef ssize_t isize;
 
 #endif /* HASH_H */
 
-#ifndef HASH_TYPE
+#if !defined(HASH_TYPE)
 #error HASH_TYPE is undefined
 #endif
 
@@ -386,7 +386,7 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
 #undef HASH_PADDING_TYPE
 #undef HASH_TYPE
 
-#ifndef HASH_H2
+#if !defined(HASH_H2)
 #define HASH_H2
 
 uint32
