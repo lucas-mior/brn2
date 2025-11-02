@@ -2,8 +2,8 @@ targets='
 test
 build
 debug
-install
-uninstall
+# install
+# uninstall
 benchmark
 # perf
 # valgrind
