@@ -11,7 +11,7 @@ dir="$(realpath "$(dirname "$0")")"
 
 target="${1:-build}"
 
-if ! grep -q "$target" targets; then
+if ! grep -q "$target" ./targets; then
     echo "usage: $(basename "$0") <targets>"
     cat targets
     exit 1
