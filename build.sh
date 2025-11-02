@@ -10,7 +10,6 @@ alias trace_off='{ set +x; } 2>/dev/null'
 dir="$(realpath "$(dirname "$0")")"
 
 target="${1:-build}"
-echo "target=$target"
 
 if ! grep -q "$target" ./targets; then
     echo "usage: $(basename "$0") <targets>"
