@@ -219,14 +219,14 @@ main(void) {
     {
         struct dirent **dirent;
         int32 nfiles;
+        FILE *ls_pipe;
+        char buffer[1024];
 
         if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
             error("Error in scandir for windows.\n");
             exit(EXIT_FAILURE);
         }
 
-        FILE *ls_pipe;
-        char buffer[1024];
         if ((ls_pipe = popen("dir /b", "r")) == NULL) {
             error("Error in popen: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
