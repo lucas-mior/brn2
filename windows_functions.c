@@ -196,30 +196,35 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
 
 int
 main(void) {
-    char *string = "aaa/bbb/ccc";
-    int64 length = strlen(string);
-    struct stat stat;
-    struct dirent **dirent;
-    int32 nfiles;
+    {
+        char *string = "aaa/bbb/ccc";
+        int64 length = strlen(string);
 
-    assert(memmem(string, length, "aaa", 3) == string);
-    assert(memmem(string, length, "bbb", 3) == string + 4);
-    assert(memmem(string, length, "aaaa", 4) == NULL);
-    assert(memmem(string, length, "bbbb", 4) == NULL);
-    assert(memmem(string, length, "/", 1) == string + 3);
-
-    assert(lstat("LICENSE", &stat) == 0);
-    assert(stat.st_size == 34523);
-    assert(stat.st_mtime == 1735689600);
-    assert(stat.st_ctime == 1735689600);
-    error("stat.atime: %lu\n", stat.st_atime);
-
-    if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
-        error("Error in scandir for windows.\n");
-        exit(EXIT_FAILURE);
+        assert(memmem(string, length, "aaa", 3) == string);
+        assert(memmem(string, length, "bbb", 3) == string + 4);
+        assert(memmem(string, length, "aaaa", 4) == NULL);
+        assert(memmem(string, length, "bbbb", 4) == NULL);
+        assert(memmem(string, length, "/", 1) == string + 3);
     }
 
     {
+        struct stat stat;
+        assert(lstat("LICENSE", &stat) == 0);
+        assert(stat.st_size == 34523);
+        assert(stat.st_mtime == 1735689600);
+        assert(stat.st_ctime == 1735689600);
+        error("stat.atime: %lu\n", stat.st_atime);
+    }
+
+    {
+        struct dirent **dirent;
+        int32 nfiles;
+
+        if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
+            error("Error in scandir for windows.\n");
+            exit(EXIT_FAILURE);
+        }
+
         FILE *ls_pipe;
         char buffer[1024];
         if ((ls_pipe = popen("dir /b", "r")) == NULL) {
