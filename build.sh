@@ -210,9 +210,9 @@ case "$target" in
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
     trace_on
-    valgrind $vg_flags $dir/brn2 -d .
-    valgrind $vg_flags $dir/brn2 -f rename
-    find . | valgrind $vg_flags $dir/brn2 -f -
+    valgrind $vg_flags $dir/bin/brn2 -d .
+    valgrind $vg_flags $dir/bin/brn2 -f rename
+    find . | valgrind $vg_flags $dir/bin/brn2 -f -
     trace_off
     exit
     ;;
