@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <libgen.h>
+#include <pthread.h>
 #include <limits.h>
 #include <sys/stat.h>
 

@@ -200,7 +200,6 @@ main(void) {
     int64 length = strlen(string);
     struct stat stat;
     struct dirent **dirent;
-    FILE *ls_pipe;
     int32 nfiles;
 
     assert(memmem(string, length, "aaa", 3) == string);
@@ -220,12 +219,13 @@ main(void) {
         exit(EXIT_FAILURE);
     }
 
-    if ((ls_pipe = popen("dir /b", "r")) == NULL) {
-        error("Error in popen: %s.\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
     {
+        FILE *ls_pipe;
         char buffer[1024];
+        if ((ls_pipe = popen("dir /b", "r")) == NULL) {
+            error("Error in popen: %s.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
         while (fgets(buffer, sizeof(buffer), ls_pipe)) {
             int64 length = strcspn(buffer, "\n");
             buffer[length] = '\0';
