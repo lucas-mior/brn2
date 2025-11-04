@@ -765,9 +765,6 @@ send_signal(const char *executable, const int32 signal_number) {
             if (errno != ENOENT || DEBUGGING) {
                 error("Error opening %s: %s.\n", buffer, strerror(errno));
             }
-            if (errno != ENOENT) {
-                fatal(EXIT_FAILURE);
-            }
             continue;
         }
 
