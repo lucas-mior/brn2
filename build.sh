@@ -69,7 +69,7 @@ case "$target" in
     exe="bin/${program}_perf"
     ;;
 "valgrind") 
-    CFLAGS="$CFLAGS -g -O2 -flto -ftree-vectorize"
+    CFLAGS="$CFLAGS -g -O1 -flto -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "test")
