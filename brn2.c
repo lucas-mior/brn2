@@ -708,6 +708,9 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
             char *diff[] = {
                 "diff", "-q", newfile->name, oldfile->name, NULL,
             };
+            if (OS_WINDOWS) {
+                diff[0] = "diff.exe";
+            }
             error("Error: " RED "'%s'" RESET " repeats on line %u. ",
                   newfile->name, i + 1);
 
