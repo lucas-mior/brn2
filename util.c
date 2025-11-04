@@ -492,7 +492,7 @@ util_command(const int argc, char **argv) {
         success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
                                  &startup_info, &proc_info);
         if (!success) {
-            error("Error running '%s': %d\n", cmdline, GetLastError());
+            error("Error running '%s': %d.\n", cmdline, GetLastError());
             return -1;
         }
     }

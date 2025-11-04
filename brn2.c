@@ -725,7 +725,7 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
                     continue;
                 }
             } else {
-                error(".\n");
+                error("\n");
             }
 
             failed = true;
