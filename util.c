@@ -488,9 +488,16 @@ util_command(const int argc, char **argv) {
         BOOL success;
         STARTUPINFO startup_info = {0};
         startup_info.cb = sizeof(startup_info);
-
-        success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
-                                 &startup_info, &proc_info);
+        success = CreateProcessA(NULL,
+                                 cmdline,
+                                 NULL,
+                                 NULL,
+                                 TRUE,
+                                 0,
+                                 NULL,
+                                 NULL,
+                                 &startup_info,
+                                 &proc_info);
         if (!success) {
             int err = GetLastError();
             error("Error running '%s': %d.\n", cmdline, err);
