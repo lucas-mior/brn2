@@ -509,12 +509,12 @@ util_command(const int argc, char **argv) {
     }
 
     WaitForSingleObject(proc_info.hProcess, INFINITE);
-
     GetExitCodeProcess(proc_info.hProcess, &exit_code);
 
     CloseHandle(proc_info.hProcess);
     CloseHandle(proc_info.hThread);
-    return 0;
+
+    return (int)exit_code;
 }
 #else
 int
