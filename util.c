@@ -554,11 +554,26 @@ util_command(const int argc, char **argv) {
         }
     }
 
-    WaitForSingleObject(proc_info.hProcess, INFINITE);
-    GetExitCodeProcess(proc_info.hProcess, &exit_code);
+    if (WaitForSingleObject(proc_info.hProcess, INFINITE) != WAIT_OBJECT_0) {
+        CloseHandle(proc_info.hThread);
+        CloseHandle(proc_info.hProcess);
+        return -1;
+    }
 
-    CloseHandle(proc_info.hProcess);
-    CloseHandle(proc_info.hThread);
+    if (!GetExitCodeProcess(proc_info.hProcess, &exit_code)) {
+        CloseHandle(proc_info.hThread);
+        CloseHandle(proc_info.hProcess);
+        return -1;
+    }
+
+    if (!CloseHandle(proc_info.hThread)) {
+        CloseHandle(proc_info.hProcess);
+        return -1;
+    }
+
+    if (!CloseHandle(proc_info.hProcess)) {
+        return -1;
+    }
 
     return (int)exit_code;
 }
