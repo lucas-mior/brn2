@@ -492,7 +492,11 @@ util_command(const int argc, char **argv) {
         success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
                                  &startup_info, &proc_info);
         if (!success) {
-            error("Error running '%s': %d.\n", cmdline, GetLastError());
+            int err = GetLastError();
+            error("Error running '%s': %d.\n", cmdline, err);
+            if (err == ERROR_PATH_NOT_FOUND) {
+                error("Path not found.\n");
+            }
             return -1;
         }
     }
