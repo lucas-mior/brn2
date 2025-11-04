@@ -84,40 +84,6 @@ scandir(const char *dir, struct dirent ***namelist,
     return (int)count;
 }
 
-static void *
-memmem(const void *haystack, size_t hay_len, const void *needle,
-       size_t needle_len) {
-    const uchar *h = haystack;
-    const uchar *n = needle;
-    const uchar *end = h + hay_len;
-    const uchar *limit = end - needle_len + 1;
-
-    if (needle_len == 0) {
-        return (void *)haystack;
-    }
-    if ((haystack == NULL) || (needle == NULL)) {
-        return NULL;
-    }
-    if (hay_len < needle_len) {
-        return NULL;
-    }
-
-    while (h < limit) {
-        const uchar *p;
-
-        if ((p = memchr(h, n[0], (size_t)(limit - h))) == NULL) {
-            return NULL;
-        }
-
-        if (memcmp(p, n, needle_len) == 0) {
-            return (void *)p;
-        }
-        h = p + 1;
-    }
-
-    return NULL;
-}
-
 static time_t
 filetime_to_time_t(const FILETIME *ft) {
     ULARGE_INTEGER ull;
