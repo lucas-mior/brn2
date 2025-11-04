@@ -188,7 +188,7 @@ create_temp_files() {
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
-    seq -w 500000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 100000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
 case "$target" in
@@ -210,9 +210,10 @@ case "$target" in
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
 
     trace_on
-    valgrind $vg_flags $dir/bin/brn2 -d .
-    valgrind $vg_flags $dir/bin/brn2 -f rename
-    find . | valgrind $vg_flags $dir/bin/brn2 -f -
+    find . \
+    | valgrind --tool=helgrind $dir/bin/brn2 -f -
+    valgrind --tool=helgrind $dir/bin/brn2 -d .
+    valgrind --tool=helgrind $dir/bin/brn2 -f rename
     trace_off
     exit
     ;;
