@@ -485,16 +485,16 @@ main(int argc, char **argv) {
         pthread_cond_broadcast(&brn2_new_work);
         xpthread_mutex_unlock(&brn2_mutex);
 
-        xpthread_mutex_destroy(&brn2_mutex);
-        xpthread_cond_destroy(&brn2_new_work);
-        xpthread_cond_destroy(&brn2_done_work);
-
         for (uint32 i = 0; i < nthreads; i += 1) {
             int err;
             if ((err = pthread_join(thread_pool[i], NULL))) {
                 error("Error joining thread %d: %s.\n", strerror(err));
             }
         }
+
+        xpthread_mutex_destroy(&brn2_mutex);
+        xpthread_cond_destroy(&brn2_new_work);
+        xpthread_cond_destroy(&brn2_done_work);
 #endif
     }
 #if OS_WINDOWS
