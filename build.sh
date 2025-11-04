@@ -211,9 +211,9 @@ case "$target" in
 
     trace_on
     find . \
-    | valgrind -s --tool=helgrind $dir/bin/brn2 -f -
-    valgrind   -s --tool=helgrind $dir/bin/brn2 -d .
-    valgrind   -s --tool=helgrind $dir/bin/brn2 -f rename
+    | valgrind -s --tool=drd $dir/bin/brn2 -f -
+    valgrind   -s --tool=drd $dir/bin/brn2 -d .
+    valgrind   -s --tool=drd $dir/bin/brn2 -f rename
     trace_off
     exit
     ;;
