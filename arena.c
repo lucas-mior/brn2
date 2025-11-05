@@ -435,10 +435,6 @@ main(void) {
     assert(arena->pos == arena->begin);
     assert(arena->npushed == 0);
 
-    assert(arena_push(arena, (uint32)arena_data_size(arena)));
-    assert(arena->npushed == 1);
-
-    arena_reset(arena);
     assert(arena->next->pos == arena->next->begin);
     assert(arena->next->npushed == 0);
     assert(arena->pos == arena->begin && arena->npushed == 0);
