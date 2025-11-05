@@ -248,6 +248,9 @@ arena_data_size(Arena *arena) {
 
 Arena *
 arena_with_space(Arena *arena, uint32 size) {
+    if (arena == NULL) {
+        return NULL;
+    }
     if (size > (arena_data_size(arena))) {
         return NULL;
     }
