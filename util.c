@@ -204,7 +204,6 @@ static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
 static long atoi2(char *);
 static size_t util_page_size = 0;
-char *basename2(char *);
 
 #if OS_WINDOWS
 static void *
@@ -261,7 +260,7 @@ util_nthreads(void) {
 #define basename basename2
 #endif
 
-char *
+static char *
 basename2(char *path) {
     int64 left = (int64)strlen(path);
     char *fslash = NULL;
@@ -396,7 +395,7 @@ xrealloc(void *old, const int64 size) {
     return p;
 }
 
-void *
+static void *
 xcalloc(const size_t nmemb, const size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
