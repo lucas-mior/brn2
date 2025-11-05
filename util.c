@@ -186,7 +186,6 @@ typedef ssize_t isize;
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
 static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
@@ -292,7 +291,7 @@ basename2(char *path) {
 }
 
 #if OS_UNIX
-void *
+static void *
 xmmap_commit(size_t *size) {
     void *p;
 
@@ -334,7 +333,7 @@ xmunmap(void *p, size_t size) {
     return;
 }
 #else
-void *
+static void *
 xmmap_commit(size_t *size) {
     void *p;
 
