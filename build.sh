@@ -167,10 +167,6 @@ case "$target" in
             exit 1
         fi
         trace_off
-        if [ $src = "arena.c" ]; then
-            exit
-        fi
-
     done
     exit
     ;;
