@@ -380,7 +380,6 @@ main(void) {
     assert(arena->npushed == 0);
     assert(arena->pos == arena->begin);
 
-    /* Out-of-range pop fails */
     int aux;
     assert(arena_pop(arena, &aux) < 0);
 
