@@ -264,7 +264,7 @@ arena_with_space(Arena *arena, uint32 size) {
             < (arena->begin + arena_data_size(arena))) {
             break;
         }
-        if (!arena->next) {
+        if (arena->next == NULL) {
             arena->next = arena_create(arena->size);
         }
 
