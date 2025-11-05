@@ -132,7 +132,9 @@ arena_create(size_t size) {
     void *p;
     Arena *arena;
 
-    p = arena_allocate(&size);
+    if ((p = arena_allocate(&size)) == NULL) {
+        return NULL;
+    }
 
     arena = p;
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
