@@ -123,6 +123,7 @@ static void arena_free(Arena *);
 static Arena *arena_with_space(Arena *, uint32);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
+static void arena_pop(Arena *, void *);
 static void *arena_reset(Arena *);
 
 static size_t arena_page_size = 0;
@@ -279,6 +280,11 @@ arena_push_index32(Arena *arena, uint32 size) {
     assert(arena->size < UINT32_MAX);
 
     return (uint32)((char *)before - (char *)arena->begin);
+}
+
+void
+arena_pop(Arena *arena, void *p) {
+    return;
 }
 
 void *
