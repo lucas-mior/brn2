@@ -307,6 +307,7 @@ arena_pop(Arena *arena, void *p) {
     while (arena) {
         if (((void *)arena->begin <= p)
             && (p < (void *)(arena + arena->size))) {
+
             arena->npushed -= 1;
             assert(arena->npushed >= 0);
             if (arena->npushed == 0) {
@@ -352,7 +353,7 @@ main(void) {
     assert(arena->pos == arena->begin);
 
     for (uint32 i = 0; i < LENGTH(objs); i += 1) {
-        size_t size = 10 + (rand() % 100);
+        size_t size = 10 + (rand() % 10000);
         assert((objs[i] = arena_push(arena, size)));
 
         total_size += size;
@@ -363,7 +364,15 @@ main(void) {
             assert((char *)arena->pos > (char *)objs[i]);
         }
     }
-    assert(arena->npushed == LENGTH(objs));
+
+    {
+        int64 total_pushed = 0;
+        for (Arena *a = arena; a; a = a->next) {
+            assert(a->npushed > 0);
+            total_pushed += a->npushed;
+        }
+        assert(total_pushed == LENGTH(objs));
+    }
 
     for (uint32 i = 0; i < LENGTH(objs); i += 1) {
         assert(arena_pop(arena, objs[i]) == 0);
