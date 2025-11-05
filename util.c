@@ -344,7 +344,8 @@ xmmap_commit(int64 *size) {
         }
     }
 
-    p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
+                     PAGE_READWRITE);
     if (p == NULL) {
         fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (long long)*size,
                 GetLastError());
