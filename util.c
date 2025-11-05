@@ -204,8 +204,7 @@ static size_t util_page_size = 0;
 
 #if OS_WINDOWS
 static void *
-memmem(void *haystack, size_t hay_len, void *needle,
-       size_t needle_len) {
+memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     uchar *h = haystack;
     uchar *n = needle;
     uchar *end = h + hay_len;
