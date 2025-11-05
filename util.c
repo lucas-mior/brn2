@@ -367,7 +367,7 @@ xmunmap(void *p, size_t size) {
 }
 #endif
 
-void *
+static void *
 xmalloc(int64 size) {
     void *p;
     if (size <= 0) {
@@ -381,7 +381,7 @@ xmalloc(int64 size) {
     return p;
 }
 
-void *
+static void *
 xrealloc(void *old, const int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
