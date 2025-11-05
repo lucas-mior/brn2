@@ -181,7 +181,7 @@ arena_allocate(int64 *size) {
     } while (0);
 
     if (p == MAP_FAILED) {
-        fprintf(stderr, "Error in mmap(%ld): %s.\n", *size, strerror(errno));
+        fprintf(stderr, "Error in mmap(%lld): %s.\n", (long long)*size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
@@ -189,15 +189,15 @@ arena_allocate(int64 *size) {
 void
 arena_free(Arena *arena) {
     if (munmap(arena, (size_t)arena->size) < 0) {
-        fprintf(stderr, "Error in munmap(%p, %ld): %s.\n", (void *)arena,
-                arena->size, strerror(errno));
+        fprintf(stderr, "Error in munmap(%p, %lld): %s.\n", (void *)arena,
+                (long long)arena->size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return;
 }
 #else
 void *
-arena_allocate(size_t *size) {
+arena_allocate(int64 *size) {
     void *p;
 
     if (arena_page_size == 0) {
@@ -212,7 +212,7 @@ arena_allocate(size_t *size) {
 
     p = VirtualAlloc(NULL, *size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%zu): %lu.\n", *size,
+        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (long long)*size,
                 GetLastError());
         exit(EXIT_FAILURE);
     }
@@ -362,7 +362,7 @@ main(void) {
 
     assert((arena = arena_create(SIZEMB(3))));
     assert(arena->pos == arena->begin);
-    error("arena->size:%ld\n", arena->size);
+    error("arena->size:%lld\n", (long long)arena->size);
     arena_size = (uint32)arena_data_size(arena);
 
     srand((uint32)time(NULL));
