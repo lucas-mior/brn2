@@ -86,6 +86,16 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
+static uint32
+xarena_push_index32(Arena *arena, uint32 size) {
+    uint32 index;
+    if ((index = arena_push_index32(arena, size)) == UINT32_MAX) {
+        error("Error in arena_push_index32.\n");
+        fatal(EXIT_FAILURE);
+    }
+    return index;
+}
+
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
@@ -251,7 +261,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     }
 
     map->collisions += 1;
-    iterator->next = arena_push_index32(map->arena, sizeof(*iterator));
+    iterator->next = xarena_push_index32(map->arena, sizeof(*iterator));
     iterator = (void *)(map->arena->begin + iterator->next);
     iterator->key = key;
     iterator->hash = hash;
