@@ -414,13 +414,15 @@ main(void) {
 
     arena_reset(arena);
 
-    void *p3;
-    void *p4;
-    assert(p3 = arena_push(arena, SIZEKB(500)));
-    assert(arena->npushed == 1);
-    assert(p4 = arena_push(arena, SIZEKB(500)));
-    assert(arena->npushed == 2);
-    assert(arena_of(arena, p3) == arena_of(arena, p4));
+    {
+        void *p3;
+        void *p4;
+        assert(p3 = arena_push(arena, SIZEKB(500)));
+        assert(arena->npushed == 1);
+        assert(p4 = arena_push(arena, SIZEKB(500)));
+        assert(arena->npushed == 2);
+        assert(arena_of(arena, p3) == arena_of(arena, p4));
+    }
 
     arena_reset(arena);
     assert(arena->pos == arena->begin);
