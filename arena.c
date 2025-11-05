@@ -240,7 +240,8 @@ arena_with_space(Arena *arena, uint32 size) {
         return NULL;
     }
 
-    while ((char *)arena->pos >= (arena->begin + arena->size - size)) {
+    while (arena
+           && ((char *)arena->pos >= (arena->begin + arena->size - size))) {
         if (!arena->next) {
             arena->next = arena_create(arena->size);
         }
