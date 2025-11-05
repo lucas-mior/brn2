@@ -120,6 +120,7 @@ static Arena *arena_create(size_t);
 static void *arena_allocate(size_t *);
 static void arena_destroy(Arena *);
 static void arena_free(Arena *);
+static Arena *arena_with_space(Arena *, uint32);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
 static void *arena_reset(Arena *);
@@ -233,10 +234,8 @@ arena_destroy(Arena *arena) {
     return;
 }
 
-void *
-arena_push(Arena *arena, uint32 size) {
-    void *before;
-
+Arena *
+arena_with_space(Arena *arena, uint32 size) {
     if (size > (arena->size - ALIGN(sizeof(*arena)))) {
         return NULL;
     }
@@ -248,6 +247,16 @@ arena_push(Arena *arena, uint32 size) {
 
         arena = arena->next;
     }
+    return arena;
+}
+
+void *
+arena_push(Arena *arena, uint32 size) {
+    void *before;
+
+    if ((arena = arena_with_space(arena, size)) == NULL) {
+        return NULL;
+    }
 
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
@@ -256,9 +265,16 @@ arena_push(Arena *arena, uint32 size) {
 
 uint32
 arena_push_index32(Arena *arena, uint32 size) {
-    void *before = arena->pos;
+    void *before;
+
+    if ((arena = arena_with_space(arena, size)) == NULL) {
+        return UINT32_MAX;
+    }
+
+    before = arena->pos;
     arena->pos = (char *)arena->pos + size;
     assert(arena->size < UINT32_MAX);
+
     return (uint32)((char *)before - (char *)arena->begin);
 }
 
