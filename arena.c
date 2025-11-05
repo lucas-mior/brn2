@@ -376,10 +376,18 @@ main(void) {
         assert(total_pushed == LENGTH(objs));
     }
 
-    for (uint32 i = 0; i < LENGTH(objs); i += 1) {
-        assert(arena_pop(arena, objs[i]) == 0);
+    int32 nallocated = LENGTH(objs);
+    while (nallocated > 0) {
+        uint32 j = (uint32)rand() % LENGTH(objs);
+        if (objs[j]) {
+            assert(arena_pop(arena, objs[j]) == 0);
+            objs[j] = NULL;
+            nallocated -= 1;
+        }
     }
-    assert(arena->npushed == 0);
+    for (Arena *a = arena; a; a = a->next) {
+        assert(a->npushed == 0);
+    }
 
     int aux;
     assert(arena_pop(arena, &aux) < 0);
