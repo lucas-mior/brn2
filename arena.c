@@ -361,6 +361,7 @@ main(void) {
 
     {
         size_t total_size = 0;
+        int64 total_pushed = 0;
         for (uint32 i = 0; i < LENGTH(objs); i += 1) {
             int32 size = 10 + (rand() % 10000);
             assert((objs[i] = arena_push(arena, (uint32)size)));
@@ -373,10 +374,7 @@ main(void) {
                 assert((char *)arena->pos >= (char *)objs[i]);
             }
         }
-    }
 
-    {
-        int64 total_pushed = 0;
         for (Arena *a = arena; a; a = a->next) {
             assert(a->npushed > 0);
             total_pushed += a->npushed;
