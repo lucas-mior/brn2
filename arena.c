@@ -255,7 +255,11 @@ arena_with_space(Arena *arena, uint32 size) {
         return NULL;
     }
 
-    while (arena && arena->npushed) {
+    if (arena->npushed == 0) {
+        return arena;
+    }
+
+    while (arena) {
         if (((char *)arena->pos + size)
             < (arena->begin + arena_data_size(arena))) {
             break;
