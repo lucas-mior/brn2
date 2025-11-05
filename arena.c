@@ -67,14 +67,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct Arena {
-    char *name;
-    char *begin;
-    void *pos;
-    size_t size;
-    struct Arena *next;
-} Arena;
-
 #if !defined(SIZEKB)
 #define SIZEKB(X) ((size_t)(X)*1024ul)
 #define SIZEMB(X) ((size_t)(X)*1024ul*1024ul)
@@ -116,6 +108,16 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
+typedef struct Arena {
+    char *name;
+    char *begin;
+    void *pos;
+    size_t size;
+    int32 n;
+    int32 padding;
+    struct Arena *next;
+} Arena;
+
 static Arena *arena_create(size_t);
 static void *arena_allocate(size_t *);
 static void arena_destroy(Arena *);
@@ -123,7 +125,7 @@ static void arena_free(Arena *);
 static Arena *arena_with_space(Arena *, uint32);
 static void *arena_push(Arena *, uint32);
 static uint32 arena_push_index32(Arena *, uint32);
-static void arena_pop(Arena *, void *);
+static int32 arena_pop(Arena *, void *);
 static void *arena_reset(Arena *);
 
 static size_t arena_page_size = 0;
@@ -243,7 +245,7 @@ arena_with_space(Arena *arena, uint32 size) {
         return NULL;
     }
 
-    while (arena
+    while (arena && arena->n
            && ((char *)arena->pos >= (arena->begin + arena->size - size))) {
         if (!arena->next) {
             arena->next = arena_create(arena->size);
@@ -264,6 +266,7 @@ arena_push(Arena *arena, uint32 size) {
 
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
+    arena->n += 1;
     return before;
 }
 
@@ -278,13 +281,28 @@ arena_push_index32(Arena *arena, uint32 size) {
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
     assert(arena->size < UINT32_MAX);
+    arena->n += 1;
 
     return (uint32)((char *)before - (char *)arena->begin);
 }
 
-void
+int32
 arena_pop(Arena *arena, void *p) {
-    return;
+    while (arena) {
+        if (((void *)arena->begin < p) && (p < (void *)(arena + arena->size))) {
+            arena->n -= 1;
+            if (arena->n == 0) {
+                arena->pos = arena->begin;
+            }
+            return 0;
+        }
+
+        if (!arena->next) {
+            break;
+        }
+        arena = arena->next;
+    }
+    return -1;
 }
 
 void *
