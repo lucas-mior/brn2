@@ -306,7 +306,7 @@ static Arena *
 arena_of(Arena *arena, void *p) {
     while (arena) {
         if (((void *)arena->begin <= p)
-            && (p < (void *)(arena + arena->size))) {
+            && (p < (void *)((char *)arena + arena->size))) {
             return arena;
         }
 
@@ -398,10 +398,6 @@ main(void) {
                 assert(arena_pop(arena, objs[j]) == 0);
                 objs[j] = NULL;
                 nallocated -= 1;
-                /* printf("nallocated=%d\n", nallocated); */
-                /* for (Arena *a = arena; a; a = a->next) { */
-                /*     printf("npushed=(%p) = %d\n", a, a->npushed); */
-                /* } */
             }
         }
         for (Arena *a = arena; a; a = a->next) {
