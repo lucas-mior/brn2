@@ -399,8 +399,8 @@ main(void) {
                 objs[j] = NULL;
                 nallocated -= 1;
                 printf("nallocated=%d\n", nallocated);
-                for (Arena *a = arena, int i = 0; a; a = a->next, i += 1) {
-                    printf("npushed=(%d) = %d\n", i, a->npushed);
+                for (Arena *a = arena; a; a = a->next) {
+                    printf("npushed=(%p) = %d\n", a, a->npushed);
                 }
             }
         }
