@@ -186,7 +186,6 @@ typedef ssize_t isize;
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static void xmunmap(void *, size_t);
 static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
@@ -325,7 +324,7 @@ xmmap_commit(size_t *size) {
     }
     return p;
 }
-void
+static void
 xmunmap(void *p, size_t size) {
     if (munmap(p, size) < 0) {
         error("Error in munmap(%p, %zu): %s.\n", p, size, strerror(errno));
@@ -355,7 +354,7 @@ xmmap_commit(size_t *size) {
     }
     return p;
 }
-void
+static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
