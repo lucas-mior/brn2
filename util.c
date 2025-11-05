@@ -191,7 +191,6 @@ static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
-static void string_from_strings(char *, int32, char *, char **, int32);
 static int32 util_string_int32(int32 *, const char *);
 static int util_command(const int, char **);
 static uint32 util_nthreads(void);
@@ -597,7 +596,7 @@ util_command(const int argc, char **argv) {
 }
 #endif
 
-void
+static void
 string_from_strings(char *buffer, int32 size, char *sep, char **array,
                     int32 array_length) {
     int32 n = 0;
