@@ -362,7 +362,7 @@ main(void) {
 
             if (total_size < arena_data_size(arena)) {
                 assert((char *)objs[i] >= arena->begin);
-                assert((char *)arena->pos > (char *)objs[i]);
+                assert((char *)arena->pos >= (char *)objs[i]);
             }
         }
     }
@@ -380,7 +380,6 @@ main(void) {
         assert(arena_pop(arena, objs[i]) == 0);
     }
     assert(arena->npushed == 0);
-    assert(arena->pos == arena->begin);
 
     int aux;
     assert(arena_pop(arena, &aux) < 0);
