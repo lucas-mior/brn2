@@ -296,9 +296,11 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                   lines_stat.st_size);
             fatal(EXIT_FAILURE);
         }
-        if (lines_stat.st_size >= (int64)UINT32_MAX) {
-            error("Error: File size = %ld.\n", lines_stat.st_size);
-            fatal(EXIT_FAILURE);
+        if (sizeof(lines_stat.st_size) > sizeof(map_size)) {
+            if (lines_stat.st_size >= (int64)UINT32_MAX) {
+                error("Error: File size = %ld.\n", lines_stat.st_size);
+                fatal(EXIT_FAILURE);
+            }
         }
         map_size = (uint32)lines_stat.st_size;
     }

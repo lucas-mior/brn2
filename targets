@@ -6,8 +6,8 @@ debug
 # uninstall
 benchmark
 # perf
-# valgrind
-# test_all
+valgrind
+test_all
 check
 cross x86-windows-gnu
 cross x86_64-windows-gnu
