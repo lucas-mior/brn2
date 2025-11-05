@@ -240,14 +240,23 @@ arena_destroy(Arena *arena) {
     return;
 }
 
+static size_t
+arena_data_size(Arena *arena) {
+    size_t size = arena->size - (size_t)(arena->begin - (char *)arena);
+    return size;
+}
+
 Arena *
 arena_with_space(Arena *arena, uint32 size) {
-    if (size > (arena->size - ALIGN(sizeof(*arena)))) {
+    if (size > (arena_data_size(arena))) {
         return NULL;
     }
 
-    while (arena && arena->npushed
-           && ((char *)arena->pos >= (arena->begin + arena->size - size))) {
+    while (arena && arena->npushed) {
+        if (((char *)arena->pos + size)
+            < (arena->begin + arena_data_size(arena))) {
+            break;
+        }
         if (!arena->next) {
             arena->next = arena_create(arena->size);
         }

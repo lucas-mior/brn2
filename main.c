@@ -70,7 +70,7 @@ handler_segv(int unused) {
     fatal(EXIT_FAILURE);
 }
 
-Arena *
+static Arena *
 xarena_create(size_t size) {
     Arena *arena;
     if ((arena = arena_create(size)) == NULL) {
