@@ -308,6 +308,7 @@ arena_pop(Arena *arena, void *p) {
     while (arena) {
         if (((void *)arena->begin < p) && (p < (void *)(arena + arena->size))) {
             arena->npushed -= 1;
+            assert(arena->npushed >= 0);
             if (arena->npushed == 0) {
                 arena->pos = arena->begin;
             }
