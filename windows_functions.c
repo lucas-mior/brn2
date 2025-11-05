@@ -39,7 +39,7 @@
 #define TESTING_windows_functions 0
 #endif
 
-int
+static int
 scandir(const char *dir, struct dirent ***namelist,
         int (*filter)(const struct dirent *),
         int (*compar)(const struct dirent **, const struct dirent **)) {
@@ -58,10 +58,10 @@ scandir(const char *dir, struct dirent ***namelist,
         return -1;
     }
 
-    list = xmalloc(capacity*sizeof(*list));
+    list = xmalloc(capacity*SIZEOF(*list));
     do {
         struct dirent *ent = xmalloc(sizeof(*ent));
-        int64 length = strlen(find_data.cFileName);
+        int64 length = (int64)strlen(find_data.cFileName);
 
         if (length > (SIZEOF(ent->d_name) - 1)) {
             error("Error scanning file %s. File name is too long.\n",
@@ -69,11 +69,11 @@ scandir(const char *dir, struct dirent ***namelist,
             fatal(EXIT_FAILURE);
         }
 
-        memcpy(ent->d_name, find_data.cFileName, length + 1);
+        memcpy(ent->d_name, find_data.cFileName, (size_t)length + 1);
 
         if (count >= capacity) {
             capacity *= 2;
-            list = xrealloc(list, capacity*sizeof(*list));
+            list = xrealloc(list, capacity*SIZEOF(*list));
         }
         list[count] = ent;
         count += 1;
@@ -95,17 +95,19 @@ filetime_to_time_t(const FILETIME *ft) {
 
 static int
 lstat(const char *path, struct stat *statbuf) {
+    wchar_t wpath[MAX_PATH];
+    WIN32_FILE_ATTRIBUTE_DATA fd;
+    ULARGE_INTEGER sz;
+
     if (path == NULL || statbuf == NULL) {
         fprintf(stderr, "lstat: Invalid argument.\n");
         return -1;
     }
 
-    wchar_t wpath[MAX_PATH];
     if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0) {
         return -1;
     }
 
-    WIN32_FILE_ATTRIBUTE_DATA fd;
     if (!GetFileAttributesExW(wpath, GetFileExInfoStandard, &fd)) {
         return -1;
     }
@@ -122,10 +124,13 @@ lstat(const char *path, struct stat *statbuf) {
     }
 
     // File size
-    ULARGE_INTEGER sz;
     sz.LowPart = fd.nFileSizeLow;
     sz.HighPart = fd.nFileSizeHigh;
-    statbuf->st_size = sz.QuadPart;
+    if (sz.QuadPart > LONG_MAX) {
+        fprintf(stderr, "Error: file is too large to be represented in long\n");
+        return -1;
+    }
+    statbuf->st_size = (long)sz.QuadPart;
 
     // Convert FILETIME -> time_t
     statbuf->st_mtime = filetime_to_time_t(&fd.ftLastWriteTime);
@@ -138,7 +143,7 @@ lstat(const char *path, struct stat *statbuf) {
 #if TESTING_windows_functions
 #include <assert.h>
 
-bool
+static bool
 contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
     for (int32 i = 0; i < *nfiles; i += 1) {
         char *from_scan = dirent[i]->d_name;
@@ -147,12 +152,12 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
             continue;
         }
 
-        if (!memcmp(buffer, from_scan, length)) {
+        if (!memcmp(buffer, from_scan, (size_t)length)) {
             printf("%s == %s\n", buffer, from_scan);
             if (i < (*nfiles - 1)) {
                 *nfiles -= 1;
                 memmove(&dirent[i], &dirent[i + 1],
-                        (*nfiles - i)*sizeof(*(dirent)));
+                        (size_t)(*nfiles - i)*sizeof(*(dirent)));
             }
             return true;
         }
@@ -164,13 +169,13 @@ int
 main(void) {
     {
         char *string = "aaa/bbb/ccc";
-        int64 length = strlen(string);
+        int64 length = (int64)strlen(string);
 
-        assert(memmem(string, length, "aaa", 3) == string);
-        assert(memmem(string, length, "bbb", 3) == string + 4);
-        assert(memmem(string, length, "aaaa", 4) == NULL);
-        assert(memmem(string, length, "bbbb", 4) == NULL);
-        assert(memmem(string, length, "/", 1) == string + 3);
+        assert(memmem(string, (size_t)length, "aaa", 3) == string);
+        assert(memmem(string, (size_t)length, "bbb", 3) == string + 4);
+        assert(memmem(string, (size_t)length, "aaaa", 4) == NULL);
+        assert(memmem(string, (size_t)length, "bbbb", 4) == NULL);
+        assert(memmem(string, (size_t)length, "/", 1) == string + 3);
     }
 
     {
@@ -198,7 +203,7 @@ main(void) {
             exit(EXIT_FAILURE);
         }
         while (fgets(buffer, sizeof(buffer), ls_pipe)) {
-            int64 length = strcspn(buffer, "\n");
+            int64 length = (int64)strcspn(buffer, "\n");
             buffer[length] = '\0';
             assert(contains(buffer, length, dirent, &nfiles));
         }

@@ -109,7 +109,7 @@ else
 fi
 
 if [ "$CC" = "clang" ]; then
-    CFLAGS="$CFLAGS -Weverything"
+    CFLAGS="$CFLAGS -Weverything -Werror -Wfatal-errors"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
@@ -167,9 +167,6 @@ case "$target" in
             exit 1
         fi
         trace_off
-        if [ $src = "arena.c" ]; then
-            exit
-        fi
     done
     exit
     ;;
