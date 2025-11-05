@@ -392,16 +392,16 @@ main(void) {
         int32 nallocated = LENGTH(objs);
 
         while (nallocated > 0) {
-            printf("nallocated=%d\n", nallocated);
-            for (Arena *a = arena; a; a = a->next) {
-                printf("npushed=(%p) = %d\n", a, a->npushed);
-            }
             uint32 j = (uint32)rand() % LENGTH(objs);
             error("j=%u\n", j);
             if (objs[j]) {
                 assert(arena_pop(arena, objs[j]) == 0);
                 objs[j] = NULL;
                 nallocated -= 1;
+                printf("nallocated=%d\n", nallocated);
+                for (Arena *a = arena, int i = 0; a; a = a->next, i += 1) {
+                    printf("npushed=(%d) = %d\n", i, a->npushed);
+                }
             }
         }
         for (Arena *a = arena; a; a = a->next) {
