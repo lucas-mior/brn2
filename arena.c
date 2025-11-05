@@ -345,19 +345,23 @@ arena_reset(Arena *arena) {
 int
 main(void) {
     Arena *arena;
-    char *objs[100];
+    char *objs[1000];
+    size_t total_size = 0;
 
     assert((arena = arena_create(SIZEMB(1))));
     assert(arena->pos == arena->begin);
 
     for (uint32 i = 0; i < LENGTH(objs); i += 1) {
-        objs[i] = arena_push(arena, ALIGNMENT);
-        assert(objs[i] != NULL);
+        size_t size = 10 + (rand() % 100);
+        assert((objs[i] = arena_push(arena, size)));
 
-        memset(objs[i], 0xCD, ALIGNMENT);
+        total_size += size;
+        memset(objs[i], 0xCD, size);
 
-        assert((char *)objs[i] >= arena->begin);
-        assert((char *)arena->pos > (char *)objs[i]);
+        if (total_size < arena_data_size(arena)) {
+            assert((char *)objs[i] >= arena->begin);
+            assert((char *)arena->pos > (char *)objs[i]);
+        }
     }
     assert(arena->npushed == LENGTH(objs));
 
