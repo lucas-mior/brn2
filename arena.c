@@ -302,18 +302,12 @@ arena_push_index32(Arena *arena, uint32 size) {
     return (uint32)((char *)before - (char *)arena->begin);
 }
 
-int32
-arena_pop(Arena *arena, void *p) {
+static Arena *
+arena_of(Arena *arena, void *p) {
     while (arena) {
         if (((void *)arena->begin <= p)
             && (p < (void *)(arena + arena->size))) {
-
-            arena->npushed -= 1;
-            assert(arena->npushed >= 0);
-            if (arena->npushed == 0) {
-                arena->pos = arena->begin;
-            }
-            return 0;
+            return arena;
         }
 
         if (!arena->next) {
@@ -321,7 +315,21 @@ arena_pop(Arena *arena, void *p) {
         }
         arena = arena->next;
     }
-    return -1;
+    return NULL;
+}
+
+int32
+arena_pop(Arena *arena, void *p) {
+    if ((arena = arena_of(arena, p)) == NULL) {
+        return -1;
+    }
+
+    arena->npushed -= 1;
+    assert(arena->npushed >= 0);
+    if (arena->npushed == 0) {
+        arena->pos = arena->begin;
+    }
+    return 0;
 }
 
 void *
