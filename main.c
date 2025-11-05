@@ -70,6 +70,16 @@ handler_segv(int unused) {
     fatal(EXIT_FAILURE);
 }
 
+Arena *
+xarena_create(size_t size) {
+    Arena *arena;
+    if ((arena = arena_create(size)) == NULL) {
+        error("Error creating arena of size %zu.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    return arena;
+}
+
 int
 main(int argc, char **argv) {
     FileList old_stack = {0};
@@ -97,8 +107,8 @@ main(int argc, char **argv) {
     old = &old_stack;
     new = &new_stack;
 
-    old->arena = arena_create(BRN2_ARENA_SIZE);
-    new->arena = arena_create(BRN2_ARENA_SIZE);
+    old->arena = xarena_create(BRN2_ARENA_SIZE);
+    new->arena = xarena_create(BRN2_ARENA_SIZE);
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL))
