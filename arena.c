@@ -261,7 +261,7 @@ arena_with_space(Arena *arena, uint32 size) {
 
     while (arena) {
         if (((char *)arena->pos + size)
-            < (arena->begin + arena_data_size(arena))) {
+            <= (arena->begin + arena_data_size(arena))) {
             break;
         }
         if (arena->next == NULL) {
@@ -336,18 +336,26 @@ arena_reset(Arena *arena) {
 
 #if TESTING_arena
 #include "assert.h"
+
+#define LENGTH(X) ((int64)(sizeof(X) / sizeof(*X)))
+#define error(...) fprintf(stderr, __VA_ARGS__)
+
 int
 main(void) {
     Arena *arena;
     void *begin;
+    void *objects[100];
 
     assert((arena = arena_create(SIZEMB(1))));
     begin = arena->begin;
 
-    assert(arena_push(arena, 10));
-    assert(arena_push(arena, 100));
-    assert(arena_push(arena, 1000));
-    assert(arena_push(arena, 10000));
+    for (uint32 i = 0; i < LENGTH(objects); i += 1) {
+        assert(objects[i] = arena_push(arena, 10*(i + 1)));
+    }
+
+    for (uint32 i = 0; i < LENGTH(objects); i += 1) {
+        assert(arena_pop(arena, objects[i]) >= 0);
+    }
 
     assert(arena_reset(arena));
     assert(arena->begin == begin);
