@@ -188,16 +188,12 @@ static char *notifiers[2] = {"dunstify", "notify-send"};
 
 static void *xmmap_commit(size_t *);
 static void xmunmap(void *, size_t);
-static void *xcalloc(const size_t, const size_t);
-static void *xmalloc(int64);
-static void *xrealloc(void *, const int64);
 static void *util_memdup(const void *, const usize);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
 static void string_from_strings(char *, int32, char *, char **, int32);
-static int32 util_copy_file(const char *, const char *);
 static int32 util_string_int32(int32 *, const char *);
 static int util_command(const int, char **);
 static uint32 util_nthreads(void);
@@ -505,7 +501,7 @@ util_command(const int argc, char **argv) {
 
     if (memmem(argv[0], len + 1, exe, strlen(exe) + 1) == NULL) {
         argv0_windows = xmalloc(len + strlen(exe) + 1);
-        memcpy(argv0_windows,       argv[0], len);
+        memcpy(argv0_windows, argv[0], len);
         memcpy(argv0_windows + len, exe, strlen(exe) + 1);
         argv[0] = argv0_windows;
     }
@@ -534,16 +530,8 @@ util_command(const int argc, char **argv) {
         BOOL success;
         STARTUPINFO startup_info = {0};
         startup_info.cb = sizeof(startup_info);
-        success = CreateProcessA(NULL,
-                                 cmdline,
-                                 NULL,
-                                 NULL,
-                                 TRUE,
-                                 0,
-                                 NULL,
-                                 NULL,
-                                 &startup_info,
-                                 &proc_info);
+        success = CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, 0, NULL, NULL,
+                                 &startup_info, &proc_info);
         if (!success) {
             int err = GetLastError();
             error("Error running '%s': %d.\n", cmdline, err);
@@ -748,8 +736,8 @@ util_memdup(const void *source, const usize size) {
 }
 
 #if OS_UNIX
-int32
-util_copy_file(const char *destination, const char *source) {
+static int32
+util_copy_file_sync(const char *destination, const char *source) {
     int32 source_fd;
     int32 destination_fd;
     char buffer[BUFSIZ];
@@ -797,6 +785,28 @@ util_copy_file(const char *destination, const char *source) {
     close(destination_fd);
     return 0;
 }
+
+static int32
+util_copy_file_async(const char *destination, const char *source,
+                     int *dest_fd) {
+    int32 source_fd;
+
+    if ((source_fd = open(source, O_RDONLY)) < 0) {
+        error("Error opening %s for reading: %s.\n", source, strerror(errno));
+        return -1;
+    }
+
+    if ((*dest_fd
+         = open(destination, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
+        < 0) {
+        error("Error opening %s for writing: %s.\n", destination,
+              strerror(errno));
+        close(source_fd);
+        return -1;
+    }
+
+    return source_fd;
+}
 #endif
 
 #if OS_LINUX
@@ -819,36 +829,20 @@ send_signal(const char *executable, const int32 signal_number) {
         ssize_t r;
 
         if (process->d_type != DT_DIR) {
-            if (DEBUGGING) {
-                error("Error: %s is not directory.\n", process->d_name);
-            }
             continue;
         }
         if ((pid = atoi(process->d_name)) <= 0) {
-            if (DEBUGGING) {
-                error("Error: atoi(%s) <= 0.\n", process->d_name);
-            }
             continue;
         }
 
         SNPRINTF(buffer, "/proc/%s/cmdline", process->d_name);
 
         if ((cmdline = open(buffer, O_RDONLY)) < 0) {
-            if (errno != ENOENT || DEBUGGING) {
-                error("Error opening %s: %s.\n", buffer, strerror(errno));
-            }
             continue;
         }
 
         errno = 0;
         if ((r = read(cmdline, command, sizeof(command))) <= 0) {
-            if (DEBUGGING) {
-                error("Error reading from %s", buffer);
-                if (r < 0) {
-                    error(": %s", strerror(errno));
-                }
-                error(".\n");
-            }
             (void)r;
             close(cmdline);
             continue;

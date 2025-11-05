@@ -435,7 +435,7 @@ hash_expected_collisions(void *map) {
 #if TESTING_hash
 
 #if !OS_UNIX
-#error hash.h tests only work on unix systems
+#error "hash.c tests only work on unix systems"
 #endif
 
 #include <assert.h>
