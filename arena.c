@@ -181,7 +181,8 @@ arena_allocate(int64 *size) {
     } while (0);
 
     if (p == MAP_FAILED) {
-        fprintf(stderr, "Error in mmap(%lld): %s.\n", (long long)*size, strerror(errno));
+        fprintf(stderr, "Error in mmap(%lld): %s.\n", (long long)*size,
+                strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
