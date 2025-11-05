@@ -633,28 +633,8 @@ string_from_strings(char *buffer, int32 size, char *sep, char **array,
 void
 error(char *format, ...) {
     char buffer[BUFSIZ];
-    char reformat[BUFSIZ];
     va_list args;
     int64 n;
-
-    if ((sizeof(long) == 4) && (sizeof(long long) == 8)) {
-        const char *src = format;
-        char *dst = reformat;
-
-        while (*src && (dst - reformat) < BUFSIZ - 1) {
-            if (src[0] == '%' && src[1] == 'l' && src[2] == 'd') {
-                *dst++ = '%';
-                *dst++ = 'l';
-                *dst++ = 'l';
-                *dst++ = 'd';
-                src += 3;
-            } else {
-                *dst++ = *src++;
-            }
-        }
-        *dst = '\0';
-        format = reformat;
-    }
 
     va_start(args, format);
     n = vsnprintf(buffer, sizeof(buffer), format, args);
