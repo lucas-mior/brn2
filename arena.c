@@ -390,7 +390,6 @@ main(void) {
         while (nallocated > 0) {
             uint32 j = (uint32)rand() % LENGTH(objs);
             if (objs[j]) {
-                error("j=%u\n", j);
                 assert(arena_pop(arena, objs[j]) == 0);
                 objs[j] = NULL;
                 nallocated -= 1;
