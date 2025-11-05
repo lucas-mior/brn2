@@ -355,9 +355,12 @@ int
 main(void) {
     Arena *arena;
     char *objs[1000];
+    uint32 arena_size;
 
-    assert((arena = arena_create(SIZEMB(1))));
+    assert((arena = arena_create(SIZEMB(3))));
     assert(arena->pos == arena->begin);
+    error("arena->size:%zu\n", arena->size);
+    arena_size = (uint32)arena_data_size(arena);
 
     {
         size_t total_size = 0;
@@ -406,9 +409,9 @@ main(void) {
         void *p1;
         void *p2;
 
-        assert(p1 = arena_push(arena, SIZEKB(1023)));
+        assert(p1 = arena_push(arena, arena_size));
         assert(arena->npushed == 1);
-        assert(p2 = arena_push(arena, SIZEKB(1023)));
+        assert(p2 = arena_push(arena, arena_size));
         assert(arena->npushed == 1);
         assert(arena->next != NULL);
         assert(arena_of(arena, p1) != arena_of(arena, p2));
@@ -416,12 +419,14 @@ main(void) {
 
     arena_reset(arena);
 
+    assert(arena_push(arena, arena_size + 1) == NULL);
+
     {
         void *p3;
         void *p4;
-        assert(p3 = arena_push(arena, SIZEKB(500)));
+        assert(p3 = arena_push(arena, arena_size / 2));
         assert(arena->npushed == 1);
-        assert(p4 = arena_push(arena, SIZEKB(500)));
+        assert(p4 = arena_push(arena, arena_size / 2));
         assert(arena->npushed == 2);
         assert(arena_of(arena, p3) == arena_of(arena, p4));
     }
@@ -432,8 +437,6 @@ main(void) {
 
     assert(arena_push(arena, (uint32)arena_data_size(arena)));
     assert(arena->npushed == 1);
-
-    error("Here4\n");
 
     arena_reset(arena);
     assert(arena->next->pos == arena->next->begin);
@@ -451,7 +454,6 @@ main(void) {
         assert((char *)arena->begin + index == (char *)arena->begin + 32);
     }
 
-    error("Here_FINAL\n");
     arena_destroy(arena);
     return 0;
 }
