@@ -113,7 +113,7 @@ typedef struct Arena {
     char *begin;
     void *pos;
     size_t size;
-    int32 n;
+    int32 npushed;
     int32 padding;
     struct Arena *next;
 } Arena;
@@ -245,7 +245,7 @@ arena_with_space(Arena *arena, uint32 size) {
         return NULL;
     }
 
-    while (arena && arena->n
+    while (arena && arena->npushed
            && ((char *)arena->pos >= (arena->begin + arena->size - size))) {
         if (!arena->next) {
             arena->next = arena_create(arena->size);
@@ -266,7 +266,7 @@ arena_push(Arena *arena, uint32 size) {
 
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
-    arena->n += 1;
+    arena->npushed += 1;
     return before;
 }
 
@@ -281,7 +281,7 @@ arena_push_index32(Arena *arena, uint32 size) {
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
     assert(arena->size < UINT32_MAX);
-    arena->n += 1;
+    arena->npushed += 1;
 
     return (uint32)((char *)before - (char *)arena->begin);
 }
@@ -290,8 +290,8 @@ int32
 arena_pop(Arena *arena, void *p) {
     while (arena) {
         if (((void *)arena->begin < p) && (p < (void *)(arena + arena->size))) {
-            arena->n -= 1;
-            if (arena->n == 0) {
+            arena->npushed -= 1;
+            if (arena->npushed == 0) {
                 arena->pos = arena->begin;
             }
             return 0;
