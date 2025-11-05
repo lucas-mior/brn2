@@ -126,7 +126,7 @@ typedef struct CAT(Bucket_, HASH_TYPE) {
 
 struct CAT(Hash_, HASH_TYPE) {
     Arena *arena;
-    usize size;
+    int64 size;
     uint32 capacity;
     uint32 bitmask;
     uint32 collisions;
@@ -177,7 +177,7 @@ CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
 
 struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32 length) {
     struct CAT(Hash_, HASH_TYPE)*map;
-    size_t size;
+    int64 size;
     uint32 capacity = 1;
     uint32 power = 0;
 

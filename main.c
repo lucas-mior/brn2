@@ -71,7 +71,7 @@ handler_segv(int unused) {
 }
 
 static Arena *
-xarena_create(size_t size) {
+xarena_create(int64 size) {
     Arena *arena;
     if ((arena = arena_create(size)) == NULL) {
         error("Error creating arena of size %zu.\n", size);
