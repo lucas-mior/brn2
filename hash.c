@@ -196,6 +196,7 @@ struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32 length) {
 
     map = xmmap_commit(&size);
     map->arena = arena_create(capacity*sizeof(*(&map->array[0])));
+    arena_push(map->arena, ALIGNMENT);
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
