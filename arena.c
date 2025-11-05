@@ -144,6 +144,7 @@ arena_create(size_t size) {
     arena->size = size;
     arena->pos = arena->begin;
     arena->next = NULL;
+    arena->npushed = 0;
     arena_push(arena, ALIGNMENT);
 
     return arena;
