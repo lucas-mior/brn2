@@ -64,6 +64,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -362,6 +363,8 @@ main(void) {
     error("arena->size:%zu\n", arena->size);
     arena_size = (uint32)arena_data_size(arena);
 
+    srand((uint32)time(NULL));
+
     {
         size_t total_size = 0;
         int64 total_pushed = 0;
@@ -388,14 +391,19 @@ main(void) {
 
     {
         int aux;
-        int32 nallocated = LENGTH(objs);
+        uint32 nallocated = LENGTH(objs);
 
         while (nallocated > 0) {
             uint32 j = (uint32)rand() % LENGTH(objs);
+            uint32 k = (uint32)rand() % LENGTH(objs);
             if (objs[j]) {
                 assert(arena_pop(arena, objs[j]) == 0);
                 objs[j] = NULL;
                 nallocated -= 1;
+            }
+            if (k < nallocated / 2) {
+                assert(objs[j] = arena_push(arena, ALIGNMENT));
+                nallocated += 1;
             }
         }
         for (Arena *a = arena; a; a = a->next) {
@@ -415,6 +423,10 @@ main(void) {
         assert(arena->npushed == 1);
         assert(arena->next != NULL);
         assert(arena_of(arena, p1) != arena_of(arena, p2));
+
+        assert(arena_pop(arena, p1) == 0);
+        assert(arena_pop(arena, p2) == 0);
+        assert(arena->npushed == 0);
     }
 
     arena_reset(arena);
@@ -424,11 +436,17 @@ main(void) {
     {
         void *p3;
         void *p4;
+
         assert(p3 = arena_push(arena, arena_size / 2));
         assert(arena->npushed == 1);
         assert(p4 = arena_push(arena, arena_size / 2));
         assert(arena->npushed == 2);
         assert(arena_of(arena, p3) == arena_of(arena, p4));
+
+        assert(arena_pop(arena, p3) == 0);
+        assert(arena->npushed == 1);
+        assert(arena_pop(arena, p4) == 0);
+        assert(arena->npushed == 0);
     }
 
     arena_reset(arena);
