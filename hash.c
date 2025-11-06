@@ -372,6 +372,18 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
 
     printf("\n");
 }
+
+static uint32
+CAT(hash_ndeleted_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
+    uint32 ndeleted = 0;
+    for (uint32 i = 0; i < map->capacity; i += 1) {
+        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[i];
+        if (iterator->key == (char *)SLOT_DELETED)
+            ndeleted += 1;
+    }
+    return ndeleted;
+}
+
 #undef HASH_VALUE_TYPE
 #undef HASH_PADDING_TYPE
 #undef HASH_TYPE
@@ -521,6 +533,7 @@ main(void) {
     print_timings("insertion", t0, t1);
 
     assert(hash_remove_map(original_map, strings[0].s, strings[0].length));
+    assert(hash_ndeleted_map(original_map) == 1);
 
     if (NSTRINGS < 10) {
         hash_print_map(original_map, true);
