@@ -531,10 +531,12 @@ main(void) {
 
     assert(hash_insert_map(original_map, strings[0].s, strings[0].length,
                            strings[0].value));
+    assert(hash_ndeleted_map(original_map) == 0);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
         assert(hash_remove_map(original_map, strings[i].s, strings[i].length));
     }
+    assert(hash_ndeleted_map(original_map) == NSTRINGS);
 
     if (NSTRINGS <= 10) {
         hash_print_map(original_map, true);
