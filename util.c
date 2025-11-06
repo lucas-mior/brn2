@@ -213,8 +213,6 @@ _Generic((S), \
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static char *xstrdup(char *);
-static int32 snprintf2(char *, int, char *, ...);
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
 static int32 util_string_int32(int32 *, const char *);
@@ -526,7 +524,7 @@ xcalloc(const size_t nmemb, const size_t size) {
     return p;
 }
 
-char *
+static char *
 xstrdup(char *string) {
     char *p;
     int64 length;
@@ -582,7 +580,7 @@ xpthread_mutex_destroy(pthread_mutex_t *mutex) {
     return;
 }
 
-int32
+static int32
 snprintf2(char *buffer, int size, char *format, ...) {
     int n;
     va_list args;
