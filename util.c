@@ -212,6 +212,7 @@ _Generic((S), \
 // clang-format on
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
+static int64 util_page_size = 0;
 
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
@@ -222,7 +223,6 @@ static void util_die_notify(char *, const char *, ...)
 static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
-static int64 util_page_size = 0;
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
 
 #if !defined(CAT)
