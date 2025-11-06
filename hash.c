@@ -143,8 +143,8 @@ static struct CAT(Hash_, HASH_TYPE)
         capacity *= 2;
         power += 1;
     }
-    /* capacity *= 2; */
-    /* power += 1; */
+    capacity *= 2;
+    power += 1;
 
     size = sizeof(*map) + capacity*sizeof(*(&map->array[0]));
 
@@ -207,7 +207,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + (i + i*i)/2) % capacity;
+        probe = (index + (i + i*i)/2) & map->bitmask;
     }
 
     if (first_tombstone >= 0) {
@@ -268,7 +268,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + (i + i*i)/2) % capacity;
+        probe = (index + (i + i*i)/2) & map->bitmask;
     }
 
     return NULL;
@@ -308,7 +308,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + (i + i*i)/2) % capacity;
+        probe = (index + (i + i*i)/2) & map->bitmask;
     }
 
     return false;
