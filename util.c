@@ -427,10 +427,13 @@ xmunmap(void *p, size_t size) {
 static void *
 xmalloc(int64 size) {
     void *p;
+
     if (size <= 0) {
         error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
+    assert((uint64)size < SIZE_MAX);
+
     if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %lld bytes.\n", (llong)size);
         fatal(EXIT_FAILURE);
@@ -442,14 +445,18 @@ static void *
 xrealloc(void *old, const int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
+
     if (size <= 0) {
         error("Error in xmalloc: invalid size = %lld.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
+    assert((uint64)size < SIZE_MAX);
+
     if ((p = realloc(old, (usize)size)) == NULL) {
         error("Failed to reallocate %zu bytes from %x.\n", size, old_save);
         fatal(EXIT_FAILURE);
     }
+
     return p;
 }
 
