@@ -116,8 +116,7 @@ typedef struct Arena {
     char *begin;
     void *pos;
     int64 size;
-    int32 npushed;
-    int32 padding;
+    int64 npushed;
     struct Arena *next;
 } Arena;
 
