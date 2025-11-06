@@ -143,20 +143,6 @@ static bool CAT(hash_insert_pre_calc_,
 #endif
 );
 
-static void *CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
-                                          char *, uint32);
-static void *CAT(hash_lookup_pre_calc_,
-                 HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32,
-                            uint32);
-static bool CAT(hash_remove_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
-                                         uint32);
-static bool CAT(hash_remove_pre_calc_,
-                HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32,
-                           uint32);
-static void CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
-                                                char *);
-static void CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, bool);
-
 static void
 CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     map->collisions = 0;
