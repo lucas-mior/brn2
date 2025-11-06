@@ -167,7 +167,7 @@ case "$target" in
             exit 1
         fi
         trace_off
-        if [ $src = "arena.c" ]; then
+        if [ $src = "hash.c" ]; then
             exit
         fi
     done
