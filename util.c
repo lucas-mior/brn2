@@ -216,7 +216,6 @@ static int64 util_page_size = 0;
 
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
-static int util_command(const int, char **);
 static void util_die_notify(char *, const char *, ...)
     __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
@@ -600,7 +599,7 @@ snprintf2(char *buffer, int size, char *format, ...) {
 }
 
 #if OS_WINDOWS
-int
+static int
 util_command(const int argc, char **argv) {
     char cmdline[1024] = {0};
     int64 j = 0;
@@ -684,7 +683,7 @@ util_command(const int argc, char **argv) {
     return (int)exit_code;
 }
 #else
-int
+static int
 util_command(const int argc, char **argv) {
     pid_t child;
     int status;
