@@ -89,6 +89,8 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
+// clang-format off
+
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
@@ -134,7 +136,7 @@ CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
 }
 
 static struct CAT(Hash_, HASH_TYPE)
-    * CAT(hash_create_, HASH_TYPE)(uint32 length) {
+*CAT(hash_create_, HASH_TYPE)(uint32 length) {
     struct CAT(Hash_, HASH_TYPE)*map;
     int64 size;
     uint32 capacity = 1;
@@ -543,3 +545,5 @@ main(void) {
     exit(EXIT_SUCCESS);
 }
 #endif
+
+// clang-format on
