@@ -232,6 +232,7 @@ case "$target" in
     exit
     ;;
 "check")
+    CC=gcc CFLAGS="-fanalyzer" ./build.sh
     scan-build --view -analyze-headers --status-bugs ./build.sh
     exit
     ;;
