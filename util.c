@@ -320,18 +320,23 @@ memcmp64(void *left, void *right, int64 size) {
     return memcmp(left, right, (size_t)size);
 }
 
-#define X64(func) \
+#define X64(func, TYPE_MAX, TYPE) \
     INLINE int64 \
 CAT(func, 64)(int fd, char *buffer, int64 size) { \
     ssize_t w; \
     assert(size >= 0); \
-    assert((uint64)size <= SIZE_MAX); \
-    w = func(fd, buffer, (size_t)size); \
+    assert((uint64)size <= TYPE_MAX); \
+    w = func(fd, buffer, (TYPE)size); \
     return (int64)w; \
 }
 
-X64(write)
-X64(read)
+#if OS_WINDOWS
+X64(write, UINT_MAX, uint)
+X64(read, UINT_MAX, uint)
+#else
+X64(write, SIZE_MAX, size_t)
+X64(read, SIZE_MAX, size_t)
+#endif
 
 #undef X64
 
