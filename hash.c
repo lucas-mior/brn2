@@ -95,8 +95,6 @@ typedef ssize_t isize;
 #define QUOTE(x) Q(x)
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
 #define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
-#define HASH_MAP_SIZE(map)                                                     \
-    (sizeof(*map) + map->capacity*sizeof(*(&map->array[0])))
 
 #define CAT_(a, b) a##b
 #define CAT(a, b) CAT_(a, b)
@@ -164,7 +162,7 @@ static struct CAT(Hash_, HASH_TYPE)
 
 static void
 CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
-    xmunmap(map, HASH_MAP_SIZE(map));
+    xmunmap(map, map->size);
     return;
 }
 

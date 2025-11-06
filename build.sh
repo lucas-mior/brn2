@@ -246,9 +246,9 @@ case "$target" in
     ls > rename
 
     trace_on
-    find . \
-    | $dir/bin/brn2_debug -f -
-    $dir/bin/brn2_debug -d .
+    # find . \
+    # | $dir/bin/brn2_debug -f -
+    # $dir/bin/brn2_debug -d .
     $dir/bin/brn2_debug -f rename
     trace_off
     exit
