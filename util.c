@@ -32,6 +32,7 @@
 #include <pthread.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <assert.h>
 
 #if defined(__linux__)
 #define OS_LINUX 1
@@ -227,12 +228,22 @@ static char *itoa2(long, char *);
 static long atoi2(char *);
 static int64 util_page_size = 0;
 
-INLINE void 
-memcpy64(void *dest, void *source, int64 size) {
-    assert(size > 0);
-    memcpy(dest, source, (size_t)size);
-    return;
-}
+#if !defined(CAT)
+#define CAT_(a, b) a##b
+#define CAT(a, b) CAT_(a, b)
+#endif
+
+#define X64(func) \
+  INLINE void \
+      CAT(func, 64)(void *dest, void *source, int64 size) { \
+      assert(size > 0); \
+      func(dest, source, (size_t)size); \
+      return; \
+  }
+
+X64(memcpy)
+X64(memmove)
+#undef X64
 
 #if OS_WINDOWS
 static void *
@@ -957,7 +968,6 @@ atoi2(char *str) {
 }
 
 #if TESTING_util
-#include <assert.h>
 
 int
 main(void) {
