@@ -28,7 +28,7 @@ program="brn2"
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
-CFLAGS="$CFLAGS -std=c99"
+CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wextra -Wall -Werror"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-unused-macros -Wno-unused-function"
@@ -119,6 +119,7 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
     CFLAGS="$CFLAGS -Wno-c++-keyword"
+    CFLAGS="$CFLAGS -Wno-pre-c11-compat"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
 fi
 
