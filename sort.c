@@ -278,7 +278,7 @@ test_sorting(uint32 n, uint32 p) {
         }
     }
 
-    sort_merge_subsorted(array, n, p, sizeof(int32), &dummy, compare_int);
+    sort_merge_subsorted(array, n, p, sizeof(dummy), &dummy, compare_int);
 
     for (uint32 i = 0; i < n; i += 1) {
         if (i < (n - 1)) {
