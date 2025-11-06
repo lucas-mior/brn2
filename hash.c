@@ -125,24 +125,6 @@ struct CAT(Hash_, HASH_TYPE) {
     CAT(Bucket_, HASH_TYPE) array[];
 };
 
-static struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32);
-static bool CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
-                                         uint32
-#if defined(HASH_VALUE_TYPE)
-                                         ,
-                                         uint32
-#endif
-);
-
-static bool CAT(hash_insert_pre_calc_,
-                HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32,
-                           uint32
-#if defined(HASH_VALUE_TYPE)
-                           ,
-                           uint32
-#endif
-);
-
 static void
 CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     map->collisions = 0;
@@ -151,7 +133,8 @@ CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     return;
 }
 
-struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32 length) {
+static struct CAT(Hash_, HASH_TYPE)
+    * CAT(hash_create_, HASH_TYPE)(uint32 length) {
     struct CAT(Hash_, HASH_TYPE)*map;
     int64 size;
     uint32 capacity = 1;
