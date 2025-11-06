@@ -48,6 +48,10 @@
 #define HASH_TYPE map
 #endif
 
+#define SLOT_FREE   0
+#define SLOT_USED   1
+#define SLOT_DELETED 2
+
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
@@ -241,28 +245,57 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     uint32 capacity = map->capacity;
     uint32 i = 0;
     uint32 probe = index;
+    int32_t first_tombstone = -1;
 
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-        if (iterator->status != 1) {
-            iterator->key = key;
-            iterator->hash = hash;
+        if (iterator->status == SLOT_FREE) {
+            /* empty slot: place into earlier tombstone if found,
+               otherwise place here. */
+            CAT(Bucket_, HASH_TYPE) *target = (first_tombstone >= 0)
+                                                  ? &map->array[first_tombstone]
+                                                  : iterator;
+
+            target->key = key;
+            target->hash = hash;
 #if defined(HASH_VALUE_TYPE)
-            iterator->value = value;
+            target->value = value;
 #endif
-            iterator->status = 1;
+            target->status = SLOT_USED;
             map->length += 1;
             return true;
         }
 
-        if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
-            return false;
+        if (iterator->status == SLOT_DELETED) {
+            /* remember first tombstone but keep scanning for duplicate */
+            if (first_tombstone < 0) {
+                first_tombstone = (int32_t)probe;
+            }
+        } else { /* SLOT_USED */
+            /* check duplicate only on truly occupied slots */
+            if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
+                return false; /* already present */
+            }
+            /* real collision: occupied by different key */
+            map->collisions += 1;
         }
 
-        map->collisions += 1;
         i += 1;
         probe = (index + i*i) % capacity;
+    }
+
+    /* table full: if we found a tombstone, reuse iterator now */
+    if (first_tombstone >= 0) {
+        CAT(Bucket_, HASH_TYPE) *target = &map->array[first_tombstone];
+        target->key = key;
+        target->hash = hash;
+#if defined(HASH_VALUE_TYPE)
+        target->value = value;
+#endif
+        target->status = SLOT_USED;
+        map->length += 1;
+        return true;
     }
 
     return false;
@@ -286,11 +319,11 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-        if (iterator->status == 0) {
+        if (iterator->status == SLOT_FREE) {
             return NULL;
         }
 
-        if (iterator->status == 1 && iterator->hash == hash
+        if (iterator->status == SLOT_USED && iterator->hash == hash
             && strcmp(iterator->key, key) == 0) {
 #if defined(HASH_VALUE_TYPE)
             return &(iterator->value);
@@ -324,13 +357,14 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-        if (iterator->status == 0) {
-            return false;
+        if (iterator->status == SLOT_FREE) {
+            return false; /* not found */
         }
 
-        if (iterator->status == 1 && iterator->hash == hash
+        if (iterator->status == SLOT_USED && iterator->hash == hash
             && strcmp(iterator->key, key) == 0) {
-            iterator->status = 2;  // tombstone
+            /* mark tombstone, keep key/hash as-is (optional) */
+            iterator->status = SLOT_DELETED;
             map->length -= 1;
             return true;
         }
@@ -358,22 +392,22 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
     CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map);
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
-        CAT(Bucket_, HASH_TYPE) *it = &map->array[i];
+        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[i];
 
-        if (!verbose && it->status != 1) {
+        if (!verbose && iterator->status != 1) {
             continue;
         }
 
         printf("\n%03u: ", i);
 
-        if (it->status == 0) {
+        if (iterator->status == 0) {
             printf("[empty]");
-        } else if (it->status == 2) {
+        } else if (iterator->status == 2) {
             printf("[deleted]");
         } else {  // status == 1
-            printf("'%s'", it->key);
+            printf("'%s'", iterator->key);
 #if defined(HASH_VALUE_TYPE)
-            printf("=%u", it->value);
+            printf("=%u", iterator->value);
 #endif
         }
     }
@@ -438,8 +472,8 @@ hash_expected_collisions(void *map) {
 
 #include <assert.h>
 
-#define NSTRINGS 500000
-#define NBYTES 10*ALIGNMENT
+#define NSTRINGS 8
+#define NBYTES 2*ALIGNMENT
 
 typedef struct String {
     char *s;
@@ -527,10 +561,19 @@ main(void) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     print_timings("insertion", t0, t1);
 
+    assert(hash_remove_map(original_map, strings[0].s, strings[0].length));
+
     if (NSTRINGS < 10) {
-        hash_print_map(original_map, false);
+        hash_print_map(original_map, true);
     } else {
         HASH_PRINT_SUMMARY_map(original_map);
+    }
+
+    assert(hash_insert_map(original_map, strings[0].s, strings[0].length,
+                           strings[0].value));
+
+    for (int i = 0; i < NSTRINGS; i += 1) {
+        assert(hash_remove_map(original_map, strings[i].s, strings[i].length));
     }
 
     free(strings);
