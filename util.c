@@ -310,7 +310,7 @@ xmmap_commit(int64 *size) {
                          | FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = (int64)UTIL_ALIGN((size_t)size, (size_t)SIZEMB(2));
+                *size = (int64)UTIL_ALIGN(*size, SIZEMB(2));
                 break;
             }
         }
