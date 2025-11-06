@@ -145,19 +145,21 @@ static bool CAT(hash_insert_pre_calc_,
 #endif
 );
 
-void *CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
-                                   uint32);
-void *CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
-                                            char *, uint32, uint32);
-bool CAT(hash_remove_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
-                                  uint32);
-bool CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
-                                           char *, uint32, uint32);
-void CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
-                                         char *);
-void CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, bool);
+static void *CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
+                                          char *, uint32);
+static void *CAT(hash_lookup_pre_calc_,
+                 HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32,
+                            uint32);
+static bool CAT(hash_remove_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
+                                         uint32);
+static bool CAT(hash_remove_pre_calc_,
+                HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *, uint32,
+                           uint32);
+static void CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *,
+                                                char *);
+static void CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, bool);
 
-void
+static void
 CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     map->collisions = 0;
     map->length = 0;
@@ -191,7 +193,7 @@ struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32 length) {
     return map;
 }
 
-void
+static void
 CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     xmunmap(map, HASH_MAP_SIZE(map));
     return;
@@ -358,7 +360,8 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 
     return false;
 }
-void
+
+static void
 CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                     char *name) {
     printf("struct Hash%s %s {\n", QUOTE(HASH_TYPE), name);
@@ -370,7 +373,7 @@ CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     return;
 }
 
-void
+static void
 CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
     CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map);
 
