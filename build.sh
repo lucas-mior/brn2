@@ -144,6 +144,9 @@ case "$target" in
     ;;
 "test")
     for src in *.c; do
+        if [ -n "$2" ] && [ $src != "$2" ]; then
+            continue
+        fi
         if [ "$src" = "$main" ]; then
             continue
         fi
@@ -173,9 +176,9 @@ case "$target" in
             exit 1
         fi
         trace_off
-        # if [ $src = "hash.c" ]; then
-        #     exit
-        # fi
+        if [ -n "$2" ] && [ $src = "$2" ]; then
+            exit
+        fi
     done
     exit
     ;;
