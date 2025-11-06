@@ -84,7 +84,9 @@
 #define BRN2_INLINE static inline __attribute__((always_inline))
 #endif
 
+#if !defined(INLINE)
 #define INLINE BRN2_INLINE
+#endif
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (uint32)(sizeof(*(struct_object)) + (usize)(array_length)*sizeof(ArrayType))

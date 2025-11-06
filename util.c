@@ -154,6 +154,14 @@ static char *program;
 #define MAP_POPULATE 0
 #endif
 
+#if !defined(INLINE)
+  #if defined(__GNUC__) 
+    #define INLINE static inline __attribute__((always_inline))
+  #else
+    #define INLINE static inline
+  #endif
+#endif
+
 #if !defined(INTEGERS)
 #define INTEGERS
 typedef unsigned char uchar;
@@ -203,7 +211,7 @@ _Generic((S), \
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static void *util_memdup(const void *, const usize);
+static void *util_memdup(void *, int64);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, size_t, char *, ...);
 static void error(char *, ...);
@@ -218,6 +226,13 @@ static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
 static long atoi2(char *);
 static int64 util_page_size = 0;
+
+INLINE void 
+memcpy64(void *dest, void *source, int64 size) {
+    assert(size > 0);
+    memcpy(dest, source, (size_t)size);
+    return;
+}
 
 #if OS_WINDOWS
 static void *
@@ -423,16 +438,16 @@ xcalloc(const size_t nmemb, const size_t size) {
 char *
 xstrdup(char *string) {
     char *p;
-    size_t length;
+    int64 length;
 
-    length = strlen(string) + 1;
-    if ((p = malloc(length)) == NULL) {
+    length = (int64)strlen(string) + 1;
+    if ((p = malloc((size_t)length)) == NULL) {
         error("Error allocating %zu bytes to duplicate '%s': %s\n", length,
               string, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
-    memcpy(p, string, length);
+    memcpy64(p, string, length);
     return p;
 }
 
@@ -516,8 +531,8 @@ util_command(const int argc, char **argv) {
 
     if (memmem(argv[0], (size_t)len + 1, exe, (size_t)exe_len + 1) == NULL) {
         argv0_windows = xmalloc(len + exe_len + 1);
-        memcpy(argv0_windows, argv[0], (size_t)len);
-        memcpy(argv0_windows + len, exe, (size_t)exe_len + 1);
+        memcpy64(argv0_windows, argv[0], (size_t)len);
+        memcpy64(argv0_windows + len, exe, (size_t)exe_len + 1);
         argv[0] = argv0_windows;
     }
 
@@ -529,7 +544,7 @@ util_command(const int argc, char **argv) {
         }
 
         cmdline[j] = '"';
-        memcpy(&cmdline[j + 1], argv[i], (size_t)len2);
+        memcpy64(&cmdline[j + 1], argv[i], (size_t)len2);
         cmdline[j + len2 + 1] = '"';
         cmdline[j + len2 + 2] = ' ';
         j += len2 + 3;
@@ -740,13 +755,9 @@ util_die_notify(char *program_name, const char *format, ...) {
 }
 
 void *
-util_memdup(const void *source, const usize size) {
-    void *p;
-    if ((p = malloc(size)) == NULL) {
-        error("Error allocating %zu bytes.\n", size);
-        fatal(EXIT_FAILURE);
-    }
-    memcpy(p, source, size);
+util_memdup(void *source, int64 size) {
+    void *p = xmalloc(size);
+    memcpy64(p, source, size);
     return p;
 }
 
@@ -999,7 +1010,7 @@ main(void) {
 #endif
 
     memset(p1, 0, SIZEMB(1));
-    memcpy(p1, string, strlen(string));
+    memcpy64(p1, string, strlen(string));
     memset(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
