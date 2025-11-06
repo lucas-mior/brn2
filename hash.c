@@ -182,9 +182,12 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 
         switch ((int64)iterator->key) {
         case SLOT_FREE: {
-            CAT(Bucket_, HASH_TYPE) *target = (first_tombstone >= 0)
-                                                  ? &map->array[first_tombstone]
-                                                  : iterator;
+            CAT(Bucket_, HASH_TYPE) *target;
+            if (first_tombstone >= 0) {
+                target = &map->array[first_tombstone];
+            } else {
+                target = iterator;
+            }
 
             target->key = key;
             target->hash = hash;
@@ -203,9 +206,12 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
             if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
                 return false;
             }
-            map->collisions += 1;
+            break;
         }
 
+        if (i == 0) {
+            map->collisions += 1;
+        }
         i += 1;
         probe = (index + i*i) % capacity;
     }
