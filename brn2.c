@@ -104,7 +104,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
-        uint16 name_length = (uint16)strlen(name);
+        uint16 name_length = (uint16)strlen64(name);
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         uint32 size;
@@ -117,7 +117,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         *file_pointer = xarena_push(list->arena, ALIGN(size));
         file = *file_pointer;
 
-        file->length = (uint16)strlen(name);
+        file->length = (uint16)strlen64(name);
         memcpy64(file->name, name, name_length + 1);
 
         length += 1;
@@ -194,7 +194,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
     int number_files;
 
     if (strcmp(directory, ".")) {
-        directory_length = (uint16)strlen(directory);
+        directory_length = (uint16)strlen64(directory);
     } else {
         directory_length = 0;
     }
@@ -211,7 +211,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         char *name = directory_list[i]->d_name;
-        uint16 name_length = (uint16)strlen(name);
+        uint16 name_length = (uint16)strlen64(name);
         uint32 size;
 
         if (brn2_is_invalid_name(name)) {
