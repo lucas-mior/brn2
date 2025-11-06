@@ -219,7 +219,6 @@ static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
 static int32 util_string_int32(int32 *, const char *);
 static int util_command(const int, char **);
-static uint32 util_nthreads(void);
 static void util_die_notify(char *, const char *, ...)
     __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
@@ -297,7 +296,7 @@ memchr64(void *pointer, int32 value, int64 size) {
 }
 
 #if OS_WINDOWS
-uint32
+static uint32
 util_nthreads(void) {
     SYSTEM_INFO sysinfo;
     memset(&sysinfo, 0, sizeof(sysinfo));
@@ -305,7 +304,7 @@ util_nthreads(void) {
     return sysinfo.dwNumberOfProcessors;
 }
 #else
-uint32
+static uint32
 util_nthreads(void) {
     return (uint32)sysconf(_SC_NPROCESSORS_ONLN);
 }
