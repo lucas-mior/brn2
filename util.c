@@ -245,6 +245,13 @@ X64(memcpy)
 X64(memmove)
 #undef X64
 
+INLINE void * \
+memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
+    assert(hay_len > 0);
+    assert(needle_len > 0);
+    return memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
+}
+
 #if OS_WINDOWS
 static void *
 memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
