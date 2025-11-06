@@ -484,12 +484,12 @@ brn2_threads_work_normalization(void *arg) {
         while ((p = memmem(file->name + off, file->length - off, "//", 2))) {
             off = (uint32)(p - file->name);
 
-            memmove(&p[0], &p[1], file->length - off);
+            memmove64(&p[0], &p[1], file->length - off);
             file->length -= 1;
         }
 
         while (file->name[0] == '.' && file->name[1] == '/') {
-            memmove(&file->name[0], &file->name[2], file->length - 1);
+            memmove64(&file->name[0], &file->name[2], file->length - 1);
             file->length -= 2;
         }
 
@@ -497,7 +497,7 @@ brn2_threads_work_normalization(void *arg) {
         while ((p = memmem(file->name + off, file->length - off, "/./", 3))) {
             off = (uint32)(p - file->name);
 
-            memmove(&p[1], &p[3], file->length - off - 2);
+            memmove64(&p[1], &p[3], file->length - off - 2);
             file->length -= 2;
         }
 
@@ -916,7 +916,7 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
             printf(GREEN "%s == %s\n" RESET, file->name, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
-                memmove(&list->files[i], &list->files[i + 1],
+                memmove64(&list->files[i], &list->files[i + 1],
                         (list->length - i)*sizeof(*(list->files)));
             }
             return true;
