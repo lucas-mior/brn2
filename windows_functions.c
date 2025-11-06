@@ -171,11 +171,11 @@ main(void) {
         char *string = "aaa/bbb/ccc";
         int64 length = strlen64(string);
 
-        assert(memmem64(string, (size_t)length, "aaa", 3) == string);
-        assert(memmem64(string, (size_t)length, "bbb", 3) == string + 4);
-        assert(memmem64(string, (size_t)length, "aaaa", 4) == NULL);
-        assert(memmem64(string, (size_t)length, "bbbb", 4) == NULL);
-        assert(memmem64(string, (size_t)length, "/", 1) == string + 3);
+        assert(memmem64(string, length, "aaa", 3) == string);
+        assert(memmem64(string, length, "bbb", 3) == string + 4);
+        assert(memmem64(string, length, "aaaa", 4) == NULL);
+        assert(memmem64(string, length, "bbbb", 4) == NULL);
+        assert(memmem64(string, length, "/", 1) == string + 3);
     }
 
     {

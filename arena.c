@@ -88,6 +88,14 @@
 #define FLAGS_HUGE_PAGES 0
 #endif
 
+#if !defined(INLINE)
+#if defined(__GNUC__)
+#define INLINE static inline __attribute__((always_inline))
+#else
+#define INLINE static inline
+#endif
+#endif
+
 #if !defined(INTEGERS)
 #define INTEGERS
 typedef unsigned char uchar;
@@ -354,6 +362,14 @@ arena_reset(Arena *arena) {
 #include "assert.h"
 #include <stdio.h>
 
+INLINE void
+memset64(void *buffer, int value, int64 size) {
+    assert(size >= 0);
+    assert((uint64)size <= SIZE_MAX);
+    memset(buffer, value, (size_t)size);
+    return;
+}
+
 #define LENGTH(X) ((int64)(sizeof(X) / sizeof(*X)))
 #define error(...) fprintf(stderr, __VA_ARGS__)
 
@@ -378,7 +394,7 @@ main(void) {
             assert((objs[i] = arena_push(arena, size)));
 
             total_size += size;
-            memset64(objs[i], 0xCD, (size_t)size);
+            memset64(objs[i], 0xCD, size);
 
             if (total_size < arena_data_size(arena)) {
                 assert((char *)objs[i] >= arena->begin);
