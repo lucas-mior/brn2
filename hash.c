@@ -163,7 +163,7 @@ CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
 
 static bool
 CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
-                                      char *key, uint32 hash, uint32 index
+                                      char *key, uint32 hash, uint32 base_index
 #if defined(HASH_VALUE_TYPE)
                                       ,
                                       HASH_VALUE_TYPE value
@@ -171,7 +171,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 ) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
-    uint32 probe = index;
+    uint32 probe = base_index;
     int32_t first_tombstone = -1;
 
     while (i < capacity) {
@@ -207,7 +207,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + (i + i*i)/2) & map->bitmask;
+        probe = (base_index + (i + i*i)/2) & map->bitmask;
     }
 
     if (first_tombstone >= 0) {
@@ -244,10 +244,10 @@ CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 
 static void *
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
-                                      char *key, uint32 hash, uint32 index) {
+                                      char *key, uint32 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
-    uint32 probe = index;
+    uint32 probe = base_index;
 
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
@@ -268,7 +268,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + (i + i*i)/2) & map->bitmask;
+        probe = (base_index + (i + i*i)/2) & map->bitmask;
     }
 
     return NULL;
@@ -284,10 +284,10 @@ CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 
 static bool
 CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
-                                      char *key, uint32 hash, uint32 index) {
+                                      char *key, uint32 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
-    uint32 probe = index;
+    uint32 probe = base_index;
 
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
@@ -308,7 +308,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + (i + i*i)/2) & map->bitmask;
+        probe = (base_index + (i + i*i)/2) & map->bitmask;
     }
 
     return false;
