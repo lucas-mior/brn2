@@ -288,7 +288,7 @@ main(int argc, char **argv) {
             FileName *file = old->files[i];
             uint32 *index = &(old->indexes[i]);
             bool contains_newline;
-            usize buffered;
+            int64 buffered;
 
             while ((contains_newline = memchr(file->name, '\n', file->length))
                    || !hash_insert_pre_calc_map(oldlist_map, file->name,
@@ -317,9 +317,9 @@ main(int argc, char **argv) {
                 index = &(old->indexes[i]);
             }
 
-            buffered = (usize)(pointer - write_buffer);
+            buffered = pointer - write_buffer;
             if (buffered >= BRN2_PATH_MAX) {
-                write(brn2_buffer.fd, write_buffer, buffered);
+                write64(brn2_buffer.fd, write_buffer, buffered);
                 pointer = write_buffer;
             }
 
@@ -329,7 +329,7 @@ main(int argc, char **argv) {
             file->name[file->length] = '\0';
         }
     close:
-        write(brn2_buffer.fd, write_buffer, (usize)(pointer - write_buffer));
+        write64(brn2_buffer.fd, write_buffer, pointer - write_buffer);
         if (close(brn2_buffer.fd) < 0) {
             error("Error closing buffer: %s\n", strerror(errno));
             fatal(EXIT_FAILURE);

@@ -715,7 +715,7 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write(STDERR_FILENO, buffer, (uint32)n);
+    write64(STDERR_FILENO, buffer, (uint32)n);
 #if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
@@ -738,7 +738,7 @@ util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
     (void)unused;
 
-    write(STDERR_FILENO, message, (uint32)strlen64(message));
+    write64(STDERR_FILENO, message, (uint32)strlen64(message));
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program, message,
                NULL);
@@ -781,7 +781,7 @@ util_die_notify(char *program_name, const char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write(STDERR_FILENO, buffer, (uint32)n + 1);
+    write64(STDERR_FILENO, buffer, (uint32)n + 1);
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program_name,
                buffer, NULL);
@@ -820,8 +820,8 @@ util_copy_file_sync(const char *destination, const char *source) {
     }
 
     errno = 0;
-    while ((r = read(source_fd, buffer, BUFSIZ)) > 0) {
-        w = write(destination_fd, buffer, (size_t)r);
+    while ((r = read64(source_fd, buffer, BUFSIZ)) > 0) {
+        w = write64(destination_fd, buffer, r);
         if (w != r) {
             fprintf(stderr, "Error writing data to %s", destination);
             if (errno) {
@@ -904,7 +904,7 @@ send_signal(char *executable, const int32 signal_number) {
         }
 
         errno = 0;
-        if ((r = read(cmdline, command, sizeof(command))) <= 0) {
+        if ((r = read64(cmdline, command, sizeof(command))) <= 0) {
             (void)r;
             close(cmdline);
             continue;
