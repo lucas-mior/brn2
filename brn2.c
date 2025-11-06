@@ -327,15 +327,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         char *begin = map;
         char *pointer = map;
         int64 left = map_size - padding;
-        uint32 nfiles = 0;
-
-        while ((pointer = memchr64(pointer, '\n', left))) {
-            nfiles += 1;
-            pointer += 1;
-            left = map_size - padding - (uint32)(pointer - begin);
-        }
-        pointer = map;
-        left = map_size - padding;
 
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
@@ -346,7 +337,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             *pointer = '\0';
             if (is_old && brn2_is_invalid_name(begin)) {
                 begin = pointer + 1;
-                nfiles -= 1;
                 continue;
             }
             if (begin == pointer) {
@@ -356,9 +346,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
             name_length = (uint16)(pointer - begin);
             size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
-            if ((length % (nfiles / nthreads)) == 0) {
-                size = BRN2_ALIGN(size, 64);
-            }
             *file_pointer = xarena_push(list->arena, ALIGN(size));
 
             file = *file_pointer;
@@ -370,9 +357,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             length += 1;
             left -= (file->length + 1);
         }
-        error("nfiles=%u\n", nfiles);
-        error("length=%u\n", length);
-        assert(nfiles == length);
     }
 
     if (length == 0) {
