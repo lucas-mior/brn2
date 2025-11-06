@@ -300,6 +300,19 @@ strlen64(char *string) {
     return (int64)len;
 }
 
+#define X64(func) \
+    INLINE int64 \
+CAT(func, 64)(int fd, char *buffer, int64 size) { \
+    ssize_t w; \
+    assert(size >= 0); \
+    assert((uint64)size < SIZE_MAX); \
+    w = func(fd, buffer, (size_t)size); \
+    return (int64)w; \
+}
+
+X64(write)
+X64(read)
+
 #if OS_WINDOWS
 static uint32
 util_nthreads(void) {
