@@ -181,9 +181,6 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
-
-typedef size_t usize;
-typedef ssize_t isize;
 #endif
 
 // clang-format off
@@ -458,7 +455,7 @@ xrealloc(void *old, const int64 size) {
     }
     assert((uint64)size < SIZE_MAX);
 
-    if ((p = realloc(old, (usize)size)) == NULL) {
+    if ((p = realloc(old, (size_t)size)) == NULL) {
         error("Failed to reallocate %zu bytes from %x.\n", size, old_save);
         fatal(EXIT_FAILURE);
     }
@@ -808,8 +805,8 @@ util_copy_file_sync(const char *destination, const char *source) {
     int32 source_fd;
     int32 destination_fd;
     char buffer[BUFSIZ];
-    isize r = 0;
-    isize w = 0;
+    ssize_t r = 0;
+    ssize_t w = 0;
 
     if ((source_fd = open(source, O_RDONLY)) < 0) {
         error("Error opening %s for reading: %s.\n", source, strerror(errno));
@@ -827,7 +824,7 @@ util_copy_file_sync(const char *destination, const char *source) {
 
     errno = 0;
     while ((r = read(source_fd, buffer, BUFSIZ)) > 0) {
-        w = write(destination_fd, buffer, (usize)r);
+        w = write(destination_fd, buffer, (size_t)r);
         if (w != r) {
             fprintf(stderr, "Error writing data to %s", destination);
             if (errno) {
