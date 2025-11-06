@@ -84,9 +84,6 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
-
-typedef size_t usize;
-typedef ssize_t isize;
 #endif
 
 // clang-format off
@@ -493,7 +490,7 @@ main(void) {
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_create_map(NSTRINGS);
-    arena = arena_create((usize)4096*NSTRINGS);
+    arena = arena_create(4096*NSTRINGS);
 
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);
