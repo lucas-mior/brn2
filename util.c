@@ -211,7 +211,7 @@ static char *notifiers[2] = {"dunstify", "notify-send"};
 
 static void *util_memdup(void *, int64);
 static char *xstrdup(char *);
-static int32 snprintf2(char *, size_t, char *, ...);
+static int32 snprintf2(char *, int, char *, ...);
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
 static int32 util_string_int32(int32 *, const char *);
@@ -530,12 +530,12 @@ xpthread_mutex_destroy(pthread_mutex_t *mutex) {
 }
 
 int32
-snprintf2(char *buffer, size_t size, char *format, ...) {
+snprintf2(char *buffer, int size, char *format, ...) {
     int n;
     va_list args;
 
     va_start(args, format);
-    n = vsnprintf(buffer, size, format, args);
+    n = vsnprintf(buffer, (size_t)size, format, args);
     va_end(args);
 
     if (n <= 0) {
