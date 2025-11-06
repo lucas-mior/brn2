@@ -61,9 +61,9 @@ sort_shuffle(void *array, int64 n, int64 size) {
             int64 rnd = rand();
             int64 j = i + rnd / (RAND_MAX / (n - i) + 1);
 
-            memcpy(tmp, arr + j*size, (usize)size);
-            memcpy(arr + j*size, arr + i*size, (usize)size);
-            memcpy(arr + i*size, tmp, (usize)size);
+            memcpy64(tmp, arr + j*size, size);
+            memcpy64(arr + j*size, arr + i*size, size);
+            memcpy64(arr + i*size, tmp, size);
         }
     }
 
@@ -107,15 +107,15 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
 }
 
 static void
-sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
+sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
                      void *dummy_last,
                      int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[MAX_NTHREADS];
     uint32 n_sub[MAX_NTHREADS];
     uint32 indices[MAX_NTHREADS] = {0};
     uint32 off_sets[MAX_NTHREADS];
-    usize memory_size = size*n;
-    char *output = xmalloc((int64)memory_size);
+    int64 memory_size = size*n;
+    char *output = xmalloc(memory_size);
     char *array2 = array;
 
     for (uint32 k = 0; k < (p - 1); k += 1) {
@@ -133,7 +133,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
 
     for (uint32 k = 0; k < p; k += 1) {
         heap[k].value = xmalloc((int64)size);
-        memcpy(heap[k].value, &array2[off_sets[k]*size], size);
+        memcpy64(heap[k].value, &array2[off_sets[k]*size], size);
         heap[k].p_index = k;
     }
 
@@ -145,17 +145,17 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, usize size,
         uint32 k = heap[0].p_index;
         uint32 i_sub = (indices[k] += 1);
 
-        memcpy(&output[i*size], heap[0].value, size);
+        memcpy64(&output[i*size], heap[0].value, size);
 
         if (i_sub < n_sub[k]) {
-            memcpy(heap[0].value, &array2[(off_sets[k] + i_sub)*size], size);
+            memcpy64(heap[0].value, &array2[(off_sets[k] + i_sub)*size], size);
         } else {
-            memcpy(heap[0].value, dummy_last, size);
+            memcpy64(heap[0].value, dummy_last, size);
         }
         sort_heapify(heap, p, 0, compare);
     }
 
-    memcpy(array2, output, n*size);
+    memcpy64(array2, output, n*size);
     free(output);
     for (uint32 i = 0; i < p; i += 1) {
         free(heap[i].value);
@@ -178,7 +178,7 @@ sort(FileList *old) {
 
     dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1));
     memset(dummy_last, 0, sizeof(*dummy_last));
-    memcpy(dummy_last, last, last_length + 1);
+    memcpy64(dummy_last, last, last_length + 1);
 
 #if SORT_BENCHMARK
     struct timespec t0;
@@ -187,9 +187,9 @@ sort(FileList *old) {
     FileList copy = {0};
     sort_shuffle(old->files, old->length, SIZEOF(*(old->files)));
 
-    memcpy(&copy, old, sizeof(*old));
+    memcpy64(&copy, old, sizeof(*old));
     copy.files = xmalloc(copy.length*sizeof(*(old->files)));
-    memcpy(copy.files, old->files, copy.length*sizeof(*(old->files)));
+    memcpy64(copy.files, old->files, copy.length*sizeof(*(old->files)));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
