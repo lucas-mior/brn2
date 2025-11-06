@@ -565,7 +565,7 @@ brn2_threads_work_changes(void *arg) {
         FileName *oldfile = work->old_list->files[i];
         FileName *newfile = work->new_list->files[i];
         if (oldfile->length == newfile->length) {
-            if (!memcmp(oldfile->name, newfile->name, oldfile->length)) {
+            if (!memcmp64(oldfile->name, newfile->name, oldfile->length)) {
                 continue;
             }
         }
@@ -912,7 +912,7 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
         if (list->files[i]->length != file->length) {
             continue;
         }
-        if (!memcmp(list->files[i]->name, file->name, file->length)) {
+        if (!memcmp64(list->files[i]->name, file->name, file->length)) {
             printf(GREEN "%s == %s\n" RESET, file->name, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
