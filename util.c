@@ -313,6 +313,8 @@ CAT(func, 64)(int fd, char *buffer, int64 size) { \
 X64(write)
 X64(read)
 
+#undef X64
+
 #if OS_WINDOWS
 static uint32
 util_nthreads(void) {
