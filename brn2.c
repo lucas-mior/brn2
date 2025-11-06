@@ -917,7 +917,7 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
-                        (list->length - i)*sizeof(*(list->files)));
+                          (list->length - i)*sizeof(*(list->files)));
             }
             return true;
         }

@@ -89,7 +89,7 @@
 #endif
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
-    (uint32)(sizeof(*(struct_object)) + (usize)(array_length)*sizeof(ArrayType))
+    (uint32)(SIZEOF(*(struct_object)) + (array_length*SIZEOF(ArrayType)))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
 #if !defined(INTEGERS)

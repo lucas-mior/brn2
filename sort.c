@@ -148,7 +148,8 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
         memcpy64(&output[i*size], heap[0].value, size);
 
         if (i_sub < n_sub[k]) {
-            memcpy64(heap[0].value, &array2[(off_sets[k] + i_sub)*size], size);
+            memcpy64(heap[0].value, &array2[(off_sets[k] + i_sub)*size],
+                     size);
         } else {
             memcpy64(heap[0].value, dummy_last, size);
         }

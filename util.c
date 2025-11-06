@@ -156,11 +156,11 @@ static char *program;
 #endif
 
 #if !defined(INLINE)
-  #if defined(__GNUC__) 
-    #define INLINE static inline __attribute__((always_inline))
-  #else
-    #define INLINE static inline
-  #endif
+#if defined(__GNUC__)
+#define INLINE static inline __attribute__((always_inline))
+#else
+#define INLINE static inline
+#endif
 #endif
 
 #if !defined(INTEGERS)
@@ -280,16 +280,18 @@ X64(memcpy)
 X64(memmove)
 #undef X64
 
-INLINE void * \
+INLINE void *
 memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
-    if (hay_len <= 0)
+    if (hay_len <= 0) {
         return NULL;
-    if (needle_len <= 0)
+    }
+    if (needle_len <= 0) {
         return NULL;
+    }
     return memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
 }
 
-INLINE void * \
+INLINE void *
 memchr64(void *pointer, int32 value, int64 size) {
     assert(size >= 0);
     return memchr(pointer, value, (size_t)size);
