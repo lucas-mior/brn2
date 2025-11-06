@@ -297,6 +297,12 @@ memchr64(void *pointer, int32 value, int64 size) {
     return memchr(pointer, value, (size_t)size);
 }
 
+INLINE int64
+strlen64(char *string) {
+    size_t len = strlen(string);
+    return (int64)len;
+}
+
 #if OS_WINDOWS
 static uint32
 util_nthreads(void) {
@@ -318,7 +324,7 @@ util_nthreads(void) {
 
 static char *
 basename2(char *path) {
-    int64 left = (int64)strlen(path);
+    int64 left = strlen64(path);
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
@@ -475,7 +481,7 @@ xstrdup(char *string) {
     char *p;
     int64 length;
 
-    length = (int64)strlen(string) + 1;
+    length = strlen64(string) + 1;
     if ((p = malloc((size_t)length)) == NULL) {
         error("Error allocating %zu bytes to duplicate '%s': %s\n", length,
               string, strerror(errno));
@@ -554,10 +560,10 @@ util_command(const int argc, char **argv) {
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
-    int64 len = (int64)strlen(argv[0]);
+    int64 len = strlen64(argv[0]);
     char *argv0_windows;
     char *exe = ".exe";
-    int64 exe_len = (int64)(strlen(exe));
+    int64 exe_len = (int64)(strlen64(exe));
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
@@ -572,7 +578,7 @@ util_command(const int argc, char **argv) {
     }
 
     for (int i = 0; i < argc - 1; i += 1) {
-        int64 len2 = (int64)strlen(argv[i]);
+        int64 len2 = strlen64(argv[i]);
         if ((j + len2) >= (int64)sizeof(cmdline)) {
             error("Command line is too long.\n");
             fatal(EXIT_FAILURE);
@@ -738,7 +744,7 @@ util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
     (void)unused;
 
-    write(STDERR_FILENO, message, (uint32)strlen(message));
+    write(STDERR_FILENO, message, (uint32)strlen64(message));
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i], notifiers[i], "-u", "critical", program, message,
                NULL);
@@ -876,7 +882,7 @@ static void
 send_signal(char *executable, const int32 signal_number) {
     DIR *processes;
     struct dirent *process;
-    int64 len = (int64)strlen(executable);
+    int64 len = strlen64(executable);
 
     if ((processes = opendir("/proc")) == NULL) {
         error("Error opening /proc: %s\n", strerror(errno));
@@ -1044,7 +1050,7 @@ main(void) {
 #endif
 
     memset(p1, 0, SIZEMB(1));
-    memcpy64(p1, string, (int64)strlen(string));
+    memcpy64(p1, string, strlen64(string));
     memset(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
