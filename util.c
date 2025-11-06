@@ -217,7 +217,7 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
 static long atoi2(char *);
-static size_t util_page_size = 0;
+static int64 util_page_size = 0;
 
 #if OS_WINDOWS
 static void *
@@ -315,7 +315,7 @@ xmmap_commit(int64 *size) {
             fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
             fatal(EXIT_FAILURE);
         }
-        util_page_size = (size_t)aux;
+        util_page_size = aux;
     }
 
     do {
