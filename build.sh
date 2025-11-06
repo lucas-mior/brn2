@@ -205,10 +205,11 @@ create_temp_files() {
 case "$target" in
 "benchmark") 
     create_temp_files
+    ls > "rename"
 
     # strace -f -c -o $dir/strace.txt $dir/brn2 -s -q -d . 2>&1
     trace_on
-    $dir/$exe -s -q -d .
+    $dir/$exe -s -q -f "rename"
     trace_off
     rm $dir/$exe
     exit
