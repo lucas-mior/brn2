@@ -375,7 +375,7 @@ main(void) {
 
         for (uint32 i = 0; i < LENGTH(objs); i += 1) {
             int64 size = 10 + (rand() % 10000);
-            assert((objs[i] = arena_push(arena, (uint32)size)));
+            assert((objs[i] = arena_push(arena, size)));
 
             total_size += size;
             memset(objs[i], 0xCD, (size_t)size);
