@@ -125,9 +125,7 @@ struct CAT(Hash_, HASH_TYPE) {
     CAT(Bucket_, HASH_TYPE) array[];
 };
 
-static void CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *);
 static struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32);
-static void CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *);
 static bool CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE) *, char *,
                                          uint32
 #if defined(HASH_VALUE_TYPE)
