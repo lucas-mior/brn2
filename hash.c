@@ -279,7 +279,7 @@ CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
     );
 }
 
-void *
+static void *
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                       char *key, uint32 hash, uint32 index) {
     uint32 capacity = map->capacity;
@@ -311,7 +311,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     return NULL;
 }
 
-void *
+static void *
 CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
                              uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
