@@ -7,7 +7,7 @@ debug2
 # uninstall
 benchmark
 # perf
-valgrind
+# valgrind
 # test_all
 # check
 cross x86-windows-gnu

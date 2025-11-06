@@ -226,38 +226,12 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
 static int64 util_page_size = 0;
+INLINE void *memchr64(void *pointer, int32 value, int64 size);
 
 #if !defined(CAT)
 #define CAT_(a, b) a##b
 #define CAT(a, b) CAT_(a, b)
 #endif
-
-#define X64(func) \
-  INLINE void \
-      CAT(func, 64)(void *dest, void *source, int64 size) { \
-      assert(size > 0); \
-      func(dest, source, (size_t)size); \
-      return; \
-  }
-
-X64(memcpy)
-X64(memmove)
-#undef X64
-
-INLINE void * \
-memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
-    if (hay_len <= 0)
-        return NULL;
-    if (needle_len <= 0)
-        return NULL;
-    return memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
-}
-
-INLINE void * \
-memchr64(void *pointer, int32 value, int64 size) {
-    assert(size >= 0);
-    return memchr(pointer, value, (size_t)size);
-}
 
 #if OS_WINDOWS
 static void *
@@ -280,7 +254,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     while (h < limit) {
         uchar *p;
 
-        if ((p = memchr64(h, n[0], (size_t)(limit - h))) == NULL) {
+        if ((p = memchr64(h, n[0], limit - h)) == NULL) {
             return NULL;
         }
 
@@ -293,6 +267,34 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     return NULL;
 }
 #endif
+
+#define X64(func) \
+  INLINE void \
+      CAT(func, 64)(void *dest, void *source, int64 size) { \
+      assert(size > 0); \
+      assert(size < SIZE_MAX); \
+      func(dest, source, (size_t)size); \
+      return; \
+  }
+
+X64(memcpy)
+X64(memmove)
+#undef X64
+
+INLINE void * \
+memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
+    if (hay_len <= 0)
+        return NULL;
+    if (needle_len <= 0)
+        return NULL;
+    return memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
+}
+
+INLINE void * \
+memchr64(void *pointer, int32 value, int64 size) {
+    assert(size >= 0);
+    return memchr(pointer, value, (size_t)size);
+}
 
 #if OS_WINDOWS
 uint32
@@ -554,10 +556,10 @@ util_command(const int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    if (memmem64(argv[0], (size_t)len + 1, exe, (size_t)exe_len + 1) == NULL) {
+    if (memmem64(argv[0], len + 1, exe, exe_len + 1) == NULL) {
         argv0_windows = xmalloc(len + exe_len + 1);
-        memcpy64(argv0_windows, argv[0], (size_t)len);
-        memcpy64(argv0_windows + len, exe, (size_t)exe_len + 1);
+        memcpy64(argv0_windows, argv[0], len);
+        memcpy64(argv0_windows + len, exe, exe_len + 1);
         argv[0] = argv0_windows;
     }
 
@@ -569,7 +571,7 @@ util_command(const int argc, char **argv) {
         }
 
         cmdline[j] = '"';
-        memcpy64(&cmdline[j + 1], argv[i], (size_t)len2);
+        memcpy64(&cmdline[j + 1], argv[i], len2);
         cmdline[j + len2 + 1] = '"';
         cmdline[j + len2 + 2] = ' ';
         j += len2 + 3;
@@ -937,7 +939,7 @@ send_signal(char *executable, int32 signal_number) {
     return;
 }
 #else
-void
+static void
 send_signal(char *executable, int32 signal_number) {
     (void)executable;
     (void)signal_number;
@@ -1034,7 +1036,7 @@ main(void) {
 #endif
 
     memset(p1, 0, SIZEMB(1));
-    memcpy64(p1, string, strlen(string));
+    memcpy64(p1, string, (int64)strlen(string));
     memset(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
