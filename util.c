@@ -154,15 +154,6 @@ static char *program;
 #define MAP_POPULATE 0
 #endif
 
-#define UTIL_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
-
-#if !defined(ALIGNMENT)
-#define ALIGNMENT 16ul
-#endif
-#if !defined(ALIGN)
-#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
-#endif
-
 #if !defined(INTEGERS)
 #define INTEGERS
 typedef unsigned char uchar;
@@ -185,6 +176,30 @@ typedef uint64_t uint64;
 typedef size_t usize;
 typedef ssize_t isize;
 #endif
+
+// clang-format off
+#define UTIL_ALIGN_UINT(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
+#define COMPILE_STOP "aaaaa"
+
+#define UTIL_ALIGN(S, A) \
+_Generic((S), \
+    unsigned long long: (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    unsigned long:      (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    unsigned int:       (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    long long:          (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    long:               (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    int:                (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    default:            COMPILE_STOP \
+)
+
+
+#if !defined(ALIGNMENT)
+#define ALIGNMENT 16ul
+#endif
+#if !defined(ALIGN)
+#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
+#endif
+// clang-format on
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
@@ -310,13 +325,13 @@ xmmap_commit(int64 *size) {
                          | FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = (int64)UTIL_ALIGN(*size, SIZEMB(2));
+                *size = UTIL_ALIGN(*size, SIZEMB(2));
                 break;
             }
         }
         p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
-        *size = (int64)UTIL_ALIGN((size_t)*size, util_page_size);
+        *size = UTIL_ALIGN(*size, util_page_size);
     } while (0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
