@@ -61,7 +61,7 @@ scandir(const char *dir, struct dirent ***namelist,
     list = xmalloc(capacity*SIZEOF(*list));
     do {
         struct dirent *ent = xmalloc(sizeof(*ent));
-        int64 length = (int64)strlen(find_data.cFileName);
+        int64 length = strlen64(find_data.cFileName);
 
         if (length > (SIZEOF(ent->d_name) - 1)) {
             error("Error scanning file %s. File name is too long.\n",
@@ -112,7 +112,7 @@ lstat(const char *path, struct stat *statbuf) {
         return -1;
     }
 
-    memset(statbuf, 0, sizeof(*statbuf));
+    memset64(statbuf, 0, sizeof(*statbuf));
 
     // File type
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
@@ -148,11 +148,11 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
     for (int32 i = 0; i < *nfiles; i += 1) {
         char *from_scan = dirent[i]->d_name;
 
-        if ((int64)strlen(from_scan) != length) {
+        if (strlen64(from_scan) != length) {
             continue;
         }
 
-        if (!memcmp(buffer, from_scan, (size_t)length)) {
+        if (!memcmp64(buffer, from_scan, length)) {
             printf("%s == %s\n", buffer, from_scan);
             if (i < (*nfiles - 1)) {
                 *nfiles -= 1;
@@ -169,13 +169,13 @@ int
 main(void) {
     {
         char *string = "aaa/bbb/ccc";
-        int64 length = (int64)strlen(string);
+        int64 length = strlen64(string);
 
-        assert(memmem(string, (size_t)length, "aaa", 3) == string);
-        assert(memmem(string, (size_t)length, "bbb", 3) == string + 4);
-        assert(memmem(string, (size_t)length, "aaaa", 4) == NULL);
-        assert(memmem(string, (size_t)length, "bbbb", 4) == NULL);
-        assert(memmem(string, (size_t)length, "/", 1) == string + 3);
+        assert(memmem64(string, (size_t)length, "aaa", 3) == string);
+        assert(memmem64(string, (size_t)length, "bbb", 3) == string + 4);
+        assert(memmem64(string, (size_t)length, "aaaa", 4) == NULL);
+        assert(memmem64(string, (size_t)length, "bbbb", 4) == NULL);
+        assert(memmem64(string, (size_t)length, "/", 1) == string + 3);
     }
 
     {

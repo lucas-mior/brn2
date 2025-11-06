@@ -174,11 +174,11 @@ sort(FileList *old) {
     char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    uint32 last_length = (uint32)strlen(last);
+    uint32 last_length = (uint32)strlen64(last);
     FileName *dummy_last;
 
     dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1));
-    memset(dummy_last, 0, sizeof(*dummy_last));
+    memset64(dummy_last, 0, sizeof(*dummy_last));
     memcpy64(dummy_last, last, last_length + 1);
 
 #if SORT_BENCHMARK
@@ -208,7 +208,7 @@ sort(FileList *old) {
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     qsort(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
-    if (memcmp(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
+    if (memcmp64(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
         error("Error in sorting.\n");
         for (uint32 i = 0; i < old->length; i += 1) {
             char *name1 = old->files[i]->name;

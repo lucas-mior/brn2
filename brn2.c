@@ -326,9 +326,9 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     {
         char *begin = map;
         char *pointer = map;
-        size_t left = map_size - padding;
+        int64 left = map_size - padding;
 
-        while ((left > 0) && (pointer = memchr(pointer, '\n', left))) {
+        while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
             uint32 size;
@@ -481,7 +481,7 @@ brn2_threads_work_normalization(void *arg) {
         char *p;
         uint32 off = 0;
 
-        while ((p = memmem(file->name + off, file->length - off, "//", 2))) {
+        while ((p = memmem64(file->name + off, file->length - off, "//", 2))) {
             off = (uint32)(p - file->name);
 
             memmove64(&p[0], &p[1], file->length - off);
@@ -494,7 +494,7 @@ brn2_threads_work_normalization(void *arg) {
         }
 
         off = 0;
-        while ((p = memmem(file->name + off, file->length - off, "/./", 3))) {
+        while ((p = memmem64(file->name + off, file->length - off, "/./", 3))) {
             off = (uint32)(p - file->name);
 
             memmove64(&p[1], &p[3], file->length - off - 2);
