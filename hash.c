@@ -123,7 +123,7 @@ typedef struct CAT(Bucket_, HASH_TYPE) {
 #if defined(HASH_PADDING_TYPE)
     HASH_PADDING_TYPE padding;
 #endif
-    uint32 next;
+    uint32 status;  // 0 empty, 1 used, 2 deleted (optional)
 } CAT(Bucket_, HASH_TYPE);
 
 struct CAT(Hash_, HASH_TYPE) {
@@ -238,43 +238,34 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                       HASH_VALUE_TYPE value
 #endif
 ) {
-    CAT(Bucket_, HASH_TYPE) *iterator = &(map->array[index]);
+    uint32 capacity = map->capacity;
+    uint32 i = 0;
+    uint32 probe = index;
 
-    if (iterator->key == NULL) {
-        iterator->key = key;
-        iterator->hash = hash;
-        iterator->next = 0;
+    while (i < capacity) {
+        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
+
+        if (iterator->status != 1) {
+            iterator->key = key;
+            iterator->hash = hash;
 #if defined(HASH_VALUE_TYPE)
-        iterator->value = value;
+            iterator->value = value;
 #endif
-        map->length += 1;
-        return true;
-    }
+            iterator->status = 1;
+            map->length += 1;
+            return true;
+        }
 
-    while (true) {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
+        if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
             return false;
         }
 
-        if (iterator->next) {
-            iterator = (void *)(map->arena->begin + iterator->next);
-        } else {
-            break;
-        }
+        map->collisions += 1;
+        i += 1;
+        probe = (index + i*i) % capacity;
     }
 
-    map->collisions += 1;
-    iterator->next = xarena_push_index32(map->arena, sizeof(*iterator));
-    iterator = (void *)(map->arena->begin + iterator->next);
-    iterator->key = key;
-    iterator->hash = hash;
-#if defined(HASH_VALUE_TYPE)
-    iterator->value = value;
-#endif
-    iterator->next = 0;
-    map->length += 1;
-
-    return true;
+    return false;
 }
 
 void *
@@ -288,14 +279,19 @@ CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 void *
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                       char *key, uint32 hash, uint32 index) {
-    CAT(Bucket_, HASH_TYPE) *iterator = &(map->array[index]);
+    uint32 capacity = map->capacity;
+    uint32 i = 0;
+    uint32 probe = index;
 
-    if (iterator->key == NULL) {
-        return NULL;
-    }
+    while (i < capacity) {
+        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-    while (true) {
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
+        if (iterator->status == 0) {
+            return NULL;
+        }
+
+        if (iterator->status == 1 && iterator->hash == hash
+            && strcmp(iterator->key, key) == 0) {
 #if defined(HASH_VALUE_TYPE)
             return &(iterator->value);
 #else
@@ -303,11 +299,8 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 #endif
         }
 
-        if (iterator->next) {
-            iterator = (void *)(map->arena->begin + iterator->next);
-        } else {
-            break;
-        }
+        i += 1;
+        probe = (index + i*i) % capacity;
     }
 
     return NULL;
@@ -324,39 +317,30 @@ CAT(hash_remove_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 bool
 CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                       char *key, uint32 hash, uint32 index) {
-    CAT(Bucket_, HASH_TYPE) *iterator = &(map->array[index]);
+    uint32 capacity = map->capacity;
+    uint32 i = 0;
+    uint32 probe = index;
 
-    if (iterator->key == NULL) {
-        return false;
-    }
+    while (i < capacity) {
+        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-    if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
-        if (iterator->next) {
-            memmove(iterator, map->arena->begin + iterator->next,
-                    sizeof(*iterator));
-            map->collisions -= 1;
-        } else {
-            memset(iterator, 0, sizeof(*iterator));
+        if (iterator->status == 0) {
+            return false;
         }
-        map->length -= 1;
-        return true;
-    }
 
-    while (iterator->next) {
-        CAT(Bucket_, HASH_TYPE) *previous = iterator;
-        iterator = (void *)(map->arena->begin + iterator->next);
-
-        if ((hash == iterator->hash) && !strcmp(iterator->key, key)) {
-            previous->next = iterator->next;
+        if (iterator->status == 1 && iterator->hash == hash
+            && strcmp(iterator->key, key) == 0) {
+            iterator->status = 2;  // tombstone
             map->length -= 1;
-            map->collisions -= 1;
             return true;
         }
+
+        i += 1;
+        probe = (index + i*i) % capacity;
     }
 
     return false;
 }
-
 void
 CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
                                     char *name) {
@@ -374,26 +358,27 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
     CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map);
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
-        CAT(Bucket_, HASH_TYPE) *iterator = &(map->array[i]);
+        CAT(Bucket_, HASH_TYPE) *it = &map->array[i];
 
-        if (iterator->key || verbose) {
-            printf("\n%03u:", i);
+        if (!verbose && it->status != 1) {
+            continue;
         }
 
-        while (iterator->key) {
-            printf("'%s'", iterator->key);
+        printf("\n%03u: ", i);
+
+        if (it->status == 0) {
+            printf("[empty]");
+        } else if (it->status == 2) {
+            printf("[deleted]");
+        } else {  // status == 1
+            printf("'%s'", it->key);
 #if defined(HASH_VALUE_TYPE)
-            printf("=%u ->", iterator->value);
+            printf("=%u", it->value);
 #endif
-            if (iterator->next) {
-                iterator = (void *)(map->arena->begin + iterator->next);
-            } else {
-                break;
-            }
         }
     }
+
     printf("\n");
-    return;
 }
 #undef HASH_VALUE_TYPE
 #undef HASH_PADDING_TYPE
