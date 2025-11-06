@@ -145,8 +145,8 @@ static struct CAT(Hash_, HASH_TYPE)
         capacity *= 2;
         power += 1;
     }
-    capacity *= 2;
-    power += 1;
+    /* capacity *= 2; */
+    /* power += 1; */
 
     size = sizeof(*map) + capacity*sizeof(*(&map->array[0]));
 
@@ -154,6 +154,7 @@ static struct CAT(Hash_, HASH_TYPE)
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
+    error("setting collisions to zero\n");
     map->collisions = 0;
     return map;
 }
@@ -177,15 +178,21 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     uint32 probe = index;
     int32_t first_tombstone = -1;
 
+    error("maplen: %u, insertint %s @ %u\n", map->length, key, index);
+
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
+        error("Trying i = %u\n", i);
 
         switch ((int64)iterator->key) {
         case SLOT_FREE: {
             CAT(Bucket_, HASH_TYPE) *target;
+            error("Found free slot!\n");
             if (first_tombstone >= 0) {
+                error("first_tombstone >= 0\n");
                 target = &map->array[first_tombstone];
             } else {
+                error("first_tombstone < 0\n");
                 target = iterator;
             }
 
@@ -198,12 +205,15 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
             return true;
         }
         case SLOT_DELETED:
+            error("FOUND SLOT_DELETED\n");
             if (first_tombstone < 0) {
                 first_tombstone = (int32_t)probe;
             }
             break;
         default:
+            error("USED SLOTTTTTTTTT\n");
             if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
+                error("Repeated key...\n");
                 return false;
             }
             break;
@@ -211,12 +221,13 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 
         if (i == 0) {
             map->collisions += 1;
+            error("i==%u, collisions = %u/%u\n", i, map->collisions, map->capacity);
         }
         i += 1;
-        probe = (index + i*i) % capacity;
+        probe = (hash + (i + i*i)/2) % capacity;
     }
+    error("Table is full i = %d\n", i);
 
-    /* table full: if we found a tombstone, reuse iterator now */
     if (first_tombstone >= 0) {
         CAT(Bucket_, HASH_TYPE) *target = &map->array[first_tombstone];
         target->key = key;
@@ -227,6 +238,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         map->length += 1;
         return true;
     }
+    error("no first tombstone\n");
 
     return false;
 }
@@ -275,7 +287,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + i*i) % capacity;
+        probe = (hash + (i + i*i)/2) % capacity;
     }
 
     return NULL;
@@ -315,7 +327,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (index + i*i) % capacity;
+        probe = (hash + (i + i*i)/2) % capacity;
     }
 
     return false;
@@ -447,7 +459,7 @@ hash_expected_collisions(void *map) {
 #include <assert.h>
 #include "arena.c"
 
-#define NSTRINGS 100000
+#define NSTRINGS 10000
 #define NBYTES 2*ALIGNMENT
 
 typedef struct String {
@@ -501,8 +513,7 @@ main(void) {
     HashMap *original_map;
     Arena *arena;
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 0};
-    String str2 = {.s = "bbbbbbbbbbbbbbbb", .value = 1};
-    String str3 = {.s = "cccccccccccccccc", .value = 2};
+    String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 1};
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     original_map = hash_create_map(NSTRINGS);
@@ -513,7 +524,6 @@ main(void) {
 
     str1.length = (uint32)strlen64(str1.s);
     str2.length = (uint32)strlen64(str2.s);
-    str3.length = (uint32)strlen64(str3.s);
 
     assert(hash_insert_map(original_map, str1.s, str1.length, str1.value));
     assert(!hash_insert_map(original_map, str1.s, str1.length, 1));
@@ -530,6 +540,7 @@ main(void) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     for (int i = 0; i < NSTRINGS; i += 1) {
+        error("i=%d, strings[i]=%s\n", i, strings[i].s);
         assert(hash_insert_map(original_map, strings[i].s, strings[i].length,
                                strings[i].value));
     }
@@ -539,7 +550,7 @@ main(void) {
     assert(hash_remove_map(original_map, strings[0].s, strings[0].length));
     assert(hash_ndeleted_map(original_map) == 1);
 
-    if (NSTRINGS < 10) {
+    if (NSTRINGS <= 100) {
         hash_print_map(original_map, true);
     } else {
         HASH_PRINT_SUMMARY_map(original_map);
