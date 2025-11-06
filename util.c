@@ -216,8 +216,6 @@ static int64 util_page_size = 0;
 
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
-static void util_die_notify(char *, const char *, ...)
-    __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
@@ -798,7 +796,7 @@ util_string_int32(int32 *number, const char *string) {
     }
 }
 
-void
+static void __attribute__((noreturn))
 util_die_notify(char *program_name, const char *format, ...) {
     int32 n;
     va_list args;
