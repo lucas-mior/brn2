@@ -253,6 +253,12 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
     return memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
 }
 
+INLINE void * \
+memchr64(void *pointer, int32 value, int64 size) {
+    assert(size >= 0);
+    return memchr(pointer, value, (size_t)size);
+}
+
 #if OS_WINDOWS
 static void *
 memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
@@ -274,7 +280,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     while (h < limit) {
         uchar *p;
 
-        if ((p = memchr(h, n[0], (size_t)(limit - h))) == NULL) {
+        if ((p = memchr64(h, n[0], (size_t)(limit - h))) == NULL) {
             return NULL;
         }
 
@@ -317,9 +323,9 @@ basename2(char *path) {
     while (left > 0) {
         int64 length;
 
-        fslash = memchr(p, '/', (usize)left);
+        fslash = memchr64(p, '/', left);
         if (OS_WINDOWS) {
-            bslash = memchr(p, '\\', (usize)left);
+            bslash = memchr64(p, '\\', left);
         }
 
         if ((fslash == NULL) && (bslash == NULL)) {
