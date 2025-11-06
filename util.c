@@ -290,13 +290,16 @@ memset64(void *buffer, int value, int64 size) {
 
 INLINE void *
 memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
+    void *result;
     if (hay_len <= 0) {
         return NULL;
     }
     if (needle_len <= 0) {
         return NULL;
     }
-    return memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
+
+    result = memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
+    return result;
 }
 
 INLINE void *
@@ -313,11 +316,13 @@ strlen64(char *string) {
 
 INLINE int
 memcmp64(void *left, void *right, int64 size) {
+    int result;
     if (size == 0) {
         return 0;
     }
     assert((uint64)size <= SIZE_MAX);
-    return memcmp(left, right, (size_t)size);
+    result = memcmp(left, right, (size_t)size);
+    return result;
 }
 
 #define X64(func, TYPE_MAX, TYPE) \
