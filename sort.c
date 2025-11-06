@@ -132,7 +132,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
     }
 
     for (uint32 k = 0; k < p; k += 1) {
-        heap[k].value = xmalloc((int64)size);
+        heap[k].value = xmalloc(size);
         memcpy64(heap[k].value, &array2[off_sets[k]*size], size);
         heap[k].p_index = k;
     }

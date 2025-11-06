@@ -455,7 +455,7 @@ random_string(Arena *arena, uint32 nbytes) {
     string.s = arena_push(arena, size);
 
     for (uint32 i = 0; i < length; i += 1) {
-        uint32 c = (uint32)rand() % ((int)sizeof(characters) - 1);
+        uint32 c = (uint32)rand() % (sizeof(characters) - 1);
         string.s[i] = characters[c];
     }
     string.s[length] = '\0';
