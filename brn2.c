@@ -356,6 +356,9 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
             name_length = (uint16)(pointer - begin);
             size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
+            if ((length % (nfiles / nthreads)) == 0) {
+                size = BRN2_ALIGN(size, 64);
+            }
             *file_pointer = xarena_push(list->arena, ALIGN(size));
 
             file = *file_pointer;

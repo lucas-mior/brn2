@@ -208,7 +208,17 @@ main(int argc, char **argv) {
     }
 #endif
 
+#if BRN2_BENCHMARK
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+#endif
+
     brn2_normalize_names(old, NULL);
+
+#if BRN2_BENCHMARK
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    brn2_timings("normalization", t0, t1, old->length);
+#endif
+    exit(EXIT_SUCCESS);
 
     for (uint32_t i = 0; i < old->length;) {
         uint32 start;
