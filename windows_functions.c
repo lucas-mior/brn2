@@ -69,7 +69,7 @@ scandir(const char *dir, struct dirent ***namelist,
             fatal(EXIT_FAILURE);
         }
 
-        memcpy(ent->d_name, find_data.cFileName, (size_t)length + 1);
+        memcpy64(ent->d_name, find_data.cFileName, length + 1);
 
         if (count >= capacity) {
             capacity *= 2;
