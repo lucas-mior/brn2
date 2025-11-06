@@ -126,7 +126,7 @@ static void arena_free(Arena *);
 static Arena *arena_with_space(Arena *, int64);
 static void *arena_push(Arena *, int64);
 static uint32 arena_push_index32(Arena *, uint32);
-static int32 arena_pop(Arena *, void *);
+static int64 arena_pop(Arena *, void *);
 static void *arena_reset(Arena *);
 
 static size_t arena_page_size = 0;
@@ -323,7 +323,7 @@ arena_of(Arena *arena, void *p) {
     return NULL;
 }
 
-int32
+int64
 arena_pop(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
         return -1;
