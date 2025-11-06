@@ -2,6 +2,7 @@ targets='
 test
 build
 debug
+debug2
 # install
 # uninstall
 benchmark

@@ -139,11 +139,9 @@ arena_create(int64 size) {
     if (size < 0) {
         return NULL;
     }
-    error("Arena requested size: %lld\n", (llong)size);
     if ((p = arena_allocate(&size)) == NULL) {
         return NULL;
     }
-    error("Arena allocated size: %lld\n", (llong)size);
 
     arena = p;
     arena->name = "arena";
