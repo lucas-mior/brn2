@@ -154,7 +154,6 @@ static struct CAT(Hash_, HASH_TYPE)
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
-    error("setting collisions to zero\n");
     map->collisions = 0;
     return map;
 }
@@ -178,21 +177,15 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     uint32 probe = index;
     int32_t first_tombstone = -1;
 
-    error("maplen: %u, insertint %s @ %u\n", map->length, key, index);
-
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
-        error("Trying i = %u\n", i);
 
         switch ((int64)iterator->key) {
         case SLOT_FREE: {
             CAT(Bucket_, HASH_TYPE) *target;
-            error("Found free slot!\n");
             if (first_tombstone >= 0) {
-                error("first_tombstone >= 0\n");
                 target = &map->array[first_tombstone];
             } else {
-                error("first_tombstone < 0\n");
                 target = iterator;
             }
 
@@ -205,15 +198,12 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
             return true;
         }
         case SLOT_DELETED:
-            error("FOUND SLOT_DELETED\n");
             if (first_tombstone < 0) {
                 first_tombstone = (int32_t)probe;
             }
             break;
         default:
-            error("USED SLOTTTTTTTTT\n");
             if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
-                error("Repeated key...\n");
                 return false;
             }
             break;
@@ -221,12 +211,10 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 
         if (i == 0) {
             map->collisions += 1;
-            error("i==%u, collisions = %u/%u\n", i, map->collisions, map->capacity);
         }
         i += 1;
         probe = (hash + (i + i*i)/2) % capacity;
     }
-    error("Table is full i = %d\n", i);
 
     if (first_tombstone >= 0) {
         CAT(Bucket_, HASH_TYPE) *target = &map->array[first_tombstone];
@@ -238,7 +226,6 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         map->length += 1;
         return true;
     }
-    error("no first tombstone\n");
 
     return false;
 }
@@ -540,7 +527,6 @@ main(void) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     for (int i = 0; i < NSTRINGS; i += 1) {
-        error("i=%d, strings[i]=%s\n", i, strings[i].s);
         assert(hash_insert_map(original_map, strings[i].s, strings[i].length,
                                strings[i].value));
     }
