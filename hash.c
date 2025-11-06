@@ -154,6 +154,7 @@ static struct CAT(Hash_, HASH_TYPE)
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
+    map->collisions = 0;
     return map;
 }
 
@@ -194,17 +195,14 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
             return true;
         }
         case SLOT_DELETED:
-            /* remember first tombstone but keep scanning for duplicate */
             if (first_tombstone < 0) {
                 first_tombstone = (int32_t)probe;
             }
             break;
         default:
-            /* check duplicate only on truly occupied slots */
             if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
-                return false; /* already present */
+                return false;
             }
-            /* real collision: occupied by different key */
             map->collisions += 1;
         }
 
@@ -443,7 +441,7 @@ hash_expected_collisions(void *map) {
 #include <assert.h>
 #include "arena.c"
 
-#define NSTRINGS 8
+#define NSTRINGS 100000
 #define NBYTES 2*ALIGNMENT
 
 typedef struct String {
