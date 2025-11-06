@@ -44,13 +44,11 @@
 
 #if TESTING_hash
 #define HASH_VALUE_TYPE uint32
-#define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
 #endif
 
 #define SLOT_FREE   0
-#define SLOT_USED   1
-#define SLOT_DELETED 2
+#define SLOT_DELETED -1
 
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -127,7 +125,6 @@ typedef struct CAT(Bucket_, HASH_TYPE) {
 #if defined(HASH_PADDING_TYPE)
     HASH_PADDING_TYPE padding;
 #endif
-    uint32 status;  // 0 empty, 1 used, 2 deleted (optional)
 } CAT(Bucket_, HASH_TYPE);
 
 struct CAT(Hash_, HASH_TYPE) {
@@ -250,9 +247,8 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-        if (iterator->status == SLOT_FREE) {
-            /* empty slot: place into earlier tombstone if found,
-               otherwise place here. */
+        switch ((int64)iterator->key) {
+        case SLOT_FREE: {
             CAT(Bucket_, HASH_TYPE) *target = (first_tombstone >= 0)
                                                   ? &map->array[first_tombstone]
                                                   : iterator;
@@ -262,17 +258,16 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 #if defined(HASH_VALUE_TYPE)
             target->value = value;
 #endif
-            target->status = SLOT_USED;
             map->length += 1;
             return true;
         }
-
-        if (iterator->status == SLOT_DELETED) {
+        case SLOT_DELETED:
             /* remember first tombstone but keep scanning for duplicate */
             if (first_tombstone < 0) {
                 first_tombstone = (int32_t)probe;
             }
-        } else { /* SLOT_USED */
+            break;
+        default:
             /* check duplicate only on truly occupied slots */
             if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
                 return false; /* already present */
@@ -293,7 +288,6 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 #if defined(HASH_VALUE_TYPE)
         target->value = value;
 #endif
-        target->status = SLOT_USED;
         map->length += 1;
         return true;
     }
@@ -319,17 +313,19 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-        if (iterator->status == SLOT_FREE) {
+        switch ((int64)iterator->key) {
+        case SLOT_FREE:
             return NULL;
-        }
-
-        if (iterator->status == SLOT_USED && iterator->hash == hash
-            && strcmp(iterator->key, key) == 0) {
+        case SLOT_DELETED:
+            break;
+        default:
+            if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
 #if defined(HASH_VALUE_TYPE)
-            return &(iterator->value);
+                return &(iterator->value);
 #else
-            return NULL;
+                return NULL;
 #endif
+            }
         }
 
         i += 1;
@@ -357,16 +353,19 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     while (i < capacity) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
 
-        if (iterator->status == SLOT_FREE) {
-            return false; /* not found */
-        }
-
-        if (iterator->status == SLOT_USED && iterator->hash == hash
-            && strcmp(iterator->key, key) == 0) {
-            /* mark tombstone, keep key/hash as-is (optional) */
-            iterator->status = SLOT_DELETED;
-            map->length -= 1;
-            return true;
+        switch ((int64)iterator->key) {
+        case SLOT_FREE:
+            return false;
+        case SLOT_DELETED:
+            break;
+        default:
+            if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
+                /* mark tombstone, keep key/hash as-is (optional) */
+                iterator->key = (char *)SLOT_DELETED;
+                map->length -= 1;
+                return true;
+            }
+            break;
         }
 
         i += 1;
@@ -394,17 +393,25 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
     for (uint32 i = 0; i < map->capacity; i += 1) {
         CAT(Bucket_, HASH_TYPE) *iterator = &map->array[i];
 
-        if (!verbose && iterator->status != 1) {
-            continue;
+        if (!verbose) {
+            if (iterator->key == (char *)SLOT_FREE) {
+                continue;
+            }
+            if (iterator->key == (char *)SLOT_DELETED) {
+                continue;
+            }
         }
 
         printf("\n%03u: ", i);
 
-        if (iterator->status == 0) {
+        switch ((int64)iterator->key) {
+        case SLOT_FREE:
             printf("[empty]");
-        } else if (iterator->status == 2) {
+            break;
+        case SLOT_DELETED:
             printf("[deleted]");
-        } else {  // status == 1
+            break;
+        default:
             printf("'%s'", iterator->key);
 #if defined(HASH_VALUE_TYPE)
             printf("=%u", iterator->value);
