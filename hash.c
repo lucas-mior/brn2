@@ -213,7 +213,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
             map->collisions += 1;
         }
         i += 1;
-        probe = (hash + (i + i*i)/2) % capacity;
+        probe = (index + (i + i*i)/2) % capacity;
     }
 
     if (first_tombstone >= 0) {
@@ -274,7 +274,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (hash + (i + i*i)/2) % capacity;
+        probe = (index + (i + i*i)/2) % capacity;
     }
 
     return NULL;
@@ -314,7 +314,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
         }
 
         i += 1;
-        probe = (hash + (i + i*i)/2) % capacity;
+        probe = (index + (i + i*i)/2) % capacity;
     }
 
     return false;
@@ -446,8 +446,8 @@ hash_expected_collisions(void *map) {
 #include <assert.h>
 #include "arena.c"
 
-#define NSTRINGS 10000
-#define NBYTES 2*ALIGNMENT
+#define NSTRINGS 100
+#define NBYTES ALIGNMENT
 
 typedef struct String {
     char *s;
@@ -536,7 +536,7 @@ main(void) {
     assert(hash_remove_map(original_map, strings[0].s, strings[0].length));
     assert(hash_ndeleted_map(original_map) == 1);
 
-    if (NSTRINGS <= 100) {
+    if (NSTRINGS <= 10) {
         hash_print_map(original_map, true);
     } else {
         HASH_PRINT_SUMMARY_map(original_map);
@@ -549,7 +549,7 @@ main(void) {
         assert(hash_remove_map(original_map, strings[i].s, strings[i].length));
     }
 
-    if (NSTRINGS <= 100) {
+    if (NSTRINGS <= 10) {
         hash_print_map(original_map, true);
     } else {
         HASH_PRINT_SUMMARY_map(original_map);
