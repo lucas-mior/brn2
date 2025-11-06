@@ -549,6 +549,12 @@ main(void) {
         assert(hash_remove_map(original_map, strings[i].s, strings[i].length));
     }
 
+    if (NSTRINGS <= 100) {
+        hash_print_map(original_map, true);
+    } else {
+        HASH_PRINT_SUMMARY_map(original_map);
+    }
+
     free(strings);
 
     exit(EXIT_SUCCESS);
