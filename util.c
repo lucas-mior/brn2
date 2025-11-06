@@ -216,7 +216,6 @@ static int64 util_page_size = 0;
 
 static void error(char *, ...);
 static void fatal(int) __attribute__((noreturn));
-static int32 util_string_int32(int32 *, const char *);
 static int util_command(const int, char **);
 static void util_die_notify(char *, const char *, ...)
     __attribute__((noreturn));
@@ -784,7 +783,7 @@ util_segv_handler(int32 unused) {
     _exit(EXIT_FAILURE);
 }
 
-int32
+static int32
 util_string_int32(int32 *number, const char *string) {
     char *endptr;
     long x;
