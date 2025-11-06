@@ -675,29 +675,13 @@ string_from_strings(char *buffer, int32 size, char *sep, char **array,
 
     for (int32 i = 0; i < (array_length - 1); i += 1) {
         int32 space = size - n;
-        int32 m = snprintf(buffer + n, (size_t)space, "%s%s", array[i], sep);
-        if (m <= 0) {
-            error("Error in snprintf().\n");
-            fatal(EXIT_FAILURE);
-        }
-        if (m >= space) {
-            error("Error printing array, not enough space.\n");
-            fatal(EXIT_FAILURE);
-        }
+        int32 m = snprintf2(buffer + n, space, "%s%s", array[i], sep);
         n += m;
     }
     {
         int32 i = array_length - 1;
         int32 space = size - n;
-        int32 m = snprintf(buffer + n, (size_t)space, "%s", array[i]);
-        if (m <= 0) {
-            error("Error in snprintf().\n");
-            fatal(EXIT_FAILURE);
-        }
-        if (m >= space) {
-            error("Error printing array, not enough space.\n");
-            fatal(EXIT_FAILURE);
-        }
+        snprintf2(buffer + n, space, "%s", array[i]);
     }
     return;
 }
