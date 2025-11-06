@@ -129,7 +129,7 @@ static void
 CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     map->collisions = 0;
     map->length = 0;
-    memset(map->array, 0, map->capacity*sizeof(*(&map->array[0])));
+    memset64(map->array, 0, map->capacity*sizeof(*(&map->array[0])));
     return;
 }
 
@@ -498,9 +498,9 @@ main(void) {
     assert(original_map);
     assert(hash_capacity(original_map) >= NSTRINGS);
 
-    str1.length = (uint32)strlen(str1.s);
-    str2.length = (uint32)strlen(str2.s);
-    str3.length = (uint32)strlen(str3.s);
+    str1.length = (uint32)strlen64(str1.s);
+    str2.length = (uint32)strlen64(str2.s);
+    str3.length = (uint32)strlen64(str3.s);
 
     assert(hash_insert_map(original_map, str1.s, str1.length, str1.value));
     assert(!hash_insert_map(original_map, str1.s, str1.length, 1));

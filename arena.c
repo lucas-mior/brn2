@@ -378,7 +378,7 @@ main(void) {
             assert((objs[i] = arena_push(arena, size)));
 
             total_size += size;
-            memset(objs[i], 0xCD, (size_t)size);
+            memset64(objs[i], 0xCD, (size_t)size);
 
             if (total_size < arena_data_size(arena)) {
                 assert((char *)objs[i] >= arena->begin);

@@ -290,7 +290,7 @@ main(int argc, char **argv) {
             bool contains_newline;
             int64 buffered;
 
-            while ((contains_newline = memchr(file->name, '\n', file->length))
+            while ((contains_newline = memchr64(file->name, '\n', file->length))
                    || !hash_insert_pre_calc_map(oldlist_map, file->name,
                                                 file->hash, *index, i)) {
                 if (contains_newline) {
