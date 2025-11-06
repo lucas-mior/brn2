@@ -139,11 +139,14 @@ arena_create(int64 size) {
     if (size < 0) {
         return NULL;
     }
+    error("Arena requested size: %lld\n", (llong)size);
     if ((p = arena_allocate(&size)) == NULL) {
         return NULL;
     }
+    error("Arena allocated size: %lld\n", (llong)size);
 
     arena = p;
+    arena->name = "arena";
     arena->begin = (char *)arena + ALIGN(sizeof(*arena));
     arena->size = size;
     arena->pos = arena->begin;
@@ -192,7 +195,7 @@ void
 arena_free(Arena *arena) {
     if (munmap(arena, (size_t)arena->size) < 0) {
         fprintf(stderr, "Error in munmap(%p, %lld): %s.\n", (void *)arena,
-                (long long)arena->size, strerror(errno));
+                (llong)arena->size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return;
@@ -364,7 +367,6 @@ main(void) {
 
     assert((arena = arena_create(SIZEMB(3))));
     assert(arena->pos == arena->begin);
-    error("arena->size:%lld\n", (long long)arena->size);
     arena_size = (uint32)arena_data_size(arena);
 
     srand((uint32)time(NULL));
