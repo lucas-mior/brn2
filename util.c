@@ -223,7 +223,6 @@ static uint32 util_nthreads(void);
 static void util_die_notify(char *, const char *, ...)
     __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
-static void send_signal(const char *, const int);
 static char *itoa2(long, char *);
 static long atoi2(char *);
 static int64 util_page_size = 0;
@@ -547,7 +546,7 @@ util_command(const int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    if (memmem(argv[0], (size_t)len + 1, exe, (size_t)exe_len + 1) == NULL) {
+    if (memmem64(argv[0], (size_t)len + 1, exe, (size_t)exe_len + 1) == NULL) {
         argv0_windows = xmalloc(len + exe_len + 1);
         memcpy64(argv0_windows, argv[0], (size_t)len);
         memcpy64(argv0_windows + len, exe, (size_t)exe_len + 1);
@@ -855,8 +854,8 @@ util_copy_file_async(const char *destination, const char *source,
 
 #if OS_LINUX
 #include <dirent.h>
-void
-send_signal(const char *executable, const int32 signal_number) {
+static void
+send_signal(char *executable, const int32 signal_number) {
     DIR *processes;
     struct dirent *process;
     int64 len = (int64)strlen(executable);
@@ -892,7 +891,7 @@ send_signal(const char *executable, const int32 signal_number) {
             close(cmdline);
             continue;
         }
-        if (memmem(command, (size_t)r, executable, (size_t)len)) {
+        if (memmem64(command, r, executable, len)) {
             if (kill(pid, signal_number) < 0) {
                 error("Error sending signal %d to program %s (pid %d): %s.\n",
                       signal_number, executable, pid, strerror(errno));
@@ -911,8 +910,8 @@ send_signal(const char *executable, const int32 signal_number) {
     return;
 }
 #elif OS_UNIX
-void
-send_signal(const char *executable, const int32 signal_number) {
+static void
+send_signal(char *executable, int32 signal_number) {
     char signal_string[14];
     SNPRINTF(signal_string, "%d", signal_number);
 
@@ -931,7 +930,7 @@ send_signal(const char *executable, const int32 signal_number) {
 }
 #else
 void
-send_signal(const char *executable, const int32 signal_number) {
+send_signal(char *executable, int32 signal_number) {
     (void)executable;
     (void)signal_number;
     return;
