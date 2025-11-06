@@ -184,19 +184,23 @@ typedef uint64_t uint64;
 #endif
 
 // clang-format off
-#define UTIL_ALIGN_UINT(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
+#define UTIL_ALIGN_UINT(S, A) (int64)(((S) + ((A) - 1)) & ~((A) - 1))
 #define COMPILE_STOP "aaaaa"
 
+#if __STDC__== 1 && __STDC_VERSION__ >= 201112L
 #define UTIL_ALIGN(S, A) \
 _Generic((S), \
-    unsigned long long: (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    unsigned long:      (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    unsigned int:       (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    long long:          (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    long:               (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    int:                (int64) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    unsigned long long: UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    unsigned long:      UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    unsigned int:       UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    long long:          UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    long:               UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
+    int:                UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
     default:            COMPILE_STOP \
 )
+#else
+#define UTIL_ALIGN(S, A) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A)
+#endif
 
 
 #if !defined(ALIGNMENT)
@@ -209,7 +213,6 @@ _Generic((S), \
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static void *util_memdup(void *, int64);
 static char *xstrdup(char *);
 static int32 snprintf2(char *, int, char *, ...);
 static void error(char *, ...);
@@ -268,7 +271,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
   INLINE void \
       CAT(func, 64)(void *dest, void *source, int64 size) { \
       assert(size > 0); \
-      assert((uint64)size < SIZE_MAX); \
+      assert((uint64)size <= SIZE_MAX); \
       func(dest, source, (size_t)size); \
       return; \
   }
@@ -276,6 +279,14 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 X64(memcpy)
 X64(memmove)
 #undef X64
+
+INLINE void
+memset64(void *buffer, int value, int64 size) {
+    assert(size >= 0);
+    assert((uint64)size <= SIZE_MAX);
+    memset(buffer, value, (size_t)size);
+    return;
+}
 
 INLINE void *
 memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
@@ -300,12 +311,21 @@ strlen64(char *string) {
     return (int64)len;
 }
 
+INLINE int
+memcmp64(void *left, void *right, int64 size) {
+    if (size == 0) {
+        return 0;
+    }
+    assert((uint64)size <= SIZE_MAX);
+    return memcmp(left, right, (size_t)size);
+}
+
 #define X64(func) \
     INLINE int64 \
 CAT(func, 64)(int fd, char *buffer, int64 size) { \
     ssize_t w; \
     assert(size >= 0); \
-    assert((uint64)size < SIZE_MAX); \
+    assert((uint64)size <= SIZE_MAX); \
     w = func(fd, buffer, (size_t)size); \
     return (int64)w; \
 }
@@ -319,7 +339,7 @@ X64(read)
 static uint32
 util_nthreads(void) {
     SYSTEM_INFO sysinfo;
-    memset(&sysinfo, 0, sizeof(sysinfo));
+    memset64(&sysinfo, 0, SIZEOF(sysinfo));
     GetSystemInfo(&sysinfo);
     return sysinfo.dwNumberOfProcessors;
 }
@@ -450,7 +470,7 @@ xmalloc(int64 size) {
         error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
-    assert((uint64)size < SIZE_MAX);
+    assert((uint64)size <= SIZE_MAX);
 
     if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %lld bytes.\n", (llong)size);
@@ -468,7 +488,7 @@ xrealloc(void *old, const int64 size) {
         error("Error in xmalloc: invalid size = %lld.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
-    assert((uint64)size < SIZE_MAX);
+    assert((uint64)size <= SIZE_MAX);
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
         error("Failed to reallocate %zu bytes from %x.\n", size, old_save);
@@ -791,7 +811,7 @@ util_die_notify(char *program_name, const char *format, ...) {
     fatal(EXIT_FAILURE);
 }
 
-void *
+static void *
 util_memdup(void *source, int64 size) {
     void *p = xmalloc(size);
     memcpy64(p, source, size);
@@ -1045,9 +1065,9 @@ main(void) {
     PRINT_VAR(var_uint64);
 #endif
 
-    memset(p1, 0, SIZEMB(1));
+    memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
-    memset(p2, 0, SIZEMB(1));
+    memset64(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
     assert(!strcmp(string, p3));
