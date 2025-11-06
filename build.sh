@@ -167,9 +167,9 @@ case "$target" in
             exit 1
         fi
         trace_off
-        if [ $src = "hash.c" ]; then
-            exit
-        fi
+        # if [ $src = "hash.c" ]; then
+        #     exit
+        # fi
     done
     exit
     ;;

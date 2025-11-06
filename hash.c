@@ -33,7 +33,6 @@
 #include <time.h>
 
 #include "rapidhash.h"
-#include "arena.c"
 #include "util.c"
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
@@ -90,16 +89,6 @@ typedef size_t usize;
 typedef ssize_t isize;
 #endif
 
-static uint32
-xarena_push_index32(Arena *arena, uint32 size) {
-    uint32 index;
-    if ((index = arena_push_index32(arena, size)) == UINT32_MAX) {
-        error("Error in arena_push_index32.\n");
-        fatal(EXIT_FAILURE);
-    }
-    return index;
-}
-
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
@@ -128,7 +117,6 @@ typedef struct CAT(Bucket_, HASH_TYPE) {
 } CAT(Bucket_, HASH_TYPE);
 
 struct CAT(Hash_, HASH_TYPE) {
-    Arena *arena;
     int64 size;
     uint32 capacity;
     uint32 bitmask;
@@ -173,7 +161,6 @@ void
 CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
     map->collisions = 0;
     map->length = 0;
-    arena_reset(map->arena);
     memset(map->array, 0, map->capacity*sizeof(*(&map->array[0])));
     return;
 }
@@ -198,8 +185,6 @@ struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32 length) {
     size = sizeof(*map) + capacity*sizeof(*(&map->array[0]));
 
     map = xmmap_commit(&size);
-    map->arena = arena_create(capacity*sizeof(*(&map->array[0])));
-    arena_push(map->arena, ALIGNMENT);
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
@@ -208,7 +193,6 @@ struct CAT(Hash_, HASH_TYPE)*CAT(hash_create_, HASH_TYPE)(uint32 length) {
 
 void
 CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
-    arena_destroy(map->arena);
     xmunmap(map, HASH_MAP_SIZE(map));
     return;
 }
@@ -478,6 +462,7 @@ hash_expected_collisions(void *map) {
 #endif
 
 #include <assert.h>
+#include "arena.c"
 
 #define NSTRINGS 8
 #define NBYTES 2*ALIGNMENT
