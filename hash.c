@@ -60,7 +60,6 @@ uint32 hash_function(char *key, uint32 key_length);
 uint32 hash_normal(void *map, uint32 hash);
 uint32 hash_capacity(void *map);
 uint32 hash_length(void *map);
-uint32 hash_collisions(void *map);
 uint32 hash_expected_collisions(void *map);
 
 typedef struct Hash_map HashMap;
@@ -117,14 +116,13 @@ struct CAT(Hash_, HASH_TYPE) {
     int64 size;
     uint32 capacity;
     uint32 bitmask;
-    uint32 collisions;
     uint32 length;
+    uint32 padding;
     CAT(Bucket_, HASH_TYPE) array[];
 };
 
 static void
 CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
-    map->collisions = 0;
     map->length = 0;
     memset64(map->array, 0, map->capacity*sizeof(*(&map->array[0])));
     return;
@@ -154,7 +152,6 @@ static struct CAT(Hash_, HASH_TYPE)
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
-    map->collisions = 0;
     return map;
 }
 
@@ -209,9 +206,6 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
             break;
         }
 
-        if (i == 0) {
-            map->collisions += 1;
-        }
         i += 1;
         probe = (index + (i + i*i)/2) % capacity;
     }
@@ -334,7 +328,6 @@ CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     printf("struct Hash%s %s {\n", QUOTE(HASH_TYPE), name);
     printf("  capacity: %u\n", map->capacity);
     printf("  length: %u\n", map->length);
-    printf("  collisions: %u\n", map->collisions);
     printf("  expected collisions: %u\n", hash_expected_collisions(map));
     printf("}\n");
     return;
@@ -418,12 +411,6 @@ uint32
 hash_length(void *map) {
     HashMap *map2 = map;
     return map2->length;
-}
-
-uint32
-hash_collisions(void *map) {
-    HashMap *map2 = map;
-    return map2->collisions;
 }
 
 uint32
