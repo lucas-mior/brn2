@@ -272,7 +272,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
   INLINE void \
       CAT(func, 64)(void *dest, void *source, int64 size) { \
       assert(size > 0); \
-      assert(size < SIZE_MAX); \
+      assert((uint64)size < SIZE_MAX); \
       func(dest, source, (size_t)size); \
       return; \
   }
