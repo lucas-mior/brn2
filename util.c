@@ -314,6 +314,14 @@ strlen64(char *string) {
     return (int64)len;
 }
 
+INLINE int64
+strnlen64(char *string, int64 size) {
+    size_t len;
+    assert((uint64)size <= SIZE_MAX);
+    len = strnlen(string, (size_t)size);
+    return (int64)len;
+}
+
 INLINE int
 memcmp64(void *left, void *right, int64 size) {
     int result;
