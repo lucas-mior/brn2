@@ -146,7 +146,7 @@ brn2_enqueue(Work *work) {
     return;
 }
 
-static void *
+static void *__attribute__((noreturn))
 brn2_threads_function(void *arg) {
     (void)arg;
 
