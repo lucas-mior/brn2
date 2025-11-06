@@ -542,7 +542,7 @@ snprintf2(char *buffer, int size, char *format, ...) {
         error("Error in snprintf.\n");
         fatal(EXIT_FAILURE);
     }
-    if (n >= (int)size) {
+    if (n >= size) {
         error("Error in snprintf: Buffer is too small.\n");
         fatal(EXIT_FAILURE);
     }
