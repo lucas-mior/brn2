@@ -118,7 +118,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         file = *file_pointer;
 
         file->length = (uint16)strlen(name);
-        memcpy(file->name, name, name_length + 1);
+        memcpy64(file->name, name, name_length + 1);
 
         length += 1;
     }
@@ -228,16 +228,16 @@ brn2_list_from_dir(FileList *list, char *directory) {
             file = *file_pointer;
 
             file->length = directory_length + 1 + name_length;
-            memcpy(file->name, directory, directory_length);
+            memcpy64(file->name, directory, directory_length);
             file->name[directory_length] = '/';
-            memcpy(file->name + directory_length + 1, name, name_length + 1);
+            memcpy64(file->name + directory_length + 1, name, name_length + 1);
         } else {
             size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
             *file_pointer = xarena_push(list->arena, ALIGN(size));
             file = *file_pointer;
 
             file->length = name_length;
-            memcpy(file->name, name, file->length + 1);
+            memcpy64(file->name, name, file->length + 1);
         }
 
         if (DEBUGGING) {
@@ -350,7 +350,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
             file = *file_pointer;
             file->length = name_length;
-            memcpy(file->name, begin, name_length + 1);
+            memcpy64(file->name, begin, name_length + 1);
 
             begin = pointer + 1;
             pointer += 1;
@@ -430,7 +430,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         file = *file_pointer;
 
         file->length = name_length;
-        memcpy(file->name, buffer, file->length + 1);
+        memcpy64(file->name, buffer, file->length + 1);
 
         length += 1;
         errno = 0;
