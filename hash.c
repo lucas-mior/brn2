@@ -435,7 +435,7 @@ hash_expected_collisions(void *map) {
 
 typedef struct String {
     char *s;
-    uint32 length;
+    uint32 len;
     uint32 value;
 } String;
 
@@ -444,18 +444,18 @@ random_string(Arena *arena, uint32 nbytes) {
     const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     String string;
     uint32 size;
-    uint32 length;
+    uint32 len;
 
-    length = nbytes + (uint32)rand() % 16u;
-    size = length + 1;
+    len = nbytes + (uint32)rand() % 16u;
+    size = len + 1;
     string.s = arena_push(arena, size);
 
-    for (uint32 i = 0; i < length; i += 1) {
+    for (uint32 i = 0; i < len; i += 1) {
         uint32 c = (uint32)rand() % (sizeof(characters) - 1);
         string.s[i] = characters[c];
     }
-    string.s[length] = '\0';
-    string.length = length;
+    string.s[len] = '\0';
+    string.len = len;
     string.value = (uint32)rand();
 
     return string;
@@ -481,27 +481,28 @@ int
 main(void) {
     struct timespec t0;
     struct timespec t1;
-    HashMap *original_map;
+    HashMap *map;
     Arena *arena;
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 0};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 1};
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
+    uint32 *stored;
 
-    original_map = hash_create_map(NSTRINGS);
+    map = hash_create_map(NSTRINGS);
     arena = arena_create(4096*NSTRINGS);
 
-    assert(original_map);
-    assert(hash_capacity(original_map) >= NSTRINGS);
+    assert(map);
+    assert(hash_capacity(map) >= NSTRINGS);
 
-    str1.length = (uint32)strlen64(str1.s);
-    str2.length = (uint32)strlen64(str2.s);
+    str1.len = (uint32)strlen64(str1.s);
+    str2.len = (uint32)strlen64(str2.s);
 
-    assert(hash_insert_map(original_map, str1.s, str1.length, str1.value));
-    assert(!hash_insert_map(original_map, str1.s, str1.length, 1));
-    assert(hash_insert_map(original_map, str2.s, str2.length, str2.value));
+    assert(hash_insert_map(map, str1.s, str1.len, str1.value));
+    assert(!hash_insert_map(map, str1.s, str1.len, 1));
+    assert(hash_insert_map(map, str2.s, str2.len, str2.value));
 
-    assert(hash_length(original_map) == 2);
-    hash_print_map(original_map, false);
+    assert(hash_length(map) == 2);
+    hash_print_map(map, false);
 
     srand(42);
 
@@ -511,34 +512,36 @@ main(void) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     for (int i = 0; i < NSTRINGS; i += 1) {
-        assert(hash_insert_map(original_map, strings[i].s, strings[i].length,
+        assert(hash_insert_map(map, strings[i].s, strings[i].len,
                                strings[i].value));
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     print_timings("insertion", t0, t1);
 
-    assert(hash_remove_map(original_map, strings[0].s, strings[0].length));
-    assert(hash_ndeleted_map(original_map) == 1);
+    stored = hash_lookup_map(map, strings[0].s, strings[0].len);
+    assert(*stored == strings[0].value);
+    assert(hash_remove_map(map, strings[0].s, strings[0].len));
+    assert(hash_ndeleted_map(map) == 1);
 
     if (NSTRINGS <= 10) {
-        hash_print_map(original_map, true);
+        hash_print_map(map, true);
     } else {
-        HASH_PRINT_SUMMARY_map(original_map);
+        HASH_PRINT_SUMMARY_map(map);
     }
 
-    assert(hash_insert_map(original_map, strings[0].s, strings[0].length,
+    assert(hash_insert_map(map, strings[0].s, strings[0].len,
                            strings[0].value));
-    assert(hash_ndeleted_map(original_map) == 0);
+    assert(hash_ndeleted_map(map) == 0);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
-        assert(hash_remove_map(original_map, strings[i].s, strings[i].length));
+        assert(hash_remove_map(map, strings[i].s, strings[i].len));
     }
-    assert(hash_ndeleted_map(original_map) == NSTRINGS);
+    assert(hash_ndeleted_map(map) == NSTRINGS);
 
     if (NSTRINGS <= 10) {
-        hash_print_map(original_map, true);
+        hash_print_map(map, true);
     } else {
-        HASH_PRINT_SUMMARY_map(original_map);
+        HASH_PRINT_SUMMARY_map(map);
     }
 
     free(strings);

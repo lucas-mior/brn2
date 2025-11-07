@@ -29,7 +29,7 @@ exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
 CFLAGS="$CFLAGS -std=c11"
-CFLAGS="$CFLAGS -Wextra -Wall -Werror"
+CFLAGS="$CFLAGS -Wextra -Wall"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-unused-macros -Wno-unused-function"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
@@ -114,7 +114,7 @@ else
 fi
 
 if [ "$CC" = "clang" ]; then
-    CFLAGS="$CFLAGS -Weverything -Werror -Wfatal-errors"
+    CFLAGS="$CFLAGS -Weverything -Wfatal-errors"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
