@@ -126,20 +126,22 @@ static char *program;
     printf("%s = %Lf \n", #variable, (long double)variable)
 
 #define PRINT_OTHER(FORMAT, variable) \
-    printf("%s = %s \n", #variable, variable)
+    printf("%s = " FORMAT " \n", #variable, variable)
 
 #define PRINT_VAR(variable)                             \
 _Generic((variable),                                    \
-    int8:        PRINT_SIGNED(variable),                \
-    int16:       PRINT_SIGNED(variable),                \
-    int32:       PRINT_SIGNED(variable),                \
-    int64:       PRINT_SIGNED(variable),                \
-    uint8:       PRINT_UNSIGNED(variable),              \
-    uint16:      PRINT_UNSIGNED(variable),              \
-    uint32:      PRINT_UNSIGNED(variable),              \
-    uint64:      PRINT_UNSIGNED(variable),              \
-    void *:      PRINT_OTHER("%p", variable),              \
-    default:     printf("%s = ?\n", #variable) \
+    char:    PRINT_OTHER("%c", variable),              \
+    bool:    PRINT_OTHER("%b", variable),              \
+    int8:    PRINT_SIGNED(variable),                \
+    int16:   PRINT_SIGNED(variable),                \
+    int32:   PRINT_SIGNED(variable),                \
+    int64:   PRINT_SIGNED(variable),                \
+    uint8:   PRINT_UNSIGNED(variable),              \
+    uint16:  PRINT_UNSIGNED(variable),              \
+    uint32:  PRINT_UNSIGNED(variable),              \
+    uint64:  PRINT_UNSIGNED(variable),              \
+    void *:  PRINT_OTHER("%p", variable),              \
+    default: printf("%s = ?\n", #variable) \
 )
 
 #endif
@@ -1111,6 +1113,8 @@ main(void) {
     PRINT_VAR(var_uint32);
     PRINT_VAR(var_uint64);
     PRINT_VAR(var_voidptr);
+    PRINT_VAR(var_bool);
+    PRINT_VAR(var_char);
 #endif
 
     memset64(p1, 0, SIZEMB(1));
