@@ -486,7 +486,6 @@ main(void) {
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 0};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 1};
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
-    uint32 *stored;
 
     map = hash_create_map(NSTRINGS);
     arena = arena_create(NBYTES*NSTRINGS);
@@ -518,8 +517,11 @@ main(void) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     print_timings("insertion", t0, t1);
 
-    stored = hash_lookup_map(map, strings[0].s, strings[0].len);
-    assert(*stored == strings[0].value);
+    for (uint32 i = 0; i < NSTRINGS; i += 1) {
+        uint32 *stored;
+        stored = hash_lookup_map(map, strings[i].s, strings[i].len);
+        assert(*stored == strings[i].value);
+    }
     assert(hash_remove_map(map, strings[0].s, strings[0].len));
     assert(hash_ndeleted_map(map) == 1);
 
