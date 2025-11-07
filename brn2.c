@@ -758,10 +758,10 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     char *oldname = old->files[i]->name;
     char *newname = new->files[i]->name;
 
-    uint32 newhash = new->files[i]->hash;
+    uint64 newhash = new->files[i]->hash;
     uint32 newindex = new->indexes[i];
 
-    uint32 oldhash = old->files[i]->hash;
+    uint64 oldhash = old->files[i]->hash;
     uint32 oldindex = old->indexes[i];
 
     if (newhash == oldhash) {

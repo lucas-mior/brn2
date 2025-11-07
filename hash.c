@@ -56,8 +56,8 @@
 #define ALIGNMENT 16
 #endif
 
-uint32 hash_function(char *key, uint32 key_length);
-uint32 hash_normal(void *map, uint32 hash);
+uint64 hash_function(char *key, uint32 key_length);
+uint32 hash_normal(void *map, uint64 hash);
 uint32 hash_capacity(void *map);
 uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
@@ -106,7 +106,7 @@ typedef uint64_t uint64;
 
 typedef struct Bucket {
     char *key;
-    uint32 hash;
+    uint64 hash;
 #if defined(HASH_VALUE_TYPE)
     HASH_VALUE_TYPE value;
 #endif
@@ -166,7 +166,7 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
 
 static bool
 CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
-                                      char *key, uint32 hash, uint32 base_index
+                                      char *key, uint64 hash, uint32 base_index
 #if defined(HASH_VALUE_TYPE)
                                       , HASH_VALUE_TYPE value
 #endif
@@ -233,7 +233,7 @@ CAT(hash_insert_, HASH_TYPE)(struct Map *map, char *key,
                              , HASH_VALUE_TYPE value
 #endif
 ) {
-    uint32 hash = hash_function(key, key_length);
+    uint64 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_insert_pre_calc_, HASH_TYPE)(map, key, hash, index
 #if defined(HASH_VALUE_TYPE)
@@ -244,7 +244,7 @@ CAT(hash_insert_, HASH_TYPE)(struct Map *map, char *key,
 
 static void *
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
-                                      char *key, uint32 hash, uint32 base_index) {
+                                      char *key, uint64 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
     uint32 probe = base_index;
@@ -276,14 +276,14 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
 
 static void *
 CAT(hash_lookup_, HASH_TYPE)(struct Map *map, char *key, uint32 key_length) {
-    uint32 hash = hash_function(key, key_length);
+    uint64 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_lookup_pre_calc_, HASH_TYPE)(map, key, hash, index);
 }
 
 static bool
 CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
-                                      char *key, uint32 hash, uint32 base_index) {
+                                      char *key, uint64 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
     uint32 probe = base_index;
@@ -315,7 +315,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
 
 static bool
 CAT(hash_remove_, HASH_TYPE)(struct Map *map, char *key, uint32 key_length) {
-    uint32 hash = hash_function(key, key_length);
+    uint64 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_remove_pre_calc_, HASH_TYPE)(map, key, hash, index);
 }
@@ -384,15 +384,15 @@ CAT(hash_ndeleted_, HASH_TYPE)(struct Map *map) {
 #if !defined(HASH_H2)
 #define HASH_H2
 
-uint32
+uint64
 hash_function(char *key, uint32 key_length) {
-    uint32 hash;
-    hash = (uint32)rapidhash(key, key_length);
-    return (uint32)hash;
+    uint64 hash;
+    hash = rapidhash(key, key_length);
+    return hash;
 }
 
 uint32
-hash_normal(void *map, uint32 hash) {
+hash_normal(void *map, uint64 hash) {
     HashMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
     return normal;
