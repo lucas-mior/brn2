@@ -671,7 +671,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 
 #if OS_UNIX && (BRN2_MAX_THREADS > 1)
 uint32
-brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
+brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
     static Work slices[BRN2_MAX_THREADS];
     uint32 range;
@@ -730,7 +730,6 @@ brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
     } else {
         length = new->length;
     }
-    error("length=%u\n", length);
 
     slices[0].start = 0;
     slices[0].end = length;
