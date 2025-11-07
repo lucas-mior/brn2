@@ -294,6 +294,7 @@ main(int argc, char **argv) {
         old->indexes_size = old->length*sizeof(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
         brn2_create_hashes(old, capacity_set);
+        brn2_full_check(old, NULL, NULL, "after creating hashes1");
 
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
@@ -351,6 +352,8 @@ main(int argc, char **argv) {
         atexit(delete_brn2_buffer);
     }
 
+    brn2_full_check(old, NULL, NULL, "after creating buffer");
+
     {
         char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
         char *args_shuf[]
@@ -404,6 +407,7 @@ main(int argc, char **argv) {
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
+            brn2_full_check(old, NULL, NULL, "first");
 #ifndef DEBUG2
             if (util_command(LENGTH(args_edit), args_edit) < 0) {
                 if (OS_WINDOWS) {
@@ -425,6 +429,8 @@ main(int argc, char **argv) {
 #endif
             brn2_list_from_file(new, brn2_buffer.name, false);
 
+            brn2_full_check(old, new, NULL, "after sed");
+
             if (old->length != new->length) {
                 error("You are renaming " RED "%u" RESET " file%.*s "
                       "but buffer contains " RED "%u" RESET " file name%.*s\n",
@@ -437,7 +443,11 @@ main(int argc, char **argv) {
                 continue;
             }
 
+            brn2_full_check(old, new, NULL, "before_normalization");
+
             brn2_normalize_names(old, new);
+
+            brn2_full_check(old, new, NULL, "after_normalization");
 
             if (newlist_set == NULL) {
                 newlist_set = hash_create_set(new->length);
@@ -450,17 +460,25 @@ main(int argc, char **argv) {
             }
 
             main_capacity = hash_capacity(newlist_set);
+            brn2_full_check(old, new, newlist_set, "before creating hashes");
+
             brn2_create_hashes(new, main_capacity);
 
-            if (!brn2_verify(new, old, newlist_set, new->indexes)) {
-                brn2_free_list(new);
-                printf("Fix your renames. Press control-c to cancel or press"
-                       " ENTER to open the file list editor again.\n");
-                fgetc(stdin);
-                continue;
-            } else {
-                break;
-            }
+            error("===============");
+            brn2_full_check(old, new, newlist_set, "after creating hashes");
+
+            /* if (!brn2_verify(new, old, newlist_set, new->indexes)) { */
+            /*     brn2_free_list(new); */
+            /*     printf("Fix your renames. Press control-c to cancel or press"
+             */
+            /*            " ENTER to open the file list editor again.\n"); */
+            /*     fgetc(stdin); */
+            /*     continue; */
+            /* } else { */
+            /*     break; */
+            /* } */
+            brn2_full_check(old, new, newlist_set, "after verification");
+            break;
         }
 #endif
     }
@@ -468,6 +486,8 @@ main(int argc, char **argv) {
     {
         uint32 number_changes = brn2_get_number_changes(old, new);
         uint32 number_renames = 0;
+
+        brn2_full_check(old, new, newlist_set, "after number changed");
 
         if (number_changes) {
             HashSet *names_renamed = hash_create_set(old->length);
@@ -478,9 +498,15 @@ main(int argc, char **argv) {
                 print = printf;
             }
 
+            brn2_full_check(old, new, newlist_set, "after create hash2");
+
             for (uint32 i = 0; i < old->length; i += 1) {
+                error("i=%u\n", i);
+                brn2_full_check(old, new, newlist_set, "before execute");
                 brn2_execute2(old, new, oldlist_map, names_renamed, i,
                               &number_renames);
+                brn2_full_check(old, new, newlist_set, "after execute");
+                error("i=%u", i);
             }
             if (DEBUGGING) {
                 hash_destroy_set(names_renamed);
