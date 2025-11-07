@@ -129,7 +129,7 @@ enum {
 };
 
 typedef struct FileName {
-    uint32 hash;
+    uint64 hash;
     uint16 length;
     uint8 type;
     uint8 unused;
