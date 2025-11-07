@@ -126,7 +126,6 @@ typedef struct Arena {
 } Arena;
 
 static void *arena_allocate(int64 *);
-static void arena_destroy(Arena *);
 static void arena_free(Arena *);
 static Arena *arena_with_space(Arena *, int64);
 static void *arena_push(Arena *, int64);
@@ -157,6 +156,18 @@ arena_create(int64 size) {
     arena->npushed = 0;
 
     return arena;
+}
+
+static void
+arena_destroy(Arena *arena) {
+    Arena *next;
+
+    do {
+        next = arena->next;
+        arena_free(arena);
+    } while ((arena = next));
+
+    return;
 }
 
 #if OS_UNIX
@@ -237,18 +248,6 @@ arena_free(Arena *arena) {
     return;
 }
 #endif
-
-void
-arena_destroy(Arena *arena) {
-    Arena *next;
-
-    do {
-        next = arena->next;
-        arena_free(arena);
-    } while ((arena = next));
-
-    return;
-}
 
 static int64
 arena_data_size(Arena *arena) {
