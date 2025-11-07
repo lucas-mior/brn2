@@ -102,6 +102,8 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
     list->files = xmalloc(argc*SIZEOF(*(list->files)));
 
+    assert(INT_MAX < UINT32_MAX);
+
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
         uint16 name_length = (uint16)strlen64(name);
