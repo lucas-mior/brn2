@@ -116,12 +116,6 @@ static char *program;
 #endif
 
 // clang-format off
-#define PRINT_SIGNED(variable) \
-    printf("%s = %lld \n", #variable, (long long)variable)
-
-#define PRINT_UNSIGNED(variable) \
-    printf("%s = %llu \n", #variable, (unsigned long long)variable)
-
 enum FloatTypes {
     FLOAT_FLOAT,
     FLOAT_DOUBLE,
@@ -150,6 +144,12 @@ print_float(char *name, char *variable, enum FloatTypes type) {
     }
     return;
 }
+
+#define PRINT_SIGNED(variable) \
+    printf("%s = %lld \n", #variable, (long long)variable)
+
+#define PRINT_UNSIGNED(variable) \
+    printf("%s = %llu \n", #variable, (unsigned long long)variable)
 
 #define PRINT_OTHER(FORMAT, variable) \
     printf("%s = " FORMAT " \n", #variable, variable)
