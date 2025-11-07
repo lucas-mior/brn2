@@ -146,22 +146,22 @@ print_float(char *name, char *variable, char *type) {
 
 #define PRINT_VAR(variable)                             \
 _Generic((variable),                                    \
-    char:    PRINT_OTHER("%c", variable),              \
-    bool:    PRINT_OTHER("%b", variable),              \
-    char *:  PRINT_OTHER("%s", variable),            \
-    int8:    PRINT_SIGNED(variable),                \
-    int16:   PRINT_SIGNED(variable),                \
-    int32:   PRINT_SIGNED(variable),                \
-    int64:   PRINT_SIGNED(variable),                \
-    uint8:   PRINT_UNSIGNED(variable),              \
-    uint16:  PRINT_UNSIGNED(variable),              \
-    uint32:  PRINT_UNSIGNED(variable),              \
-    uint64:  PRINT_UNSIGNED(variable),              \
-    void *:  PRINT_OTHER("%p", variable),              \
-    float:  print_float(#variable, (char *)&variable, "float"),   \
-    double: print_float(#variable, (char *)&variable, "double"),  \
+    char:        PRINT_OTHER("%c", variable),              \
+    bool:        PRINT_OTHER("%b", variable),              \
+    char *:      PRINT_OTHER("%s", variable),            \
+    int8:        PRINT_SIGNED(variable),                \
+    int16:       PRINT_SIGNED(variable),                \
+    int32:       PRINT_SIGNED(variable),                \
+    int64:       PRINT_SIGNED(variable),                \
+    uint8:       PRINT_UNSIGNED(variable),              \
+    uint16:      PRINT_UNSIGNED(variable),              \
+    uint32:      PRINT_UNSIGNED(variable),              \
+    uint64:      PRINT_UNSIGNED(variable),              \
+    void *:      PRINT_OTHER("%p", variable),              \
+    float:       print_float(#variable, (char *)&variable, "float"),   \
+    double:      print_float(#variable, (char *)&variable, "double"),  \
     long double: print_float(#variable, (char *)&variable, "long double"),  \
-    default: printf("%s = ?\n", #variable) \
+    default:     printf("%s = ?\n", #variable) \
 )
 
 #endif
