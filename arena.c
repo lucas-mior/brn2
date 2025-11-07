@@ -418,7 +418,7 @@ main(void) {
                 objs[j] = NULL;
                 nallocated -= 1;
             }
-            if (k < nallocated / 2) {
+            if ((k + 1) < (nallocated / 2)) {
                 assert(objs[j] = arena_push(arena, ALIGNMENT));
                 nallocated += 1;
             }
