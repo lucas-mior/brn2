@@ -101,7 +101,10 @@ typedef uint64_t uint64;
 #error HASH_TYPE is undefined
 #endif
 
-typedef struct CAT(Bucket_, HASH_TYPE) {
+#define Bucket CAT(Bucket_, HASH_TYPE)
+#define Map CAT(Hash_, HASH_TYPE) 
+
+typedef struct Bucket {
     char *key;
     uint32 hash;
 #if defined(HASH_VALUE_TYPE)
@@ -110,27 +113,27 @@ typedef struct CAT(Bucket_, HASH_TYPE) {
 #if defined(HASH_PADDING_TYPE)
     HASH_PADDING_TYPE padding;
 #endif
-} CAT(Bucket_, HASH_TYPE);
+} Bucket;
 
-struct CAT(Hash_, HASH_TYPE) {
+struct Map  {
     int64 size;
     uint32 capacity;
     uint32 bitmask;
     uint32 length;
     uint32 padding;
-    CAT(Bucket_, HASH_TYPE) array[];
+    Bucket array[];
 };
 
 static void
-CAT(hash_zero_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
+CAT(hash_zero_, HASH_TYPE)(struct Map *map) {
     map->length = 0;
     memset64(map->array, 0, map->capacity*sizeof(*(&map->array[0])));
     return;
 }
 
-static struct CAT(Hash_, HASH_TYPE)
+static struct Map 
 *CAT(hash_create_, HASH_TYPE)(uint32 length) {
-    struct CAT(Hash_, HASH_TYPE)*map;
+    struct Map *map;
     int64 size;
     uint32 capacity = 1;
     uint32 power = 0;
@@ -156,17 +159,16 @@ static struct CAT(Hash_, HASH_TYPE)
 }
 
 static void
-CAT(hash_destroy_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
+CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
     xmunmap(map, map->size);
     return;
 }
 
 static bool
-CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
+CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
                                       char *key, uint32 hash, uint32 base_index
 #if defined(HASH_VALUE_TYPE)
-                                      ,
-                                      HASH_VALUE_TYPE value
+                                      , HASH_VALUE_TYPE value
 #endif
 ) {
     uint32 capacity = map->capacity;
@@ -175,11 +177,11 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     int32_t first_tombstone = -1;
 
     while (i < capacity) {
-        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
+        Bucket *iterator = &map->array[probe];
 
         switch ((int64)iterator->key) {
         case SLOT_FREE: {
-            CAT(Bucket_, HASH_TYPE) *target;
+            Bucket *target;
             if (first_tombstone >= 0) {
                 target = &map->array[first_tombstone];
             } else {
@@ -211,7 +213,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
     }
 
     if (first_tombstone >= 0) {
-        CAT(Bucket_, HASH_TYPE) *target = &map->array[first_tombstone];
+        Bucket *target = &map->array[first_tombstone];
         target->key = key;
         target->hash = hash;
 #if defined(HASH_VALUE_TYPE)
@@ -225,32 +227,30 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 }
 
 static bool
-CAT(hash_insert_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
+CAT(hash_insert_, HASH_TYPE)(struct Map *map, char *key,
                              uint32 key_length
 #if defined(HASH_VALUE_TYPE)
-                             ,
-                             uint32 value
+                             , HASH_VALUE_TYPE value
 #endif
 ) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_insert_pre_calc_, HASH_TYPE)(map, key, hash, index
 #if defined(HASH_VALUE_TYPE)
-                                                 ,
-                                                 value
+                                                 , value
 #endif
     );
 }
 
 static void *
-CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
+CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
                                       char *key, uint32 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
     uint32 probe = base_index;
 
     while (i < capacity) {
-        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
+        Bucket *iterator = &map->array[probe];
 
         switch ((int64)iterator->key) {
         case SLOT_FREE:
@@ -275,7 +275,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 }
 
 static void *
-CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
+CAT(hash_lookup_, HASH_TYPE)(struct Map *map, char *key,
                              uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
@@ -283,14 +283,14 @@ CAT(hash_lookup_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 }
 
 static bool
-CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
+CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
                                       char *key, uint32 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
     uint32 i = 0;
     uint32 probe = base_index;
 
     while (i < capacity) {
-        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[probe];
+        Bucket *iterator = &map->array[probe];
 
         switch ((int64)iterator->key) {
         case SLOT_FREE:
@@ -315,7 +315,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 }
 
 static bool
-CAT(hash_remove_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
+CAT(hash_remove_, HASH_TYPE)(struct Map *map, char *key,
                              uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
@@ -323,7 +323,7 @@ CAT(hash_remove_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, char *key,
 }
 
 static void
-CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
+CAT(hash_print_summary_, HASH_TYPE)(struct Map *map,
                                     char *name) {
     printf("struct Hash%s %s {\n", QUOTE(HASH_TYPE), name);
     printf("  capacity: %u\n", map->capacity);
@@ -334,11 +334,11 @@ CAT(hash_print_summary_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map,
 }
 
 static void
-CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
+CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
     CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map);
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
-        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[i];
+        Bucket *iterator = &map->array[i];
 
         if (!verbose) {
             if (iterator->key == (char *)SLOT_FREE) {
@@ -370,10 +370,10 @@ CAT(hash_print_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map, bool verbose) {
 }
 
 static uint32
-CAT(hash_ndeleted_, HASH_TYPE)(struct CAT(Hash_, HASH_TYPE)*map) {
+CAT(hash_ndeleted_, HASH_TYPE)(struct Map *map) {
     uint32 ndeleted = 0;
     for (uint32 i = 0; i < map->capacity; i += 1) {
-        CAT(Bucket_, HASH_TYPE) *iterator = &map->array[i];
+        Bucket *iterator = &map->array[i];
         if (iterator->key == (char *)SLOT_DELETED)
             ndeleted += 1;
     }
