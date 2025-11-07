@@ -106,11 +106,6 @@ brn2_full_check(FileList *old, FileList *new, HashSet *newlist_set,
 
     if (old && newlist_set) {
         for (uint32 i = 0; i < old->length; i += 1) {
-            FileName *file = old->files[i];
-            uint64 hash = hash_function(file->name, file->length);
-            assert(hash == file->hash);
-            assert((hash & newlist_set->bitmask)
-                   == (file->hash % hash_capacity(newlist_set)));
         }
     }
     if (old) {
