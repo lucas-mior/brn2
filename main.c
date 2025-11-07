@@ -293,6 +293,7 @@ main(int argc, char **argv) {
             while ((contains_newline = memchr64(file->name, '\n', file->length))
                    || !hash_insert_pre_calc_map(oldlist_map, file->name,
                                                 file->hash, *index, i)) {
+                uint32 length_left;
                 if (contains_newline) {
                     error(RED "'%s'" RESET " contains new line.", file->name);
                 } else {
@@ -310,9 +311,10 @@ main(int argc, char **argv) {
                     goto close;
                 }
 
+                length_left = old->length - i;
                 memmove(&old->files[i], &old->files[i + 1],
-                        (old->length - i)*sizeof(*(&old->files[i])));
-                memmove(index, index + 1, (old->length - i)*sizeof(*index));
+                        length_left*sizeof(*(&old->files[i])));
+                memmove(index, index + 1, length_left*sizeof(*index));
                 file = old->files[i];
                 index = &(old->indexes[i]);
             }
