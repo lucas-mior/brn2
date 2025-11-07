@@ -122,8 +122,21 @@ static char *program;
 #define PRINT_UNSIGNED(variable) \
     printf("%s = %llu \n", #variable, (unsigned long long)variable)
 
-#define PRINT_FLOAT(name, variable) \
-    printf("%s = %f \n", name, (double)variable)
+static void
+print_float(char *name, char *variable, char *type) {
+    char buffer[8]; 
+    if (!strcmp(type, "float")) {
+        memcpy(&(buffer[0]), variable, 4);
+        printf("%s = %f \n", name, *(float *)&buffer[0]);
+    } else if (!strcmp(type, "double")) {
+        memcpy(&(buffer[0]), variable, 8);
+        printf("%s = %f \n", name, *(double *)&buffer[0]);
+    } else {
+        fprintf(stderr, "Invalid type.\n");
+        exit(EXIT_FAILURE);
+    }
+    return;
+}
 
 #define PRINT_OTHER(FORMAT, variable) \
     printf("%s = " FORMAT " \n", #variable, variable)
@@ -142,13 +155,10 @@ _Generic((variable),                                    \
     uint32:  PRINT_UNSIGNED(variable),              \
     uint64:  PRINT_UNSIGNED(variable),              \
     void *:  PRINT_OTHER("%p", variable),              \
-    float: PRINT_FLOAT(#variable, (uint64)variable),            \
-    double: PRINT_FLOAT(#variable, (uint64)variable),            \
+    float:  print_float(#variable, (char *)&variable, "float"),   \
+    double: print_float(#variable, (char *)&variable, "double"),  \
     default: printf("%s = ?\n", #variable) \
 )
-/* float: */
-/* double: */
-/* long double: */
 
 #endif
 // clang-format on
