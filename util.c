@@ -118,31 +118,29 @@ static char *program;
 // clang-format off
 #define PRINT_SIGNED(variable) \
     printf("%s = %lld \n", #variable, (long long)variable)
+
 #define PRINT_UNSIGNED(variable) \
     printf("%s = %llu \n", #variable, (unsigned long long)variable)
+
 #define PRINT_FLOAT(variable) \
     printf("%s = %Lf \n", #variable, (long double)variable)
-#define PRINT_OTHER(FORMAT, variable) \
-    printf("%s = " FORMAT "\n", #variable, variable)
 
-#define PRINT_VAR(variable)                                 \
-    _Generic((variable),                                    \
-        bool:        PRINT_OTHER("%b", variable),           \
-        char:        PRINT_OTHER("%c", variable),           \
-        char *:      PRINT_OTHER("%s", variable),           \
-        float:       PRINT_FLOAT(variable),                 \
-        double:      PRINT_FLOAT(variable),                 \
-        long double: PRINT_FLOAT(variable),                 \
-        int8:        PRINT_SIGNED(variable),                \
-        int16:       PRINT_SIGNED(variable),                \
-        int32:       PRINT_SIGNED(variable),                \
-        int64:       PRINT_SIGNED(variable),                \
-        uint8:       PRINT_UNSIGNED(variable),              \
-        uint16:      PRINT_UNSIGNED(variable),              \
-        uint32:      PRINT_UNSIGNED(variable),              \
-        uint64:      PRINT_UNSIGNED(variable),              \
-        void *:      PRINT_UNSIGNED(variable),              \
-        default:     printf("%s = ?\n", #variable))
+#define PRINT_OTHER(FORMAT, variable) \
+    printf("%s = %s \n", #variable, variable)
+
+#define PRINT_VAR(variable)                             \
+_Generic((variable),                                    \
+    int8:        PRINT_SIGNED(variable),                \
+    int16:       PRINT_SIGNED(variable),                \
+    int32:       PRINT_SIGNED(variable),                \
+    int64:       PRINT_SIGNED(variable),                \
+    uint8:       PRINT_UNSIGNED(variable),              \
+    uint16:      PRINT_UNSIGNED(variable),              \
+    uint32:      PRINT_UNSIGNED(variable),              \
+    uint64:      PRINT_UNSIGNED(variable),              \
+    void *:      PRINT_OTHER("%p", variable),              \
+    default:     printf("%s = ?\n", #variable) \
+)
 
 #endif
 // clang-format on
@@ -1104,13 +1102,6 @@ main(void) {
     };
 
 #if defined(__clang__)
-    PRINT_VAR(var_bool);
-    PRINT_VAR(var_char);
-    PRINT_VAR(var_string);
-    PRINT_VAR(var_voidptr);
-    PRINT_VAR(var_float);
-    PRINT_VAR(var_double);
-    PRINT_VAR(var_longdouble);
     PRINT_VAR(var_int8);
     PRINT_VAR(var_int16);
     PRINT_VAR(var_int32);
@@ -1119,6 +1110,7 @@ main(void) {
     PRINT_VAR(var_uint16);
     PRINT_VAR(var_uint32);
     PRINT_VAR(var_uint64);
+    PRINT_VAR(var_voidptr);
 #endif
 
     memset64(p1, 0, SIZEMB(1));
