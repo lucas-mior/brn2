@@ -156,9 +156,6 @@ print_float(char *name, char *variable, enum FloatTypes type) {
 
 #define PRINT_VAR(variable)                                                    \
 _Generic((variable),                                                           \
-    char:        PRINT_OTHER("%c", variable),                                  \
-    bool:        PRINT_OTHER("%b", variable),                                  \
-    char *:      PRINT_OTHER("%s", variable),                                  \
     int8:        PRINT_SIGNED(variable),                                       \
     int16:       PRINT_SIGNED(variable),                                       \
     int32:       PRINT_SIGNED(variable),                                       \
@@ -167,6 +164,9 @@ _Generic((variable),                                                           \
     uint16:      PRINT_UNSIGNED(variable),                                     \
     uint32:      PRINT_UNSIGNED(variable),                                     \
     uint64:      PRINT_UNSIGNED(variable),                                     \
+    char:        PRINT_OTHER("%c", variable),                                  \
+    bool:        PRINT_OTHER("%b", variable),                                  \
+    char *:      PRINT_OTHER("%s", variable),                                  \
     void *:      PRINT_OTHER("%p", variable),                                  \
     float:       print_float(#variable, (char *)&variable, FLOAT_FLOAT),       \
     double:      print_float(#variable, (char *)&variable, FLOAT_DOUBLE),      \
