@@ -262,7 +262,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
 #if defined(HASH_VALUE_TYPE)
                 return &(iterator->value);
 #else
-                return NULL;
+                return key;
 #endif
             }
         }
