@@ -298,7 +298,6 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
             break;
         default:
             if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
-                /* mark tombstone, keep key/hash as-is (optional) */
                 iterator->key = (char *)SLOT_DELETED;
                 map->length -= 1;
                 return true;
