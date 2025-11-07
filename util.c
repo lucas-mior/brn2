@@ -1119,10 +1119,12 @@ main(void) {
     int8 var_int8 = INT8_MAX;
     int16 var_int16 = INT16_MAX;
     int32 var_int32 = INT32_MAX;
+    int var_int = INT_MAX;
     int64 var_int64 = INT64_MAX;
     uint8 var_uint8 = UINT8_MAX;
     uint16 var_uint16 = UINT16_MAX;
     uint32 var_uint32 = UINT32_MAX;
+    uint var_uint = UINT_MAX;
     uint64 var_uint64 = UINT64_MAX;
 
     char *paths[] = {
@@ -1136,10 +1138,12 @@ main(void) {
     PRINT_VAR(var_int8);
     PRINT_VAR(var_int16);
     PRINT_VAR(var_int32);
+    PRINT_VAR(var_int);
     PRINT_VAR(var_int64);
     PRINT_VAR(var_uint8);
     PRINT_VAR(var_uint16);
     PRINT_VAR(var_uint32);
+    PRINT_VAR(var_uint);
     PRINT_VAR(var_uint64);
     PRINT_VAR(var_voidptr);
     PRINT_VAR(var_bool);
