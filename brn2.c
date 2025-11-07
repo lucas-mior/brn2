@@ -434,6 +434,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         length += 1;
         errno = 0;
+        if (length >= UINT32_MAX) {
+            error("Error: more than %u files being renamed.\n", UINT32_MAX);
+            fatal(EXIT_FAILURE);
+        }
     }
     if (errno) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
