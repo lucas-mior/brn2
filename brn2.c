@@ -52,8 +52,8 @@ typedef struct Work {
     uint32 *partial;
 } Work;
 
-uint32 brn2_threads(void *(*function)(struct Work *), FileList *old,
-                    FileList *new, uint32 *numbers, uint32 map_size);
+uint32 brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
+                    uint32 *numbers, uint32 map_size);
 
 static void *brn2_threads_work_hashes(Work *);
 static void *brn2_threads_work_normalization(Work *);
@@ -72,7 +72,7 @@ pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 #endif
 
 static struct WorkQueue {
-    struct Work *items[BRN2_MAX_THREADS];
+    Work *items[BRN2_MAX_THREADS];
     uint32 head;
     uint32 tail;
     uint32 count;
@@ -726,9 +726,9 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
 }
 #else
 uint32
-brn2_threads(void *(*function)(struct Work *), FileList *old, FileList *new,
+brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
-    struct Work slices[1];
+    Work slices[1];
     uint32 length;
 
     if (old) {
