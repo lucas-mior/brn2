@@ -685,21 +685,13 @@ brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
 
     range = length / nthreads;
 
-    for (uint32 i = 0; i < (nthreads - 1); i += 1) {
+    for (uint32 i = 0; i < nthreads; i += 1) {
         slices[i].start = i*range;
-        slices[i].end = (i + 1)*range;
-        slices[i].old_list = old;
-        slices[i].new_list = new;
-        slices[i].partial = numbers ? &numbers[i] : NULL;
-        slices[i].map_capacity = map_size;
-        slices[i].function = function;
-
-        brn2_enqueue(&slices[i]);
-    }
-    {
-        uint32 i = nthreads - 1;
-        slices[i].start = i*range;
-        slices[i].end = length;
+        if (i + 1 < nthreads) {
+            slices[i].end = (i + 1)*range;
+        } else {
+            slices[i].end = length;
+        }
         slices[i].old_list = old;
         slices[i].new_list = new;
         slices[i].partial = numbers ? &numbers[i] : NULL;
