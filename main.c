@@ -462,8 +462,6 @@ main(int argc, char **argv) {
             } else {
                 break;
             }
-            brn2_full_check(old, new, newlist_set, "after verification");
-            break;
         }
 #endif
     }

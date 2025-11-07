@@ -597,7 +597,7 @@ brn2_slash_add(FileName *file) {
     return;
 }
 
-void *
+static void *
 brn2_threads_work_sort(Work *arg) {
     Work *work = arg;
     FileName **files = &(work->old_list->files[work->start]);
@@ -610,7 +610,6 @@ brn2_threads_work_hashes(Work *arg) {
     Work *work = arg;
 
     for (uint32 i = work->start; i < work->end; i += 1) {
-        error("i=%u\n", i);
         FileList *list = work->old_list;
         FileName *newfile = list->files[i];
         assert(newfile->length == strlen(newfile->name));
