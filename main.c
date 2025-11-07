@@ -278,6 +278,7 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         }
 #else
+        (void)temp;
         SNPRINTF(brn2_buffer.name, "%s", "bufferbrn2.txt");
         if ((brn2_buffer.fd
              = open(brn2_buffer.name, O_WRONLY | O_CREAT | O_TRUNC,
