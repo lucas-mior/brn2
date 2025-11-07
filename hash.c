@@ -131,8 +131,8 @@ CAT(hash_zero_, HASH_TYPE)(struct Map *map) {
     return;
 }
 
-static struct Map 
-*CAT(hash_create_, HASH_TYPE)(uint32 length) {
+static struct Map *
+CAT(hash_create_, HASH_TYPE)(uint32 length) {
     struct Map *map;
     int64 size;
     uint32 capacity = 1;
