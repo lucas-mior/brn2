@@ -127,13 +127,13 @@ print_float(char *name, char *variable, char *type) {
     char buffer[16]; 
     if (!strcmp(type, "float")) {
         memcpy(&(buffer[0]), variable, 4);
-        printf("%s = %f \n", name, *(float *)&buffer[0]);
+        printf("%s = %f \n", name, (double)(*(float *)&buffer[0]));
     } else if (!strcmp(type, "double")) {
         memcpy(&(buffer[0]), variable, 8);
         printf("%s = %f \n", name, *(double *)&buffer[0]);
     } else if (!strcmp(type, "long double")) {
         memcpy(&(buffer[0]), variable, sizeof(long double));
-        printf("%s = %f \n", name, *(long double *)&buffer[0]);
+        printf("%s = %Lf \n", name, *(long double *)&buffer[0]);
     } else {
         fprintf(stderr, "Invalid type.\n");
         exit(EXIT_FAILURE);
