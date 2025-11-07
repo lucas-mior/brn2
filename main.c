@@ -351,8 +351,6 @@ main(int argc, char **argv) {
         atexit(delete_brn2_buffer);
     }
 
-    brn2_full_check(old, NULL, NULL, "after creating buffer");
-
     {
         char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
         char *args_shuf[]
@@ -406,7 +404,6 @@ main(int argc, char **argv) {
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
-            brn2_full_check(old, NULL, NULL, "first");
 #ifndef DEBUG2
             if (util_command(LENGTH(args_edit), args_edit) < 0) {
                 if (OS_WINDOWS) {
@@ -428,8 +425,6 @@ main(int argc, char **argv) {
 #endif
             brn2_list_from_file(new, brn2_buffer.name, false);
 
-            brn2_full_check(old, new, NULL, "after sed");
-
             if (old->length != new->length) {
                 error("You are renaming " RED "%u" RESET " file%.*s "
                       "but buffer contains " RED "%u" RESET " file name%.*s\n",
@@ -442,11 +437,7 @@ main(int argc, char **argv) {
                 continue;
             }
 
-            brn2_full_check(old, new, NULL, "before_normalization");
-
             brn2_normalize_names(old, new);
-
-            brn2_full_check(old, new, NULL, "after_normalization");
 
             if (newlist_set == NULL) {
                 newlist_set = hash_create_set(new->length);
