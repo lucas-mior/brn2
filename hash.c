@@ -275,8 +275,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
 }
 
 static void *
-CAT(hash_lookup_, HASH_TYPE)(struct Map *map, char *key,
-                             uint32 key_length) {
+CAT(hash_lookup_, HASH_TYPE)(struct Map *map, char *key, uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_lookup_pre_calc_, HASH_TYPE)(map, key, hash, index);
@@ -315,16 +314,14 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
 }
 
 static bool
-CAT(hash_remove_, HASH_TYPE)(struct Map *map, char *key,
-                             uint32 key_length) {
+CAT(hash_remove_, HASH_TYPE)(struct Map *map, char *key, uint32 key_length) {
     uint32 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_remove_pre_calc_, HASH_TYPE)(map, key, hash, index);
 }
 
 static void
-CAT(hash_print_summary_, HASH_TYPE)(struct Map *map,
-                                    char *name) {
+CAT(hash_print_summary_, HASH_TYPE)(struct Map *map, char *name) {
     printf("struct Hash%s %s {\n", QUOTE(HASH_TYPE), name);
     printf("  capacity: %u\n", map->capacity);
     printf("  length: %u\n", map->length);
