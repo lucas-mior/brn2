@@ -294,7 +294,6 @@ main(int argc, char **argv) {
         old->indexes_size = old->length*sizeof(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
         brn2_create_hashes(old, capacity_set);
-        brn2_full_check(old, NULL, NULL, "after creating hashes1");
 
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
@@ -487,8 +486,6 @@ main(int argc, char **argv) {
         uint32 number_changes = brn2_get_number_changes(old, new);
         uint32 number_renames = 0;
 
-        brn2_full_check(old, new, newlist_set, "after number changed");
-
         if (number_changes) {
             HashSet *names_renamed = hash_create_set(old->length);
 
@@ -498,15 +495,9 @@ main(int argc, char **argv) {
                 print = printf;
             }
 
-            brn2_full_check(old, new, newlist_set, "after create hash2");
-
             for (uint32 i = 0; i < old->length; i += 1) {
-                error("i=%u\n", i);
-                brn2_full_check(old, new, newlist_set, "before execute");
                 brn2_execute2(old, new, oldlist_map, names_renamed, i,
                               &number_renames);
-                brn2_full_check(old, new, newlist_set, "after execute");
-                error("i=%u", i);
             }
             if (DEBUGGING) {
                 hash_destroy_set(names_renamed);
