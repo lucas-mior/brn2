@@ -489,7 +489,7 @@ main(void) {
     uint32 *stored;
 
     map = hash_create_map(NSTRINGS);
-    arena = arena_create(4096*NSTRINGS);
+    arena = arena_create(NBYTES*NSTRINGS);
 
     assert(map);
     assert(hash_capacity(map) >= NSTRINGS);

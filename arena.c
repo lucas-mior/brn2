@@ -343,6 +343,16 @@ arena_pop(Arena *arena, void *p) {
     return 0;
 }
 
+static int64
+arena_narenas(Arena *arena) {
+    int64 n = 0;
+    while (arena) {
+        n += 1;
+        arena = arena->next;
+    }
+    return n;
+}
+
 void *
 arena_reset(Arena *arena) {
     Arena *first = arena;
@@ -382,6 +392,8 @@ main(void) {
 
     srand((uint32)time(NULL));
 
+    assert(arena_narenas(arena) == 1);
+
     {
         int64 total_size = 0;
         int64 total_pushed = 0;
@@ -394,6 +406,7 @@ main(void) {
             memset64(objs[i], 0xCD, size);
 
             if (total_size < arena_data_size(arena)) {
+                assert(arena_narenas(arena) == 1);
                 assert((char *)objs[i] >= arena->begin);
                 assert((char *)arena->pos >= (char *)objs[i]);
             }
@@ -430,6 +443,7 @@ main(void) {
         assert(arena_pop(arena, &aux) < 0);
     }
 
+    arena_reset(arena);
     {
         void *p1;
         void *p2;
@@ -438,6 +452,7 @@ main(void) {
         assert(arena->npushed == 1);
         assert(p2 = arena_push(arena, arena_size));
         assert(arena->npushed == 1);
+        assert(arena_narenas(arena) == 2);
         assert(arena->next != NULL);
         assert(arena_of(arena, p1) != arena_of(arena, p2));
 
