@@ -201,7 +201,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             error("Error: directory name too long.\n");
             fatal(EXIT_FAILURE);
         }
-        directory_length = len;
+        directory_length = (uint16)len;
     } else {
         directory_length = 0;
     }
