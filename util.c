@@ -115,29 +115,37 @@ static char *program;
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
-#define PRINT_VAR_EVAL(FORMAT, variable)                                       \
+// clang-format off
+#define PRINT_SIGNED(variable) \
+    printf("%s = %lld \n", #variable, (long long)variable)
+#define PRINT_UNSIGNED(variable) \
+    printf("%s = %llu \n", #variable, (unsigned long long)variable)
+#define PRINT_FLOAT(variable) \
+    printf("%s = %Lf \n", #variable, (long double)variable)
+#define PRINT_OTHER(FORMAT, variable) \
     printf("%s = " FORMAT "\n", #variable, variable)
 
-#define PRINT_VAR(variable)                                                    \
-    _Generic((variable),                                                       \
-        bool: PRINT_VAR_EVAL("%b", variable),                                  \
-        char: PRINT_VAR_EVAL("%c", variable),                                  \
-        char *: PRINT_VAR_EVAL("%s", variable),                                \
-        float: PRINT_VAR_EVAL("%f", variable),                                 \
-        double: PRINT_VAR_EVAL("%f", variable),                                \
-        long double: PRINT_VAR_EVAL("%Lf", variable),                          \
-        int8: PRINT_VAR_EVAL("%d", variable),                                  \
-        int16: PRINT_VAR_EVAL("%d", variable),                                 \
-        int32: PRINT_VAR_EVAL("%d", variable),                                 \
-        int64: PRINT_VAR_EVAL("%lld", (long long)variable),                                \
-        uint8: PRINT_VAR_EVAL("%u", variable),                                 \
-        uint16: PRINT_VAR_EVAL("%u", variable),                                \
-        uint32: PRINT_VAR_EVAL("%u", variable),                                \
-        uint64: PRINT_VAR_EVAL("%lu", variable),                               \
-        void *: PRINT_VAR_EVAL("%p", variable),                                \
-        default: printf("%s = ?\n", #variable))
+#define PRINT_VAR(variable)                                 \
+    _Generic((variable),                                    \
+        bool:        PRINT_OTHER("%b", variable),           \
+        char:        PRINT_OTHER("%c", variable),           \
+        char *:      PRINT_OTHER("%s", variable),           \
+        float:       PRINT_FLOAT(variable),                 \
+        double:      PRINT_FLOAT(variable),                 \
+        long double: PRINT_FLOAT(variable),                 \
+        int8:        PRINT_SIGNED(variable),                \
+        int16:       PRINT_SIGNED(variable),                \
+        int32:       PRINT_SIGNED(variable),                \
+        int64:       PRINT_SIGNED(variable),                \
+        uint8:       PRINT_UNSIGNED(variable),              \
+        uint16:      PRINT_UNSIGNED(variable),              \
+        uint32:      PRINT_UNSIGNED(variable),              \
+        uint64:      PRINT_UNSIGNED(variable),              \
+        void *:      PRINT_UNSIGNED(variable),              \
+        default:     printf("%s = ?\n", #variable))
 
 #endif
+// clang-format on
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
@@ -951,6 +959,7 @@ send_signal(char *executable, const int32 signal_number) {
         int32 pid;
         int32 cmdline;
         ssize_t r;
+        char *last;
 
         if (process->d_type != DT_DIR) {
             continue;
@@ -971,7 +980,14 @@ send_signal(char *executable, const int32 signal_number) {
             close(cmdline);
             continue;
         }
+
         if (memmem64(command, r, executable, len)) {
+            if ((last = memchr64(command, '\0', r))) {
+                r = last - command;
+                if (!memmem64(command, r, executable, len)) {
+                    continue;
+                }
+            }
             if (kill(pid, signal_number) < 0) {
                 error("Error sending signal %d to program %s (pid %d): %s.\n",
                       signal_number, executable, pid, strerror(errno));
