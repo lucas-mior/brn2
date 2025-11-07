@@ -270,13 +270,24 @@ main(int argc, char **argv) {
         }
 #endif
 
+#ifndef DEBUG2
         SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.XXXXXX");
-
         if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
             error("Error opening '%s': %s.\n", brn2_buffer.name,
                   strerror(errno));
             fatal(EXIT_FAILURE);
         }
+#else
+        SNPRINTF(brn2_buffer.name, "%s", "bufferbrn2.txt");
+        if ((brn2_buffer.fd
+             = open(brn2_buffer.name, O_WRONLY | O_CREAT | O_TRUNC,
+                    S_IRUSR | S_IWUSR))
+            < 0) {
+            error("Error opening '%s': %s.\n", brn2_buffer.name,
+                  strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+#endif
 
         oldlist_map = hash_create_map(old->length);
         capacity_set = hash_capacity(oldlist_map);
@@ -393,6 +404,7 @@ main(int argc, char **argv) {
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
+#ifndef DEBUG2
             if (util_command(LENGTH(args_edit), args_edit) < 0) {
                 if (OS_WINDOWS) {
                     args_edit[0] = "Notepad.exe";
@@ -403,6 +415,14 @@ main(int argc, char **argv) {
                     fatal(EXIT_FAILURE);
                 }
             }
+#else
+            system("sed -i "
+                   " 's/$/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                   "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+                   "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+                   "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD/'"
+                   " bufferbrn2.txt");
+#endif
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             if (old->length != new->length) {
