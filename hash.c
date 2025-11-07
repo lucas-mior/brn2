@@ -115,7 +115,7 @@ typedef struct Bucket {
 #endif
 } Bucket;
 
-struct Map  {
+struct Map {
     int64 size;
     uint32 capacity;
     uint32 bitmask;
