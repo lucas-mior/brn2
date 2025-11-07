@@ -127,11 +127,6 @@ typedef struct Arena {
 
 static void *arena_allocate(int64 *);
 static void arena_free(Arena *);
-static Arena *arena_with_space(Arena *, int64);
-static void *arena_push(Arena *, int64);
-static uint32 arena_push_index32(Arena *, uint32);
-static int64 arena_pop(Arena *, void *);
-static void *arena_reset(Arena *);
 
 static int64 arena_page_size = 0;
 
@@ -255,7 +250,7 @@ arena_data_size(Arena *arena) {
     return size;
 }
 
-Arena *
+static Arena *
 arena_with_space(Arena *arena, int64 size) {
     if (arena == NULL) {
         return NULL;
@@ -282,7 +277,7 @@ arena_with_space(Arena *arena, int64 size) {
     return arena;
 }
 
-void *
+static void *
 arena_push(Arena *arena, int64 size) {
     void *before;
 
@@ -296,7 +291,7 @@ arena_push(Arena *arena, int64 size) {
     return before;
 }
 
-uint32
+static uint32
 arena_push_index32(Arena *arena, uint32 size) {
     void *before;
 
@@ -328,7 +323,7 @@ arena_of(Arena *arena, void *p) {
     return NULL;
 }
 
-int64
+static int64
 arena_pop(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
         return -1;
@@ -352,7 +347,7 @@ arena_narenas(Arena *arena) {
     return n;
 }
 
-void *
+static void *
 arena_reset(Arena *arena) {
     Arena *first = arena;
 
