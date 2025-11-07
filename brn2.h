@@ -24,7 +24,7 @@
   #define BRN2_MAX_THREADS 1
   #include <windows.h>
 #else
-  #define BRN2_MAX_THREADS 64
+  #define BRN2_MAX_THREADS 1
   #include <pthread.h>
   #include <sys/mman.h>
   #include <sys/wait.h>
@@ -128,9 +128,9 @@ enum {
 
 typedef struct FileName {
     uint64 hash;
-    uint16 length;
     uint8 type;
     uint8 unused;
+    uint16 length;
     char name[];
 } FileName;
 
@@ -171,9 +171,6 @@ void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, HashSet *, uint32 *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
-uint32 brn2_threads(void *(*)(void *),
-                    FileList *, FileList *, uint32 *, uint32);
-void *brn2_threads_work_sort(void *);
 void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 void brn2_execute2(FileList *, FileList *,

@@ -41,9 +41,23 @@
 #include "windows_functions.c"
 #endif
 
-static void *brn2_threads_work_hashes(void *);
-static void *brn2_threads_work_normalization(void *);
-static void *brn2_threads_work_changes(void *);
+typedef struct Work {
+    void *(*function)(struct Work *);
+    FileList *old_list;
+    FileList *new_list;
+    uint32 start;
+    uint32 end;
+    uint32 map_capacity;
+    uint32 unused;
+    uint32 *partial;
+} Work;
+
+uint32 brn2_threads(void *(*function)(struct Work *), FileList *old,
+                    FileList *new, uint32 *numbers, uint32 map_size);
+
+static void *brn2_threads_work_hashes(Work *);
+static void *brn2_threads_work_normalization(Work *);
+static void *brn2_threads_work_changes(Work *);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
@@ -56,17 +70,6 @@ pthread_t thread_pool[BRN2_MAX_THREADS];
 static uint32 work_pending = 0;
 pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
 #endif
-
-typedef struct Work {
-    void *(*function)(void *);
-    FileList *old_list;
-    FileList *new_list;
-    uint32 start;
-    uint32 end;
-    uint32 map_capacity;
-    uint32 unused;
-    uint32 *partial;
-} Work;
 
 static struct WorkQueue {
     struct Work *items[BRN2_MAX_THREADS];
@@ -94,6 +97,46 @@ brn2_compare(const void *a, const void *b) {
     FileName *const *file_a = a;
     FileName *const *file_b = b;
     return strcmp((*file_a)->name, (*file_b)->name);
+}
+
+static void
+brn2_full_check(FileList *old, FileList *new, HashSet *newlist_set,
+                char *name) {
+    error("brn2_full_check(%s)\n", name);
+
+    if (old && newlist_set) {
+        for (uint32 i = 0; i < old->length; i += 1) {
+            FileName *file = old->files[i];
+            uint64 hash = hash_function(file->name, file->length);
+            /* assert(hash == file->hash); */
+            /* assert((hash & newlist_set->bitmask) == (file->hash %
+             * hash_capacity(newlist_set))); */
+        }
+    }
+    if (old) {
+        for (uint32 i = 0; i < old->length; i += 1) {
+            if (old->files[i]->length != strlen(old->files[i]->name)) {
+                error("old [%u] %u != %u\n", i, old->files[i]->length,
+                      strlen(old->files[i]->name));
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+    if (new) {
+        for (uint32 i = 0; i < new->length; i += 1) {
+            assert(new->files[i]->length == strlen(new->files[i]->name));
+        }
+    }
+    if (new && old) {
+        assert(new->length == old->length);
+        for (uint32 i = 0; i < old->length; i += 1) {
+            assert(old->files[i]->length + 200 == new->files[i]->length);
+            assert(new->files[i]->length == strlen(new->files[i]->name));
+            assert(old->files[i]->length == strlen(old->files[i]->name));
+        }
+    }
+
+    return;
 }
 
 void
@@ -354,7 +397,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                 fatal(EXIT_FAILURE);
             }
 
-            size = STRUCT_ARRAY_SIZE(file_pointer, char, name_length + 2);
+            size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
             *file_pointer = xarena_push(list->arena, ALIGN(size));
 
             file = *file_pointer;
@@ -481,7 +524,7 @@ brn2_is_invalid_name(char *filename) {
 }
 
 void *
-brn2_threads_work_normalization(void *arg) {
+brn2_threads_work_normalization(Work *arg) {
     Work *work = arg;
     FileList *list;
     bool old_list;
@@ -555,7 +598,7 @@ brn2_slash_add(FileName *file) {
 }
 
 void *
-brn2_threads_work_sort(void *arg) {
+brn2_threads_work_sort(Work *arg) {
     Work *work = arg;
     FileName **files = &(work->old_list->files[work->start]);
     qsort(files, work->end - work->start, sizeof(*files), brn2_compare);
@@ -563,12 +606,14 @@ brn2_threads_work_sort(void *arg) {
 }
 
 void *
-brn2_threads_work_hashes(void *arg) {
+brn2_threads_work_hashes(Work *arg) {
     Work *work = arg;
 
     for (uint32 i = work->start; i < work->end; i += 1) {
+        error("i=%u\n", i);
         FileList *list = work->old_list;
         FileName *newfile = list->files[i];
+        assert(newfile->length == strlen(newfile->name));
         newfile->hash = hash_function(newfile->name, newfile->length);
         list->indexes[i] = newfile->hash % work->map_capacity;
     }
@@ -576,7 +621,7 @@ brn2_threads_work_hashes(void *arg) {
 }
 
 void *
-brn2_threads_work_changes(void *arg) {
+brn2_threads_work_changes(Work *arg) {
     Work *work = arg;
 
     for (uint32 i = work->start; i < work->end; i += 1) {
@@ -681,9 +726,9 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
 }
 #else
 uint32
-brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
+brn2_threads(void *(*function)(struct Work *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
-    Work slices[1];
+    struct Work slices[1];
     uint32 length;
 
     if (old) {
@@ -691,6 +736,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
     } else {
         length = new->length;
     }
+    error("length=%u\n", length);
 
     slices[0].start = 0;
     slices[0].end = length;
@@ -699,7 +745,7 @@ brn2_threads(void *(*function)(void *), FileList *old, FileList *new,
     slices[0].partial = numbers ? &numbers[0] : NULL;
     slices[0].map_capacity = map_size;
     slices[0].function = function;
-    function((void *)&slices[0]);
+    function(&slices[0]);
 
     return 1;
 }
