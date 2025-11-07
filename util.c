@@ -132,6 +132,7 @@ static char *program;
 _Generic((variable),                                    \
     char:    PRINT_OTHER("%c", variable),              \
     bool:    PRINT_OTHER("%b", variable),              \
+    char *: PRINT_OTHER("%s", variable),            \
     int8:    PRINT_SIGNED(variable),                \
     int16:   PRINT_SIGNED(variable),                \
     int32:   PRINT_SIGNED(variable),                \
@@ -143,6 +144,9 @@ _Generic((variable),                                    \
     void *:  PRINT_OTHER("%p", variable),              \
     default: printf("%s = ?\n", #variable) \
 )
+/* float: */
+/* double: */
+/* long double: */
 
 #endif
 // clang-format on
@@ -1115,6 +1119,7 @@ main(void) {
     PRINT_VAR(var_voidptr);
     PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
+    PRINT_VAR(var_string);
 #endif
 
     memset64(p1, 0, SIZEMB(1));
