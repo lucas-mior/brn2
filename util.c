@@ -122,19 +122,29 @@ static char *program;
 #define PRINT_UNSIGNED(variable) \
     printf("%s = %llu \n", #variable, (unsigned long long)variable)
 
+enum FloatTypes {
+    FLOAT_FLOAT,
+    FLOAT_DOUBLE,
+    FLOAT_LONG_DOUBLE,
+};
+
 static void
-print_float(char *name, char *variable, char *type) {
+print_float(char *name, char *variable, enum FloatTypes type) {
     char buffer[16]; 
-    if (!strcmp(type, "float")) {
+    switch (type) {
+    case FLOAT_FLOAT:
         memcpy(&(buffer[0]), variable, 4);
         printf("%s = %f \n", name, (double)(*(float *)&buffer[0]));
-    } else if (!strcmp(type, "double")) {
+        break;
+    case FLOAT_DOUBLE:
         memcpy(&(buffer[0]), variable, 8);
         printf("%s = %f \n", name, *(double *)&buffer[0]);
-    } else if (!strcmp(type, "long double")) {
+        break;
+    case FLOAT_LONG_DOUBLE:
         memcpy(&(buffer[0]), variable, sizeof(long double));
         printf("%s = %Lf \n", name, *(long double *)&buffer[0]);
-    } else {
+        break;
+    default:
         fprintf(stderr, "Invalid type.\n");
         exit(EXIT_FAILURE);
     }
@@ -144,23 +154,23 @@ print_float(char *name, char *variable, char *type) {
 #define PRINT_OTHER(FORMAT, variable) \
     printf("%s = " FORMAT " \n", #variable, variable)
 
-#define PRINT_VAR(variable)                                                 \
-_Generic((variable),                                                        \
-    char:        PRINT_OTHER("%c", variable),                               \
-    bool:        PRINT_OTHER("%b", variable),                               \
-    char *:      PRINT_OTHER("%s", variable),                               \
-    int8:        PRINT_SIGNED(variable),                                    \
-    int16:       PRINT_SIGNED(variable),                                    \
-    int32:       PRINT_SIGNED(variable),                                    \
-    int64:       PRINT_SIGNED(variable),                                    \
-    uint8:       PRINT_UNSIGNED(variable),                                  \
-    uint16:      PRINT_UNSIGNED(variable),                                  \
-    uint32:      PRINT_UNSIGNED(variable),                                  \
-    uint64:      PRINT_UNSIGNED(variable),                                  \
-    void *:      PRINT_OTHER("%p", variable),                               \
-    float:       print_float(#variable, (char *)&variable, "float"),        \
-    double:      print_float(#variable, (char *)&variable, "double"),       \
-    long double: print_float(#variable, (char *)&variable, "long double"),  \
+#define PRINT_VAR(variable)                                                    \
+_Generic((variable),                                                           \
+    char:        PRINT_OTHER("%c", variable),                                  \
+    bool:        PRINT_OTHER("%b", variable),                                  \
+    char *:      PRINT_OTHER("%s", variable),                                  \
+    int8:        PRINT_SIGNED(variable),                                       \
+    int16:       PRINT_SIGNED(variable),                                       \
+    int32:       PRINT_SIGNED(variable),                                       \
+    int64:       PRINT_SIGNED(variable),                                       \
+    uint8:       PRINT_UNSIGNED(variable),                                     \
+    uint16:      PRINT_UNSIGNED(variable),                                     \
+    uint32:      PRINT_UNSIGNED(variable),                                     \
+    uint64:      PRINT_UNSIGNED(variable),                                     \
+    void *:      PRINT_OTHER("%p", variable),                                  \
+    float:       print_float(#variable, (char *)&variable, FLOAT_FLOAT),       \
+    double:      print_float(#variable, (char *)&variable, FLOAT_DOUBLE),      \
+    long double: print_float(#variable, (char *)&variable, FLOAT_LONG_DOUBLE), \
     default:     printf("%s = ?\n", #variable) \
 )
 
