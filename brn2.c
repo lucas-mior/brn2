@@ -335,8 +335,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         char *pointer = map;
         int64 left = map_size - padding;
 
-        assert((pointer + left) == (map + map_size - padding));
-
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
@@ -370,10 +368,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                 if (length % 100000 == 0) {
                     error("Read %u files...\n", length);
                 }
-            }
-            if ((pointer + left) > (map + map_size)) {
-                error("pointer + left: %p > %p\n", pointer + left,
-                      map + map_size);
             }
         }
     }
