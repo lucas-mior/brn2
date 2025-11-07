@@ -363,6 +363,11 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             pointer += 1;
             length += 1;
             left -= (file->length + 1);
+            if (length >= (UINT32_MAX / 1000)) {
+                if (length % 100000 == 0) {
+                    error("Read %u files...\n", length);
+                }
+            }
         }
     }
 
