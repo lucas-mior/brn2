@@ -196,7 +196,12 @@ brn2_list_from_dir(FileList *list, char *directory) {
     int number_files;
 
     if (strcmp(directory, ".")) {
-        directory_length = (uint16)strlen64(directory);
+        int64 len = strlen64(directory);
+        if (len >= UINT16_MAX) {
+            error("Error: directory name too long.\n");
+            fatal(EXIT_FAILURE);
+        }
+        directory_length = len;
     } else {
         directory_length = 0;
     }
