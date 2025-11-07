@@ -83,7 +83,7 @@ xarena_push(Arena *arena, uint32 size) {
     void *p;
 
     if ((p = arena_push(arena, size)) == NULL) {
-        error("%u bytes is too large object for arena.\n", size);
+        error("Error pushing %u bytes into arena %p.", size, arena);
         exit(EXIT_FAILURE);
     }
     return p;
