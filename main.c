@@ -450,23 +450,18 @@ main(int argc, char **argv) {
             }
 
             main_capacity = hash_capacity(newlist_set);
-            brn2_full_check(old, new, newlist_set, "before creating hashes");
-
             brn2_create_hashes(new, main_capacity);
 
-            error("===============");
-            brn2_full_check(old, new, newlist_set, "after creating hashes");
+            if (!brn2_verify(new, old, newlist_set, new->indexes)) {
+                brn2_free_list(new);
+                printf("Fix your renames. Press control-c to cancel or press"
 
-            /* if (!brn2_verify(new, old, newlist_set, new->indexes)) { */
-            /*     brn2_free_list(new); */
-            /*     printf("Fix your renames. Press control-c to cancel or press"
-             */
-            /*            " ENTER to open the file list editor again.\n"); */
-            /*     fgetc(stdin); */
-            /*     continue; */
-            /* } else { */
-            /*     break; */
-            /* } */
+                       " ENTER to open the file list editor again.\n");
+                fgetc(stdin);
+                continue;
+            } else {
+                break;
+            }
             brn2_full_check(old, new, newlist_set, "after verification");
             break;
         }
