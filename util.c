@@ -124,13 +124,16 @@ static char *program;
 
 static void
 print_float(char *name, char *variable, char *type) {
-    char buffer[8]; 
+    char buffer[16]; 
     if (!strcmp(type, "float")) {
         memcpy(&(buffer[0]), variable, 4);
         printf("%s = %f \n", name, *(float *)&buffer[0]);
     } else if (!strcmp(type, "double")) {
         memcpy(&(buffer[0]), variable, 8);
         printf("%s = %f \n", name, *(double *)&buffer[0]);
+    } else if (!strcmp(type, "long double")) {
+        memcpy(&(buffer[0]), variable, sizeof(long double));
+        printf("%s = %f \n", name, *(long double *)&buffer[0]);
     } else {
         fprintf(stderr, "Invalid type.\n");
         exit(EXIT_FAILURE);
@@ -157,6 +160,7 @@ _Generic((variable),                                    \
     void *:  PRINT_OTHER("%p", variable),              \
     float:  print_float(#variable, (char *)&variable, "float"),   \
     double: print_float(#variable, (char *)&variable, "double"),  \
+    long double: print_float(#variable, (char *)&variable, "long double"),  \
     default: printf("%s = ?\n", #variable) \
 )
 
