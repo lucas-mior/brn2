@@ -122,8 +122,8 @@ static char *program;
 #define PRINT_UNSIGNED(variable) \
     printf("%s = %llu \n", #variable, (unsigned long long)variable)
 
-#define PRINT_FLOAT(variable) \
-    printf("%s = %Lf \n", #variable, (long double)variable)
+#define PRINT_FLOAT(name, variable) \
+    printf("%s = %f \n", name, (double)variable)
 
 #define PRINT_OTHER(FORMAT, variable) \
     printf("%s = " FORMAT " \n", #variable, variable)
@@ -132,7 +132,7 @@ static char *program;
 _Generic((variable),                                    \
     char:    PRINT_OTHER("%c", variable),              \
     bool:    PRINT_OTHER("%b", variable),              \
-    char *: PRINT_OTHER("%s", variable),            \
+    char *:  PRINT_OTHER("%s", variable),            \
     int8:    PRINT_SIGNED(variable),                \
     int16:   PRINT_SIGNED(variable),                \
     int32:   PRINT_SIGNED(variable),                \
@@ -142,6 +142,8 @@ _Generic((variable),                                    \
     uint32:  PRINT_UNSIGNED(variable),              \
     uint64:  PRINT_UNSIGNED(variable),              \
     void *:  PRINT_OTHER("%p", variable),              \
+    float: PRINT_FLOAT(#variable, (uint64)variable),            \
+    double: PRINT_FLOAT(#variable, (uint64)variable),            \
     default: printf("%s = ?\n", #variable) \
 )
 /* float: */
@@ -1107,7 +1109,6 @@ main(void) {
         "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
 
-#if defined(__clang__)
     PRINT_VAR(var_int8);
     PRINT_VAR(var_int16);
     PRINT_VAR(var_int32);
@@ -1120,7 +1121,9 @@ main(void) {
     PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
     PRINT_VAR(var_string);
-#endif
+    PRINT_VAR(var_float);
+    PRINT_VAR(var_double);
+    PRINT_VAR(var_longdouble);
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
