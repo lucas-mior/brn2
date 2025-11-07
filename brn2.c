@@ -370,17 +370,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                     error("Read %u files...\n", length);
                 }
             }
-            char *pleft = (pointer + left);
-            char *psize = (map + map_size - padding);
-            if (pleft != psize) {
-                if (pleft < psize) {
-                    error("left: %p < %p\n", pointer + left,
-                          map + map_size - padding);
-                } else {
-                    error("left: %p > %p\n", pointer + left,
-                          map + map_size - padding);
-                }
-            }
         }
     }
 
