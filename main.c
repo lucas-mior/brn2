@@ -240,12 +240,12 @@ main(int argc, char **argv) {
         old->length -= count;
     }
 
-    old->files = xrealloc(old->files, old->length*sizeof(*(old->files)));
-
     if (old->length == 0) {
         error("No files to rename.\n");
         fatal(EXIT_FAILURE);
     }
+
+    old->files = xrealloc(old->files, old->length*sizeof(*(old->files)));
 
     if (brn2_options_sort) {
         sort(old);
