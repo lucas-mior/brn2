@@ -131,6 +131,28 @@ static int64 arena_pop(Arena *arena, void *p);
 
 static int64 arena_page_size = 0;
 
+#define error2(...) fprintf(stderr, __VA_ARGS__)
+
+static void
+arena_print(Arena *arena) {
+    while (arena) {
+        error2("Arena %p {\n", (void *)arena);
+        error2("  name: %s\n", arena->name);
+        error2("  begin: %p\n", arena->begin);
+        error2("  pos: %p\n", arena->pos);
+        error2("  size: %lld\n", (llong)arena->size);
+        error2("  npushed: %lld\n", (llong)arena->npushed);
+        error2("  next:    %p\n", (void *)arena->next);
+        error2("}");
+        if (arena->next) {
+            error2(" -> ");
+        } else {
+            error2("\n");
+        }
+        arena = arena->next;
+    }
+}
+
 static Arena *
 arena_create(int64 size) {
     void *p;
@@ -495,6 +517,8 @@ main(void) {
         assert(index != UINT32_MAX);
         assert(arena->begin + index == (char *)arena->begin + 32);
     }
+
+    arena_print(arena);
 
     arena_destroy(arena);
     return 0;
