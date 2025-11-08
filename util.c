@@ -175,8 +175,6 @@ _Generic((VARIABLE),                   \
   default:     printf("%s = ?\n", #VARIABLE) \
 )
 
-// clang-format off
-
 #endif
 // clang-format on
 
