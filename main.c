@@ -524,7 +524,7 @@ main(int argc, char **argv) {
         for (uint32 i = 0; i < nthreads; i += 1) {
             int err;
             if ((err = pthread_join(thread_pool[i], NULL))) {
-                error("Error joining thread %d: %s.\n", strerror(err));
+                error("Error joining thread %u: %s.\n", i, strerror(err));
             }
         }
 

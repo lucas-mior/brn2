@@ -117,6 +117,7 @@ fi
 
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything -Wfatal-errors -Werror -Wno-padded"
+    CFLAGS="$CFLAGS -Wno-ignored-attributes"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
