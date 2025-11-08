@@ -1137,7 +1137,6 @@ main(void) {
         "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
 
-#if defined(__clang__)
     PRINT_VAR(var_int8);
     PRINT_VAR(var_int16);
     PRINT_VAR(var_int32);
@@ -1156,7 +1155,6 @@ main(void) {
     PRINT_VAR(var_float);
     PRINT_VAR(var_double);
     PRINT_VAR(var_longdouble);
-#endif
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
