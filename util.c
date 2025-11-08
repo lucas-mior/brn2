@@ -643,7 +643,7 @@ xpthread_mutex_destroy(pthread_mutex_t *mutex) {
     return;
 }
 
-static int32
+static int32 __attribute__((format(printf, 3, 4)))
 snprintf2(char *buffer, int size, char *format, ...) {
     int n;
     va_list args;
