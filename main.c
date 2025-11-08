@@ -506,10 +506,10 @@ main(int argc, char **argv) {
 #endif
 
     if (DEBUGGING) {
-        xmunmap(old->indexes, old->indexes_size);
-        xmunmap(new->indexes, new->indexes_size);
         brn2_free_list(old);
         brn2_free_list(new);
+        xmunmap(old->indexes, old->indexes_size);
+        xmunmap(new->indexes, new->indexes_size);
         hash_destroy_map(oldlist_map);
         hash_destroy_set(newlist_set);
         arena_destroy(old->arena);

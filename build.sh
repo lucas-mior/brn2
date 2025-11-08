@@ -84,7 +84,7 @@ case "$target" in
     ;;
 "check") 
     CC=gcc
-    CFLAGS="$CFLAGS $GNUSOURCE -fanalyzer"
+    CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer"
     ;;
 "build") 
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
@@ -257,7 +257,7 @@ case "$target" in
     # find . \
     # | $dir/bin/brn2_debug -f -
     # $dir/bin/brn2_debug -d .
-    $dir/bin/brn2_debug -f rename
+    $dir/bin/brn2_debug -f rename -q
     trace_off
     exit
     ;;
