@@ -659,7 +659,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 }
 
 #if OS_UNIX && (BRN2_MAX_THREADS > 1)
-void
+static void
 brn2_threads_join(void) {
     xpthread_mutex_lock(&brn2_mutex);
     stop_threads = true;
