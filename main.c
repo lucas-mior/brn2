@@ -506,15 +506,6 @@ main(int argc, char **argv) {
 #endif
 
     if (DEBUGGING) {
-        brn2_free_list(old);
-        brn2_free_list(new);
-        xmunmap(old->indexes, old->indexes_size);
-        xmunmap(new->indexes, new->indexes_size);
-        hash_destroy_map(oldlist_map);
-        hash_destroy_set(newlist_set);
-        arena_destroy(old->arena);
-        arena_destroy(new->arena);
-
 #if BRN2_MAX_THREADS > 1
         xpthread_mutex_lock(&brn2_mutex);
         stop_threads = true;
@@ -532,6 +523,14 @@ main(int argc, char **argv) {
         xpthread_cond_destroy(&brn2_new_work);
         xpthread_cond_destroy(&brn2_done_work);
 #endif
+        brn2_free_list(old);
+        brn2_free_list(new);
+        xmunmap(old->indexes, old->indexes_size);
+        xmunmap(new->indexes, new->indexes_size);
+        hash_destroy_map(oldlist_map);
+        hash_destroy_set(newlist_set);
+        arena_destroy(old->arena);
+        arena_destroy(new->arena);
     }
 #if OS_WINDOWS
     printf("Press enter to continue.\n");
