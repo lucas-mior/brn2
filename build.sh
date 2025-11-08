@@ -33,12 +33,9 @@ CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wextra -Wall"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wfatal-errors"
-CFLAGS="$CFLAGS -Wno-cast-align"
 CFLAGS="$CFLAGS -Wno-unused-macros"
 CFLAGS="$CFLAGS -Wno-unused-function"
-CFLAGS="$CFLAGS -Wno-covered-switch-default"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
-CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
@@ -125,6 +122,7 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-pre-c11-compat"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
     CFLAGS="$CFLAGS -Wno-ignored-attributes"
+    CFLAGS="$CFLAGS -Wno-covered-switch-default"
 fi
 
 case "$target" in
