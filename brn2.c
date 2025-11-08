@@ -112,7 +112,7 @@ brn2_full_check(FileList *old, FileList *new, HashSet *newlist_set,
         for (uint32 i = 0; i < old->length; i += 1) {
             if (old->files[i]->length != strlen(old->files[i]->name)) {
                 error("old [%u] %u != %u\n", i, old->files[i]->length,
-                      strlen(old->files[i]->name));
+                      (uint)strlen(old->files[i]->name));
                 exit(EXIT_FAILURE);
             }
         }
@@ -334,8 +334,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
-        error("Error in ftruncate(%s, %zu): %s.\n", filename, strerror(errno),
-              map_size);
+        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size,
+              strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
@@ -402,8 +402,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error in ftruncate(%s, %s): %s.\n", filename, strerror(errno),
-              map_size - padding);
+        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size - padding,
+              strerror(errno));
         fatal(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
@@ -482,7 +482,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         fatal(EXIT_FAILURE);
     }
     if (fclose(lines)) {
-        error("Error closing file %s: %s.\n", strerror(errno));
+        error("Error closing file %s: %s.\n", filename, strerror(errno));
     }
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
