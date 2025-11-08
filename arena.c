@@ -196,7 +196,7 @@ arena_allocate(int64 *size) {
     if (arena_page_size == 0) {
         long aux;
         if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
-            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
+            error2("Error getting page size: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         arena_page_size = aux;
@@ -217,8 +217,7 @@ arena_allocate(int64 *size) {
     } while (0);
 
     if (p == MAP_FAILED) {
-        fprintf(stderr, "Error in mmap(%lld): %s.\n", (long long)*size,
-                strerror(errno));
+        error2("Error in mmap(%lld): %s.\n", (long long)*size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
@@ -226,8 +225,8 @@ arena_allocate(int64 *size) {
 void
 arena_free(Arena *arena) {
     if (munmap(arena, (size_t)arena->size) < 0) {
-        fprintf(stderr, "Error in munmap(%p, %lld): %s.\n", (void *)arena,
-                (llong)arena->size, strerror(errno));
+        error2("Error in munmap(%p, %lld): %s.\n", (void *)arena,
+               (llong)arena->size, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return;
@@ -242,15 +241,15 @@ arena_allocate(int64 *size) {
         GetSystemInfo(&si);
         arena_page_size = si.dwPageSize;
         if (arena_page_size <= 0) {
-            fprintf(stderr, "Error getting page size.\n");
+            error2("Error getting page size.\n");
             exit(EXIT_FAILURE);
         }
     }
 
     p = VirtualAlloc(NULL, *size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (long long)*size,
-                GetLastError());
+        error2("Error in VirtualAlloc(%lld): %lu.\n", (long long)*size,
+               GetLastError());
         exit(EXIT_FAILURE);
     }
     *size = ARENA_ALIGN(*size, arena_page_size);
@@ -259,8 +258,7 @@ arena_allocate(int64 *size) {
 void
 arena_free(Arena *arena) {
     if (!VirtualFree(arena, 0, MEM_RELEASE)) {
-        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", arena,
-                GetLastError());
+        error2("Error in VirtualFree(%p): %lu.\n", arena, GetLastError());
         exit(EXIT_FAILURE);
     }
     return;
@@ -396,7 +394,6 @@ memset64(void *buffer, int value, int64 size) {
 }
 
 #define LENGTH(X) ((int64)(sizeof(X) / sizeof(*X)))
-#define error(...) fprintf(stderr, __VA_ARGS__)
 
 int
 main(void) {
