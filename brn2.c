@@ -282,6 +282,7 @@ brn2_free_list(FileList *list) {
     if (DEBUGGING) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName *file = list->files[i];
+            (void)file;
             assert(arena_pop(list->arena, file) == 0);
         }
     }
