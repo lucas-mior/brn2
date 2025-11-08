@@ -127,6 +127,7 @@ typedef struct Arena {
 
 static void *arena_allocate(int64 *);
 static void arena_free(Arena *);
+static int64 arena_pop(Arena *arena, void *p);
 
 static int64 arena_page_size = 0;
 
@@ -277,7 +278,7 @@ arena_with_space(Arena *arena, int64 size) {
     return arena;
 }
 
-static void *
+static void * __attribute__((malloc(arena_pop, 2)))
 arena_push(Arena *arena, int64 size) {
     void *before;
 

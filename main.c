@@ -203,7 +203,7 @@ main(int argc, char **argv) {
         int err;
         if ((err = pthread_create(&thread_pool[i], NULL, brn2_threads_function,
                                   NULL))) {
-            error("Error joining thread %d: %s.\n", strerror(err));
+            error("Error joining thread %u: %s.\n", i, strerror(err));
         }
     }
 #endif

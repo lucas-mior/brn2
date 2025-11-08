@@ -800,7 +800,7 @@ string_from_strings(char *buffer, int32 size, char *sep, char **array,
     return;
 }
 
-void
+void __attribute__((format (printf, 1, 2)))
 error(char *format, ...) {
     char buffer[BUFSIZ];
     va_list args;
