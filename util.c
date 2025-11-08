@@ -324,6 +324,7 @@ memset64(void *buffer, int value, int64 size) {
 INLINE void *
 memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
     void *result;
+
     if (hay_len <= 0) {
         return NULL;
     }
