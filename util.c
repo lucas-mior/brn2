@@ -146,33 +146,33 @@ print_float(char *name, char *variable, enum FloatTypes type) {
 }
 
 // clang-format off
-#define PRINT_SIGNED(type, variable) \
-    printf("%s%s = %lld \n", type, #variable, (long long)variable)
+#define PRINT_SIGNED(TYPE, VARIABLE) \
+    printf("%s%s = %lld \n", TYPE, #VARIABLE, (long long)VARIABLE)
 
-#define PRINT_UNSIGNED(type, variable) \
-    printf("%s%s = %lld \n", type, #variable, (long long)variable)
+#define PRINT_UNSIGNED(TYPE, VARIABLE) \
+    printf("%s%s = %lld \n", TYPE, #VARIABLE, (long long)VARIABLE)
 
-#define PRINT_OTHER(FORMAT, variable) \
-    printf("%s = " FORMAT " \n", #variable, variable)
+#define PRINT_OTHER(FORMAT, VARIABLE) \
+    printf("%s = " FORMAT " \n", #VARIABLE, VARIABLE)
 
-#define PRINT_VAR(variable)            \
-_Generic((variable),                   \
-    int8:        PRINT_SIGNED("[int8]", variable), \
-    int16:       PRINT_SIGNED("[int16]", variable), \
-    int32:       PRINT_SIGNED("[int32]", variable), \
-    int64:       PRINT_SIGNED("[int64]", variable), \
-    uint8:       PRINT_UNSIGNED("[uint8]", variable),  \
-    uint16:      PRINT_UNSIGNED("[uint16]", variable), \
-    uint32:      PRINT_UNSIGNED("[uint32]", variable), \
-    uint64:      PRINT_UNSIGNED("[uint64]", variable), \
-    char:        PRINT_OTHER("%c", variable),                                  \
-    bool:        PRINT_OTHER("%b", variable),                                  \
-    char *:      PRINT_OTHER("%s", variable),                                  \
-    void *:      PRINT_OTHER("%p", variable),                                  \
-    float:       print_float(#variable, (char *)&variable, FLOAT_FLOAT),       \
-    double:      print_float(#variable, (char *)&variable, FLOAT_DOUBLE),      \
-    long double: print_float(#variable, (char *)&variable, FLOAT_LONG_DOUBLE), \
-    default:     printf("%s = ?\n", #variable) \
+#define PRINT_VAR(VARIABLE)            \
+_Generic((VARIABLE),                   \
+  int8:        PRINT_SIGNED("[int8]", VARIABLE), \
+  int16:       PRINT_SIGNED("[int16]", VARIABLE), \
+  int32:       PRINT_SIGNED("[int32]", VARIABLE), \
+  int64:       PRINT_SIGNED("[int64]", VARIABLE), \
+  uint8:       PRINT_UNSIGNED("[uint8]", VARIABLE),  \
+  uint16:      PRINT_UNSIGNED("[uint16]", VARIABLE), \
+  uint32:      PRINT_UNSIGNED("[uint32]", VARIABLE), \
+  uint64:      PRINT_UNSIGNED("[uint64]", VARIABLE), \
+  char:        PRINT_OTHER("%c", VARIABLE),                                  \
+  bool:        PRINT_OTHER("%b", VARIABLE),                                  \
+  char *:      PRINT_OTHER("%s", VARIABLE),                                  \
+  void *:      PRINT_OTHER("%p", VARIABLE),                                  \
+  float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT),       \
+  double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE),      \
+  long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
+  default:     printf("%s = ?\n", #VARIABLE) \
 )
 
 // clang-format off
@@ -1152,6 +1152,7 @@ main(void) {
     PRINT_VAR(var_bool);
     PRINT_VAR(var_char);
     PRINT_VAR(var_string);
+    PRINT_VAR(*var_string);
     PRINT_VAR(var_float);
     PRINT_VAR(var_double);
     PRINT_VAR(var_longdouble);
