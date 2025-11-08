@@ -507,21 +507,7 @@ main(int argc, char **argv) {
 
     if (DEBUGGING) {
 #if BRN2_MAX_THREADS > 1
-        xpthread_mutex_lock(&brn2_mutex);
-        stop_threads = true;
-        pthread_cond_broadcast(&brn2_new_work);
-        xpthread_mutex_unlock(&brn2_mutex);
-
-        for (uint32 i = 0; i < nthreads; i += 1) {
-            int err;
-            if ((err = pthread_join(thread_pool[i], NULL))) {
-                error("Error joining thread %u: %s.\n", i, strerror(err));
-            }
-        }
-
-        xpthread_mutex_destroy(&brn2_mutex);
-        xpthread_cond_destroy(&brn2_new_work);
-        xpthread_cond_destroy(&brn2_done_work);
+        brn2_threads_join();
 #endif
         brn2_free_list(old);
         brn2_free_list(new);
