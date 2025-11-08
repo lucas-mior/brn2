@@ -113,7 +113,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
     HeapNode heap[MAX_NTHREADS];
     uint32 n_sub[MAX_NTHREADS];
     uint32 indices[MAX_NTHREADS] = {0};
-    uint32 off_sets[MAX_NTHREADS];
+    uint32 offsets[MAX_NTHREADS];
     int64 memory_size = size*n;
     char *output = xmalloc(memory_size);
     char *array2 = array;
@@ -126,14 +126,14 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
         n_sub[k] = n / p + (n % p);
     }
 
-    off_sets[0] = 0;
+    offsets[0] = 0;
     for (uint32 k = 1; k < p; k += 1) {
-        off_sets[k] = off_sets[k - 1] + n_sub[k - 1];
+        offsets[k] = offsets[k - 1] + n_sub[k - 1];
     }
 
     for (uint32 k = 0; k < p; k += 1) {
         heap[k].value = xmalloc(size);
-        memcpy64(heap[k].value, &array2[off_sets[k]*size], size);
+        memcpy64(heap[k].value, &array2[offsets[k]*size], size);
         heap[k].p_index = k;
     }
 
@@ -148,8 +148,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
         memcpy64(&output[i*size], heap[0].value, size);
 
         if (i_sub < n_sub[k]) {
-            memcpy64(heap[0].value, &array2[(off_sets[k] + i_sub)*size],
-                     size);
+            memcpy64(heap[0].value, &array2[(offsets[k] + i_sub)*size], size);
         } else {
             memcpy64(heap[0].value, dummy_last, size);
         }
