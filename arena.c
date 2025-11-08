@@ -286,7 +286,7 @@ arena_push(Arena *arena, int64 size) {
         return NULL;
     }
 
-    before = arena->pos + 0;
+    before = arena->pos;
     arena->pos = (char *)arena->pos + size;
     arena->npushed += 1;
     return before;
