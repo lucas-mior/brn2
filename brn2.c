@@ -86,7 +86,7 @@ xarena_push(Arena *arena, uint32 size) {
     void *p;
 
     if ((p = arena_push(arena, size)) == NULL) {
-        error("Error pushing %u bytes into arena %p.", size, arena);
+        error("Error pushing %u bytes into arena %p.", size, (void *)arena);
         exit(EXIT_FAILURE);
     }
     return p;

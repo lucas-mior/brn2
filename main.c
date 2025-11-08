@@ -74,7 +74,7 @@ static Arena *
 xarena_create(int64 size) {
     Arena *arena;
     if ((arena = arena_create(size)) == NULL) {
-        error("Error creating arena of size %zu.\n", size);
+        error("Error creating arena of size %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
     return arena;
