@@ -426,7 +426,7 @@ main(void) {
                 nallocated -= 1;
             }
             if ((k + 1) < (nallocated / 2)) {
-                assert(objs[j] = arena_push(arena, ALIGNMENT));
+                assert((objs[j] = arena_push(arena, ALIGNMENT)));
                 nallocated += 1;
             }
         }
@@ -442,9 +442,9 @@ main(void) {
         void *p1;
         void *p2;
 
-        assert(p1 = arena_push(arena, arena_size));
+        assert((p1 = arena_push(arena, arena_size)));
         assert(arena->npushed == 1);
-        assert(p2 = arena_push(arena, arena_size));
+        assert((p2 = arena_push(arena, arena_size)));
         assert(arena->npushed == 1);
         assert(arena_narenas(arena) == 2);
         assert(arena->next != NULL);
