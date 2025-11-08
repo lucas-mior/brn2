@@ -463,9 +463,9 @@ main(void) {
         void *p3;
         void *p4;
 
-        assert(p3 = arena_push(arena, arena_size / 2));
+        assert((p3 = arena_push(arena, arena_size / 2)));
         assert(arena->npushed == 1);
-        assert(p4 = arena_push(arena, arena_size / 2));
+        assert((p4 = arena_push(arena, arena_size / 2)));
         assert(arena->npushed == 2);
         assert(arena_of(arena, p3) == arena_of(arena, p4));
 
