@@ -145,25 +145,26 @@ print_float(char *name, char *variable, enum FloatTypes type) {
     return;
 }
 
-#define PRINT_SIGNED(variable) \
-    printf("%s = %lld \n", #variable, (long long)variable)
+// clang-format off
+#define PRINT_SIGNED(type, variable) \
+    printf("%s%s = %lld \n", type, #variable, (long long)variable)
 
-#define PRINT_UNSIGNED(variable) \
-    printf("%s = %llu \n", #variable, (unsigned long long)variable)
+#define PRINT_UNSIGNED(type, variable) \
+    printf("%s%s = %lld \n", type, #variable, (long long)variable)
 
 #define PRINT_OTHER(FORMAT, variable) \
     printf("%s = " FORMAT " \n", #variable, variable)
 
-#define PRINT_VAR(variable)                                                    \
-_Generic((variable),                                                           \
-    int8:        PRINT_SIGNED(variable),                                       \
-    int16:       PRINT_SIGNED(variable),                                       \
-    int32:       PRINT_SIGNED(variable),                                       \
-    int64:       PRINT_SIGNED(variable),                                       \
-    uint8:       PRINT_UNSIGNED(variable),                                     \
-    uint16:      PRINT_UNSIGNED(variable),                                     \
-    uint32:      PRINT_UNSIGNED(variable),                                     \
-    uint64:      PRINT_UNSIGNED(variable),                                     \
+#define PRINT_VAR(variable)            \
+_Generic((variable),                   \
+    int8:        PRINT_SIGNED("[int8]", variable), \
+    int16:       PRINT_SIGNED("[int16]", variable), \
+    int32:       PRINT_SIGNED("[int32]", variable), \
+    int64:       PRINT_SIGNED("[int64]", variable), \
+    uint8:       PRINT_UNSIGNED("[uint8]", variable),  \
+    uint16:      PRINT_UNSIGNED("[uint16]", variable), \
+    uint32:      PRINT_UNSIGNED("[uint32]", variable), \
+    uint64:      PRINT_UNSIGNED("[uint64]", variable), \
     char:        PRINT_OTHER("%c", variable),                                  \
     bool:        PRINT_OTHER("%b", variable),                                  \
     char *:      PRINT_OTHER("%s", variable),                                  \
@@ -173,6 +174,8 @@ _Generic((variable),                                                           \
     long double: print_float(#variable, (char *)&variable, FLOAT_LONG_DOUBLE), \
     default:     printf("%s = ?\n", #variable) \
 )
+
+// clang-format off
 
 #endif
 // clang-format on
