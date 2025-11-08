@@ -310,9 +310,10 @@ arena_push_index32(Arena *arena, uint32 size) {
 
 static Arena *
 arena_of(Arena *arena, void *p) {
+    char *pchar = p;
     while (arena) {
-        if (((void *)arena->begin <= p)
-            && (p < (void *)((char *)arena + arena->size))) {
+        if ((arena->begin <= pchar)
+            && (pchar < ((char *)arena + arena->size))) {
             return arena;
         }
 

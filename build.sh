@@ -29,7 +29,7 @@ exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
 CFLAGS="$CFLAGS -std=c11"
-CFLAGS="$CFLAGS -Wextra -Wall"
+CFLAGS="$CFLAGS -Wextra -Wall -Werror"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-cast-align"
 CFLAGS="$CFLAGS -Wno-unused-macros -Wno-unused-function"
