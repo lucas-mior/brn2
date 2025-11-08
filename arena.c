@@ -327,7 +327,6 @@ arena_of(Arena *arena, void *p) {
 static int64
 arena_pop(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
-        error("no arena for %p...\n", p);
         return -1;
     }
 
