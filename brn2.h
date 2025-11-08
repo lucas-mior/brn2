@@ -55,11 +55,11 @@
 #define BRN2_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
 
 #define HASH_VALUE_TYPE uint32
+#define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
 #include "hash.c"
 
 #define HASH_TYPE set
-#define HASH_PADDING_TYPE uint32
 #include "hash.c"
 
 #if defined(__GNUC__)
@@ -128,9 +128,10 @@ enum {
 
 typedef struct FileName {
     uint64 hash;
+    uint16 length;
     uint8 type;
     uint8 unused;
-    uint16 length;
+    uint32 padding;
     char name[];
 } FileName;
 
