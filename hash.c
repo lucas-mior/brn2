@@ -43,6 +43,7 @@
 
 #if TESTING_hash
 #define HASH_VALUE_TYPE uint32
+#define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
 #endif
 
