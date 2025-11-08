@@ -659,6 +659,25 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 }
 
 #if OS_UNIX && (BRN2_MAX_THREADS > 1)
+void
+brn2_threads_join(void) {
+    xpthread_mutex_lock(&brn2_mutex);
+    stop_threads = true;
+    pthread_cond_broadcast(&brn2_new_work);
+    xpthread_mutex_unlock(&brn2_mutex);
+
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        int err;
+        if ((err = pthread_join(thread_pool[i], NULL))) {
+            error("Error joining thread %u: %s.\n", i, strerror(err));
+        }
+    }
+
+    xpthread_mutex_destroy(&brn2_mutex);
+    xpthread_cond_destroy(&brn2_new_work);
+    xpthread_cond_destroy(&brn2_done_work);
+}
+
 uint32
 brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
