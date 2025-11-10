@@ -50,10 +50,13 @@ typedef struct Work {
     uint32 map_capacity;
     uint32 unused;
     uint32 *partial;
+    char *map;
 } Work;
 
+static uint32 global_length;
+
 uint32 brn2_threads(void *(*function)(Work *, uint32), FileList *old,
-                    FileList *new, uint32 *numbers, uint32 map_size);
+                    FileList *new, uint32 *numbers, uint32 map_size, char *map);
 
 static void *brn2_threads_work_hashes(Work *, uint32);
 static void *brn2_threads_work_normalization(Work *, uint32);
@@ -91,6 +94,15 @@ xarena_push(Arena **arenas, uint32 number, uint32 size) {
         exit(EXIT_FAILURE);
     }
     return p;
+}
+
+void
+brn2_print_list(FileList *list) {
+    for (uint32 i = 0; i < list->length; i += 1) {
+        FileName *file = list->files[i];
+        assert(file->length == strlen(file->name));
+        error("[%u] = %s\n", i, file->name);
+    }
 }
 
 int
@@ -423,7 +435,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 static void
 brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
     char *map;
-    uint32 length = 0;
     uint32 map_size;
     uint32 padding;
     int fd;
@@ -480,62 +491,22 @@ brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
         fatal(EXIT_FAILURE);
     }
 
-    uint32 capacity = map_size / 2;
-    list->files = xmalloc(capacity*sizeof(*(list->files)));
-
-    FileList dummy = {.length = capacity};
-    brn2_threads(brn2_threads_work_map, &dummy, NULL, NULL, 0);
-    exit(0);
-
     {
-        char *begin = map;
-        char *pointer = map;
-        int64 left = map_size - padding;
-
-        assert((pointer + left) == (map + map_size - padding));
-
-        while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
-            FileName **file_pointer = &(list->files[length]);
-            FileName *file;
-            uint32 size;
-            uint16 name_length = (uint16)(pointer - begin);
-
-            *pointer = '\0';
-            if (is_old && brn2_is_invalid_name(begin)) {
-                begin = pointer + 1;
-                left -= (name_length + 1);
-                continue;
-            }
-            if (begin == pointer) {
-                error("Empty line in file. Exiting.\n");
-                fatal(EXIT_FAILURE);
-            }
-
-            size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
-            *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
-
-            file = *file_pointer;
-            file->length = name_length;
-            memcpy64(file->name, begin, name_length + 1);
-
-            begin = pointer + 1;
-            pointer += 1;
-            length += 1;
-            left -= (name_length + 1);
-            if (length >= (UINT32_MAX / 1000)) {
-                if (length % 100000 == 0) {
-                    error("Read %u files...\n", length);
-                }
-            }
-        }
+        uint32 capacity = map_size / 2;
+        list->files = xmalloc(capacity*sizeof(*(list->files)));
     }
+    list->length = map_size;
 
-    if (length == 0) {
+    global_length = 0;
+    brn2_threads(brn2_threads_work_map, list, NULL, NULL, 0, map);
+
+    if (global_length == 0) {
         error("Empty list. Exiting.\n");
         fatal(EXIT_FAILURE);
     }
-    list->files = xrealloc(list->files, length*sizeof(*(list->files)));
-    list->length = length;
+    list->files = xrealloc(list->files, global_length*sizeof(*(list->files)));
+    list->length = global_length;
+    /* brn2_print_list(list); */
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
@@ -754,13 +725,76 @@ brn2_threads_work_changes(Work *arg, uint32 id) {
     return 0;
 }
 
+#if OS_UNIX
 static void *
 brn2_threads_work_map(Work *arg, uint32 id) {
     Work *work = arg;
-    (void)id;
+    FileList *list;
+    bool is_old = false;
+
+    char *begin = work->map + work->start;
+    char *pointer = work->map + work->start;
+    int64 left = work->end - work->start + 1;
+
+    if (work->old_list) {
+        list = work->old_list;
+        is_old = true;
+    } else if (work->new_list) {
+        list = work->new_list;
+    } else {
+        fatal(EXIT_FAILURE);
+    }
+
+    if (work->start != 0) {
+        while (*pointer != '\n') {
+            pointer -= 1;
+            begin -= 1;
+
+            assert(pointer > work->map);
+        }
+        pointer += 1;
+        begin += 1;
+    }
+
+    usleep(100);
+    while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
+        FileName **file_pointer;
+        FileName *file;
+        uint32 size;
+        uint16 name_length = (uint16)(pointer - begin);
+
+        *pointer = '\0';
+        if (is_old && brn2_is_invalid_name(begin)) {
+            begin = pointer + 1;
+            left -= (name_length + 1);
+            continue;
+        }
+
+        pthread_mutex_lock(&brn2_mutex);
+        file_pointer = &(list->files[global_length]);
+        global_length += 1;
+        pthread_mutex_unlock(&brn2_mutex);
+
+        if (begin == pointer) {
+            error("Empty line in file. Exiting.\n");
+            fatal(EXIT_FAILURE);
+        }
+
+        size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
+        *file_pointer = arena_push(list->arenas[id], ALIGN(size));
+
+        file = *file_pointer;
+        file->length = name_length;
+        memcpy64(file->name, begin, name_length + 1);
+
+        begin = pointer + 1;
+        pointer += 1;
+        left -= (name_length + 1);
+    }
 
     return 0;
 }
+#endif
 
 void
 brn2_timings(char *name, struct timespec t0, struct timespec t1,
@@ -778,13 +812,14 @@ brn2_timings(char *name, struct timespec t0, struct timespec t1,
 
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-    brn2_threads(brn2_threads_work_normalization, old, new, NULL, 0);
+    brn2_threads(brn2_threads_work_normalization, old, new, NULL, 0, NULL);
     return;
 }
 
 void
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    brn2_threads(brn2_threads_work_hashes, list, NULL, NULL, map_capacity);
+    brn2_threads(brn2_threads_work_hashes, list, NULL, NULL, map_capacity,
+                 NULL);
     return;
 }
 
@@ -792,7 +827,7 @@ uint32
 brn2_get_number_changes(FileList *old, FileList *new) {
     uint32 total = 0;
     uint32 numbers[BRN2_MAX_THREADS] = {0};
-    brn2_threads(brn2_threads_work_changes, old, new, numbers, 0);
+    brn2_threads(brn2_threads_work_changes, old, new, numbers, 0, NULL);
 
     for (uint32 i = 0; i < BRN2_MAX_THREADS; i += 1) {
         total += numbers[i];
@@ -822,7 +857,7 @@ brn2_threads_join(void) {
 
 uint32
 brn2_threads(void *(*function)(Work *, uint32), FileList *old, FileList *new,
-             uint32 *numbers, uint32 map_size) {
+             uint32 *numbers, uint32 map_size, char *map) {
     static Work slices[BRN2_MAX_THREADS];
     uint32 range;
     uint32 length;
@@ -847,6 +882,7 @@ brn2_threads(void *(*function)(Work *, uint32), FileList *old, FileList *new,
         slices[i].partial = numbers ? &numbers[i] : NULL;
         slices[i].map_capacity = map_size;
         slices[i].function = function;
+        slices[i].map = map;
 
         xpthread_mutex_lock(&brn2_mutex);
 
@@ -874,8 +910,8 @@ brn2_threads(void *(*function)(Work *, uint32), FileList *old, FileList *new,
 }
 #else
 uint32
-brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
-             uint32 *numbers, uint32 map_size) {
+brn2_threads(void *(*function)(Work *, uint32), FileList *old, FileList *new,
+             uint32 *numbers, uint32 map_size, char *map) {
     Work slices[1];
     uint32 length;
 
@@ -892,7 +928,8 @@ brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
     slices[0].partial = numbers ? &numbers[0] : NULL;
     slices[0].map_capacity = map_size;
     slices[0].function = function;
-    function(&slices[0]);
+    slices[0].map = map;
+    function(&slices[0], 0);
 
     return 1;
 }
@@ -1110,6 +1147,7 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_brn2
 #include <assert.h>
+#include "sort.c"
 
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
@@ -1169,7 +1207,11 @@ main(void) {
 
         system(command);
         brn2_list_from_dir(list1, ".");
+#if OS_LINUX
         brn2_list_from_file2(list2, file, true);
+#else
+        brn2_list_from_file(list2, file, true);
+#endif
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1200,7 +1242,11 @@ main(void) {
 
         system(command);
 
+#if OS_LINUX
         brn2_list_from_file2(list1, filelist, true);
+#else
+        brn2_list_from_file(list1, filelist, true);
+#endif
         brn2_normalize_names(list1, NULL);
 
         list_map = hash_create_map(list1->length);
