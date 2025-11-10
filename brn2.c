@@ -59,7 +59,6 @@ uint32 brn2_threads(void *(*function)(Work *), uint32, FileList *old,
 static void *brn2_threads_work_hashes(Work *);
 static void *brn2_threads_work_normalization(Work *);
 static void *brn2_threads_work_changes(Work *);
-static void *brn2_threads_work_map(Work *);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
@@ -640,69 +639,6 @@ brn2_threads_work_changes(Work *arg) {
     }
     return 0;
 }
-
-#if OS_UNIX
-static void *
-brn2_threads_work_map(Work *arg) {
-    Work *work = arg;
-    FileList *list;
-
-    char *begin = work->map + work->start;
-    char *pointer = work->map + work->start;
-    int64 left = work->end - work->start + 1;
-    uint32 length;
-
-    if (work->old_list) {
-        list = work->old_list;
-    } else if (work->new_list) {
-        list = work->new_list;
-    } else {
-        fatal(EXIT_FAILURE);
-    }
-
-    if (work->start != 0) {
-        while (*pointer != '\n') {
-            pointer -= 1;
-            begin -= 1;
-
-            assert(pointer > work->map);
-        }
-        pointer += 1;
-        begin += 1;
-    }
-
-    length = work->id*(list->length / nthreads);
-
-    while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
-        FileName **file_pointer;
-        FileName *file;
-        uint32 size;
-        uint16 name_length = (uint16)(pointer - begin);
-
-        file_pointer = &(list->files[length]);
-        length += 1;
-
-        if (begin == pointer) {
-            error("Empty line in file. Exiting.\n");
-            fatal(EXIT_FAILURE);
-        }
-
-        size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
-        *file_pointer = arena_push(list->arenas[work->id], ALIGN(size));
-
-        file = *file_pointer;
-        file->length = name_length;
-        memcpy64(file->name, begin, name_length + 1);
-        file->name[name_length] = '\0';
-
-        begin = pointer + 1;
-        pointer += 1;
-        left -= (name_length + 1);
-    }
-
-    return 0;
-}
-#endif
 
 void
 brn2_timings(char *name, struct timespec t0, struct timespec t1,
