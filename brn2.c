@@ -1009,7 +1009,8 @@ main(void) {
     FileList *list2 = &list2_stack;
 
     char *command = "ls -a > /tmp/brn2test";
-    char *file = command + 8;
+    char *file = memchr(command, '/', strlen(command));
+    assert(file);
 
     list1->arena = arena_create(BRN2_ARENA_SIZE);
     list2->arena = arena_create(BRN2_ARENA_SIZE);
