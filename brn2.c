@@ -395,11 +395,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                 error("Empty line in file. Exiting.\n");
                 fatal(EXIT_FAILURE);
             }
-            if (is_old && brn2_is_invalid_name(begin)) {
-                begin = pointer + 1;
-                left -= (name_length + 1);
-                continue;
-            }
 
             size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
@@ -407,6 +402,13 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             file = *file_pointer;
             file->length = name_length;
             memcpy64(file->name, begin, name_length + 1);
+            file->name[name_length] = '\0';
+
+            if (is_old && brn2_is_invalid_name(file->name)) {
+                begin = pointer + 1;
+                left -= (name_length + 1);
+                continue;
+            }
 
             begin = pointer + 1;
             pointer += 1;
