@@ -78,7 +78,7 @@ case "$target" in
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "test")
-    CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1"
+    CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined"
     ;;
 "check") 
     CC=gcc

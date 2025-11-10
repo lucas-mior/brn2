@@ -644,6 +644,17 @@ xpthread_mutex_destroy(pthread_mutex_t *mutex) {
     return;
 }
 
+static void
+xpthread_create(pthread_t *thread, pthread_attr_t *attr,
+                void *(*function)(void *), void *arg) {
+    int err;
+    if ((err = pthread_create(thread, attr, function, arg))) {
+        error("Error creating thread: %s.\n", strerror(err));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
 static int32 __attribute__((format(printf, 3, 4)))
 snprintf2(char *buffer, int size, char *format, ...) {
     int n;
