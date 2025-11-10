@@ -1066,8 +1066,12 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
+            uint64 hash;
+
             assert(file->length == strlen(file->name));
-            assert(file->hash == hash_function(file->name, file->length));
+            hash = hash_function(file->name, file->length);
+            assert(file->hash == hash);
+            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
         }
 
         brn2_free_list(list1);
