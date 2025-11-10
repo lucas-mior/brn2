@@ -89,7 +89,9 @@ main(int argc, char **argv) {
     HashMap *oldlist_map = NULL;
     HashSet *newlist_set = NULL;
     uint32 available_threads;
+#if OS_UNIX
     uint32 thread_ids[BRN2_MAX_THREADS];
+#endif
 
     uint32 main_capacity;
     char *EDITOR;
@@ -197,7 +199,11 @@ main(int argc, char **argv) {
 
     switch (mode) {
     case FILES_FROM_FILE:
+#if OS_LINUX
         brn2_list_from_file2(old, lines, true);
+#else
+        brn2_list_from_file(old, lines, true);
+#endif
         break;
     case FILES_FROM_ARGS:
         brn2_list_from_args(old, argc - optind, &argv[optind]);
