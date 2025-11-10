@@ -1047,6 +1047,8 @@ main(void) {
     {
         char *command = "find . > /tmp/brn2test";
         char *filelist = memchr(command, '/', strlen(command));
+        uint32 capacity_set;
+        HashMap *list_map = NULL;
         assert(filelist);
 
         list1->arena = arena_create(BRN2_ARENA_SIZE);
@@ -1056,9 +1058,16 @@ main(void) {
         brn2_list_from_file(list1, filelist, true);
         brn2_normalize_names(list1, NULL);
 
+        list_map = hash_create_map(list1->length);
+        capacity_set = hash_capacity(list_map);
+        list1->indexes_size = list1->length*sizeof(*(list1->indexes));
+        list1->indexes = xmmap_commit(&(list1->indexes_size));
+        brn2_create_hashes(list1, capacity_set);
+
         for (uint32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             assert(file->length == strlen(file->name));
+            assert(file->hash == hash_function(file->name, file->length));
         }
 
         brn2_free_list(list1);
