@@ -1035,6 +1035,8 @@ main(void) {
     brn2_free_list(list1);
     brn2_free_list(list2);
 
+    brn2_threads_join();
+
     unlink(file);
     exit(0);
 }
