@@ -173,24 +173,6 @@ main(int argc, char **argv) {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
     }
 
-    switch (mode) {
-    case FILES_FROM_FILE:
-        brn2_list_from_file(old, lines, true);
-        break;
-    case FILES_FROM_ARGS:
-        brn2_list_from_args(old, argc - optind, &argv[optind]);
-        break;
-    case FILES_FROM_DIR:
-        brn2_list_from_dir(old, directory);
-        break;
-    default:
-        error("Unexpected mode: %d.\n", mode);
-        fatal(EXIT_FAILURE);
-    }
-    if (!brn2_options_quiet) {
-        printf("Normalizing filenames...\n");
-    }
-
 #if BRN2_MAX_THREADS > 1
     if (nthreads*2 >= old->length) {
         nthreads = 1;
@@ -208,6 +190,24 @@ main(int argc, char **argv) {
     }
 #endif
 
+    switch (mode) {
+    case FILES_FROM_FILE:
+        brn2_list_from_file(old, lines, true);
+        break;
+    case FILES_FROM_ARGS:
+        brn2_list_from_args(old, argc - optind, &argv[optind]);
+        break;
+    case FILES_FROM_DIR:
+        brn2_list_from_dir(old, directory);
+        break;
+    default:
+        error("Unexpected mode: %d.\n", mode);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (!brn2_options_quiet) {
+        printf("Normalizing filenames...\n");
+    }
     brn2_normalize_names(old, NULL);
 
     for (uint32_t i = 0; i < old->length;) {
