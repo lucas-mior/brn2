@@ -775,7 +775,7 @@ brn2_threads(void *(*function)(Work *), uint32 length, FileList *old,
 
     for (uint32 i = 0; i < nthreads; i += 1) {
         slices[i].start = i*range;
-        if (i + 1 < nthreads) {
+        if ((i + 1) < nthreads) {
             slices[i].end = (i + 1)*range;
         } else {
             slices[i].end = length;
