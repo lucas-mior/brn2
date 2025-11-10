@@ -565,7 +565,7 @@ xrealloc(void *old, const int64 size) {
     uint64 old_save = (uint64)old;
 
     if (size <= 0) {
-        error("Error in xmalloc: invalid size = %lld.\n", (long long)size);
+        error("Error in xrealloc: invalid size = %lld.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
     assert((uint64)size <= SIZE_MAX);
