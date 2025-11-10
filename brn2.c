@@ -49,7 +49,7 @@ typedef struct Work {
     uint32 end;
     uint32 map_capacity;
     uint32 id;
-    uint32 *partial;
+    uint32 *numbers;
     char *map;
 } Work;
 
@@ -636,7 +636,7 @@ brn2_threads_work_changes(Work *arg) {
                 continue;
             }
         }
-        *(work->partial) += 1;
+        work->numbers[work->id] += 1;
     }
     return 0;
 }
@@ -782,7 +782,7 @@ brn2_threads(void *(*function)(Work *), uint32 length, FileList *old,
         }
         slices[i].old_list = old;
         slices[i].new_list = new;
-        slices[i].partial = numbers ? &numbers[i] : NULL;
+        slices[i].numbers = numbers;
         slices[i].map_capacity = map_size;
         slices[i].function = function;
         slices[i].map = map;
@@ -822,7 +822,7 @@ brn2_threads(void *(*function)(Work *), uint32 length, FileList *old,
     slices[0].end = length;
     slices[0].old_list = old;
     slices[0].new_list = new;
-    slices[0].partial = numbers ? &numbers[0] : NULL;
+    slices[0].numbers = numbers;
     slices[0].map_capacity = map_size;
     slices[0].function = function;
     slices[0].map = map;
