@@ -366,7 +366,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         fatal(EXIT_FAILURE);
     }
 
-    map = mmap(NULL, map_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    map = mmap(NULL, map_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (map == MAP_FAILED) {
         error("Error mapping history file to memory: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
@@ -390,7 +390,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             uint32 size;
             uint16 name_length = (uint16)(pointer - begin);
 
-            *pointer = '\0';
             if (begin == pointer) {
                 error("Empty line in file. Exiting.\n");
                 fatal(EXIT_FAILURE);
@@ -407,6 +406,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             if (is_old && brn2_is_invalid_name(file->name)) {
                 begin = pointer + 1;
                 left -= (name_length + 1);
+                pointer += 1;
                 continue;
             }
 
