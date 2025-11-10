@@ -440,127 +440,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
     return;
 }
-static void
-brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
-    char *map;
-    uint32 map_size;
-    uint32 padding;
-    int fd;
-
-    if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
-        error("Reading from stdin...\n");
-        brn2_list_from_lines(list, filename, is_old);
-        return;
-    }
-    if ((fd = open(filename, O_RDWR)) < 0) {
-        error("Error opening '%s' for reading: %s.\n", filename,
-              strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-
-    {
-        struct stat lines_stat;
-        if (fstat(fd, &lines_stat) < 0) {
-            error("Error in fstat(%s): %s.\n", filename, strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
-        if (lseek(fd, 0, SEEK_CUR) < 0 && errno == ESPIPE) {
-            error("Error getting file names: File is not seekable.\n");
-            fatal(EXIT_FAILURE);
-        }
-        if (!S_ISREG(lines_stat.st_mode)) {
-            error("Error getting file names: Not a regular file.\n");
-            fatal(EXIT_FAILURE);
-        }
-        if (lines_stat.st_size <= 0) {
-            error("Error getting file names: File size = %lld.\n",
-                  (llong)lines_stat.st_size);
-            fatal(EXIT_FAILURE);
-        }
-        if (sizeof(lines_stat.st_size) > sizeof(map_size)) {
-            if (lines_stat.st_size >= (int64)UINT32_MAX) {
-                error("Error: File size = %lld.\n", (llong)lines_stat.st_size);
-                fatal(EXIT_FAILURE);
-            }
-        }
-        map_size = (uint32)lines_stat.st_size;
-    }
-    padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
-    map_size += padding;
-    if (ftruncate(fd, map_size) < 0) {
-        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size,
-              strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-
-    map = mmap(NULL, map_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-    if (map == MAP_FAILED) {
-        error("Error mapping history file to memory: %s.\n", strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-
-    {
-        uint32 capacity = map_size / 2;
-        int64 size = capacity*sizeof(*(list->files));
-        list->files = xmalloc(size);
-        memset64(list->files, 0, size);
-        list->length = capacity;
-
-        brn2_threads(brn2_threads_work_map, map_size, list, NULL, NULL, 0, map);
-    }
-
-    for (uint32 i = 0; i < list->length;) {
-        uint32 start;
-        uint32 end;
-        uint32 count;
-
-        if (list->files[i] && !brn2_is_invalid_name(list->files[i]->name)) {
-            i += 1;
-            continue;
-        }
-
-        start = i;
-        end = i + 1;
-
-        while (end < list->length) {
-            if (list->files[end] == NULL) {
-                end += 1;
-            } else if (brn2_is_invalid_name(list->files[end]->name)) {
-                end += 1;
-            } else {
-                break;
-            }
-        }
-
-        count = end - start;
-
-        if (end < list->length) {
-            memmove(&list->files[start], &list->files[end],
-                    (list->length - end)*sizeof(*(&list->files[i])));
-        }
-
-        list->length -= count;
-    }
-
-    if (list->length == 0) {
-        error("Empty list. Exiting.\n");
-        fatal(EXIT_FAILURE);
-    }
-
-    list->files = xrealloc(list->files, list->length*sizeof(*(list->files)));
-    munmap(map, map_size);
-
-    if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size - padding,
-              strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-    if (close(fd) < 0) {
-        error("Error closing '%s': %s.\n", filename, strerror(errno));
-    }
-
-    return;
-}
 #else
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
@@ -1223,11 +1102,7 @@ main(void) {
 
         system(command);
         brn2_list_from_dir(list1, ".");
-#if OS_LINUX && (BRN2_MAX_THREADS > 1)
-        brn2_list_from_file2(list2, filelist, true);
-#else
         brn2_list_from_file(list2, filelist, true);
-#endif
 
         assert(list1->length == list2->length);
 
@@ -1261,11 +1136,7 @@ main(void) {
 
         system(command);
 
-#if OS_LINUX && (BRN2_MAX_THREADS > 1)
-        brn2_list_from_file2(list1, filelist, true);
-#else
         brn2_list_from_file(list1, filelist, true);
-#endif
         brn2_normalize_names(list1, NULL);
 
         list_map = hash_create_map(list1->length);

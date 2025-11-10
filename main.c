@@ -199,11 +199,7 @@ main(int argc, char **argv) {
 
     switch (mode) {
     case FILES_FROM_FILE:
-#if OS_LINUX && (BRN2_MAX_THREADS > 1)
-        brn2_list_from_file2(old, lines, true);
-#else
         brn2_list_from_file(old, lines, true);
-#endif
         break;
     case FILES_FROM_ARGS:
         brn2_list_from_args(old, argc - optind, &argv[optind]);
