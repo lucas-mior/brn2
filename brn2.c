@@ -973,7 +973,7 @@ bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_autosolve = false;
-uint32 nthreads = 1;
+uint32 nthreads = 2;
 
 static bool
 contains_filename(FileList *list, FileName *file, bool verbose) {
