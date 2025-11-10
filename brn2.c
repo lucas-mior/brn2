@@ -1206,7 +1206,7 @@ main(void) {
 
         system(command);
         brn2_list_from_dir(list1, ".");
-#if OS_LINUX
+#if OS_LINUX && (BRN2_MAX_THREADS > 1)
         brn2_list_from_file2(list2, file, true);
 #else
         brn2_list_from_file(list2, file, true);

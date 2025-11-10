@@ -199,7 +199,8 @@ main(int argc, char **argv) {
 
     switch (mode) {
     case FILES_FROM_FILE:
-#if OS_LINUX
+#if OS_LINUX && (BRN2_MAX_THREADS > 1)
+        error("nthreas=%u...\n", nthreads);
         brn2_list_from_file2(old, lines, true);
 #else
         brn2_list_from_file(old, lines, true);
@@ -215,6 +216,8 @@ main(int argc, char **argv) {
         error("Unexpected mode: %d.\n", mode);
         fatal(EXIT_FAILURE);
     }
+    brn2_print_list(old);
+    exit(EXIT_SUCCESS);
 
     if (!brn2_options_quiet) {
         printf("Normalizing filenames...\n");
