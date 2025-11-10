@@ -53,8 +53,6 @@ typedef struct Work {
     char *map;
 } Work;
 
-static uint32 global_length;
-
 uint32 brn2_threads(void *(*function)(Work *, uint32), FileList *old,
                     FileList *new, uint32 *numbers, uint32 map_size, char *map);
 
@@ -98,10 +96,20 @@ xarena_push(Arena **arenas, uint32 number, uint32 size) {
 
 void
 brn2_print_list(FileList *list) {
-    for (uint32 i = 0; i < list->length; i += 1) {
+    for (uint32 i = 0; i < list->length;) {
         FileName *file = list->files[i];
-        assert(file->length == strlen(file->name));
-        error("[%u] = %s\n", i, file->name);
+        if (file) {
+            assert(file->length == strlen(file->name));
+            error("[%u] = %s\n", i, file->name);
+        } else {
+            error("[%u]", i);
+            while (file == NULL) {
+                i += 1;
+                file = list->files[i];
+            }
+            error(" ... [%u] = NULL\n", i);
+        }
+        i += 1;
     }
 }
 
@@ -492,20 +500,52 @@ brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
     }
 
     {
-        uint32 capacity = map_size / 2;
-        list->files = xmalloc(capacity*sizeof(*(list->files)));
+        int64 size = map_size*sizeof(*(list->files));
+        list->files = xmalloc(size);
+        memset64(list->files, 0, size);
+        list->length = map_size;
+
+        brn2_threads(brn2_threads_work_map, list, NULL, NULL, 0, map);
+
+        brn2_print_list(list);
     }
-    list->length = map_size;
 
-    global_length = 0;
-    brn2_threads(brn2_threads_work_map, list, NULL, NULL, 0, map);
+    for (uint32 i = 0; i < list->length; i += 1) {
+        uint32 start;
+        uint32 end;
+        uint32 count;
 
-    if (global_length == 0) {
+        if (list->files[i]) {
+            error("valid file: %s\n", list->files[i]->name);
+            i += 1;
+            continue;
+        }
+        error("invalid file: %p\n", (void *)list->files[i]);
+
+        start = i;
+        end = i + 1;
+
+        while ((end < list->length) && (list->files[end] == NULL)) {
+            end += 1;
+        }
+
+        count = end - start;
+
+        if (end < list->length) {
+            memmove(&list->files[start], &list->files[end],
+                    (list->length - end)*sizeof(*(&list->files[i])));
+        }
+
+        list->length -= count;
+    }
+
+    if (list->length == 0) {
         error("Empty list. Exiting.\n");
         fatal(EXIT_FAILURE);
     }
-    list->files = xrealloc(list->files, global_length*sizeof(*(list->files)));
-    list->length = global_length;
+
+    brn2_print_list(list);
+    list->files = xrealloc(list->files, list->length*sizeof(*(list->files)));
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
@@ -734,6 +774,7 @@ brn2_threads_work_map(Work *arg, uint32 id) {
     char *begin = work->map + work->start;
     char *pointer = work->map + work->start;
     int64 left = work->end - work->start + 1;
+    uint32 length = work->start;
 
     if (work->old_list) {
         list = work->old_list;
@@ -769,10 +810,8 @@ brn2_threads_work_map(Work *arg, uint32 id) {
             continue;
         }
 
-        pthread_mutex_lock(&brn2_mutex);
-        file_pointer = &(list->files[global_length]);
-        global_length += 1;
-        pthread_mutex_unlock(&brn2_mutex);
+        file_pointer = &(list->files[length]);
+        length += 1;
 
         if (begin == pointer) {
             error("Empty line in file. Exiting.\n");
