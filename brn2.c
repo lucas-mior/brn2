@@ -58,6 +58,7 @@ uint32 brn2_threads(void *(*function)(Work *, uint32), FileList *old,
 static void *brn2_threads_work_hashes(Work *, uint32);
 static void *brn2_threads_work_normalization(Work *, uint32);
 static void *brn2_threads_work_changes(Work *, uint32);
+static void *brn2_threads_work_map(Work *arg, uint32 id);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
@@ -479,10 +480,12 @@ brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
         fatal(EXIT_FAILURE);
     }
 
-    {
-        uint32 capacity = map_size / 2;
-        list->files = xmalloc(capacity*sizeof(*(list->files)));
-    }
+    uint32 capacity = map_size / 2;
+    list->files = xmalloc(capacity*sizeof(*(list->files)));
+
+    FileList dummy = {.length = capacity};
+    brn2_threads(brn2_threads_work_map, &dummy, NULL, NULL, 0);
+    exit(0);
 
     {
         char *begin = map;
@@ -748,6 +751,14 @@ brn2_threads_work_changes(Work *arg, uint32 id) {
         }
         *(work->partial) += 1;
     }
+    return 0;
+}
+
+static void *
+brn2_threads_work_map(Work *arg, uint32 id) {
+    Work *work = arg;
+    (void)id;
+
     return 0;
 }
 
