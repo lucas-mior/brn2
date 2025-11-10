@@ -42,7 +42,7 @@
 #endif
 
 typedef struct Work {
-    void *(*function)(struct Work *);
+    void *(*function)(struct Work *, uint32);
     FileList *old_list;
     FileList *new_list;
     uint32 start;
@@ -52,12 +52,12 @@ typedef struct Work {
     uint32 *partial;
 } Work;
 
-uint32 brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
-                    uint32 *numbers, uint32 map_size);
+uint32 brn2_threads(void *(*function)(Work *, uint32), FileList *old,
+                    FileList *new, uint32 *numbers, uint32 map_size);
 
-static void *brn2_threads_work_hashes(Work *);
-static void *brn2_threads_work_normalization(Work *);
-static void *brn2_threads_work_changes(Work *);
+static void *brn2_threads_work_hashes(Work *, uint32);
+static void *brn2_threads_work_normalization(Work *, uint32);
+static void *brn2_threads_work_changes(Work *, uint32);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
@@ -170,7 +170,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 #if OS_UNIX
 static void *__attribute__((noreturn))
 brn2_threads_function(void *arg) {
-    (void)arg;
+    uint32 *thread_id = arg;
 
     while (true) {
         Work *work;
@@ -196,7 +196,7 @@ brn2_threads_function(void *arg) {
         xpthread_mutex_unlock(&brn2_mutex);
 
         if (work) {
-            work->function(work);
+            work->function(work, *thread_id);
             xpthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
             if (work_pending == 0 && (work_queue.count == 0)) {
@@ -419,7 +419,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
     return;
 }
-void
+static void
 brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
     char *map;
     uint32 length = 0;
@@ -635,10 +635,11 @@ brn2_is_invalid_name(char *filename) {
 }
 
 void *
-brn2_threads_work_normalization(Work *arg) {
+brn2_threads_work_normalization(Work *arg, uint32 id) {
     Work *work = arg;
     FileList *list;
     bool old_list;
+    (void)id;
 
     if (work->new_list) {
         list = work->new_list;
@@ -709,16 +710,18 @@ brn2_slash_add(FileName *file) {
 }
 
 static void *
-brn2_threads_work_sort(Work *arg) {
+brn2_threads_work_sort(Work *arg, uint32 id) {
     Work *work = arg;
     FileName **files = &(work->old_list->files[work->start]);
     qsort(files, work->end - work->start, sizeof(*files), brn2_compare);
+    (void)id;
     return 0;
 }
 
 void *
-brn2_threads_work_hashes(Work *arg) {
+brn2_threads_work_hashes(Work *arg, uint32 id) {
     Work *work = arg;
+    (void)id;
 
     for (uint32 i = work->start; i < work->end; i += 1) {
         FileList *list = work->old_list;
@@ -731,8 +734,9 @@ brn2_threads_work_hashes(Work *arg) {
 }
 
 void *
-brn2_threads_work_changes(Work *arg) {
+brn2_threads_work_changes(Work *arg, uint32 id) {
     Work *work = arg;
+    (void)id;
 
     for (uint32 i = work->start; i < work->end; i += 1) {
         FileName *oldfile = work->old_list->files[i];
@@ -806,7 +810,7 @@ brn2_threads_join(void) {
 }
 
 uint32
-brn2_threads(void *(*function)(Work *), FileList *old, FileList *new,
+brn2_threads(void *(*function)(Work *, uint32), FileList *old, FileList *new,
              uint32 *numbers, uint32 map_size) {
     static Work slices[BRN2_MAX_THREADS];
     uint32 range;
@@ -1134,9 +1138,12 @@ main(void) {
     FileList list2_stack = {0};
     FileList *list1 = &list1_stack;
     FileList *list2 = &list2_stack;
+    uint32 thread_ids[BRN2_MAX_THREADS];
 
     for (uint32 i = 0; i < nthreads; i += 1) {
-        pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
+        thread_ids[i] = i;
+        pthread_create(&thread_pool[i], NULL, brn2_threads_function,
+                       &thread_ids[i]);
     }
 
     {
@@ -1150,10 +1157,6 @@ main(void) {
         system(command);
         brn2_list_from_dir(list1, ".");
         brn2_list_from_file2(list2, file, true);
-
-        for (uint32 i = 0; i < nthreads; i += 1) {
-            pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
-        }
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1178,6 +1181,7 @@ main(void) {
         HashMap *list_map = NULL;
         assert(filelist);
 
+        Arena **arenas = xmalloc(nthreads*sizeof(*arenas));
         list1->arena = arena_create(BRN2_ARENA_SIZE);
 
         system(command);
