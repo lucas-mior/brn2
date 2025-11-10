@@ -506,7 +506,6 @@ brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
     }
     list->files = xrealloc(list->files, global_length*sizeof(*(list->files)));
     list->length = global_length;
-    /* brn2_print_list(list); */
     munmap(map, map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
