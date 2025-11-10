@@ -89,6 +89,7 @@ main(int argc, char **argv) {
     HashMap *oldlist_map = NULL;
     HashSet *newlist_set = NULL;
     uint32 available_threads;
+    uint32 thread_ids[BRN2_MAX_THREADS];
 
     uint32 main_capacity;
     char *EDITOR;
@@ -104,11 +105,6 @@ main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    old = &old_stack;
-    new = &new_stack;
-
-    old->arena = xarena_create(BRN2_ARENA_SIZE);
-    new->arena = xarena_create(BRN2_ARENA_SIZE);
     program = basename(argv[0]);
 
     while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL))
@@ -173,6 +169,14 @@ main(int argc, char **argv) {
         nthreads = MIN(available_threads, BRN2_MAX_THREADS);
     }
 
+    old = &old_stack;
+    new = &new_stack;
+
+    for (uint32 i = 0; i < nthreads; i += 1) {
+        old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+        new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+    }
+
 #if BRN2_MAX_THREADS > 1
     if (nthreads*2 >= old->length) {
         nthreads = 1;
@@ -183,8 +187,9 @@ main(int argc, char **argv) {
 
     for (uint32 i = 0; i < nthreads; i += 1) {
         int err;
+        thread_ids[i] = i;
         if ((err = pthread_create(&thread_pool[i], NULL, brn2_threads_function,
-                                  NULL))) {
+                                  &thread_ids[i]))) {
             error("Error joining thread %u: %s.\n", i, strerror(err));
         }
     }
@@ -515,8 +520,8 @@ main(int argc, char **argv) {
         xmunmap(new->indexes, new->indexes_size);
         hash_destroy_map(oldlist_map);
         hash_destroy_set(newlist_set);
-        arena_destroy(old->arena);
-        arena_destroy(new->arena);
+        arenas_destroy(old->arenas, nthreads);
+        arenas_destroy(new->arenas, nthreads);
     }
 #if OS_WINDOWS
     printf("Press enter to continue.\n");
