@@ -136,7 +136,7 @@ typedef struct FileName {
 } FileName;
 
 typedef struct FileList {
-    Arena *arena;
+    Arena *arenas[BRN2_MAX_THREADS];
     uint32 *indexes;
     int64 indexes_size;
     uint32 length;
