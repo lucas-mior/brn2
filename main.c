@@ -192,7 +192,7 @@ main(int argc, char **argv) {
 
     switch (mode) {
     case FILES_FROM_FILE:
-        brn2_list_from_file(old, lines, true);
+        brn2_list_from_file2(old, lines, true);
         break;
     case FILES_FROM_ARGS:
         brn2_list_from_args(old, argc - optind, &argv[optind]);

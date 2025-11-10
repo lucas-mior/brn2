@@ -419,6 +419,133 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
     return;
 }
+void
+brn2_list_from_file2(FileList *list, char *filename, bool is_old) {
+    char *map;
+    uint32 length = 0;
+    uint32 map_size;
+    uint32 padding;
+    int fd;
+
+    if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
+        error("Reading from stdin...\n");
+        brn2_list_from_lines(list, filename, is_old);
+        return;
+    }
+    if ((fd = open(filename, O_RDWR)) < 0) {
+        error("Error opening '%s' for reading: %s.\n", filename,
+              strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    {
+        struct stat lines_stat;
+        if (fstat(fd, &lines_stat) < 0) {
+            error("Error in fstat(%s): %s.\n", filename, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        if (lseek(fd, 0, SEEK_CUR) < 0 && errno == ESPIPE) {
+            error("Error getting file names: File is not seekable.\n");
+            fatal(EXIT_FAILURE);
+        }
+        if (!S_ISREG(lines_stat.st_mode)) {
+            error("Error getting file names: Not a regular file.\n");
+            fatal(EXIT_FAILURE);
+        }
+        if (lines_stat.st_size <= 0) {
+            error("Error getting file names: File size = %lld.\n",
+                  (llong)lines_stat.st_size);
+            fatal(EXIT_FAILURE);
+        }
+        if (sizeof(lines_stat.st_size) > sizeof(map_size)) {
+            if (lines_stat.st_size >= (int64)UINT32_MAX) {
+                error("Error: File size = %lld.\n", (llong)lines_stat.st_size);
+                fatal(EXIT_FAILURE);
+            }
+        }
+        map_size = (uint32)lines_stat.st_size;
+    }
+    padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
+    map_size += padding;
+    if (ftruncate(fd, map_size) < 0) {
+        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size,
+              strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    map = mmap(NULL, map_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    if (map == MAP_FAILED) {
+        error("Error mapping history file to memory: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    {
+        uint32 capacity = map_size / 2;
+        list->files = xmalloc(capacity*sizeof(*(list->files)));
+    }
+
+    {
+        char *begin = map;
+        char *pointer = map;
+        int64 left = map_size - padding;
+
+        assert((pointer + left) == (map + map_size - padding));
+
+        while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
+            FileName **file_pointer = &(list->files[length]);
+            FileName *file;
+            uint32 size;
+            uint16 name_length = (uint16)(pointer - begin);
+
+            *pointer = '\0';
+            if (is_old && brn2_is_invalid_name(begin)) {
+                begin = pointer + 1;
+                left -= (name_length + 1);
+                continue;
+            }
+            if (begin == pointer) {
+                error("Empty line in file. Exiting.\n");
+                fatal(EXIT_FAILURE);
+            }
+
+            size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
+            *file_pointer = xarena_push(list->arena, ALIGN(size));
+
+            file = *file_pointer;
+            file->length = name_length;
+            memcpy64(file->name, begin, name_length + 1);
+
+            begin = pointer + 1;
+            pointer += 1;
+            length += 1;
+            left -= (name_length + 1);
+            if (length >= (UINT32_MAX / 1000)) {
+                if (length % 100000 == 0) {
+                    error("Read %u files...\n", length);
+                }
+            }
+        }
+    }
+
+    if (length == 0) {
+        error("Empty list. Exiting.\n");
+        fatal(EXIT_FAILURE);
+    }
+    list->files = xrealloc(list->files, length*sizeof(*(list->files)));
+    list->length = length;
+    munmap(map, map_size);
+
+    if (ftruncate(fd, map_size - padding) < 0) {
+        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size - padding,
+              strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    if (close(fd) < 0) {
+        error("Error closing '%s': %s.\n", filename, strerror(errno));
+    }
+
+    return;
+}
 #else
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
@@ -1022,7 +1149,7 @@ main(void) {
 
         system(command);
         brn2_list_from_dir(list1, ".");
-        brn2_list_from_file(list2, file, true);
+        brn2_list_from_file2(list2, file, true);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
@@ -1055,7 +1182,7 @@ main(void) {
 
         system(command);
 
-        brn2_list_from_file(list1, filelist, true);
+        brn2_list_from_file2(list1, filelist, true);
         brn2_normalize_names(list1, NULL);
 
         list_map = hash_create_map(list1->length);
