@@ -1072,6 +1072,9 @@ main(void) {
             hash = hash_function(file->name, file->length);
             assert(file->hash == hash);
             assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+
+            assert(hash_insert_pre_calc_map(list_map, file->name, hash,
+                                            list1->indexes[i], 0));
         }
 
         brn2_free_list(list1);
