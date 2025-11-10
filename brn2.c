@@ -1046,14 +1046,14 @@ main(void) {
 
     {
         char *command = "find . > /tmp/brn2test";
-        char *file = memchr(command, '/', strlen(command));
-        assert(file);
+        char *filelist = memchr(command, '/', strlen(command));
+        assert(filelist);
 
         list1->arena = arena_create(BRN2_ARENA_SIZE);
 
         system(command);
 
-        brn2_list_from_file(list1, file, true);
+        brn2_list_from_file(list1, filelist, true);
         brn2_normalize_names(list1, NULL);
 
         for (uint32 i = 0; i < list1->length; i += 1) {
@@ -1062,7 +1062,7 @@ main(void) {
         }
 
         brn2_free_list(list1);
-        unlink(file);
+        unlink(filelist);
     }
 
     brn2_threads_join();
