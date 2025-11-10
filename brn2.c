@@ -1008,37 +1008,64 @@ main(void) {
     FileList *list1 = &list1_stack;
     FileList *list2 = &list2_stack;
 
-    char *command = "ls -a > /tmp/brn2test";
-    char *file = memchr(command, '/', strlen(command));
-    assert(file);
-
-    list1->arena = arena_create(BRN2_ARENA_SIZE);
-    list2->arena = arena_create(BRN2_ARENA_SIZE);
-
-    system(command);
-    brn2_list_from_dir(list1, ".");
-    brn2_list_from_file(list2, file, true);
-
     for (uint32 i = 0; i < nthreads; i += 1) {
         pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
     }
 
-    brn2_normalize_names(list1, NULL);
-    brn2_normalize_names(list2, NULL);
+    {
+        char *command = "ls -a > /tmp/brn2test";
+        char *file = memchr(command, '/', strlen(command));
+        assert(file);
 
-    assert(list1->length == list2->length);
+        list1->arena = arena_create(BRN2_ARENA_SIZE);
+        list2->arena = arena_create(BRN2_ARENA_SIZE);
 
-    for (uint32 i = 0; i < list1->length; i += 1) {
-        printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-        assert(contains_filename(list2, list1->files[i], list1->length < 9999));
+        system(command);
+        brn2_list_from_dir(list1, ".");
+        brn2_list_from_file(list2, file, true);
+
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            pthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
+        }
+
+        brn2_normalize_names(list1, NULL);
+        brn2_normalize_names(list2, NULL);
+
+        assert(list1->length == list2->length);
+
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            printf(RED "%u / %u\n" RESET, i + 1, list1->length);
+            assert(contains_filename(list2, list1->files[i],
+                                     list1->length < 9999));
+        }
+
+        brn2_free_list(list1);
+        brn2_free_list(list2);
+        unlink(file);
     }
 
-    brn2_free_list(list1);
-    brn2_free_list(list2);
+    {
+        char *command = "find . > /tmp/brn2test";
+        char *file = memchr(command, '/', strlen(command));
+        assert(file);
+
+        list1->arena = arena_create(BRN2_ARENA_SIZE);
+
+        system(command);
+
+        brn2_list_from_file(list1, file, true);
+        brn2_normalize_names(list1, NULL);
+
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            FileName *file = list1->files[i];
+            assert(file->length == strlen(file->name));
+        }
+
+        brn2_free_list(list1);
+        unlink(file);
+    }
 
     brn2_threads_join();
-
-    unlink(file);
     exit(0);
 }
 #endif
