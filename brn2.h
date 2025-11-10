@@ -162,9 +162,6 @@ extern int (*print)(const char *, ...);
 
 int brn2_compare(const void *, const void *);
 void brn2_list_from_dir(FileList *, char *);
-#if OS_UNIX
-void brn2_list_from_dir_recurse(FileList *, char *);
-#endif
 void brn2_list_from_file(FileList *, char *, bool);
 void brn2_list_from_args(FileList *, int, char **);
 void brn2_normalize_names(FileList *, FileList *);
