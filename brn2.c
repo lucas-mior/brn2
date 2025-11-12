@@ -168,10 +168,15 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
-        uint16 name_length = (uint16)strlen64(name);
+        int64 name_length = strlen64(name);
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         uint32 size;
+
+        if (name_length >= MAXOF(file->length)) {
+            error("Error in arg %d: argument too long\n", i);
+            fatal(EXIT_FAILURE);
+        }
 
         if (brn2_is_invalid_name(name)) {
             continue;
@@ -181,7 +186,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
         file = *file_pointer;
 
-        file->length = (uint16)strlen64(name);
+        file->length = (uint16)name_length;
         memcpy64(file->name, name, name_length + 1);
 
         length += 1;
