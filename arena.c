@@ -158,7 +158,7 @@ arena_create(int64 size) {
     void *p;
     Arena *arena;
 
-    if (size < 0) {
+    if (size <= 0) {
         return NULL;
     }
     if ((p = arena_allocate(&size)) == NULL) {
