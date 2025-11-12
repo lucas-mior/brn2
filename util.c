@@ -207,15 +207,15 @@ _Generic((VARIABLE),                   \
 
 #define MAXOF(VARIABLE)            \
 _Generic((VARIABLE),                   \
-  int8:        INT8_MAX, \
-  int16:       INT16_MAX, \
-  int32:       INT32_MAX, \
-  int64:       INT64_MAX, \
-  uint8:       UINT8_MAX, \
-  uint16:      UINT16_MAX, \
-  uint32:      UINT32_MAX, \
-  uint64:      UINT64_MAX, \
-  char:        CHAR_MAX, \
+  int8:        (int64)INT8_MAX, \
+  int16:       (int64)INT16_MAX, \
+  int32:       (int64)INT32_MAX, \
+  int64:       (int64)INT64_MAX, \
+  uint8:       (int64)UINT8_MAX, \
+  uint16:      (int64)UINT16_MAX, \
+  uint32:      (int64)UINT32_MAX, \
+  uint64:      (uint64)UINT64_MAX, \
+  char:        (int64)CHAR_MAX, \
   bool:        1, \
   float:       FLT_MAX, \
   double:      DBL_MAX, \

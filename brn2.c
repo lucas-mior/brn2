@@ -161,7 +161,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     list->files = xmalloc(argc*SIZEOF(*(list->files)));
 
     if ((__typeof__(list->length))argc >= MAXOF(list->length)) {
-        error("List can't hold more than %u names.\n", MAXOF(list->length));
+        error("List can't hold more than %lld names.\n", (llong)MAXOF(list->length));
         fatal(EXIT_FAILURE);
     }
 
@@ -353,7 +353,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                   (llong)lines_stat.st_size);
             fatal(EXIT_FAILURE);
         }
-        if (sizeof(lines_stat.st_size) > sizeof(map_size)) {
+        if (MAXOF(lines_stat.st_size) > MAXOF(map_size)) {
             if (lines_stat.st_size >= (int64)MAXOF(list->length)) {
                 error("Error: File size = %lld.\n", (llong)lines_stat.st_size);
                 fatal(EXIT_FAILURE);
@@ -501,8 +501,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         length += 1;
         errno = 0;
         if (length >= MAXOF(list->length)) {
-            error("Error: more than %u files being renamed.\n",
-                  MAXOF(list->length));
+            error("Error: more than %lld files being renamed.\n",
+                  (llong)MAXOF(list->length));
             fatal(EXIT_FAILURE);
         }
     }
