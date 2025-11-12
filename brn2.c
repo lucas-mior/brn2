@@ -306,7 +306,7 @@ brn2_free_list(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName *file = list->files[i];
             (void)file;
-            assert(arenas_pop(list->arenas, nthreads, file) == 0);
+            assert(arenas_pop(list->arenas, nthreads, file));
         }
     }
     free(list->files);
@@ -987,7 +987,6 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_brn2
 #include <assert.h>
-#include "sort.c"
 
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
