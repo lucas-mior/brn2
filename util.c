@@ -1216,13 +1216,6 @@ main(void) {
     PRINT_VAR(int_max);
     PRINT_VAR(int_min);
 
-#if defined(__GNUC__) || defined(__clang__)
-    __uint128_t var_uint128 = 0;
-    __int128_t var_int128 = 0;
-    PRINT_VAR(var_uint128);
-    PRINT_VAR(var_int128);
-#endif
-
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
     memset64(p2, 0, SIZEMB(1));
