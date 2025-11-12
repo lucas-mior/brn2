@@ -1068,9 +1068,7 @@ main(void) {
         uint32 capacity_set;
         HashMap *list_map = NULL;
 
-        SNPRINTF(command, "ls -a | grep -v '^\\.\\.\?/\?$' > %s", filelist);
-
-        assert(filelist);
+        SNPRINTF(command, "find . | grep -v '^\\.\\.\?/\?$' > %s", filelist);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
@@ -1079,7 +1077,16 @@ main(void) {
         system(command);
 
         brn2_list_from_file(list1, filelist, true);
+        brn2_list_from_lines(list2, filelist, true);
+
         brn2_normalize_names(list1, NULL);
+        brn2_normalize_names(list2, NULL);
+
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            printf(RED "%u / %u\n" RESET, i + 1, list1->length);
+            assert(contains_filename(list2, list1->files[i],
+                                     list1->length < 9999));
+        }
 
         list_map = hash_create_map(list1->length);
         capacity_set = hash_capacity(list_map);
@@ -1098,6 +1105,17 @@ main(void) {
 
             assert(hash_insert_pre_calc_map(list_map, file->name, hash,
                                             list1->indexes[i], 0));
+        }
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            FileName *file = list1->files[i];
+            uint64 hash;
+            assert(file->length == strlen(file->name));
+            hash = hash_function(file->name, file->length);
+            assert(file->hash == hash);
+            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+
+            assert(hash_remove_pre_calc_map(list_map, file->name, hash,
+                                            list1->indexes[i]));
         }
 
         brn2_free_list(list1);
