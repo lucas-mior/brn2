@@ -1040,7 +1040,7 @@ main(void) {
     {
         char command[256];
         char *filelist = "/tmp/brn2test";
-        SNPRINTF(command, "ls -a | grep -v '^\\.\\.\?/\?$' > %s", filelist);
+        SNPRINTF(command, "ls -a > %s", filelist);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
@@ -1073,7 +1073,7 @@ main(void) {
         uint32 capacity_set;
         HashMap *list_map = NULL;
 
-        SNPRINTF(command, "find . | grep -v '^\\.\\.\?/\?$' > %s", filelist);
+        SNPRINTF(command, "find . > %s", filelist);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
@@ -1137,7 +1137,7 @@ main(void) {
         uint32 capacity_set;
         HashMap *list_map = NULL;
 
-        SNPRINTF(command, "ls *.c | grep -v '^\\.\\.\?/\?$' > %s", filelist);
+        SNPRINTF(command, "ls *.c > %s", filelist);
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
