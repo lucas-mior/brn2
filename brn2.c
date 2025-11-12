@@ -158,7 +158,7 @@ void
 brn2_list_from_args(FileList *list, int argc, char **argv) {
     uint32 length = 0;
 
-    if ((int64)argc >= MAXOF(list->length)) {
+    if ((uint64)argc >= (uint64)MAXOF(list->length)) {
         error("List can't hold more than %lld names.\n",
               (llong)MAXOF(list->length));
         fatal(EXIT_FAILURE);
