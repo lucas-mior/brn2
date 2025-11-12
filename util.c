@@ -180,6 +180,44 @@ _Generic((VARIABLE),                   \
   default:     printf("%s = ?\n", #VARIABLE) \
 )
 
+#define MAXOF(VARIABLE)            \
+_Generic((VARIABLE),                   \
+  int8:        INT8_MAX, \
+  int16:       INT16_MAX, \
+  int32:       INT32_MAX, \
+  int64:       INT64_MAX, \
+  uint8:       INT8_MAX, \
+  uint16:      INT16_MAX, \
+  uint32:      INT32_MAX, \
+  uint64:      INT64_MAX, \
+  char:        CHAR_MAX, \
+  bool:        BOOL_MAX, \
+  float:       FLT_MAX, \
+  double:      DBL_MAX, \
+  long double: LDBL_MAX, \
+  default:     0 \
+)
+
+/* #define MAXOF(VARIABLE) \ */
+/*     (__typeof__(VARIABLE)){ \ */
+/*         _Generic((VARIABLE), \ */
+/*             int8_t:        INT8_MAX, \ */
+/*             int16_t:       INT16_MAX, \ */
+/*             int32_t:       INT32_MAX, \ */
+/*             int64_t:       INT64_MAX, \ */
+/*             uint8_t:       UINT8_MAX, \ */
+/*             uint16_t:      UINT16_MAX, \ */
+/*             uint32_t:      UINT32_MAX, \ */
+/*             uint64_t:      UINT64_MAX, \ */
+/*             bool:          BOOL_MAX, \ */
+/*             char:          CHAR_MAX, \ */
+/*             float:         FLT_MAX, \ */
+/*             double:        DBL_MAX, \ */
+/*             long double:   LDBL_MAX, \ */
+/*             default:       0 \ */
+/*         ) \ */
+/*     } */
+
 #endif
 // clang-format on
 
@@ -1173,6 +1211,12 @@ main(void) {
     PRINT_VAR(var_float);
     PRINT_VAR(var_double);
     PRINT_VAR(var_longdouble);
+
+    int int_max = MAXOF(var_int);
+    PRINT_VAR(int_max);
+
+    /* PRINT_VAR(MAXOF(var_float)); */
+    /* PRINT_VAR(MAXOF(var_bool)); */
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
