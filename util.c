@@ -180,16 +180,23 @@ _Generic((VARIABLE),                   \
   default:     printf("%s = ?\n", #VARIABLE) \
 )
 
+#endif
+// clang-format on
+
+#if !defined(DEBUGGING)
+#define DEBUGGING 0
+#endif
+
 #define MINOF(VARIABLE)            \
 _Generic((VARIABLE),                   \
   int8:        INT8_MIN, \
   int16:       INT16_MIN, \
   int32:       INT32_MIN, \
   int64:       INT64_MIN, \
-  uint8:       INT8_MIN, \
-  uint16:      INT16_MIN, \
-  uint32:      INT32_MIN, \
-  uint64:      INT64_MIN, \
+  uint8:       0, \
+  uint16:      0, \
+  uint32:      0, \
+  uint64:      0, \
   char:        CHAR_MIN, \
   bool:        0, \
   float:       FLT_MIN, \
@@ -204,24 +211,17 @@ _Generic((VARIABLE),                   \
   int16:       INT16_MAX, \
   int32:       INT32_MAX, \
   int64:       INT64_MAX, \
-  uint8:       INT8_MAX, \
-  uint16:      INT16_MAX, \
-  uint32:      INT32_MAX, \
-  uint64:      INT64_MAX, \
+  uint8:       UINT8_MAX, \
+  uint16:      UINT16_MAX, \
+  uint32:      UINT32_MAX, \
+  uint64:      UINT64_MAX, \
   char:        CHAR_MAX, \
-  bool:        BOOL_MAX, \
+  bool:        1, \
   float:       FLT_MAX, \
   double:      DBL_MAX, \
   long double: LDBL_MAX, \
   default:     0 \
 )
-
-#endif
-// clang-format on
-
-#if !defined(DEBUGGING)
-#define DEBUGGING 0
-#endif
 
 #if !defined(FLAGS_HUGE_PAGES)
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
