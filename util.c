@@ -1184,7 +1184,6 @@ main(void) {
     uint32 var_uint32 = UINT32_MAX;
     uint var_uint = UINT_MAX;
     uint64 var_uint64 = UINT64_MAX;
-
     char *paths[] = {
         "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
         "a/b/cccc",        "a/bb/cccc", "aaaa/cccc",
@@ -1213,9 +1212,14 @@ main(void) {
     PRINT_VAR(var_longdouble);
 
     int_max = MAXOF(var_int);
-    PRINT_VAR(int_max);
     int_min = MINOF(var_int);
+    PRINT_VAR(int_max);
     PRINT_VAR(int_min);
+
+#if defined(__GNUC__) || defined(__clang__)
+    __uint128_t var_uint128 = 0;
+    PRINT_VAR(var_uint128);
+#endif
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
