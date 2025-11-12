@@ -1165,6 +1165,10 @@ main(void) {
             argv[argc][strcspn(argv[argc], "\n")] = '\0';
             argc += 1;
         }
+        if (fclose(args) != 0) {
+            error("Error closing %s: %s.\n", filelist, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
         brn2_list_from_args(list2, argc, argv);
         brn2_print_list(list2);
 
