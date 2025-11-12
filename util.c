@@ -407,7 +407,7 @@ X64(read, SIZE_MAX, size_t)
 
 #define X64(func) \
     INLINE int64 \
-CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) {\
+CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
     assert(size >= 0); \
     assert(n >= 0); \
