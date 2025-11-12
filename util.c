@@ -1196,9 +1196,6 @@ main(void) {
     int_max = MAXOF(var_int);
     PRINT_VAR(int_max);
 
-    /* PRINT_VAR(MAXOF(var_float)); */
-    /* PRINT_VAR(MAXOF(var_bool)); */
-
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
     memset64(p2, 0, SIZEMB(1));
