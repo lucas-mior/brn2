@@ -354,7 +354,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             fatal(EXIT_FAILURE);
         }
         if (sizeof(lines_stat.st_size) > sizeof(map_size)) {
-            if (lines_stat.st_size >= (int64)UINT32_MAX) {
+            if (lines_stat.st_size >= (int64)MAXOF(list->length)) {
                 error("Error: File size = %lld.\n", (llong)lines_stat.st_size);
                 fatal(EXIT_FAILURE);
             }
@@ -417,7 +417,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             pointer += 1;
             length += 1;
             left -= (name_length + 1);
-            if (length >= (UINT32_MAX / 1000)) {
+            if (length >= (MAXOF(length) / 1000)) {
                 if (length % 100000 == 0) {
                     error("Read %u files...\n", length);
                 }
@@ -500,8 +500,9 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         length += 1;
         errno = 0;
-        if (length >= UINT32_MAX) {
-            error("Error: more than %u files being renamed.\n", UINT32_MAX);
+        if (length >= MAXOF(list->length)) {
+            error("Error: more than %u files being renamed.\n",
+                  MAXOF(list->length));
             fatal(EXIT_FAILURE);
         }
     }
