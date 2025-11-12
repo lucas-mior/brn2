@@ -180,6 +180,24 @@ _Generic((VARIABLE),                   \
   default:     printf("%s = ?\n", #VARIABLE) \
 )
 
+#define MINOF(VARIABLE)            \
+_Generic((VARIABLE),                   \
+  int8:        INT8_MIN, \
+  int16:       INT16_MIN, \
+  int32:       INT32_MIN, \
+  int64:       INT64_MIN, \
+  uint8:       INT8_MIN, \
+  uint16:      INT16_MIN, \
+  uint32:      INT32_MIN, \
+  uint64:      INT64_MIN, \
+  char:        CHAR_MIN, \
+  bool:        0, \
+  float:       FLT_MIN, \
+  double:      DBL_MIN, \
+  long double: LDBL_MIN, \
+  default:     0 \
+)
+
 #define MAXOF(VARIABLE)            \
 _Generic((VARIABLE),                   \
   int8:        INT8_MAX, \
@@ -1148,6 +1166,7 @@ main(void) {
     char *string = __FILE__;
 
     int int_max;
+    int int_min;
     bool var_bool = true;
     char var_char = 'c';
     char *var_string = "a nice string";
@@ -1195,6 +1214,8 @@ main(void) {
 
     int_max = MAXOF(var_int);
     PRINT_VAR(int_max);
+    int_min = MINOF(var_int);
+    PRINT_VAR(int_min);
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
