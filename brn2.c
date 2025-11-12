@@ -1128,7 +1128,7 @@ main(void) {
     }
     {
         int argc = 0;
-        int capacity = 128;
+        int64 capacity = 128;
         char **argv;
         FILE *args;
 
@@ -1147,17 +1147,17 @@ main(void) {
 
         brn2_list_from_file(list1, filelist, true);
 
-        argv = xmalloc(capacity*sizeof(*argv));
+        argv = xmalloc(capacity*SIZEOF(*argv));
         for (int i = 0; i < capacity; i += 1) {
-            argv[i] = xmalloc(capacity*sizeof(char));
+            argv[i] = xmalloc(capacity*SIZEOF(*argv[i]));
         }
 
-        args = fopen(filelist, "r");
-        if (!args) {
-            exit(EXIT_FAILURE);
+        if ((args = fopen(filelist, "r")) == NULL) {
+            error("Error opening %s: %s.\n", filelist, strerror(errno));
+            fatal(EXIT_FAILURE);
         }
 
-        while (fgets(argv[argc], capacity, args)) {
+        while (fgets(argv[argc], (int)capacity, args)) {
             if (argc >= capacity) {
                 error("Arguments file too long\n");
                 fatal(EXIT_FAILURE);
