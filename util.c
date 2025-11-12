@@ -357,8 +357,9 @@ X64(memmove)
 INLINE void
 memset64(void *buffer, int value, int64 size) {
     assert(size > 0);
-    if (size == 0)
+    if (size == 0) {
         return;
+    }
     assert((uint64)size <= SIZE_MAX);
     memset(buffer, value, (size_t)size);
     return;
