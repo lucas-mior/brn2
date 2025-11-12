@@ -1147,6 +1147,7 @@ main(void) {
     char *p3;
     char *string = __FILE__;
 
+    int int_max;
     bool var_bool = true;
     char var_char = 'c';
     char *var_string = "a nice string";
@@ -1192,7 +1193,7 @@ main(void) {
     PRINT_VAR(var_double);
     PRINT_VAR(var_longdouble);
 
-    int int_max = MAXOF(var_int);
+    int_max = MAXOF(var_int);
     PRINT_VAR(int_max);
 
     /* PRINT_VAR(MAXOF(var_float)); */
