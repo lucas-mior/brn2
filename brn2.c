@@ -158,13 +158,13 @@ void
 brn2_list_from_args(FileList *list, int argc, char **argv) {
     uint32 length = 0;
 
-    list->files = xmalloc(argc*SIZEOF(*(list->files)));
-
     if ((int64)argc >= MAXOF(list->length)) {
         error("List can't hold more than %lld names.\n",
               (llong)MAXOF(list->length));
         fatal(EXIT_FAILURE);
     }
+
+    list->files = xmalloc(argc*SIZEOF(*(list->files)));
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
