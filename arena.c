@@ -127,7 +127,7 @@ typedef struct Arena {
 
 static void *arena_allocate(int64 *);
 static void arena_free(Arena *);
-static int64 arena_pop(Arena *arena, void *p);
+static bool arena_pop(Arena *arena, void *p);
 
 static int64 arena_page_size = 0;
 
@@ -356,20 +356,20 @@ arena_of(Arena *arena, void *p) {
     return NULL;
 }
 
-static int64
+static bool
 arenas_pop(Arena **arenas, uint32 number, void *p) {
     for (uint32 i = 0; i < number; i += 1) {
-        if (arena_pop(arenas[i], p) == 0) {
-            return 0;
+        if (arena_pop(arenas[i], p)) {
+            return true;
         }
     }
-    return -1;
+    return false;
 }
 
-static int64
+static bool
 arena_pop(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
-        return -1;
+        return false;
     }
 
     arena->npushed -= 1;
@@ -377,7 +377,7 @@ arena_pop(Arena *arena, void *p) {
     if (arena->npushed == 0) {
         arena->pos = arena->begin;
     }
-    return 0;
+    return true;
 }
 
 static int64
@@ -479,7 +479,7 @@ main(void) {
             uint32 j = (uint32)rand() % LENGTH(objs);
             uint32 k = (uint32)rand() % LENGTH(objs);
             if (objs[j]) {
-                assert(arena_pop(arena, objs[j]) == 0);
+                assert(arena_pop(arena, objs[j]));
                 objs[j] = NULL;
                 nallocated -= 1;
             }
@@ -492,7 +492,7 @@ main(void) {
             assert(a->npushed == 0);
         }
 
-        assert(arena_pop(arena, &aux) < 0);
+        assert(!arena_pop(arena, &aux));
     }
 
     arena_reset(arena);
@@ -508,8 +508,8 @@ main(void) {
         assert(arena->next != NULL);
         assert(arena_of(arena, p1) != arena_of(arena, p2));
 
-        assert(arena_pop(arena, p1) == 0);
-        assert(arena_pop(arena, p2) == 0);
+        assert(arena_pop(arena, p1));
+        assert(arena_pop(arena, p2));
         assert(arena->npushed == 0);
     }
 
@@ -527,9 +527,9 @@ main(void) {
         assert(arena->npushed == 2);
         assert(arena_of(arena, p3) == arena_of(arena, p4));
 
-        assert(arena_pop(arena, p3) == 0);
+        assert(arena_pop(arena, p3));
         assert(arena->npushed == 1);
-        assert(arena_pop(arena, p4) == 0);
+        assert(arena_pop(arena, p4));
         assert(arena->npushed == 0);
     }
 
