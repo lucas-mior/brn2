@@ -198,26 +198,6 @@ _Generic((VARIABLE),                   \
   default:     0 \
 )
 
-/* #define MAXOF(VARIABLE) \ */
-/*     (__typeof__(VARIABLE)){ \ */
-/*         _Generic((VARIABLE), \ */
-/*             int8_t:        INT8_MAX, \ */
-/*             int16_t:       INT16_MAX, \ */
-/*             int32_t:       INT32_MAX, \ */
-/*             int64_t:       INT64_MAX, \ */
-/*             uint8_t:       UINT8_MAX, \ */
-/*             uint16_t:      UINT16_MAX, \ */
-/*             uint32_t:      UINT32_MAX, \ */
-/*             uint64_t:      UINT64_MAX, \ */
-/*             bool:          BOOL_MAX, \ */
-/*             char:          CHAR_MAX, \ */
-/*             float:         FLT_MAX, \ */
-/*             double:        DBL_MAX, \ */
-/*             long double:   LDBL_MAX, \ */
-/*             default:       0 \ */
-/*         ) \ */
-/*     } */
-
 #endif
 // clang-format on
 
