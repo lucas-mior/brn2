@@ -1126,6 +1126,90 @@ main(void) {
         brn2_free_list(list1);
         unlink(filelist);
     }
+    {
+        int argc = 0;
+        int capacity = 128;
+        char **argv;
+        FILE *args;
+
+        char command[256];
+        char *filelist = "/tmp/brn2test";
+        uint32 capacity_set;
+        HashMap *list_map = NULL;
+
+        SNPRINTF(command, "ls *.c | grep -v '^\\.\\.\?/\?$' > %s", filelist);
+
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+        }
+
+        system(command);
+
+        brn2_list_from_file(list1, filelist, true);
+
+        argv = xmalloc(capacity*sizeof(*argv));
+        for (int i = 0; i < capacity; i += 1) {
+            argv[i] = xmalloc(capacity*sizeof(char));
+        }
+
+        args = fopen(filelist, "r");
+        if (!args) {
+            exit(EXIT_FAILURE);
+        }
+
+        while (fgets(argv[argc], capacity, args)) {
+            if (argc >= capacity) {
+                error("Arguments file too long\n");
+                fatal(EXIT_FAILURE);
+            }
+            argv[argc][strcspn(argv[argc], "\n")] = '\0';
+            argc += 1;
+        }
+        brn2_list_from_args(list2, argc, argv);
+        brn2_print_list(list2);
+
+        brn2_normalize_names(list1, NULL);
+        brn2_normalize_names(list2, NULL);
+
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            printf(RED "%u / %u\n" RESET, i + 1, list1->length);
+            assert(contains_filename(list2, list1->files[i],
+                                     list1->length < 9999));
+        }
+
+        list_map = hash_create_map(list1->length);
+        capacity_set = hash_capacity(list_map);
+        list1->indexes_size = list1->length*sizeof(*(list1->indexes));
+        list1->indexes = xmmap_commit(&(list1->indexes_size));
+        brn2_create_hashes(list1, capacity_set);
+
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            FileName *file = list1->files[i];
+            uint64 hash;
+
+            assert(file->length == strlen(file->name));
+            hash = hash_function(file->name, file->length);
+            assert(file->hash == hash);
+            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+
+            assert(hash_insert_pre_calc_map(list_map, file->name, hash,
+                                            list1->indexes[i], 0));
+        }
+        for (uint32 i = 0; i < list1->length; i += 1) {
+            FileName *file = list1->files[i];
+            uint64 hash;
+            assert(file->length == strlen(file->name));
+            hash = hash_function(file->name, file->length);
+            assert(file->hash == hash);
+            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+
+            assert(hash_remove_pre_calc_map(list_map, file->name, hash,
+                                            list1->indexes[i]));
+        }
+
+        brn2_free_list(list1);
+        unlink(filelist);
+    }
 
     brn2_threads_join();
     exit(EXIT_SUCCESS);
