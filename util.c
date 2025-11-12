@@ -1218,7 +1218,9 @@ main(void) {
 
 #if defined(__GNUC__) || defined(__clang__)
     __uint128_t var_uint128 = 0;
+    __int128_t var_int128 = 0;
     PRINT_VAR(var_uint128);
+    PRINT_VAR(var_int128);
 #endif
 
     memset64(p1, 0, SIZEMB(1));
