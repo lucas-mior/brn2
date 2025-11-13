@@ -539,7 +539,7 @@ xmmap_commit(int64 *size) {
         *size = UTIL_ALIGN(*size, util_page_size);
     } while (0);
     if (p == MAP_FAILED) {
-        error("Error in mmap(%zu): %s.\n", *size, strerror(errno));
+        error("Error in mmap(%lld): %s.\n", (llong)*size, strerror(errno));
         fatal(EXIT_FAILURE);
     }
     return p;
