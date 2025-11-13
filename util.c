@@ -558,9 +558,9 @@ xmmap_commit(int64 *size) {
     void *p;
 
     if (util_page_size == 0) {
-        SYSTEM_INFO si;
-        GetSystemInfo(&si);
-        util_page_size = si.dwPageSize;
+        SYSTEM_INFO system_info;
+        GetSystemInfo(&system_info);
+        util_page_size = system_info.dwPageSize;
         if (util_page_size <= 0) {
             fprintf(stderr, "Error getting page size.\n");
             fatal(EXIT_FAILURE);
