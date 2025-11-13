@@ -247,7 +247,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
 
     if (strcmp(directory, ".")) {
         int64 len = strlen64(directory);
-        if (len >= UINT16_MAX) {
+        if (len >= MAXOF(directory_length)) {
             error("Error: directory name too long.\n");
             fatal(EXIT_FAILURE);
         }
@@ -268,13 +268,17 @@ brn2_list_from_dir(FileList *list, char *directory) {
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         char *name = directory_list[i]->d_name;
-        uint16 name_length = (uint16)strlen64(name);
+        int64 name_length = strlen64(name);
         uint32 size;
 
         if (brn2_is_invalid_name(name)) {
             if (DEBUGGING) {
                 free(directory_list[i]);
             }
+            continue;
+        }
+        if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
+            error("File name too long. Skipping...\n");
             continue;
         }
 
@@ -284,7 +288,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = directory_length + 1 + name_length;
+            file->length = (uint16)(directory_length + 1 + name_length);
             memcpy64(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy64(file->name + directory_length + 1, name, name_length + 1);
@@ -293,7 +297,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = name_length;
+            file->length = (uint16)name_length;
             memcpy64(file->name, name, file->length + 1);
         }
 
