@@ -191,8 +191,7 @@ main(int argc, char **argv) {
         brn2_list_from_dir(old, directory);
         break;
     default:
-        error("Unexpected mode: %d.\n", mode);
-        fatal(EXIT_FAILURE);
+        brn2_usage(stderr);
     }
 
     if (old->length == 0) {
