@@ -344,6 +344,8 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 #define X64(func) \
   INLINE void \
       CAT(func, 64)(void *dest, void *source, int64 size) { \
+      if (size == 0) \
+          return; \
       assert(size > 0); \
       assert((uint64)size <= SIZE_MAX); \
       func(dest, source, (size_t)size); \
