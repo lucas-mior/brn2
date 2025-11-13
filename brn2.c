@@ -183,7 +183,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
             continue;
         }
 
-        size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
+        size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
         *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
         file = *file_pointer;
 
@@ -279,7 +279,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
 
         if (directory_length) {
-            size = STRUCT_ARRAY_SIZE(*file_pointer, char,
+            size = STRUCT_ARRAY_SIZE(file, char,
                                      directory_length + 1 + name_length + 2);
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
@@ -289,7 +289,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             file->name[directory_length] = '/';
             memcpy64(file->name + directory_length + 1, name, name_length + 1);
         } else {
-            size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
+            size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
@@ -501,7 +501,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
                 = xrealloc(list->files, capacity*sizeof(*(list->files)));
         }
 
-        size = STRUCT_ARRAY_SIZE(*file_pointer, char, name_length + 2);
+        size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
 
         file_pointer = &(list->files[length]);
         *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
