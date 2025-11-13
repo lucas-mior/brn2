@@ -525,7 +525,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    if (fclose(lines)) {
+    if (fclose(lines) != 0) {
         error("Error closing file %s: %s.\n", filename, strerror(errno));
     }
     if (length == 0) {
