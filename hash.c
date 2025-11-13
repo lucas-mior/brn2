@@ -546,6 +546,7 @@ main(void) {
         HASH_PRINT_SUMMARY_map(map);
     }
 
+    hash_destroy_map(map);
     free(strings);
 
     exit(EXIT_SUCCESS);
