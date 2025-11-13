@@ -195,6 +195,11 @@ main(int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
+    if (old->length == 0) {
+        error("Empty list. Exiting.\n");
+        fatal(EXIT_FAILURE);
+    }
+
 #if BRN2_MAX_THREADS > 1
     if (nthreads*2 >= old->length) {
         nthreads = 1;
