@@ -1174,7 +1174,6 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
         brn2_list_from_args(list2, argc, argv);
-        brn2_print_list(list2);
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
