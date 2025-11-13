@@ -514,12 +514,12 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         memcpy64(file->name, buffer, file->length + 1);
 
         length += 1;
-        errno = 0;
         if (length >= MAXOF(list->length)) {
             error("Error: more than %lld files being renamed.\n",
                   (llong)MAXOF(list->length));
             break;
         }
+        errno = 0;
     }
     if (errno) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
