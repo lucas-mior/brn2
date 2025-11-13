@@ -347,7 +347,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             error("Error in fstat(%s): %s.\n", filename, strerror(errno));
             fatal(EXIT_FAILURE);
         }
-        if (lseek(fd, 0, SEEK_CUR) < 0 && errno == ESPIPE) {
+        if ((lseek(fd, 0, SEEK_CUR) < 0) && (errno == ESPIPE)) {
             error("File is not seekable.\n");
             if (close(fd) < 0) {
                 error("Error closing %s: %s.\n", filename, strerror(errno));
