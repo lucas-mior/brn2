@@ -330,7 +330,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     uint32 padding;
     int fd;
 
-    if (!strcmp(filename, "-") || !strcmp(filename, "/dev/stdin")) {
+    if (!strcmp(filename, "-")) {
         error("Reading from stdin...\n");
         brn2_list_from_lines(list, filename, is_old);
         return;
@@ -348,8 +348,12 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             fatal(EXIT_FAILURE);
         }
         if (lseek(fd, 0, SEEK_CUR) < 0 && errno == ESPIPE) {
-            error("Error getting file names: File is not seekable.\n");
-            fatal(EXIT_FAILURE);
+            error("File is not seekable.\n");
+            if (close(fd) < 0) {
+                error("Error closing %s: %s.\n", filename, strerror(errno));
+            }
+            brn2_list_from_lines(list, filename, is_old);
+            return;
         }
         if (!S_ISREG(lines_stat.st_mode)) {
             error("Error getting file names: Not a regular file.\n");
