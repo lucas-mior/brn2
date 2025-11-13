@@ -1214,6 +1214,7 @@ main(void) {
                                             list1->indexes[i]));
         }
 
+        hash_destroy_map(list_map);
         brn2_free_list(list1);
         unlink(filelist);
     }
