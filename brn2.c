@@ -396,7 +396,14 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
             uint32 size;
-            uint16 name_length = (uint16)(pointer - begin);
+            int64 name_length = pointer - begin;
+            if (name_length >= MAXOF(file->length)) {
+                error("Too long line. Skipping...\n");
+                begin = pointer + 1;
+                left -= (name_length + 1);
+                pointer += 1;
+                continue;
+            }
 
             if (begin == pointer) {
                 error("Empty line in file. Exiting.\n");
@@ -407,7 +414,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
 
             file = *file_pointer;
-            file->length = name_length;
+            file->length = (uint16)name_length;
             memcpy64(file->name, begin, name_length + 1);
             file->name[name_length] = '\0';
 
