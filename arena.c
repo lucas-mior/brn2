@@ -544,6 +544,7 @@ main(void) {
     arena_reset(arena);
 
     assert(arena_push(arena, arena_size + 1) == NULL);
+    error2("Error in arena_push: %s.\n", arena_strerror(errno));
 
     {
         void *p3;
