@@ -326,7 +326,7 @@ void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     char *map;
     uint32 length = 0;
-    uint32 map_size;
+    int64 map_size;
     uint32 padding;
     int fd;
 
@@ -360,31 +360,29 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                   (llong)lines_stat.st_size);
             fatal(EXIT_FAILURE);
         }
-        if (MAXOF(lines_stat.st_size) > MAXOF(map_size)) {
-            if (lines_stat.st_size >= (int64)MAXOF(list->length)) {
-                error("Error: File size = %lld.\n", (llong)lines_stat.st_size);
-                fatal(EXIT_FAILURE);
-            }
-        }
-        map_size = (uint32)lines_stat.st_size;
+        map_size = lines_stat.st_size;
     }
-    padding = BRN2_ALIGNMENT - (map_size % BRN2_ALIGNMENT);
+    padding = BRN2_ALIGNMENT - ((uint64)map_size % BRN2_ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
-        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size,
+        error("Error in ftruncate(%s, %lld): %s.\n", filename, (llong)map_size,
               strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
-    map = mmap(NULL, map_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    map = mmap(NULL, (size_t)map_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (map == MAP_FAILED) {
         error("Error mapping history file to memory: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
     {
-        uint32 capacity = map_size / 2;
-        list->files = xmalloc(capacity*sizeof(*(list->files)));
+        int64 capacity = map_size / 2;
+        if (capacity >= MAXOF(list->length)) {
+            error("Error: Too large file.\n");
+            fatal(EXIT_FAILURE);
+        }
+        list->files = xmalloc(capacity*SIZEOF(*(list->files)));
     }
 
     {
@@ -438,11 +436,11 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
-    munmap(map, map_size);
+    munmap(map, (size_t)map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error in ftruncate(%s, %u): %s.\n", filename, map_size - padding,
-              strerror(errno));
+        error("Error in ftruncate(%s, %lld): %s.\n", filename,
+              (llong)map_size - padding, strerror(errno));
         fatal(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
