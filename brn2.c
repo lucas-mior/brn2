@@ -175,8 +175,8 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         uint32 size;
 
         if (name_length >= MAXOF(file->length)) {
-            error("Error in arg %d: argument too long\n", i);
-            fatal(EXIT_FAILURE);
+            error("Error in arg %d: argument too long. Skipping...\n", i);
+            continue;
         }
 
         if (brn2_is_invalid_name(name)) {
@@ -515,7 +515,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         if (length >= MAXOF(list->length)) {
             error("Error: more than %lld files being renamed.\n",
                   (llong)MAXOF(list->length));
-            fatal(EXIT_FAILURE);
+            break;
         }
     }
     if (errno) {
