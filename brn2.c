@@ -1075,7 +1075,7 @@ main(void) {
         char command[256];
         char *filelist = "/tmp/brn2test";
         uint32 capacity_set;
-        HashMap *list_map = NULL;
+        HashMap *map = NULL;
 
         SNPRINTF(command, "find . > %s", filelist);
 
@@ -1097,8 +1097,8 @@ main(void) {
                                      list1->length < 9999));
         }
 
-        list_map = hash_create_map(list1->length);
-        capacity_set = hash_capacity(list_map);
+        map = hash_create_map(list1->length);
+        capacity_set = hash_capacity(map);
         list1->indexes_size = list1->length*sizeof(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
         brn2_create_hashes(list1, capacity_set);
@@ -1110,9 +1110,9 @@ main(void) {
             assert(file->length == strlen(file->name));
             hash = hash_function(file->name, file->length);
             assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+            assert((file->hash % capacity_set) == (hash & map->bitmask));
 
-            assert(hash_insert_pre_calc_map(list_map, file->name, hash,
+            assert(hash_insert_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i], 0));
         }
         for (uint32 i = 0; i < list1->length; i += 1) {
@@ -1121,9 +1121,9 @@ main(void) {
             assert(file->length == strlen(file->name));
             hash = hash_function(file->name, file->length);
             assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+            assert((file->hash % capacity_set) == (hash & map->bitmask));
 
-            assert(hash_remove_pre_calc_map(list_map, file->name, hash,
+            assert(hash_remove_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i]));
         }
 
@@ -1139,7 +1139,7 @@ main(void) {
         char command[256];
         char *filelist = "/tmp/brn2test";
         uint32 capacity_set;
-        HashMap *list_map = NULL;
+        HashMap *map = NULL;
 
         SNPRINTF(command, "ls *.c > %s", filelist);
 
@@ -1184,8 +1184,8 @@ main(void) {
                                      list1->length < 9999));
         }
 
-        list_map = hash_create_map(list1->length);
-        capacity_set = hash_capacity(list_map);
+        map = hash_create_map(list1->length);
+        capacity_set = hash_capacity(map);
         list1->indexes_size = list1->length*sizeof(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
         brn2_create_hashes(list1, capacity_set);
@@ -1197,9 +1197,9 @@ main(void) {
             assert(file->length == strlen(file->name));
             hash = hash_function(file->name, file->length);
             assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+            assert((file->hash % capacity_set) == (hash & map->bitmask));
 
-            assert(hash_insert_pre_calc_map(list_map, file->name, hash,
+            assert(hash_insert_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i], 0));
         }
         for (uint32 i = 0; i < list1->length; i += 1) {
@@ -1208,13 +1208,13 @@ main(void) {
             assert(file->length == strlen(file->name));
             hash = hash_function(file->name, file->length);
             assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & list_map->bitmask));
+            assert((file->hash % capacity_set) == (hash & map->bitmask));
 
-            assert(hash_remove_pre_calc_map(list_map, file->name, hash,
+            assert(hash_remove_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i]));
         }
 
-        hash_destroy_map(list_map);
+        hash_destroy_map(map);
         brn2_free_list(list1);
         unlink(filelist);
     }
