@@ -525,11 +525,11 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    if (length == 0) {
-        return;
-    }
     if (fclose(lines)) {
         error("Error closing file %s: %s.\n", filename, strerror(errno));
+    }
+    if (length == 0) {
+        return;
     }
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
