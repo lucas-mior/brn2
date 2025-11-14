@@ -483,6 +483,12 @@ main(int argc, char **argv) {
 #endif
     }
 
+#if BRN2_BENCHMARK
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    brn2_timings("before renames", t0, t1, old->length);
+    exit(0);
+#endif
+
     {
         uint32 number_changes = brn2_get_number_changes(old, new);
         uint32 number_renames = 0;
