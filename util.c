@@ -301,7 +301,7 @@ assert_equal_integer(char *file, uint32 line,
 
 #define ASSERT_EQUAL(VAR1, VAR2) \
 _Generic((VAR1), \
-    char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, VAR1, VAR2), \
+    char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, (char *)VAR1, (char *)VAR2), \
     default: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, (llong)VAR1, (llong)VAR2) \
 )
 

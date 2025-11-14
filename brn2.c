@@ -1340,7 +1340,7 @@ main(void) {
                           &number_renames);
         }
 
-        assert(number_renames == number_changes);
+        ASSERT_EQUAL(number_renames, number_changes);
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
             char path[512];
             char buffer[512];
