@@ -1273,17 +1273,17 @@ main(void) {
         }
 
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
-            char buffer[128];
+            char path[128];
             FILE *file;
-            SNPRINTF(buffer, "%s/%s", directory, files[i].original);
+            SNPRINTF(path, "%s/%s", directory, files[i].original);
 
-            if ((file = fopen(buffer, "w")) == NULL) {
-                error("Error opening %s: %s.\n", buffer, strerror(errno));
+            if ((file = fopen(path, "w")) == NULL) {
+                error("Error opening %s: %s.\n", path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
             fprintf(file, "%s", files[i].renamed);
             if (fclose(file) != 0) {
-                error("Error closing %s: %s.\n", buffer, strerror(errno));
+                error("Error closing %s: %s.\n", path, strerror(errno));
             }
         }
 
@@ -1298,17 +1298,17 @@ main(void) {
             FileName *file;
             uint32 name_length;
             uint32 size;
-            char buffer[128];
+            char path[128];
 
-            name_length = (uint32)SNPRINTF(buffer, "%s/%s", directory,
-                                           files[i].renamed);
+            name_length
+                = (uint32)SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
             size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
             *file_pointer = xarena_push(new->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
             file->length = (uint16)name_length;
-            memcpy64(file->name, buffer, name_length + 1);
+            memcpy64(file->name, path, name_length + 1);
         }
 
         brn2_normalize_names(old, new);
@@ -1353,21 +1353,21 @@ main(void) {
 
         assert(number_renames == LENGTH(files));
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
+            char path[128];
             char buffer[128];
-            char buffer2[128];
             FILE *file;
-            SNPRINTF(buffer, "%s/%s", directory, files[i].renamed);
+            SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
-            if ((file = fopen(buffer, "r")) == NULL) {
-                error("Error opening %s: %s.\n", buffer, strerror(errno));
+            if ((file = fopen(path, "r")) == NULL) {
+                error("Error opening %s: %s.\n", path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
 
-            assert(fgets(buffer2, sizeof(buffer2), file));
-            assert(!strcmp(buffer2, files[i].renamed));
+            assert(fgets(buffer, sizeof(buffer), file));
+            assert(!strcmp(buffer, files[i].renamed));
 
             if (fclose(file) != 0) {
-                error("Error closing %s: %s.\n", buffer, strerror(errno));
+                error("Error closing %s: %s.\n", path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
         }
