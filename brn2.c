@@ -105,7 +105,7 @@ brn2_print_list(FileList *list) {
     for (uint32 i = 0; i < list->length;) {
         FileName *file = list->files[i];
         if (file) {
-            assert(file->length == strlen(file->name));
+            ASSERT_EQUAL(file->length, strlen(file->name));
             error("[%u] = %s\n", i, file->name);
         } else {
             error("[%u]", i);
@@ -371,7 +371,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         char *pointer = map;
         int64 left = map_size - padding;
 
-        assert((pointer + left) == (map + map_size - padding));
+        ASSERT_EQUAL(pointer + left, map + map_size - padding);
 
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
@@ -613,7 +613,7 @@ brn2_threads_work_hashes(Work *arg) {
     for (uint32 i = work->start; i < work->end; i += 1) {
         FileList *list = work->old_list;
         FileName *newfile = list->files[i];
-        assert(newfile->length == strlen(newfile->name));
+        ASSERT_EQUAL(newfile->length, strlen(newfile->name));
         newfile->hash = hash_function(newfile->name, newfile->length);
         list->indexes[i] = newfile->hash % work->map_capacity;
     }
@@ -1038,7 +1038,7 @@ main(void) {
         brn2_list_from_dir(list1, ".");
         brn2_list_from_file(list2, filelist, true);
 
-        assert(list1->length == list2->length);
+        ASSERT_EQUAL(list1->length, list2->length);
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1097,10 +1097,10 @@ main(void) {
             FileName *file = list1->files[i];
             uint64 hash;
 
-            assert(file->length == strlen(file->name));
+            ASSERT_EQUAL(file->length, strlen(file->name));
             hash = hash_function(file->name, file->length);
-            assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & map->bitmask));
+            ASSERT_EQUAL(file->hash, hash);
+            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
             assert(hash_insert_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i], 0));
