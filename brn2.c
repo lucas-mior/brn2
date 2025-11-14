@@ -1379,7 +1379,6 @@ main(void) {
         char *filelist = "/tmp/brn2list.txt";
         char command_rmdir[128];
         FILE *args;
-        int capacity = 128;
 
         for (uint32 i = 1; i < LENGTH(files2); i += 1) {
             assert(strcmp(files2[i - 1].original, files2[i].original) < 0);
