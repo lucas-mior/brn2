@@ -629,7 +629,6 @@ brn2_threads_work_changes(Work *arg) {
         FileName *newfile = work->new_list->files[i];
         if (oldfile->length == newfile->length) {
             if (!memcmp64(oldfile->name, newfile->name, oldfile->length)) {
-                error("equal: %s == %s\n", oldfile->name, newfile->name);
                 continue;
             }
         }
