@@ -1245,6 +1245,9 @@ main(void) {
                 number_changed_hard += 1;
             }
         }
+        for (uint32 i = 1; i < LENGTH(files); i += 1) {
+            assert(strcmp(files[i - 1].original, files[i].original) < 0);
+        }
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
