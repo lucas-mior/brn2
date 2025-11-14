@@ -129,10 +129,6 @@ print_float(char *name, char *variable, enum FloatTypes type) {
     double value_d;
     long double value_ld;
 
-    size_t float_size = sizeof(float);
-    size_t double_size = sizeof(double);
-    size_t long_double_size = sizeof(long double);
-
     switch (type) {
     case FLOAT_FLOAT:
         memcpy(&value_f, variable, sizeof(float));
