@@ -71,4 +71,8 @@ static struct {
      "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
      "GGGGG"},
     {"13xxx", "13xxx"},
+    {"14xxx", "14xxx"},
+    {"15xxx", "15xxx"},
+    {"16xxx", "16xxx"},
+    {"17xxx", "17xxx"},
 };
