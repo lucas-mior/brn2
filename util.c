@@ -77,7 +77,7 @@
 #define DEBUGGING 0
 #endif
 
-#if DEBUGGING
+#if DEBUGGING && OS_UNIX
 #include <valgrind/valgrind.h>
 #else
 #define RUNNING_ON_VALGRIND 0
@@ -524,101 +524,6 @@ basename2(char *path) {
     return path;
 }
 
-#if OS_UNIX
-static void *
-xmmap_commit(int64 *size) {
-    void *p;
-
-    if (RUNNING_ON_VALGRIND) {
-        p = xmalloc(*size);
-        memset(p, 0, *size);
-        return p;
-    }
-    if (util_page_size == 0) {
-        long aux;
-        if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
-            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
-        util_page_size = aux;
-    }
-
-    do {
-        if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
-            p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
-                     MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE
-                         | FLAGS_HUGE_PAGES,
-                     -1, 0);
-            if (p != MAP_FAILED) {
-                *size = UTIL_ALIGN(*size, SIZEMB(2));
-                break;
-            }
-        }
-        p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
-                 MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
-        *size = UTIL_ALIGN(*size, util_page_size);
-    } while (0);
-    if (p == MAP_FAILED) {
-        error("Error in mmap(%lld): %s.\n", (llong)*size, strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-    return p;
-}
-static void
-xmunmap(void *p, int64 size) {
-    if (RUNNING_ON_VALGRIND) {
-        free(p);
-        return;
-    }
-    if (munmap(p, (size_t)size) < 0) {
-        error("Error in munmap(%p, %lld): %s.\n", p, (llong)size,
-              strerror(errno));
-    }
-    return;
-}
-#else
-static void *
-xmmap_commit(int64 *size) {
-    void *p;
-
-    if (RUNNING_ON_VALGRIND) {
-        p = xmalloc(*size);
-        memset(p, 0, size);
-        return p;
-    }
-    if (util_page_size == 0) {
-        SYSTEM_INFO system_info;
-        GetSystemInfo(&system_info);
-        util_page_size = system_info.dwPageSize;
-        if (util_page_size <= 0) {
-            fprintf(stderr, "Error getting page size.\n");
-            fatal(EXIT_FAILURE);
-        }
-    }
-
-    p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
-                     PAGE_READWRITE);
-    if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (llong)*size,
-                GetLastError());
-        fatal(EXIT_FAILURE);
-    }
-    return p;
-}
-static void
-xmunmap(void *p, size_t size) {
-    (void)size;
-    if (RUNNING_ON_VALGRIND) {
-        free(p);
-        return;
-    }
-    if (!VirtualFree(p, 0, MEM_RELEASE)) {
-        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
-    }
-    return;
-}
-#endif
-
 INLINE void *
 xmalloc(int64 size) {
     void *p;
@@ -680,6 +585,101 @@ xstrdup(char *string) {
     memcpy64(p, string, length);
     return p;
 }
+
+#if OS_UNIX
+static void *
+xmmap_commit(int64 *size) {
+    void *p;
+
+    if (RUNNING_ON_VALGRIND) {
+        p = xmalloc(*size);
+        memset64(p, 0, *size);
+        return p;
+    }
+    if (util_page_size == 0) {
+        long aux;
+        if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
+            fprintf(stderr, "Error getting page size: %s.\n", strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        util_page_size = aux;
+    }
+
+    do {
+        if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
+            p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
+                     MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE
+                         | FLAGS_HUGE_PAGES,
+                     -1, 0);
+            if (p != MAP_FAILED) {
+                *size = UTIL_ALIGN(*size, SIZEMB(2));
+                break;
+            }
+        }
+        p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
+                 MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
+        *size = UTIL_ALIGN(*size, util_page_size);
+    } while (0);
+    if (p == MAP_FAILED) {
+        error("Error in mmap(%lld): %s.\n", (llong)*size, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return p;
+}
+static void
+xmunmap(void *p, int64 size) {
+    if (RUNNING_ON_VALGRIND) {
+        free(p);
+        return;
+    }
+    if (munmap(p, (size_t)size) < 0) {
+        error("Error in munmap(%p, %lld): %s.\n", p, (llong)size,
+              strerror(errno));
+    }
+    return;
+}
+#else
+static void *
+xmmap_commit(int64 *size) {
+    void *p;
+
+    if (RUNNING_ON_VALGRIND) {
+        p = xmalloc(*size);
+        memset64(p, 0, *size);
+        return p;
+    }
+    if (util_page_size == 0) {
+        SYSTEM_INFO system_info;
+        GetSystemInfo(&system_info);
+        util_page_size = system_info.dwPageSize;
+        if (util_page_size <= 0) {
+            fprintf(stderr, "Error getting page size.\n");
+            fatal(EXIT_FAILURE);
+        }
+    }
+
+    p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
+                     PAGE_READWRITE);
+    if (p == NULL) {
+        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (llong)*size,
+                GetLastError());
+        fatal(EXIT_FAILURE);
+    }
+    return p;
+}
+static void
+xmunmap(void *p, size_t size) {
+    (void)size;
+    if (RUNNING_ON_VALGRIND) {
+        free(p);
+        return;
+    }
+    if (!VirtualFree(p, 0, MEM_RELEASE)) {
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
+    }
+    return;
+}
+#endif
 
 static void
 xpthread_mutex_lock(pthread_mutex_t *mutex) {
