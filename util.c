@@ -1001,8 +1001,10 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
+#if OS_WINDOWS
+    write(STDERR_FILENO, buffer, (uint)n);
+#else
     write(STDERR_FILENO, buffer, (size_t)n);
-#if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
 #endif
