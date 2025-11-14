@@ -486,7 +486,6 @@ main(int argc, char **argv) {
 #if BRN2_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     brn2_timings("before renames", t0, t1, old->length);
-    exit(0);
 #endif
 
     {
