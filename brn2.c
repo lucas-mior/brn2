@@ -1253,10 +1253,9 @@ main(void) {
         hash_destroy_map(map);
         brn2_free_list(list1);
         brn2_free_list(list2);
-        for (uint32 i = 0; i < nthreads; i += 1) {
-            arena_destroy(list1->arenas[i]);
-            arena_destroy(list2->arenas[i]);
-        }
+        xmunmap(list1->indexes, list1->indexes_size);
+        arenas_destroy(list1->arenas, nthreads);
+        arenas_destroy(list2->arenas, nthreads);
         unlink(filelist);
     }
     if (OS_LINUX) {
@@ -1398,10 +1397,10 @@ main(void) {
         }
         brn2_free_list(old);
         brn2_free_list(new);
-        for (uint32 i = 0; i < nthreads; i += 1) {
-            arena_destroy(old->arenas[i]);
-            arena_destroy(new->arenas[i]);
-        }
+        arenas_destroy(old->arenas, nthreads);
+        arenas_destroy(new->arenas, nthreads);
+        xmunmap(old->indexes, old->indexes_size);
+        xmunmap(new->indexes, new->indexes_size);
         hash_destroy_map(oldlist_map);
         hash_destroy_set(names_renamed);
     }
