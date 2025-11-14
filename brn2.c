@@ -1350,6 +1350,7 @@ main(void) {
             brn2_execute2(old, new, oldlist_map, names_renamed, i,
                           &number_renames);
         }
+
         assert(number_renames == LENGTH(files));
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
             char buffer[128];
