@@ -423,7 +423,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
     list->files = xrealloc(list->files, length*sizeof(*(list->files)));
     list->length = length;
-    xmunmap(map, map_size);
+    munmap(map, (size_t)map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n", filename,
