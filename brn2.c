@@ -1352,7 +1352,10 @@ main(void) {
                 fatal(EXIT_FAILURE);
             }
 
-            assert(fgets(renamed, sizeof(renamed), file));
+            if (fgets(renamed, sizeof(renamed), file) == NULL) {
+                error("Error in fgets from %s: %s.\n", path, strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
             ASSERT_EQUAL(renamed, files[i].renamed);
 
             if (fclose(file) != 0) {
