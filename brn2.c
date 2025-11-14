@@ -1363,6 +1363,7 @@ main(void) {
             brn2_create_hashes(new, main_capacity);
 
             assert(brn2_verify(new, old, newlist_set, new->indexes));
+            hash_destroy_set(newlist_set);
         }
 
         number_changes = brn2_get_number_changes(old, new);
@@ -1401,6 +1402,7 @@ main(void) {
             arena_destroy(old->arenas[i]);
             arena_destroy(new->arenas[i]);
         }
+        hash_destroy_map(oldlist_map);
     }
 
     brn2_threads_join();
