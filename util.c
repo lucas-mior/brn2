@@ -765,20 +765,22 @@ util_command(const int argc, char **argv) {
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
     int64 len = strlen64(argv[0]);
-    char *argv0_windows;
-    char *exe = ".exe";
-    int64 exe_len = (int64)(strlen64(exe));
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
         fatal(EXIT_FAILURE);
     }
 
-    if (memmem64(argv[0], len + 1, exe, exe_len + 1) == NULL) {
-        argv0_windows = xmalloc(len + exe_len + 1);
-        memcpy64(argv0_windows, argv[0], len);
-        memcpy64(argv0_windows + len, exe, exe_len + 1);
-        argv[0] = argv0_windows;
+    {
+        char *exe = ".exe";
+        int64 exe_len = (int64)(strlen64(exe));
+        char *argv0_windows;
+        if (memmem64(argv[0], len + 1, exe, exe_len + 1) == NULL) {
+            argv0_windows = xmalloc(len + exe_len + 1);
+            memcpy64(argv0_windows, argv[0], len);
+            memcpy64(argv0_windows + len, exe, exe_len + 1);
+            argv[0] = argv0_windows;
+        }
     }
 
     for (int i = 0; i < argc - 1; i += 1) {
