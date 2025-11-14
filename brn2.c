@@ -1378,8 +1378,6 @@ main(void) {
         char *directory = "/tmp/brn2_abcd";
         char *filelist = "/tmp/brn2list.txt";
         char command_rmdir[128];
-        char **argv;
-        int argc = 0;
         FILE *args;
         int capacity = 128;
 
@@ -1410,35 +1408,14 @@ main(void) {
         }
 
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
-            fprintf(args, "%s\n", files2[i].normalized);
+            fprintf(args, "%s\n", files2[i].original);
         }
         if (fclose(args) != 0) {
             error("Error closing %s: %s.\n", filelist, strerror(errno));
         }
 
-        argv = xmalloc(capacity*SIZEOF(*argv));
-        for (int i = 0; i < capacity; i += 1) {
-            argv[i] = xmalloc(capacity*SIZEOF(*argv[i]));
-        }
+        brn2_list_from_file(old, filelist, true);
 
-        if ((args = fopen(filelist, "r")) == NULL) {
-            error("Error opening %s: %s.\n", filelist, strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
-
-        while (fgets(argv[argc], (int)capacity, args)) {
-            if (argc >= capacity) {
-                error("Arguments args too long\n");
-                fatal(EXIT_FAILURE);
-            }
-            argv[argc][strcspn(argv[argc], "\n")] = '\0';
-            argc += 1;
-        }
-        if (fclose(args) != 0) {
-            error("Error closing %s: %s.\n", filelist, strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
-        brn2_list_from_args(old, argc, argv);
         brn2_normalize_names(old, NULL);
         brn2_print_list(old);
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
