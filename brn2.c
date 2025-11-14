@@ -1153,10 +1153,9 @@ main(void) {
 
         brn2_free_list(list1);
         brn2_free_list(list2);
-        for (uint32 i = 0; i < nthreads; i += 1) {
-            arena_destroy(list1->arenas[i]);
-            arena_destroy(list2->arenas[i]);
-        }
+        xmunmap(list1->indexes, list1->indexes_size);
+        arenas_destroy(list1->arenas, nthreads);
+        arenas_destroy(list2->arenas, nthreads);
         hash_destroy_map(map);
         unlink(filelist);
     }
