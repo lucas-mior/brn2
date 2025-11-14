@@ -99,6 +99,8 @@ static char *program = __FILE__;
 static char *program;
 #endif
 
+static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
+
 #define SIZEOF(X) (int64)sizeof(X)
 
 #if !defined(SIZEKB)
@@ -205,8 +207,6 @@ typedef uint64_t uint64;
 #pragma clang diagnostic ignored "-Wformat"
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
-
-static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
 // clang-format off
 enum FloatTypes {
@@ -586,7 +586,7 @@ xrealloc(void *old, const int64 size) {
     assert((uint64)size <= SIZE_MAX);
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
-        error("Failed to reallocate %zu bytes from %lx.\n", size, old_save);
+        error("Failed to reallocate %lld bytes from %llx.\n", (llong)size, (ullong)old_save);
         fatal(EXIT_FAILURE);
     }
 
@@ -610,7 +610,7 @@ xstrdup(char *string) {
 
     length = strlen64(string) + 1;
     if ((p = malloc((size_t)length)) == NULL) {
-        error("Error allocating %zu bytes to duplicate '%s': %s\n", length,
+        error("Error allocating %lld bytes to duplicate '%s': %s\n", (llong)length,
               string, strerror(errno));
         fatal(EXIT_FAILURE);
     }
@@ -842,7 +842,7 @@ util_command(const int argc, char **argv) {
                                  &startup_info, &proc_info);
         if (!success) {
             DWORD err = GetLastError();
-            error("Error running '%s': %d.\n", cmdline, err);
+            error("Error running '%s': %llu.\n", cmdline, (ullong)err);
             if (err == ERROR_PATH_NOT_FOUND) {
                 error("Path not found.\n");
             }
