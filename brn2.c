@@ -1102,6 +1102,7 @@ main(void) {
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
         }
 
         system(command);
@@ -1151,8 +1152,10 @@ main(void) {
         }
 
         brn2_free_list(list1);
+        brn2_free_list(list2);
         for (uint32 i = 0; i < nthreads; i += 1) {
             arena_destroy(list1->arenas[i]);
+            arena_destroy(list2->arenas[i]);
         }
         hash_destroy_map(map);
         unlink(filelist);
@@ -1172,6 +1175,7 @@ main(void) {
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
         }
 
         system(command);
@@ -1243,8 +1247,10 @@ main(void) {
 
         hash_destroy_map(map);
         brn2_free_list(list1);
+        brn2_free_list(list2);
         for (uint32 i = 0; i < nthreads; i += 1) {
             arena_destroy(list1->arenas[i]);
+            arena_destroy(list2->arenas[i]);
         }
         unlink(filelist);
     }
