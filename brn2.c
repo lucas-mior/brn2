@@ -1419,7 +1419,7 @@ main(void) {
         brn2_normalize_names(old, NULL);
         brn2_print_list(old);
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
-            assert(!strcmp(files2[i].normalized, old->files[i]->name));
+            ASSERT_EQUAL(files2[i].normalized, old->files[i]->name);
         }
     }
 
