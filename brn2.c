@@ -1158,7 +1158,7 @@ main(void) {
         char command[256];
         char *filelist = "/tmp/brn2test";
         uint32 capacity_set;
-        HashMap *map = NULL;
+        HashMap *map;
 
         SNPRINTF(command, "ls *.c > %s", filelist);
 
@@ -1235,6 +1235,9 @@ main(void) {
 
         hash_destroy_map(map);
         brn2_free_list(list1);
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            arena_destroy(list1->arenas[i]);
+        }
         unlink(filelist);
     }
     if (OS_LINUX) {
