@@ -1410,8 +1410,6 @@ main(void) {
         }
 
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
-            char *filename = files2[i].original;
-
             fprintf(args, "%s\n", files2[i].normalized);
         }
         if (fclose(args) != 0) {
