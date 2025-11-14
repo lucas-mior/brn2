@@ -336,6 +336,7 @@ arena_push(Arena *arena, int64 size) {
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
     arena->npushed += 1;
+    before = __builtin_assume_aligned(before, ALIGNMENT);
     return before;
 }
 
