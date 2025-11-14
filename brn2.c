@@ -981,6 +981,7 @@ brn2_usage(FILE *stream) {
 #if TESTING_brn2
 #include <assert.h>
 #include "sort.c"
+#include "files.h"
 
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
@@ -1239,7 +1240,6 @@ main(void) {
         char *directory = "/tmp/brn2_abcd";
         char command_rmdir[128];
 
-#include "files.h"
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
             if (strcmp(files[i].original, files[i].renamed)) {
                 number_changed_hard += 1;
