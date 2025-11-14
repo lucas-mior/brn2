@@ -1108,10 +1108,10 @@ main(void) {
         for (uint32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
-            assert(file->length == strlen(file->name));
+            ASSERT_EQUAL(file->length, strlen(file->name));
             hash = hash_function(file->name, file->length);
-            assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & map->bitmask));
+            ASSERT_EQUAL(file->hash, hash);
+            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
             assert(hash_remove_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i]));
@@ -1195,10 +1195,10 @@ main(void) {
             FileName *file = list1->files[i];
             uint64 hash;
 
-            assert(file->length == strlen(file->name));
+            ASSERT_EQUAL(file->length, strlen(file->name));
             hash = hash_function(file->name, file->length);
-            assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & map->bitmask));
+            ASSERT_EQUAL(file->hash, hash);
+            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
             assert(hash_insert_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i], 0));
@@ -1206,10 +1206,10 @@ main(void) {
         for (uint32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
-            assert(file->length == strlen(file->name));
+            ASSERT_EQUAL(file->length, strlen(file->name));
             hash = hash_function(file->name, file->length);
-            assert(file->hash == hash);
-            assert((file->hash % capacity_set) == (hash & map->bitmask));
+            ASSERT_EQUAL(file->hash, hash);
+            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
             assert(hash_remove_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i]));
