@@ -129,8 +129,8 @@ enum {
 
 typedef struct FileName {
     uint64 hash;
-    uint16 length;
-    uint16 type;
+    uint32 length;
+    uint32 type;
     char name[];
 } FileName;
 
