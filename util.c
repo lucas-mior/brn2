@@ -77,6 +77,12 @@
 #define DEBUGGING 0
 #endif
 
+#if DEBUGGING
+#include <valgrind/valgrind.h>
+#else
+#define RUNNING_ON_VALGRIND 0
+#endif
+
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_util 1
 #elif !defined(TESTING_util)
@@ -523,6 +529,11 @@ static void *
 xmmap_commit(int64 *size) {
     void *p;
 
+    if (RUNNING_ON_VALGRIND) {
+        p = malloc(*size);
+        memset(p, 0, *size);
+        return p;
+    }
     if (util_page_size == 0) {
         long aux;
         if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
@@ -555,6 +566,10 @@ xmmap_commit(int64 *size) {
 }
 static void
 xmunmap(void *p, int64 size) {
+    if (RUNNING_ON_VALGRIND) {
+        free(p);
+        return;
+    }
     if (munmap(p, (size_t)size) < 0) {
         error("Error in munmap(%p, %lld): %s.\n", p, (llong)size,
               strerror(errno));
@@ -566,6 +581,11 @@ static void *
 xmmap_commit(int64 *size) {
     void *p;
 
+    if (RUNNING_ON_VALGRIND) {
+        p = malloc(*size);
+        memset(p, 0, size);
+        return p;
+    }
     if (util_page_size == 0) {
         SYSTEM_INFO system_info;
         GetSystemInfo(&system_info);
@@ -588,6 +608,10 @@ xmmap_commit(int64 *size) {
 static void
 xmunmap(void *p, size_t size) {
     (void)size;
+    if (RUNNING_ON_VALGRIND) {
+        free(p);
+        return;
+    }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
         fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
     }

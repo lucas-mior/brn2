@@ -156,6 +156,7 @@ CAT(hash_create_, HASH_TYPE)(uint32 length) {
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = size;
+    map->length = 0;
     return map;
 }
 
