@@ -152,10 +152,10 @@ print_float(char *name, char *variable, enum FloatTypes type) {
 
 // clang-format off
 #define PRINT_SIGNED(TYPE, VARIABLE) \
-    printf(TYPE "%zu %s = %lld\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE,  (llong)VARIABLE)
+    printf(TYPE "%zu %s = %lld\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, (llong)VARIABLE)
 
 #define PRINT_UNSIGNED(TYPE, VARIABLE) \
-    printf(TYPE "%zu %s = %llu\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE,  (ullong)VARIABLE)
+    printf(TYPE "%zu %s = %llu\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, (ullong)VARIABLE)
 
 #define PRINT_OTHER(TYPE, FORMAT, VARIABLE) \
     printf(TYPE "%zu %s = " FORMAT "\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, VARIABLE)
