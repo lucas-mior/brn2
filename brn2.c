@@ -1373,6 +1373,12 @@ main(void) {
                 fatal(EXIT_FAILURE);
             }
         }
+        brn2_free_list(old);
+        brn2_free_list(new);
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            arena_destroy(old->arenas[i]);
+            arena_destroy(new->arenas[i]);
+        }
     }
 
     brn2_threads_join();
