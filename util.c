@@ -533,7 +533,7 @@ CAT(func, 64)(int fd, void *buffer, int64 size) { \
     ssize_t w; \
     (void)instance; \
     assert(size >= 0); \
-    ASSERT_EQUAL((uint64)size, MAXOF(instance)); \
+    ASSERT_LESS_EQUAL((uint64)size, MAXOF(instance)); \
     w = func(fd, buffer, (TYPE)size); \
     return (int64)w; \
 }
