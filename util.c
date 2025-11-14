@@ -530,7 +530,7 @@ xmmap_commit(int64 *size) {
     void *p;
 
     if (RUNNING_ON_VALGRIND) {
-        p = malloc(*size);
+        p = xmalloc(*size);
         memset(p, 0, *size);
         return p;
     }
@@ -582,7 +582,7 @@ xmmap_commit(int64 *size) {
     void *p;
 
     if (RUNNING_ON_VALGRIND) {
-        p = malloc(*size);
+        p = xmalloc(*size);
         memset(p, 0, size);
         return p;
     }
