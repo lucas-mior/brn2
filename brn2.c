@@ -1147,6 +1147,9 @@ main(void) {
         }
 
         brn2_free_list(list1);
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            arena_destroy(list1->arenas[i]);
+        }
         unlink(filelist);
     }
     {
