@@ -1235,7 +1235,7 @@ main(void) {
         brn2_free_list(list1);
         unlink(filelist);
     }
-    {
+    if (OS_LINUX) {
         FileList old_stack;
         FileList new_stack;
         FileList *old = &old_stack;
