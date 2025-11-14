@@ -206,6 +206,8 @@ typedef uint64_t uint64;
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
+static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
+
 // clang-format off
 enum FloatTypes {
     FLOAT_FLOAT,
@@ -276,6 +278,33 @@ _Generic((VARIABLE), \
 )
 
 #endif
+
+void
+assert_equal_strings(char *file, uint32 line,
+                     char *name1, char *name2, char *var1, char *var2) {
+    if (strcmp(var1, var2)) {
+        error("Assertion failed at %s:%u\n", file, line);
+        error("%s = %s != %s = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+}
+
+void
+assert_equal_integer(char *file, uint32 line,
+                     char *name1, char *name2, llong var1, llong var2) {
+    if (var1 != var2) {
+        error("Assertion failed at %s:%u\n", file, line);
+        error("%s = %lld != %lld = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+}
+
+#define ASSERT_EQUAL(VAR1, VAR2) \
+_Generic((VAR1), \
+    char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, VAR1, VAR2), \
+    default: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, (llong)VAR1, (llong)VAR2) \
+)
+
 // clang-format on
 
 // clang-format off
@@ -557,7 +586,7 @@ xrealloc(void *old, const int64 size) {
     assert((uint64)size <= SIZE_MAX);
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
-        error("Failed to reallocate %zu bytes from %x.\n", size, old_save);
+        error("Failed to reallocate %zu bytes from %lx.\n", size, old_save);
         fatal(EXIT_FAILURE);
     }
 
