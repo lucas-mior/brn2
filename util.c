@@ -252,8 +252,8 @@ print_float(char *name, char *variable, enum FloatTypes type) {
 #define PRINT_UNSIGNED(TYPE, VARIABLE) \
     printf(TYPE "%zu %s = %llu\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, (ullong)VARIABLE)
 
-#define PRINT_OTHER(TYPE, FORMAT, VARIABLE) \
-    printf(TYPE "%zu %s = " FORMAT "\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, VARIABLE)
+#define PRINT_OTHER(TYPE, FORMAT, NAME, VARIABLE) \
+    printf(TYPE "%zu %s = " FORMAT "\n", sizeof(VARIABLE)*CHAR_BIT, NAME, VARIABLE)
 
 #define PRINT_VAR(VARIABLE) \
 _Generic((VARIABLE), \
@@ -267,10 +267,10 @@ _Generic((VARIABLE), \
   uint:        PRINT_UNSIGNED("[uint]", VARIABLE), \
   ulong:       PRINT_UNSIGNED("[ulong]", VARIABLE), \
   ullong:      PRINT_UNSIGNED("[ullong]", VARIABLE), \
-  char:        PRINT_OTHER("[char]", "%c", VARIABLE), \
-  bool:        PRINT_OTHER("[bool]", "%d", VARIABLE), \
-  char *:      PRINT_OTHER("[char *]", "%s", (char *)(uintptr_t)VARIABLE), \
-  void *:      PRINT_OTHER("[void *]", "%p", (void *)(uintptr_t)VARIABLE), \
+  char:        PRINT_OTHER("[char]", "%c", #VARIABLE, VARIABLE), \
+  bool:        PRINT_OTHER("[bool]", "%d", #VARIABLE, VARIABLE), \
+  char *:      PRINT_OTHER("[char *]", "%s", #VARIABLE, (char *)(uintptr_t)VARIABLE), \
+  void *:      PRINT_OTHER("[void *]", "%p", #VARIABLE, (void *)(uintptr_t)VARIABLE), \
   float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT), \
   double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE), \
   long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
