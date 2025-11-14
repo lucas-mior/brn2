@@ -195,7 +195,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
         file = *file_pointer;
 
-        file->length = (uint16)name_length;
+        file->length = (uint32)name_length;
         memcpy64(file->name, name, name_length + 1);
 
         length += 1;
@@ -250,7 +250,7 @@ void
 brn2_list_from_dir(FileList *list, char *directory) {
     struct dirent **directory_list;
     uint32 length = 0;
-    uint16 directory_length;
+    uint32 directory_length;
     int number_files;
 
     if (strcmp(directory, ".")) {
@@ -259,7 +259,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             error("Error: directory name too long.\n");
             fatal(EXIT_FAILURE);
         }
-        directory_length = (uint16)len;
+        directory_length = (uint32)len;
     } else {
         directory_length = 0;
     }
@@ -296,7 +296,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = (uint16)(directory_length + 1 + name_length);
+            file->length = directory_length + 1 + (uint32)name_length;
             memcpy64(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy64(file->name + directory_length + 1, name, name_length + 1);
@@ -305,7 +305,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = (uint16)name_length;
+            file->length = (uint32)name_length;
             memcpy64(file->name, name, file->length + 1);
         }
 
@@ -430,7 +430,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
 
             file = *file_pointer;
-            file->length = (uint16)name_length;
+            file->length = (uint32)name_length;
             memcpy64(file->name, begin, name_length + 1);
             file->name[name_length] = '\0';
 
@@ -501,10 +501,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     while (fgets(buffer, sizeof(buffer), lines)) {
         FileName **file_pointer;
         FileName *file;
-        uint16 name_length;
+        uint32 name_length;
         uint32 size;
 
-        name_length = (uint16)strcspn(buffer, "\n");
+        name_length = (uint32)strcspn(buffer, "\n");
         buffer[name_length] = '\0';
         if (is_old && brn2_is_invalid_name(buffer)) {
             continue;
@@ -1329,7 +1329,7 @@ main(void) {
             *file_pointer = xarena_push(new->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = (uint16)name_length;
+            file->length = (uint32)name_length;
             memcpy64(file->name, path, name_length + 1);
         }
 
