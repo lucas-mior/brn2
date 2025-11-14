@@ -1092,7 +1092,7 @@ main(void) {
         char command[256];
         char *filelist = "/tmp/brn2test";
         uint32 capacity_set;
-        HashMap *map = NULL;
+        HashMap *map;
 
         SNPRINTF(command, "find . > %s", filelist);
 
@@ -1150,6 +1150,7 @@ main(void) {
         for (uint32 i = 0; i < nthreads; i += 1) {
             arena_destroy(list1->arenas[i]);
         }
+        hash_destroy_map(map);
         unlink(filelist);
     }
     {
