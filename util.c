@@ -533,7 +533,7 @@ CAT(func, 64)(int fd, void *buffer, int64 size) { \
     ssize_t w; \
     (void)instance; \
     assert(size >= 0); \
-    assert((uint64)size <= MAXOF(instance)); \
+    ASSERT_EQUAL((uint64)size, MAXOF(instance)); \
     w = func(fd, buffer, (TYPE)size); \
     return (int64)w; \
 }
@@ -1001,7 +1001,7 @@ error(char *format, ...) {
     }
 
     buffer[n] = '\0';
-    write64(STDERR_FILENO, buffer, (uint32)n);
+    write(STDERR_FILENO, buffer, (size_t)n);
 #if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
