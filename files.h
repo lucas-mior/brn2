@@ -76,3 +76,11 @@ static struct {
     {"16xxx", "16xxx"},
     {"17xxx", "17xxx"},
 };
+
+static struct {
+    char *original;
+    char *renamed;
+} files2[] = {
+    {"././aaa", "aaa"},
+    {"/./bbb", "/bbb"},
+};
