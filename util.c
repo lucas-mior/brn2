@@ -357,9 +357,9 @@ _Generic((VAR1), \
 
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) \
 _Generic((VAR1), \
-    char *: assert_less_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
+    char *: assert_less_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
         (char *)(uintptr_t)(VAR1), (char *)(uintptr_t)(VAR2)), \
-    default: assert_less_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+    default: assert_less_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
                  (llong)(VAR1), (llong)(VAR2)) \
 )
 
