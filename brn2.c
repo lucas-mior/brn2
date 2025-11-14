@@ -1031,6 +1031,8 @@ main(void) {
         char *filelist = "/tmp/brn2test";
         SNPRINTF(command, "ls -a > %s", filelist);
 
+        error("brn2.c: test 0...\n");
+
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
             list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
@@ -1065,6 +1067,8 @@ main(void) {
         HashMap *map;
 
         SNPRINTF(command, "find . > %s", filelist);
+
+        error("brn2.c: test 1...\n");
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
@@ -1137,6 +1141,8 @@ main(void) {
         HashMap *map;
 
         SNPRINTF(command, "ls *.c > %s", filelist);
+
+        error("brn2.c: test 2...\n");
 
         for (uint32 i = 0; i < nthreads; i += 1) {
             list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
@@ -1238,6 +1244,8 @@ main(void) {
 
         char *directory = "/tmp/brn2_abcd";
         char command_rmdir[128];
+
+        error("brn2.c: test 3 (linux only)...\n");
 
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
             if (strcmp(files[i].original, files[i].renamed)) {
@@ -1385,6 +1393,7 @@ main(void) {
         for (uint32 i = 1; i < LENGTH(files2); i += 1) {
             ASSERT_LESS(files2[i - 1].original, files2[i].original);
         }
+        error("brn2.c: test 4 ...\n");
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
