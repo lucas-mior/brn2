@@ -1371,6 +1371,82 @@ main(void) {
         hash_destroy_map(oldlist_map);
         hash_destroy_set(names_renamed);
     }
+    {
+        FileList old_stack;
+        FileList *old = &old_stack;
+
+        char *directory = "/tmp/brn2_abcd";
+        char *filelist = "/tmp/brn2list.txt";
+        char command_rmdir[128];
+        char **argv;
+        int argc = 0;
+        FILE *args;
+        int capacity = 128;
+
+        for (uint32 i = 1; i < LENGTH(files2); i += 1) {
+            assert(strcmp(files2[i - 1].original, files2[i].original) < 0);
+        }
+
+        SNPRINTF(command_rmdir, "rm -rf %s", directory);
+        system(command_rmdir);
+        if (mkdir(directory, 0777) < 0) {
+            error("Error creating directory %s: %s.\n", directory,
+                  strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        if (chdir(directory) < 0) {
+            error("Error changing dir into %s: %s.\n", directory,
+                  strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+        }
+
+        if ((args = fopen(filelist, "w")) == NULL) {
+            error("Error opening %s: %s.\n", filelist, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+
+        for (uint32 i = 0; i < LENGTH(files2); i += 1) {
+            char *filename = files2[i].original;
+
+            fprintf(args, "%s\n", files2[i].normalized);
+        }
+        if (fclose(args) != 0) {
+            error("Error closing %s: %s.\n", filelist, strerror(errno));
+        }
+
+        argv = xmalloc(capacity*SIZEOF(*argv));
+        for (int i = 0; i < capacity; i += 1) {
+            argv[i] = xmalloc(capacity*SIZEOF(*argv[i]));
+        }
+
+        if ((args = fopen(filelist, "r")) == NULL) {
+            error("Error opening %s: %s.\n", filelist, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+
+        while (fgets(argv[argc], (int)capacity, args)) {
+            if (argc >= capacity) {
+                error("Arguments args too long\n");
+                fatal(EXIT_FAILURE);
+            }
+            argv[argc][strcspn(argv[argc], "\n")] = '\0';
+            argc += 1;
+        }
+        if (fclose(args) != 0) {
+            error("Error closing %s: %s.\n", filelist, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        brn2_list_from_args(old, argc, argv);
+        brn2_normalize_names(old, NULL);
+        brn2_print_list(old);
+        for (uint32 i = 0; i < LENGTH(files2); i += 1) {
+            assert(!strcmp(files2[i].normalized, old->files[i]->name));
+        }
+    }
 
     brn2_threads_join();
     exit(EXIT_SUCCESS);
