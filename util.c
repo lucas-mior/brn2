@@ -129,18 +129,23 @@ print_float(char *name, char *variable, enum FloatTypes type) {
     double value_d;
     long double value_ld;
 
+    size_t float_size = sizeof(float);
+    size_t double_size = sizeof(double);
+    size_t long_double_size = sizeof(long double);
+
     switch (type) {
     case FLOAT_FLOAT:
         memcpy(&value_f, variable, sizeof(float));
-        printf("[float]%s = %e = %f\n", name, (double)value_f, (double)value_f);
+        printf("[float]%zu %s = %e = %f\n", sizeof(float)*CHAR_BIT,
+                name, (double)value_f, (double)value_f);
         break;
     case FLOAT_DOUBLE:
         memcpy(&value_d, variable, sizeof(double));
-        printf("[double]%s = %e = %f\n", name, value_d, value_d);
+        printf("[double]%zu %s = %e = %f\n", sizeof(double)*CHAR_BIT, name, value_d, value_d);
         break;
     case FLOAT_LONG_DOUBLE:
         memcpy(&value_ld, variable, sizeof(long double));
-        printf("[long double]%s = %Le = %Lf\n", name, value_ld, value_ld);
+        printf("[long double]%zu %s = %Le = %Lf\n", sizeof(long double)*CHAR_BIT,name, value_ld, value_ld);
         break;
     default:
         fprintf(stderr, "Invalid type.\n");
@@ -162,20 +167,20 @@ print_float(char *name, char *variable, enum FloatTypes type) {
 
 #define PRINT_VAR(VARIABLE) \
 _Generic((VARIABLE), \
-  signed char: PRINT_SIGNED("schar", VARIABLE), \
-  short:       PRINT_SIGNED("short", VARIABLE), \
-  int:         PRINT_SIGNED("int", VARIABLE), \
-  long:        PRINT_SIGNED("long", VARIABLE), \
-  llong:       PRINT_SIGNED("llong", VARIABLE), \
-  uchar:       PRINT_UNSIGNED("uchar", VARIABLE), \
-  ushort:      PRINT_UNSIGNED("ushort", VARIABLE), \
-  uint:        PRINT_UNSIGNED("uint", VARIABLE), \
-  ulong:       PRINT_UNSIGNED("ulong", VARIABLE), \
-  ullong:      PRINT_UNSIGNED("ullong", VARIABLE), \
-  char:        PRINT_OTHER("char", "%c", VARIABLE), \
-  bool:        PRINT_OTHER("bool", "%d", VARIABLE), \
-  char *:      PRINT_OTHER("char *", "%s", VARIABLE), \
-  void *:      PRINT_OTHER("void *", "%p", VARIABLE), \
+  signed char: PRINT_SIGNED("[schar]", VARIABLE), \
+  short:       PRINT_SIGNED("[short]", VARIABLE), \
+  int:         PRINT_SIGNED("[int]", VARIABLE), \
+  long:        PRINT_SIGNED("[long]", VARIABLE), \
+  llong:       PRINT_SIGNED("[llong]", VARIABLE), \
+  uchar:       PRINT_UNSIGNED("[uchar]", VARIABLE), \
+  ushort:      PRINT_UNSIGNED("[ushort]", VARIABLE), \
+  uint:        PRINT_UNSIGNED("[uint]", VARIABLE), \
+  ulong:       PRINT_UNSIGNED("[ulong]", VARIABLE), \
+  ullong:      PRINT_UNSIGNED("[ullong]", VARIABLE), \
+  char:        PRINT_OTHER("[char]", "%c", VARIABLE), \
+  bool:        PRINT_OTHER("[bool]", "%d", VARIABLE), \
+  char *:      PRINT_OTHER("[char *]", "%s", VARIABLE), \
+  void *:      PRINT_OTHER("[void *]", "%p", VARIABLE), \
   float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT), \
   double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE), \
   long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
