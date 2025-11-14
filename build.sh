@@ -203,7 +203,7 @@ create_temp_files() {
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
-    seq -w 1000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 100000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
 case "$target" in
