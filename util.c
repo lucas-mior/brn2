@@ -291,10 +291,10 @@ assert_equal_strings(char *file, uint32 line,
 
 static void
 assert_equal_integer(char *file, uint32 line,
-                     char *name1, char *name2, llong var1, llong var2) {
+                     char *name1, char *name2, ullong var1, ullong var2) {
     if (var1 != var2) {
         error("Assertion failed at %s:%u\n", file, line);
-        error("%s = %lld != %lld = %s\n", name1, var1, var2, name2);
+        error("%s = %llu != %llu = %s\n", name1, var1, var2, name2);
         abort();
     }
 }
@@ -311,10 +311,10 @@ assert_less_strings(char *file, uint32 line,
 
 static void
 assert_less_integer(char *file, uint32 line,
-                     char *name1, char *name2, llong var1, llong var2) {
+                     char *name1, char *name2, ullong var1, ullong var2) {
     if (var1 >= var2) {
         error("Assertion failed at %s:%u\n", file, line);
-        error("%s = %lld >= %lld = %s\n", name1, var1, var2, name2);
+        error("%s = %llu >= %llu = %s\n", name1, var1, var2, name2);
         abort();
     }
 }
@@ -331,10 +331,10 @@ assert_less_equal_strings(char *file, uint32 line,
 
 static void
 assert_less_equal_integer(char *file, uint32 line,
-                     char *name1, char *name2, llong var1, llong var2) {
+                     char *name1, char *name2, ullong var1, ullong var2) {
     if (var1 > var2) {
         error("Assertion failed at %s:%u\n", file, line);
-        error("%s = %lld > %lld = %s\n", name1, var1, var2, name2);
+        error("%s = %llu > %llu = %s\n", name1, var1, var2, name2);
         abort();
     }
 }
@@ -344,7 +344,7 @@ _Generic((VAR1), \
     char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
         (char *)(uintptr_t)(VAR1), (char *)(uintptr_t)(VAR2)), \
     default: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
-                 (llong)(VAR1), (llong)(VAR2)) \
+                 (ullong)(VAR1), (ullong)(VAR2)) \
 )
 
 #define ASSERT_LESS(VAR1, VAR2) \
@@ -352,7 +352,7 @@ _Generic((VAR1), \
     char *: assert_less_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
         (char *)(uintptr_t)(VAR1), (char *)(uintptr_t)(VAR2)), \
     default: assert_less_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
-                 (llong)(VAR1), (llong)(VAR2)) \
+                 (ullong)(VAR1), (ullong)(VAR2)) \
 )
 
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) \
@@ -360,7 +360,7 @@ _Generic((VAR1), \
     char *: assert_less_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
         (char *)(uintptr_t)(VAR1), (char *)(uintptr_t)(VAR2)), \
     default: assert_less_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
-                 (llong)(VAR1), (llong)(VAR2)) \
+                 (ullong)(VAR1), (ullong)(VAR2)) \
 )
 
 // clang-format on
