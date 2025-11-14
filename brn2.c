@@ -633,7 +633,6 @@ brn2_threads_work_changes(Work *arg) {
                 continue;
             }
         }
-        error("diff: %s != %s\n", oldfile->name, newfile->name);
         work->numbers[work->id] += 1;
     }
     return 0;
