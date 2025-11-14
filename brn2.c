@@ -987,27 +987,28 @@ bool brn2_options_quiet = false;
 bool brn2_options_autosolve = false;
 uint32 nthreads = 2;
 
-static bool
-contains_filename(FileList *list, FileName *file, bool verbose) {
+static void
+assert_contains_filename(FileList *list, FileName *file, bool verbose) {
     for (uint32 i = 0; i < list->length; i += 1) {
         if (list->files[i]->length != file->length) {
             continue;
         }
         if (!memcmp64(list->files[i]->name, file->name, file->length)) {
-            printf(GREEN "%s == %s\n" RESET, file->name, list->files[i]->name);
+            printf(GREEN "%s == %s" RESET "\n", file->name, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
                           (list->length - i)*sizeof(*(list->files)));
             }
-            return true;
+            return;
         }
         if (verbose) {
             printf("%u / %u | %s != %s \n", i + 1, list->length,
                    list->files[i]->name, file->name);
         }
     }
-    return false;
+    error("List does not contain '%s'\n", file->name);
+    fatal(EXIT_FAILURE);
 }
 // flags: -lm
 
@@ -1045,8 +1046,7 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert(contains_filename(list2, list1->files[i],
-                                     list1->length < 9999));
+            assert_contains_filename(list2, list1->files[i], list1->length < 9999);
         }
 
         brn2_free_list(list1);
@@ -1083,8 +1083,7 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert(contains_filename(list2, list1->files[i],
-                                     list1->length < 9999));
+            assert_contains_filename(list2, list1->files[i], list1->length < 9999);
         }
 
         map = hash_create_map(list1->length);
@@ -1181,9 +1180,9 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert(contains_filename(list2, list1->files[i],
-                                     list1->length < 9999));
+            assert_contains_filename(list2, list1->files[i], list1->length < 9999);
         }
+        printf(RESET);
 
         map = hash_create_map(list1->length);
         capacity_set = hash_capacity(map);
@@ -1244,7 +1243,7 @@ main(void) {
             }
         }
         for (uint32 i = 1; i < LENGTH(files); i += 1) {
-            assert(strcmp(files[i - 1].original, files[i].original) < 0);
+            ASSERT_LESS(files[i - 1].original, files[i].original);
         }
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
@@ -1382,7 +1381,7 @@ main(void) {
         FILE *args;
 
         for (uint32 i = 1; i < LENGTH(files2); i += 1) {
-            assert(strcmp(files2[i - 1].original, files2[i].original) < 0);
+            ASSERT_LESS(files2[i - 1].original, files2[i].original);
         }
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
