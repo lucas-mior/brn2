@@ -73,7 +73,7 @@
 #include <pthread.h>
 #endif
 
-#ifndef DEBUGGING
+#if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
 
