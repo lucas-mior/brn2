@@ -1411,6 +1411,7 @@ main(void) {
         }
         if (fclose(args) != 0) {
             error("Error closing %s: %s.\n", filelist, strerror(errno));
+            fatal(EXIT_FAILURE);
         }
 
         brn2_list_from_file(old, filelist, true);
