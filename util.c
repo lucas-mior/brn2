@@ -1220,6 +1220,7 @@ main(void) {
     PRINT_VAR(var_float);
     PRINT_VAR(var_double);
     PRINT_VAR(var_longdouble);
+    PRINT_VAR(var_uint - var_int);
 
     int_max = MAXOF(var_int);
     int_min = MINOF(var_int);
