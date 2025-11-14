@@ -469,6 +469,11 @@ main(int argc, char **argv) {
             main_capacity = hash_capacity(newlist_set);
             brn2_create_hashes(new, main_capacity);
 
+#ifdef DEBUG2
+            brn2_full_check(old, new, "final check");
+            exit(0);
+#endif
+
             if (!brn2_verify(new, old, newlist_set, new->indexes)) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"

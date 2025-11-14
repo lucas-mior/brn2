@@ -129,14 +129,9 @@ brn2_compare(const void *a, const void *b) {
 }
 
 static void
-brn2_full_check(FileList *old, FileList *new, HashSet *newlist_set,
-                char *name) {
+brn2_full_check(FileList *old, FileList *new, char *name) {
     error("brn2_full_check(%s)\n", name);
 
-    if (old && newlist_set) {
-        for (uint32 i = 0; i < old->length; i += 1) {
-        }
-    }
     if (old) {
         for (uint32 i = 0; i < old->length; i += 1) {
             if (old->files[i]->length != strlen(old->files[i]->name)) {
