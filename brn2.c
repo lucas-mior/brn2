@@ -994,7 +994,8 @@ assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             continue;
         }
         if (!memcmp64(list->files[i]->name, file->name, file->length)) {
-            printf(GREEN "%s == %s" RESET "\n", file->name, list->files[i]->name);
+            printf(GREEN "%s == %s" RESET "\n", file->name,
+                   list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
@@ -1046,15 +1047,14 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert_contains_filename(list2, list1->files[i], list1->length < 9999);
+            assert_contains_filename(list2, list1->files[i],
+                                     list1->length < 9999);
         }
 
         brn2_free_list(list1);
         brn2_free_list(list2);
-        for (uint32 i = 0; i < nthreads; i += 1) {
-            arena_destroy(list1->arenas[i]);
-            arena_destroy(list2->arenas[i]);
-        }
+        arenas_destroy(list1->arenas, nthreads);
+        arenas_destroy(list2->arenas, nthreads);
         unlink(filelist);
     }
 
@@ -1083,7 +1083,8 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert_contains_filename(list2, list1->files[i], list1->length < 9999);
+            assert_contains_filename(list2, list1->files[i],
+                                     list1->length < 9999);
         }
 
         map = hash_create_map(list1->length);
@@ -1180,7 +1181,8 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert_contains_filename(list2, list1->files[i], list1->length < 9999);
+            assert_contains_filename(list2, list1->files[i],
+                                     list1->length < 9999);
         }
         printf(RESET);
 
