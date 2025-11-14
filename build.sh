@@ -58,11 +58,6 @@ case "$target" in
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     exe="bin/${program}_debug"
     ;;
-"debug2")
-    CFLAGS="$CFLAGS -g -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -DDEBUG2"
-    exe="bin/${program}_debug"
-    ;;
 "benchmark")
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
@@ -249,18 +244,6 @@ case "$target" in
 "check")
     CC=gcc CFLAGS="-fanalyzer" ./build.sh
     scan-build --view -analyze-headers --status-bugs ./build.sh
-    exit
-    ;;
-"debug2")
-    create_temp_files
-    ls > rename
-
-    trace_on
-    # find . \
-    # | $dir/bin/brn2_debug -f -
-    # $dir/bin/brn2_debug -d .
-    $dir/bin/brn2_debug -f rename -q
-    trace_off
     exit
     ;;
 esac

@@ -128,36 +128,6 @@ brn2_compare(const void *a, const void *b) {
     return strcmp((*file_a)->name, (*file_b)->name);
 }
 
-static void
-brn2_full_check(FileList *old, FileList *new, char *name) {
-    error("brn2_full_check(%s)\n", name);
-
-    if (old) {
-        for (uint32 i = 0; i < old->length; i += 1) {
-            if (old->files[i]->length != strlen(old->files[i]->name)) {
-                error("old [%u] %u != %u\n", i, old->files[i]->length,
-                      (uint)strlen(old->files[i]->name));
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-    if (new) {
-        for (uint32 i = 0; i < new->length; i += 1) {
-            assert(new->files[i]->length == strlen(new->files[i]->name));
-        }
-    }
-    if (new && old) {
-        assert(new->length == old->length);
-        for (uint32 i = 0; i < old->length; i += 1) {
-            assert(old->files[i]->length + 200 == new->files[i]->length);
-            assert(new->files[i]->length == strlen(new->files[i]->name));
-            assert(old->files[i]->length == strlen(old->files[i]->name));
-        }
-    }
-
-    return;
-}
-
 void
 brn2_list_from_args(FileList *list, int argc, char **argv) {
     uint32 length = 0;
@@ -1274,14 +1244,12 @@ main(void) {
             {"b", "bxx"},
             {"c", "d"},
             {"d", "a"},
-            {"e",
-                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-                "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
-                "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
-                "FFFFF"
-            },
+            {"e", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                  "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+                  "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+                  "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+                  "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+                  "FFFFF"},
         };
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
