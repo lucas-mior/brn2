@@ -85,4 +85,6 @@ static struct {
     {"/./bbb", "/bbb"},
     {"///ccc", "/ccc"},
     {"///ddd//ddd", "/ddd/ddd"},
+    {"///eee/./eee", "/eee/eee"},
+    {"fff/././/fff", "fff/fff"},
 };
