@@ -1422,6 +1422,8 @@ main(void) {
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
             ASSERT_EQUAL(files2[i].normalized, old->files[i]->name);
         }
+        brn2_free_list(old);
+        arenas_destroy(old->arenas, nthreads);
     }
 
     brn2_threads_join();
