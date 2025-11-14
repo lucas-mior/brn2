@@ -96,6 +96,12 @@ xarena_push(Arena **arenas, uint32 number, uint32 size) {
 
 void
 brn2_print_list(FileList *list) {
+    error("FileList = {\n");
+    error(" arenas,\n");
+    error(" indexes = %p\n", (void *)list->indexes);
+    error(" indexes_size = %lld\n", (llong)list->indexes_size);
+    error(" length = %u\n", list->length);
+
     for (uint32 i = 0; i < list->length;) {
         FileName *file = list->files[i];
         if (file) {
@@ -111,6 +117,8 @@ brn2_print_list(FileList *list) {
         }
         i += 1;
     }
+
+    error("}\n");
 }
 
 int
@@ -1005,6 +1013,7 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_brn2
 #include <assert.h>
+#include "sort.c"
 
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
@@ -1036,7 +1045,7 @@ contains_filename(FileList *list, FileName *file, bool verbose) {
 }
 // flags: -lm
 
-int (*print)(const char *, ...);
+int (*print)(const char *, ...) = printf;
 
 int
 main(void) {
@@ -1225,6 +1234,142 @@ main(void) {
         hash_destroy_map(map);
         brn2_free_list(list1);
         unlink(filelist);
+    }
+    {
+        FileList old_stack;
+        FileList new_stack;
+        FileList *old = &old_stack;
+        FileList *new = &new_stack;
+
+        HashMap *oldlist_map;
+        HashSet *names_renamed;
+        uint32 number_renames = 0;
+        uint32 number_changes;
+
+        char *directory = "/tmp/brn2_abcd";
+        char command_rmdir[128];
+
+        static struct {
+            char *original;
+            char *renamed;
+        } files[4] = {
+            {"a", "c"},
+            {"b", "bxx"},
+            {"c", "d"},
+            {"d", "a"},
+        };
+
+        SNPRINTF(command_rmdir, "rm -rf %s", directory);
+        system(command_rmdir);
+        if (mkdir(directory, 0777) < 0) {
+            error("Error creating directory %s: %s.\n", directory,
+                  strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+        }
+
+        for (uint32 i = 0; i < LENGTH(files); i += 1) {
+            char buffer[128];
+            FILE *file;
+            SNPRINTF(buffer, "%s/%s", directory, files[i].original);
+
+            if ((file = fopen(buffer, "w")) == NULL) {
+                error("Error opening %s: %s.\n", buffer, strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
+            fprintf(file, "%s", files[i].renamed);
+            if (fclose(file) != 0) {
+                error("Error closing %s: %s.\n", buffer, strerror(errno));
+            }
+        }
+
+        brn2_list_from_dir(old, directory);
+        brn2_normalize_names(old, NULL);
+        sort(old);
+
+        new->files = xmalloc(old->length*sizeof(*(new->files)));
+        new->length = old->length;
+        for (uint32 i = 0; i < new->length; i += 1) {
+            FileName **file_pointer = &(new->files[i]);
+            FileName *file;
+            uint32 name_length;
+            uint32 size;
+            char buffer[128];
+
+            name_length = (uint32)SNPRINTF(buffer, "%s/%s", directory,
+                                           files[i].renamed);
+
+            size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
+            *file_pointer = xarena_push(new->arenas, nthreads, ALIGN(size));
+            file = *file_pointer;
+
+            file->length = (uint16)name_length;
+            memcpy64(file->name, buffer, name_length + 1);
+        }
+
+        brn2_normalize_names(old, new);
+
+        {
+            uint32 capacity_set;
+            oldlist_map = hash_create_map(old->length);
+            capacity_set = hash_capacity(oldlist_map);
+            old->indexes_size = old->length*sizeof(*(old->indexes));
+            old->indexes = xmmap_commit(&(old->indexes_size));
+            brn2_create_hashes(old, capacity_set);
+        }
+
+        for (uint32 i = 0; i < old->length; i += 1) {
+            FileName *file = old->files[i];
+            uint32 *index = &(old->indexes[i]);
+            assert(hash_insert_pre_calc_map(oldlist_map, file->name, file->hash,
+                                            *index, i));
+        }
+
+        {
+            uint32 main_capacity;
+            HashSet *newlist_set = hash_create_set(new->length);
+            new->indexes_size = new->length*sizeof(*(new->indexes));
+            new->indexes = xmmap_commit(&(new->indexes_size));
+            main_capacity = hash_capacity(newlist_set);
+
+            brn2_create_hashes(new, main_capacity);
+
+            assert(brn2_verify(new, old, newlist_set, new->indexes));
+        }
+
+        number_changes = brn2_get_number_changes(old, new);
+        assert(number_changes == LENGTH(files));
+
+        names_renamed = hash_create_set(old->length);
+
+        for (uint32 i = 0; i < old->length; i += 1) {
+            brn2_execute2(old, new, oldlist_map, names_renamed, i,
+                          &number_renames);
+        }
+        assert(number_renames == LENGTH(files));
+        for (uint32 i = 0; i < LENGTH(files); i += 1) {
+            char buffer[128];
+            char buffer2[128];
+            FILE *file;
+            SNPRINTF(buffer, "%s/%s", directory, files[i].renamed);
+
+            if ((file = fopen(buffer, "r")) == NULL) {
+                error("Error opening %s: %s.\n", buffer, strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
+
+            assert(fgets(buffer2, sizeof(buffer2), file));
+            assert(!strcmp(buffer2, files[i].renamed));
+
+            if (fclose(file) != 0) {
+                error("Error closing %s: %s.\n", buffer, strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
+        }
     }
 
     brn2_threads_join();
