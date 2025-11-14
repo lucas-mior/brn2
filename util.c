@@ -279,7 +279,7 @@ _Generic((VARIABLE), \
 
 #endif
 
-void
+static void
 assert_equal_strings(char *file, uint32 line,
                      char *name1, char *name2, char *var1, char *var2) {
     if (strcmp(var1, var2)) {
@@ -289,7 +289,7 @@ assert_equal_strings(char *file, uint32 line,
     }
 }
 
-void
+static void
 assert_equal_integer(char *file, uint32 line,
                      char *name1, char *name2, llong var1, llong var2) {
     if (var1 != var2) {
