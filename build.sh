@@ -203,7 +203,7 @@ create_temp_files() {
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
-    seq -w 100000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 1000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
 case "$target" in
@@ -224,12 +224,13 @@ case "$target" in
 
     vg_flags="--error-exitcode=1 --errors-for-leak-kinds=all"
     vg_flags="$vg_flags --leak-check=full --show-leak-kinds=all"
+    vg_flags="$vg_flags --track-origins=yes"
 
     trace_on
     find . \
-    | valgrind -s --tool=memcheck $dir/bin/brn2 -f -
-    valgrind   -s --tool=memcheck $dir/bin/brn2 -d .
-    valgrind   -s --tool=memcheck $dir/bin/brn2 -f rename
+    | valgrind $vg_flags -s --tool=memcheck $dir/bin/brn2 -f -
+    valgrind   $vg_flags -s --tool=memcheck $dir/bin/brn2 -d .
+    valgrind   $vg_flags -s --tool=memcheck $dir/bin/brn2 -f rename
     trace_off
     exit
     ;;
