@@ -152,32 +152,32 @@ print_float(char *name, char *variable, enum FloatTypes type) {
 
 // clang-format off
 #define PRINT_SIGNED(TYPE, VARIABLE) \
-    printf("%s%s = %lld \n", TYPE, #VARIABLE, (llong)VARIABLE)
+    printf(TYPE "%zu %s = %lld\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE,  (llong)VARIABLE)
 
 #define PRINT_UNSIGNED(TYPE, VARIABLE) \
-    printf("%s%s = %llu \n", TYPE, #VARIABLE, (ullong)VARIABLE)
+    printf(TYPE "%zu %s = %llu\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE,  (ullong)VARIABLE)
 
 #define PRINT_OTHER(TYPE, FORMAT, VARIABLE) \
-    printf("%s%s = " FORMAT " \n", TYPE, #VARIABLE, VARIABLE)
+    printf(TYPE "%zu %s = " FORMAT "\n", sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, VARIABLE)
 
-#define PRINT_VAR(VARIABLE)            \
-_Generic((VARIABLE),                   \
-  signed char: PRINT_SIGNED("[schar]", VARIABLE), \
-  short:       PRINT_SIGNED("[short]", VARIABLE), \
-  int:         PRINT_SIGNED("[int]", VARIABLE), \
-  long:        PRINT_SIGNED("[long]", VARIABLE), \
-  llong:       PRINT_SIGNED("[llong]", VARIABLE), \
-  uchar:       PRINT_UNSIGNED("[uchar]", VARIABLE), \
-  ushort:      PRINT_UNSIGNED("[ushort]", VARIABLE), \
-  uint:        PRINT_UNSIGNED("[uint]", VARIABLE), \
-  ulong:       PRINT_UNSIGNED("[ulong]", VARIABLE), \
-  ullong:      PRINT_UNSIGNED("[ullong]", VARIABLE), \
-  char:        PRINT_OTHER("[char]", "%c", VARIABLE),                        \
-  bool:        PRINT_OTHER("[bool]", "%b", VARIABLE),                        \
-  char *:      PRINT_OTHER("[char *]", "%s", VARIABLE),                      \
-  void *:      PRINT_OTHER("[void *]", "%p", VARIABLE),                        \
-  float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT),       \
-  double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE),      \
+#define PRINT_VAR(VARIABLE) \
+_Generic((VARIABLE), \
+  signed char: PRINT_SIGNED("schar", VARIABLE), \
+  short:       PRINT_SIGNED("short", VARIABLE), \
+  int:         PRINT_SIGNED("int", VARIABLE), \
+  long:        PRINT_SIGNED("long", VARIABLE), \
+  llong:       PRINT_SIGNED("llong", VARIABLE), \
+  uchar:       PRINT_UNSIGNED("uchar", VARIABLE), \
+  ushort:      PRINT_UNSIGNED("ushort", VARIABLE), \
+  uint:        PRINT_UNSIGNED("uint", VARIABLE), \
+  ulong:       PRINT_UNSIGNED("ulong", VARIABLE), \
+  ullong:      PRINT_UNSIGNED("ullong", VARIABLE), \
+  char:        PRINT_OTHER("char", "%c", VARIABLE), \
+  bool:        PRINT_OTHER("bool", "%d", VARIABLE), \
+  char *:      PRINT_OTHER("char *", "%s", VARIABLE), \
+  void *:      PRINT_OTHER("void *", "%p", VARIABLE), \
+  float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT), \
+  double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE), \
   long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
   default:     printf("%s = ?\n", #VARIABLE) \
 )
