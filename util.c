@@ -746,11 +746,11 @@ snprintf2(char *buffer, int size, char *format, ...) {
     va_end(args);
 
     if (n <= 0) {
-        error("Error in snprintf.\n");
+        error("Error in snprintf %s.\n", format);
         fatal(EXIT_FAILURE);
     }
     if (n >= size) {
-        error("Error in snprintf: Buffer is too small.\n");
+        error("Error in snprintf %s: Buffer is too small.\n", format);
         fatal(EXIT_FAILURE);
     }
     return n;

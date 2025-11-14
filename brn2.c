@@ -1269,11 +1269,19 @@ main(void) {
         static struct {
             char *original;
             char *renamed;
-        } files[4] = {
+        } files[] = {
             {"a", "c"},
             {"b", "bxx"},
             {"c", "d"},
             {"d", "a"},
+            {"e",
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+                "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+                "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+                "FFFFF"
+            },
         };
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
@@ -1290,7 +1298,7 @@ main(void) {
         }
 
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
-            char path[128];
+            char path[512];
             FILE *file;
             SNPRINTF(path, "%s/%s", directory, files[i].original);
 
@@ -1315,7 +1323,7 @@ main(void) {
             FileName *file;
             uint32 name_length;
             uint32 size;
-            char path[128];
+            char path[512];
 
             name_length
                 = (uint32)SNPRINTF(path, "%s/%s", directory, files[i].renamed);
@@ -1371,8 +1379,8 @@ main(void) {
 
         assert(number_renames == LENGTH(files));
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
-            char path[128];
-            char buffer[128];
+            char path[512];
+            char buffer[512];
             FILE *file;
             SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
