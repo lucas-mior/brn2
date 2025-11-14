@@ -760,7 +760,6 @@ snprintf2(char *buffer, int size, char *format, ...) {
 static int
 util_command(const int argc, char **argv) {
     char cmdline[1024] = {0};
-    int64 j = 0;
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
@@ -783,20 +782,23 @@ util_command(const int argc, char **argv) {
         }
     }
 
-    for (int i = 0; i < argc - 1; i += 1) {
-        int64 len2 = strlen64(argv[i]);
-        if ((j + len2) >= (int64)sizeof(cmdline)) {
-            error("Command line is too long.\n");
-            fatal(EXIT_FAILURE);
-        }
+    {
+        int64 j = 0;
+        for (int i = 0; i < argc - 1; i += 1) {
+            int64 len2 = strlen64(argv[i]);
+            if ((j + len2) >= (int64)sizeof(cmdline)) {
+                error("Command line is too long.\n");
+                fatal(EXIT_FAILURE);
+            }
 
-        cmdline[j] = '"';
-        memcpy64(&cmdline[j + 1], argv[i], len2);
-        cmdline[j + len2 + 1] = '"';
-        cmdline[j + len2 + 2] = ' ';
-        j += len2 + 3;
+            cmdline[j] = '"';
+            memcpy64(&cmdline[j + 1], argv[i], len2);
+            cmdline[j + len2 + 1] = '"';
+            cmdline[j + len2 + 2] = ' ';
+            j += len2 + 3;
+        }
+        cmdline[j - 1] = '\0';
     }
-    cmdline[j - 1] = '\0';
 
     if ((tty = freopen("CONIN$", "r", stdin)) == NULL) {
         error("Error reopening stdin: %s.\n", strerror(errno));
