@@ -1105,6 +1105,8 @@ main(void) {
         brn2_list_from_file(list1, filelist, true);
         brn2_list_from_lines(list2, filelist, true);
 
+        assert(list1->length = list2->length);
+
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
 
