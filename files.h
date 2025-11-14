@@ -83,4 +83,6 @@ static struct {
 } files2[] = {
     {"././aaa", "aaa"},
     {"/./bbb", "/bbb"},
+    {"///ccc", "/ccc"},
+    {"///ddd//ddd", "/ddd/ddd"},
 };
