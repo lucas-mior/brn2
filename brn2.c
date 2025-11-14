@@ -1343,7 +1343,7 @@ main(void) {
         ASSERT_EQUAL(number_renames, number_changes);
         for (uint32 i = 0; i < LENGTH(files); i += 1) {
             char path[512];
-            char buffer[512];
+            char renamed[512];
             FILE *file;
             SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
@@ -1352,8 +1352,8 @@ main(void) {
                 fatal(EXIT_FAILURE);
             }
 
-            assert(fgets(buffer, sizeof(buffer), file));
-            assert(!strcmp(buffer, files[i].renamed));
+            assert(fgets(renamed, sizeof(renamed), file));
+            ASSERT_EQUAL(renamed, files[i].renamed);
 
             if (fclose(file) != 0) {
                 error("Error closing %s: %s.\n", path, strerror(errno));
