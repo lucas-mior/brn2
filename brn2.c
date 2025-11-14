@@ -1403,6 +1403,7 @@ main(void) {
             arena_destroy(new->arenas[i]);
         }
         hash_destroy_map(oldlist_map);
+        hash_destroy_set(names_renamed);
     }
 
     brn2_threads_join();
