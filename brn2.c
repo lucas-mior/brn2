@@ -1331,7 +1331,7 @@ main(void) {
         }
 
         number_changes = brn2_get_number_changes(old, new);
-        assert(number_changes == number_changed_hard);
+        ASSERT_EQUAL(number_changes, number_changed_hard);
 
         names_renamed = hash_create_set(old->length);
 
