@@ -269,8 +269,8 @@ _Generic((VARIABLE), \
   ullong:      PRINT_UNSIGNED("[ullong]", VARIABLE), \
   char:        PRINT_OTHER("[char]", "%c", VARIABLE), \
   bool:        PRINT_OTHER("[bool]", "%d", VARIABLE), \
-  char *:      PRINT_OTHER("[char *]", "%s", VARIABLE), \
-  void *:      PRINT_OTHER("[void *]", "%p", VARIABLE), \
+  char *:      PRINT_OTHER("[char *]", "%s", (char *)(uintptr_t)VARIABLE), \
+  void *:      PRINT_OTHER("[void *]", "%p", (void *)(uintptr_t)VARIABLE), \
   float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT), \
   double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE), \
   long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
