@@ -79,7 +79,7 @@ static struct {
 
 static struct {
     char *original;
-    char *renamed;
+    char *normalized;
 } files2[] = {
     {"././aaa", "aaa"},
     {"/./bbb", "/bbb"},
