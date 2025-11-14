@@ -363,7 +363,6 @@ _Generic((VAR1), \
                  (llong)(VAR1), (llong)(VAR2)) \
 )
 
-
 // clang-format on
 
 // clang-format off
@@ -1358,7 +1357,7 @@ main(void) {
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
         int n = rand() - RAND_MAX / 2;
-        ASSERT_EQUAL(atoi2(itoa2(n, buffer)),n);
+        ASSERT_EQUAL(atoi2(itoa2(n, buffer)), n);
     }
 
     for (int64 i = 0; i < LENGTH(paths); i += 1) {
