@@ -1085,6 +1085,10 @@ main(void) {
 
         brn2_free_list(list1);
         brn2_free_list(list2);
+        for (uint32 i = 0; i < nthreads; i += 1) {
+            arena_destroy(list1->arenas[i]);
+            arena_destroy(list2->arenas[i]);
+        }
         unlink(filelist);
     }
 
