@@ -138,12 +138,12 @@ print_float(char *name, char *variable, enum FloatTypes type) {
     case FLOAT_DOUBLE:
         memcpy(&value_d, variable, sizeof(double));
         printf("[double]%zu %s = %e = %f\n",
-                sizeof(double)*CHAR_BIT, name, value_d, value_d);
+               sizeof(double)*CHAR_BIT, name, value_d, value_d);
         break;
     case FLOAT_LONG_DOUBLE:
         memcpy(&value_ld, variable, sizeof(long double));
         printf("[long double]%zu %s = %Le = %Lf\n",
-                sizeof(long double)*CHAR_BIT,name, value_ld, value_ld);
+               sizeof(long double)*CHAR_BIT,name, value_ld, value_ld);
         break;
     default:
         fprintf(stderr, "Invalid type.\n");
