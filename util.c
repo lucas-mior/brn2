@@ -586,7 +586,8 @@ xrealloc(void *old, const int64 size) {
     assert((uint64)size <= SIZE_MAX);
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
-        error("Failed to reallocate %lld bytes from %llx.\n", (llong)size, (ullong)old_save);
+        error("Failed to reallocate %lld bytes from %llx.\n", (llong)size,
+              (ullong)old_save);
         fatal(EXIT_FAILURE);
     }
 
@@ -610,8 +611,8 @@ xstrdup(char *string) {
 
     length = strlen64(string) + 1;
     if ((p = malloc((size_t)length)) == NULL) {
-        error("Error allocating %lld bytes to duplicate '%s': %s\n", (llong)length,
-              string, strerror(errno));
+        error("Error allocating %lld bytes to duplicate '%s': %s\n",
+              (llong)length, string, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
