@@ -301,8 +301,10 @@ assert_equal_integer(char *file, uint32 line,
 
 #define ASSERT_EQUAL(VAR1, VAR2) \
 _Generic((VAR1), \
-    char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, (char *)(uintptr_t)VAR1, (char *)(uintptr_t)VAR2), \
-    default: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, (llong)VAR1, (llong)VAR2) \
+    char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
+        (char *)(uintptr_t)(VAR1), (char *)(uintptr_t)(VAR2)), \
+    default: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                 (llong)(VAR1), (llong)(VAR2)) \
 )
 
 // clang-format on
@@ -1299,7 +1301,7 @@ main(void) {
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
         int n = rand() - RAND_MAX / 2;
-        assert(atoi2(itoa2(n, buffer)) == n);
+        ASSERT_EQUAL(atoi2(itoa2(n, buffer)),n);
     }
 
     for (int64 i = 0; i < LENGTH(paths); i += 1) {
