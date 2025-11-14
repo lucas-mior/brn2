@@ -1206,6 +1206,11 @@ main(void) {
         }
         brn2_list_from_args(list2, argc, argv);
 
+        for (int i = 0; i < capacity; i += 1) {
+            free(argv[i]);
+        }
+        free(argv);
+
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
 
