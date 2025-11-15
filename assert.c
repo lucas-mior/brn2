@@ -304,16 +304,16 @@ assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
                       #VAR1, #VAR2, \
                       (llong)(VAR1), (ullong)(VAR2))
 
-#define COMPARE_SIGNED(VAR1, VAR2, MODE) \
+#define COMPARE_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  char: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
-  short: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
-  int: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
-  long: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
-  llong: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  char:   COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  short:  COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  int:    COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  long:   COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  llong:  COMPARE_SIGNED2(MODE, VAR1, VAR2), \
   ushort: COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  uint: COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  ulong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
   default: assert(false) \
 )
@@ -328,35 +328,35 @@ _Generic((VAR2), \
                       #VAR1, #VAR2, \
                       (ullong)(VAR1), (llong)(VAR2))
 
-#define COMPARE_UNSIGNED(VAR1, VAR2, MODE) \
+#define COMPARE_UNSIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
   ushort: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
-  uint: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
-  ulong: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  uint:   COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
   ullong: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
-  short: COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  int: COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  long: COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  llong: COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  short:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  long:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  llong:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
   default: assert(false) \
 )
 
-#define ASSERT_COMPARE(WHAT, VAR1, VAR2) \
+#define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
-    char *: assert_strings_##WHAT(__FILE__, __LINE__, #VAR1, #VAR2, \
+    char *: assert_strings_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                                  (char *)(uintptr_t)(VAR1), \
                                  (char *)(uintptr_t)(VAR2)), \
     default: assert(false) \
   ), \
-  short:  COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  int:    COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  long:   COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  llong:  COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  ushort: COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
-  uint:   COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
-  ulong:  COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
-  ullong: COMPARE_UNSIGNED(VAR1, VAR2, WHAT) \
+  short:  COMPARE_SIGNED(MODE, VAR1, VAR2), \
+  int:    COMPARE_SIGNED(MODE, VAR1, VAR2), \
+  long:   COMPARE_SIGNED(MODE, VAR1, VAR2), \
+  llong:  COMPARE_SIGNED(MODE, VAR1, VAR2), \
+  ushort: COMPARE_UNSIGNED(MODE, VAR1, VAR2), \
+  uint:   COMPARE_UNSIGNED(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_UNSIGNED(MODE, VAR1, VAR2), \
+  ullong: COMPARE_UNSIGNED(MODE, VAR1, VAR2) \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
