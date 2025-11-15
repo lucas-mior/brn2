@@ -409,6 +409,8 @@ main(void) {
     ASSERT_EQUAL(s1, s2);
     ASSERT_NOT_EQUAL(a, b);
     ASSERT_NOT_EQUAL(s1, s3);
+
+    exit(EXIT_SUCCESS);
 }
 #endif
 
