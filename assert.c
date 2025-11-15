@@ -159,6 +159,25 @@ integer_un_si(ullong u, llong s) {
 }
 
 // clang-format off
+#define COMPARE_SIGN_UNSIGN(MODE, SYMBOL) \
+    static void \
+assert_si_un_##MODE(char *file, uint line, \
+                   char *name1, char *name2, \
+                   llong var1, ullong var2) { \
+    if (!(integer_un_si(var2, var1) SYMBOL 0)) { \
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %lld " #SYMBOL " %llu = %s\n", name1, var1, var2, name2); \
+        trap(); \
+    } \
+}
+
+COMPARE_SIGN_UNSIGN(equal, ==)
+COMPARE_SIGN_UNSIGN(not_equal, !=)
+COMPARE_SIGN_UNSIGN(less, >)
+COMPARE_SIGN_UNSIGN(less_equal, >=)
+COMPARE_SIGN_UNSIGN(more, <)
+COMPARE_SIGN_UNSIGN(more_equal, <=)
+
 static void
 assert_un_si_equal(char *file, uint line,
                    char *name1, char *name2,
@@ -172,36 +191,12 @@ assert_un_si_equal(char *file, uint line,
 }
 
 static void
-assert_si_un_equal(char *file, uint line,
-                   char *name1, char *name2,
-                   llong var1, ullong var2) {
-    if (integer_un_si(var2, var1) != 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %lld != %llu = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
 assert_un_si_not_equal(char *file, uint line,
                        char *name1, char *name2,
                        ullong var1, llong var2) {
     if (integer_un_si(var1, var2) == 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %llu == %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_si_un_not_equal(char *file, uint line,
-                       char *name1, char *name2,
-                       llong var1, ullong var2) {
-    if (integer_un_si(var2, var1) == 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %lld == %llu = %s\n", name1, var1, var2, name2);
         trap();
     }
     return;
@@ -232,30 +227,6 @@ assert_un_si_less_equal(char *file, uint line,
 }
 
 static void
-assert_si_un_less(char *file, uint line,
-                  char *name1, char *name2,
-                  llong var1, ullong var2) {
-    if (integer_un_si(var2, var1) <= 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %lld >= %llu = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_si_un_less_equal(char *file, uint line,
-                        char *name1, char *name2,
-                        llong var1, ullong var2) {
-    if (integer_un_si(var2, var1) < 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %lld > %llu = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
 assert_un_si_more(char *file, uint line,
                   char *name1, char *name2,
                   ullong var1, llong var2) {
@@ -274,30 +245,6 @@ assert_un_si_more_equal(char *file, uint line,
     if (integer_un_si(var1, var2) > 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_si_un_more(char *file, uint line,
-                  char *name1, char *name2,
-                  llong var1, ullong var2) {
-    if (integer_un_si(var2, var1) <= 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %lld >= %llu = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_si_un_more_equal(char *file, uint line,
-                        char *name1, char *name2,
-                        llong var1, ullong var2) {
-    if (integer_un_si(var2, var1) < 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %lld > %llu = %s\n", name1, var1, var2, name2);
         trap();
     }
     return;
@@ -416,6 +363,7 @@ main(void) {
     ASSERT_LESS_EQUAL(f, e);
     ASSERT_LESS_EQUAL(d, c);
     ASSERT_LESS(g, h);
+    ASSERT_LESS(g, g3);
     ASSERT_LESS_EQUAL(g, h);
     ASSERT_LESS(g2, g3);
     ASSERT_LESS(g4, g3);
