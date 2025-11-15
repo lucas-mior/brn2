@@ -425,6 +425,8 @@ main(void) {
     ASSERT_EQUAL(s1, s2);
     ASSERT_NOT_EQUAL(a, b);
     ASSERT_NOT_EQUAL(s1, s3);
+    ASSERT_MORE(s1, s3);
+    ASSERT_LESS(s3, s1);
 
     exit(EXIT_SUCCESS);
 }
