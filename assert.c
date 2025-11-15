@@ -128,7 +128,7 @@ assert_si_un_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     llong var1, ullong var2) { \
     if (!(compare_unsign_with_sign(var2, var1) SYMBOL 0)) { \
-        error2("\n%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %lld " #SYMBOL " %llu = %s\n", name1, var1, var2, name2); \
         trap(); \
     } \
@@ -149,7 +149,7 @@ assert_un_si_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     ullong var1, llong var2) { \
     if (!(compare_unsign_with_sign(var1, var2) SYMBOL 0)) { \
-        error2("\n%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
         trap(); \
     } \
@@ -305,7 +305,7 @@ main(void) {
         int a = 1;
         uint b = 1;
         ASSERT_EQUAL(a, b);
-        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_LESS_EQUAL(a, b - 1);
         ASSERT_MORE_EQUAL(a, b);
     }
     {
