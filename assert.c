@@ -275,6 +275,7 @@ main(void) {
     long g = -10;
     long h = 10;
     long g2 = -20;
+    long g2 = MAXOF(g2);
 
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
