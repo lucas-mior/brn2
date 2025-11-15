@@ -290,7 +290,7 @@ brn2_free_list(FileList *list) {
         for (uint32 i = 0; i < list->length; i += 1) {
             FileName *file = list->files[i];
             (void)file;
-            assert(arenas_pop(list->arenas, nthreads, file));
+            ASSERT(arenas_pop(list->arenas, nthreads, file));
         }
     }
     free(list->files);
@@ -1080,7 +1080,7 @@ main(void) {
         brn2_list_from_file(list1, filelist, true);
         brn2_list_from_lines(list2, filelist, true);
 
-        assert(list1->length = list2->length);
+        ASSERT_EQUAL(list1->length, list2->length);
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1106,7 +1106,7 @@ main(void) {
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            assert(hash_insert_pre_calc_map(map, file->name, hash,
+            ASSERT(hash_insert_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i], 0));
         }
         for (uint32 i = 0; i < list1->length; i += 1) {
@@ -1117,7 +1117,7 @@ main(void) {
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            assert(hash_remove_pre_calc_map(map, file->name, hash,
+            ASSERT(hash_remove_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i]));
         }
 
@@ -1207,7 +1207,7 @@ main(void) {
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            assert(hash_insert_pre_calc_map(map, file->name, hash,
+            ASSERT(hash_insert_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i], 0));
         }
         for (uint32 i = 0; i < list1->length; i += 1) {
@@ -1218,7 +1218,7 @@ main(void) {
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            assert(hash_remove_pre_calc_map(map, file->name, hash,
+            ASSERT(hash_remove_pre_calc_map(map, file->name, hash,
                                             list1->indexes[i]));
         }
 
@@ -1322,7 +1322,7 @@ main(void) {
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             uint32 *index = &(old->indexes[i]);
-            assert(hash_insert_pre_calc_map(oldlist_map, file->name, file->hash,
+            ASSERT(hash_insert_pre_calc_map(oldlist_map, file->name, file->hash,
                                             *index, i));
         }
 
@@ -1335,7 +1335,7 @@ main(void) {
 
             brn2_create_hashes(new, main_capacity);
 
-            assert(brn2_verify(new, old, newlist_set, new->indexes));
+            ASSERT(brn2_verify(new, old, newlist_set, new->indexes));
             hash_destroy_set(newlist_set);
         }
 
