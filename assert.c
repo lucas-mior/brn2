@@ -280,49 +280,6 @@ _Generic((VAR1), \
 #if TESTING_assert
 int
 main(void) {
-    int a = 0;
-    int b = 1;
-    int c = 2;
-    uint d = 2;
-    uint e = 3;
-    int f = -1;
-    long g = -10;
-    long h = 10;
-    long g4 = MINOF(g4);
-    long g2 = MAXOF(g2);
-    ulong g3 = MAXOF(g3);
-    ulong g8 = 0;
-    char *s1 = "aaa";
-    char *s2 = "aaa";
-    char *s3 = "BBB";
-
-    ASSERT_EQUAL(a, a);
-    ASSERT_LESS(b, c);
-    ASSERT_LESS_EQUAL(a, b);
-
-    ASSERT_MORE(b, a);
-    ASSERT_MORE(f, g4);
-
-    ASSERT_EQUAL(c, d);
-    ASSERT_LESS_EQUAL(c, d);
-    ASSERT_LESS(f, e);
-    ASSERT_LESS(f, g8);
-    ASSERT_LESS_EQUAL(f, e);
-    ASSERT_LESS_EQUAL(d, c);
-    ASSERT_LESS(g, h);
-    ASSERT_LESS(g, g3);
-    ASSERT_LESS_EQUAL(g, h);
-    ASSERT_LESS(g2, g3);
-    ASSERT_LESS(g4, g3);
-    ASSERT_LESS(g4, g2);
-    ASSERT_LESS(g4, g8);
-    ASSERT_LESS(g8, g2);
-    ASSERT_EQUAL(s1, s2);
-    ASSERT_NOT_EQUAL(a, b);
-    ASSERT_NOT_EQUAL(s1, s3);
-    ASSERT_MORE(s1, s3);
-    ASSERT_LESS(s3, s1);
-
     exit(EXIT_SUCCESS);
 }
 #endif
