@@ -293,6 +293,7 @@ assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
     return;
 }
 
+// clang-format off
 #define COMPARE_SIGNED2(MODE, VAR1, VAR2) \
   assert_signed_##MODE(__FILE__, __LINE__, \
                        #VAR1, #VAR2, \
@@ -358,10 +359,12 @@ _Generic((VAR1), \
   ullong: COMPARE_UNSIGNED(VAR1, VAR2, WHAT) \
 )
 
-#define ASSERT_EQUAL(VAR1, VAR2) ASSERT_COMPARE(equal, VAR1, VAR2)
-#define ASSERT_NOT_EQUAL(VAR1, VAR2) ASSERT_COMPARE(not_equal, VAR1, VAR2)
-#define ASSERT_LESS(VAR1, VAR2) ASSERT_COMPARE(less, VAR1, VAR2)
+#define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
+#define ASSERT_NOT_EQUAL(VAR1, VAR2)  ASSERT_COMPARE(not_equal, VAR1, VAR2)
+#define ASSERT_LESS(VAR1, VAR2)       ASSERT_COMPARE(less, VAR1, VAR2)
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
+
+// clang-format on
 
 #if TESTING_assert
 int
