@@ -8,6 +8,14 @@
 #include <string.h>
 #include <assert.h>
 
+#if defined(__GNUC__) || defined(__clang__)
+#define ASSERT(c) if (!(c)) __builtin_trap()
+#elif defined(_MSC_VER)
+#define ASSERT(c) if (!(c)) __debugbreak()
+#else
+#define ASSERT(c) if (!(c)) *(volatile int *)0 = 0
+#endif
+
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_assert 1
 #elif !defined(TESTING_assert)
@@ -37,8 +45,8 @@ typedef uint64_t uint64;
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
 static void
-assert_strings_equal(char *file, uint32 line,
-                     char *name1, char *name2, char *var1, char *var2) {
+assert_strings_equal(char *file, uint32 line, char *name1, char *name2,
+                     char *var1, char *var2) {
     if (strcmp(var1, var2)) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %s != %s = %s\n", name1, var1, var2, name2);
@@ -47,8 +55,8 @@ assert_strings_equal(char *file, uint32 line,
 }
 
 static void
-assert_strings_less(char *file, uint32 line,
-                     char *name1, char *name2, char *var1, char *var2) {
+assert_strings_less(char *file, uint32 line, char *name1, char *name2,
+                    char *var1, char *var2) {
     if (strcmp(var1, var2) >= 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %s >= %s = %s\n", name1, var1, var2, name2);
@@ -57,8 +65,8 @@ assert_strings_less(char *file, uint32 line,
 }
 
 static void
-assert_strings_less_equal(char *file, uint32 line,
-                          char *name1, char *name2, char *var1, char *var2) {
+assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
+                          char *var1, char *var2) {
     if (strcmp(var1, var2) > 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %s > %s = %s\n", name1, var1, var2, name2);
@@ -120,7 +128,7 @@ _Generic((VAR2), \
   llong: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                             (llong)(VAR1), (llong)(VAR2)), \
   default: assert(false) \
-) \
+)
 
 #define COMPARE_UNSIGNED(VAR1, VAR2, MODE) \
 _Generic((VAR2), \
@@ -133,9 +141,9 @@ _Generic((VAR2), \
   ullong: assert_unsigned_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                                 (ullong)(VAR1), (ullong)(VAR2)), \
   default: assert(false) \
-) \
+)
 
-#define ASSERT(WHAT, VAR1, VAR2) \
+#define ASSERT_COMPARE(WHAT, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
     char *: assert_strings_##WHAT(__FILE__, __LINE__, #VAR1, #VAR2, \
@@ -153,12 +161,13 @@ _Generic((VAR1), \
   ullong: COMPARE_UNSIGNED(VAR1, VAR2, WHAT) \
 )
 
-#define ASSERT_EQUAL(VAR1, VAR2) ASSERT(equal, VAR1, VAR2)
-#define ASSERT_LESS(VAR1, VAR2) ASSERT(less, VAR1, VAR2)
-#define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT(less_equal, VAR1, VAR2)
+#define ASSERT_EQUAL(VAR1, VAR2) ASSERT_COMPARE(equal, VAR1, VAR2)
+#define ASSERT_LESS(VAR1, VAR2) ASSERT_COMPARE(less, VAR1, VAR2)
+#define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
 
 #if TESTING_assert
-int main(void) {
+int
+main(void) {
     int a = 0;
     int b = 1;
     int c = 2;
