@@ -196,7 +196,7 @@ assert_si_un_equal(char *file, uint line, char *name1, char *name2, llong var1,
 static void
 assert_un_si_less(char *file, uint line, char *name1, char *name2, ullong var1,
                   llong var2) {
-    if (integer_un_si(var1, var2) <= 0) {
+    if (integer_un_si(var1, var2) >= 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %llu <= %lld = %s\n", name1, var1, var2, name2);
         abort();
@@ -207,7 +207,7 @@ assert_un_si_less(char *file, uint line, char *name1, char *name2, ullong var1,
 static void
 assert_un_si_less_equal(char *file, uint line, char *name1, char *name2,
                         ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) < 0) {
+    if (integer_un_si(var1, var2) > 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
         abort();
@@ -239,6 +239,8 @@ assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
 
 #define COMPARE_SIGNED(VAR1, VAR2, MODE) \
 _Generic((VAR2), \
+  char: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                             (llong)(VAR1), (llong)(VAR2)), \
   short: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                              (llong)(VAR1), (llong)(VAR2)), \
   int: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
@@ -315,6 +317,7 @@ main(void) {
     long g4 = MINOF(g4);
     long g2 = MAXOF(g2);
     ulong g3 = MAXOF(g3);
+    ulong g8 = 0;
 
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
@@ -330,6 +333,7 @@ main(void) {
     ASSERT_LESS(g2, g3);
     ASSERT_LESS(g4, g3);
     ASSERT_LESS(g4, g2);
+    ASSERT_LESS(g8, g2);
 }
 #endif
 
