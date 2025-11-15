@@ -276,7 +276,7 @@ assert_si_un_less_equal(char *file, uint line,
 // clang-format on
 
 // clang-format off
-#define COMPARE_TWO_SIGNED(MODE, VAR1, VAR2) \
+#define COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2) \
   assert_signed_##MODE(__FILE__, __LINE__, \
                        #VAR1, #VAR2, \
                        (llong)(VAR1), (llong)(VAR2))
@@ -288,11 +288,11 @@ assert_si_un_less_equal(char *file, uint line,
 
 #define COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  schar:  COMPARE_TWO_SIGNED(MODE, VAR1, VAR2), \
-  short:  COMPARE_TWO_SIGNED(MODE, VAR1, VAR2), \
-  int:    COMPARE_TWO_SIGNED(MODE, VAR1, VAR2), \
-  long:   COMPARE_TWO_SIGNED(MODE, VAR1, VAR2), \
-  llong:  COMPARE_TWO_SIGNED(MODE, VAR1, VAR2), \
+  schar:  COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  short:  COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  int:    COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  long:   COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  llong:  COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
   uchar:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ushort: COMPARE_SI_UN(MODE, VAR1, VAR2), \
   uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
@@ -301,7 +301,7 @@ _Generic((VAR2), \
   default: assert(false) \
 )
 
-#define COMPARE_TWO_UNSIGNED(MODE, VAR1, VAR2) \
+#define COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
   assert_unsigned_##MODE(__FILE__, __LINE__, \
                          #VAR1, #VAR2, \
                          (ullong)(VAR1), (ullong)(VAR2))
@@ -313,11 +313,11 @@ _Generic((VAR2), \
 
 #define COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  uchar:  COMPARE_TWO_UNSIGNED(MODE, VAR1, VAR2), \
-  ushort: COMPARE_TWO_UNSIGNED(MODE, VAR1, VAR2), \
-  uint:   COMPARE_TWO_UNSIGNED(MODE, VAR1, VAR2), \
-  ulong:  COMPARE_TWO_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong: COMPARE_TWO_UNSIGNED(MODE, VAR1, VAR2), \
+  uchar:  COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  ushort: COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  uint:   COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  ullong: COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
   schar:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
   short:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
   int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
