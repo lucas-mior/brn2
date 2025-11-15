@@ -90,53 +90,29 @@ _Generic((VARIABLE), \
 
 #endif
 
-// clang-format on
-
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
-static void
-assert_strings_equal(char *file, uint32 line, char *name1, char *name2,
-                     char *var1, char *var2) {
-    if (strcmp(var1, var2)) {
-        error2("Assertion failed at %s:%u\n", file, line);
-        error2("%s = %s != %s = %s\n", name1, var1, var2, name2);
-        trap();
-    }
+#define STRING_COMPARE(MODE, SYMBOL) \
+    static void \
+    assert_strings_##MODE(char *file, uint line, \
+                          char *name1, char *name2, \
+                          char *var1, char *var2) { \
+    if (!(strcmp(var1, var2) SYMBOL 0)) { \
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %s " #SYMBOL "%s = %s\n", \
+               name1, var1, var2, name2); \
+        trap(); \
+    } \
 }
 
-static void
-assert_strings_not_equal(char *file, uint32 line, char *name1, char *name2,
-                         char *var1, char *var2) {
-    if (!strcmp(var1, var2)) {
-        error2("Assertion failed at %s:%u\n", file, line);
-        error2("%s = %s == %s = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-}
+STRING_COMPARE(less, <)
+STRING_COMPARE(less_equal, <=)
+STRING_COMPARE(equal, ==)
+STRING_COMPARE(not_equal, !=)
+STRING_COMPARE(more, >)
+STRING_COMPARE(more_equal, >=)
 
-static void
-assert_strings_less(char *file, uint32 line, char *name1, char *name2,
-                    char *var1, char *var2) {
-    if (strcmp(var1, var2) >= 0) {
-        error2("Assertion failed at %s:%u\n", file, line);
-        error2("%s = %s >= %s = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-}
-
-static void
-assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
-                          char *var1, char *var2) {
-    if (strcmp(var1, var2) > 0) {
-        error2("Assertion failed at %s:%u\n", file, line);
-        error2("%s = %s > %s = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-}
-
-// clang-format off
-
-#define INTEGER_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
+#define INTEGER_SAME_SIGN_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
     static void \
     assert_##TYPE##_##MODE(char *file, uint32 line, \
                            char *name1, char *name2, \
@@ -149,14 +125,20 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     } \
 }
 
-INTEGER_COMPARE(signed,   "%lld", <,  less)
-INTEGER_COMPARE(unsigned, "%llu", <,  less)
-INTEGER_COMPARE(signed,   "%lld", <=, less_equal)
-INTEGER_COMPARE(unsigned, "%llu", <=, less_equal)
-INTEGER_COMPARE(signed,   "%lld", ==, equal)
-INTEGER_COMPARE(unsigned, "%llu", ==, equal)
-INTEGER_COMPARE(signed,   "%lld", !=, not_equal)
-INTEGER_COMPARE(unsigned, "%llu", !=, not_equal)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", <,  less)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", <,  less)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", <=, less_equal)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", <=, less_equal)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", ==, equal)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", ==, equal)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", !=, not_equal)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", !=, not_equal)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", >,  more)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", >,  more)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", >=, more_equal)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", >=, more_equal)
+
+#undef INTEGER_SAME_SIGN_COMPARE
 
 // clang-format on
 
@@ -273,6 +255,54 @@ assert_si_un_less_equal(char *file, uint line,
     return;
 }
 
+static void
+assert_un_si_more(char *file, uint line,
+                  char *name1, char *name2,
+                  ullong var1, llong var2) {
+    if (integer_un_si(var1, var2) >= 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %llu <= %lld = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+    return;
+}
+
+static void
+assert_un_si_more_equal(char *file, uint line,
+                        char *name1, char *name2,
+                        ullong var1, llong var2) {
+    if (integer_un_si(var1, var2) > 0) {
+        error2("Assertion failed at %s:%u\n", file, line);
+        error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+    return;
+}
+
+static void
+assert_si_un_more(char *file, uint line,
+                  char *name1, char *name2,
+                  llong var1, ullong var2) {
+    if (integer_un_si(var2, var1) <= 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %lld >= %llu = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+    return;
+}
+
+static void
+assert_si_un_more_equal(char *file, uint line,
+                        char *name1, char *name2,
+                        llong var1, ullong var2) {
+    if (integer_un_si(var2, var1) < 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %lld > %llu = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+    return;
+}
+
 // clang-format on
 
 // clang-format off
@@ -348,6 +378,8 @@ _Generic((VAR1), \
 #define ASSERT_NOT_EQUAL(VAR1, VAR2)  ASSERT_COMPARE(not_equal, VAR1, VAR2)
 #define ASSERT_LESS(VAR1, VAR2)       ASSERT_COMPARE(less, VAR1, VAR2)
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
+#define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more, VAR1, VAR2)
+#define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
 
 // clang-format on
 
@@ -373,6 +405,9 @@ main(void) {
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
     ASSERT_LESS_EQUAL(a, b);
+
+    ASSERT_MORE(b, a);
+    ASSERT_MORE(f, g4);
 
     ASSERT_EQUAL(c, d);
     ASSERT_LESS_EQUAL(c, d);
