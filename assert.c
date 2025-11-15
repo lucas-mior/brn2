@@ -10,41 +10,48 @@
 #include <limits.h>
 #include <float.h>
 
+#if !defined(MINOF)
 #define MINOF(VARIABLE)            \
 _Generic((VARIABLE),                   \
-  int8:        INT8_MIN, \
-  int16:       INT16_MIN, \
-  int32:       INT32_MIN, \
-  int64:       INT64_MIN, \
-  uint8:       0, \
-  uint16:      0, \
-  uint32:      0, \
-  uint64:      0, \
+  signed char: SCHAR_MIN, \
+  short:     SHRT_MIN, \
+  int:       INT_MIN, \
+  long:       LONG_MIN, \
+  uchar:      0, \
+  ushort:     0, \
+  uint:      0u, \
+  ulong:      0ul, \
+  ullong:      0ull, \
   char:        CHAR_MIN, \
-  bool:        0, \
+  bool:        1, \
   float:       FLT_MIN, \
   double:      DBL_MIN, \
   long double: LDBL_MIN, \
   default:     0 \
 )
+#endif
+
+#if !defined(MAXOF)
 
 #define MAXOF(VARIABLE)            \
 _Generic((VARIABLE),                   \
-  int8:        (int64)INT8_MAX, \
-  int16:       (int64)INT16_MAX, \
-  int32:       (int64)INT32_MAX, \
-  int64:       (int64)INT64_MAX, \
-  uint8:       (int64)UINT8_MAX, \
-  uint16:      (int64)UINT16_MAX, \
-  uint32:      (int64)UINT32_MAX, \
-  uint64:      (uint64)UINT64_MAX, \
-  char:        (int64)CHAR_MAX, \
+  signed char: SCHAR_MAX, \
+  short:     SHRT_MAX, \
+  int:       INT_MAX, \
+  long:       LONG_MAX, \
+  uchar:      UCHAR_MAX, \
+  ushort:     USHRT_MAX, \
+  uint:      UINT_MAX, \
+  ulong:      ULONG_MAX, \
+  ullong:      ULLONG_MAX, \
+  char:        CHAR_MAX, \
   bool:        1, \
   float:       FLT_MAX, \
   double:      DBL_MAX, \
   long double: LDBL_MAX, \
   default:     0 \
 )
+#endif
 
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
