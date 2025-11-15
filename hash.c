@@ -432,7 +432,7 @@ hash_expected_collisions(void *map) {
 #include <assert.h>
 #include "arena.c"
 
-#define NSTRINGS 100u
+#define NSTRINGS 100
 #define NBYTES ALIGNMENT
 
 typedef struct String {
@@ -507,12 +507,12 @@ main(void) {
 
     srand(42);
 
-    for (uint i = 0; i < NSTRINGS; i += 1) {
+    for (uint32 i = 0; i < NSTRINGS; i += 1) {
         strings[i] = random_string(arena, NBYTES);
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-    for (uint i = 0; i < NSTRINGS; i += 1) {
+    for (uint32 i = 0; i < NSTRINGS; i += 1) {
         ASSERT(hash_insert_map(map, strings[i].s, strings[i].len,
                                strings[i].value));
     }
@@ -525,7 +525,7 @@ main(void) {
         ASSERT_EQUAL(*stored, strings[i].value);
     }
     ASSERT(hash_remove_map(map, strings[0].s, strings[0].len));
-    ASSERT_EQUAL(hash_ndeleted_map(map), 1u);
+    ASSERT_EQUAL(hash_ndeleted_map(map), 1);
 
     if (NSTRINGS <= 10) {
         hash_print_map(map, true);
@@ -535,7 +535,7 @@ main(void) {
 
     ASSERT(hash_insert_map(map, strings[0].s, strings[0].len,
                            strings[0].value));
-    ASSERT_EQUAL(hash_ndeleted_map(map), 0u);
+    ASSERT_EQUAL(hash_ndeleted_map(map), 0);
 
     for (uint i = 0; i < NSTRINGS; i += 1) {
         ASSERT(hash_remove_map(map, strings[i].s, strings[i].len));
