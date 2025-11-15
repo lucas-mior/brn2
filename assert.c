@@ -18,7 +18,7 @@
 #define trap(...) *(volatile int *)0 = 0
 #endif
 
-#define ASSERT(c) if (!(c)) trap()
+#define ASSERT(c) do { if (!(c)) trap(); } while (0)
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_assert 1
