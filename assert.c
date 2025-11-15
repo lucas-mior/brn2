@@ -105,11 +105,11 @@ _Generic((VARIABLE), \
     } \
 }
 
-STRING_COMPARE(less, <)
+STRING_COMPARE(less,       <)
 STRING_COMPARE(less_equal, <=)
-STRING_COMPARE(equal, ==)
-STRING_COMPARE(not_equal, !=)
-STRING_COMPARE(more, >)
+STRING_COMPARE(equal,      ==)
+STRING_COMPARE(not_equal,  !=)
+STRING_COMPARE(more,       >)
 STRING_COMPARE(more_equal, >=)
 
 #define INTEGER_SAME_SIGN_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
