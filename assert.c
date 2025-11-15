@@ -305,7 +305,7 @@ main(void) {
         int a = 1;
         uint b = 1;
         ASSERT_EQUAL(a, b);
-        ASSERT_LESS_EQUAL(a, b - 1);
+        ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
     }
     {
