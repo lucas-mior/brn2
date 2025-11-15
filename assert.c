@@ -382,6 +382,7 @@ main(void) {
     ASSERT_EQUAL(c, d);
     ASSERT_LESS_EQUAL(c, d);
     ASSERT_LESS(f, e);
+    ASSERT_LESS(f, g8);
     ASSERT_LESS_EQUAL(f, e);
     ASSERT_LESS_EQUAL(d, c);
     ASSERT_LESS(g, h);
