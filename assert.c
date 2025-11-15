@@ -363,6 +363,7 @@ main(void) {
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }
+    ASSERT(true);
     exit(EXIT_SUCCESS);
 }
 #endif
