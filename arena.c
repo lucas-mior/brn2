@@ -459,6 +459,9 @@ arenas_destroy(Arena **arenas, int64 number) {
 
 INLINE void
 memset64(void *buffer, int value, int64 size) {
+    if (size == 0) {
+        return;
+    }
     assert(size >= 0);
     assert((uint64)size <= SIZE_MAX);
     memset(buffer, value, (size_t)size);
