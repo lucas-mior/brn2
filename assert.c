@@ -7,6 +7,44 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
+#include <float.h>
+
+#define MINOF(VARIABLE)            \
+_Generic((VARIABLE),                   \
+  int8:        INT8_MIN, \
+  int16:       INT16_MIN, \
+  int32:       INT32_MIN, \
+  int64:       INT64_MIN, \
+  uint8:       0, \
+  uint16:      0, \
+  uint32:      0, \
+  uint64:      0, \
+  char:        CHAR_MIN, \
+  bool:        0, \
+  float:       FLT_MIN, \
+  double:      DBL_MIN, \
+  long double: LDBL_MIN, \
+  default:     0 \
+)
+
+#define MAXOF(VARIABLE)            \
+_Generic((VARIABLE),                   \
+  int8:        (int64)INT8_MAX, \
+  int16:       (int64)INT16_MAX, \
+  int32:       (int64)INT32_MAX, \
+  int64:       (int64)INT64_MAX, \
+  uint8:       (int64)UINT8_MAX, \
+  uint16:      (int64)UINT16_MAX, \
+  uint32:      (int64)UINT32_MAX, \
+  uint64:      (uint64)UINT64_MAX, \
+  char:        (int64)CHAR_MAX, \
+  bool:        1, \
+  float:       FLT_MAX, \
+  double:      DBL_MAX, \
+  long double: LDBL_MAX, \
+  default:     0 \
+)
 
 #if defined(__GNUC__) || defined(__clang__)
 #define ASSERT(c) if (!(c)) __builtin_trap()
@@ -274,8 +312,9 @@ main(void) {
     int f = -1;
     long g = -10;
     long h = 10;
-    long g2 = -20;
+    long g4 = MINOF(g4);
     long g2 = MAXOF(g2);
+    ulong g3 = MAXOF(g3);
 
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
@@ -288,7 +327,9 @@ main(void) {
     ASSERT_LESS_EQUAL(f, e);
     ASSERT_LESS(g, h);
     ASSERT_LESS_EQUAL(g, h);
-    ASSERT_LESS(g2, g);
+    ASSERT_LESS(g2, g3);
+    ASSERT_LESS(g4, g3);
+    ASSERT_LESS(g4, g2);
 }
 #endif
 
