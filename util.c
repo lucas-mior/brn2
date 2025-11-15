@@ -287,7 +287,17 @@ _Generic((VARIABLE), \
   float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT), \
   double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE), \
   long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
-  default:     printf("%s = ?\n", #VARIABLE) \
+  default: _Generic((VARIABLE), \
+    int8:      PRINT_SIGNED("[int8]", VARIABLE), \
+    int16:     PRINT_SIGNED("[int16]", VARIABLE), \
+    int32:     PRINT_SIGNED("[int32]", VARIABLE), \
+    int64:     PRINT_SIGNED("[int64]", VARIABLE), \
+    uint8:     PRINT_UNSIGNED("[uint8]", VARIABLE), \
+    uint16:    PRINT_UNSIGNED("[uint16]", VARIABLE), \
+    uint32:    PRINT_UNSIGNED("[uint32]", VARIABLE), \
+    uint64:    PRINT_UNSIGNED("[uint64]", VARIABLE), \
+    default:   assert(false) \
+  ) \
 )
 
 #endif
