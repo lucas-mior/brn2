@@ -553,7 +553,7 @@ main(void) {
 
     arena_reset(arena);
 
-    ASSERT_NULL(arena_push(arena, arena_size + 1));
+    ASSERT(arena_push(arena, arena_size + 1) == NULL);
     error2("Expected error in arena_push: %s.\n", arena_strerror(errno));
 
     {
