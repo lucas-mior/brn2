@@ -405,8 +405,11 @@ arena_pop(Arena *arena, void *p) {
     }
 
     arena->npushed -= 1;
-    assert(arena->npushed >= 0);
-    if (arena->npushed == 0) {
+    if (arena->npushed < 0) {
+        error2("Warning: inconsistent arena state (npushed = %lld)\n",
+               (llong)arena->npushed);
+    }
+    if (arena->npushed <= 0) {
         arena->pos = arena->begin;
     }
     return true;
