@@ -127,6 +127,46 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
 #include "assert.c"
 
+#if !defined(FLAGS_HUGE_PAGES)
+#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
+#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
+#else
+#define FLAGS_HUGE_PAGES 0
+#endif
+#endif
+
+#if !defined(MAP_POPULATE)
+#define MAP_POPULATE 0
+#endif
+
+#if !defined(INLINE)
+#if defined(__GNUC__)
+#define INLINE static inline __attribute__((always_inline))
+#else
+#define INLINE static inline
+#endif
+#endif
+
+#if !defined(INTEGERS)
+#define INTEGERS
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ullong;
+
+typedef long long llong;
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+#endif
+
 #if !defined(MINOF)
 
 #define MINOF(VARIABLE) \
@@ -169,46 +209,6 @@ _Generic((VARIABLE), \
   long double: LDBL_MAX    \
 )
 
-#endif
-
-#if !defined(FLAGS_HUGE_PAGES)
-#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
-#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
-#else
-#define FLAGS_HUGE_PAGES 0
-#endif
-#endif
-
-#if !defined(MAP_POPULATE)
-#define MAP_POPULATE 0
-#endif
-
-#if !defined(INLINE)
-#if defined(__GNUC__)
-#define INLINE static inline __attribute__((always_inline))
-#else
-#define INLINE static inline
-#endif
-#endif
-
-#if !defined(INTEGERS)
-#define INTEGERS
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
-
-typedef long long llong;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
 #endif
 
 #if DEBUGGING || TESTING_util
