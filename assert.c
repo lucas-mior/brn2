@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <limits.h>
 #include <float.h>
 
@@ -189,7 +188,7 @@ _Generic((VAR2), \
   uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ulong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  default: assert(false) \
+  default: 0 \
 )
 
 #define COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
@@ -214,7 +213,7 @@ _Generic((VAR2), \
   int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
   long:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
   llong:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  default: assert(false) \
+  default: 0 \
 )
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
@@ -223,7 +222,7 @@ _Generic((VAR1), \
     char *: assert_strings_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                                  (char *)(uintptr_t)(VAR1), \
                                  (char *)(uintptr_t)(VAR2)), \
-    default: assert(false) \
+    default: 0\
   ), \
   schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
