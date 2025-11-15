@@ -147,7 +147,7 @@ assert_un_si_equal(char *file, uint line, char *name1, char *name2, ullong var1,
 static void
 assert_si_un_equal(char *file, uint line, char *name1, char *name2, llong var1,
                    ullong var2) {
-    if (integer_un_si(var1, var2) != 0) {
+    if (integer_un_si(var2, var1) != 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %lld != %llu = %s\n", name1, var1, var2, name2);
         abort();
@@ -191,7 +191,7 @@ assert_si_un_less(char *file, uint line, char *name1, char *name2, llong var1,
 static void
 assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
                         llong var1, ullong var2) {
-    if (integer_un_si(var1, var2) < 0) {
+    if (integer_un_si(var2, var1) < 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %lld > %llu = %s\n", name1, var1, var2, name2);
         abort();
