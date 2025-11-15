@@ -134,62 +134,27 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     }
 }
 
-#define INTEGER_LESS(TYPE, FORMAT) \
+#define INTEGER_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
     static void \
-    assert_##TYPE##_less(char *file, uint32 line, \
+    assert_##TYPE##_##MODE(char *file, uint32 line, \
                                char *name1, char *name2, \
                                TYPE long long var1, TYPE long long var2) { \
-    if (var1 >= var2) { \
+    if (!(var1 SYMBOL var2)) { \
         error2("Assertion failed at %s:%u\n", file, line); \
-        error2("%s = "FORMAT" >= "FORMAT" = %s\n", name1, var1, var2, name2); \
+        error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
+               name1, var1, var2, name2); \
         trap(); \
     } \
 }
 
-#define INTEGER_LESS_EQUAL(TYPE, FORMAT) \
-    static void \
-    assert_##TYPE##_less_equal(char *file, uint32 line, \
-                               char *name1, char *name2, \
-                               TYPE long long var1, TYPE long long var2) { \
-    if (var1 > var2) { \
-        error2("Assertion failed at %s:%u\n", file, line); \
-        error2("%s = "FORMAT" > "FORMAT" = %s\n", name1, var1, var2, name2); \
-        trap(); \
-    } \
-}
-
-#define INTEGER_EQUAL(TYPE, FORMAT) \
-    static void \
-    assert_##TYPE##_equal(char *file, uint32 line, \
-                             char *name1, char *name2, \
-                             TYPE long long var1, TYPE long long var2) { \
-    if (var1 != var2) { \
-        error2("Assertion failed at %s:%u\n", file, line); \
-        error2("%s = "FORMAT" != "FORMAT" = %s\n", name1, var1, var2, name2); \
-        trap(); \
-    } \
-}
-
-#define INTEGER_NOT_EQUAL(TYPE, FORMAT) \
-    static void \
-    assert_##TYPE##_not_equal(char *file, uint32 line, \
-                              char *name1, char *name2, \
-                              TYPE long long var1, TYPE long long var2) { \
-    if (var1 == var2) { \
-        error2("Assertion failed at %s:%u\n", file, line); \
-        error2("%s = "FORMAT" == "FORMAT" = %s\n", name1, var1, var2, name2); \
-        trap(); \
-    } \
-}
-
-INTEGER_LESS(signed, "%lld")
-INTEGER_LESS(unsigned, "%llu")
-INTEGER_LESS_EQUAL(signed, "%lld")
-INTEGER_LESS_EQUAL(unsigned, "%llu")
-INTEGER_EQUAL(signed, "%lld")
-INTEGER_EQUAL(unsigned, "%llu")
-INTEGER_NOT_EQUAL(signed, "%lld")
-INTEGER_NOT_EQUAL(unsigned, "%llu")
+INTEGER_COMPARE(signed, "%lld", <, less)
+INTEGER_COMPARE(unsigned, "%llu", <, less)
+INTEGER_COMPARE(signed, "%lld", <=, less_equal)
+INTEGER_COMPARE(unsigned, "%llu", <=, less_equal)
+INTEGER_COMPARE(signed, "%lld", ==, equal)
+INTEGER_COMPARE(unsigned, "%llu", ==, equal)
+INTEGER_COMPARE(signed, "%lld", !=, not_equal)
+INTEGER_COMPARE(unsigned, "%llu", !=, not_equal)
 
 static int
 integer_un_si(ullong u, llong s) {
