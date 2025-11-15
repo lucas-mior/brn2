@@ -221,9 +221,10 @@ _Generic((VAR2), \
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
-    char *: assert_strings_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                                 (char *)(uintptr_t)(VAR1), \
-                                 (char *)(uintptr_t)(VAR2)), \
+    char *: assert_strings_##MODE(__FILE__, __LINE__, \
+                                  #VAR1, #VAR2, \
+                                  (char *)(uintptr_t)(VAR1), \
+                                  (char *)(uintptr_t)(VAR2)), \
     default: assert(false) \
   ), \
   schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
