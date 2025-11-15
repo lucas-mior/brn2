@@ -54,10 +54,10 @@ typedef uint64_t uint64;
 // clang-format off
 
 #define STRING_COMPARE(MODE, SYMBOL) \
-    static void \
-    assert_strings_##MODE(char *file, uint line, \
-                          char *name1, char *name2, \
-                          char *var1, char *var2) { \
+static void \
+assert_strings_##MODE(char *file, uint line, \
+                      char *name1, char *name2, \
+                      char *var1, char *var2) { \
     if (!(strcmp(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %s " #SYMBOL " %s = %s\n", \
@@ -76,10 +76,10 @@ STRING_COMPARE(more_equal, >=)
 #undef STRING_COMPARE
 
 #define INTEGER_SAME_SIGN_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
-    static void \
-    assert_##TYPE##_##MODE(char *file, uint32 line, \
-                           char *name1, char *name2, \
-                           TYPE long long var1, TYPE long long var2) { \
+static void \
+assert_##TYPE##_##MODE(char *file, uint32 line, \
+                       char *name1, char *name2, \
+                       TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
