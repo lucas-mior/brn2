@@ -47,12 +47,14 @@ _Generic((VARIABLE),                   \
 )
 
 #if defined(__GNUC__) || defined(__clang__)
-#define ASSERT(c) if (!(c)) __builtin_trap()
+#define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
-#define ASSERT(c) if (!(c)) __debugbreak()
+#define trap(...) __debugbreak()
 #else
-#define ASSERT(c) if (!(c)) *(volatile int *)0 = 0
+#define trap(...) *(volatile int *)0 = 0
 #endif
+
+#define ASSERT(c) if (!(c)) trap()
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_assert 1
