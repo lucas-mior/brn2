@@ -360,7 +360,9 @@ arena_push_index32(Arena *arena, uint32 size) {
 
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
-    assert(arena->size < UINT32_MAX);
+    if (arena->size >= UINT32_MAX) {
+        return UINT32_MAX;
+    }
     arena->npushed += 1;
 
     return (uint32)((char *)before - (char *)arena->begin);
