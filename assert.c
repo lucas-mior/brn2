@@ -95,6 +95,16 @@ assert_strings_equal(char *file, uint32 line, char *name1, char *name2,
 }
 
 static void
+assert_strings_not_equal(char *file, uint32 line, char *name1, char *name2,
+                         char *var1, char *var2) {
+    if (!strcmp(var1, var2)) {
+        error2("Assertion failed at %s:%u\n", file, line);
+        error2("%s = %s == %s = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+}
+
+static void
 assert_strings_less(char *file, uint32 line, char *name1, char *name2,
                     char *var1, char *var2) {
     if (strcmp(var1, var2) >= 0) {
@@ -150,12 +160,26 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     } \
 }
 
+#define INTEGER_NOT_EQUAL(TYPE, FORMAT) \
+    static void \
+    assert_##TYPE##_not_equal(char *file, uint32 line, \
+                              char *name1, char *name2, \
+                              TYPE long long var1, TYPE long long var2) { \
+    if (var1 == var2) { \
+        error2("Assertion failed at %s:%u\n", file, line); \
+        error2("%s = "FORMAT" == "FORMAT" = %s\n", name1, var1, var2, name2); \
+        trap(); \
+    } \
+}
+
 INTEGER_LESS(signed, "%lld")
 INTEGER_LESS(unsigned, "%llu")
 INTEGER_LESS_EQUAL(signed, "%lld")
 INTEGER_LESS_EQUAL(unsigned, "%llu")
 INTEGER_EQUAL(signed, "%lld")
 INTEGER_EQUAL(unsigned, "%llu")
+INTEGER_NOT_EQUAL(signed, "%lld")
+INTEGER_NOT_EQUAL(unsigned, "%llu")
 
 static int
 integer_un_si(ullong u, llong s) {
@@ -190,6 +214,28 @@ assert_si_un_equal(char *file, uint line, char *name1, char *name2, llong var1,
     if (integer_un_si(var2, var1) != 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %lld != %llu = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+    return;
+}
+
+static void
+assert_un_si_not_equal(char *file, uint line, char *name1, char *name2,
+                       ullong var1, llong var2) {
+    if (integer_un_si(var1, var2) == 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %llu == %lld = %s\n", name1, var1, var2, name2);
+        trap();
+    }
+    return;
+}
+
+static void
+assert_si_un_not_equal(char *file, uint line, char *name1, char *name2,
+                       llong var1, ullong var2) {
+    if (integer_un_si(var2, var1) == 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %lld == %llu = %s\n", name1, var1, var2, name2);
         trap();
     }
     return;
@@ -302,6 +348,7 @@ _Generic((VAR1), \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2) ASSERT_COMPARE(equal, VAR1, VAR2)
+#define ASSERT_NOT_EQUAL(VAR1, VAR2) ASSERT_COMPARE(not_equal, VAR1, VAR2)
 #define ASSERT_LESS(VAR1, VAR2) ASSERT_COMPARE(less, VAR1, VAR2)
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
 
@@ -322,6 +369,7 @@ main(void) {
     ulong g8 = 0;
     char *s1 = "aaa";
     char *s2 = "aaa";
+    char *s3 = "BBB";
 
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
@@ -339,6 +387,8 @@ main(void) {
     ASSERT_LESS(g4, g2);
     ASSERT_LESS(g8, g2);
     ASSERT_EQUAL(s1, s2);
+    ASSERT_NOT_EQUAL(a, b);
+    ASSERT_NOT_EQUAL(s1, s3);
 }
 #endif
 
