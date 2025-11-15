@@ -81,7 +81,7 @@ STRING_COMPARE(more_equal, >=)
                            char *name1, char *name2, \
                            TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
-        error2("Assertion failed at %s:%u\n", file, line); \
+        error2("%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
                name1, var1, var2, name2); \
         trap(); \
