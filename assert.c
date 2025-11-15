@@ -307,11 +307,12 @@ assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
 
 #define COMPARE_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  char:   COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  schar:  COMPARE_SIGNED2(MODE, VAR1, VAR2), \
   short:  COMPARE_SIGNED2(MODE, VAR1, VAR2), \
   int:    COMPARE_SIGNED2(MODE, VAR1, VAR2), \
   long:   COMPARE_SIGNED2(MODE, VAR1, VAR2), \
   llong:  COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  uchar:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ushort: COMPARE_SI_UN(MODE, VAR1, VAR2), \
   uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ulong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
