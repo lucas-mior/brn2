@@ -31,6 +31,7 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 typedef unsigned long long ullong;
 
+typedef signed char schar;
 typedef long long llong;
 
 typedef int8_t int8;
@@ -48,7 +49,7 @@ typedef uint64_t uint64;
 
 #define MINOF(VARIABLE) \
 _Generic((VARIABLE), \
-  signed char: SCHAR_MIN, \
+  schar:       SCHAR_MIN, \
   short:       SHRT_MIN,  \
   int:         INT_MIN,   \
   long:        LONG_MIN,  \
@@ -70,7 +71,7 @@ _Generic((VARIABLE), \
 
 #define MAXOF(VARIABLE) \
 _Generic((VARIABLE), \
-  signed char: SCHAR_MAX,  \
+  schar:       SCHAR_MAX,  \
   short:       SHRT_MAX,   \
   int:         INT_MAX,    \
   long:        LONG_MAX,   \
@@ -330,10 +331,12 @@ _Generic((VAR2), \
 
 #define COMPARE_UNSIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
+  uchar:  COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
   ushort: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
   uint:   COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
   ulong:  COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
   ullong: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  schar:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
   short:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
   int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
   long:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
