@@ -339,12 +339,48 @@ assert_less_equal_integer(char *file, uint32 line,
     }
 }
 
+#define COMPARE_SIGNED(VAR1, VAR2) \
+_Generic((VAR2), \
+  short: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                             (llong)(VAR1), (llong)(VAR2)), \
+  int: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2)), \
+  long: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2)), \
+  llong: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2)), \
+  default: assert(false) \
+) \
+
+#define COMPARE_UNSIGNED(VAR1, VAR2) \
+_Generic((VAR2), \
+  ushort: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                             (llong)(VAR1), (llong)(VAR2)), \
+  uint: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2)), \
+  ulong: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2)), \
+  ullong: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2)), \
+  default: assert(false) \
+) \
+
 #define ASSERT_EQUAL(VAR1, VAR2) \
 _Generic((VAR1), \
+  char *: _Generic((VAR2), \
     char *: assert_equal_strings(__FILE__, __LINE__, #VAR1, #VAR2, \
-        (char *)(uintptr_t)(VAR1), (char *)(uintptr_t)(VAR2)), \
-    default: assert_equal_integer(__FILE__, __LINE__, #VAR1, #VAR2, \
-                 (ullong)(VAR1), (ullong)(VAR2)) \
+                                 (char *)(uintptr_t)(VAR1), \
+                                 (char *)(uintptr_t)(VAR2)), \
+    default: assert(false) \
+  ), \
+  short: COMPARE_SIGNED(VAR1, VAR2), \
+  int: COMPARE_SIGNED(VAR1, VAR2), \
+  long: COMPARE_SIGNED(VAR1, VAR2), \
+  llong: COMPARE_SIGNED(VAR1, VAR2), \
+  ushort: COMPARE_UNSIGNED(VAR1, VAR2), \
+  uint: COMPARE_UNSIGNED(VAR1, VAR2), \
+  ulong: COMPARE_UNSIGNED(VAR1, VAR2), \
+  ullong: COMPARE_UNSIGNED(VAR1, VAR2) \
 )
 
 #define ASSERT_LESS(VAR1, VAR2) \
