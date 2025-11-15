@@ -9,47 +9,6 @@
 #include <limits.h>
 #include <float.h>
 
-#if !defined(MINOF)
-#define MINOF(VARIABLE)            \
-_Generic((VARIABLE),                   \
-  signed char: SCHAR_MIN, \
-  short:     SHRT_MIN, \
-  int:       INT_MIN, \
-  long:       LONG_MIN, \
-  uchar:      0, \
-  ushort:     0, \
-  uint:      0u, \
-  ulong:      0ul, \
-  ullong:      0ull, \
-  char:        CHAR_MIN, \
-  bool:        1, \
-  float:       FLT_MIN, \
-  double:      DBL_MIN, \
-  long double: LDBL_MIN \
-)
-#endif
-
-#if !defined(MAXOF)
-
-#define MAXOF(VARIABLE)            \
-_Generic((VARIABLE),                   \
-  signed char: SCHAR_MAX, \
-  short:     SHRT_MAX, \
-  int:       INT_MAX, \
-  long:       LONG_MAX, \
-  uchar:      UCHAR_MAX, \
-  ushort:     USHRT_MAX, \
-  uint:      UINT_MAX, \
-  ulong:      ULONG_MAX, \
-  ullong:      ULLONG_MAX, \
-  char:        CHAR_MAX, \
-  bool:        1, \
-  float:       FLT_MAX, \
-  double:      DBL_MAX, \
-  long double: LDBL_MAX \
-)
-#endif
-
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
@@ -66,8 +25,6 @@ _Generic((VARIABLE),                   \
 #define TESTING_assert 0
 #endif
 
-#if !defined(INTEGERS)
-#define INTEGERS
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -84,7 +41,54 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
+
+// clang-format off
+
+#if !defined(MINOF)
+
+#define MINOF(VARIABLE) \
+_Generic((VARIABLE), \
+  signed char: SCHAR_MIN, \
+  short:       SHRT_MIN,  \
+  int:         INT_MIN,   \
+  long:        LONG_MIN,  \
+  uchar:       0,         \
+  ushort:      0,         \
+  uint:        0u,        \
+  ulong:       0ul,       \
+  ullong:      0ull,      \
+  char:        CHAR_MIN,  \
+  bool:        1,         \
+  float:       FLT_MIN,   \
+  double:      DBL_MIN,   \
+  long double: LDBL_MIN   \
+)
+
 #endif
+
+#if !defined(MAXOF)
+
+#define MAXOF(VARIABLE) \
+_Generic((VARIABLE), \
+  signed char: SCHAR_MAX,  \
+  short:       SHRT_MAX,   \
+  int:         INT_MAX,    \
+  long:        LONG_MAX,   \
+  uchar:       UCHAR_MAX,  \
+  ushort:      USHRT_MAX,  \
+  uint:        UINT_MAX,   \
+  ulong:       ULONG_MAX,  \
+  ullong:      ULLONG_MAX, \
+  char:        CHAR_MAX,   \
+  bool:        1,          \
+  float:       FLT_MAX,    \
+  double:      DBL_MAX,    \
+  long double: LDBL_MAX    \
+)
+
+#endif
+
+// clang-format on
 
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
