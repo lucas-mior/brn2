@@ -10,6 +10,8 @@
 #include <limits.h>
 #include <float.h>
 
+#define error2(...) fprintf(stderr, __VA_ARGS__)
+
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
@@ -18,7 +20,12 @@
 #define trap(...) *(volatile int *)0 = 0
 #endif
 
-#define ASSERT(c) do { if (!(c)) trap(); } while (0)
+#define ASSERT(C) do { \
+    if (!(C)) { \
+        error2("Assertion '%s' failed at %s:%d\n", #C, __FILE__, __LINE__); \
+        trap(); \
+    } \
+} while (0)
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_assert 1
@@ -45,8 +52,6 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 
 // clang-format off
-
-#define error2(...) fprintf(stderr, __VA_ARGS__)
 
 #define STRING_COMPARE(MODE, SYMBOL) \
     static void \
