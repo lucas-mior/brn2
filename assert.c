@@ -280,6 +280,63 @@ _Generic((VAR1), \
 #if TESTING_assert
 int
 main(void) {
+    {
+        int a = 1;
+        int b = 1;
+        ASSERT_EQUAL(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE_EQUAL(a, b);
+    }
+    {
+        int a = 1;
+        uint b = 1;
+        ASSERT_EQUAL(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE_EQUAL(a, b);
+    }
+    {
+        int a = 1;
+        uint b = 2;
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
+    }
+    {
+        long a = -1;
+        ulong b = 0;
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
+    }
+    {
+        long a = -2;
+        long b = -1;
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
+    }
+    {
+        char *a = "aaa";
+        char *b = "aaa";
+        ASSERT_EQUAL(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE_EQUAL(b, a);
+    }
+    {
+        char *a = "aaa";
+        char *b = "bbb";
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
+    }
     exit(EXIT_SUCCESS);
 }
 #endif
