@@ -125,6 +125,8 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define DEBUGGING 0
 #endif
 
+#include "assert.c"
+
 #define MINOF(VARIABLE)            \
 _Generic((VARIABLE),                   \
   int8:        INT8_MIN, \

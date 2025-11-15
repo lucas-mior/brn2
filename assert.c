@@ -1,9 +1,18 @@
+#if !defined(ASSERT_C)
+#define ASSERT_C
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#define TESTING_assert 1
+#elif !defined(TESTING_assert)
+#define TESTING_assert 0
+#endif
 
 #if !defined(INTEGERS)
 #define INTEGERS
@@ -129,7 +138,7 @@ _Generic((VAR2), \
 #define ASSERT(WHAT, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
-    char *: assert_strings_equal(__FILE__, __LINE__, #VAR1, #VAR2, \
+    char *: assert_strings_##WHAT(__FILE__, __LINE__, #VAR1, #VAR2, \
                                  (char *)(uintptr_t)(VAR1), \
                                  (char *)(uintptr_t)(VAR2)), \
     default: assert(false) \
@@ -148,8 +157,6 @@ _Generic((VAR1), \
 #define ASSERT_LESS(VAR1, VAR2) ASSERT(less, VAR1, VAR2)
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT(less_equal, VAR1, VAR2)
 
-#define TESTING_assert 1
-
 #if TESTING_assert
 int main(void) {
     int a = 0;
@@ -159,4 +166,6 @@ int main(void) {
     ASSERT_LESS(b, c);
     ASSERT_LESS_EQUAL(a, b);
 }
+#endif
+
 #endif
