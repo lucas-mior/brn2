@@ -366,8 +366,8 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
       CAT(func, 64)(void *dest, void *source, int64 size) { \
       if (size == 0) \
           return; \
-      assert(size > 0); \
-      ASSERT_LESS_EQUAL((uint64)size, SIZE_MAX); \
+      ASSERT_LESS(0, size); \
+      ASSERT_LESS_EQUAL(size, SIZE_MAX); \
       func(dest, source, (size_t)size); \
       return; \
   }
@@ -381,8 +381,8 @@ memset64(void *buffer, int value, int64 size) {
     if (size == 0) {
         return;
     }
-    assert(size > 0);
-    assert((uint64)size <= SIZE_MAX);
+    ASSERT_LESS(0, size);
+    ASSERT_LESS_EQUAL(size, SIZE_MAX);
     memset(buffer, value, (size_t)size);
     return;
 }
@@ -404,7 +404,7 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
 
 INLINE void *
 memchr64(void *pointer, int32 value, int64 size) {
-    assert(size >= 0);
+    ASSERT_LESS_EQUAL(0, size);
     return memchr(pointer, value, (size_t)size);
 }
 
@@ -417,7 +417,7 @@ strlen64(char *string) {
 INLINE int64
 strnlen64(char *string, int64 size) {
     size_t len;
-    assert((uint64)size <= SIZE_MAX);
+    ASSERT_LESS_EQUAL(size, SIZE_MAX);
     len = strnlen(string, (size_t)size);
     return (int64)len;
 }
@@ -428,7 +428,7 @@ strncmp64(char *left, char *right, int64 size) {
     if (size == 0) {
         return 0;
     }
-    assert((uint64)size <= SIZE_MAX);
+    ASSERT_LESS_EQUAL(size, SIZE_MAX);
     result = strncmp(left, right, (size_t)size);
     return result;
 }
@@ -439,7 +439,7 @@ memcmp64(void *left, void *right, int64 size) {
     if (size == 0) {
         return 0;
     }
-    assert((uint64)size <= SIZE_MAX);
+    ASSERT_LESS_EQUAL(size, SIZE_MAX);
     result = memcmp(left, right, (size_t)size);
     return result;
 }
@@ -450,8 +450,8 @@ CAT(func, 64)(int fd, void *buffer, int64 size) { \
     TYPE instance; \
     ssize_t w; \
     (void)instance; \
-    assert(size >= 0); \
-    ASSERT_LESS_EQUAL((uint64)size, MAXOF(instance)); \
+    ASSERT_LESS_EQUAL(0, size); \
+    ASSERT_LESS_EQUAL(size, MAXOF(instance)); \
     w = func(fd, buffer, (TYPE)size); \
     return (int64)w; \
 }
@@ -470,10 +470,10 @@ X64(read, size_t)
     INLINE int64 \
 CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
-    assert(size >= 0); \
-    assert(n >= 0); \
-    assert((uint64)size <= SIZE_MAX); \
-    assert((uint64)n <= SIZE_MAX); \
+    ASSERT_LESS_EQUAL(0, size); \
+    ASSERT_LESS_EQUAL(0, n); \
+    ASSERT_LESS_EQUAL(size, SIZE_MAX); \
+    ASSERT_LESS_EQUAL(n, SIZE_MAX); \
     rw = func(buffer, (size_t)size, (size_t)n, file); \
     return (int64)rw; \
 }
@@ -541,7 +541,7 @@ xmalloc(int64 size) {
         error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
-    assert((uint64)size <= SIZE_MAX);
+    ASSERT_LESS_EQUAL(size, SIZE_MAX);
 
     if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %lld bytes.\n", (llong)size);
@@ -559,7 +559,7 @@ xrealloc(void *old, const int64 size) {
         error("Error in xrealloc: invalid size = %lld.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
-    assert((uint64)size <= SIZE_MAX);
+    ASSERT_LESS_EQUAL(size, SIZE_MAX);
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
         error("Failed to reallocate %lld bytes from %llx.\n", (llong)size,
