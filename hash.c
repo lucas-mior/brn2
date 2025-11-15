@@ -507,12 +507,12 @@ main(void) {
 
     srand(42);
 
-    for (int i = 0; i < NSTRINGS; i += 1) {
+    for (uint i = 0; i < NSTRINGS; i += 1) {
         strings[i] = random_string(arena, NBYTES);
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-    for (int i = 0; i < NSTRINGS; i += 1) {
+    for (uint i = 0; i < NSTRINGS; i += 1) {
         ASSERT(hash_insert_map(map, strings[i].s, strings[i].len,
                                strings[i].value));
     }
@@ -537,7 +537,7 @@ main(void) {
                            strings[0].value));
     ASSERT_EQUAL(hash_ndeleted_map(map), 0u);
 
-    for (int i = 0; i < NSTRINGS; i += 1) {
+    for (uint i = 0; i < NSTRINGS; i += 1) {
         ASSERT(hash_remove_map(map, strings[i].s, strings[i].len));
     }
     ASSERT_EQUAL(hash_ndeleted_map(map), NSTRINGS);
