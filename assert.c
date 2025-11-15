@@ -258,6 +258,7 @@ _Generic((VAR1), \
                                  (char *)(uintptr_t)(VAR2)), \
     default: assert(false) \
   ), \
+  schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   int:    COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   long:   COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
