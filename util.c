@@ -143,8 +143,7 @@ _Generic((VARIABLE),                   \
   bool:        1, \
   float:       FLT_MIN, \
   double:      DBL_MIN, \
-  long double: LDBL_MIN, \
-  default:     0 \
+  long double: LDBL_MIN \
 )
 #endif
 
@@ -165,8 +164,7 @@ _Generic((VARIABLE),                   \
   bool:        1, \
   float:       FLT_MAX, \
   double:      DBL_MAX, \
-  long double: LDBL_MAX, \
-  default:     0 \
+  long double: LDBL_MAX \
 )
 #endif
 
