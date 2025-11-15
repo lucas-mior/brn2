@@ -245,7 +245,8 @@ assert_un_si_not_equal(char *file, uint line,
 }
 
 static void
-assert_si_un_not_equal(char *file, uint line, char *name1, char *name2,
+assert_si_un_not_equal(char *file, uint line,
+                       char *name1, char *name2,
                        llong var1, ullong var2) {
     if (integer_un_si(var2, var1) == 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
