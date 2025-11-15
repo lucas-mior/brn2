@@ -318,6 +318,8 @@ main(void) {
     long g2 = MAXOF(g2);
     ulong g3 = MAXOF(g3);
     ulong g8 = 0;
+    char *s1 = "aaa";
+    char *s2 = "aaa";
 
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
@@ -334,6 +336,7 @@ main(void) {
     ASSERT_LESS(g4, g3);
     ASSERT_LESS(g4, g2);
     ASSERT_LESS(g8, g2);
+    ASSERT_EQUAL(s1, s2);
 }
 #endif
 
