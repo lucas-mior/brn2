@@ -90,7 +90,7 @@ assert_strings_equal(char *file, uint32 line, char *name1, char *name2,
     if (strcmp(var1, var2)) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %s != %s = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
 }
 
@@ -100,7 +100,7 @@ assert_strings_less(char *file, uint32 line, char *name1, char *name2,
     if (strcmp(var1, var2) >= 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %s >= %s = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
 }
 
@@ -110,7 +110,7 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     if (strcmp(var1, var2) > 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %s > %s = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
 }
 
@@ -122,7 +122,7 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     if (var1 >= var2) { \
         error2("Assertion failed at %s:%u\n", file, line); \
         error2("%s = "FORMAT" >= "FORMAT" = %s\n", name1, var1, var2, name2); \
-        abort(); \
+        trap(); \
     } \
 }
 
@@ -134,7 +134,7 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     if (var1 > var2) { \
         error2("Assertion failed at %s:%u\n", file, line); \
         error2("%s = "FORMAT" > "FORMAT" = %s\n", name1, var1, var2, name2); \
-        abort(); \
+        trap(); \
     } \
 }
 
@@ -146,7 +146,7 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     if (var1 != var2) { \
         error2("Assertion failed at %s:%u\n", file, line); \
         error2("%s = "FORMAT" != "FORMAT" = %s\n", name1, var1, var2, name2); \
-        abort(); \
+        trap(); \
     } \
 }
 
@@ -179,7 +179,7 @@ assert_un_si_equal(char *file, uint line, char *name1, char *name2, ullong var1,
     if (integer_un_si(var1, var2) != 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %llu != %lld = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
     return;
 }
@@ -190,7 +190,7 @@ assert_si_un_equal(char *file, uint line, char *name1, char *name2, llong var1,
     if (integer_un_si(var2, var1) != 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %lld != %llu = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
     return;
 }
@@ -201,7 +201,7 @@ assert_un_si_less(char *file, uint line, char *name1, char *name2, ullong var1,
     if (integer_un_si(var1, var2) >= 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %llu <= %lld = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
     return;
 }
@@ -212,7 +212,7 @@ assert_un_si_less_equal(char *file, uint line, char *name1, char *name2,
     if (integer_un_si(var1, var2) > 0) {
         error2("Assertion failed at %s:%u\n", file, line);
         error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
     return;
 }
@@ -223,7 +223,7 @@ assert_si_un_less(char *file, uint line, char *name1, char *name2, llong var1,
     if (integer_un_si(var2, var1) <= 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %lld >= %llu = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
     return;
 }
@@ -234,7 +234,7 @@ assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
     if (integer_un_si(var2, var1) < 0) {
         error2("%s Assertion failed at %s:%u\n", __func__, file, line);
         error2("%s = %lld > %llu = %s\n", name1, var1, var2, name2);
-        abort();
+        trap();
     }
     return;
 }
