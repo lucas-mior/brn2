@@ -112,6 +112,8 @@ STRING_COMPARE(not_equal,  !=)
 STRING_COMPARE(more,       >)
 STRING_COMPARE(more_equal, >=)
 
+#undef STRING_COMPARE
+
 #define INTEGER_SAME_SIGN_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
     static void \
     assert_##TYPE##_##MODE(char *file, uint32 line, \
@@ -178,6 +180,8 @@ COMPARE_SIGN_UNSIGN(less_equal, >=)
 COMPARE_SIGN_UNSIGN(more, <)
 COMPARE_SIGN_UNSIGN(more_equal, <=)
 
+#undef COMPARE_SIGN_UNSIGN
+
 #define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
     static void \
 assert_un_si_##MODE(char *file, uint line, \
@@ -196,6 +200,8 @@ COMPARE_UNSIGN_SIGN(less, <)
 COMPARE_UNSIGN_SIGN(less_equal, <=)
 COMPARE_UNSIGN_SIGN(more, >)
 COMPARE_UNSIGN_SIGN(more_equal, >=)
+
+#undef COMPARE_UNSIGN_SIGN
 
 // clang-format on
 
