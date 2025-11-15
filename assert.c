@@ -46,50 +46,6 @@ typedef uint64_t uint64;
 
 // clang-format off
 
-#if !defined(MINOF)
-
-#define MINOF(VARIABLE) \
-_Generic((VARIABLE), \
-  schar:       SCHAR_MIN, \
-  short:       SHRT_MIN,  \
-  int:         INT_MIN,   \
-  long:        LONG_MIN,  \
-  uchar:       0,         \
-  ushort:      0,         \
-  uint:        0u,        \
-  ulong:       0ul,       \
-  ullong:      0ull,      \
-  char:        CHAR_MIN,  \
-  bool:        0,         \
-  float:       -FLT_MAX,  \
-  double:      -DBL_MAX,  \
-  long double: -LDBL_MAX  \
-)
-
-#endif
-
-#if !defined(MAXOF)
-
-#define MAXOF(VARIABLE) \
-_Generic((VARIABLE), \
-  schar:       SCHAR_MAX,  \
-  short:       SHRT_MAX,   \
-  int:         INT_MAX,    \
-  long:        LONG_MAX,   \
-  uchar:       UCHAR_MAX,  \
-  ushort:      USHRT_MAX,  \
-  uint:        UINT_MAX,   \
-  ulong:       ULONG_MAX,  \
-  ullong:      ULLONG_MAX, \
-  char:        CHAR_MAX,   \
-  bool:        1,          \
-  float:       FLT_MAX,    \
-  double:      DBL_MAX,    \
-  long double: LDBL_MAX    \
-)
-
-#endif
-
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
 #define STRING_COMPARE(MODE, SYMBOL) \
@@ -287,6 +243,51 @@ _Generic((VAR1), \
 // clang-format on
 
 #if TESTING_assert
+
+#if !defined(MINOF)
+
+#define MINOF(VARIABLE) \
+_Generic((VARIABLE), \
+  schar:       SCHAR_MIN, \
+  short:       SHRT_MIN,  \
+  int:         INT_MIN,   \
+  long:        LONG_MIN,  \
+  uchar:       0,         \
+  ushort:      0,         \
+  uint:        0u,        \
+  ulong:       0ul,       \
+  ullong:      0ull,      \
+  char:        CHAR_MIN,  \
+  bool:        0,         \
+  float:       -FLT_MAX,  \
+  double:      -DBL_MAX,  \
+  long double: -LDBL_MAX  \
+)
+
+#endif
+
+#if !defined(MAXOF)
+
+#define MAXOF(VARIABLE) \
+_Generic((VARIABLE), \
+  schar:       SCHAR_MAX,  \
+  short:       SHRT_MAX,   \
+  int:         INT_MAX,    \
+  long:        LONG_MAX,   \
+  uchar:       UCHAR_MAX,  \
+  ushort:      USHRT_MAX,  \
+  uint:        UINT_MAX,   \
+  ulong:       ULONG_MAX,  \
+  ullong:      ULLONG_MAX, \
+  char:        CHAR_MAX,   \
+  bool:        1,          \
+  float:       FLT_MAX,    \
+  double:      DBL_MAX,    \
+  long double: LDBL_MAX    \
+)
+
+#endif
+
 int
 main(void) {
     {
