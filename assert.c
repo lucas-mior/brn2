@@ -59,8 +59,8 @@ typedef uint64_t uint64;
                           char *name1, char *name2, \
                           char *var1, char *var2) { \
     if (!(strcmp(var1, var2) SYMBOL 0)) { \
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %s " #SYMBOL "%s = %s\n", \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %s " #SYMBOL " %s = %s\n", \
                name1, var1, var2, name2); \
         trap(); \
     } \
@@ -81,7 +81,7 @@ STRING_COMPARE(more_equal, >=)
                            char *name1, char *name2, \
                            TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
-        error2("%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
                name1, var1, var2, name2); \
         trap(); \
@@ -128,7 +128,7 @@ assert_si_un_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     llong var1, ullong var2) { \
     if (!(compare_unsign_with_sign(var2, var1) SYMBOL 0)) { \
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %lld " #SYMBOL " %llu = %s\n", name1, var1, var2, name2); \
         trap(); \
     } \
@@ -149,7 +149,7 @@ assert_un_si_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     ullong var1, llong var2) { \
     if (!(compare_unsign_with_sign(var1, var2) SYMBOL 0)) { \
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
         trap(); \
     } \
