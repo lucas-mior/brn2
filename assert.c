@@ -88,6 +88,26 @@ assert_##TYPE##_##MODE(char *file, uint line, \
     } \
 }
 
+#define FLOAT_COMPARE(SYMBOL, MODE) \
+static void \
+assert_float_##MODE(char *file, uint line, \
+                    char *name1, char *name2, \
+                    long double var1, long double var2) { \
+    if (!(var1 SYMBOL var2)) { \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %Lf " #SYMBOL " %Lf = %s\n", \
+               name1, var1, var2, name2); \
+        trap(); \
+    } \
+}
+
+FLOAT_COMPARE(==, equal)
+FLOAT_COMPARE(!=, not_equal)
+FLOAT_COMPARE(<, less)
+FLOAT_COMPARE(<=, less_equal)
+FLOAT_COMPARE(>, more)
+FLOAT_COMPARE(>=, more_equal)
+
 INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", ==, equal)
 INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", ==, equal)
 INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", !=, not_equal)
@@ -236,7 +256,11 @@ _Generic((VAR1), \
   ushort: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   uint:   COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   ulong:  COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
+  ullong: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
+  float: assert_float_##MODE(__FILE__, __LINE__, \
+                             #VAR1, #VAR2, \
+                             (intptr_t)(VAR1), \
+                             (intptr_t)(VAR2)) \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
@@ -378,6 +402,18 @@ main(void) {
         ASSERT_LESS_EQUAL(a, 0);
         ASSERT_MORE(0, a);
         ASSERT_MORE_EQUAL(0, a);
+    }
+    {
+        long a = -1;
+        float b = 1;
+
+        ASSERT_LESS((float)a, b);
+    }
+    {
+        float a = -1;
+        double b = 1;
+
+        ASSERT_LESS(a, b);
     }
     ASSERT(true);
     exit(EXIT_SUCCESS);
