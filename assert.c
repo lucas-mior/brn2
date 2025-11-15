@@ -88,14 +88,14 @@ assert_##TYPE##_##MODE(char *file, uint line, \
     } \
 }
 
-INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", <,  less)
-INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", <,  less)
-INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", <=, less_equal)
-INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", <=, less_equal)
 INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", ==, equal)
 INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", ==, equal)
 INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", !=, not_equal)
 INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", !=, not_equal)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", <,  less)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", <,  less)
+INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", <=, less_equal)
+INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", <=, less_equal)
 INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", >,  more)
 INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", >,  more)
 INTEGER_SAME_SIGN_COMPARE(signed,   "%lld", >=, more_equal)
