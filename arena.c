@@ -68,8 +68,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "assert.c"
-
 #if !defined(SIZEKB)
 #define SIZEKB(X) ((int64)(X)*1024l)
 #define SIZEMB(X) ((int64)(X)*1024l*1024l)
@@ -456,7 +454,7 @@ arenas_destroy(Arena **arenas, int64 number) {
 }
 
 #if TESTING_arena
-#include "assert.h"
+#include "assert.c"
 #include <stdio.h>
 
 INLINE void
