@@ -363,6 +363,14 @@ main(void) {
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }
+    {
+        long a = -1;
+        ASSERT_NOT_EQUAL(a, 0);
+        ASSERT_LESS(a, 0);
+        ASSERT_LESS_EQUAL(a, 0);
+        ASSERT_MORE(0, a);
+        ASSERT_MORE_EQUAL(0, a);
+    }
     ASSERT(true);
     exit(EXIT_SUCCESS);
 }
