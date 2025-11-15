@@ -139,8 +139,8 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
 #define INTEGER_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
     static void \
     assert_##TYPE##_##MODE(char *file, uint32 line, \
-                               char *name1, char *name2, \
-                               TYPE long long var1, TYPE long long var2) { \
+                           char *name1, char *name2, \
+                           TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("Assertion failed at %s:%u\n", file, line); \
         error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
