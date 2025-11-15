@@ -293,47 +293,50 @@ assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
     return;
 }
 
+#define COMPARE_SIGNED2(MODE, VAR1, VAR2) \
+  assert_signed_##MODE(__FILE__, __LINE__, \
+                       #VAR1, #VAR2, \
+                       (llong)(VAR1), (llong)(VAR2))
+
+#define COMPARE_SI_UN(MODE, VAR1, VAR2) \
+  assert_si_un_##MODE(__FILE__, __LINE__, \
+                      #VAR1, #VAR2, \
+                      (llong)(VAR1), (ullong)(VAR2))
+
 #define COMPARE_SIGNED(VAR1, VAR2, MODE) \
 _Generic((VAR2), \
-  char: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                             (llong)(VAR1), (llong)(VAR2)), \
-  short: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                             (llong)(VAR1), (llong)(VAR2)), \
-  int: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                           (llong)(VAR1), (llong)(VAR2)), \
-  long: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                            (llong)(VAR1), (llong)(VAR2)), \
-  llong: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                            (llong)(VAR1), (llong)(VAR2)), \
-  ushort: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                              (llong)(VAR1), (ullong)(VAR2)), \
-  uint: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                            (llong)(VAR1), (ullong)(VAR2)), \
-  ulong: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                             (llong)(VAR1), (ullong)(VAR2)), \
-  ullong: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                              (llong)(VAR1), (ullong)(VAR2)), \
+  char: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  short: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  int: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  long: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  llong: COMPARE_SIGNED2(MODE, VAR1, VAR2), \
+  ushort: COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  uint: COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  ulong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
   default: assert(false) \
 )
 
+#define COMPARE_UNSIGNED2(MODE, VAR1, VAR2) \
+  assert_unsigned_##MODE(__FILE__, __LINE__, \
+                         #VAR1, #VAR2, \
+                         (ullong)(VAR1), (ullong)(VAR2))
+
+#define COMPARE_UN_SI(MODE, VAR1, VAR2) \
+  assert_un_si_##MODE(__FILE__, __LINE__, \
+                      #VAR1, #VAR2, \
+                      (ullong)(VAR1), (llong)(VAR2))
+
 #define COMPARE_UNSIGNED(VAR1, VAR2, MODE) \
 _Generic((VAR2), \
-  ushort: assert_unsigned_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                                (ullong)(VAR1), (ullong)(VAR2)), \
-  uint: assert_unsigned_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                              (ullong)(VAR1), (ullong)(VAR2)), \
-  ulong: assert_unsigned_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                               (ullong)(VAR1), (ullong)(VAR2)), \
-  ullong: assert_unsigned_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                                (ullong)(VAR1), (ullong)(VAR2)), \
-  short: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                             (ullong)(VAR1), (llong)(VAR2)), \
-  int: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                           (ullong)(VAR1), (llong)(VAR2)), \
-  long: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                            (ullong)(VAR1), (llong)(VAR2)), \
-  llong: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
-                             (ullong)(VAR1), (llong)(VAR2)), \
+  ushort: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  uint: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  ulong: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  ullong: COMPARE_UNSIGNED2(MODE, VAR1, VAR2), \
+  short: COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  int: COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  long: COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  llong: COMPARE_UN_SI(MODE, VAR1, VAR2), \
   default: assert(false) \
 )
 
