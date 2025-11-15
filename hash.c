@@ -34,6 +34,7 @@
 
 #include "rapidhash.h"
 #include "util.c"
+#include "assert.c"
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_hash 1
@@ -431,7 +432,7 @@ hash_expected_collisions(void *map) {
 #include <assert.h>
 #include "arena.c"
 
-#define NSTRINGS 100
+#define NSTRINGS 100u
 #define NBYTES ALIGNMENT
 
 typedef struct String {
@@ -491,17 +492,17 @@ main(void) {
     map = hash_create_map(NSTRINGS);
     arena = arena_create(NBYTES*NSTRINGS);
 
-    assert(map);
-    assert(hash_capacity(map) >= NSTRINGS);
+    ASSERT(map);
+    ASSERT_LESS_EQUAL(NSTRINGS, hash_capacity(map));
 
     str1.len = (uint32)strlen64(str1.s);
     str2.len = (uint32)strlen64(str2.s);
 
-    assert(hash_insert_map(map, str1.s, str1.len, str1.value));
-    assert(!hash_insert_map(map, str1.s, str1.len, 1));
-    assert(hash_insert_map(map, str2.s, str2.len, str2.value));
+    ASSERT(hash_insert_map(map, str1.s, str1.len, str1.value));
+    ASSERT(!hash_insert_map(map, str1.s, str1.len, 1));
+    ASSERT(hash_insert_map(map, str2.s, str2.len, str2.value));
 
-    assert(hash_length(map) == 2);
+    ASSERT_EQUAL(hash_length(map), 2u);
     hash_print_map(map, false);
 
     srand(42);
@@ -512,7 +513,7 @@ main(void) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
     for (int i = 0; i < NSTRINGS; i += 1) {
-        assert(hash_insert_map(map, strings[i].s, strings[i].len,
+        ASSERT(hash_insert_map(map, strings[i].s, strings[i].len,
                                strings[i].value));
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
@@ -521,10 +522,10 @@ main(void) {
     for (uint32 i = 0; i < NSTRINGS; i += 1) {
         uint32 *stored;
         stored = hash_lookup_map(map, strings[i].s, strings[i].len);
-        assert(*stored == strings[i].value);
+        ASSERT_EQUAL(*stored, strings[i].value);
     }
-    assert(hash_remove_map(map, strings[0].s, strings[0].len));
-    assert(hash_ndeleted_map(map) == 1);
+    ASSERT(hash_remove_map(map, strings[0].s, strings[0].len));
+    ASSERT_EQUAL(hash_ndeleted_map(map), 1u);
 
     if (NSTRINGS <= 10) {
         hash_print_map(map, true);
@@ -532,14 +533,14 @@ main(void) {
         HASH_PRINT_SUMMARY_map(map);
     }
 
-    assert(hash_insert_map(map, strings[0].s, strings[0].len,
+    ASSERT(hash_insert_map(map, strings[0].s, strings[0].len,
                            strings[0].value));
-    assert(hash_ndeleted_map(map) == 0);
+    ASSERT_EQUAL(hash_ndeleted_map(map), 0u);
 
     for (int i = 0; i < NSTRINGS; i += 1) {
-        assert(hash_remove_map(map, strings[i].s, strings[i].len));
+        ASSERT(hash_remove_map(map, strings[i].s, strings[i].len));
     }
-    assert(hash_ndeleted_map(map) == NSTRINGS);
+    ASSERT_EQUAL(hash_ndeleted_map(map), NSTRINGS);
 
     if (NSTRINGS <= 10) {
         hash_print_map(map, true);
