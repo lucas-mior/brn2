@@ -129,7 +129,7 @@ assert_si_un_##MODE(char *file, uint line, \
                     llong var1, ullong var2) { \
     if (!(compare_unsign_with_sign(var2, var1) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %lld " #SYMBOL " %llu = %s\n", name1, var1, var2, name2); \
+        error2("%s = %llu " #SYMBOL " %lld = %s\n", name2, var2, var1, name1); \
         trap(); \
     } \
 }
