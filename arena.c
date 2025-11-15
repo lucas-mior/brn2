@@ -585,11 +585,11 @@ main(void) {
     {
         uint32 index = arena_push_index32(arena, 32);
         ASSERT_NOT_EQUAL(index, UINT32_MAX);
-        ASSERT(arena->begin + index == (char *)arena->begin);
+        ASSERT(arena->begin + index == arena->begin);
 
         index = arena_push_index32(arena, 32);
         ASSERT_NOT_EQUAL(index, UINT32_MAX);
-        ASSERT(arena->begin + index == (char *)arena->begin + 32);
+        ASSERT(arena->begin + index == arena->begin + 32);
     }
 
     arena_print(arena);
