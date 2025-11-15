@@ -331,7 +331,7 @@ main(void) {
     ASSERT_LESS_EQUAL(c, d);
     ASSERT_LESS(f, e);
     ASSERT_LESS_EQUAL(f, e);
-    ASSERT_LESS_EQUAL(f, e);
+    ASSERT_LESS_EQUAL(d, c);
     ASSERT_LESS(g, h);
     ASSERT_LESS_EQUAL(g, h);
     ASSERT_LESS(g2, g3);
