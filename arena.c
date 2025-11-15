@@ -476,7 +476,7 @@ main(void) {
     char *objs[1000];
     uint32 arena_size;
 
-    assert((arena = arena_create(SIZEMB(3))));
+    ASSERT((arena = arena_create(SIZEMB(3))));
     assert(arena->pos == arena->begin);
     arena_size = (uint32)arena_data_size(arena);
 
