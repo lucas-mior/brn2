@@ -178,77 +178,24 @@ COMPARE_SIGN_UNSIGN(less_equal, >=)
 COMPARE_SIGN_UNSIGN(more, <)
 COMPARE_SIGN_UNSIGN(more_equal, <=)
 
-static void
-assert_un_si_equal(char *file, uint line,
-                   char *name1, char *name2,
-                   ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) != 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %llu != %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
+#define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
+    static void \
+assert_un_si_##MODE(char *file, uint line, \
+                   char *name1, char *name2, \
+                   ullong var1, llong var2) { \
+    if (!(integer_un_si(var1, var2) SYMBOL 0)) { \
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
+        trap(); \
+    } \
 }
 
-static void
-assert_un_si_not_equal(char *file, uint line,
-                       char *name1, char *name2,
-                       ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) == 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %llu == %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_un_si_less(char *file, uint line,
-                  char *name1, char *name2,
-                  ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) >= 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %llu <= %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_un_si_less_equal(char *file, uint line,
-                        char *name1, char *name2,
-                        ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) > 0) {
-        error2("Assertion failed at %s:%u\n", file, line);
-        error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_un_si_more(char *file, uint line,
-                  char *name1, char *name2,
-                  ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) >= 0) {
-        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
-        error2("%s = %llu <= %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
-
-static void
-assert_un_si_more_equal(char *file, uint line,
-                        char *name1, char *name2,
-                        ullong var1, llong var2) {
-    if (integer_un_si(var1, var2) > 0) {
-        error2("Assertion failed at %s:%u\n", file, line);
-        error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
-        trap();
-    }
-    return;
-}
+COMPARE_UNSIGN_SIGN(equal, ==)
+COMPARE_UNSIGN_SIGN(not_equal, !=)
+COMPARE_UNSIGN_SIGN(less, <)
+COMPARE_UNSIGN_SIGN(less_equal, <=)
+COMPARE_UNSIGN_SIGN(more, >)
+COMPARE_UNSIGN_SIGN(more_equal, >=)
 
 // clang-format on
 
