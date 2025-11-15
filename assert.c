@@ -282,6 +282,7 @@ _Generic((VAR1), \
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
 #define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more, VAR1, VAR2)
 #define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
+#define ASSERT_NULL(VAR1) ASSERT(VAR1 == NULL)
 
 // clang-format on
 
