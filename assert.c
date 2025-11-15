@@ -183,7 +183,7 @@ COMPARE_SIGN_UNSIGN(more_equal, <=)
 #undef COMPARE_SIGN_UNSIGN
 
 #define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
-    static void \
+static void \
 assert_un_si_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     ullong var1, llong var2) { \
