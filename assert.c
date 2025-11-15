@@ -117,6 +117,88 @@ INTEGER_LESS_EQUAL(unsigned, "%llu")
 INTEGER_EQUAL(signed, "%lld")
 INTEGER_EQUAL(unsigned, "%llu")
 
+static int
+integer_un_si(ullong u, llong s) {
+    ullong saux;
+    if (s < 0) {
+        return 1;
+    }
+    saux = (ullong)s;
+    if (saux < u) {
+        return 1;
+    } else if (saux == u) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+static void
+assert_un_si_equal(char *file, uint line, char *name1, char *name2, ullong var1,
+                   llong var2) {
+    if (integer_un_si(var1, var2) != 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %llu != %lld = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+    return;
+}
+
+static void
+assert_si_un_equal(char *file, uint line, char *name1, char *name2, llong var1,
+                   ullong var2) {
+    if (integer_un_si(var1, var2) != 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %lld != %llu = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+    return;
+}
+
+static void
+assert_un_si_less(char *file, uint line, char *name1, char *name2, ullong var1,
+                  llong var2) {
+    if (integer_un_si(var1, var2) <= 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %llu <= %lld = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+    return;
+}
+
+static void
+assert_un_si_less_equal(char *file, uint line, char *name1, char *name2,
+                        ullong var1, llong var2) {
+    if (integer_un_si(var1, var2) < 0) {
+        error2("Assertion failed at %s:%u\n", file, line);
+        error2("%s = %llu < %lld = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+    return;
+}
+
+static void
+assert_si_un_less(char *file, uint line, char *name1, char *name2, llong var1,
+                  ullong var2) {
+    if (integer_un_si(var2, var1) <= 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %lld >= %llu = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+    return;
+}
+
+static void
+assert_si_un_less_equal(char *file, uint line, char *name1, char *name2,
+                        llong var1, ullong var2) {
+    if (integer_un_si(var1, var2) < 0) {
+        error2("%s Assertion failed at %s:%u\n", __func__, file, line);
+        error2("%s = %lld > %llu = %s\n", name1, var1, var2, name2);
+        abort();
+    }
+    return;
+}
+
 #define COMPARE_SIGNED(VAR1, VAR2, MODE) \
 _Generic((VAR2), \
   short: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
@@ -127,6 +209,14 @@ _Generic((VAR2), \
                             (llong)(VAR1), (llong)(VAR2)), \
   llong: assert_signed_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                             (llong)(VAR1), (llong)(VAR2)), \
+  ushort: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                              (llong)(VAR1), (ullong)(VAR2)), \
+  uint: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (llong)(VAR1), (ullong)(VAR2)), \
+  ulong: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                             (llong)(VAR1), (ullong)(VAR2)), \
+  ullong: assert_si_un_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                              (llong)(VAR1), (ullong)(VAR2)), \
   default: assert(false) \
 )
 
@@ -140,6 +230,14 @@ _Generic((VAR2), \
                                (ullong)(VAR1), (ullong)(VAR2)), \
   ullong: assert_unsigned_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
                                 (ullong)(VAR1), (ullong)(VAR2)), \
+  short: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                             (ullong)(VAR1), (llong)(VAR2)), \
+  int: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                           (ullong)(VAR1), (llong)(VAR2)), \
+  long: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                            (ullong)(VAR1), (llong)(VAR2)), \
+  llong: assert_un_si_##MODE(__FILE__, __LINE__, #VAR1, #VAR2, \
+                             (ullong)(VAR1), (llong)(VAR2)), \
   default: assert(false) \
 )
 
@@ -171,9 +269,25 @@ main(void) {
     int a = 0;
     int b = 1;
     int c = 2;
+    uint d = 2;
+    uint e = 3;
+    int f = -1;
+    long g = -10;
+    long h = 10;
+    long g2 = -20;
+
     ASSERT_EQUAL(a, a);
     ASSERT_LESS(b, c);
     ASSERT_LESS_EQUAL(a, b);
+
+    ASSERT_EQUAL(c, d);
+    ASSERT_LESS_EQUAL(c, d);
+    ASSERT_LESS(f, e);
+    ASSERT_LESS_EQUAL(f, e);
+    ASSERT_LESS_EQUAL(f, e);
+    ASSERT_LESS(g, h);
+    ASSERT_LESS_EQUAL(g, h);
+    ASSERT_LESS(g2, g);
 }
 #endif
 
