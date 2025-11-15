@@ -68,6 +68,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "assert.c"
+
 #if !defined(SIZEKB)
 #define SIZEKB(X) ((int64)(X)*1024l)
 #define SIZEMB(X) ((int64)(X)*1024l*1024l)
