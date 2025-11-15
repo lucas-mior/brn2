@@ -162,7 +162,7 @@ compare_unsign_with_sign(ullong u, llong s) {
 
 // clang-format off
 #define COMPARE_SIGN_UNSIGN(MODE, SYMBOL) \
-    static void \
+static void \
 assert_si_un_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     llong var1, ullong var2) { \
