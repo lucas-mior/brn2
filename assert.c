@@ -134,6 +134,8 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     }
 }
 
+// clang-format off
+
 #define INTEGER_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
     static void \
     assert_##TYPE##_##MODE(char *file, uint32 line, \
@@ -147,14 +149,16 @@ assert_strings_less_equal(char *file, uint32 line, char *name1, char *name2,
     } \
 }
 
-INTEGER_COMPARE(signed, "%lld", <, less)
-INTEGER_COMPARE(unsigned, "%llu", <, less)
-INTEGER_COMPARE(signed, "%lld", <=, less_equal)
+INTEGER_COMPARE(signed,   "%lld", <,  less)
+INTEGER_COMPARE(unsigned, "%llu", <,  less)
+INTEGER_COMPARE(signed,   "%lld", <=, less_equal)
 INTEGER_COMPARE(unsigned, "%llu", <=, less_equal)
-INTEGER_COMPARE(signed, "%lld", ==, equal)
+INTEGER_COMPARE(signed,   "%lld", ==, equal)
 INTEGER_COMPARE(unsigned, "%llu", ==, equal)
-INTEGER_COMPARE(signed, "%lld", !=, not_equal)
+INTEGER_COMPARE(signed,   "%lld", !=, not_equal)
 INTEGER_COMPARE(unsigned, "%llu", !=, not_equal)
+
+// clang-format on
 
 static int
 integer_un_si(ullong u, llong s) {
