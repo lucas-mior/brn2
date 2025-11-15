@@ -164,8 +164,8 @@ compare_unsign_with_sign(ullong u, llong s) {
 #define COMPARE_SIGN_UNSIGN(MODE, SYMBOL) \
     static void \
 assert_si_un_##MODE(char *file, uint line, \
-                   char *name1, char *name2, \
-                   llong var1, ullong var2) { \
+                    char *name1, char *name2, \
+                    llong var1, ullong var2) { \
     if (!(compare_unsign_with_sign(var2, var1) SYMBOL 0)) { \
         error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %lld " #SYMBOL " %llu = %s\n", name1, var1, var2, name2); \
@@ -185,8 +185,8 @@ COMPARE_SIGN_UNSIGN(more_equal, <=)
 #define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
     static void \
 assert_un_si_##MODE(char *file, uint line, \
-                   char *name1, char *name2, \
-                   ullong var1, llong var2) { \
+                    char *name1, char *name2, \
+                    ullong var1, llong var2) { \
     if (!(compare_unsign_with_sign(var1, var2) SYMBOL 0)) { \
         error2("%s Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
