@@ -349,13 +349,13 @@ _Generic((VAR1), \
                                  (char *)(uintptr_t)(VAR2)), \
     default: assert(false) \
   ), \
-  short: COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  int: COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  long: COMPARE_SIGNED(VAR1, VAR2, WHAT), \
-  llong: COMPARE_SIGNED(VAR1, VAR2, WHAT), \
+  short:  COMPARE_SIGNED(VAR1, VAR2, WHAT), \
+  int:    COMPARE_SIGNED(VAR1, VAR2, WHAT), \
+  long:   COMPARE_SIGNED(VAR1, VAR2, WHAT), \
+  llong:  COMPARE_SIGNED(VAR1, VAR2, WHAT), \
   ushort: COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
-  uint: COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
-  ulong: COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
+  uint:   COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
+  ulong:  COMPARE_UNSIGNED(VAR1, VAR2, WHAT), \
   ullong: COMPARE_UNSIGNED(VAR1, VAR2, WHAT) \
 )
 
