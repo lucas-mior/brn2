@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <limits.h>
 #include <float.h>
@@ -596,7 +597,15 @@ main(void) {
     {
         int a = 0;
         double b = 1;
-        signal(SIGILL, handler_failed_assertion);
+        struct sigaction signal_action;
+        signal_action.sa_handler = handler_failed_assertion;
+        sigemptyset(&signal_action.sa_mask);
+        signal_action.sa_flags = SA_RESTART;
+
+        if (sigaction(SIGILL, &signal_action, NULL) != 0) {
+            error2("Error in sigaction: %s.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
 
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_EQUAL(a, b);
