@@ -283,22 +283,22 @@ static ldouble ldouble_from_char(char x)     { (void)x; return 0.0l; }
 #define LDOUBLE_GET(x) \
 _Generic((x), \
   ldouble: ldouble_from_ldouble, \
-  double: ldouble_from_double, \
-  float:  ldouble_from_float, \
-  schar:  ldouble_from_schar, \
-  short:  ldouble_from_short, \
-  int:    ldouble_from_int, \
-  long:   ldouble_from_long, \
-  llong:  ldouble_from_llong, \
-  uchar:  ldouble_from_uchar, \
-  ushort: ldouble_from_ushort, \
-  uint:   ldouble_from_uint, \
-  ulong:  ldouble_from_ulong, \
-  ullong: ldouble_from_ullong, \
-  char *: ldouble_from_charp, \
-  void *: ldouble_from_voidp, \
-  bool:   ldouble_from_bool, \
-  char:   ldouble_from_char \
+  double:  ldouble_from_double, \
+  float:   ldouble_from_float, \
+  schar:   ldouble_from_schar, \
+  short:   ldouble_from_short, \
+  int:     ldouble_from_int, \
+  long:    ldouble_from_long, \
+  llong:   ldouble_from_llong, \
+  uchar:   ldouble_from_uchar, \
+  ushort:  ldouble_from_ushort, \
+  uint:    ldouble_from_uint, \
+  ulong:   ldouble_from_ulong, \
+  ullong:  ldouble_from_ullong, \
+  char *:  ldouble_from_charp, \
+  void *:  ldouble_from_voidp, \
+  bool:    ldouble_from_bool, \
+  char:    ldouble_from_char \
 )(x)
 
 #define COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
