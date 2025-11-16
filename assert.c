@@ -523,6 +523,12 @@ main(void) {
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }
+    /* { */
+    /*     int c; */
+    /*     void *a = NULL; */
+    /*     void *b = &c; */
+    /*     ASSERT_NOT_EQUAL(a, b); */
+    /* } */
     ASSERT(true);
     exit(EXIT_SUCCESS);
 }
