@@ -258,18 +258,17 @@ _Generic((VAR2), \
 
 static inline double dg_from_double(double x)             { return x; }
 static inline double dg_from_float(float x)               { return (double)x; }
-static inline double dg_from_schar(signed char x)         { return (double)x; }
+static inline double dg_from_schar(schar x)         { return (double)x; }
 static inline double dg_from_short(short x)               { return (double)x; }
 static inline double dg_from_int(int x)                   { return (double)x; }
 static inline double dg_from_long(long x)                 { return (double)x; }
-static inline double dg_from_llong(long long x)           { return (double)x; }
-static inline double dg_from_uchar(unsigned char x)       { return (double)x; }
-static inline double dg_from_ushort(unsigned short x)     { return (double)x; }
-static inline double dg_from_uint(unsigned int x)         { return (double)x; }
-static inline double dg_from_ulong(unsigned long x)       { return (double)x; }
-static inline double dg_from_ullong(unsigned long long x) { return (double)x; }
+static inline double dg_from_llong(llong x)           { return (double)x; }
+static inline double dg_from_uchar(uchar x)       { return (double)x; }
+static inline double dg_from_ushort(ushort x)     { return (double)x; }
+static inline double dg_from_uint(uint x)         { return (double)x; }
+static inline double dg_from_ulong(ulong x)       { return (double)x; }
+static inline double dg_from_ullong(ullong x) { return (double)x; }
 static inline double dg_from_charp(char *x)               { (void)x; return 0.0; }
-static inline double dg_from_ccharp(const char *x)        { (void)x; return 0.0; }
 
 #define DOUBLE_GET(x) \
 _Generic((x), \
