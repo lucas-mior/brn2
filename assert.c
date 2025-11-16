@@ -213,6 +213,7 @@ _Generic((VAR2), \
   uint:    COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ulong:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ullong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  ldouble: COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   double:  COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   float:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   default: unsupported_type_for_generic() \
