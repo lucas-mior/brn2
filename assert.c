@@ -161,12 +161,12 @@ COMPARE_SIGN_UNSIGN(more_equal, <=)
 
 #define COMPARE_LDOUBLE(MODE, SYMBOL) \
 static void \
-assert_float_##MODE(char *file, uint line, \
-                    char *name1, char *name2, \
-                    double var1, double var2) { \
+assert_ldouble_##MODE(char *file, uint line, \
+                      char *name1, char *name2, \
+                      ldouble var1, ldouble var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %f " #SYMBOL " %f = %s\n", \
+        error2("%s = %Lf " #SYMBOL " %Lf = %s\n", \
                name1, var1, var2, name2); \
         trap(); \
     } \
@@ -302,9 +302,9 @@ _Generic((x), \
 )(x)
 
 #define COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
-    assert_float_##MODE(__FILE__, __LINE__, \
-                        #VAR1, #VAR2, \
-                        LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
+    assert_ldouble_##MODE(__FILE__, __LINE__, \
+                          #VAR1, #VAR2, \
+                          LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
 
 #define COMPARE_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
