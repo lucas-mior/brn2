@@ -142,6 +142,26 @@ COMPARE_SIGN_UNSIGN(less_equal, >=)
 COMPARE_SIGN_UNSIGN(more, <)
 COMPARE_SIGN_UNSIGN(more_equal, <=)
 
+#define COMPARE_DOUBLE(MODE, SYMBOL) \
+static void \
+assert_float_##MODE(char *file, uint line, \
+                    char *name1, char *name2, \
+                    double var1, double var2) { \
+    if (!(var1 SYMBOL var2)) { \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %f " #SYMBOL " %f = %s\n", \
+               name2, var2, var1, name1); \
+        trap(); \
+    } \
+}
+
+COMPARE_DOUBLE(equal, ==)
+COMPARE_DOUBLE(not_equal, !=)
+COMPARE_DOUBLE(less, >)
+COMPARE_DOUBLE(less_equal, >=)
+COMPARE_DOUBLE(more, <)
+COMPARE_DOUBLE(more_equal, <=)
+
 #undef COMPARE_SIGN_UNSIGN
 
 #define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
