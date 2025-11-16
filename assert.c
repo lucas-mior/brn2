@@ -287,11 +287,11 @@ _Generic((x), \
   char *: dg_from_charp \
 )(x)
 
-#define COMPARE_BOTH_DOUBLE(MODE, V1, V2) \
+#define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
     assert_float_##MODE(__FILE__, __LINE__, \
-                        #V1, #V2, \
-                        DOUBLE_GET(V1), \
-                        DOUBLE_GET(V2))
+                        #VAR1, #VAR2, \
+                        DOUBLE_GET(VAR1), \
+                        DOUBLE_GET(VAR2))
 
 #define COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
@@ -307,24 +307,7 @@ _Generic((VAR2), \
   uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
-)
-
-#define COMPARE_FIRST_IS_FLOAT(MODE, VAR1, VAR2) \
-_Generic((VAR2), \
-  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
+  default: unsupported_type_for_generic \
 )
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
@@ -347,7 +330,7 @@ _Generic((VAR1), \
   ulong:  COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   ullong: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   double: COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2), \
-  float:  COMPARE_FIRST_IS_FLOAT(MODE, VAR1, VAR2) \
+  float:  COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
@@ -497,6 +480,15 @@ main(void) {
         ASSERT_EQUAL(b, b);
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
+    }
+    {
+        double a = -1;
+        double b = 0;
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
     }
     ASSERT(true);
     exit(EXIT_SUCCESS);
