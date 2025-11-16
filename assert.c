@@ -384,7 +384,7 @@ static bool assertion_failed = false;
 static sigjmp_buf assert_env;
 
 static void
-failed_assertion(int unused) __attribute__((noreturn)) {
+handler_failed_assertion(int unused) __attribute__((noreturn)) {
     (void)unused;
     assertion_failed = true;
     siglongjmp(assert_env, 1);
@@ -596,7 +596,7 @@ main(void) {
     {
         int a = 0;
         double b = 1;
-        signal(SIGILL, failed_assertion);
+        signal(SIGILL, handler_failed_assertion);
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_EQUAL(a, b);
         }
