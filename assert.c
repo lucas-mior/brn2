@@ -309,8 +309,8 @@ double_get(DoubleUnion var, DoubleType type) {
 #define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, VAR1_TYPE, VAR2_TYPE) \
   assert_float_##MODE(__FILE__, __LINE__, \
                       #VAR1, #VAR2, \
-                      double_get((DoubleUnion)VAR1, VAR1_TYPE), \
-                      double_get((DoubleUnion)VAR2, VAR2_TYPE))
+                      double_get((DoubleUnion)(VAR1), VAR1_TYPE), \
+                      double_get((DoubleUnion)(VAR2), VAR2_TYPE))
 
 #define COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
@@ -514,6 +514,8 @@ main(void) {
         double b = -1;
         ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
+        ASSERT_MORE_EQUAL(a, b);
+        ASSERT_LESS_EQUAL(a, b);
     }
     ASSERT(true);
     exit(EXIT_SUCCESS);
