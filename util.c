@@ -219,43 +219,6 @@ _Generic((VARIABLE), \
 #endif
 
 // clang-format off
-enum FloatTypes {
-    FLOAT_FLOAT,
-    FLOAT_DOUBLE,
-    FLOAT_LONG_DOUBLE,
-};
-
-static void
-print_float(char *name, char *variable, enum FloatTypes type) {
-    float value_f;
-    double value_d;
-    long double value_ld;
-
-    switch (type) {
-    case FLOAT_FLOAT:
-        memcpy(&value_f, variable, sizeof(float));
-        printf("[float]%zu %s = %e = %f\n",
-               sizeof(float)*CHAR_BIT, name, (double)value_f, (double)value_f);
-        break;
-    case FLOAT_DOUBLE:
-        memcpy(&value_d, variable, sizeof(double));
-        printf("[double]%zu %s = %e = %f\n",
-               sizeof(double)*CHAR_BIT, name, value_d, value_d);
-        break;
-    case FLOAT_LONG_DOUBLE:
-        memcpy(&value_ld, variable, sizeof(long double));
-        printf("[long double]%zu %s = %Le = %Lf\n",
-               sizeof(long double)*CHAR_BIT, name, value_ld, value_ld);
-        break;
-    default:
-        fprintf(stderr, "Invalid type.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    return;
-}
-
-// clang-format off
 #define PRINT_SIGNED(TYPE, VARIABLE) \
     printf(TYPE "%zu %s = %lld\n", \
            sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, (llong)VARIABLE)
@@ -265,6 +228,10 @@ print_float(char *name, char *variable, enum FloatTypes type) {
            sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, (ullong)VARIABLE)
 
 #define PRINT_OTHER(TYPE, FORMAT, NAME, VARIABLE) \
+    printf(TYPE "%zu %s = " FORMAT "\n", \
+           sizeof(VARIABLE)*CHAR_BIT, NAME, VARIABLE)
+
+#define PRINT_FLOAT(TYPE, FORMAT, NAME, VARIABLE) \
     printf(TYPE "%zu %s = " FORMAT "\n", \
            sizeof(VARIABLE)*CHAR_BIT, NAME, VARIABLE)
 
@@ -284,9 +251,9 @@ _Generic((VARIABLE), \
   bool:        PRINT_OTHER("[bool]", "%d", #VARIABLE, VARIABLE), \
   char *:      PRINT_OTHER("[char *]", "%s", #VARIABLE, (char *)(uintptr_t)(VARIABLE)), \
   void *:      PRINT_OTHER("[void *]", "%p", #VARIABLE, (void *)(uintptr_t)(VARIABLE)), \
-  float:       print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_FLOAT), \
-  double:      print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_DOUBLE), \
-  long double: print_float(#VARIABLE, (char *)&VARIABLE, FLOAT_LONG_DOUBLE), \
+  float:       PRINT_FLOAT("[float]", "%Lf", #VARIABLE, DOUBLE_GET(VARIABLE)), \
+  double:      PRINT_FLOAT("[double]", "%Lf", #VARIABLE, DOUBLE_GET(VARIABLE)), \
+  long double: PRINT_FLOAT("[long double]", "%Lf", #VARIABLE, DOUBLE_GET(VARIABLE)), \
   default: _Generic((VARIABLE), \
     int8:      PRINT_SIGNED("[int8]", VARIABLE), \
     int16:     PRINT_SIGNED("[int16]", VARIABLE), \

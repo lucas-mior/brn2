@@ -41,6 +41,7 @@ typedef unsigned long long ullong;
 
 typedef signed char schar;
 typedef long long llong;
+typedef long double ldouble;
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -255,27 +256,33 @@ _Generic((VAR2), \
   int:     COMPARE_UN_SI(MODE, VAR1, VAR2), \
   long:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
   llong:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
+  ldouble: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   double:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   float:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   default: unsupported_type_for_generic() \
 )
 
-static double dg_from_double(double x) { return x;            }
-static double dg_from_float(float x)   { return (double)x;    }
-static double dg_from_schar(schar x)   { return (double)x;    }
-static double dg_from_short(short x)   { return (double)x;    }
-static double dg_from_int(int x)       { return (double)x;    }
-static double dg_from_long(long x)     { return (double)x;    }
-static double dg_from_llong(llong x)   { return (double)x;    }
-static double dg_from_uchar(uchar x)   { return (double)x;    }
-static double dg_from_ushort(ushort x) { return (double)x;    }
-static double dg_from_uint(uint x)     { return (double)x;    }
-static double dg_from_ulong(ulong x)   { return (double)x;    }
-static double dg_from_ullong(ullong x) { return (double)x;    }
-static double dg_from_charp(char *x)   { (void)x; return 0.0; }
+static ldouble dg_from_ldouble(ldouble x) { return x;           }
+static ldouble dg_from_double(double x) { return (ldouble)x;    }
+static ldouble dg_from_float(float x)   { return (ldouble)x;    }
+static ldouble dg_from_schar(schar x)   { return (ldouble)x;    }
+static ldouble dg_from_short(short x)   { return (ldouble)x;    }
+static ldouble dg_from_int(int x)       { return (ldouble)x;    }
+static ldouble dg_from_long(long x)     { return (ldouble)x;    }
+static ldouble dg_from_llong(llong x)   { return (ldouble)x;    }
+static ldouble dg_from_uchar(uchar x)   { return (ldouble)x;    }
+static ldouble dg_from_ushort(ushort x) { return (ldouble)x;    }
+static ldouble dg_from_uint(uint x)     { return (ldouble)x;    }
+static ldouble dg_from_ulong(ulong x)   { return (ldouble)x;    }
+static ldouble dg_from_ullong(ullong x) { return (ldouble)x;    }
+static ldouble dg_from_charp(char *x)   { (void)x; return 0.0; }
+static ldouble dg_from_voidp(void *x)   { (void)x; return 0.0; }
+static ldouble dg_from_bool(bool x)   { (void)x; return 0.0; }
+static ldouble dg_from_char(char x)   { (void)x; return 0.0; }
 
 #define DOUBLE_GET(x) \
 _Generic((x), \
+  ldouble: dg_from_ldouble, \
   double: dg_from_double, \
   float:  dg_from_float, \
   schar:  dg_from_schar, \
@@ -288,7 +295,10 @@ _Generic((x), \
   uint:   dg_from_uint, \
   ulong:  dg_from_ulong, \
   ullong: dg_from_ullong, \
-  char *: dg_from_charp \
+  char *: dg_from_charp, \
+  void *: dg_from_voidp, \
+  bool: dg_from_bool, \
+  char: dg_from_char \
 )(x)
 
 #define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
