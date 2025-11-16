@@ -166,17 +166,17 @@ assert_float_##MODE(char *file, uint line, \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %f " #SYMBOL " %f = %s\n", \
-               name2, var2, var1, name1); \
+               name1, var1, var2, name2); \
         trap(); \
     } \
 }
 
 COMPARE_DOUBLE(equal, ==)
 COMPARE_DOUBLE(not_equal, !=)
-COMPARE_DOUBLE(less, >)
-COMPARE_DOUBLE(less_equal, >=)
-COMPARE_DOUBLE(more, <)
-COMPARE_DOUBLE(more_equal, <=)
+COMPARE_DOUBLE(less, <)
+COMPARE_DOUBLE(less_equal, <=)
+COMPARE_DOUBLE(more, >)
+COMPARE_DOUBLE(more_equal, >=)
 
 #undef COMPARE_SIGN_UNSIGN
 
@@ -290,8 +290,7 @@ _Generic((x), \
 #define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
     assert_float_##MODE(__FILE__, __LINE__, \
                         #VAR1, #VAR2, \
-                        DOUBLE_GET(VAR1), \
-                        DOUBLE_GET(VAR2))
+                        DOUBLE_GET(VAR1), DOUBLE_GET(VAR2))
 
 #define COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
