@@ -275,10 +275,10 @@ static ldouble dg_from_ushort(ushort x) { return (ldouble)x;    }
 static ldouble dg_from_uint(uint x)     { return (ldouble)x;    }
 static ldouble dg_from_ulong(ulong x)   { return (ldouble)x;    }
 static ldouble dg_from_ullong(ullong x) { return (ldouble)x;    }
-static ldouble dg_from_charp(char *x)   { (void)x; return 0.0; }
-static ldouble dg_from_voidp(void *x)   { (void)x; return 0.0; }
-static ldouble dg_from_bool(bool x)   { (void)x; return 0.0; }
-static ldouble dg_from_char(char x)   { (void)x; return 0.0; }
+static ldouble dg_from_charp(char *x)   { (void)x; return 0.0l; }
+static ldouble dg_from_voidp(void *x)   { (void)x; return 0.0l; }
+static ldouble dg_from_bool(bool x)     { (void)x; return 0.0l; }
+static ldouble dg_from_char(char x)     { (void)x; return 0.0l; }
 
 #define DOUBLE_GET(x) \
 _Generic((x), \
