@@ -76,6 +76,26 @@ STRING_COMPARE(more_equal, >=)
 
 #undef STRING_COMPARE
 
+#define POINTER_COMPARE(MODE, SYMBOL) \
+static void \
+assert_pointers_##MODE(char *file, uint line, \
+                       char *name1, char *name2, \
+                       void *var1, void *var2) { \
+    if (!(var1 SYMBOL var2)) { \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %p " #SYMBOL " %p = %s\n", \
+               name1, var1, var2, name2); \
+        trap(); \
+    } \
+}
+
+POINTER_COMPARE(less,       <)
+POINTER_COMPARE(less_equal, <=)
+POINTER_COMPARE(equal,      ==)
+POINTER_COMPARE(not_equal,  !=)
+POINTER_COMPARE(more,       >)
+POINTER_COMPARE(more_equal, >=)
+
 #define INTEGER_SAME_SIGN_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
 assert_##TYPE##_##MODE(char *file, uint line, \
@@ -309,6 +329,12 @@ _Generic((VAR2), \
   default: unsupported_type_for_generic() \
 )
 
+#define COMPARE_POINTERS(MODE, VAR1, VAR2) \
+    assert_pointers_##MODE(__FILE__, __LINE__, \
+                           #VAR1, #VAR2, \
+                           (char *)(uintptr_t)(VAR1), \
+                           (char *)(uintptr_t)(VAR2))
+
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
@@ -317,6 +343,11 @@ _Generic((VAR1), \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
       default: unsupported_type_for_generic() \
+  ), \
+  void *: _Generic((VAR2), \
+    char *: COMPARE_POINTERS(MODE, VAR1, VAR2), \
+    void *: COMPARE_POINTERS(MODE, VAR1, VAR2), \
+    default: unsupported_type_for_generic() \
   ), \
   schar:   COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:   COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
@@ -531,12 +562,22 @@ main(void) {
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }
-    /* { */
-    /*     int c; */
-    /*     void *a = NULL; */
-    /*     void *b = &c; */
-    /*     ASSERT_NOT_EQUAL(a, b); */
-    /* } */
+    {
+        int c;
+        void *a = NULL;
+        void *b = &c;
+        ASSERT_NOT_EQUAL(a, b);
+    }
+    {
+        int array[100];
+        void *a = &array[0];
+        void *b = &array[1];
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
+    }
     ASSERT(true);
     exit(EXIT_SUCCESS);
 }
