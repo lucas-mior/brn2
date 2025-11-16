@@ -231,9 +231,9 @@ _Generic((VARIABLE), \
     printf(TYPE "%zu %s = " FORMAT "\n", \
            sizeof(VARIABLE)*CHAR_BIT, NAME, VARIABLE)
 
-#define PRINT_FLOAT(TYPE, FORMAT, NAME, VARIABLE) \
-    printf(TYPE "%zu %s = " FORMAT "\n", \
-           sizeof(VARIABLE)*CHAR_BIT, NAME, VARIABLE)
+#define PRINT_FLOAT(TYPE, VARIABLE) \
+    printf(TYPE "%zu %s = %Lf\n", \
+           sizeof(VARIABLE)*CHAR_BIT, #VARIABLE, LDOUBLE_GET(VARIABLE))
 
 #define PRINT_VAR(VARIABLE) \
 _Generic((VARIABLE), \
@@ -251,9 +251,9 @@ _Generic((VARIABLE), \
   bool:        PRINT_OTHER("[bool]", "%d", #VARIABLE, VARIABLE), \
   char *:      PRINT_OTHER("[char *]", "%s", #VARIABLE, (char *)(uintptr_t)(VARIABLE)), \
   void *:      PRINT_OTHER("[void *]", "%p", #VARIABLE, (void *)(uintptr_t)(VARIABLE)), \
-  float:       PRINT_FLOAT("[float]", "%Lf", #VARIABLE, DOUBLE_GET(VARIABLE)), \
-  double:      PRINT_FLOAT("[double]", "%Lf", #VARIABLE, DOUBLE_GET(VARIABLE)), \
-  long double: PRINT_FLOAT("[long double]", "%Lf", #VARIABLE, DOUBLE_GET(VARIABLE)), \
+  float:       PRINT_FLOAT("[float]", VARIABLE), \
+  double:      PRINT_FLOAT("[double]", VARIABLE), \
+  long double: PRINT_FLOAT("[long double]", VARIABLE), \
   default: _Generic((VARIABLE), \
     int8:      PRINT_SIGNED("[int8]", VARIABLE), \
     int16:     PRINT_SIGNED("[int16]", VARIABLE), \
