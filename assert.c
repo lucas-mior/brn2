@@ -272,19 +272,19 @@ static inline double dg_from_charp(char *x)   { (void)x; return 0.0; }
 
 #define DOUBLE_GET(x) \
 _Generic((x), \
-    double: dg_from_double, \
-    float:  dg_from_float, \
-    schar:  dg_from_schar, \
-    short:  dg_from_short, \
-    int:    dg_from_int, \
-    long:   dg_from_long, \
-    llong:  dg_from_llong, \
-    uchar:  dg_from_uchar, \
-    ushort: dg_from_ushort, \
-    uint:   dg_from_uint, \
-    ulong:  dg_from_ulong, \
-    ullong: dg_from_ullong, \
-    char*:  dg_from_charp \
+  double: dg_from_double, \
+  float:  dg_from_float, \
+  schar:  dg_from_schar, \
+  short:  dg_from_short, \
+  int:    dg_from_int, \
+  long:   dg_from_long, \
+  llong:  dg_from_llong, \
+  uchar:  dg_from_uchar, \
+  ushort: dg_from_ushort, \
+  uint:   dg_from_uint, \
+  ulong:  dg_from_ulong, \
+  ullong: dg_from_ullong, \
+  char *: dg_from_charp \
 )(x)
 
 #define COMPARE_BOTH_DOUBLE(MODE, V1, V2) \
