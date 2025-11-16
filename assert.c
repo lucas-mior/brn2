@@ -9,7 +9,6 @@
 #include <limits.h>
 #include <float.h>
 #include <assert.h>
-#include <setjmp.h>
 
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
@@ -379,6 +378,7 @@ _Generic((VAR1), \
 #if TESTING_assert
 
 #include <signal.h>
+#include <setjmp.h>
 
 static bool assertion_failed = false;
 static sigjmp_buf assert_env;
