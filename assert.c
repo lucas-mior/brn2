@@ -214,7 +214,7 @@ COMPARE_UNSIGN_SIGN(more_equal, >=)
                       #VAR1, #VAR2, \
                       (llong)(VAR1), (ullong)(VAR2))
 
-static void unsupported_type_for_generic(void);
+void __attribute__((weak)) unsupported_type_for_generic(void);
 
 #define COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
@@ -228,6 +228,8 @@ _Generic((VAR2), \
   uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ulong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
+  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  float: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   default: (void)unsupported_type_for_generic \
 )
 
@@ -253,7 +255,9 @@ _Generic((VAR2), \
   int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
   long:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
   llong:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  default: unsupported_type_for_generic \
+  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  float: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  default: (void)unsupported_type_for_generic \
 )
 
 static inline double dg_from_double(double x) { return x;            }
@@ -296,17 +300,7 @@ _Generic((x), \
 _Generic((VAR2), \
   double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  default: unsupported_type_for_generic \
+  default: (void)unsupported_type_for_generic \
 )
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
@@ -316,7 +310,7 @@ _Generic((VAR1), \
                                   #VAR1, #VAR2, \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
-      default: unsupported_type_for_generic \
+      default: (void)unsupported_type_for_generic \
   ), \
   schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
@@ -475,6 +469,14 @@ main(void) {
     {
         long a = -1;
         double b = -1;
+        ASSERT_EQUAL(a, b);
+        ASSERT_EQUAL(b, b);
+        ASSERT_MORE_EQUAL(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+    }
+    {
+        double a = -1;
+        long b = -1;
         ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
         ASSERT_MORE_EQUAL(a, b);
