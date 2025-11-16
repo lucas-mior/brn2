@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <float.h>
 #include <assert.h>
+#include <setjmp.h>
 
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
@@ -380,11 +381,13 @@ _Generic((VAR1), \
 #include <signal.h>
 
 static bool assertion_failed = false;
+static sigjmp_buf assert_env;
 
 static void
 failed_assertion(int unused) {
     (void)unused;
     assertion_failed = true;
+    siglongjmp(assert_env, 1);
     return;
 }
 
@@ -595,7 +598,9 @@ main(void) {
         int a = 0;
         double b = 1;
         signal(SIGILL, failed_assertion);
-        ASSERT_EQUAL(a, b);
+        if (sigsetjmp(assert_env, 1) == 0) {
+            ASSERT_EQUAL(a, b);
+        }
         ASSERT(assertion_failed);
         assertion_failed = false;
     }
