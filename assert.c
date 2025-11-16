@@ -306,11 +306,52 @@ double_get(DoubleUnion var, DoubleType type) {
     }
 }
 
-#define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, VAR1_TYPE, VAR2_TYPE) \
-  assert_float_##MODE(__FILE__, __LINE__, \
-                      #VAR1, #VAR2, \
-                      double_get((DoubleUnion)(VAR1), VAR1_TYPE), \
-                      double_get((DoubleUnion)(VAR2), VAR2_TYPE))
+/* #define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, VAR1_TYPE, VAR2_TYPE) \ */
+/*   assert_float_##MODE(__FILE__, __LINE__, \ */
+/*                       #VAR1, #VAR2, \ */
+/*                       double_get((DoubleUnion)(VAR1), VAR1_TYPE), \ */
+/*                       double_get((DoubleUnion)(VAR2), VAR2_TYPE)) */
+
+static inline double dg_from_double(double x)             { return x; }
+static inline double dg_from_float(float x)               { return (double)x; }
+static inline double dg_from_schar(signed char x)         { return (double)x; }
+static inline double dg_from_short(short x)               { return (double)x; }
+static inline double dg_from_int(int x)                   { return (double)x; }
+static inline double dg_from_long(long x)                 { return (double)x; }
+static inline double dg_from_llong(long long x)           { return (double)x; }
+static inline double dg_from_uchar(unsigned char x)       { return (double)x; }
+static inline double dg_from_ushort(unsigned short x)     { return (double)x; }
+static inline double dg_from_uint(unsigned int x)         { return (double)x; }
+static inline double dg_from_ulong(unsigned long x)       { return (double)x; }
+static inline double dg_from_ullong(unsigned long long x) { return (double)x; }
+static inline double dg_from_charp(char *x)               { return 0.0; }
+static inline double dg_from_ccharp(const char *x)        { return 0.0; }
+
+/* _Generic dispatcher (all expressions valid since each helper matches type) */
+
+#define DOUBLE_GET(x) \
+    _Generic((x), \
+        double:             dg_from_double, \
+        float:              dg_from_float, \
+        signed char:        dg_from_schar, \
+        short:              dg_from_short, \
+        int:                dg_from_int, \
+        long:               dg_from_long, \
+        long long:          dg_from_llong, \
+        unsigned char:      dg_from_uchar, \
+        unsigned short:     dg_from_ushort, \
+        unsigned int:       dg_from_uint, \
+        unsigned long:      dg_from_ulong, \
+        unsigned long long: dg_from_ullong, \
+        char*:              dg_from_charp, \
+        const char*:        dg_from_ccharp \
+    )(x)
+
+#define COMPARE_BOTH_DOUBLE(MODE, V1, V2, V1_TYPE, V2_TYPE) \
+    assert_float_##MODE(__FILE__, __LINE__, \
+                        #V1, #V2, \
+                        DOUBLE_GET(V1), \
+                        DOUBLE_GET(V2))
 
 #define COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
