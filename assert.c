@@ -384,11 +384,10 @@ static bool assertion_failed = false;
 static sigjmp_buf assert_env;
 
 static void
-failed_assertion(int unused) {
+failed_assertion(int unused) __attribute__((noreturn)) {
     (void)unused;
     assertion_failed = true;
     siglongjmp(assert_env, 1);
-    return;
 }
 
 #if !defined(MINOF)
