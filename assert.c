@@ -262,43 +262,43 @@ _Generic((VAR2), \
   default: unsupported_type_for_generic() \
 )
 
-static ldouble dg_from_ldouble(ldouble x) { return x;           }
-static ldouble dg_from_double(double x) { return (ldouble)x;    }
-static ldouble dg_from_float(float x)   { return (ldouble)x;    }
-static ldouble dg_from_schar(schar x)   { return (ldouble)x;    }
-static ldouble dg_from_short(short x)   { return (ldouble)x;    }
-static ldouble dg_from_int(int x)       { return (ldouble)x;    }
-static ldouble dg_from_long(long x)     { return (ldouble)x;    }
-static ldouble dg_from_llong(llong x)   { return (ldouble)x;    }
-static ldouble dg_from_uchar(uchar x)   { return (ldouble)x;    }
-static ldouble dg_from_ushort(ushort x) { return (ldouble)x;    }
-static ldouble dg_from_uint(uint x)     { return (ldouble)x;    }
-static ldouble dg_from_ulong(ulong x)   { return (ldouble)x;    }
-static ldouble dg_from_ullong(ullong x) { return (ldouble)x;    }
-static ldouble dg_from_charp(char *x)   { (void)x; return 0.0l; }
-static ldouble dg_from_voidp(void *x)   { (void)x; return 0.0l; }
-static ldouble dg_from_bool(bool x)     { (void)x; return 0.0l; }
-static ldouble dg_from_char(char x)     { (void)x; return 0.0l; }
+static ldouble ldouble_from_ldouble(ldouble x) { return x;           }
+static ldouble ldouble_from_double(double x) { return (ldouble)x;    }
+static ldouble ldouble_from_float(float x)   { return (ldouble)x;    }
+static ldouble ldouble_from_schar(schar x)   { return (ldouble)x;    }
+static ldouble ldouble_from_short(short x)   { return (ldouble)x;    }
+static ldouble ldouble_from_int(int x)       { return (ldouble)x;    }
+static ldouble ldouble_from_long(long x)     { return (ldouble)x;    }
+static ldouble ldouble_from_llong(llong x)   { return (ldouble)x;    }
+static ldouble ldouble_from_uchar(uchar x)   { return (ldouble)x;    }
+static ldouble ldouble_from_ushort(ushort x) { return (ldouble)x;    }
+static ldouble ldouble_from_uint(uint x)     { return (ldouble)x;    }
+static ldouble ldouble_from_ulong(ulong x)   { return (ldouble)x;    }
+static ldouble ldouble_from_ullong(ullong x) { return (ldouble)x;    }
+static ldouble ldouble_from_charp(char *x)   { (void)x; return 0.0l; }
+static ldouble ldouble_from_voidp(void *x)   { (void)x; return 0.0l; }
+static ldouble ldouble_from_bool(bool x)     { (void)x; return 0.0l; }
+static ldouble ldouble_from_char(char x)     { (void)x; return 0.0l; }
 
 #define LDOUBLE_GET(x) \
 _Generic((x), \
-  ldouble: dg_from_ldouble, \
-  double: dg_from_double, \
-  float:  dg_from_float, \
-  schar:  dg_from_schar, \
-  short:  dg_from_short, \
-  int:    dg_from_int, \
-  long:   dg_from_long, \
-  llong:  dg_from_llong, \
-  uchar:  dg_from_uchar, \
-  ushort: dg_from_ushort, \
-  uint:   dg_from_uint, \
-  ulong:  dg_from_ulong, \
-  ullong: dg_from_ullong, \
-  char *: dg_from_charp, \
-  void *: dg_from_voidp, \
-  bool:   dg_from_bool, \
-  char:   dg_from_char \
+  ldouble: ldouble_from_ldouble, \
+  double: ldouble_from_double, \
+  float:  ldouble_from_float, \
+  schar:  ldouble_from_schar, \
+  short:  ldouble_from_short, \
+  int:    ldouble_from_int, \
+  long:   ldouble_from_long, \
+  llong:  ldouble_from_llong, \
+  uchar:  ldouble_from_uchar, \
+  ushort: ldouble_from_ushort, \
+  uint:   ldouble_from_uint, \
+  ulong:  ldouble_from_ulong, \
+  ullong: ldouble_from_ullong, \
+  char *: ldouble_from_charp, \
+  void *: ldouble_from_voidp, \
+  bool:   ldouble_from_bool, \
+  char:   ldouble_from_char \
 )(x)
 
 #define COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
