@@ -230,7 +230,7 @@ _Generic((VAR2), \
   ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
   double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   float: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  default: (void)unsupported_type_for_generic \
+  default: unsupported_type_for_generic() \
 )
 
 #define COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
@@ -257,7 +257,7 @@ _Generic((VAR2), \
   llong:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
   double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   float: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  default: (void)unsupported_type_for_generic \
+  default: unsupported_type_for_generic() \
 )
 
 static inline double dg_from_double(double x) { return x;            }
@@ -320,7 +320,7 @@ _Generic((VAR1), \
                                   #VAR1, #VAR2, \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
-      default: (void)unsupported_type_for_generic \
+      default: unsupported_type_for_generic() \
   ), \
   schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
