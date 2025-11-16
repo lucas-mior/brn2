@@ -297,8 +297,8 @@ _Generic((x), \
   ullong: dg_from_ullong, \
   char *: dg_from_charp, \
   void *: dg_from_voidp, \
-  bool: dg_from_bool, \
-  char: dg_from_char \
+  bool:   dg_from_bool, \
+  char:   dg_from_char \
 )(x)
 
 #define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
