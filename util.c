@@ -253,7 +253,7 @@ _Generic((VARIABLE), \
   void *:      PRINT_OTHER("[void *]", "%p", #VARIABLE, (void *)(uintptr_t)(VARIABLE)), \
   float:       PRINT_FLOAT("[float]", VARIABLE), \
   double:      PRINT_FLOAT("[double]", VARIABLE), \
-  long double: PRINT_FLOAT("[long double]", VARIABLE), \
+  long double: PRINT_FLOAT("[ldouble]", VARIABLE), \
   default: _Generic((VARIABLE), \
     int8:      PRINT_SIGNED("[int8]", VARIABLE), \
     int16:     PRINT_SIGNED("[int16]", VARIABLE), \
