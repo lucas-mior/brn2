@@ -597,6 +597,7 @@ main(void) {
         int a = 0;
         double b = 1;
         signal(SIGILL, handler_failed_assertion);
+
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_EQUAL(a, b);
         }
@@ -605,6 +606,24 @@ main(void) {
 
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_MORE(a, b);
+        }
+        ASSERT(assertion_failed);
+        assertion_failed = false;
+
+        if (sigsetjmp(assert_env, 1) == 0) {
+            ASSERT_LESS(b, a);
+        }
+        ASSERT(assertion_failed);
+        assertion_failed = false;
+
+        if (sigsetjmp(assert_env, 1) == 0) {
+            ASSERT_MORE_EQUAL(a, b);
+        }
+        ASSERT(assertion_failed);
+        assertion_failed = false;
+
+        if (sigsetjmp(assert_env, 1) == 0) {
+            ASSERT_LESS_EQUAL(b, a);
         }
         ASSERT(assertion_failed);
         assertion_failed = false;
