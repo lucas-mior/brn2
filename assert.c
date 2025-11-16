@@ -259,7 +259,13 @@ _Generic((VAR1), \
   uint:   COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   ulong:  COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   ullong: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  default: unsupported_type_for_generic() \
+  default: _Generic((VAR1), \
+    double: assert_float_##MODE(__FILE__, __LINE__, \
+                                #VAR1, #VAR2, \
+                                (double)(VAR1), \
+                                (double)(VAR2)), \
+    default: unsupported_type_for_generic() \
+    ) \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
