@@ -198,6 +198,8 @@ COMPARE_UNSIGN_SIGN(more_equal, >=)
                       #VAR1, #VAR2, \
                       (llong)(VAR1), (ullong)(VAR2))
 
+void unsupported_type_for_generic(void);
+
 #define COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
   schar:  COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
@@ -210,7 +212,7 @@ _Generic((VAR2), \
   uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ulong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  default: assert(false) \
+  default: unsupported_type_for_generic \
 )
 
 #define COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
@@ -235,7 +237,7 @@ _Generic((VAR2), \
   int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
   long:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
   llong:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  default: assert(false) \
+  default: unsupported_type_for_generic \
 )
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
@@ -245,7 +247,7 @@ _Generic((VAR1), \
                                   #VAR1, #VAR2, \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
-    default: assert(false) \
+      default: unsupported_type_for_generic \
   ), \
   schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
