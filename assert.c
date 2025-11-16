@@ -342,7 +342,7 @@ _Generic((VAR1), \
                                   #VAR1, #VAR2, \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
-      default: unsupported_type_for_generic() \
+    default: unsupported_type_for_generic() \
   ), \
   void *: _Generic((VAR2), \
     char *: COMPARE_POINTERS(MODE, VAR1, VAR2), \
