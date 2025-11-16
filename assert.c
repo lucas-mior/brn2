@@ -52,22 +52,6 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
-typedef union DoubleUnion {
-    double adouble;
-    float afloat;
-    schar aschar;
-    short ashort;
-    int aint;
-    long along;
-    llong allong;
-    uchar auchar;
-    ushort aushort;
-    uint auint;
-    ulong aulong;
-    ullong aullong;
-    char *stupid;
-} DoubleUnion;
-
 // clang-format off
 
 #define STRING_COMPARE(MODE, SYMBOL) \
