@@ -474,6 +474,14 @@ main(void) {
         ASSERT_MORE_EQUAL(0, a);
     }
     {
+        double a = 0.123;
+        ASSERT_NOT_EQUAL(a, 0.123000001);
+        ASSERT_LESS(a, 0.123000001);
+        ASSERT_LESS_EQUAL(a, 0.123000001);
+        ASSERT_MORE(0.123000001, a);
+        ASSERT_MORE_EQUAL(0.123000001, a);
+    }
+    {
         long a = -1;
         double b = -1;
         ASSERT_EQUAL(a, b);
