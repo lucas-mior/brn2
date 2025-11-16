@@ -324,30 +324,30 @@ static inline double dg_from_ushort(unsigned short x)     { return (double)x; }
 static inline double dg_from_uint(unsigned int x)         { return (double)x; }
 static inline double dg_from_ulong(unsigned long x)       { return (double)x; }
 static inline double dg_from_ullong(unsigned long long x) { return (double)x; }
-static inline double dg_from_charp(char *x)               { return 0.0; }
-static inline double dg_from_ccharp(const char *x)        { return 0.0; }
+static inline double dg_from_charp(char *x)               { (void)x; return 0.0; }
+static inline double dg_from_ccharp(const char *x)        { (void)x; return 0.0; }
 
 /* _Generic dispatcher (all expressions valid since each helper matches type) */
 
 #define DOUBLE_GET(x) \
-    _Generic((x), \
-        double:             dg_from_double, \
-        float:              dg_from_float, \
-        signed char:        dg_from_schar, \
-        short:              dg_from_short, \
-        int:                dg_from_int, \
-        long:               dg_from_long, \
-        long long:          dg_from_llong, \
-        unsigned char:      dg_from_uchar, \
-        unsigned short:     dg_from_ushort, \
-        unsigned int:       dg_from_uint, \
-        unsigned long:      dg_from_ulong, \
-        unsigned long long: dg_from_ullong, \
-        char*:              dg_from_charp, \
-        const char*:        dg_from_ccharp \
-    )(x)
+_Generic((x), \
+    double:             dg_from_double, \
+    float:              dg_from_float, \
+    signed char:        dg_from_schar, \
+    short:              dg_from_short, \
+    int:                dg_from_int, \
+    long:               dg_from_long, \
+    long long:          dg_from_llong, \
+    unsigned char:      dg_from_uchar, \
+    unsigned short:     dg_from_ushort, \
+    unsigned int:       dg_from_uint, \
+    unsigned long:      dg_from_ulong, \
+    unsigned long long: dg_from_ullong, \
+    char*:              dg_from_charp, \
+    const char*:        dg_from_ccharp \
+)(x)
 
-#define COMPARE_BOTH_DOUBLE(MODE, V1, V2, V1_TYPE, V2_TYPE) \
+#define COMPARE_BOTH_DOUBLE(MODE, V1, V2) \
     assert_float_##MODE(__FILE__, __LINE__, \
                         #V1, #V2, \
                         DOUBLE_GET(V1), \
@@ -355,36 +355,36 @@ static inline double dg_from_ccharp(const char *x)        { return 0.0; }
 
 #define COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_DOUBLE), \
-  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_FLOAT), \
-  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_SCHAR), \
-  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_SHORT), \
-  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_INT), \
-  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_LONG), \
-  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_LLONG), \
-  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_UCHAR), \
-  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_USHORT), \
-  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_UINT), \
-  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_ULONG), \
-  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_ULLONG), \
-  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_CHAR_P) \
+  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
 )
 
 #define COMPARE_FIRST_IS_FLOAT(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_DOUBLE), \
-  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_FLOAT), \
-  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_SCHAR), \
-  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_SHORT), \
-  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_INT), \
-  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_LONG), \
-  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_LLONG), \
-  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_UCHAR), \
-  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_USHORT), \
-  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_UINT), \
-  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_ULONG), \
-  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_ULLONG), \
-  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_CHAR_P) \
+  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2) \
 )
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
