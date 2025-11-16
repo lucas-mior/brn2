@@ -256,62 +256,6 @@ _Generic((VAR2), \
   default: unsupported_type_for_generic \
 )
 
-typedef enum DoubleType {
-    DOUBLE_DOUBLE,
-    DOUBLE_FLOAT,
-    DOUBLE_SCHAR,
-    DOUBLE_SHORT, 
-    DOUBLE_INT,
-    DOUBLE_LONG,
-    DOUBLE_LLONG,
-    DOUBLE_UCHAR,
-    DOUBLE_USHORT,
-    DOUBLE_UINT,
-    DOUBLE_ULONG,
-    DOUBLE_ULLONG,
-    DOUBLE_CHAR_P,
-} DoubleType;
-
-static double
-double_get(DoubleUnion var, DoubleType type) {
-    switch (type) {
-    case DOUBLE_DOUBLE:
-        return var.adouble;
-    case DOUBLE_FLOAT:
-        return (double)var.afloat;
-    case DOUBLE_SCHAR:
-        return (double)var.aschar;
-    case DOUBLE_SHORT: 
-        return (double)var.ashort;
-    case DOUBLE_INT:
-        return (double)var.aint;
-    case DOUBLE_LONG:
-        return (double)var.along;
-    case DOUBLE_LLONG:
-        return (double)var.allong;
-    case DOUBLE_UCHAR:
-        return (double)var.auchar;
-    case DOUBLE_USHORT:
-        return (double)var.aushort;
-    case DOUBLE_UINT:
-        return (double)var.auint;
-    case DOUBLE_ULONG:
-        return (double)var.along;
-    case DOUBLE_ULLONG:
-        return (double)var.allong;
-    case DOUBLE_CHAR_P:
-        return 0.0;
-    default:
-        return 0.0;
-    }
-}
-
-/* #define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, VAR1_TYPE, VAR2_TYPE) \ */
-/*   assert_float_##MODE(__FILE__, __LINE__, \ */
-/*                       #VAR1, #VAR2, \ */
-/*                       double_get((DoubleUnion)(VAR1), VAR1_TYPE), \ */
-/*                       double_get((DoubleUnion)(VAR2), VAR2_TYPE)) */
-
 static inline double dg_from_double(double x)             { return x; }
 static inline double dg_from_float(float x)               { return (double)x; }
 static inline double dg_from_schar(signed char x)         { return (double)x; }
@@ -327,23 +271,21 @@ static inline double dg_from_ullong(unsigned long long x) { return (double)x; }
 static inline double dg_from_charp(char *x)               { (void)x; return 0.0; }
 static inline double dg_from_ccharp(const char *x)        { (void)x; return 0.0; }
 
-/* _Generic dispatcher (all expressions valid since each helper matches type) */
-
 #define DOUBLE_GET(x) \
 _Generic((x), \
-    double:             dg_from_double, \
-    float:              dg_from_float, \
-    schar:        dg_from_schar, \
-    short:              dg_from_short, \
-    int:                dg_from_int, \
-    long:               dg_from_long, \
-    llong:          dg_from_llong, \
-    uchar:      dg_from_uchar, \
-    ushort:     dg_from_ushort, \
-    uint:       dg_from_uint, \
-    ulong:      dg_from_ulong, \
+    double: dg_from_double, \
+    float:  dg_from_float, \
+    schar:  dg_from_schar, \
+    short:  dg_from_short, \
+    int:    dg_from_int, \
+    long:   dg_from_long, \
+    llong:  dg_from_llong, \
+    uchar:  dg_from_uchar, \
+    ushort: dg_from_ushort, \
+    uint:   dg_from_uint, \
+    ulong:  dg_from_ulong, \
     ullong: dg_from_ullong, \
-    char*:              dg_from_charp \
+    char*:  dg_from_charp \
 )(x)
 
 #define COMPARE_BOTH_DOUBLE(MODE, V1, V2) \
