@@ -214,7 +214,7 @@ COMPARE_UNSIGN_SIGN(more_equal, >=)
                       #VAR1, #VAR2, \
                       (llong)(VAR1), (ullong)(VAR2))
 
-void __attribute__((weak)) unsupported_type_for_generic(void);
+void unsupported_type_for_generic(void);
 
 #define COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
@@ -300,7 +300,17 @@ _Generic((x), \
 _Generic((VAR2), \
   double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
   float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
-  default: (void)unsupported_type_for_generic \
+  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2), \
+  default: unsupported_type_for_generic() \
 )
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
