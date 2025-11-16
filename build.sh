@@ -38,6 +38,7 @@ CFLAGS="$CFLAGS -Wno-unused-macros"
 CFLAGS="$CFLAGS -Wno-unused-function"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-float-equal"
+CFLAGS="$CFLAGS -Wno-gnu-union-cast"
 LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
