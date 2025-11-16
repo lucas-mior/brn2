@@ -228,7 +228,7 @@ _Generic((VAR2), \
   uint:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ulong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
   ullong: COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  default: unsupported_type_for_generic() \
+  default: (void)unsupported_type_for_generic \
 )
 
 #define COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
@@ -253,25 +253,98 @@ _Generic((VAR2), \
   int:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
   long:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
   llong:  COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  default: unsupported_type_for_generic() \
+  default: unsupported_type_for_generic \
 )
 
 typedef enum DoubleType {
     DOUBLE_DOUBLE,
     DOUBLE_FLOAT,
+    DOUBLE_SCHAR,
+    DOUBLE_SHORT, 
+    DOUBLE_INT,
+    DOUBLE_LONG,
+    DOUBLE_LLONG,
+    DOUBLE_UCHAR,
+    DOUBLE_USHORT,
+    DOUBLE_UINT,
+    DOUBLE_ULONG,
+    DOUBLE_ULLONG,
+    DOUBLE_CHAR_P,
 } DoubleType;
 
-double
+static double
 double_get(DoubleUnion var, DoubleType type) {
     switch (type) {
     case DOUBLE_DOUBLE:
         return var.adouble;
     case DOUBLE_FLOAT:
-        return var.afloat;
+        return (double)var.afloat;
+    case DOUBLE_SCHAR:
+        return (double)var.aschar;
+    case DOUBLE_SHORT: 
+        return (double)var.ashort;
+    case DOUBLE_INT:
+        return (double)var.aint;
+    case DOUBLE_LONG:
+        return (double)var.along;
+    case DOUBLE_LLONG:
+        return (double)var.allong;
+    case DOUBLE_UCHAR:
+        return (double)var.auchar;
+    case DOUBLE_USHORT:
+        return (double)var.aushort;
+    case DOUBLE_UINT:
+        return (double)var.auint;
+    case DOUBLE_ULONG:
+        return (double)var.along;
+    case DOUBLE_ULLONG:
+        return (double)var.allong;
+    case DOUBLE_CHAR_P:
+        return 0.0;
     default:
         return 0.0;
     }
 }
+
+#define COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, VAR1_TYPE, VAR2_TYPE) \
+  assert_float_##MODE(__FILE__, __LINE__, \
+                      #VAR1, #VAR2, \
+                      double_get((DoubleUnion)VAR1, VAR1_TYPE), \
+                      double_get((DoubleUnion)VAR2, VAR2_TYPE))
+
+#define COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2) \
+_Generic((VAR2), \
+  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_DOUBLE), \
+  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_FLOAT), \
+  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_SCHAR), \
+  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_SHORT), \
+  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_INT), \
+  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_LONG), \
+  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_LLONG), \
+  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_UCHAR), \
+  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_USHORT), \
+  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_UINT), \
+  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_ULONG), \
+  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_ULLONG), \
+  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_DOUBLE, DOUBLE_CHAR_P) \
+)
+
+#define COMPARE_FIRST_IS_FLOAT(MODE, VAR1, VAR2) \
+_Generic((VAR2), \
+  double: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_DOUBLE), \
+  float:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_FLOAT), \
+  schar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_SCHAR), \
+  short:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_SHORT), \
+  int:    COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_INT), \
+  long:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_LONG), \
+  llong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_LLONG), \
+  uchar:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_UCHAR), \
+  ushort: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_USHORT), \
+  uint:   COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_UINT), \
+  ulong:  COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_ULONG), \
+  ullong: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_ULLONG), \
+  char *: COMPARE_BOTH_DOUBLE(MODE, VAR1, VAR2, DOUBLE_FLOAT, DOUBLE_CHAR_P) \
+)
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
@@ -280,7 +353,7 @@ _Generic((VAR1), \
                                   #VAR1, #VAR2, \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
-      default: unsupported_type_for_generic() \
+      default: unsupported_type_for_generic \
   ), \
   schar:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
   short:  COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
@@ -292,17 +365,8 @@ _Generic((VAR1), \
   uint:   COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   ulong:  COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   ullong: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  default: _Generic((VAR1), \
-    double: assert_float_##MODE(__FILE__, __LINE__, \
-                               #VAR1, #VAR2, \
-                               double_get((DoubleUnion)VAR1, DOUBLE_DOUBLE), \
-                               double_get((DoubleUnion)VAR2, DOUBLE_DOUBLE)), \
-    float: assert_float_##MODE(__FILE__, __LINE__, \
-                               #VAR1, #VAR2, \
-                               double_get((DoubleUnion)VAR1, DOUBLE_FLOAT), \
-                               double_get((DoubleUnion)VAR2, DOUBLE_FLOAT)), \
-    default: unsupported_type_for_generic() \
-    ) \
+  double: COMPARE_FIRST_IS_DOUBLE(MODE, VAR1, VAR2), \
+  float:  COMPARE_FIRST_IS_FLOAT(MODE, VAR1, VAR2) \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
@@ -448,6 +512,7 @@ main(void) {
     {
         long a = -1;
         double b = -1;
+        ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
     }
     ASSERT(true);
