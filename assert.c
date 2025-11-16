@@ -377,6 +377,17 @@ _Generic((VAR1), \
 
 #if TESTING_assert
 
+#include <signal.h>
+
+static bool assertion_failed = false;
+
+static void
+failed_assertion(int unused) {
+    (void)unused;
+    assertion_failed = true;
+    return;
+}
+
 #if !defined(MINOF)
 
 #define MINOF(VARIABLE) \
@@ -579,6 +590,14 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
+    }
+    {
+        int a = 0;
+        double b = 1;
+        signal(SIGILL, failed_assertion);
+        ASSERT_EQUAL(a, b);
+        ASSERT(assertion_failed);
+        assertion_failed = false;
     }
     ASSERT(true);
     exit(EXIT_SUCCESS);
