@@ -51,6 +51,22 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
+typedef union DoubleCharPointer {
+    double value;
+    float stupid;
+    char *stupid0;
+    schar stupid1;
+    short stupid2;
+    int stupid3;
+    long stupid4;
+    llong stupid5;
+    uchar stupid6;
+    ushort stupid7;
+    uint stupid8;
+    ulong stupid9;
+    ullong stupid10;
+} DoubleCharPointer;
+
 // clang-format off
 
 #define STRING_COMPARE(MODE, SYMBOL) \
@@ -146,7 +162,9 @@ COMPARE_SIGN_UNSIGN(more_equal, <=)
 static void \
 assert_float_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
-                    double var1, double var2) { \
+                    DoubleCharPointer var01, DoubleCharPointer var02) { \
+    double var1 = var01.value; \
+    double var2 = var02.value; \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %f " #SYMBOL " %f = %s\n", \
@@ -261,9 +279,13 @@ _Generic((VAR1), \
   ullong: COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
   default: _Generic((VAR1), \
     double: assert_float_##MODE(__FILE__, __LINE__, \
-                                #VAR1, #VAR2, \
-                                (double)(VAR1), \
-                                (double)(VAR2)), \
+                               #VAR1, #VAR2, \
+                               (DoubleCharPointer)(VAR1), \
+                               (DoubleCharPointer)(VAR2)), \
+    float: assert_float_##MODE(__FILE__, __LINE__, \
+                               #VAR1, #VAR2, \
+                               (DoubleCharPointer)(VAR1), \
+                               (DoubleCharPointer)(VAR2)), \
     default: unsupported_type_for_generic() \
     ) \
 )
@@ -410,7 +432,7 @@ main(void) {
     }
     {
         long a = -1;
-        float b = -1;
+        double b = -1;
         ASSERT_EQUAL(b, b);
     }
     ASSERT(true);
