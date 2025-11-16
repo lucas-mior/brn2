@@ -10,15 +10,26 @@
 #include <limits.h>
 #include <float.h>
 #include <assert.h>
+#include <signal.h>
 
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#define TESTING_assert 1
+#elif !defined(TESTING_assert)
+#define TESTING_assert 0
+#endif
+
+#if TESTING_assert
+#define trap(...) raise(SIGILL)
+#else
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
 #define trap(...) __debugbreak()
 #else
 #define trap(...) *(volatile int *)0 = 0
+#endif
 #endif
 
 #define ASSERT(C) do { \
@@ -27,12 +38,6 @@
         trap(); \
     } \
 } while (0)
-
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_assert 1
-#elif !defined(TESTING_assert)
-#define TESTING_assert 0
-#endif
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
