@@ -47,13 +47,13 @@ _Generic((VARIABLE), \
   bool:        0,         \
   float:       -FLT_MAX,  \
   double:      -DBL_MAX,  \
-  long double: -LDBL_MAX,  \
+  long double: -LDBL_MAX, \
   default: _Generic((VARIABLE), \
-    int8:      INT8_MIN, \
+    int8:      INT8_MIN,  \
     int16:     INT16_MIN, \
     int32:     INT32_MIN, \
     int64:     INT64_MIN, \
-    uint8:     (uint8)0, \
+    uint8:     (uint8)0,  \
     uint16:    (uint16)0, \
     uint32:    (uint32)0, \
     uint64:    (uint64)0, \
