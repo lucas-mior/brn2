@@ -366,7 +366,11 @@ strncmp64(char *left, char *right, int64 size) {
     if (size == 0) {
         return 0;
     }
-    ASSERT_LESS_EQUAL(size, SIZE_MAX);
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
     result = strncmp(left, right, (size_t)size);
     return result;
 }
@@ -377,7 +381,11 @@ memcmp64(void *left, void *right, int64 size) {
     if (size == 0) {
         return 0;
     }
-    ASSERT_LESS_EQUAL(size, SIZE_MAX);
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
     result = memcmp(left, right, (size_t)size);
     return result;
 }
