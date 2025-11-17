@@ -539,7 +539,11 @@ xrealloc(void *old, const int64 size) {
         error("Error in xrealloc: invalid size = %lld.\n", (long long)size);
         fatal(EXIT_FAILURE);
     }
-    ASSERT_LESS_EQUAL(size, SIZE_MAX);
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error in xrealloc: Number (%lld) is bigger than SIZEMAX\n",
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
         error("Failed to reallocate %lld bytes from %llx.\n", (llong)size,
