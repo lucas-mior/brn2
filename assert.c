@@ -428,7 +428,7 @@ _Generic((VARIABLE), \
   short:       SHRT_MAX,   \
   int:         INT_MAX,    \
   long:        LONG_MAX,   \
-  llong:       LLONG_MAX,   \
+  llong:       LLONG_MAX,  \
   uchar:       UCHAR_MAX,  \
   ushort:      USHRT_MAX,  \
   uint:        UINT_MAX,   \
