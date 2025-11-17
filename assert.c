@@ -169,28 +169,6 @@ COMPARE_SIGN_UNSIGN(less_equal, >=)
 COMPARE_SIGN_UNSIGN(more, <)
 COMPARE_SIGN_UNSIGN(more_equal, <=)
 
-#define COMPARE_LDOUBLE(MODE, SYMBOL) \
-static void \
-assert_ldouble_##MODE(char *file, uint line, \
-                      char *name1, char *name2, \
-                      ldouble var1, ldouble var2) { \
-    if (!(var1 SYMBOL var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %Lf " #SYMBOL " %Lf = %s\n", \
-               name1, var1, var2, name2); \
-        trap(); \
-    } \
-}
-
-COMPARE_LDOUBLE(equal, ==)
-COMPARE_LDOUBLE(not_equal, !=)
-COMPARE_LDOUBLE(less, <)
-COMPARE_LDOUBLE(less_equal, <=)
-COMPARE_LDOUBLE(more, >)
-COMPARE_LDOUBLE(more_equal, >=)
-
-#undef COMPARE_LDOUBLE
-
 #undef COMPARE_SIGN_UNSIGN
 
 #define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
@@ -213,6 +191,28 @@ COMPARE_UNSIGN_SIGN(more, >)
 COMPARE_UNSIGN_SIGN(more_equal, >=)
 
 #undef COMPARE_UNSIGN_SIGN
+
+#define COMPARE_LDOUBLE(MODE, SYMBOL) \
+static void \
+assert_ldouble_##MODE(char *file, uint line, \
+                      char *name1, char *name2, \
+                      ldouble var1, ldouble var2) { \
+    if (!(var1 SYMBOL var2)) { \
+        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("%s = %Lf " #SYMBOL " %Lf = %s\n", \
+               name1, var1, var2, name2); \
+        trap(); \
+    } \
+}
+
+COMPARE_LDOUBLE(equal, ==)
+COMPARE_LDOUBLE(not_equal, !=)
+COMPARE_LDOUBLE(less, <)
+COMPARE_LDOUBLE(less_equal, <=)
+COMPARE_LDOUBLE(more, >)
+COMPARE_LDOUBLE(more_equal, >=)
+
+#undef COMPARE_LDOUBLE
 
 // clang-format on
 
