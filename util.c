@@ -517,7 +517,11 @@ xmalloc(int64 size) {
         error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
-    ASSERT_LESS_EQUAL(size, SIZE_MAX);
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error in xmalloc: Number (%lld) is bigger than SIZEMAX\n",
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
 
     if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %lld bytes.\n", (llong)size);
