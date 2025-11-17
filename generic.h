@@ -1,6 +1,8 @@
 #if !defined(GENERIC_H)
 #define GENERIC_H
 
+#include <stdint.h>
+
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
