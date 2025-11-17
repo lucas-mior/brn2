@@ -150,7 +150,7 @@ compare_sign_with_unsign(llong s, ullong u) {
 
 // clang-format off
 
-#define COMPARE_SIGN_UNSIGN(MODE, SYMBOL) \
+#define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL) \
 static void \
 assert_si_un_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
@@ -163,14 +163,14 @@ assert_si_un_##MODE(char *file, uint line, \
     } \
 }
 
-COMPARE_SIGN_UNSIGN(equal,      ==)
-COMPARE_SIGN_UNSIGN(not_equal,  !=)
-COMPARE_SIGN_UNSIGN(less,       <)
-COMPARE_SIGN_UNSIGN(less_equal, <=)
-COMPARE_SIGN_UNSIGN(more,       >)
-COMPARE_SIGN_UNSIGN(more_equal, >=)
+GENERATE_ASSERT_SIGNED_UNSIGNED(equal,      ==)
+GENERATE_ASSERT_SIGNED_UNSIGNED(not_equal,  !=)
+GENERATE_ASSERT_SIGNED_UNSIGNED(less,       <)
+GENERATE_ASSERT_SIGNED_UNSIGNED(less_equal, <=)
+GENERATE_ASSERT_SIGNED_UNSIGNED(more,       >)
+GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
-#undef COMPARE_SIGN_UNSIGN
+#undef GENERATE_ASSERT_SIGNED_UNSIGNED
 
 #define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
 static void \
