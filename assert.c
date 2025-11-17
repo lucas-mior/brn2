@@ -82,7 +82,7 @@ GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
 
-#define POINTER_COMPARE(MODE, SYMBOL) \
+#define GENERATE_ASSERT_POINTERS(MODE, SYMBOL) \
 static void \
 assert_pointers_##MODE(char *file, uint line, \
                        char *name1, char *name2, \
@@ -95,12 +95,12 @@ assert_pointers_##MODE(char *file, uint line, \
     } \
 }
 
-POINTER_COMPARE(less,       <)
-POINTER_COMPARE(less_equal, <=)
-POINTER_COMPARE(equal,      ==)
-POINTER_COMPARE(not_equal,  !=)
-POINTER_COMPARE(more,       >)
-POINTER_COMPARE(more_equal, >=)
+GENERATE_ASSERT_POINTERS(less,       <)
+GENERATE_ASSERT_POINTERS(less_equal, <=)
+GENERATE_ASSERT_POINTERS(equal,      ==)
+GENERATE_ASSERT_POINTERS(not_equal,  !=)
+GENERATE_ASSERT_POINTERS(more,       >)
+GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #define INTEGER_SAME_SIGN_COMPARE(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
