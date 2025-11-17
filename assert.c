@@ -386,7 +386,7 @@ _Generic((VAR1), \
 #include <signal.h>
 #include <setjmp.h>
 
-static bool assertion_failed = false;
+static volatile sig_atomic_t assertion_failed = false;
 static sigjmp_buf assert_env;
 
 static void __attribute__((noreturn))
