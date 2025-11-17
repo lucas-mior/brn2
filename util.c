@@ -35,6 +35,8 @@
 #include <assert.h>
 #include <float.h>
 
+#include "generic.h"
+
 #if defined(__linux__)
 #define OS_LINUX 1
 #define OS_MAC 0
@@ -125,7 +127,6 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define DEBUGGING 0
 #endif
 
-#include "generic.h"
 #include "assert.c"
 
 #if !defined(FLAGS_HUGE_PAGES)
