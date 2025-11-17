@@ -341,7 +341,10 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
 
 INLINE void *
 memchr64(void *pointer, int32 value, int64 size) {
-    ASSERT_LESS_EQUAL(0, size);
+    if (size <= 0) {
+        error("Error in %s: Invalid size = %lld\n", __func__, (llong)size);
+        fatal(EXIT_FAILURE);
+    }
     return memchr(pointer, value, (size_t)size);
 }
 
