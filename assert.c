@@ -234,8 +234,6 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                                (llong)(VAR1), (ullong)(VAR2), \
                                TYPENAME(VAR1), TYPENAME(VAR2))
 
-void unsupported_type_for_generic(void);
-
 #define ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
   schar:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
