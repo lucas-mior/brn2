@@ -79,6 +79,10 @@
 #define DEBUGGING 0
 #endif
 
+#if !defined(ERROR_NOTIFY)
+#define ERROR_NOTIFY 0
+#endif
+
 #if defined(__has_include)
 #if __has_include(<valgrind/valgrind.h>)
 #include <valgrind/valgrind.h>
@@ -910,6 +914,27 @@ error(char *format, ...) {
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
 #endif
+
+#if ERROR_NOTIFY
+#if OS_WINDOWS
+#error "ERROR_NOTIFY is defined but unsupported for windows."
+#endif
+    switch (fork()) {
+    case 0:
+        for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
+            execlp(notifiers[i], notifiers[i], "-u", "critical", program,
+                   buffer, NULL);
+        }
+        fprintf(stderr, "Error executing notifier: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    case -1:
+        fprintf(stderr, "Error forking: %s.\n", strerror(errno));
+        break;
+    default:
+        break;
+    }
+#endif
+
     return;
 }
 
