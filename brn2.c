@@ -94,33 +94,6 @@ xarena_push(Arena **arenas, uint32 number, uint32 size) {
     return p;
 }
 
-void
-brn2_print_list(FileList *list) {
-    error("FileList = {\n");
-    error(" arenas,\n");
-    error(" indexes = %p\n", (void *)list->indexes);
-    error(" indexes_size = %lld\n", (llong)list->indexes_size);
-    error(" length = %u\n", list->length);
-
-    for (uint32 i = 0; i < list->length;) {
-        FileName *file = list->files[i];
-        if (file) {
-            ASSERT_EQUAL(file->length, strlen(file->name));
-            error("[%u] = %s\n", i, file->name);
-        } else {
-            error("[%u]", i);
-            while (file == NULL) {
-                i += 1;
-                file = list->files[i];
-            }
-            error(" ... [%u] = NULL\n", i);
-        }
-        i += 1;
-    }
-
-    error("}\n");
-}
-
 int
 brn2_compare(const void *a, const void *b) {
     FileName *const *file_a = a;
@@ -370,8 +343,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         char *begin = map;
         char *pointer = map;
         int64 left = map_size - padding;
-
-        ASSERT_EQUAL(pointer + left, map + map_size - padding);
 
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
@@ -977,6 +948,7 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_brn2
 #include <assert.h>
+#include "assert.c"
 #include "sort.c"
 #include "files.h"
 
@@ -986,8 +958,35 @@ bool brn2_options_quiet = false;
 bool brn2_options_autosolve = false;
 uint32 nthreads = 2;
 
+void
+brn2_print_list(FileList *list) {
+    error("FileList = {\n");
+    error(" arenas,\n");
+    error(" indexes = %p\n", (void *)list->indexes);
+    error(" indexes_size = %lld\n", (llong)list->indexes_size);
+    error(" length = %u\n", list->length);
+
+    for (uint32 i = 0; i < list->length;) {
+        FileName *file = list->files[i];
+        if (file) {
+            ASSERT_EQUAL(file->length, strlen(file->name));
+            error("[%u] = %s\n", i, file->name);
+        } else {
+            error("[%u]", i);
+            while (file == NULL) {
+                i += 1;
+                file = list->files[i];
+            }
+            error(" ... [%u] = NULL\n", i);
+        }
+        i += 1;
+    }
+
+    error("}\n");
+}
+
 static void
-assert_contains_filename(FileList *list, FileName *file, bool verbose) {
+brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
     for (uint32 i = 0; i < list->length; i += 1) {
         if (list->files[i]->length != file->length) {
             continue;
@@ -1048,8 +1047,8 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert_contains_filename(list2, list1->files[i],
-                                     list1->length < 9999);
+            brn2_assert_contains_filename(list2, list1->files[i],
+                                          list1->length < 9999);
         }
 
         brn2_free_list(list1);
@@ -1086,8 +1085,8 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert_contains_filename(list2, list1->files[i],
-                                     list1->length < 9999);
+            brn2_assert_contains_filename(list2, list1->files[i],
+                                          list1->length < 9999);
         }
 
         map = hash_create_map(list1->length);
@@ -1186,8 +1185,8 @@ main(void) {
 
         for (uint32 i = 0; i < list1->length; i += 1) {
             printf(RED "%u / %u\n" RESET, i + 1, list1->length);
-            assert_contains_filename(list2, list1->files[i],
-                                     list1->length < 9999);
+            brn2_assert_contains_filename(list2, list1->files[i],
+                                          list1->length < 9999);
         }
         printf(RESET);
 
