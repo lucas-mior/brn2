@@ -178,7 +178,44 @@ typedef union LongDoubleUnion {
 
 static char *
 typename(Type type) {
-    return "dummy";
+    switch (type) {
+    case TYPE_LDOUBLE:
+        return "ldouble";
+    case TYPE_DOUBLE:
+        return "double";
+    case TYPE_FLOAT:
+        return "float";
+    case TYPE_SCHAR:
+        return "schar";
+    case TYPE_SHORT:
+        return "short";
+    case TYPE_INT:
+        return "int";
+    case TYPE_LONG:
+        return "long";
+    case TYPE_LLONG:
+        return "llong";
+    case TYPE_UCHAR:
+        return "uchar";
+    case TYPE_USHORT:
+        return "ushort";
+    case TYPE_UINT:
+        return "uint";
+    case TYPE_ULONG:
+        return "ulong";
+    case TYPE_ULLONG:
+        return "ullong";
+    case TYPE_CHARP:
+        return "char*";
+    case TYPE_VOIDP:
+        return "void*";
+    case TYPE_BOOL:
+        return "bool";
+    case TYPE_CHAR:
+        return "char";
+    default:
+        return "unknown type";
+    }
 }
 
 #if !defined(error2)
