@@ -263,7 +263,7 @@ _Generic((VARIABLE), \
     uint16:    PRINT_UNSIGNED("[uint16]", VARIABLE), \
     uint32:    PRINT_UNSIGNED("[uint32]", VARIABLE), \
     uint64:    PRINT_UNSIGNED("[uint64]", VARIABLE), \
-    default:   assert(false) \
+    default:   unsupported_type_for_generic() \
   ) \
 )
 
