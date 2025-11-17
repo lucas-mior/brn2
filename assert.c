@@ -261,7 +261,7 @@ _Generic((VAR2), \
 #define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2) \
   assert_unsigned_signed##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
-                              TYPENAME(VAR1), TYPENAME(VAR2), \
+                               TYPENAME(VAR1), TYPENAME(VAR2), \
                                (ullong)(VAR1), (llong)(VAR2))
 
 #define ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
