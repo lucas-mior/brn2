@@ -593,9 +593,8 @@ main(void) {
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }{
-        int c;
         void *a = NULL;
-        void *b = &c;
+        void *b = &a;
         ASSERT_NOT_EQUAL(a, b);
     }{
         int array[100];
