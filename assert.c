@@ -184,11 +184,11 @@ assert_un_si_##MODE(char *file, uint line, \
     } \
 }
 
-COMPARE_UNSIGN_SIGN(equal, ==)
-COMPARE_UNSIGN_SIGN(not_equal, !=)
-COMPARE_UNSIGN_SIGN(less, <)
+COMPARE_UNSIGN_SIGN(equal,      ==)
+COMPARE_UNSIGN_SIGN(not_equal,  !=)
+COMPARE_UNSIGN_SIGN(less,       <)
 COMPARE_UNSIGN_SIGN(less_equal, <=)
-COMPARE_UNSIGN_SIGN(more, >)
+COMPARE_UNSIGN_SIGN(more,       >)
 COMPARE_UNSIGN_SIGN(more_equal, >=)
 
 #undef COMPARE_UNSIGN_SIGN
