@@ -225,13 +225,13 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 #define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_both_signed_##MODE(__FILE__, __LINE__, \
                        #VAR1, #VAR2, \
-                       #TYPE1, #TYPE2, \
+                       typename(TYPE1), typename(TYPE2), \
                        (llong)(VAR1), (llong)(VAR2)) \
 
 #define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_signed_unsigned##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
-                          #TYPE1, #TYPE2, \
+                          typename(TYPE1), typename(TYPE2), \
                           (llong)(VAR1), (ullong)(VAR2))
 
 #define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
@@ -255,13 +255,13 @@ _Generic((VAR2), \
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_both_unsigned_##MODE(__FILE__, __LINE__, \
                          #VAR1, #VAR2, \
-                         #TYPE1, #TYPE2, \
+                         typename(TYPE1), typename(TYPE2), \
                          (ullong)(VAR1), (ullong)(VAR2))
 
 #define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_unsigned_signed_##MODE(__FILE__, __LINE__, \
                            #VAR1, #VAR2, \
-                           #TYPE1, #TYPE2, \
+                           typename(TYPE1), typename(TYPE2), \
                            (ullong)(VAR1), (llong)(VAR2))
 
 #define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
@@ -285,7 +285,7 @@ _Generic((VAR2), \
 #define A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     a_ldouble_##MODE(__FILE__, __LINE__, \
                      #VAR1, #VAR2, \
-                     #TYPE1, #TYPE2, \
+                     typename(TYPE1), typename(TYPE2), \
                      LDOUBLE_GET(VAR1, TYPE1), LDOUBLE_GET(VAR2, TYPE2))
 
 #define A_FIRST_LDOUBLE(MODE, VAR1, VAR2, TYPE1) \
