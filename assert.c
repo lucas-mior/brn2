@@ -223,7 +223,7 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                             #VAR1, #VAR2, \
                             (llong)(VAR1), (llong)(VAR2))
 
-#define ASSERT_SI_UN(MODE, VAR1, VAR2) \
+#define ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2) \
   assert_signed_unsigned##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
                                (llong)(VAR1), (ullong)(VAR2))
@@ -237,11 +237,11 @@ _Generic((VAR2), \
   int:     ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
   long:    ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
   llong:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  uchar:   ASSERT_SI_UN(MODE, VAR1, VAR2), \
-  ushort:  ASSERT_SI_UN(MODE, VAR1, VAR2), \
-  uint:    ASSERT_SI_UN(MODE, VAR1, VAR2), \
-  ulong:   ASSERT_SI_UN(MODE, VAR1, VAR2), \
-  ullong:  ASSERT_SI_UN(MODE, VAR1, VAR2), \
+  uchar:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
+  ushort:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
+  uint:    ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
+  ulong:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
+  ullong:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
   ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
@@ -253,7 +253,7 @@ _Generic((VAR2), \
                               #VAR1, #VAR2, \
                               (ullong)(VAR1), (ullong)(VAR2))
 
-#define ASSERT_UN_SI(MODE, VAR1, VAR2) \
+#define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2) \
   assert_unsigned_signed##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
                                (ullong)(VAR1), (llong)(VAR2))
@@ -265,11 +265,11 @@ _Generic((VAR2), \
   uint:    ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
   ulong:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
   ullong:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  schar:   ASSERT_UN_SI(MODE, VAR1, VAR2), \
-  short:   ASSERT_UN_SI(MODE, VAR1, VAR2), \
-  int:     ASSERT_UN_SI(MODE, VAR1, VAR2), \
-  long:    ASSERT_UN_SI(MODE, VAR1, VAR2), \
-  llong:   ASSERT_UN_SI(MODE, VAR1, VAR2), \
+  schar:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
+  short:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
+  int:     ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
+  long:    ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
+  llong:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
   ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
