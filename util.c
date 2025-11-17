@@ -418,8 +418,16 @@ CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
     ASSERT_LESS_EQUAL(0, size); \
     ASSERT_LESS_EQUAL(0, n); \
-    ASSERT_LESS_EQUAL(size, SIZE_MAX); \
-    ASSERT_LESS_EQUAL(n, SIZE_MAX); \
+    if ((ullong)size >= (ullong)SIZE_MAX) { \
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__, \
+              (llong)size); \
+        fatal(EXIT_FAILURE); \
+    } \
+    if ((ullong)n >= (ullong)SIZE_MAX) { \
+        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n", __func__, \
+              (llong)size); \
+        fatal(EXIT_FAILURE); \
+    } \
     rw = func(buffer, (size_t)size, (size_t)n, file); \
     return (int64)rw; \
 }
