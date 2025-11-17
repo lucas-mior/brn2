@@ -64,7 +64,7 @@ typedef uint64_t uint64;
 
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
-assert_strings_##MODE(char *file, uint line, \
+a_strings_##MODE(char *file, uint line, \
                       char *name1, char *name2, \
                       char *var1, char *var2) { \
     if (!(strcmp(var1, var2) SYMBOL 0)) { \
@@ -86,7 +86,7 @@ GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #define GENERATE_ASSERT_POINTERS(MODE, SYMBOL) \
 static void \
-assert_pointers_##MODE(char *file, uint line, \
+a_pointers_##MODE(char *file, uint line, \
                        char *name1, char *name2, \
                        void *var1, void *var2) { \
     if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) { \
@@ -106,7 +106,7 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
-assert_both_##TYPE##_##MODE(char *file, uint line, \
+a_both_##TYPE##_##MODE(char *file, uint line, \
                             char *name1, char *name2, \
                             char *type1, char *type2, \
                             TYPE long long var1, TYPE long long var2) { \
@@ -155,7 +155,7 @@ compare_sign_with_unsign(llong s, ullong u) {
 
 #define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL) \
 static void \
-assert_signed_unsigned##MODE(char *file, uint line, \
+a_signed_unsigned##MODE(char *file, uint line, \
                              char *name1, char *name2, \
                              char *type1, char *type2, \
                              llong var1, ullong var2) { \
@@ -178,7 +178,7 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL) \
 static void \
-assert_unsigned_signed##MODE(char *file, uint line, \
+a_unsigned_signed##MODE(char *file, uint line, \
                              char *name1, char *name2, \
                              char *type1, char *type2, \
                              ullong var1, llong var2) { \
@@ -201,7 +201,7 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #define GENERATE_ASSERT_LDOUBLE(MODE, SYMBOL) \
 static void \
-assert_ldouble_##MODE(char *file, uint line, \
+a_ldouble_##MODE(char *file, uint line, \
                       char *name1, char *name2, \
                       char *type1, char *type2, \
                       ldouble var1, ldouble var2) { \
@@ -223,13 +223,13 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 #undef GENERATE_ASSERT_LDOUBLE
 
 #define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-  assert_both_signed_##MODE(__FILE__, __LINE__, \
+  a_both_signed_##MODE(__FILE__, __LINE__, \
                             #VAR1, #VAR2, \
                             TYPE1, TYPE2, \
                             (llong)(VAR1), (llong)(VAR2)) \
 
 #define ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-  assert_signed_unsigned##MODE(__FILE__, __LINE__, \
+  a_signed_unsigned##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
                                TYPE1, TYPE2, \
                                (llong)(VAR1), (ullong)(VAR2))
@@ -253,13 +253,13 @@ _Generic((VAR2), \
 )
 
 #define ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-  assert_both_unsigned_##MODE(__FILE__, __LINE__, \
+  a_both_unsigned_##MODE(__FILE__, __LINE__, \
                               #VAR1, #VAR2, \
                               TYPE1, TYPE2, \
                               (ullong)(VAR1), (ullong)(VAR2))
 
 #define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-  assert_unsigned_signed##MODE(__FILE__, __LINE__, \
+  a_unsigned_signed##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
                                TYPE1, TYPE2, \
                                (ullong)(VAR1), (llong)(VAR2))
@@ -283,7 +283,7 @@ _Generic((VAR2), \
 )
 
 #define ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    assert_ldouble_##MODE(__FILE__, __LINE__, \
+    a_ldouble_##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
                           TYPE1, TYPE2, \
                           LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
@@ -307,7 +307,7 @@ _Generic((VAR2), \
 )
 
 #define ASSERT_POINTERS(MODE, VAR1, VAR2) \
-    assert_pointers_##MODE(__FILE__, __LINE__, \
+    a_pointers_##MODE(__FILE__, __LINE__, \
                            #VAR1, #VAR2, \
                            (void *)(uintptr_t)(VAR1), \
                            (void *)(uintptr_t)(VAR2))
@@ -315,7 +315,7 @@ _Generic((VAR2), \
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
-    char *: assert_strings_##MODE(__FILE__, __LINE__, \
+    char *: a_strings_##MODE(__FILE__, __LINE__, \
                                   #VAR1, #VAR2, \
                                   (char *)(uintptr_t)(VAR1), \
                                   (char *)(uintptr_t)(VAR2)), \
