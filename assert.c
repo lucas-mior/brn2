@@ -106,11 +106,12 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 static void \
 assert_both_##TYPE##_##MODE(char *file, uint line, \
                             char *name1, char *name2, \
-                            TYPE long long var1, TYPE long long var2) { \
+                            TYPE long long var1, TYPE long long var2, \
+                            char *type1, char *type2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
-               name1, var1, var2, name2); \
+        error2("[%s]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s]\n", \
+               type1, name1, var1, var2, name2, type2); \
         trap(); \
     } \
 }
@@ -154,11 +155,12 @@ compare_sign_with_unsign(llong s, ullong u) {
 static void \
 assert_signed_unsigned##MODE(char *file, uint line, \
                              char *name1, char *name2, \
-                             llong var1, ullong var2) { \
+                             llong var1, ullong var2, \
+                             char *type1, char *type2) { \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %lld " #SYMBOL " %llu = %s\n", \
-               name1, var1, var2, name2); \
+        error2("[%s]%s = %lld " #SYMBOL " %llu = %s[%s]\n", \
+               type1, name1, var1, var2, name2, type2); \
         trap(); \
     } \
 }
@@ -176,10 +178,12 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 static void \
 assert_unsigned_signed##MODE(char *file, uint line, \
                              char *name1, char *name2, \
-                             ullong var1, llong var2) { \
+                             ullong var1, llong var2, \
+                             char *type1, char *type2) { \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
+        error2("[%s]%s = %llu " #SYMBOL " %lld = %s[%s]\n", \
+                type1, name1, var1, var2, name2, type2); \
         trap(); \
     } \
 }
@@ -197,11 +201,12 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 static void \
 assert_ldouble_##MODE(char *file, uint line, \
                       char *name1, char *name2, \
-                      ldouble var1, ldouble var2) { \
+                      ldouble var1, ldouble var2, \
+                      char *type1, char *type2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %Lf " #SYMBOL " %Lf = %s\n", \
-               name1, var1, var2, name2); \
+        error2("[%s]%s = %Lf " #SYMBOL " %Lf = %s[%s]\n", \
+               type1, name1, var1, var2, name2, type2); \
         trap(); \
     } \
 }
@@ -215,61 +220,65 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
 #undef GENERATE_ASSERT_LDOUBLE
 
-#define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   assert_both_signed_##MODE(__FILE__, __LINE__, \
                             #VAR1, #VAR2, \
-                            (llong)(VAR1), (llong)(VAR2))
+                            (llong)(VAR1), (llong)(VAR2), \
+                            TYPE1, TYPE2)
 
-#define ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   assert_signed_unsigned##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
-                               (llong)(VAR1), (ullong)(VAR2))
+                               (llong)(VAR1), (ullong)(VAR2), \
+                               TYPE1, TYPE2)
 
 void unsupported_type_for_generic(void);
 
-#define ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-  schar:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  short:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  int:     ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  long:    ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  llong:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  uchar:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
-  ushort:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
-  uint:    ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
-  ulong:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2), \
-  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  schar:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, "schar"), \
+  short:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, "short"), \
+  int:     ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, "int"), \
+  long:    ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, "long"), \
+  llong:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, "llong"), \
+  uchar:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uchar"), \
+  ushort:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ushort"), \
+  uint:    ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uint"), \
+  ulong:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ulong"), \
+  ullong:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ullong"), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "ldouble"), \
+  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "double"), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "float"), \
   default: unsupported_type_for_generic() \
 )
 
-#define ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   assert_both_unsigned_##MODE(__FILE__, __LINE__, \
                               #VAR1, #VAR2, \
-                              (ullong)(VAR1), (ullong)(VAR2))
+                              (ullong)(VAR1), (ullong)(VAR2), \
+                              TYPE1, TYPE2)
 
-#define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   assert_unsigned_signed##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
-                               (ullong)(VAR1), (llong)(VAR2))
+                               (ullong)(VAR1), (llong)(VAR2), \
+                              TYPE1, TYPE2)
 
-#define ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-  uchar:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  ushort:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  uint:    ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  ulong:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  schar:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
-  short:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
-  int:     ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
-  long:    ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
-  llong:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2), \
-  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  uchar:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uchar"), \
+  ushort:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ushort"), \
+  uint:    ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uint"), \
+  ulong:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ulong"), \
+  ullong:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ullong"), \
+  schar:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "schar"), \
+  short:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "short"), \
+  int:     ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "int"), \
+  long:    ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "long"), \
+  llong:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "llong"), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "ldouble"), \
+  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "double"), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "float"), \
   default: unsupported_type_for_generic() \
 )
 
@@ -312,26 +321,27 @@ _Generic((x), \
   char:    ldouble_from_char \
 )(x)
 
-#define ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
+#define ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     assert_ldouble_##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
-                          LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
+                          LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2), \
+                          TYPE1, TYPE2)
 
-#define ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
+#define ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  schar:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  short:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  int:     ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  long:    ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  llong:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  uchar:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  ushort:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  uint:    ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  ulong:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  ullong:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "ldouble"), \
+  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "double"), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "float"), \
+  schar:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "schar"), \
+  short:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "int"), \
+  int:     ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "long"), \
+  long:    ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "long"), \
+  llong:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "llong"), \
+  uchar:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "uchar"), \
+  ushort:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "ushort"), \
+  uint:    ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "uint"), \
+  ulong:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "ulong"), \
+  ullong:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, "ullong"), \
   default: unsupported_type_for_generic() \
 )
 
@@ -355,19 +365,19 @@ _Generic((VAR1), \
     void *: ASSERT_POINTERS(MODE, VAR1, VAR2), \
     default: unsupported_type_for_generic() \
   ), \
-  schar:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  short:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  int:     ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  long:    ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  llong:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  uchar:   ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ushort:  ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  uint:    ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ulong:   ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong:  ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ldouble: ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
+  schar:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2, "schar"), \
+  short:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2, "short"), \
+  int:     ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2, "int"), \
+  long:    ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2, "long"), \
+  llong:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2, "llong"), \
+  uchar:   ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2, "uchar"), \
+  ushort:  ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2, "ushort"), \
+  uint:    ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2, "uint"), \
+  ulong:   ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2, "ulong"), \
+  ullong:  ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2, "ullong"), \
+  ldouble: ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2, "ldouble"), \
+  double:  ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2, "double"), \
+  float:   ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2, "float") \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
