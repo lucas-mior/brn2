@@ -396,8 +396,17 @@ CAT(func, 64)(int fd, void *buffer, int64 size) { \
     TYPE instance; \
     ssize_t w; \
     (void)instance; \
-    ASSERT_LESS_EQUAL(0, size); \
-    ASSERT_LESS_EQUAL(size, MAXOF(instance)); \
+    if (size == 0) \
+        return 0; \
+    if (size < 0) {\
+        error("Error in %s: Invalid size = %lld\n", __func__, (llong)size); \
+        fatal(EXIT_FAILURE); \
+    } \
+    if ((ullong)size >= (ullong)MAXOF(instance)) { \
+        error("Error in %s: Size (%lld) is too big for %s\n", __func__, \
+              (llong)size, #func); \
+        fatal(EXIT_FAILURE); \
+    } \
     w = func(fd, buffer, (TYPE)size); \
     return (int64)w; \
 }
