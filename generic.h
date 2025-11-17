@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
+
+#if !defined(error2)
+#define error2(...) fprintf(stderr, __VA_ARGS__)
+#endif
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -133,9 +138,6 @@ static ldouble ldouble_from_voidp(void *x)     { (void)x; return 0.0l; }
 static ldouble ldouble_from_bool(bool x)       { (void)x; return 0.0l; }
 static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 
-#if defined(__GNUC__) || defined(__clang__)
-#include <string.h>
-
 typedef enum Type {
     TYPE_LDOUBLE,
     TYPE_DOUBLE,
@@ -218,10 +220,6 @@ typename(Type type) {
     }
 }
 
-#if !defined(error2)
-#define error2(...) fprintf(stderr, __VA_ARGS__)
-#endif
-
 static ldouble
 ldouble_get(LongDoubleUnion var, Type type) {
     switch (type) {
@@ -264,9 +262,6 @@ ldouble_get(LongDoubleUnion var, Type type) {
     }
 }
 
-#define LDOUBLE_GET(VAR, TYPE) \
-    ldouble_get((LongDoubleUnion)(VAR), TYPE)
-#else
 #define LDOUBLE_GET(x) \
 _Generic((x), \
   ldouble: ldouble_from_ldouble, \
@@ -287,6 +282,11 @@ _Generic((x), \
   bool:    ldouble_from_bool, \
   char:    ldouble_from_char \
 )(x)
+
+#if defined(__GNUC__) || defined(__clang__)
+#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((LongDoubleUnion)(VAR), TYPE)
+#else
+#define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
 #endif
 
 #endif
