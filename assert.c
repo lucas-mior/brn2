@@ -87,7 +87,7 @@ static void \
 assert_pointers_##MODE(char *file, uint line, \
                        char *name1, char *name2, \
                        void *var1, void *var2) { \
-    if (!(var1 SYMBOL var2)) { \
+    if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %p " #SYMBOL " %p = %s\n", \
                name1, var1, var2, name2); \
