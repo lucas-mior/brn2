@@ -19,15 +19,15 @@ _Generic((VAR), \
   double:  "double",  \
   float:   "float",    \
   default: _Generic((VAR), \
-    int8:      "int8",   \
-    int16:     "int16",  \
-    int32:     "int32",  \
-    int64:     "int64",  \
-    uint8:     "uint8",  \
-    uint16:    "uint16", \
-    uint32:    "uint32", \
-    uint64:    "uint64", \
-    default:   unsupported_type_for_generic() \
+    int8:    "int8",   \
+    int16:   "int16",  \
+    int32:   "int32",  \
+    int64:   "int64",  \
+    uint8:   "uint8",  \
+    uint16:  "uint16", \
+    uint32:  "uint32", \
+    uint64:  "uint64", \
+    default: unsupported_type_for_generic() \
   ) \
 )
 
