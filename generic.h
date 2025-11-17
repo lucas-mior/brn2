@@ -185,11 +185,11 @@ ldouble_get(LongDoubleUnion var, Type type) {
     case TYPE_UINT:    return (ldouble)var.auint;
     case TYPE_ULONG:   return (ldouble)var.aulong;
     case TYPE_ULLONG:  return (ldouble)var.aullong;
-    case TYPE_CHARP:   return (ldouble)0.0l;
-    case TYPE_VOIDP:   return (ldouble)0.0l;
-    case TYPE_BOOL:    return (ldouble)0.0l;
-    case TYPE_CHAR:    return (ldouble)0.0l;
-    default:           return 0.0l;
+    case TYPE_CHARP:   *(volatile int *)0 = 0; return (ldouble)0.0l;
+    case TYPE_VOIDP:   *(volatile int *)0 = 0; return (ldouble)0.0l;
+    case TYPE_BOOL:    *(volatile int *)0 = 0; return (ldouble)0.0l;
+    case TYPE_CHAR:    *(volatile int *)0 = 0; return (ldouble)0.0l;
+    default:           *(volatile int *)0 = 0; return 0.0l;
     }
 }
 
