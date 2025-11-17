@@ -340,8 +340,8 @@ _Generic((VAR2), \
 #define COMPARE_POINTERS(MODE, VAR1, VAR2) \
     assert_pointers_##MODE(__FILE__, __LINE__, \
                            #VAR1, #VAR2, \
-                           (char *)(uintptr_t)(VAR1), \
-                           (char *)(uintptr_t)(VAR2))
+                           (void *)(uintptr_t)(VAR1), \
+                           (void *)(uintptr_t)(VAR2))
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
