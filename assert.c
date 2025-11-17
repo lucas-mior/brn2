@@ -228,7 +228,7 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                        TYPE1, TYPE2, \
                        (llong)(VAR1), (llong)(VAR2)) \
 
-#define ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
+#define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_signed_unsigned##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
                           TYPE1, TYPE2, \
@@ -241,11 +241,11 @@ _Generic((VAR2), \
   int:     A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, "int"    ), \
   long:    A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, "long"   ), \
   llong:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, "llong"  ), \
-  uchar:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uchar"  ), \
-  ushort:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ushort" ), \
-  uint:    ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uint"   ), \
-  ulong:   ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ulong"  ), \
-  ullong:  ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ullong" ), \
+  uchar:   A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uchar"  ), \
+  ushort:  A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ushort" ), \
+  uint:    A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "uint"   ), \
+  ulong:   A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ulong"  ), \
+  ullong:  A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, "ullong" ), \
   float:   A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "float"  ), \
   double:  A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "double" ), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "ldouble"), \
@@ -258,7 +258,7 @@ _Generic((VAR2), \
                          TYPE1, TYPE2, \
                          (ullong)(VAR1), (ullong)(VAR2))
 
-#define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
+#define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_unsigned_signed##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
                           TYPE1, TYPE2, \
@@ -266,11 +266,11 @@ _Generic((VAR2), \
 
 #define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-  schar:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "schar"  ), \
-  short:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "short"  ), \
-  int:     ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "int"    ), \
-  long:    ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "long"   ), \
-  llong:   ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "llong"  ), \
+  schar:   A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "schar"  ), \
+  short:   A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "short"  ), \
+  int:     A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "int"    ), \
+  long:    A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "long"   ), \
+  llong:   A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, "llong"  ), \
   uchar:   A_BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, "uchar"  ), \
   ushort:  A_BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, "ushort" ), \
   uint:    A_BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, "uint"   ), \
