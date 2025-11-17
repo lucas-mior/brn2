@@ -289,8 +289,15 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
       CAT(func, 64)(void *dest, void *source, int64 size) { \
       if (size == 0) \
           return; \
-      ASSERT_LESS(0, size); \
-      ASSERT_LESS_EQUAL(size, SIZE_MAX); \
+      if (size < 0) { \
+          error("Error in %s: Invalid size = %lld\n", __func__, (llong)size); \
+          fatal(EXIT_FAILURE); \
+      } \
+      if ((ullong)size >= (ullong)SIZE_MAX) { \
+          error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", \
+                 __func__, (llong)size); \
+          fatal(EXIT_FAILURE); \
+      } \
       func(dest, source, (size_t)size); \
       return; \
   }
