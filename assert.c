@@ -306,7 +306,7 @@ _Generic((VAR2), \
   default: unsupported_type_for_generic() \
 )
 
-#define ASSERT_POINTERS(MODE, VAR1, VAR2) \
+#define A_POINTERS(MODE, VAR1, VAR2) \
     a_pointers_##MODE(__FILE__, __LINE__, \
                       #VAR1, #VAR2, \
                       (void *)(uintptr_t)(VAR1), \
@@ -322,8 +322,8 @@ _Generic((VAR1), \
     default: unsupported_type_for_generic() \
   ), \
   void *: _Generic((VAR2), \
-    char *: ASSERT_POINTERS(MODE, VAR1, VAR2), \
-    void *: ASSERT_POINTERS(MODE, VAR1, VAR2), \
+    char *: A_POINTERS(MODE, VAR1, VAR2), \
+    void *: A_POINTERS(MODE, VAR1, VAR2), \
     default: unsupported_type_for_generic() \
   ), \
   schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, "schar"  ), \
