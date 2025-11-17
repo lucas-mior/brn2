@@ -17,7 +17,7 @@ _Generic((VAR), \
   ullong:  "ullong",  \
   ldouble: "ldouble", \
   double:  "double",  \
-  float:   "float",    \
+  float:   "float",   \
   default: _Generic((VAR), \
     int8:    "int8",   \
     int16:   "int16",  \
