@@ -133,22 +133,6 @@ INTEGER_SAME_SIGN_COMPARE(unsigned, "%llu", >=, more_equal)
 // clang-format on
 
 static int
-compare_unsign_with_sign(ullong u, llong s) {
-    ullong saux;
-    if (s < 0) {
-        return +1;
-    }
-    saux = (ullong)s;
-    if (saux < u) {
-        return +1;
-    } else if (saux == u) {
-        return 0;
-    } else {
-        return -1;
-    }
-}
-
-static int
 compare_sign_with_unsign(llong s, ullong u) {
     ullong saux;
     if (s < 0) {
@@ -173,8 +157,8 @@ assert_si_un_##MODE(char *file, uint line, \
                     llong var1, ullong var2) { \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("%s = %llu " #SYMBOL " %lld = %s\n", \
-               name2, var2, var1, name1); \
+        error2("%s = %lld " #SYMBOL " %llu = %s\n", \
+               name1, var1, var2, name2); \
         trap(); \
     } \
 }
@@ -193,7 +177,7 @@ static void \
 assert_un_si_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     ullong var1, llong var2) { \
-    if (!(compare_unsign_with_sign(var1, var2) SYMBOL 0)) { \
+    if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
         trap(); \
