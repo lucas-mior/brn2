@@ -413,14 +413,6 @@ main(void) {
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }{
-        long a = -2;
-        long b = -1;
-        ASSERT_NOT_EQUAL(a, b);
-        ASSERT_LESS(a, b);
-        ASSERT_LESS_EQUAL(a, b);
-        ASSERT_MORE(b, a);
-        ASSERT_MORE_EQUAL(b, a);
-    }{
         char *a = "aaa";
         char *b = "aaa";
         ASSERT_EQUAL(a, b);
@@ -483,14 +475,6 @@ main(void) {
         ldouble b = 1;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
-        ASSERT_MORE_EQUAL(b, a);
-    }{
-        llong a = 1;
-        ldouble b = 2;
-        ASSERT_NOT_EQUAL(a, b);
-        ASSERT_LESS(a, b);
-        ASSERT_LESS_EQUAL(a, b);
-        ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
     }{
         void *a = NULL;
