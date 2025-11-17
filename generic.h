@@ -1,9 +1,9 @@
 #if !defined(GENERIC_H)
 #define GENERIC_H
 
+#include <limits.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
 
 #if !defined(error2)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
