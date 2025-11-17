@@ -152,9 +152,9 @@ compare_sign_with_unsign(llong s, ullong u) {
 
 #define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL) \
 static void \
-assert_si_un_##MODE(char *file, uint line, \
-                    char *name1, char *name2, \
-                    llong var1, ullong var2) { \
+assert_signed_unsigned##MODE(char *file, uint line, \
+                             char *name1, char *name2, \
+                             llong var1, ullong var2) { \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %lld " #SYMBOL " %llu = %s\n", \
@@ -224,9 +224,9 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                             (llong)(VAR1), (llong)(VAR2))
 
 #define ASSERT_SI_UN(MODE, VAR1, VAR2) \
-  assert_si_un_##MODE(__FILE__, __LINE__, \
-                      #VAR1, #VAR2, \
-                      (llong)(VAR1), (ullong)(VAR2))
+  assert_signed_unsigned##MODE(__FILE__, __LINE__, \
+                               #VAR1, #VAR2, \
+                               (llong)(VAR1), (ullong)(VAR2))
 
 void unsupported_type_for_generic(void);
 
