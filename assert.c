@@ -218,61 +218,61 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 // clang-format on
 
 // clang-format off
-#define COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2) \
   assert_signed_##MODE(__FILE__, __LINE__, \
                        #VAR1, #VAR2, \
                        (llong)(VAR1), (llong)(VAR2))
 
-#define COMPARE_SI_UN(MODE, VAR1, VAR2) \
+#define ASSERT_SI_UN(MODE, VAR1, VAR2) \
   assert_si_un_##MODE(__FILE__, __LINE__, \
                       #VAR1, #VAR2, \
                       (llong)(VAR1), (ullong)(VAR2))
 
 void unsupported_type_for_generic(void);
 
-#define COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  schar:   COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  short:   COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  int:     COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  long:    COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  llong:   COMPARE_BOTH_SIGNED(MODE, VAR1, VAR2), \
-  uchar:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  ushort:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  uint:    COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  ulong:   COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  ullong:  COMPARE_SI_UN(MODE, VAR1, VAR2), \
-  ldouble: COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  schar:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  short:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  int:     ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  long:    ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  llong:   ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2), \
+  uchar:   ASSERT_SI_UN(MODE, VAR1, VAR2), \
+  ushort:  ASSERT_SI_UN(MODE, VAR1, VAR2), \
+  uint:    ASSERT_SI_UN(MODE, VAR1, VAR2), \
+  ulong:   ASSERT_SI_UN(MODE, VAR1, VAR2), \
+  ullong:  ASSERT_SI_UN(MODE, VAR1, VAR2), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   default: unsupported_type_for_generic() \
 )
 
-#define COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
   assert_unsigned_##MODE(__FILE__, __LINE__, \
                          #VAR1, #VAR2, \
                          (ullong)(VAR1), (ullong)(VAR2))
 
-#define COMPARE_UN_SI(MODE, VAR1, VAR2) \
+#define ASSERT_UN_SI(MODE, VAR1, VAR2) \
   assert_un_si_##MODE(__FILE__, __LINE__, \
                       #VAR1, #VAR2, \
                       (ullong)(VAR1), (llong)(VAR2))
 
-#define COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
+#define ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  uchar:   COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  ushort:  COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  uint:    COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  ulong:   COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong:  COMPARE_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
-  schar:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  short:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  int:     COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  long:    COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  llong:   COMPARE_UN_SI(MODE, VAR1, VAR2), \
-  ldouble: COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  uchar:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  ushort:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  uint:    ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  ulong:   ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  ullong:  ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2), \
+  schar:   ASSERT_UN_SI(MODE, VAR1, VAR2), \
+  short:   ASSERT_UN_SI(MODE, VAR1, VAR2), \
+  int:     ASSERT_UN_SI(MODE, VAR1, VAR2), \
+  long:    ASSERT_UN_SI(MODE, VAR1, VAR2), \
+  llong:   ASSERT_UN_SI(MODE, VAR1, VAR2), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   default: unsupported_type_for_generic() \
 )
 
@@ -315,30 +315,30 @@ _Generic((x), \
   char:    ldouble_from_char \
 )(x)
 
-#define COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
+#define ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
     assert_ldouble_##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
                           LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
 
-#define COMPARE_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
+#define ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
-  ldouble: COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  schar:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  short:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  int:     COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  long:    COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  llong:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  uchar:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  ushort:  COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  uint:    COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  ulong:   COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
-  ullong:  COMPARE_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  double:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  schar:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  short:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  int:     ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  long:    ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  llong:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  uchar:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  ushort:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  uint:    ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  ulong:   ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
+  ullong:  ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2), \
   default: unsupported_type_for_generic() \
 )
 
-#define COMPARE_POINTERS(MODE, VAR1, VAR2) \
+#define ASSERT_POINTERS(MODE, VAR1, VAR2) \
     assert_pointers_##MODE(__FILE__, __LINE__, \
                            #VAR1, #VAR2, \
                            (void *)(uintptr_t)(VAR1), \
@@ -354,23 +354,23 @@ _Generic((VAR1), \
     default: unsupported_type_for_generic() \
   ), \
   void *: _Generic((VAR2), \
-    char *: COMPARE_POINTERS(MODE, VAR1, VAR2), \
-    void *: COMPARE_POINTERS(MODE, VAR1, VAR2), \
+    char *: ASSERT_POINTERS(MODE, VAR1, VAR2), \
+    void *: ASSERT_POINTERS(MODE, VAR1, VAR2), \
     default: unsupported_type_for_generic() \
   ), \
-  schar:   COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  short:   COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  int:     COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  long:    COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  llong:   COMPARE_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
-  uchar:   COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ushort:  COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  uint:    COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ulong:   COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ullong:  COMPARE_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
-  ldouble: COMPARE_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2), \
-  double:  COMPARE_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2), \
-  float:   COMPARE_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
+  schar:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
+  short:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
+  int:     ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
+  long:    ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
+  llong:   ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2), \
+  uchar:   ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
+  ushort:  ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
+  uint:    ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
+  ulong:   ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
+  ullong:  ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2), \
+  ldouble: ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2), \
+  double:  ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2), \
+  float:   ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal, VAR1, VAR2)
