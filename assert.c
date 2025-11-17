@@ -108,8 +108,8 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 static void \
 assert_both_##TYPE##_##MODE(char *file, uint line, \
                             char *name1, char *name2, \
-                            TYPE long long var1, TYPE long long var2, \
-                            char *type1, char *type2) { \
+                            char *type1, char *type2, \
+                            TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s]\n", \
@@ -157,8 +157,8 @@ compare_sign_with_unsign(llong s, ullong u) {
 static void \
 assert_signed_unsigned##MODE(char *file, uint line, \
                              char *name1, char *name2, \
-                             llong var1, ullong var2, \
-                             char *type1, char *type2) { \
+                             char *type1, char *type2, \
+                             llong var1, ullong var2) { \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s]%s = %lld " #SYMBOL " %llu = %s[%s]\n", \
@@ -180,8 +180,8 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 static void \
 assert_unsigned_signed##MODE(char *file, uint line, \
                              char *name1, char *name2, \
-                             ullong var1, llong var2, \
-                             char *type1, char *type2) { \
+                             char *type1, char *type2, \
+                             ullong var1, llong var2) { \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s]%s = %llu " #SYMBOL " %lld = %s[%s]\n", \
@@ -203,8 +203,8 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 static void \
 assert_ldouble_##MODE(char *file, uint line, \
                       char *name1, char *name2, \
-                      ldouble var1, ldouble var2, \
-                      char *type1, char *type2) { \
+                      char *type1, char *type2, \
+                      ldouble var1, ldouble var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s]%s = %Lf " #SYMBOL " %Lf = %s[%s]\n", \
@@ -225,14 +225,14 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 #define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2) \
   assert_both_signed_##MODE(__FILE__, __LINE__, \
                             #VAR1, #VAR2, \
-                            (llong)(VAR1), (llong)(VAR2), \
-                            TYPENAME(VAR1), TYPENAME(VAR2))
+                            TYPENAME(VAR1), TYPENAME(VAR2), \
+                            (llong)(VAR1), (llong)(VAR2)) \
 
 #define ASSERT_SIGNED_UNSIGNED(MODE, VAR1, VAR2) \
   assert_signed_unsigned##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
-                               (llong)(VAR1), (ullong)(VAR2), \
-                               TYPENAME(VAR1), TYPENAME(VAR2))
+                               TYPENAME(VAR1), TYPENAME(VAR2), \
+                               (llong)(VAR1), (ullong)(VAR2))
 
 #define ASSERT_FIRST_IS_SIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
@@ -255,14 +255,14 @@ _Generic((VAR2), \
 #define ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
   assert_both_unsigned_##MODE(__FILE__, __LINE__, \
                               #VAR1, #VAR2, \
-                              (ullong)(VAR1), (ullong)(VAR2), \
-                              TYPENAME(VAR1), TYPENAME(VAR2))
+                              TYPENAME(VAR1), TYPENAME(VAR2), \
+                              (ullong)(VAR1), (ullong)(VAR2))
 
 #define ASSERT_UNSIGNED_SIGNED(MODE, VAR1, VAR2) \
   assert_unsigned_signed##MODE(__FILE__, __LINE__, \
                                #VAR1, #VAR2, \
-                               (ullong)(VAR1), (llong)(VAR2), \
-                              TYPENAME(VAR1), TYPENAME(VAR2))
+                              TYPENAME(VAR1), TYPENAME(VAR2), \
+                               (ullong)(VAR1), (llong)(VAR2))
 
 #define ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
@@ -285,8 +285,8 @@ _Generic((VAR2), \
 #define ASSERT_BOTH_LDOUBLE(MODE, VAR1, VAR2) \
     assert_ldouble_##MODE(__FILE__, __LINE__, \
                           #VAR1, #VAR2, \
-                          LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2), \
-                          TYPENAME(VAR1), TYPENAME(VAR2))
+                          TYPENAME(VAR1), TYPENAME(VAR2), \
+                          LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
 
 #define ASSERT_FIRST_IS_LDOUBLE(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
