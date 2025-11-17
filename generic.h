@@ -133,6 +133,76 @@ static ldouble ldouble_from_voidp(void *x)     { (void)x; return 0.0l; }
 static ldouble ldouble_from_bool(bool x)       { (void)x; return 0.0l; }
 static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 
+#if defined(__GNUC__) || defined(__clang__)
+#include <string.h>
+
+typedef union LongDoubleUnion {
+  ldouble aldouble;
+  double adouble;
+  float afloat;
+  schar aschar;
+  short ashort;
+  int aint;
+  long along;
+  llong allong;
+  uchar auchar;
+  ushort aushort;
+  uint auint;
+  ulong aulong;
+  ullong aullong;
+  char *aucharp;
+  void *avoidp;
+  bool abool;
+  char achar;
+} LongDoubleUnion;
+
+#if !defined(error2)
+#define error2(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
+static ldouble
+ldouble_get(LongDoubleUnion var, char *type) {
+    if (!strcmp(type, "ldouble"))
+        return var.aldouble;
+    if (!strcmp(type, "double")) {
+        return (ldouble)var.adouble;
+    }
+    if (!strcmp(type, "float"))
+        return (ldouble)var.afloat;
+    if (!strcmp(type, "schar"))
+        return (ldouble)var.aschar;
+    if (!strcmp(type, "short"))
+        return (ldouble)var.ashort;
+    if (!strcmp(type, "int"))
+        return (ldouble)var.aint;
+    if (!strcmp(type, "long"))
+        return (ldouble)var.along;
+    if (!strcmp(type, "llong"))
+        return (ldouble)var.allong;
+    if (!strcmp(type, "uchar"))
+        return (ldouble)var.auchar;
+    if (!strcmp(type, "ushort"))
+        return (ldouble)var.aushort;
+    if (!strcmp(type, "uint"))
+        return (ldouble)var.auint;
+    if (!strcmp(type, "ulong"))
+        return (ldouble)var.aulong;
+    if (!strcmp(type, "ullong"))
+        return (ldouble)var.aullong;
+    if (!strcmp(type, "charp"))
+        return (ldouble)0.0l;
+    if (!strcmp(type, "void"))
+        return (ldouble)0.0l;
+    if (!strcmp(type, "bool"))
+        return (ldouble)0.0l;
+    if (!strcmp(type, "char"))
+        return (ldouble)0.0l;
+    return 0.0l;
+}
+
+#define LDOUBLE_GET(VAR, TYPE) \
+    ldouble_get((LongDoubleUnion)(VAR), TYPE)
+#else
 #define LDOUBLE_GET(x) \
 _Generic((x), \
   ldouble: ldouble_from_ldouble, \
@@ -153,5 +223,6 @@ _Generic((x), \
   bool:    ldouble_from_bool, \
   char:    ldouble_from_char \
 )(x)
+#endif
 
 #endif

@@ -286,7 +286,7 @@ _Generic((VAR2), \
     a_ldouble_##MODE(__FILE__, __LINE__, \
                      #VAR1, #VAR2, \
                      TYPE1, TYPE2, \
-                     LDOUBLE_GET(VAR1), LDOUBLE_GET(VAR2))
+                     LDOUBLE_GET(VAR1, TYPE1), LDOUBLE_GET(VAR2, TYPE2))
 
 #define A_FIRST_LDOUBLE(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
