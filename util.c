@@ -320,7 +320,6 @@ memset64(void *buffer, int value, int64 size) {
               (llong)size);
         fatal(EXIT_FAILURE);
     }
-    ASSERT_LESS_EQUAL(size, SIZE_MAX);
     memset(buffer, value, (size_t)size);
     return;
 }
