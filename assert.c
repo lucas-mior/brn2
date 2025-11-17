@@ -215,9 +215,6 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
 #undef GENERATE_ASSERT_LDOUBLE
 
-// clang-format on
-
-// clang-format off
 #define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2) \
   assert_both_signed_##MODE(__FILE__, __LINE__, \
                             #VAR1, #VAR2, \
