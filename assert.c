@@ -62,21 +62,21 @@ typedef uint64_t uint64;
 
 #define TYPENAME(VAR) \
 _Generic((VAR), \
-  void *:   "void*", \
-  char *:   "char*", \
-  schar:   "schar", \
-  short:   "short", \
-  int:     "int", \
-  long:    "long", \
-  llong:   "llong", \
-  uchar:   "uchar", \
-  ushort:  "ushort", \
-  uint:    "uint", \
-  ulong:   "ulong", \
-  ullong:  "ullong", \
+  void *:  "void*",   \
+  char *:  "char*",   \
+  schar:   "schar",   \
+  short:   "short",   \
+  int:     "int",     \
+  long:    "long",    \
+  llong:   "llong",   \
+  uchar:   "uchar",   \
+  ushort:  "ushort",  \
+  uint:    "uint",    \
+  ulong:   "ulong",   \
+  ullong:  "ullong",  \
   ldouble: "ldouble", \
-  double:  "double", \
-  float:   "float" \
+  double:  "double",  \
+  float:   "float"    \
 )
 
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
