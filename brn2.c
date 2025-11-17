@@ -613,7 +613,6 @@ brn2_threads_work_hashes(Work *arg) {
     for (uint32 i = work->start; i < work->end; i += 1) {
         FileList *list = work->old_list;
         FileName *newfile = list->files[i];
-        ASSERT_EQUAL(newfile->length, strlen(newfile->name));
         newfile->hash = hash_function(newfile->name, newfile->length);
         list->indexes[i] = newfile->hash % work->map_capacity;
     }
