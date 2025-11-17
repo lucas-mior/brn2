@@ -172,42 +172,24 @@ typename(Type type) {
 static ldouble
 ldouble_get(LongDoubleUnion var, Type type) {
     switch (type) {
-    case TYPE_LDOUBLE:
-        return var.aldouble;
-    case TYPE_DOUBLE:
-        return (ldouble)var.adouble;
-    case TYPE_FLOAT:
-        return (ldouble)var.afloat;
-    case TYPE_SCHAR:
-        return (ldouble)var.aschar;
-    case TYPE_SHORT:
-        return (ldouble)var.ashort;
-    case TYPE_INT:
-        return (ldouble)var.aint;
-    case TYPE_LONG:
-        return (ldouble)var.along;
-    case TYPE_LLONG:
-        return (ldouble)var.allong;
-    case TYPE_UCHAR:
-        return (ldouble)var.auchar;
-    case TYPE_USHORT:
-        return (ldouble)var.aushort;
-    case TYPE_UINT:
-        return (ldouble)var.auint;
-    case TYPE_ULONG:
-        return (ldouble)var.aulong;
-    case TYPE_ULLONG:
-        return (ldouble)var.aullong;
-    case TYPE_CHARP:
-        return (ldouble)0.0l;
-    case TYPE_VOIDP:
-        return (ldouble)0.0l;
-    case TYPE_BOOL:
-        return (ldouble)0.0l;
-    case TYPE_CHAR:
-        return (ldouble)0.0l;
-    default:
-        return 0.0l;
+    case TYPE_LDOUBLE: return var.aldouble;
+    case TYPE_DOUBLE:  return (ldouble)var.adouble;
+    case TYPE_FLOAT:   return (ldouble)var.afloat;
+    case TYPE_SCHAR:   return (ldouble)var.aschar;
+    case TYPE_SHORT:   return (ldouble)var.ashort;
+    case TYPE_INT:     return (ldouble)var.aint;
+    case TYPE_LONG:    return (ldouble)var.along;
+    case TYPE_LLONG:   return (ldouble)var.allong;
+    case TYPE_UCHAR:   return (ldouble)var.auchar;
+    case TYPE_USHORT:  return (ldouble)var.aushort;
+    case TYPE_UINT:    return (ldouble)var.auint;
+    case TYPE_ULONG:   return (ldouble)var.aulong;
+    case TYPE_ULLONG:  return (ldouble)var.aullong;
+    case TYPE_CHARP:   return (ldouble)0.0l;
+    case TYPE_VOIDP:   return (ldouble)0.0l;
+    case TYPE_BOOL:    return (ldouble)0.0l;
+    case TYPE_CHAR:    return (ldouble)0.0l;
+    default:           return 0.0l;
     }
 }
 
