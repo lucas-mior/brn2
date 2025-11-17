@@ -275,7 +275,7 @@ _Generic((VAR2), \
   default: unsupported_type_for_generic() \
 )
 
-static ldouble ldouble_from_ldouble(ldouble x) { return x;           }
+static ldouble ldouble_from_ldouble(ldouble x) { return x;             }
 static ldouble ldouble_from_double(double x)   { return (ldouble)x;    }
 static ldouble ldouble_from_float(float x)     { return (ldouble)x;    }
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x;    }
