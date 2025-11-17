@@ -226,9 +226,6 @@ _Generic((VARIABLE), \
 
 #endif
 
-// clang-format on
-
-// clang-format off
 #define UTIL_ALIGN_UINT(S, A) (int64)(((S) + ((A) - 1)) & ~((A) - 1))
 #define COMPILE_STOP "aaaaa"
 
