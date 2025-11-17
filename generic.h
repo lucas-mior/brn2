@@ -136,6 +136,26 @@ static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 #if defined(__GNUC__) || defined(__clang__)
 #include <string.h>
 
+typedef enum Type {
+    TYPE_LDOUBLE,
+    TYPE_DOUBLE,
+    TYPE_FLOAT,
+    TYPE_SCHAR,
+    TYPE_SHORT,
+    TYPE_INT,
+    TYPE_LONG,
+    TYPE_LLONG,
+    TYPE_UCHAR,
+    TYPE_USHORT,
+    TYPE_UINT,
+    TYPE_ULONG,
+    TYPE_ULLONG,
+    TYPE_CHARP,
+    TYPE_VOIDP,
+    TYPE_BOOL,
+    TYPE_CHAR,
+} Type;
+
 typedef union LongDoubleUnion {
   ldouble aldouble;
   double adouble;
