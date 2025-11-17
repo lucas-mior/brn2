@@ -176,48 +176,55 @@ typedef union LongDoubleUnion {
   char achar;
 } LongDoubleUnion;
 
+static char *
+typename(Type type) {
+    return "dummy";
+}
+
 #if !defined(error2)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
 static ldouble
-ldouble_get(LongDoubleUnion var, char *type) {
-    if (!strcmp(type, "ldouble"))
+ldouble_get(LongDoubleUnion var, Type type) {
+    switch (type) {
+    case TYPE_LDOUBLE:
         return var.aldouble;
-    if (!strcmp(type, "double")) {
+    case TYPE_DOUBLE:
         return (ldouble)var.adouble;
-    }
-    if (!strcmp(type, "float"))
+    case TYPE_FLOAT:
         return (ldouble)var.afloat;
-    if (!strcmp(type, "schar"))
+    case TYPE_SCHAR:
         return (ldouble)var.aschar;
-    if (!strcmp(type, "short"))
+    case TYPE_SHORT:
         return (ldouble)var.ashort;
-    if (!strcmp(type, "int"))
+    case TYPE_INT:
         return (ldouble)var.aint;
-    if (!strcmp(type, "long"))
+    case TYPE_LONG:
         return (ldouble)var.along;
-    if (!strcmp(type, "llong"))
+    case TYPE_LLONG:
         return (ldouble)var.allong;
-    if (!strcmp(type, "uchar"))
+    case TYPE_UCHAR:
         return (ldouble)var.auchar;
-    if (!strcmp(type, "ushort"))
+    case TYPE_USHORT:
         return (ldouble)var.aushort;
-    if (!strcmp(type, "uint"))
+    case TYPE_UINT:
         return (ldouble)var.auint;
-    if (!strcmp(type, "ulong"))
+    case TYPE_ULONG:
         return (ldouble)var.aulong;
-    if (!strcmp(type, "ullong"))
+    case TYPE_ULLONG:
         return (ldouble)var.aullong;
-    if (!strcmp(type, "charp"))
+    case TYPE_CHARP:
         return (ldouble)0.0l;
-    if (!strcmp(type, "void"))
+    case TYPE_VOIDP:
         return (ldouble)0.0l;
-    if (!strcmp(type, "bool"))
+    case TYPE_BOOL:
         return (ldouble)0.0l;
-    if (!strcmp(type, "char"))
+    case TYPE_CHAR:
         return (ldouble)0.0l;
-    return 0.0l;
+    default:
+        return 0.0l;
+    }
 }
 
 #define LDOUBLE_GET(VAR, TYPE) \
