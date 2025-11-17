@@ -179,23 +179,23 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
 #define PRINT_VAR(VARIABLE) \
 _Generic((VARIABLE), \
-  signed char: PRINT_SIGNED("[schar]",    VARIABLE), \
-  short:       PRINT_SIGNED("[short]",    VARIABLE), \
-  int:         PRINT_SIGNED("[int]",      VARIABLE), \
-  long:        PRINT_SIGNED("[long]",     VARIABLE), \
-  llong:       PRINT_SIGNED("[llong]",    VARIABLE), \
-  uchar:       PRINT_UNSIGNED("[uchar]",  VARIABLE), \
-  ushort:      PRINT_UNSIGNED("[ushort]", VARIABLE), \
-  uint:        PRINT_UNSIGNED("[uint]",   VARIABLE), \
-  ulong:       PRINT_UNSIGNED("[ulong]",  VARIABLE), \
-  ullong:      PRINT_UNSIGNED("[ullong]", VARIABLE), \
-  char:        PRINT_OTHER("[char]",   "%c", #VARIABLE, VARIABLE), \
-  bool:        PRINT_OTHER("[bool]",   "%d", #VARIABLE, VARIABLE), \
-  char *:      PRINT_OTHER("[char *]", "%s", #VARIABLE, (char *)(uintptr_t)(VARIABLE)), \
-  void *:      PRINT_OTHER("[void *]", "%p", #VARIABLE, (void *)(uintptr_t)(VARIABLE)), \
-  float:       PRINT_FLOAT("[float]",   VARIABLE), \
-  double:      PRINT_FLOAT("[double]",  VARIABLE), \
-  long double: PRINT_FLOAT("[ldouble]", VARIABLE) \
+  schar:   PRINT_SIGNED("[schar]",    VARIABLE), \
+  short:   PRINT_SIGNED("[short]",    VARIABLE), \
+  int:     PRINT_SIGNED("[int]",      VARIABLE), \
+  long:    PRINT_SIGNED("[long]",     VARIABLE), \
+  llong:   PRINT_SIGNED("[llong]",    VARIABLE), \
+  uchar:   PRINT_UNSIGNED("[uchar]",  VARIABLE), \
+  ushort:  PRINT_UNSIGNED("[ushort]", VARIABLE), \
+  uint:    PRINT_UNSIGNED("[uint]",   VARIABLE), \
+  ulong:   PRINT_UNSIGNED("[ulong]",  VARIABLE), \
+  ullong:  PRINT_UNSIGNED("[ullong]", VARIABLE), \
+  char:    PRINT_OTHER("[char]",   "%c", #VARIABLE, VARIABLE), \
+  bool:    PRINT_OTHER("[bool]",   "%d", #VARIABLE, VARIABLE), \
+  char *:  PRINT_OTHER("[char *]", "%s", #VARIABLE, (char *)(uintptr_t)(VARIABLE)), \
+  void *:  PRINT_OTHER("[void *]", "%p", #VARIABLE, (void *)(uintptr_t)(VARIABLE)), \
+  float:   PRINT_FLOAT("[float]",   VARIABLE), \
+  double:  PRINT_FLOAT("[double]",  VARIABLE), \
+  ldouble: PRINT_FLOAT("[ldouble]", VARIABLE) \
 )
 
 #endif
