@@ -436,17 +436,18 @@ X64(read, size_t)
 CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
     if ((size <= 0) || (n <= 0)) { \
-        error("Error in %s: Invalid size(%lld) or n(%lld)\n", __func__, (llong)size, (llong)n); \
+        error("Error in %s: Invalid size(%lld) or n(%lld)\n", \
+              __func__, (llong)size, (llong)n); \
         fatal(EXIT_FAILURE); \
     } \
     if ((ullong)size >= (ullong)SIZE_MAX) { \
-        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__, \
-              (llong)size); \
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", \
+              __func__, (llong)size); \
         fatal(EXIT_FAILURE); \
     } \
     if ((ullong)n >= (ullong)SIZE_MAX) { \
-        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n", __func__, \
-              (llong)size); \
+        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n", \
+              __func__, (llong)size); \
         fatal(EXIT_FAILURE); \
     } \
     rw = func(buffer, (size_t)size, (size_t)n, file); \
