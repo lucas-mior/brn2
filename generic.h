@@ -169,7 +169,7 @@ typename(Type type) {
     }
 }
 
-static uint32
+static uint
 typebits(Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return sizeof(ldouble)*CHAR_BIT;
