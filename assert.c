@@ -276,9 +276,9 @@ _Generic((VAR2), \
   uint:    ASSERT_BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, "uint"   ), \
   ulong:   ASSERT_BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, "ulong"  ), \
   ullong:  ASSERT_BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, "ullong" ), \
-  ldouble: ASSERT_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "float"  ), \
+  float:   ASSERT_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "float"  ), \
   double:  ASSERT_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "double" ), \
-  float:   ASSERT_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "ldouble"), \
+  ldouble: ASSERT_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, "ldouble"), \
   default: unsupported_type_for_generic() \
 )
 
