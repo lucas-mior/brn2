@@ -174,9 +174,9 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL) \
 static void \
-assert_un_si_##MODE(char *file, uint line, \
-                    char *name1, char *name2, \
-                    ullong var1, llong var2) { \
+assert_unsigned_signed##MODE(char *file, uint line, \
+                             char *name1, char *name2, \
+                             ullong var1, llong var2) { \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %llu " #SYMBOL " %lld = %s\n", name1, var1, var2, name2); \
@@ -254,9 +254,9 @@ _Generic((VAR2), \
                               (ullong)(VAR1), (ullong)(VAR2))
 
 #define ASSERT_UN_SI(MODE, VAR1, VAR2) \
-  assert_un_si_##MODE(__FILE__, __LINE__, \
-                      #VAR1, #VAR2, \
-                      (ullong)(VAR1), (llong)(VAR2))
+  assert_unsigned_signed##MODE(__FILE__, __LINE__, \
+                               #VAR1, #VAR2, \
+                               (ullong)(VAR1), (llong)(VAR2))
 
 #define ASSERT_FIRST_IS_UNSIGNED(MODE, VAR1, VAR2) \
 _Generic((VAR2), \
