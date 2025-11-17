@@ -311,7 +311,15 @@ memset64(void *buffer, int value, int64 size) {
     if (size == 0) {
         return;
     }
-    ASSERT_LESS(0, size);
+    if (size < 0) {
+        error("Error in %s: Invalid size = %lld\n", __func__, (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
     ASSERT_LESS_EQUAL(size, SIZE_MAX);
     memset(buffer, value, (size_t)size);
     return;
