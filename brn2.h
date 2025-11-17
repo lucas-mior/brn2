@@ -40,6 +40,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "generic.h"
+
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
@@ -92,26 +94,6 @@
     (uint32)(SIZEOF(*(struct_object)) + (array_length*SIZEOF(ArrayType)))
 
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
-
-#if !defined(INTEGERS)
-#define INTEGERS
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
-
-typedef long long llong;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-#endif
 
 #include "arena.c"
 
