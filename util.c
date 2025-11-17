@@ -278,16 +278,16 @@ _Generic((VARIABLE), \
 #if __STDC__== 1 && __STDC_VERSION__ >= 201112L
 #define UTIL_ALIGN(S, A) \
 _Generic((S), \
-    unsigned long long: UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    unsigned long:      UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    unsigned int:       UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    long long:          UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    long:               UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    int:                UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A), \
-    default:            COMPILE_STOP \
+  ullong:  UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+  ulong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+  uint:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+  llong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+  long:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+  int:     UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+  default: COMPILE_STOP \
 )
 #else
-#define UTIL_ALIGN(S, A) UTIL_ALIGN_UINT((uint64_t)S, (uint64_t)A)
+#define UTIL_ALIGN(S, A) UTIL_ALIGN_UINT((uint64)S, (uint64)A)
 #endif
 
 
