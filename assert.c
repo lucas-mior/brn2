@@ -104,9 +104,9 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
-assert_##TYPE##_##MODE(char *file, uint line, \
-                       char *name1, char *name2, \
-                       TYPE long long var1, TYPE long long var2) { \
+assert_both_##TYPE##_##MODE(char *file, uint line, \
+                            char *name1, char *name2, \
+                            TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = "FORMAT" " #SYMBOL " "FORMAT" = %s\n", \
@@ -219,9 +219,9 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
 // clang-format off
 #define ASSERT_BOTH_SIGNED(MODE, VAR1, VAR2) \
-  assert_signed_##MODE(__FILE__, __LINE__, \
-                       #VAR1, #VAR2, \
-                       (llong)(VAR1), (llong)(VAR2))
+  assert_both_signed_##MODE(__FILE__, __LINE__, \
+                            #VAR1, #VAR2, \
+                            (llong)(VAR1), (llong)(VAR2))
 
 #define ASSERT_SI_UN(MODE, VAR1, VAR2) \
   assert_si_un_##MODE(__FILE__, __LINE__, \
@@ -249,9 +249,9 @@ _Generic((VAR2), \
 )
 
 #define ASSERT_BOTH_UNSIGNED(MODE, VAR1, VAR2) \
-  assert_unsigned_##MODE(__FILE__, __LINE__, \
-                         #VAR1, #VAR2, \
-                         (ullong)(VAR1), (ullong)(VAR2))
+  assert_both_unsigned_##MODE(__FILE__, __LINE__, \
+                              #VAR1, #VAR2, \
+                              (ullong)(VAR1), (ullong)(VAR2))
 
 #define ASSERT_UN_SI(MODE, VAR1, VAR2) \
   assert_un_si_##MODE(__FILE__, __LINE__, \
