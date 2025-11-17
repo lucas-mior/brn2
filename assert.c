@@ -440,6 +440,7 @@ _Generic((VARIABLE), \
 
 #endif
 
+// clang-format off
 int
 main(void) {
     {
@@ -448,15 +449,13 @@ main(void) {
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
-    }
-    {
+    }{
         int a = 1;
         uint b = 1;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
-    }
-    {
+    }{
         int a = 1;
         uint b = 2;
         ASSERT_NOT_EQUAL(a, b);
@@ -464,8 +463,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         long a = -1;
         ulong b = 0;
         ASSERT_NOT_EQUAL(a, b);
@@ -473,8 +471,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         long a = MINOF(a);
         ulong b = MAXOF(b);
         ASSERT_NOT_EQUAL(a, b);
@@ -482,8 +479,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         ulong a = MINOF(a);
         long b = MAXOF(b);
         ASSERT_NOT_EQUAL(a, b);
@@ -491,8 +487,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         long a = -2;
         long b = -1;
         ASSERT_NOT_EQUAL(a, b);
@@ -500,15 +495,13 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         char *a = "aaa";
         char *b = "aaa";
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         char *a = "aaa";
         char *b = "bbb";
         ASSERT_NOT_EQUAL(a, b);
@@ -516,40 +509,35 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         long a = -1;
         ASSERT_NOT_EQUAL(a, 0);
         ASSERT_LESS(a, 0);
         ASSERT_LESS_EQUAL(a, 0);
         ASSERT_MORE(0, a);
         ASSERT_MORE_EQUAL(0, a);
-    }
-    {
+    }{
         double a = 0.123;
         ASSERT_NOT_EQUAL(a, 0.123000001);
         ASSERT_LESS(a, 0.123000001);
         ASSERT_LESS_EQUAL(a, 0.123000001);
         ASSERT_MORE(0.123000001, a);
         ASSERT_MORE_EQUAL(0.123000001, a);
-    }
-    {
+    }{
         long a = -1;
         double b = -1;
         ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
-    }
-    {
+    }{
         double a = -1;
         long b = -1;
         ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
-    }
-    {
+    }{
         double a = -1;
         double b = 0;
         ASSERT_NOT_EQUAL(a, b);
@@ -557,8 +545,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         float a = -1;
         double b = 1;
         ASSERT_NOT_EQUAL(a, b);
@@ -566,15 +553,13 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         llong a = 1;
         ldouble b = 1;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         llong a = 1;
         ldouble b = 2;
         ASSERT_NOT_EQUAL(a, b);
@@ -582,14 +567,12 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         int c;
         void *a = NULL;
         void *b = &c;
         ASSERT_NOT_EQUAL(a, b);
-    }
-    {
+    }{
         int array[100];
         void *a = &array[0];
         void *b = &array[1];
@@ -598,8 +581,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }
-    {
+    }{
         int a = 0;
         double b = 1;
         struct sigaction signal_action;
@@ -645,6 +627,7 @@ main(void) {
     ASSERT(true);
     exit(EXIT_SUCCESS);
 }
+// clang-format on
 #endif
 
 #endif
