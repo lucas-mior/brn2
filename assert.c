@@ -206,11 +206,11 @@ assert_ldouble_##MODE(char *file, uint line, \
     } \
 }
 
-COMPARE_LDOUBLE(equal, ==)
-COMPARE_LDOUBLE(not_equal, !=)
-COMPARE_LDOUBLE(less, <)
+COMPARE_LDOUBLE(equal,      ==)
+COMPARE_LDOUBLE(not_equal,  !=)
+COMPARE_LDOUBLE(less,       <)
 COMPARE_LDOUBLE(less_equal, <=)
-COMPARE_LDOUBLE(more, >)
+COMPARE_LDOUBLE(more,       >)
 COMPARE_LDOUBLE(more_equal, >=)
 
 #undef COMPARE_LDOUBLE
