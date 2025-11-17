@@ -44,9 +44,9 @@ _Generic((VAR), \
   uint:    "uint",    \
   ulong:   "ulong",   \
   ullong:  "ullong",  \
-  ldouble: "ldouble", \
+  float:   "float",   \
   double:  "double",  \
-  float:   "float"   \
+  ldouble: "ldouble" \
 )
 
 #define MINOF(VARIABLE) \
