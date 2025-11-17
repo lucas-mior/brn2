@@ -172,7 +172,7 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_SIGNED_UNSIGNED
 
-#define COMPARE_UNSIGN_SIGN(MODE, SYMBOL) \
+#define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL) \
 static void \
 assert_un_si_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
@@ -184,14 +184,14 @@ assert_un_si_##MODE(char *file, uint line, \
     } \
 }
 
-COMPARE_UNSIGN_SIGN(equal,      ==)
-COMPARE_UNSIGN_SIGN(not_equal,  !=)
-COMPARE_UNSIGN_SIGN(less,       <)
-COMPARE_UNSIGN_SIGN(less_equal, <=)
-COMPARE_UNSIGN_SIGN(more,       >)
-COMPARE_UNSIGN_SIGN(more_equal, >=)
+GENERATE_ASSERT_UNSIGNED_SIGNED(equal,      ==)
+GENERATE_ASSERT_UNSIGNED_SIGNED(not_equal,  !=)
+GENERATE_ASSERT_UNSIGNED_SIGNED(less,       <)
+GENERATE_ASSERT_UNSIGNED_SIGNED(less_equal, <=)
+GENERATE_ASSERT_UNSIGNED_SIGNED(more,       >)
+GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
-#undef COMPARE_UNSIGN_SIGN
+#undef GENERATE_ASSERT_UNSIGNED_SIGNED
 
 #define COMPARE_LDOUBLE(MODE, SYMBOL) \
 static void \
