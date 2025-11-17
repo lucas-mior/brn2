@@ -60,7 +60,7 @@ typedef uint64_t uint64;
 
 // clang-format off
 
-#define STRING_COMPARE(MODE, SYMBOL) \
+#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
 assert_strings_##MODE(char *file, uint line, \
                       char *name1, char *name2, \
@@ -73,14 +73,14 @@ assert_strings_##MODE(char *file, uint line, \
     } \
 }
 
-STRING_COMPARE(less,       <)
-STRING_COMPARE(less_equal, <=)
-STRING_COMPARE(equal,      ==)
-STRING_COMPARE(not_equal,  !=)
-STRING_COMPARE(more,       >)
-STRING_COMPARE(more_equal, >=)
+GENERATE_ASSERT_STRINGS(less,       <)
+GENERATE_ASSERT_STRINGS(less_equal, <=)
+GENERATE_ASSERT_STRINGS(equal,      ==)
+GENERATE_ASSERT_STRINGS(not_equal,  !=)
+GENERATE_ASSERT_STRINGS(more,       >)
+GENERATE_ASSERT_STRINGS(more_equal, >=)
 
-#undef STRING_COMPARE
+#undef GENERATE_ASSERT_STRINGS
 
 #define POINTER_COMPARE(MODE, SYMBOL) \
 static void \
