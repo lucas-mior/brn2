@@ -28,7 +28,7 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
-void unsupported_type_for_generic(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC(void);
 
 #define TYPENAME(VAR) \
 _Generic((VAR), \
