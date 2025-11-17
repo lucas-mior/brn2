@@ -136,15 +136,31 @@ static int
 compare_unsign_with_sign(ullong u, llong s) {
     ullong saux;
     if (s < 0) {
-        return 1;
+        return +1;
     }
     saux = (ullong)s;
     if (saux < u) {
-        return 1;
+        return +1;
     } else if (saux == u) {
         return 0;
     } else {
         return -1;
+    }
+}
+
+static int
+compare_sign_with_unsign(llong s, ullong u) {
+    ullong saux;
+    if (s < 0) {
+        return -1;
+    }
+    saux = (ullong)s;
+    if (saux < u) {
+        return -1;
+    } else if (saux == u) {
+        return 0;
+    } else {
+        return +1;
     }
 }
 
@@ -155,7 +171,7 @@ static void \
 assert_si_un_##MODE(char *file, uint line, \
                     char *name1, char *name2, \
                     llong var1, ullong var2) { \
-    if (!(compare_unsign_with_sign(var2, var1) SYMBOL 0)) { \
+    if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %llu " #SYMBOL " %lld = %s\n", \
                name2, var2, var1, name1); \
@@ -165,10 +181,10 @@ assert_si_un_##MODE(char *file, uint line, \
 
 COMPARE_SIGN_UNSIGN(equal,      ==)
 COMPARE_SIGN_UNSIGN(not_equal,  !=)
-COMPARE_SIGN_UNSIGN(less,       >)
-COMPARE_SIGN_UNSIGN(less_equal, >=)
-COMPARE_SIGN_UNSIGN(more,       <)
-COMPARE_SIGN_UNSIGN(more_equal, <=)
+COMPARE_SIGN_UNSIGN(less,       <)
+COMPARE_SIGN_UNSIGN(less_equal, <=)
+COMPARE_SIGN_UNSIGN(more,       >)
+COMPARE_SIGN_UNSIGN(more_equal, >=)
 
 #undef COMPARE_SIGN_UNSIGN
 
