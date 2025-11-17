@@ -255,7 +255,7 @@ _Generic((VAR2), \
   float:   A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
   double:  A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-  default: unsupported_type_for_generic() \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC() \
 )
 
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
@@ -287,7 +287,7 @@ _Generic((VAR2), \
   float:   A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
   double:  A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-  default: unsupported_type_for_generic() \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC() \
 )
 
 #define A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
@@ -312,7 +312,7 @@ _Generic((VAR2), \
   float:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
   double:  A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
   ldouble: A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-  default: unsupported_type_for_generic() \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC() \
 )
 
 #define A_POINTERS(MODE, VAR1, VAR2) \
@@ -328,12 +328,12 @@ _Generic((VAR1), \
                              #VAR1, #VAR2, \
                              (char *)(uintptr_t)(VAR1), \
                              (char *)(uintptr_t)(VAR2)), \
-    default: unsupported_type_for_generic() \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC() \
   ), \
   void *: _Generic((VAR2), \
     char *: A_POINTERS(MODE, VAR1, VAR2), \
     void *: A_POINTERS(MODE, VAR1, VAR2), \
-    default: unsupported_type_for_generic() \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC() \
   ), \
   schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ), \
   short:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ), \
