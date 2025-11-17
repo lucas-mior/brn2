@@ -2,6 +2,7 @@
 #define GENERIC_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
