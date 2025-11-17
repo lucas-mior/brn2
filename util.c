@@ -175,6 +175,7 @@ _Generic((VARIABLE), \
   short:       SHRT_MIN,  \
   int:         INT_MIN,   \
   long:        LONG_MIN,  \
+  llong:       LLONG_MIN, \
   uchar:       0,         \
   ushort:      0,         \
   uint:        0u,        \
@@ -197,6 +198,7 @@ _Generic((VARIABLE), \
   short:       SHRT_MAX,   \
   int:         INT_MAX,    \
   long:        LONG_MAX,   \
+  llong:       LLONG_MAX,   \
   uchar:       UCHAR_MAX,  \
   ushort:      USHRT_MAX,  \
   uint:        UINT_MAX,   \
