@@ -193,7 +193,7 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_UNSIGNED_SIGNED
 
-#define COMPARE_LDOUBLE(MODE, SYMBOL) \
+#define GENERATE_ASSERT_LDOUBLE(MODE, SYMBOL) \
 static void \
 assert_ldouble_##MODE(char *file, uint line, \
                       char *name1, char *name2, \
@@ -206,14 +206,14 @@ assert_ldouble_##MODE(char *file, uint line, \
     } \
 }
 
-COMPARE_LDOUBLE(equal,      ==)
-COMPARE_LDOUBLE(not_equal,  !=)
-COMPARE_LDOUBLE(less,       <)
-COMPARE_LDOUBLE(less_equal, <=)
-COMPARE_LDOUBLE(more,       >)
-COMPARE_LDOUBLE(more_equal, >=)
+GENERATE_ASSERT_LDOUBLE(equal,      ==)
+GENERATE_ASSERT_LDOUBLE(not_equal,  !=)
+GENERATE_ASSERT_LDOUBLE(less,       <)
+GENERATE_ASSERT_LDOUBLE(less_equal, <=)
+GENERATE_ASSERT_LDOUBLE(more,       >)
+GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
-#undef COMPARE_LDOUBLE
+#undef GENERATE_ASSERT_LDOUBLE
 
 // clang-format on
 
