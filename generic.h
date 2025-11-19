@@ -123,7 +123,7 @@ typedef enum Type {
     TYPE_CHAR,
 } Type;
 
-typedef union PrimitivesUnion {
+union Primitives {
   ldouble aldouble;
   double adouble;
   float afloat;
@@ -141,7 +141,7 @@ typedef union PrimitivesUnion {
   void *avoidp;
   bool abool;
   char achar;
-} PrimitivesUnion;
+} Primitives;
 
 static char *
 typename(Type type) {
@@ -192,7 +192,7 @@ typebits(Type type) {
 }
 
 static ldouble
-ldouble_get(PrimitivesUnion var, Type type) {
+ldouble_get(union Primitives var, Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return var.aldouble;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
@@ -237,7 +237,7 @@ _Generic((x), \
 )(x)
 
 #if defined(__GNUC__) || defined(__clang__)
-#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((PrimitivesUnion)(VAR), TYPE)
+#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((union Primitives)(VAR), TYPE)
 #else
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
 #endif
