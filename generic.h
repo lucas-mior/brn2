@@ -123,7 +123,7 @@ enum Type {
     TYPE_CHAR,
 };
 
-union Primitives {
+union Primitive {
   ldouble aldouble;
   double adouble;
   float afloat;
@@ -192,7 +192,7 @@ typebits(enum Type type) {
 }
 
 static ldouble
-ldouble_get(union Primitives var, enum Type type) {
+ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return var.aldouble;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
@@ -237,7 +237,7 @@ _Generic((x), \
 )(x)
 
 #if defined(__GNUC__) || defined(__clang__)
-#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((union Primitives)(VAR), TYPE)
+#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((union Primitive)(VAR), TYPE)
 #else
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
 #endif
