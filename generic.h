@@ -141,7 +141,7 @@ union Primitives {
   void *avoidp;
   bool abool;
   char achar;
-} Primitives;
+};
 
 static char *
 typename(Type type) {
