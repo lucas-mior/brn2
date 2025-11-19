@@ -901,7 +901,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
 #endif
     renamed = rename(oldname, newname);
     if (renamed < 0) {
-        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET
+        error("Error renaming "RED"'%s'" RESET " to " RED "'%s'" RESET
               ": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
