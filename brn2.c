@@ -512,10 +512,10 @@ brn2_threads_work_normalization(Work *arg) {
     for (uint32 i = work->start; i < work->end; i += 1) {
         FileName *file = list->files[i];
         char *p;
-        uint32 off = 0;
+        int64 off = 0;
 
         while ((p = memmem64(file->name + off, file->length - off, "//", 2))) {
-            off = (uint32)(p - file->name);
+            off = p - file->name;
 
             memmove64(&p[0], &p[1], file->length - off);
             file->length -= 1;
@@ -528,7 +528,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         off = 0;
         while ((p = memmem64(file->name + off, file->length - off, "/./", 3))) {
-            off = (uint32)(p - file->name);
+            off = p - file->name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
             file->length -= 2;
