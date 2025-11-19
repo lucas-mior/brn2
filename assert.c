@@ -240,6 +240,7 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                           typebits(TYPE1), typebits(TYPE2), \
                           (llong)(VAR1), (ullong)(VAR2))
 
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 #define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
   schar:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -255,7 +256,7 @@ _Generic((VAR2), \
   float:   A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
   double:  A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-  default: UNSUPPORTED_TYPE_FOR_GENERIC() \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED() \
 )
 
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
@@ -272,6 +273,7 @@ _Generic((VAR2), \
                            typebits(TYPE1), typebits(TYPE2), \
                            (ullong)(VAR1), (llong)(VAR2))
 
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 #define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
   schar:   A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -287,7 +289,7 @@ _Generic((VAR2), \
   float:   A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
   double:  A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-  default: UNSUPPORTED_TYPE_FOR_GENERIC() \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED() \
 )
 
 #define A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
@@ -297,6 +299,7 @@ _Generic((VAR2), \
                      typebits(TYPE1), typebits(TYPE2), \
                      LDOUBLE_GET2(VAR1, TYPE1), LDOUBLE_GET2(VAR2, TYPE2))
 
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE(void);
 #define A_FIRST_LDOUBLE(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
   schar:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -312,7 +315,7 @@ _Generic((VAR2), \
   float:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
   double:  A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
   ldouble: A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-  default: UNSUPPORTED_TYPE_FOR_GENERIC() \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE() \
 )
 
 #define A_POINTERS(MODE, VAR1, VAR2) \
@@ -321,6 +324,8 @@ _Generic((VAR2), \
                       (void *)(uintptr_t)(VAR1), \
                       (void *)(uintptr_t)(VAR2))
 
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP(void);
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
   char *: _Generic((VAR2), \
@@ -328,12 +333,12 @@ _Generic((VAR1), \
                              #VAR1, #VAR2, \
                              (char *)(uintptr_t)(VAR1), \
                              (char *)(uintptr_t)(VAR2)), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC() \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP() \
   ), \
   void *: _Generic((VAR2), \
     char *: A_POINTERS(MODE, VAR1, VAR2), \
     void *: A_POINTERS(MODE, VAR1, VAR2), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC() \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP() \
   ), \
   schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ), \
   short:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ), \
