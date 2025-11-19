@@ -764,9 +764,9 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
                   newfile->name, i + 1);
 
             if (util_command(LENGTH(diff), diff) == 0) {
-                error(
-                    "Old (%s) and new name (%s)" " have exactly the same content.\n",
-                    oldfile->name, newfile->name);
+                error("Old (%s) and new name (%s)"
+                      " have exactly the same content.\n",
+                      oldfile->name, newfile->name);
                 if (brn2_options_autosolve) {
                     error("--autosolve is enabled: Deleting old file...\n");
                     if (unlink(newfile->name) < 0) {
@@ -796,7 +796,7 @@ noop(const char *unused, ...) {
     return 0;
 }
 
-// clang-format off
+// clang-format on
 void
 brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
               HashSet *names_renamed, uint32 i, uint32 *number_renames) {
@@ -827,11 +827,10 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
         error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ":\n",
               oldname, newname);
-        error(
-            RED
-            "'%s'" RESET
-            " already exists," " but it was not given in the list of" " files to rename, and --implict option is off.\n",
-            newname);
+        error(RED "'%s'" RESET " already exists,"
+                  " but it was not given in the list of"
+                  " files to rename, and --implict option is off.\n",
+              newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
         }
@@ -869,11 +868,11 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                 SWAP(*file_j, *oldfile);
                 SWAP(old->indexes[i], old->indexes[next]);
             } else {
-                error(
-                    "Warning: '%s' was swapped with '%s', even though" " '%s' was not in the list of files to rename.\n",
-                    newname, oldname, newname);
-                error(
-                    "To disable this behaviour," " don't pass the --implict option.\n");
+                error("Warning: '%s' was swapped with '%s', even though"
+                      " '%s' was not in the list of files to rename.\n",
+                      newname, oldname, newname);
+                error("To disable this behaviour,"
+                      " don't pass the --implict option.\n");
                 hash_insert_pre_calc_map(oldlist_map, newname, newhash,
                                          newindex, i);
             }
@@ -902,7 +901,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
 #endif
     renamed = rename(oldname, newname);
     if (renamed < 0) {
-        error("Error renaming "RED"'%s'" RESET " to " RED "'%s'" RESET
+        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET
               ": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
@@ -923,8 +922,31 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
 
 void
 brn2_usage(FILE *stream) {
-    fprintf(stream,
-            "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n" "usage: brn2 [OPTIONS] -f <filename>\n" "usage: brn2 [OPTIONS] -d <dir>\n" "Rename filenames based on provided arguments.\n" "\n" "Options:\n" "  -F, --fatal     : Exit on first renaming error.\n" "  -a, --autosolve : Auto solve name conflicts for equal files.\n" "  -e, --explict   : Only rename files given in the list (default).\n" "  -h, --help      : Display this help message and exit.\n" "  -i, --implict   : Rename files not given in the list of files to " "rename.\n" "  -q, --quiet     : Quiet mode; suppress output messages.\n" "  -s, --sort      : Disable sorting of original list.\n" "  -v, --verbose   : Verbose mode (default); output messages.\n" "\n" "Arguments:\n" "  No arguments             : Rename files of current working " "directory.\n" "  1 or more arguments      : Rename filenames passed as arguments.\n" "  -d <dir>, --dir=<dir>    : Rename files in directory.\n" "  -f <file>, --file=<file> : Rename filenames listed in this " "argument.\n");
+    fprintf(
+        stream,
+        "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
+        "usage: brn2 [OPTIONS] -f <filename>\n"
+        "usage: brn2 [OPTIONS] -d <dir>\n"
+        "Rename filenames based on provided arguments.\n"
+        "\n"
+        "Options:\n"
+        "  -F, --fatal     : Exit on first renaming error.\n"
+        "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
+        "  -e, --explict   : Only rename files given in the list (default).\n"
+        "  -h, --help      : Display this help message and exit.\n"
+        "  -i, --implict   : Rename files not given in the list of files to "
+        "rename.\n"
+        "  -q, --quiet     : Quiet mode; suppress output messages.\n"
+        "  -s, --sort      : Disable sorting of original list.\n"
+        "  -v, --verbose   : Verbose mode (default); output messages.\n"
+        "\n"
+        "Arguments:\n"
+        "  No arguments             : Rename files of current working "
+        "directory.\n"
+        "  1 or more arguments      : Rename filenames passed as arguments.\n"
+        "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
+        "  -f <file>, --file=<file> : Rename filenames listed in this "
+        "argument.\n");
     exit((int)(stream != stdout));
 }
 

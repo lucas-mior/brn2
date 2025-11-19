@@ -364,8 +364,10 @@ main(int argc, char **argv) {
 
 #if BRN2_BENCHMARK
         {
-            char allowed[]
-                = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "!@#$%&*()[]-=_+<>," "0123456789";
+            char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                             "abcdefghijklmnopqrstuvwxyz"
+                             "!@#$%&*()[]-=_+<>,"
+                             "0123456789";
             util_command(LENGTH(args_shuf), args_shuf);
             brn2_list_from_file(new, brn2_buffer.name, false);
 
@@ -419,14 +421,13 @@ main(int argc, char **argv) {
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             if (old->length != new->length) {
-                error("You are renaming " RED "%u" RESET
-                      " file%.*s " "but buffer contains " RED "%u" RESET
-                      " file name%.*s\n",
+                error("You are renaming " RED "%u" RESET " file%.*s "
+                      "but buffer contains " RED "%u" RESET " file name%.*s\n",
                       old->length, old->length != 1, "s", new->length,
                       new->length != 1, "s");
                 brn2_free_list(new);
-                printf(
-                    "Fix your renames. Press control-c to cancel or press" " ENTER to open the file list editor again.\n");
+                printf("Fix your renames. Press control-c to cancel or press"
+                       " ENTER to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
             }
@@ -487,10 +488,10 @@ main(int argc, char **argv) {
             }
         }
         if (number_changes != number_renames) {
-            error(
-                "%u name%.*s changed but %u file%.*s renamed. " "Check your files.\n",
-                number_changes, number_changes != 1, "s", number_renames,
-                number_renames != 1, "s");
+            error("%u name%.*s changed but %u file%.*s renamed. "
+                  "Check your files.\n",
+                  number_changes, number_changes != 1, "s", number_renames,
+                  number_renames != 1, "s");
             fatal(EXIT_FAILURE);
         } else {
             printf("%u file%.*s renamed.\n", number_renames,
