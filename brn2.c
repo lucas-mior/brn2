@@ -1302,7 +1302,7 @@ main(void) {
             *file_pointer = xarena_push(new->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = (uint32)name_length;
+            file->length = name_length;
             memcpy64(file->name, path, name_length + 1);
         }
 
