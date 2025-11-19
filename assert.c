@@ -240,7 +240,6 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                           typebits(TYPE1), typebits(TYPE2), \
                           (llong)(VAR1), (ullong)(VAR2))
 
-void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 #define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
   schar:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -258,6 +257,7 @@ _Generic((VAR2), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
   default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED() \
 )
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
   a_both_unsigned_##MODE(__FILE__, __LINE__, \
@@ -273,7 +273,6 @@ _Generic((VAR2), \
                            typebits(TYPE1), typebits(TYPE2), \
                            (ullong)(VAR1), (llong)(VAR2))
 
-void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 #define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
   schar:   A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -291,6 +290,7 @@ _Generic((VAR2), \
   ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
   default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED() \
 )
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 
 #define A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     a_ldouble_##MODE(__FILE__, __LINE__, \
@@ -299,7 +299,6 @@ _Generic((VAR2), \
                      typebits(TYPE1), typebits(TYPE2), \
                      LDOUBLE_GET2(VAR1, TYPE1), LDOUBLE_GET2(VAR2, TYPE2))
 
-void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE(void);
 #define A_FIRST_LDOUBLE(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
   schar:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -317,6 +316,7 @@ _Generic((VAR2), \
   ldouble: A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
   default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE() \
 )
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE(void);
 
 #define A_POINTERS(MODE, VAR1, VAR2) \
     a_pointers_##MODE(__FILE__, __LINE__, \
@@ -503,6 +503,11 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
+    }{
+        // uncomment to trigger linking error
+        /* double x = 0.1; */
+        /* void *a = NULL; */
+        /* ASSERT_MORE_EQUAL(x, a); */
     }{
         int a = 0;
         double b = 1;
