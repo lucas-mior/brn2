@@ -840,12 +840,12 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
         renamed
             = renameat2(AT_FDCWD, oldname, AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
-            if (hash_insert_pre_calc_set(names_renamed, oldname, oldhash,
-                                         oldindex)) {
+            if (hash_insert_pre_calc_set(names_renamed,
+                                         oldname, oldhash, oldindex)) {
                 *number_renames += 1;
             }
-            if (hash_insert_pre_calc_set(names_renamed, newname, newhash,
-                                         newindex)) {
+            if (hash_insert_pre_calc_set(names_renamed,
+                                         newname, newhash, newindex)) {
                 *number_renames += 1;
             }
             print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname,
@@ -855,15 +855,15 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                 uint32 next = *newname_index_on_oldlist;
                 FileName **file_j = &(old->files[next]);
 
-                hash_remove_pre_calc_map(oldlist_map, newname, newhash,
-                                         newindex);
-                hash_remove_pre_calc_map(oldlist_map, oldname, oldhash,
-                                         oldindex);
+                hash_remove_pre_calc_map(oldlist_map,
+                                         newname, newhash, newindex);
+                hash_remove_pre_calc_map(oldlist_map,
+                                         oldname, oldhash, oldindex);
 
-                hash_insert_pre_calc_map(oldlist_map, newname, newhash,
-                                         newindex, i);
-                hash_insert_pre_calc_map(oldlist_map, oldname, oldhash,
-                                         oldindex, next);
+                hash_insert_pre_calc_map(oldlist_map,
+                                         newname, newhash, newindex, i);
+                hash_insert_pre_calc_map(oldlist_map,
+                                         oldname, oldhash, oldindex, next);
 
                 SWAP(*file_j, *oldfile);
                 SWAP(old->indexes[i], old->indexes[next]);
@@ -878,8 +878,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
             }
             return;
         } else if (errno != ENOENT) {
-            error("Error swapping "RED"'%s'"RESET" and "RED"'%s'"RESET
-                  ": %s.\n",
+            error("Error swapping "RED"'%s'"RESET" and "RED"'%s'"RESET": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
@@ -890,8 +889,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     (void)newname_index_on_oldlist;
     (void)oldfile;
     if (newname_exists) {
-        error("Error renaming "RED"'%s'"RESET
-              " to '%s': File already exists.\n",
+        error("Error renaming "RED"'%s'"RESET" to '%s': File already exists.\n",
               oldname, newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
@@ -901,8 +899,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
 #endif
     renamed = rename(oldname, newname);
     if (renamed < 0) {
-        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET
-              ": %s.\n",
+        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
