@@ -828,8 +828,8 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
         error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
               oldname, newname);
         error(RED"'%s'"RESET" already exists,"
-                  " but it was not given in the list of"
-                  " files to rename, and --implict option is off.\n",
+              " but it was not given in the list of files to rename,"
+              " and --implict option is off.\n",
               newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
