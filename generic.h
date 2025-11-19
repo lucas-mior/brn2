@@ -137,7 +137,7 @@ union Primitives {
   uint auint;
   ulong aulong;
   ullong aullong;
-  char *aucharp;
+  char *acharp;
   void *avoidp;
   bool abool;
   char achar;
