@@ -103,7 +103,7 @@ static ldouble ldouble_from_voidp(void *x)     { (void)x; return 0.0l; }
 static ldouble ldouble_from_bool(bool x)       { (void)x; return 0.0l; }
 static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 
-typedef enum Type {
+enum Type {
     TYPE_LDOUBLE,
     TYPE_DOUBLE,
     TYPE_FLOAT,
@@ -121,7 +121,7 @@ typedef enum Type {
     TYPE_VOIDP,
     TYPE_BOOL,
     TYPE_CHAR,
-} Type;
+};
 
 union Primitives {
   ldouble aldouble;
@@ -144,7 +144,7 @@ union Primitives {
 };
 
 static char *
-typename(Type type) {
+typename(enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return "ldouble";
     case TYPE_DOUBLE:  return "double";
@@ -168,7 +168,7 @@ typename(Type type) {
 }
 
 static uint
-typebits(Type type) {
+typebits(enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return sizeof(ldouble)*CHAR_BIT;
     case TYPE_DOUBLE:  return sizeof(double)*CHAR_BIT;
@@ -192,7 +192,7 @@ typebits(Type type) {
 }
 
 static ldouble
-ldouble_get(union Primitives var, Type type) {
+ldouble_get(union Primitives var, enum Type type) {
     switch (type) {
     case TYPE_LDOUBLE: return var.aldouble;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
