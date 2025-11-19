@@ -796,7 +796,7 @@ noop(const char *unused, ...) {
     return 0;
 }
 
-// clang-format on
+// clang-format off
 void
 brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
               HashSet *names_renamed, uint32 i, uint32 *number_renames) {
@@ -825,9 +825,9 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     newname_exists = !access(newname, F_OK);
 #if defined(_GNU_SOURCE)
     if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
-        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET ":\n",
+        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
               oldname, newname);
-        error(RED "'%s'" RESET " already exists,"
+        error(RED"'%s'"RESET" already exists,"
                   " but it was not given in the list of"
                   " files to rename, and --implict option is off.\n",
               newname);
@@ -848,7 +848,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                                          newindex)) {
                 *number_renames += 1;
             }
-            print(GREEN "%s" RESET " <-> " GREEN "%s" RESET "\n", oldname,
+            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname,
                   newname);
 
             if (newname_index_on_oldlist) {
@@ -878,7 +878,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
             }
             return;
         } else if (errno != ENOENT) {
-            error("Error swapping " RED "'%s'" RESET " and " RED "'%s'" RESET
+            error("Error swapping "RED"'%s'"RESET" and "RED"'%s'"RESET
                   ": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
@@ -890,7 +890,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
     (void)newname_index_on_oldlist;
     (void)oldfile;
     if (newname_exists) {
-        error("Error renaming " RED "'%s'" RESET
+        error("Error renaming "RED"'%s'"RESET
               " to '%s': File already exists.\n",
               oldname, newname);
         if (brn2_options_fatal) {
@@ -901,7 +901,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
 #endif
     renamed = rename(oldname, newname);
     if (renamed < 0) {
-        error("Error renaming " RED "'%s'" RESET " to " RED "'%s'" RESET
+        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET
               ": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
@@ -913,7 +913,7 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                                      oldindex)) {
             *number_renames += 1;
         }
-        print("%s -> " GREEN "%s" RESET "\n", oldname, newname);
+        print("%s -> "GREEN"%s"RESET"\n", oldname, newname);
     }
     return;
 }
