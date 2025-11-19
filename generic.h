@@ -215,34 +215,31 @@ ldouble_get(PrimitivesUnion var, Type type) {
     }
 }
 
-#define CASE(TYPE) \
-    TYPE: ldouble_from_##TYPE
-
 #define LDOUBLE_GET(x) \
 _Generic((x), \
-  CASE(ldouble), \
-  CASE(double), \
-  CASE(float), \
-  CASE(schar), \
-  CASE(short), \
-  CASE(int), \
-  CASE(long), \
-  CASE(llong), \
-  CASE(uchar), \
-  CASE(ushort), \
-  CASE(uint), \
-  CASE(ulong), \
-  CASE(ullong), \
-  CASE(char *), \
-  CASE(void *), \
-  CASE(bool), \
-  CASE(char) \
+  ldouble: ldouble_from_ldouble, \
+  double:  ldouble_from_double, \
+  float:   ldouble_from_float, \
+  schar:   ldouble_from_schar, \
+  short:   ldouble_from_short, \
+  int:     ldouble_from_int, \
+  long:    ldouble_from_long, \
+  llong:   ldouble_from_llong, \
+  uchar:   ldouble_from_uchar, \
+  ushort:  ldouble_from_ushort, \
+  uint:    ldouble_from_uint, \
+  ulong:   ldouble_from_ulong, \
+  ullong:  ldouble_from_ullong, \
+  char *:  ldouble_from_charp, \
+  void *:  ldouble_from_voidp, \
+  bool:    ldouble_from_bool, \
+  char:    ldouble_from_char \
 )(x)
 
-/* #if defined(__GNUC__) || defined(__clang__) */
-/* #define LDOUBLE_GET2(VAR, TYPE) ldouble_get((PrimitivesUnion)(VAR), TYPE) */
-/* #else */
+#if defined(__GNUC__) || defined(__clang__)
+#define LDOUBLE_GET2(VAR, TYPE) ldouble_get((PrimitivesUnion)(VAR), TYPE)
+#else
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
-/* #endif */
+#endif
 
 #endif
