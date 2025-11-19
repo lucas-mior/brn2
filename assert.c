@@ -521,6 +521,9 @@ main(void) {
             exit(EXIT_FAILURE);
         }
 
+        error2("\nThe following assertions are supposed to fail");
+        error2("\nand then check the 'assertion_failed' variable\n");
+
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_EQUAL(a, b);
         }
