@@ -134,7 +134,7 @@ _Generic((VAR), \
   ullong:  TYPE_ULLONG, \
   float:   TYPE_FLOAT,  \
   double:  TYPE_DOUBLE, \
-  ldouble: TYPE_LDOUBLE  \
+  ldouble: TYPE_LDOUBLE \
 )
 
 enum Type {
