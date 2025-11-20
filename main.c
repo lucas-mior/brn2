@@ -262,6 +262,7 @@ main(int argc, char **argv) {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
+        uint32 j = 0;
 #if OS_UNIX
         char *temp = "/tmp";
 #else
@@ -285,7 +286,6 @@ main(int argc, char **argv) {
         old->indexes = xmmap_commit(&(old->indexes_size));
         brn2_create_hashes(old, capacity_set);
 
-        uint32 j = 0;
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             uint32 index = old->indexes[i];
