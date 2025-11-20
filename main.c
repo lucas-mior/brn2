@@ -252,7 +252,6 @@ main(int argc, char **argv) {
     if (brn2_options_sort) {
         sort(old);
     }
-    exit(0);
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
