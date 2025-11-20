@@ -168,12 +168,12 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
 #define UTIL_ALIGN(SIZE, A) \
 _Generic((SIZE), \
-    ullong:  UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
-    ulong:   UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
-    uint:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A),   \
-    llong:   UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
-    long:    UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
-    int:     UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)   \
+    ullong: UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
+    ulong:  UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
+    uint:   UTIL_ALIGN_UINT((uint)SIZE,   (uint)A),   \
+    llong:  UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
+    long:   UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
+    int:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)   \
 )
 
 #if !defined(ALIGNMENT)
