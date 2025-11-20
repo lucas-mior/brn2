@@ -234,11 +234,11 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
                          (llong)(VAR1), (llong)(VAR2))     \
 
 #define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-  a_signed_unsigned##MODE(__FILE__, __LINE__,               \
-                          #VAR1, #VAR2,                     \
-                          typename(TYPE1), typename(TYPE2), \
-                          TYPEBITS(TYPE1), TYPEBITS(TYPE2), \
-                          (llong)(VAR1), (ullong)(VAR2))
+    a_signed_unsigned##MODE(__FILE__, __LINE__,               \
+                            #VAR1, #VAR2,                     \
+                            typename(TYPE1), typename(TYPE2), \
+                            TYPEBITS(TYPE1), TYPEBITS(TYPE2), \
+                            (llong)(VAR1), (ullong)(VAR2))
 
 #define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
