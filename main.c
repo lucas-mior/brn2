@@ -228,7 +228,7 @@ main(int argc, char **argv) {
 
     {
         uint32 j = 0;
-        for (uint32_t i = 0; i < old->length; i++) {
+        for (uint32 i = 0; i < old->length; i++) {
             FileName *file = old->files[i];
             if (file->type == TYPE_ERR) {
                 fprintf(stderr, "Removing '%s' from list.\n", file->name);
