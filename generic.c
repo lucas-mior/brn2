@@ -371,13 +371,13 @@ main(void) {
         uint64 var_uint64;
 
         assert(MAXOF(var_int32) == INT32_MAX);
-        assert(MAXOF(var_uint32) == UINT32_MAX);
         assert(MAXOF(var_int64) == INT64_MAX);
+        assert(MAXOF(var_uint32) == UINT32_MAX);
         assert(MAXOF(var_uint64) == UINT64_MAX);
 
         assert(MINOF(var_int32) == INT32_MIN);
-        assert(MINOF(var_uint32) == 0u);
         assert(MINOF(var_int64) == INT64_MIN);
+        assert(MINOF(var_uint32) == 0u);
         assert(MINOF(var_uint64) == 0ull);
     }
 
