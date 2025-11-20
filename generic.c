@@ -255,10 +255,44 @@ _Generic((x), \
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
 #endif
 
+#define PRINT_SIGNED(VAR, TYPE) \
+    fprintf(stderr, "%s = %lld\n", #VAR, (llong)VAR)
+
+#define PRINT_UNSIGNED(VAR, TYPE) \
+    fprintf(stderr, "%s = %llu\n", #VAR, (llong)VAR)
+
+#define PRINT_LDOUBLE(VAR, TYPE) \
+    fprintf(stderr, "%s = %Lf\n", #VAR, LDOUBLE_GET2(VAR, TYPE))
+
+#define PRINT_OTHER(VAR, TYPE, FORMAT) \
+    fprintf(stderr, "%s = "FORMAT"\n", #VAR, VAR)
+
+#define PRINT(VAR) \
+_Generic((VAR), \
+  void *:  PRINT_OTHER(VAR,    TYPE_VOIDP  , "%p"), \
+  char *:  PRINT_OTHER(VAR,    TYPE_CHARP  , "%s"), \
+  bool:    PRINT_UNSIGNED(VAR, TYPE_BOOL   ),   \
+  char:    PRINT_OTHER(VAR,    TYPE_CHAR   , "%c"), \
+  schar:   PRINT_SIGNED(VAR,   TYPE_SCHAR),   \
+  short:   PRINT_SIGNED(VAR,   TYPE_SHORT),   \
+  int:     PRINT_SIGNED(VAR,   TYPE_INT),     \
+  long:    PRINT_SIGNED(VAR,   TYPE_LONG),    \
+  llong:   PRINT_SIGNED(VAR,   TYPE_LLONG),   \
+  uchar:   PRINT_UNSIGNED(VAR, TYPE_UCHAR),   \
+  ushort:  PRINT_UNSIGNED(VAR, TYPE_USHORT),  \
+  uint:    PRINT_UNSIGNED(VAR, TYPE_UINT),    \
+  ulong:   PRINT_UNSIGNED(VAR, TYPE_ULONG),   \
+  ullong:  PRINT_UNSIGNED(VAR, TYPE_ULLONG),  \
+  float:   PRINT_LDOUBLE(VAR,  TYPE_FLOAT),   \
+  double:  PRINT_LDOUBLE(VAR,  TYPE_DOUBLE),  \
+  ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE)  \
+)
+
 #if TESTING_generic
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 // clang-format off
 
@@ -326,6 +360,46 @@ main(void) {
         assert(MINOF(var_uint32) == 0u);
         assert(MINOF(var_int64) == INT64_MIN);
         assert(MINOF(var_uint64) == 0ull);
+    }
+
+    {
+        bool var_bool = true;
+        char var_char = 'c';
+        char *var_string = "a nice string";
+        void *var_voidptr = NULL;
+        float var_float = FLT_MAX;
+        double var_double = DBL_MAX;
+        long double var_longdouble = DBL_MAX;
+        int8 var_int8 = INT8_MAX;
+        int16 var_int16 = INT16_MAX;
+        int32 var_int32 = INT32_MAX;
+        int var_int = INT_MAX;
+        int64 var_int64 = INT64_MAX;
+        uint8 var_uint8 = UINT8_MAX;
+        uint16 var_uint16 = UINT16_MAX;
+        uint32 var_uint32 = UINT32_MAX;
+        uint var_uint = UINT_MAX;
+        uint64 var_uint64 = UINT64_MAX;
+
+        PRINT(var_int8);
+        PRINT(var_int16);
+        PRINT(var_int32);
+        PRINT(var_int);
+        PRINT(var_int64);
+        PRINT(var_uint8);
+        PRINT(var_uint16);
+        PRINT(var_uint32);
+        PRINT(var_uint);
+        PRINT(var_uint64);
+        PRINT(var_voidptr);
+        PRINT(var_bool);
+        PRINT(var_char);
+        PRINT(var_string);
+        PRINT(*var_string);
+        PRINT(var_float);
+        PRINT(var_double);
+        PRINT(var_longdouble);
+        PRINT(var_uint - (uint)var_int);
     }
 }
 
