@@ -169,13 +169,13 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
 #define UTIL_ALIGN(S, A) \
 _Generic((S), \
-  ullong:  UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-  ulong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-  uint:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-  llong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-  long:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-  int:     UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-  default: COMPILE_STOP \
+    ullong:  UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+    ulong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+    uint:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+    llong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+    long:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+    int:     UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+    default: COMPILE_STOP \
 )
 
 #if !defined(ALIGNMENT)
