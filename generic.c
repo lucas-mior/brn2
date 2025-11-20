@@ -175,96 +175,56 @@ static char *typename(enum Type type) {
     default:           return "unknown type";
     }
 }
-// clang-format on
 
 static uint
 typebits(enum Type type) {
     switch (type) {
-    case TYPE_LDOUBLE:
-        return sizeof(ldouble)*CHAR_BIT;
-    case TYPE_DOUBLE:
-        return sizeof(double)*CHAR_BIT;
-    case TYPE_FLOAT:
-        return sizeof(float)*CHAR_BIT;
-    case TYPE_SCHAR:
-        return sizeof(schar)*CHAR_BIT;
-    case TYPE_SHORT:
-        return sizeof(short)*CHAR_BIT;
-    case TYPE_INT:
-        return sizeof(int)*CHAR_BIT;
-    case TYPE_LONG:
-        return sizeof(long)*CHAR_BIT;
-    case TYPE_LLONG:
-        return sizeof(llong)*CHAR_BIT;
-    case TYPE_UCHAR:
-        return sizeof(uchar)*CHAR_BIT;
-    case TYPE_USHORT:
-        return sizeof(ushort)*CHAR_BIT;
-    case TYPE_UINT:
-        return sizeof(uint)*CHAR_BIT;
-    case TYPE_ULONG:
-        return sizeof(ulong)*CHAR_BIT;
-    case TYPE_ULLONG:
-        return sizeof(ullong)*CHAR_BIT;
-    case TYPE_CHARP:
-        return sizeof(char *)*CHAR_BIT;
-    case TYPE_VOIDP:
-        return sizeof(void *)*CHAR_BIT;
-    case TYPE_BOOL:
-        return sizeof(bool)*CHAR_BIT;
-    case TYPE_CHAR:
-        return sizeof(char)*CHAR_BIT;
-    default:
-        return 0;
+    case TYPE_LDOUBLE: return sizeof(ldouble)*CHAR_BIT;
+    case TYPE_DOUBLE:  return sizeof(double)*CHAR_BIT;
+    case TYPE_FLOAT:   return sizeof(float)*CHAR_BIT;
+    case TYPE_SCHAR:   return sizeof(schar)*CHAR_BIT;
+    case TYPE_SHORT:   return sizeof(short)*CHAR_BIT;
+    case TYPE_INT:     return sizeof(int)*CHAR_BIT;
+    case TYPE_LONG:    return sizeof(long)*CHAR_BIT;
+    case TYPE_LLONG:   return sizeof(llong)*CHAR_BIT;
+    case TYPE_UCHAR:   return sizeof(uchar)*CHAR_BIT;
+    case TYPE_USHORT:  return sizeof(ushort)*CHAR_BIT;
+    case TYPE_UINT:    return sizeof(uint)*CHAR_BIT;
+    case TYPE_ULONG:   return sizeof(ulong)*CHAR_BIT;
+    case TYPE_ULLONG:  return sizeof(ullong)*CHAR_BIT;
+    case TYPE_CHARP:   return sizeof(char *)*CHAR_BIT;
+    case TYPE_VOIDP:   return sizeof(void *)*CHAR_BIT;
+    case TYPE_BOOL:    return sizeof(bool)*CHAR_BIT;
+    case TYPE_CHAR:    return sizeof(char)*CHAR_BIT;
+    default:           return 0;
     }
 }
 
 static ldouble
 ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
-    case TYPE_LDOUBLE:
-        return var.aldouble;
-    case TYPE_DOUBLE:
-        return (ldouble)var.adouble;
-    case TYPE_FLOAT:
-        return (ldouble)var.afloat;
-    case TYPE_SCHAR:
-        return (ldouble)var.aschar;
-    case TYPE_SHORT:
-        return (ldouble)var.ashort;
-    case TYPE_INT:
-        return (ldouble)var.aint;
-    case TYPE_LONG:
-        return (ldouble)var.along;
-    case TYPE_LLONG:
-        return (ldouble)var.allong;
-    case TYPE_UCHAR:
-        return (ldouble)var.auchar;
-    case TYPE_USHORT:
-        return (ldouble)var.aushort;
-    case TYPE_UINT:
-        return (ldouble)var.auint;
-    case TYPE_ULONG:
-        return (ldouble)var.aulong;
-    case TYPE_ULLONG:
-        return (ldouble)var.aullong;
-    case TYPE_CHARP:
-        *(volatile int *)0 = 0;
-        return (ldouble)0.0l;
-    case TYPE_VOIDP:
-        *(volatile int *)0 = 0;
-        return (ldouble)0.0l;
-    case TYPE_BOOL:
-        *(volatile int *)0 = 0;
-        return (ldouble)0.0l;
-    case TYPE_CHAR:
-        *(volatile int *)0 = 0;
-        return (ldouble)0.0l;
-    default:
-        *(volatile int *)0 = 0;
-        return 0.0l;
+    case TYPE_LDOUBLE: return var.aldouble;
+    case TYPE_DOUBLE:  return (ldouble)var.adouble;
+    case TYPE_FLOAT:   return (ldouble)var.afloat;
+    case TYPE_SCHAR:   return (ldouble)var.aschar;
+    case TYPE_SHORT:   return (ldouble)var.ashort;
+    case TYPE_INT:     return (ldouble)var.aint;
+    case TYPE_LONG:    return (ldouble)var.along;
+    case TYPE_LLONG:   return (ldouble)var.allong;
+    case TYPE_UCHAR:   return (ldouble)var.auchar;
+    case TYPE_USHORT:  return (ldouble)var.aushort;
+    case TYPE_UINT:    return (ldouble)var.auint;
+    case TYPE_ULONG:   return (ldouble)var.aulong;
+    case TYPE_ULLONG:  return (ldouble)var.aullong;
+    case TYPE_CHARP: *(volatile int *)0 = 0; return (ldouble)0.0l;
+    case TYPE_VOIDP: *(volatile int *)0 = 0; return (ldouble)0.0l;
+    case TYPE_BOOL:  *(volatile int *)0 = 0; return (ldouble)0.0l;
+    case TYPE_CHAR:  *(volatile int *)0 = 0; return (ldouble)0.0l;
+    default:         *(volatile int *)0 = 0; return 0.0l;
     }
 }
+
+// clang-format on
 
 #define LDOUBLE_GET(x) \
 _Generic((x), \
