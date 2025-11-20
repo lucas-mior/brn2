@@ -110,9 +110,9 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define SIZEOF(X) (int64)sizeof(X)
 
 #if !defined(SIZEKB)
-#define SIZEKB(X) ((int64)(X)*1024l)
-#define SIZEMB(X) ((int64)(X)*1024l*1024l)
-#define SIZEGB(X) ((int64)(X)*1024l*1024l*1024l)
+#define SIZEKB(X) ((int64)(X)*1024ll)
+#define SIZEMB(X) ((int64)(X)*1024ll*1024ll)
+#define SIZEGB(X) ((int64)(X)*1024ll*1024ll*1024ll)
 #endif
 
 #if !defined(LENGTH)
