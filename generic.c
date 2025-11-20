@@ -296,7 +296,6 @@ _Generic((VAR), \
 
 #if TESTING_generic
 #include <assert.h>
-#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 
