@@ -285,16 +285,16 @@ main(int argc, char **argv) {
         old->indexes = xmmap_commit(&(old->indexes_size));
         brn2_create_hashes(old, capacity_set);
 
+        uint32 j = 0;
         for (uint32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
-            uint32 *index = &(old->indexes[i]);
+            uint32 index = old->indexes[i];
             bool contains_newline;
             int64 buffered;
 
-            while ((contains_newline = memchr64(file->name, '\n', file->length))
-                   || !hash_insert_pre_calc_map(oldlist_map, file->name,
-                                                file->hash, *index, i)) {
-                uint32 length_left;
+            if ((contains_newline = memchr64(file->name, '\n', file->length))
+                || !hash_insert_pre_calc_map(oldlist_map, file->name,
+                                             file->hash, index, i)) {
                 if (contains_newline) {
                     error(RED "'%s'" RESET " contains new line.", file->name);
                 } else {
@@ -305,20 +305,16 @@ main(int argc, char **argv) {
                     error("\n");
                     fatal(EXIT_FAILURE);
                 }
+
                 error(" Removing from list...\n");
-
-                old->length -= 1;
-                if (old->length <= i) {
-                    goto close;
-                }
-
-                length_left = old->length - i;
-                memmove(&old->files[i], &old->files[i + 1],
-                        length_left*sizeof(*(&old->files[i])));
-                memmove(index, index + 1, length_left*sizeof(*index));
-                file = old->files[i];
-                index = &(old->indexes[i]);
+                continue;
             }
+
+            if (j != i) {
+                old->files[j] = file;
+                old->indexes[j] = index;
+            }
+            j += 1;
 
             buffered = pointer - write_buffer;
             if (buffered >= BRN2_PATH_MAX) {
@@ -331,7 +327,7 @@ main(int argc, char **argv) {
             pointer += file->length + 1;
             file->name[file->length] = '\0';
         }
-    close:
+        old->length = j;
         write64(brn2_buffer.fd, write_buffer, pointer - write_buffer);
         if (close(brn2_buffer.fd) < 0) {
             error("Error closing buffer: %s\n", strerror(errno));
