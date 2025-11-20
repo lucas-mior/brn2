@@ -118,23 +118,23 @@ static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 
 #define TYPEID(VAR) \
 _Generic((VAR), \
-  void *:     TYPE_VOIDP,  \
-  char *:     TYPE_CHARP,  \
-  bool:       TYPE_BOOL,   \
-  char:       TYPE_CHAR,   \
-  schar:      TYPE_SCHAR,  \
-  short:      TYPE_SHORT,  \
-  int:        TYPE_INT,    \
-  long:       TYPE_LONG,   \
-  llong:      TYPE_LLONG,  \
-  uchar:      TYPE_UCHAR,  \
-  ushort:     TYPE_USHORT, \
-  uint:       TYPE_UINT,   \
-  ulong:      TYPE_ULONG,  \
-  ullong:     TYPE_ULLONG, \
-  float:      TYPE_FLOAT,  \
-  double:     TYPE_DOUBLE, \
-  ldouble:    TYPE_LDOUBLE  \
+  void *:  TYPE_VOIDP,  \
+  char *:  TYPE_CHARP,  \
+  bool:    TYPE_BOOL,   \
+  char:    TYPE_CHAR,   \
+  schar:   TYPE_SCHAR,  \
+  short:   TYPE_SHORT,  \
+  int:     TYPE_INT,    \
+  long:    TYPE_LONG,   \
+  llong:   TYPE_LLONG,  \
+  uchar:   TYPE_UCHAR,  \
+  ushort:  TYPE_USHORT, \
+  uint:    TYPE_UINT,   \
+  ulong:   TYPE_ULONG,  \
+  ullong:  TYPE_ULLONG, \
+  float:   TYPE_FLOAT,  \
+  double:  TYPE_DOUBLE, \
+  ldouble: TYPE_LDOUBLE  \
 )
 
 enum Type {
