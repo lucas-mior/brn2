@@ -235,22 +235,22 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 #endif
 
 #define X64(func) \
-  INLINE void \
-      CAT(func, 64)(void *dest, void *source, int64 size) { \
-      if (size == 0) \
-          return; \
-      if (size < 0) { \
-          error("Error in %s: Invalid size = %lld\n", __func__, (llong)size); \
-          fatal(EXIT_FAILURE); \
-      } \
-      if ((ullong)size >= (ullong)SIZE_MAX) { \
-          error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", \
-                 __func__, (llong)size); \
-          fatal(EXIT_FAILURE); \
-      } \
-      func(dest, source, (size_t)size); \
-      return; \
-  }
+INLINE void \
+CAT(func, 64)(void *dest, void *source, int64 size) { \
+    if (size == 0) \
+        return; \
+    if (size < 0) { \
+        error("Error in %s: Invalid size = %lld\n", __func__, (llong)size); \
+        fatal(EXIT_FAILURE); \
+    } \
+    if ((ullong)size >= (ullong)SIZE_MAX) { \
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", \
+               __func__, (llong)size); \
+        fatal(EXIT_FAILURE); \
+    } \
+    func(dest, source, (size_t)size); \
+    return; \
+}
 
 X64(memcpy)
 X64(memmove)
@@ -351,7 +351,7 @@ memcmp64(void *left, void *right, int64 size) {
 }
 
 #define X64(func, TYPE) \
-    INLINE int64 \
+INLINE int64 \
 CAT(func, 64)(int fd, void *buffer, int64 size) { \
     TYPE instance; \
     ssize_t w; \
@@ -382,7 +382,7 @@ X64(read, size_t)
 #undef X64
 
 #define X64(func) \
-    INLINE int64 \
+INLINE int64 \
 CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
     if ((size <= 0) || (n <= 0)) { \
