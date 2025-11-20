@@ -667,6 +667,7 @@ brn2_threads_join(void) {
     xpthread_mutex_destroy(&brn2_mutex);
     xpthread_cond_destroy(&brn2_new_work);
     xpthread_cond_destroy(&brn2_done_work);
+    return;
 }
 
 uint32
