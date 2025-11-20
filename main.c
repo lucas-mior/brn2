@@ -226,19 +226,21 @@ main(int argc, char **argv) {
     }
     brn2_normalize_names(old, NULL);
 
-    uint32 j = 0;
-    for (uint32_t read = 0; read < old->length; read++) {
-        FileName *file = old->files[read];
-        if (file->type == TYPE_ERR) {
-            fprintf(stderr, "Removing '%s' from list.\n", file->name);
-            continue;
+    {
+        uint32 j = 0;
+        for (uint32_t i = 0; i < old->length; i++) {
+            FileName *file = old->files[i];
+            if (file->type == TYPE_ERR) {
+                fprintf(stderr, "Removing '%s' from list.\n", file->name);
+                continue;
+            }
+            if (j != i) {
+                old->files[j] = file;
+            }
+            j += 1;
         }
-        if (j != read) {
-            old->files[j] = file;
-        }
-        j += 1;
+        old->length = j;
     }
-    old->length = j;
 
     if (old->length == 0) {
         error("No files to rename.\n");
