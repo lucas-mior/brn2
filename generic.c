@@ -383,6 +383,21 @@ main(void) {
     assert(MINOF(primitive.aulong) == 0ul);
     assert(MINOF(primitive.aullong) == 0ull);
     assert(MINOF(primitive.abool) == 0);
+
+    assert(MAXOF(primitive.aldouble) == LDBL_MAX);
+    assert(MAXOF(primitive.adouble) == DBL_MAX);
+    assert(MAXOF(primitive.afloat) == FLT_MAX);
+    assert(MAXOF(primitive.aschar) == SCHAR_MAX);
+    assert(MAXOF(primitive.ashort) == SHRT_MAX);
+    assert(MAXOF(primitive.aint) == INT_MAX);
+    assert(MAXOF(primitive.along) == LONG_MAX);
+    assert(MAXOF(primitive.allong) == LLONG_MAX);
+    assert(MAXOF(primitive.auchar) == UCHAR_MAX);
+    assert(MAXOF(primitive.aushort) == USHRT_MAX);
+    assert(MAXOF(primitive.auint) == UINT_MAX);
+    assert(MAXOF(primitive.aulong) == ULONG_MAX);
+    assert(MAXOF(primitive.aullong) == ULLONG_MAX);
+    assert(MAXOF(primitive.abool) == 1);
 }
 
 #endif
