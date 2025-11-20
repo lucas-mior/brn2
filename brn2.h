@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "generic.h"
+#include "generic.c"
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
