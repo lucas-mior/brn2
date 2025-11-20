@@ -259,11 +259,11 @@ _Generic((x), \
 
 #define PRINT_SIGNED(VAR, TYPE) \
   fprintf(stderr, "[%s%zu]%s = %lld\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, (llong)VAR)
+                  typename(TYPE), TYPEBITS(VAR), #VAR, (llong)(VAR))
 
 #define PRINT_UNSIGNED(VAR, TYPE) \
   fprintf(stderr, "[%s%zu]%s = %llu\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, (ullong)VAR)
+                  typename(TYPE), TYPEBITS(VAR), #VAR, (ullong)(VAR))
 
 #define PRINT_LDOUBLE(VAR, TYPE) \
   fprintf(stderr, "[%s%zu]%s = %Lf\n", \
