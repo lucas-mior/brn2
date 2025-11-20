@@ -116,6 +116,26 @@ static ldouble ldouble_from_bool(bool x)       { (void)x; return 0.0l; }
 static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 // clang-format on
 
+enum Type {
+    TYPE_VOIDP = 1,
+    TYPE_CHARP,
+    TYPE_BOOL,
+    TYPE_CHAR,
+    TYPE_SCHAR,
+    TYPE_SHORT,
+    TYPE_INT,
+    TYPE_LONG,
+    TYPE_LLONG,
+    TYPE_UCHAR,
+    TYPE_USHORT,
+    TYPE_UINT,
+    TYPE_ULONG,
+    TYPE_ULLONG,
+    TYPE_FLOAT,
+    TYPE_DOUBLE,
+    TYPE_LDOUBLE,
+};
+
 #define TYPEID(VAR) \
 _Generic((VAR), \
   void *:  TYPE_VOIDP,  \
@@ -136,26 +156,6 @@ _Generic((VAR), \
   double:  TYPE_DOUBLE, \
   ldouble: TYPE_LDOUBLE \
 )
-
-enum Type {
-    TYPE_VOIDP = 1,
-    TYPE_CHARP,
-    TYPE_BOOL,
-    TYPE_CHAR,
-    TYPE_SCHAR,
-    TYPE_SHORT,
-    TYPE_INT,
-    TYPE_LONG,
-    TYPE_LLONG,
-    TYPE_UCHAR,
-    TYPE_USHORT,
-    TYPE_UINT,
-    TYPE_ULONG,
-    TYPE_ULLONG,
-    TYPE_FLOAT,
-    TYPE_DOUBLE,
-    TYPE_LDOUBLE,
-};
 
 union Primitive {
     void *avoidp;
