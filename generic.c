@@ -420,6 +420,7 @@ main(void) {
         PRINT(var_double);
         PRINT(var_longdouble);
         PRINT(var_uint - (uint)var_int);
+        PRINT((void*)main);
     }
 }
 
