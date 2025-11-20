@@ -53,7 +53,7 @@ _Generic((VAR), \
     ullong:  "ullong",  \
     float:   "float",   \
     double:  "double",  \
-    ldouble: "ldouble" \
+    ldouble: "ldouble"  \
 )
 
 #define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
@@ -74,7 +74,7 @@ _Generic((VARIABLE), \
     bool:    0,         \
     float:   -FLT_MAX,  \
     double:  -DBL_MAX,  \
-    ldouble: -LDBL_MAX \
+    ldouble: -LDBL_MAX  \
 )
 
 #define MAXOF(VARIABLE) \
