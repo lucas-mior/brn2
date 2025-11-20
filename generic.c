@@ -56,6 +56,8 @@ _Generic((VAR), \
   ldouble: "ldouble" \
 )
 
+#define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
+
 #define MINOF(VARIABLE) \
 _Generic((VARIABLE), \
   schar:   SCHAR_MIN, \
@@ -197,30 +199,6 @@ typename(enum Type type) {
     case TYPE_DOUBLE:  return "double";
     case TYPE_LDOUBLE: return "ldouble";
     default:           return "unknown type";
-    }
-}
-
-static uint
-typebits(enum Type type) {
-    switch (type) {
-    case TYPE_VOIDP:   return sizeof(void *)*CHAR_BIT;
-    case TYPE_CHARP:   return sizeof(char *)*CHAR_BIT;
-    case TYPE_BOOL:    return sizeof(bool)*CHAR_BIT;
-    case TYPE_CHAR:    return sizeof(char)*CHAR_BIT;
-    case TYPE_SCHAR:   return sizeof(schar)*CHAR_BIT;
-    case TYPE_SHORT:   return sizeof(short)*CHAR_BIT;
-    case TYPE_INT:     return sizeof(int)*CHAR_BIT;
-    case TYPE_LONG:    return sizeof(long)*CHAR_BIT;
-    case TYPE_LLONG:   return sizeof(llong)*CHAR_BIT;
-    case TYPE_UCHAR:   return sizeof(uchar)*CHAR_BIT;
-    case TYPE_USHORT:  return sizeof(ushort)*CHAR_BIT;
-    case TYPE_UINT:    return sizeof(uint)*CHAR_BIT;
-    case TYPE_ULONG:   return sizeof(ulong)*CHAR_BIT;
-    case TYPE_ULLONG:  return sizeof(ullong)*CHAR_BIT;
-    case TYPE_FLOAT:   return sizeof(float)*CHAR_BIT;
-    case TYPE_DOUBLE:  return sizeof(double)*CHAR_BIT;
-    case TYPE_LDOUBLE: return sizeof(ldouble)*CHAR_BIT;
-    default:           return 0;
     }
 }
 
