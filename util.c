@@ -167,7 +167,6 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define UTIL_ALIGN_UINT(S, A) (int64)(((S) + ((A) - 1)) & ~((A) - 1))
 #define COMPILE_STOP "aaaaa"
 
-#if __STDC__== 1 && __STDC_VERSION__ >= 201112L
 #define UTIL_ALIGN(S, A) \
 _Generic((S), \
   ullong:  UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
@@ -178,10 +177,6 @@ _Generic((S), \
   int:     UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
   default: COMPILE_STOP \
 )
-#else
-#define UTIL_ALIGN(S, A) UTIL_ALIGN_UINT((uint64)S, (uint64)A)
-#endif
-
 
 #if !defined(ALIGNMENT)
 #define ALIGNMENT 16ul
