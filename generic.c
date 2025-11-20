@@ -255,17 +255,23 @@ _Generic((x), \
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
 #endif
 
+// clang-format off
+
 #define PRINT_SIGNED(VAR, TYPE) \
-    fprintf(stderr, "%s = %lld\n", #VAR, (llong)VAR)
+  fprintf(stderr, "[%s%zu]%s = %lld\n", \
+                  typename(TYPE), TYPEBITS(VAR), #VAR, (llong)VAR)
 
 #define PRINT_UNSIGNED(VAR, TYPE) \
-    fprintf(stderr, "%s = %llu\n", #VAR, (llong)VAR)
+  fprintf(stderr, "[%s%zu]%s = %llu\n", \
+                  typename(TYPE), TYPEBITS(VAR), #VAR, (ullong)VAR)
 
 #define PRINT_LDOUBLE(VAR, TYPE) \
-    fprintf(stderr, "%s = %Lf\n", #VAR, LDOUBLE_GET2(VAR, TYPE))
+  fprintf(stderr, "[%s%zu]%s = %Lf\n", \
+                  typename(TYPE), TYPEBITS(VAR), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT) \
-    fprintf(stderr, "%s = "FORMAT"\n", #VAR, VAR)
+  fprintf(stderr, "[%s%zu]%s = "FORMAT"\n", \
+                  typename(TYPE), TYPEBITS(VAR), #VAR, VAR)
 
 #define PRINT(VAR) \
 _Generic((VAR), \
