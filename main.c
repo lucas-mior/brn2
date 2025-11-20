@@ -226,39 +226,19 @@ main(int argc, char **argv) {
     }
     brn2_normalize_names(old, NULL);
 
-    for (uint32_t i = 0; i < old->length;) {
-        uint32 start;
-        uint32 end;
-        uint32 count;
-
-        if (old->files[i]->type != TYPE_ERR) {
-            i += 1;
+    uint32 j = 0;
+    for (uint32_t read = 0; read < old->length; read++) {
+        FileName *file = old->files[read];
+        if (file->type == TYPE_ERR) {
+            fprintf(stderr, "Removing '%s' from list.\n", file->name);
             continue;
         }
-
-        start = i;
-        end = i + 1;
-
-        while (end < old->length) {
-            if (old->files[end]->type == TYPE_ERR) {
-                end += 1;
-            } else {
-                break;
-            }
+        if (j != read) {
+            old->files[j] = file;
         }
-
-        count = end - start;
-        for (uint32 j = start; j < end; j += 1) {
-            fprintf(stderr, "Removing '%s' from list.\n", old->files[j]->name);
-        }
-
-        if (end < old->length) {
-            memmove(&old->files[start], &old->files[end],
-                    (old->length - end)*sizeof(*(&old->files[i])));
-        }
-
-        old->length -= count;
+        j += 1;
     }
+    old->length = j;
 
     if (old->length == 0) {
         error("No files to rename.\n");
@@ -270,6 +250,7 @@ main(int argc, char **argv) {
     if (brn2_options_sort) {
         sort(old);
     }
+    exit(0);
 
     if (!(EDITOR = getenv("EDITOR"))) {
         EDITOR = "vim";
