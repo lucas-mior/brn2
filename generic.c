@@ -269,16 +269,16 @@ _Generic((x), \
   fprintf(stderr, "[%s%zu]%s = %Lf\n", \
                   typename(TYPE), TYPEBITS(VAR), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
-#define PRINT_OTHER(VAR, TYPE, FORMAT) \
+#define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
   fprintf(stderr, "[%s%zu]%s = "FORMAT"\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, VAR)
+                  typename(TYPE), TYPEBITS(VAR), #VAR, (CAST)(uintptr_t)(VAR))
 
 #define PRINT(VAR) \
 _Generic((VAR), \
-  void *:  PRINT_OTHER(VAR,    TYPE_VOIDP, "%p"), \
-  char *:  PRINT_OTHER(VAR,    TYPE_CHARP, "%s"), \
-  bool:    PRINT_OTHER(VAR,    TYPE_BOOL,  "%u"), \
-  char:    PRINT_OTHER(VAR,    TYPE_CHAR,  "%c"), \
+  void *:  PRINT_OTHER(VAR,    TYPE_VOIDP, "%p", void *), \
+  char *:  PRINT_OTHER(VAR,    TYPE_CHARP, "%s", char *), \
+  bool:    PRINT_OTHER(VAR,    TYPE_BOOL,  "%u", bool), \
+  char:    PRINT_OTHER(VAR,    TYPE_CHAR,  "%c", char), \
   schar:   PRINT_SIGNED(VAR,   TYPE_SCHAR),       \
   short:   PRINT_SIGNED(VAR,   TYPE_SHORT),       \
   int:     PRINT_SIGNED(VAR,   TYPE_INT),         \
@@ -375,7 +375,7 @@ main(void) {
         void *var_voidptr = NULL;
         float var_float = FLT_MAX;
         double var_double = DBL_MAX;
-        long double var_longdouble = DBL_MAX;
+        long double var_longdouble = (ldouble)DBL_MAX;
         int8 var_int8 = INT8_MAX;
         int16 var_int16 = INT16_MAX;
         int32 var_int32 = INT32_MAX;
