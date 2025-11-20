@@ -249,7 +249,7 @@ main(int argc, char **argv) {
 
         count = end - start;
         for (uint32 j = start; j < end; j += 1) {
-            error("Removing '%s' from list.\n", old->files[j]->name);
+            fprintf(stderr, "Removing '%s' from list.\n", old->files[j]->name);
         }
 
         if (end < old->length) {
