@@ -2,6 +2,7 @@
 #define GENERIC_C
 
 #include <limits.h>
+#include <float.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -366,8 +367,24 @@ _Generic((x), \
 
 int
 main(void) {
-    assert(true);
+    union Primitive primitive;
+
+    assert(MINOF(primitive.aldouble) == -LDBL_MAX);
+    assert(MINOF(primitive.adouble) == -DBL_MAX);
+    assert(MINOF(primitive.afloat) == -FLT_MAX);
+    assert(MINOF(primitive.aschar) == SCHAR_MIN);
+    assert(MINOF(primitive.ashort) == SHRT_MIN);
+    assert(MINOF(primitive.aint) == INT_MIN);
+    assert(MINOF(primitive.along) == LONG_MIN);
+    assert(MINOF(primitive.allong) == LLONG_MIN);
+    assert(MINOF(primitive.auchar) == 0);
+    assert(MINOF(primitive.aushort) == 0);
+    assert(MINOF(primitive.auint) == 0u);
+    assert(MINOF(primitive.aulong) == 0ul);
+    assert(MINOF(primitive.aullong) == 0ull);
+    assert(MINOF(primitive.abool) == 0);
 }
+
 #endif
 
 #endif
