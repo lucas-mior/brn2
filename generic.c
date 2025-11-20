@@ -134,7 +134,7 @@ _Generic((VAR) \
 )
 
 enum Type {
-    TYPE_VOIDP,
+    TYPE_VOIDP = 1,
     TYPE_CHARP,
     TYPE_BOOL,
     TYPE_CHAR,
