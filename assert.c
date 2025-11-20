@@ -505,10 +505,10 @@ main(void) {
         ASSERT_MORE_EQUAL(b, a);
     }{
         // uncomment to trigger linking error
-        double x = 0.1;
-        void *a = NULL;
-        ASSERT_MORE_EQUAL(x, a);
-        ASSERT_MORE_EQUAL(a, x);
+        /* double x = 0.1; */
+        /* void *a = NULL; */
+        /* ASSERT_MORE_EQUAL(x, a); */
+        /* ASSERT_MORE_EQUAL(a, x); */
     }{
         int a = 0;
         double b = 1;
