@@ -12,7 +12,7 @@
 
 #if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
 #define TESTING_generic 1
-#elif !defined(TESTING_hash)
+#elif !defined(TESTING_generic)
 #define TESTING_generic 0
 #endif
 
@@ -117,7 +117,7 @@ static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
 // clang-format on
 
 #define TYPEID(VAR) \
-_Generic((VAR) \
+_Generic((VAR), \
   void *:     TYPE_VOIDP,  \
   char *:     TYPE_CHARP,  \
   bool:       TYPE_BOOL,   \
@@ -258,6 +258,7 @@ _Generic((x), \
 #if TESTING_generic
 #include <assert.h>
 #include <stdint.h>
+#include <string.h>
 
 // clang-format off
 
@@ -294,6 +295,21 @@ main(void) {
     assert(MAXOF(primitive.aulong)   == ULONG_MAX);
     assert(MAXOF(primitive.aullong)  == ULLONG_MAX);
     assert(MAXOF(primitive.abool)    == 1);
+
+    assert(!strcmp(TYPENAME(primitive.aldouble), typename(TYPEID(primitive.aldouble))));
+    assert(!strcmp(TYPENAME(primitive.adouble) , typename(TYPEID(primitive.adouble))));
+    assert(!strcmp(TYPENAME(primitive.afloat)  , typename(TYPEID(primitive.afloat))));
+    assert(!strcmp(TYPENAME(primitive.aschar)  , typename(TYPEID(primitive.aschar))));
+    assert(!strcmp(TYPENAME(primitive.ashort)  , typename(TYPEID(primitive.ashort))));
+    assert(!strcmp(TYPENAME(primitive.aint)    , typename(TYPEID(primitive.aint))));
+    assert(!strcmp(TYPENAME(primitive.along)   , typename(TYPEID(primitive.along))));
+    assert(!strcmp(TYPENAME(primitive.allong)  , typename(TYPEID(primitive.allong))));
+    assert(!strcmp(TYPENAME(primitive.auchar)  , typename(TYPEID(primitive.auchar))));
+    assert(!strcmp(TYPENAME(primitive.aushort) , typename(TYPEID(primitive.aushort))));
+    assert(!strcmp(TYPENAME(primitive.auint)   , typename(TYPEID(primitive.auint))));
+    assert(!strcmp(TYPENAME(primitive.aulong)  , typename(TYPEID(primitive.aulong))));
+    assert(!strcmp(TYPENAME(primitive.aullong) , typename(TYPEID(primitive.aullong))));
+    assert(!strcmp(TYPENAME(primitive.abool)   , typename(TYPEID(primitive.abool))));
 
     {
         int32 var_int32;
