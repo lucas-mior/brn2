@@ -328,17 +328,17 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP(void);
 #define ASSERT_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
+  void *: _Generic((VAR2), \
+    char *: A_POINTERS(MODE, VAR1, VAR2), \
+    void *: A_POINTERS(MODE, VAR1, VAR2), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP() \
+  ), \
   char *: _Generic((VAR2), \
     char *: a_strings_##MODE(__FILE__, __LINE__, \
                              #VAR1, #VAR2, \
                              (char *)(uintptr_t)(VAR1), \
                              (char *)(uintptr_t)(VAR2)), \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP() \
-  ), \
-  void *: _Generic((VAR2), \
-    char *: A_POINTERS(MODE, VAR1, VAR2), \
-    void *: A_POINTERS(MODE, VAR1, VAR2), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP() \
   ), \
   schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ), \
   short:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ), \
