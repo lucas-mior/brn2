@@ -164,17 +164,17 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
 #endif
 
-#define UTIL_ALIGN_UINT(S, A) (int64)(((S) + ((A) - 1)) & ~((A) - 1))
+#define UTIL_ALIGN_UINT(SIZE, A) (int64)(((SIZE) + ((A) - 1)) & ~((A) - 1))
 #define COMPILE_STOP "aaaaa"
 
-#define UTIL_ALIGN(S, A) \
-_Generic((S), \
-    ullong:  UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-    ulong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-    uint:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-    llong:   UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-    long:    UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
-    int:     UTIL_ALIGN_UINT((uint64)S, (uint64)A), \
+#define UTIL_ALIGN(SIZE, A) \
+_Generic((SIZE), \
+    ullong:  UTIL_ALIGN_UINT((uint64)SIZE, (uint64)A), \
+    ulong:   UTIL_ALIGN_UINT((uint64)SIZE, (uint64)A), \
+    uint:    UTIL_ALIGN_UINT((uint64)SIZE, (uint64)A), \
+    llong:   UTIL_ALIGN_UINT((uint64)SIZE, (uint64)A), \
+    long:    UTIL_ALIGN_UINT((uint64)SIZE, (uint64)A), \
+    int:     UTIL_ALIGN_UINT((uint64)SIZE, (uint64)A), \
     default: COMPILE_STOP \
 )
 
