@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <signal.h>
 
-#include "generic.h"
+#include "generic.c"
 
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 

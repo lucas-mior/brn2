@@ -35,7 +35,7 @@
 #include <assert.h>
 #include <float.h>
 
-#include "generic.h"
+#include "generic.c"
 
 #if defined(__linux__)
 #define OS_LINUX 1
