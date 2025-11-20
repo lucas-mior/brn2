@@ -39,6 +39,8 @@ typedef uint64_t uint64;
 _Generic((VAR), \
   void *:  "void*",   \
   char *:  "char*",   \
+  bool:    "bool",    \
+  char:    "char",    \
   schar:   "schar",   \
   short:   "short",   \
   int:     "int",     \
