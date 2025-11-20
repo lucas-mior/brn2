@@ -9,6 +9,12 @@
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
+#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#define TESTING_generic 1
+#elif !defined(TESTING_hash)
+#define TESTING_generic 0
+#endif
+
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -353,6 +359,15 @@ _Generic((x), \
 #define LDOUBLE_GET2(VAR, TYPE) ldouble_get((union Primitive)(VAR), TYPE)
 #else
 #define LDOUBLE_GET2(VAR, TYPE) LDOUBLE_GET(VAR)
+#endif
+
+#if TESTING_generic
+#include <assert.h>
+
+int
+main(void) {
+    assert(true);
+}
 #endif
 
 #endif
