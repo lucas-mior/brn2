@@ -142,7 +142,7 @@ case "$target" in
     ;;
 "assembly")
     trace_on
-    $CC $CPPFLAGS $CFLAGS -S -o ${program}_$CC.S "$main" $LDFLAGS
+    $CC $CPPFLAGS $CFLAGS -S $LDFLAGS -o ${program}_$CC.S "$main"
     exit
     ;;
 "test")
@@ -165,10 +165,10 @@ case "$target" in
             cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
             cmdline="$cmdline -target x86_64-windows-gnu"
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1"
-            cmdline="$cmdline $src -o /tmp/$src.exe $flags"
+            cmdline="$cmdline $flags -o /tmp/$src.exe $src"
         else
             cmdline="$CC $CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
-            cmdline="$cmdline $src -o /tmp/$src.exe $flags"
+            cmdline="$cmdline $flags -o /tmp/$src.exe $src"
         fi
 
         trace_on
@@ -191,7 +191,7 @@ case "$target" in
     trace_on
     ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
     vtags.sed tags | sort | uniq > .tags.vim       2> /dev/null || true
-    $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
+    $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     trace_off
     ;;
 esac
