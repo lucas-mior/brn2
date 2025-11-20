@@ -174,7 +174,8 @@ union Primitive {
 };
 
 // clang-format off
-static char *typename(enum Type type) {
+static char *
+typename(enum Type type) {
     switch (type) {
     case TYPE_VOIDP:   return "void*";
     case TYPE_CHARP:   return "char*";
