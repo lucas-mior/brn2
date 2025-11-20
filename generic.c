@@ -269,23 +269,23 @@ _Generic((x), \
 
 #define PRINT(VAR) \
 _Generic((VAR), \
-  void *:  PRINT_OTHER(VAR,    TYPE_VOIDP  , "%p"), \
-  char *:  PRINT_OTHER(VAR,    TYPE_CHARP  , "%s"), \
-  bool:    PRINT_UNSIGNED(VAR, TYPE_BOOL   ),   \
-  char:    PRINT_OTHER(VAR,    TYPE_CHAR   , "%c"), \
-  schar:   PRINT_SIGNED(VAR,   TYPE_SCHAR),   \
-  short:   PRINT_SIGNED(VAR,   TYPE_SHORT),   \
-  int:     PRINT_SIGNED(VAR,   TYPE_INT),     \
-  long:    PRINT_SIGNED(VAR,   TYPE_LONG),    \
-  llong:   PRINT_SIGNED(VAR,   TYPE_LLONG),   \
-  uchar:   PRINT_UNSIGNED(VAR, TYPE_UCHAR),   \
-  ushort:  PRINT_UNSIGNED(VAR, TYPE_USHORT),  \
-  uint:    PRINT_UNSIGNED(VAR, TYPE_UINT),    \
-  ulong:   PRINT_UNSIGNED(VAR, TYPE_ULONG),   \
-  ullong:  PRINT_UNSIGNED(VAR, TYPE_ULLONG),  \
-  float:   PRINT_LDOUBLE(VAR,  TYPE_FLOAT),   \
-  double:  PRINT_LDOUBLE(VAR,  TYPE_DOUBLE),  \
-  ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE)  \
+  void *:  PRINT_OTHER(VAR,    TYPE_VOIDP, "%p"), \
+  char *:  PRINT_OTHER(VAR,    TYPE_CHARP, "%s"), \
+  bool:    PRINT_OTHER(VAR,    TYPE_BOOL,  "%u"), \
+  char:    PRINT_OTHER(VAR,    TYPE_CHAR,  "%c"), \
+  schar:   PRINT_SIGNED(VAR,   TYPE_SCHAR),       \
+  short:   PRINT_SIGNED(VAR,   TYPE_SHORT),       \
+  int:     PRINT_SIGNED(VAR,   TYPE_INT),         \
+  long:    PRINT_SIGNED(VAR,   TYPE_LONG),        \
+  llong:   PRINT_SIGNED(VAR,   TYPE_LLONG),       \
+  uchar:   PRINT_UNSIGNED(VAR, TYPE_UCHAR),       \
+  ushort:  PRINT_UNSIGNED(VAR, TYPE_USHORT),      \
+  uint:    PRINT_UNSIGNED(VAR, TYPE_UINT),        \
+  ulong:   PRINT_UNSIGNED(VAR, TYPE_ULONG),       \
+  ullong:  PRINT_UNSIGNED(VAR, TYPE_ULLONG),      \
+  float:   PRINT_LDOUBLE(VAR,  TYPE_FLOAT),       \
+  double:  PRINT_LDOUBLE(VAR,  TYPE_DOUBLE),      \
+  ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE)      \
 )
 
 #if TESTING_generic
