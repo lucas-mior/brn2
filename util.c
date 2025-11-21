@@ -83,12 +83,8 @@
 #define ERROR_NOTIFY 0
 #endif
 
-#if defined(__has_include)
-#if __has_include(<valgrind/valgrind.h>)
+#if defined(__has_include) && __has_include(<valgrind/valgrind.h>)
 #include <valgrind/valgrind.h>
-#else
-#define RUNNING_ON_VALGRIND 0
-#endif
 #else
 #define RUNNING_ON_VALGRIND 0
 #endif

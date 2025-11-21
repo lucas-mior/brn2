@@ -1429,7 +1429,7 @@ main(void) {
 
         brn2_normalize_names(old, NULL);
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
-            ASSERT_EQUAL(files2[i].normalized, old->files[i]->name);
+            ASSERT_EQUAL(files2[i].normalized, (char *)old->files[i]->name);
         }
         brn2_free_list(old);
         arenas_destroy(old->arenas, nthreads);
