@@ -849,8 +849,12 @@ error(char *format, ...) {
     n = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    if (n <= 0 || n >= (int32)sizeof(buffer)) {
-        fprintf(stderr, "Error in vsnprintf()\n");
+    if (n <= 0) {
+        fprintf(stderr, "Error in vsnprintf(%s)\n", format);
+        fatal(EXIT_FAILURE);
+    }
+    if (n >= SIZEOF(buffer)) {
+        fprintf(stderr, "Error in vsnprintf(%s): Buffer too small.\n", format);
         fatal(EXIT_FAILURE);
     }
 
