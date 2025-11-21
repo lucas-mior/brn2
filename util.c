@@ -700,6 +700,7 @@ util_command(const int argc, char **argv) {
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
     int64 len = strlen64(argv[0]);
+    bool malloced_argv0 = false;
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
@@ -715,6 +716,7 @@ util_command(const int argc, char **argv) {
             memcpy64(argv0_windows, argv[0], len);
             memcpy64(argv0_windows + len, exe, exe_len + 1);
             argv[0] = argv0_windows;
+            malloced_argv0 = true;
         }
     }
 
@@ -734,6 +736,10 @@ util_command(const int argc, char **argv) {
             j += len2 + 3;
         }
         cmdline[j - 1] = '\0';
+    }
+
+    if (malloced_argv0) {
+        free(argv[0]);
     }
 
     if ((tty = freopen("CONIN$", "r", stdin)) == NULL) {
