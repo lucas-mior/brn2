@@ -874,8 +874,8 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
                       newname, oldname, newname);
                 error("To disable this behaviour,"
                       " don't pass the --implict option.\n");
-                hash_insert_pre_calc_map(oldlist_map, newname, newhash,
-                                         newindex, i);
+                hash_insert_pre_calc_map(oldlist_map,
+                                         newname, newhash, newindex, i);
             }
             return;
         } else if (errno != ENOENT) {
