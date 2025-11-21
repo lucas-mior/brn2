@@ -83,11 +83,11 @@ static struct WorkQueue {
 bool stop_threads = false;
 
 static void *
-xarena_push(Arena **arenas, uint32 number, uint32 size) {
+xarena_push(Arena **arenas, uint32 number, int64 size) {
     void *p;
 
     if ((p = arenas_push(arenas, number, size)) == NULL) {
-        error("Error pushing %u bytes into arenas %p: %s.", size,
+        error("Error pushing %lld bytes into arenas %p: %s.", (llong)size,
               (void *)arenas, arena_strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -347,7 +347,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
-            uint32 size;
+            int64 size;
             int64 name_length = pointer - begin;
             if (name_length >= MAXOF(file->length)) {
                 error("Too long line. Skipping...\n");

@@ -53,8 +53,13 @@
 #define ALIGNMENT BRN2_ALIGNMENT
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
-#define ALIGN(x) BRN2_ALIGN(x, BRN2_ALIGNMENT)
-#define BRN2_ALIGN(S, A) (((S) + ((A) - 1)) & ~((A) - 1))
+
+#if !defined(ALIGNMENT)
+#define ALIGNMENT 16ul
+#endif
+#if !defined(ALIGN)
+#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
+#endif
 
 #define HASH_VALUE_TYPE uint32
 #define HASH_PADDING_TYPE uint32
