@@ -477,7 +477,7 @@ xmalloc(int64 size) {
 }
 
 INLINE void *
-xrealloc(void *old, const int64 size) {
+xrealloc(void *old, int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
 
@@ -501,7 +501,7 @@ xrealloc(void *old, const int64 size) {
 }
 
 static void *
-xcalloc(const size_t nmemb, const size_t size) {
+xcalloc(size_t nmemb, size_t size) {
     void *p;
     if ((p = calloc(nmemb, size)) == NULL) {
         error("Error allocating %zu members of %zu bytes each.\n", nmemb, size);
@@ -694,7 +694,7 @@ snprintf2(char *buffer, int size, char *format, ...) {
 
 #if OS_WINDOWS
 static int
-util_command(const int argc, char **argv) {
+util_command(int argc, char **argv) {
     char cmdline[1024] = {0};
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
@@ -788,7 +788,7 @@ util_command(const int argc, char **argv) {
 }
 #else
 static int
-util_command(const int argc, char **argv) {
+util_command(int argc, char **argv) {
     pid_t child;
     int status;
 
@@ -916,7 +916,7 @@ util_segv_handler(int32 unused) {
 // clang-format on
 
 static int32
-util_string_int32(int32 *number, const char *string) {
+util_string_int32(int32 *number, char *string) {
     char *endptr;
     long x;
     errno = 0;
@@ -932,7 +932,7 @@ util_string_int32(int32 *number, const char *string) {
 }
 
 static void __attribute__((noreturn))
-util_die_notify(char *program_name, const char *format, ...) {
+util_die_notify(char *program_name, char *format, ...) {
     int32 n;
     va_list args;
     char buffer[BUFSIZ];
@@ -967,7 +967,7 @@ util_memdup(void *source, int64 size) {
 
 #if OS_UNIX
 static int32
-util_copy_file_sync(const char *destination, const char *source) {
+util_copy_file_sync(char *destination, char *source) {
     int32 source_fd;
     int32 destination_fd;
     char buffer[BUFSIZ];
@@ -1017,8 +1017,7 @@ util_copy_file_sync(const char *destination, const char *source) {
 }
 
 static int32
-util_copy_file_async(const char *destination, const char *source,
-                     int *dest_fd) {
+util_copy_file_async(char *destination, char *source, int *dest_fd) {
     int32 source_fd;
 
     if ((source_fd = open(source, O_RDONLY)) < 0) {
@@ -1042,7 +1041,7 @@ util_copy_file_async(const char *destination, const char *source,
 #if OS_LINUX
 #include <dirent.h>
 static void
-send_signal(char *executable, const int32 signal_number) {
+send_signal(char *executable, int32 signal_number) {
     DIR *processes;
     struct dirent *process;
     int64 len = strlen64(executable);
