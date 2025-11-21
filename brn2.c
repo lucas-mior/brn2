@@ -907,8 +907,8 @@ brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
         }
         return;
     } else {
-        if (hash_insert_pre_calc_set(names_renamed, oldname, oldhash,
-                                     oldindex)) {
+        if (hash_insert_pre_calc_set(names_renamed,
+                                     oldname, oldhash, oldindex)) {
             *number_renames += 1;
         }
         print("%s -> "GREEN"%s"RESET"\n", oldname, newname);
