@@ -70,9 +70,9 @@
 #include "hash.c"
 
 #if defined(__GNUC__)
-# define BRN2_ASSUME_ALIGNED(X) do { \
+#define BRN2_ASSUME_ALIGNED(X) do { \
     X = __builtin_assume_aligned(X, BRN2_ALIGNMENT); \
-    } while (0)
+} while (0)
 #else
 #define BRN2_ASSUME_ALIGNED(X) do {} while (0)
 #endif
