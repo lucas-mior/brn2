@@ -103,7 +103,7 @@ static char *program;
 
 static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
-#define SIZEOF(X) (int64)sizeof(X)
+#define SIZEOF(X) ((int64)sizeof(X))
 
 #if !defined(SIZEKB)
 #define SIZEKB(X) ((int64)(X)*1024ll)
