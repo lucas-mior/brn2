@@ -900,6 +900,7 @@ fatal(int status) {
     }
 }
 
+// clang-format off
 void
 util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
@@ -907,11 +908,12 @@ util_segv_handler(int32 unused) {
 
     write64(STDERR_FILENO, message, (uint32)strlen64(message));
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
-        execlp(notifiers[i], notifiers[i], "-u", "critical", program, message,
-               NULL);
+        execlp(notifiers[i],
+               notifiers[i], "-u", "critical", program, message, NULL);
     }
     _exit(EXIT_FAILURE);
 }
+// clang-format on
 
 static int32
 util_string_int32(int32 *number, const char *string) {
