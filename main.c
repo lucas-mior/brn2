@@ -260,6 +260,8 @@ main(int argc, char **argv) {
         char *pointer = write_buffer;
         uint32 capacity_set;
         uint32 j = 0;
+        int64 w;
+        int64 buffered;
 #if OS_UNIX
         char *temp = "/tmp";
 #else
@@ -287,7 +289,6 @@ main(int argc, char **argv) {
             FileName *file = old->files[i];
             uint32 index = old->indexes[i];
             bool contains_newline;
-            int64 buffered;
 
             if ((contains_newline = memchr64(file->name, '\n', file->length))
                 || !hash_insert_pre_calc_map(oldlist_map, file->name,
@@ -307,25 +308,44 @@ main(int argc, char **argv) {
                 continue;
             }
 
+            buffered = pointer - write_buffer;
+            if (buffered >= BRN2_PATH_MAX) {
+                if ((w = write64(brn2_buffer.fd, write_buffer, buffered))
+                    != buffered) {
+                    error("Error writing %lld bytes to buffer (line %u)",
+                          (llong)buffered, i);
+                    if (w < 0) {
+                        error(": %s", strerror(errno));
+                    }
+                    error(".\n");
+                    fatal(EXIT_FAILURE);
+                }
+                pointer = write_buffer;
+            }
+
             if (j != i) {
                 old->files[j] = file;
                 old->indexes[j] = index;
             }
             j += 1;
 
-            buffered = pointer - write_buffer;
-            if (buffered >= BRN2_PATH_MAX) {
-                write64(brn2_buffer.fd, write_buffer, buffered);
-                pointer = write_buffer;
-            }
-
             file->name[file->length] = '\n';
             memcpy(pointer, file->name, file->length + 1);
             pointer += file->length + 1;
             file->name[file->length] = '\0';
         }
-        old->length = j;
-        write64(brn2_buffer.fd, write_buffer, pointer - write_buffer);
+        buffered = pointer - write_buffer;
+        if ((w = write64(brn2_buffer.fd, write_buffer, buffered)) != buffered) {
+            error("Error writing %lld bytes to buffer (last line)",
+                  (llong)buffered);
+            if (w < 0) {
+                error(": %s", strerror(errno));
+            }
+            error(".\n");
+            fatal(EXIT_FAILURE);
+        } else {
+            old->length = j;
+        }
         if (close(brn2_buffer.fd) < 0) {
             error("Error closing buffer: %s\n", strerror(errno));
             fatal(EXIT_FAILURE);
