@@ -212,12 +212,9 @@ main(int argc, char **argv) {
     }
 
     for (uint32 i = 0; i < nthreads; i += 1) {
-        int err;
         thread_ids[i] = i;
-        if ((err = pthread_create(&thread_pool[i], NULL, brn2_threads_function,
-                                  &thread_ids[i]))) {
-            error("Error joining thread %u: %s.\n", i, strerror(err));
-        }
+        xpthread_create(&thread_pool[i], NULL, brn2_threads_function,
+                        &thread_ids[i]);
     }
 #endif
 
