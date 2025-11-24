@@ -135,7 +135,7 @@ $ brn2 --file rename
   [`sort(1)`](https://man7.org/linux/man-pages/man1/sort.1.html), and
   [`cut(1)`](https://man7.org/linux/man-pages/man1/cut.1.html)).
 ```
-$ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -f -
+$ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -s -f -
 ```
  
 ## Changes over original brn
