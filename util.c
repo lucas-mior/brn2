@@ -944,7 +944,6 @@ util_die_notify(char *program_name, char *format, ...) {
     if (n < 0) {
         fatal(EXIT_FAILURE);
     }
-
     if (n >= SIZEOF(buffer)) {
         fatal(EXIT_FAILURE);
     }
