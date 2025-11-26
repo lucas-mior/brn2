@@ -198,16 +198,16 @@ static llong
 typebits(enum Type type) {
     llong size;
     union Primitive primitive;
-    void **unused;
+    void **pointer;
 
     switch (type) {
     case TYPE_VOIDP:
-        unused = &(primitive.avoidp);
-        size = ((char*)(unused + 1)) - (char*)unused;
+        pointer = &(primitive.avoidp);
+        size = ((char*)(pointer + 1)) - (char*)pointer;
         break;
     case TYPE_CHARP:
-        unused = (void*)&(primitive.acharp);
-        size = ((char*)(unused + 1)) - (char*)unused;
+        pointer = (void*)&(primitive.acharp);
+        size = ((char*)(pointer + 1)) - (char*)pointer;
         break;
     case TYPE_BOOL:    size = sizeof(bool);    break;
     case TYPE_CHAR:    size = sizeof(char);    break;
