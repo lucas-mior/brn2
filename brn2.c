@@ -257,20 +257,6 @@ brn2_list_from_dir(FileList *list, char *directory) {
     return;
 }
 
-void
-brn2_free_list(FileList *list) {
-    if (DEBUGGING) {
-        for (uint32 i = 0; i < list->length; i += 1) {
-            FileName *file = list->files[i];
-            (void)file;
-            ASSERT(arenas_pop(list->arenas, nthreads, file));
-        }
-    }
-    free(list->files);
-    arenas_reset(list->arenas, nthreads);
-    return;
-}
-
 #if defined(__linux__)
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
@@ -494,6 +480,20 @@ brn2_is_invalid_name(char *filename) {
         filename += 1;
     }
     return true;
+}
+
+void
+brn2_free_list(FileList *list) {
+    if (DEBUGGING) {
+        for (uint32 i = 0; i < list->length; i += 1) {
+            FileName *file = list->files[i];
+            (void)file;
+            ASSERT(arenas_pop(list->arenas, nthreads, file));
+        }
+    }
+    free(list->files);
+    arenas_reset(list->arenas, nthreads);
+    return;
 }
 
 void *
