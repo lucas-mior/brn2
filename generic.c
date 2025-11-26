@@ -311,19 +311,19 @@ _Generic((x), \
 // clang-format off
 
 #define PRINT_SIGNED(VAR, TYPE) \
-  fprintf(stderr, "[%s%lld]%s = %lld", \
+  fprintf(stderr, "[%s%lld]%s = %lld ", \
                   typename(TYPE), typebits(TYPE), #VAR, (llong)(VAR))
 
 #define PRINT_UNSIGNED(VAR, TYPE) \
-  fprintf(stderr, "[%s%lld]%s = %llu", \
+  fprintf(stderr, "[%s%lld]%s = %llu ", \
                   typename(TYPE), typebits(TYPE), #VAR, (ullong)(VAR))
 
 #define PRINT_LDOUBLE(VAR, TYPE) \
-  fprintf(stderr, "[%s%lld]%s = %Lf", \
+  fprintf(stderr, "[%s%lld]%s = %Lf ", \
                   typename(TYPE), typebits(TYPE), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
-  fprintf(stderr, "[%s%lld]%s = "FORMAT"", \
+  fprintf(stderr, "[%s%lld]%s = "FORMAT" ", \
                   typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr_t)(VAR))
 
 #define PRINT(VAR) \
@@ -467,7 +467,7 @@ main(void) {
         PRINTLN(var_char);
         PRINTLN(var_int8);
         PRINTLN(var_int16);
-        PRINTLN(var_int32);
+        PRINT(var_int32);
         PRINTLN(var_int);
         PRINTLN(var_int64);
         PRINTLN(var_uint8);
