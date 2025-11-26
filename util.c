@@ -476,14 +476,16 @@ INLINE void *
 xmalloc(int64 size) {
     void *p;
 
-    if (size <= 0) {
-        error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
-        fatal(EXIT_FAILURE);
-    }
-    if ((ullong)size >= (ullong)SIZE_MAX) {
-        error("Error in xmalloc: Number (%lld) is bigger than SIZEMAX\n",
-              (llong)size);
-        fatal(EXIT_FAILURE);
+    if (DEBUGGING) {
+        if (size <= 0) {
+            error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
+            fatal(EXIT_FAILURE);
+        }
+        if ((ullong)size >= (ullong)SIZE_MAX) {
+            error("Error in xmalloc: Number (%lld) is bigger than SIZEMAX\n",
+                  (llong)size);
+            fatal(EXIT_FAILURE);
+        }
     }
 
     if ((p = malloc((size_t)size)) == NULL) {
@@ -498,14 +500,16 @@ xrealloc(void *old, int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
 
-    if (size <= 0) {
-        error("Error in xrealloc: invalid size = %lld.\n", (long long)size);
-        fatal(EXIT_FAILURE);
-    }
-    if ((ullong)size >= (ullong)SIZE_MAX) {
-        error("Error in xrealloc: Number (%lld) is bigger than SIZEMAX\n",
-              (llong)size);
-        fatal(EXIT_FAILURE);
+    if (DEBUGGING) {
+        if (size <= 0) {
+            error("Error in xrealloc: invalid size = %lld.\n", (long long)size);
+            fatal(EXIT_FAILURE);
+        }
+        if ((ullong)size >= (ullong)SIZE_MAX) {
+            error("Error in xrealloc: Number (%lld) is bigger than SIZEMAX\n",
+                  (llong)size);
+            fatal(EXIT_FAILURE);
+        }
     }
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
