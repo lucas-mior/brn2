@@ -229,11 +229,8 @@ typebits(enum Type type) {
     return size*CHAR_BIT;
 }
 
-// clang-format on
-
 #define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
 
-// clang-format off
 static char *
 typename(enum Type type) {
     switch (type) {
