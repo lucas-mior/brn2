@@ -512,6 +512,7 @@ main(void) {
     }{
         int a = 0;
         double b = 1;
+        float array[10] = {0};
         struct sigaction signal_action;
         signal_action.sa_handler = handler_failed_assertion;
         sigemptyset(&signal_action.sa_mask);
@@ -551,6 +552,12 @@ main(void) {
 
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_LESS_EQUAL(b, a);
+        }
+        ASSERT(assertion_failed);
+        assertion_failed = false;
+
+        if (sigsetjmp(assert_env, 1) == 0) {
+            ASSERT_LESS((void *)&array[1], (void *)&array[0]);
         }
         ASSERT(assertion_failed);
         assertion_failed = false;
