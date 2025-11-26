@@ -37,8 +37,8 @@ typedef uint64_t uint64;
 
 #define TYPENAME(VAR) \
 _Generic((VAR), \
-    void *:  "void*",  \
-    char *:  "char*",  \
+    void*:   "void*",  \
+    char*:   "char*",  \
     bool:    "bool",   \
     char:    "char",   \
     schar:   "schar",  \
@@ -95,12 +95,12 @@ _Generic((VARIABLE), \
 )
 
 // clang-format off
-static ldouble ldouble_from_voidp(void *x) {
+static ldouble ldouble_from_voidp(void* x) {
     (void)x;
     *(volatile int *)0 = 0;
     return 0.0l;
 }
-static ldouble ldouble_from_charp(char *x) {
+static ldouble ldouble_from_charp(char* x) {
     (void)x;
     *(volatile int *)0 = 0;
     return 0.0l;
@@ -155,8 +155,8 @@ enum Type {
 
 #define TYPEID(VAR) \
 _Generic((VAR), \
-    void *:  TYPE_VOIDP,  \
-    char *:  TYPE_CHARP,  \
+    void*:   TYPE_VOIDP,  \
+    char*:   TYPE_CHARP,  \
     bool:    TYPE_BOOL,   \
     char:    TYPE_CHAR,   \
     schar:   TYPE_SCHAR,  \
@@ -203,11 +203,11 @@ typebits(enum Type type) {
     switch (type) {
     case TYPE_VOIDP:
         unused = &(primitive.avoidp);
-        size = ((char *)(unused + 1)) - (char *)unused;
+        size = ((char*)(unused + 1)) - (char*)unused;
         break;
     case TYPE_CHARP:
-        unused = (void *)&(primitive.acharp);
-        size = ((char *)(unused + 1)) - (char *)unused;
+        unused = (void*)&(primitive.acharp);
+        size = ((char*)(unused + 1)) - (char*)unused;
         break;
     case TYPE_BOOL:    size = sizeof(bool);    break;
     case TYPE_CHAR:    size = sizeof(char);    break;
@@ -286,8 +286,8 @@ ldouble_get(union Primitive var, enum Type type) {
 
 #define LDOUBLE_GET(x) \
 _Generic((x), \
-    void *:  ldouble_from_voidp,  \
-    char *:  ldouble_from_charp,  \
+    void*:   ldouble_from_voidp,  \
+    char*:   ldouble_from_charp,  \
     bool:    ldouble_from_char,   \
     char:    ldouble_from_bool,   \
     schar:   ldouble_from_schar,  \
@@ -331,8 +331,8 @@ _Generic((x), \
 
 #define PRINT(VAR) \
 _Generic((VAR), \
-    void *:  PRINT_OTHER(VAR,    TYPE_VOIDP, "%p",   void *), \
-    char *:  PRINT_OTHER(VAR,    TYPE_CHARP, "%s",   char *), \
+    void*:   PRINT_OTHER(VAR,    TYPE_VOIDP, "%p",   void*), \
+    char*:   PRINT_OTHER(VAR,    TYPE_CHARP, "%s",   char*), \
     bool:    PRINT_OTHER(VAR,    TYPE_BOOL,  "%u",   bool),   \
     char:    PRINT_OTHER(VAR,    TYPE_CHAR,  "'%c'", char),   \
     schar:   PRINT_SIGNED(VAR,   TYPE_SCHAR),                 \
@@ -442,8 +442,8 @@ main(void) {
     }
 
     {
-        void *var_voidptr = NULL;
-        char *var_string = "a nice string";
+        void* var_voidptr = NULL;
+        char* var_string = "a nice string";
         bool var_bool = true;
         char var_char = 'c';
         int8 var_int8 = INT8_MAX;
