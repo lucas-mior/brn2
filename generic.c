@@ -444,6 +444,7 @@ main(void) {
     {
         void* var_voidptr = NULL;
         char* var_string = "a nice string";
+        char var_buffer[128] = "a nice buffer";
         bool var_bool = true;
         char var_char = 'c';
         int8 var_int8 = INT8_MAX;
@@ -459,7 +460,6 @@ main(void) {
         float var_float = FLT_MAX;
         double var_double = DBL_MAX;
         long double var_longdouble = (ldouble)DBL_MAX;
-        char var_buffer[128] = "a nice buffer";
 
         PRINT(var_voidptr);
         PRINT(var_string);
