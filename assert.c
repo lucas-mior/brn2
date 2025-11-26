@@ -109,11 +109,11 @@ static void \
 a_both_##TYPE##_##MODE(char *file, uint line, \
                        char *name1, char *name2, \
                        char *type1, char *type2, \
-                       uint bits1, uint bits2, \
+                       llong bits1, llong bits2, \
                        TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("[%s%u]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%u]\n", \
+        error2("[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         trap(); \
     } \
@@ -159,11 +159,11 @@ static void \
 a_signed_unsigned##MODE(char *file, uint line, \
                         char *name1, char *name2, \
                         char *type1, char *type2, \
-                        uint bits1, uint bits2, \
+                        llong bits1, llong bits2, \
                         llong var1, ullong var2) { \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("[%s%u]%s = %lld " #SYMBOL " %llu = %s[%s%u]\n", \
+        error2("[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         trap(); \
     } \
@@ -183,11 +183,11 @@ static void \
 a_unsigned_signed_##MODE(char *file, uint line, \
                          char *name1, char *name2, \
                          char *type1, char *type2, \
-                         uint bits1, uint bits2, \
+                         llong bits1, llong bits2, \
                          ullong var1, llong var2) { \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("[%s%u]%s = %llu " #SYMBOL " %lld = %s[%s%u]\n", \
+        error2("[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         trap(); \
     } \
@@ -207,11 +207,11 @@ static void \
 a_ldouble_##MODE(char *file, uint line, \
                  char *name1, char *name2, \
                  char *type1, char *type2, \
-                 uint bits1, uint bits2, \
+                 llong bits1, llong bits2, \
                  ldouble var1, ldouble var2) { \
     if (!(var1 SYMBOL var2)) { \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
-        error2("[%s%u]%s = %Lf " #SYMBOL " %Lf = %s[%s%u]\n", \
+        error2("[%s%lld]%s = %Lf " #SYMBOL " %Lf = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         trap(); \
     } \
