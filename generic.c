@@ -192,6 +192,8 @@ union Primitive {
     ldouble aldouble;
 };
 
+// clang-format off
+
 static llong
 typebits(enum Type type) {
     llong size;
@@ -207,57 +209,27 @@ typebits(enum Type type) {
         unused = (void *)&(primitive.acharp);
         size = ((char *)(unused + 1)) - (char *)unused;
         break;
-    case TYPE_BOOL:
-        size = sizeof(bool);
-        break;
-    case TYPE_CHAR:
-        size = sizeof(char);
-        break;
-    case TYPE_SCHAR:
-        size = sizeof(schar);
-        break;
-    case TYPE_SHORT:
-        size = sizeof(short);
-        break;
-    case TYPE_INT:
-        size = sizeof(int);
-        break;
-    case TYPE_LONG:
-        size = sizeof(long);
-        break;
-    case TYPE_LLONG:
-        size = sizeof(llong);
-        break;
-    case TYPE_UCHAR:
-        size = sizeof(uchar);
-        break;
-    case TYPE_USHORT:
-        size = sizeof(ushort);
-        break;
-    case TYPE_UINT:
-        size = sizeof(uint);
-        break;
-    case TYPE_ULONG:
-        size = sizeof(ulong);
-        break;
-    case TYPE_ULLONG:
-        size = sizeof(ullong);
-        break;
-    case TYPE_FLOAT:
-        size = sizeof(float);
-        break;
-    case TYPE_DOUBLE:
-        size = sizeof(double);
-        break;
-    case TYPE_LDOUBLE:
-        size = sizeof(ldouble);
-        break;
-    default:
-        *(volatile int *)0 = 0;
-        return 0.0l;
+    case TYPE_BOOL:    size = sizeof(bool);    break;
+    case TYPE_CHAR:    size = sizeof(char);    break;
+    case TYPE_SCHAR:   size = sizeof(schar);   break;
+    case TYPE_SHORT:   size = sizeof(short);   break;
+    case TYPE_INT:     size = sizeof(int);     break;
+    case TYPE_LONG:    size = sizeof(long);    break;
+    case TYPE_LLONG:   size = sizeof(llong);   break;
+    case TYPE_UCHAR:   size = sizeof(uchar);   break;
+    case TYPE_USHORT:  size = sizeof(ushort);  break;
+    case TYPE_UINT:    size = sizeof(uint);    break;
+    case TYPE_ULONG:   size = sizeof(ulong);   break;
+    case TYPE_ULLONG:  size = sizeof(ullong);  break;
+    case TYPE_FLOAT:   size = sizeof(float);   break;
+    case TYPE_DOUBLE:  size = sizeof(double);  break;
+    case TYPE_LDOUBLE: size = sizeof(ldouble); break;
+    default: *(volatile int *)0 = 0; return 0.0l;
     }
     return size*CHAR_BIT;
 }
+
+// clang-format on
 
 #define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
 
