@@ -151,6 +151,8 @@ enum Type {
     TYPE_LDOUBLE,
 };
 
+// clang-format off
+
 #define TYPEID(VAR) \
 _Generic((VAR), \
     void *:  TYPE_VOIDP,  \
@@ -173,26 +175,24 @@ _Generic((VAR), \
 )
 
 union Primitive {
-    void *avoidp;
-    char *acharp;
-    bool abool;
-    char achar;
-    schar aschar;
-    short ashort;
-    int aint;
-    long along;
-    llong allong;
-    uchar auchar;
-    ushort aushort;
-    uint auint;
-    ulong aulong;
-    ullong aullong;
-    float afloat;
-    double adouble;
+    void*   avoidp;
+    char*   acharp;
+    bool    abool;
+    char    achar;
+    schar   aschar;
+    short   ashort;
+    int     aint;
+    long    along;
+    llong   allong;
+    uchar   auchar;
+    ushort  aushort;
+    uint    auint;
+    ulong   aulong;
+    ullong  aullong;
+    float   afloat;
+    double  adouble;
     ldouble aldouble;
 };
-
-// clang-format off
 
 static llong
 typebits(enum Type type) {
