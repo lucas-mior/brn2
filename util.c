@@ -894,7 +894,7 @@ void
 fatal(int status) {
     if (DEBUGGING) {
         (void)status;
-        abort();
+        trap();
     } else {
         exit(status);
     }
