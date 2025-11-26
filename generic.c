@@ -224,7 +224,7 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
-    default: *(volatile int *)0 = 0; return 0.0l;
+    default: *(volatile int *)0 = 0; return 0ll;
     }
     return size*CHAR_BIT;
 }
