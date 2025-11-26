@@ -693,6 +693,16 @@ xpthread_create(pthread_t *thread, pthread_attr_t *attr,
     return;
 }
 
+static void
+xpthread_join(pthread_t thread, void **thread_return) {
+    int err;
+    if ((err = pthread_join(thread, thread_return))) {
+        error("Error joining thread: %s.\n", strerror(err));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
 static int32 __attribute__((format(printf, 3, 4)))
 snprintf2(char *buffer, int size, char *format, ...) {
     int n;

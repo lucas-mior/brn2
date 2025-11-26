@@ -658,10 +658,7 @@ brn2_threads_join(void) {
     xpthread_mutex_unlock(&brn2_mutex);
 
     for (uint32 i = 0; i < nthreads; i += 1) {
-        int err;
-        if ((err = pthread_join(thread_pool[i], NULL))) {
-            error("Error joining thread %u: %s.\n", i, strerror(err));
-        }
+        xpthread_join(thread_pool[i], NULL);
     }
 
     xpthread_mutex_destroy(&brn2_mutex);
