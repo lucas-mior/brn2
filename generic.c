@@ -56,8 +56,6 @@ _Generic((VAR), \
     ldouble: "ldouble" \
 )
 
-#define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
-
 #define MINOF(VARIABLE) \
 _Generic((VARIABLE), \
     schar:   SCHAR_MIN, \
@@ -97,10 +95,26 @@ _Generic((VARIABLE), \
 )
 
 // clang-format off
-static ldouble ldouble_from_voidp(void *x)     { (void)x; return 0.0l; }
-static ldouble ldouble_from_charp(char *x)     { (void)x; return 0.0l; }
-static ldouble ldouble_from_bool(bool x)       { (void)x; return 0.0l; }
-static ldouble ldouble_from_char(char x)       { (void)x; return 0.0l; }
+static ldouble ldouble_from_voidp(void *x) {
+    (void)x;
+    *(volatile int *)0 = 0;
+    return 0.0l;
+}
+static ldouble ldouble_from_charp(char *x) {
+    (void)x;
+    *(volatile int *)0 = 0;
+    return 0.0l;
+}
+static ldouble ldouble_from_bool(bool x) {
+    (void)x;
+    *(volatile int *)0 = 0;
+    return 0.0l;
+}
+static ldouble ldouble_from_char(char x) {
+    (void)x;
+    *(volatile int *)0 = 0;
+    return 0.0l;
+}
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x;    }
 static ldouble ldouble_from_short(short x)     { return (ldouble)x;    }
 static ldouble ldouble_from_int(int x)         { return (ldouble)x;    }
@@ -114,6 +128,7 @@ static ldouble ldouble_from_ullong(ullong x)   { return (ldouble)x;    }
 static ldouble ldouble_from_float(float x)     { return (ldouble)x;    }
 static ldouble ldouble_from_double(double x)   { return (ldouble)x;    }
 static ldouble ldouble_from_ldouble(ldouble x) { return x;             }
+
 // clang-format on
 
 enum Type {
@@ -176,6 +191,75 @@ union Primitive {
     double adouble;
     ldouble aldouble;
 };
+
+static llong
+typebits(enum Type type) {
+    llong size;
+    union Primitive primitive;
+    void **unused;
+
+    switch (type) {
+    case TYPE_VOIDP:
+        unused = &(primitive.avoidp);
+        size = ((char *)(unused + 1)) - (char *)unused;
+        break;
+    case TYPE_CHARP:
+        unused = (void *)&(primitive.acharp);
+        size = ((char *)(unused + 1)) - (char *)unused;
+        break;
+    case TYPE_BOOL:
+        size = sizeof(bool);
+        break;
+    case TYPE_CHAR:
+        size = sizeof(char);
+        break;
+    case TYPE_SCHAR:
+        size = sizeof(schar);
+        break;
+    case TYPE_SHORT:
+        size = sizeof(short);
+        break;
+    case TYPE_INT:
+        size = sizeof(int);
+        break;
+    case TYPE_LONG:
+        size = sizeof(long);
+        break;
+    case TYPE_LLONG:
+        size = sizeof(llong);
+        break;
+    case TYPE_UCHAR:
+        size = sizeof(uchar);
+        break;
+    case TYPE_USHORT:
+        size = sizeof(ushort);
+        break;
+    case TYPE_UINT:
+        size = sizeof(uint);
+        break;
+    case TYPE_ULONG:
+        size = sizeof(ulong);
+        break;
+    case TYPE_ULLONG:
+        size = sizeof(ullong);
+        break;
+    case TYPE_FLOAT:
+        size = sizeof(float);
+        break;
+    case TYPE_DOUBLE:
+        size = sizeof(double);
+        break;
+    case TYPE_LDOUBLE:
+        size = sizeof(ldouble);
+        break;
+    default:
+        *(volatile int *)0 = 0;
+        return 0.0l;
+    }
+    return size*CHAR_BIT;
+}
+
+#define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
 
 // clang-format off
 static char *
@@ -258,20 +342,20 @@ _Generic((x), \
 // clang-format off
 
 #define PRINT_SIGNED(VAR, TYPE) \
-  fprintf(stderr, "[%s%zu]%s = %lld\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, (llong)(VAR))
+  fprintf(stderr, "[%s%lld]%s = %lld\n", \
+                  typename(TYPE), typebits(TYPE), #VAR, (llong)(VAR))
 
 #define PRINT_UNSIGNED(VAR, TYPE) \
-  fprintf(stderr, "[%s%zu]%s = %llu\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, (ullong)(VAR))
+  fprintf(stderr, "[%s%lld]%s = %llu\n", \
+                  typename(TYPE), typebits(TYPE), #VAR, (ullong)(VAR))
 
 #define PRINT_LDOUBLE(VAR, TYPE) \
-  fprintf(stderr, "[%s%zu]%s = %Lf\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, LDOUBLE_GET2(VAR, TYPE))
+  fprintf(stderr, "[%s%lld]%s = %Lf\n", \
+                  typename(TYPE), typebits(TYPE),  #VAR, LDOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
-  fprintf(stderr, "[%s%zu]%s = "FORMAT"\n", \
-                  typename(TYPE), TYPEBITS(VAR), #VAR, (CAST)(uintptr_t)(VAR))
+  fprintf(stderr, "[%s%lld]%s = "FORMAT"\n", \
+                  typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr_t)(VAR))
 
 #define PRINT(VAR) \
 _Generic((VAR), \
