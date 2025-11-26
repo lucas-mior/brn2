@@ -332,7 +332,7 @@ _Generic((x), \
 #define PRINT(VAR) \
 _Generic((VAR), \
     void*:   PRINT_OTHER(VAR,    TYPE_VOIDP, "%p",   void*), \
-    char*:   PRINT_OTHER(VAR,    TYPE_CHARP, "%s",   char*), \
+    char*:   PRINT_OTHER(VAR,    TYPE_CHARP, "\"%s\"",   char*), \
     bool:    PRINT_OTHER(VAR,    TYPE_BOOL,  "%u",   bool),   \
     char:    PRINT_OTHER(VAR,    TYPE_CHAR,  "'%c'", char),   \
     schar:   PRINT_SIGNED(VAR,   TYPE_SCHAR),                 \
