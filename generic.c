@@ -323,7 +323,7 @@ _Generic((x), \
 
 #define PRINT_LDOUBLE(VAR, TYPE) \
   fprintf(stderr, "[%s%lld]%s = %Lf\n", \
-                  typename(TYPE), typebits(TYPE),  #VAR, LDOUBLE_GET2(VAR, TYPE))
+                  typename(TYPE), typebits(TYPE), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
   fprintf(stderr, "[%s%lld]%s = "FORMAT"\n", \
