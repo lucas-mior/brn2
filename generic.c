@@ -231,7 +231,7 @@ typebits(enum Type type) {
 
 // clang-format on
 
-#define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
+#define TYPEBITS(VAR) (llong)(sizeof(VAR)*CHAR_BIT)
 
 // clang-format off
 static char *
@@ -327,7 +327,7 @@ _Generic((x), \
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
   fprintf(stderr, "[%s%lld]%s = "FORMAT"\n", \
-                  typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr_t)(VAR))
+                  typename(TYPE), TYPEBITS(VAR), #VAR, (CAST)(uintptr_t)(VAR))
 
 #define PRINT(VAR) \
 _Generic((VAR), \
