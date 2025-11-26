@@ -115,19 +115,19 @@ static ldouble ldouble_from_char(char x) {
     *(volatile int *)0 = 0;
     return 0.0l;
 }
-static ldouble ldouble_from_schar(schar x)     { return (ldouble)x;    }
-static ldouble ldouble_from_short(short x)     { return (ldouble)x;    }
-static ldouble ldouble_from_int(int x)         { return (ldouble)x;    }
-static ldouble ldouble_from_long(long x)       { return (ldouble)x;    }
-static ldouble ldouble_from_llong(llong x)     { return (ldouble)x;    }
-static ldouble ldouble_from_uchar(uchar x)     { return (ldouble)x;    }
-static ldouble ldouble_from_ushort(ushort x)   { return (ldouble)x;    }
-static ldouble ldouble_from_uint(uint x)       { return (ldouble)x;    }
-static ldouble ldouble_from_ulong(ulong x)     { return (ldouble)x;    }
-static ldouble ldouble_from_ullong(ullong x)   { return (ldouble)x;    }
-static ldouble ldouble_from_float(float x)     { return (ldouble)x;    }
-static ldouble ldouble_from_double(double x)   { return (ldouble)x;    }
-static ldouble ldouble_from_ldouble(ldouble x) { return x;             }
+static ldouble ldouble_from_schar(schar x)     { return (ldouble)x; }
+static ldouble ldouble_from_short(short x)     { return (ldouble)x; }
+static ldouble ldouble_from_int(int x)         { return (ldouble)x; }
+static ldouble ldouble_from_long(long x)       { return (ldouble)x; }
+static ldouble ldouble_from_llong(llong x)     { return (ldouble)x; }
+static ldouble ldouble_from_uchar(uchar x)     { return (ldouble)x; }
+static ldouble ldouble_from_ushort(ushort x)   { return (ldouble)x; }
+static ldouble ldouble_from_uint(uint x)       { return (ldouble)x; }
+static ldouble ldouble_from_ulong(ulong x)     { return (ldouble)x; }
+static ldouble ldouble_from_ullong(ullong x)   { return (ldouble)x; }
+static ldouble ldouble_from_float(float x)     { return (ldouble)x; }
+static ldouble ldouble_from_double(double x)   { return (ldouble)x; }
+static ldouble ldouble_from_ldouble(ldouble x) { return x;          }
 
 // clang-format on
 
