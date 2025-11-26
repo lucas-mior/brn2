@@ -393,6 +393,11 @@ X64(read, size_t)
 INLINE int64 \
 CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
+    if (size >= (SIZE_MAX/n)) { \
+        error("Error in %s: Overflow (%lld*%lld)\n", \
+              __func__, (llong)size, (llong)n); \
+        fatal(EXIT_FAILURE); \
+    } \
     if ((size <= 0) || (n <= 0)) { \
         error("Error in %s: Invalid size(%lld) or n(%lld)\n", \
               __func__, (llong)size, (llong)n); \
