@@ -311,19 +311,19 @@ _Generic((x), \
 // clang-format off
 
 #define PRINT_SIGNED(VAR, TYPE) \
-  fprintf(stderr, "[%s%lld]%s = %lld\n", \
+  fprintf(stderr, "[%s%lld]%s = %lld", \
                   typename(TYPE), typebits(TYPE), #VAR, (llong)(VAR))
 
 #define PRINT_UNSIGNED(VAR, TYPE) \
-  fprintf(stderr, "[%s%lld]%s = %llu\n", \
+  fprintf(stderr, "[%s%lld]%s = %llu", \
                   typename(TYPE), typebits(TYPE), #VAR, (ullong)(VAR))
 
 #define PRINT_LDOUBLE(VAR, TYPE) \
-  fprintf(stderr, "[%s%lld]%s = %Lf\n", \
+  fprintf(stderr, "[%s%lld]%s = %Lf", \
                   typename(TYPE), typebits(TYPE), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
-  fprintf(stderr, "[%s%lld]%s = "FORMAT"\n", \
+  fprintf(stderr, "[%s%lld]%s = "FORMAT"", \
                   typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr_t)(VAR))
 
 #define PRINT(VAR) \
@@ -346,6 +346,8 @@ _Generic((VAR), \
     double:  PRINT_LDOUBLE(VAR,  TYPE_DOUBLE),                 \
     ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE)                 \
 )
+
+#define PRINTLN(VAR) do { PRINT(VAR); fprintf(stderr, "\n"); } while (0)
 
 #if TESTING_generic
 #include <assert.h>
@@ -458,28 +460,28 @@ main(void) {
         double var_double = DBL_MAX;
         long double var_longdouble = (ldouble)DBL_MAX;
 
-        PRINT(var_voidptr);
-        PRINT(var_string);
-        PRINT(var_buffer);
-        PRINT(var_bool);
-        PRINT(var_char);
-        PRINT(var_int8);
-        PRINT(var_int16);
-        PRINT(var_int32);
-        PRINT(var_int);
-        PRINT(var_int64);
-        PRINT(var_uint8);
-        PRINT(var_uint16);
-        PRINT(var_uint32);
-        PRINT(var_uint);
-        PRINT(var_uint64);
-        PRINT(var_float);
-        PRINT(var_double);
-        PRINT(var_longdouble);
+        PRINTLN(var_voidptr);
+        PRINTLN(var_string);
+        PRINTLN(var_buffer);
+        PRINTLN(var_bool);
+        PRINTLN(var_char);
+        PRINTLN(var_int8);
+        PRINTLN(var_int16);
+        PRINTLN(var_int32);
+        PRINTLN(var_int);
+        PRINTLN(var_int64);
+        PRINTLN(var_uint8);
+        PRINTLN(var_uint16);
+        PRINTLN(var_uint32);
+        PRINTLN(var_uint);
+        PRINTLN(var_uint64);
+        PRINTLN(var_float);
+        PRINTLN(var_double);
+        PRINTLN(var_longdouble);
 
-        PRINT(*var_string);
-        PRINT(var_uint - (uint)var_int);
-        PRINT((void*)main);
+        PRINTLN(*var_string);
+        PRINTLN(var_uint - (uint)var_int);
+        PRINTLN((void*)main);
     }
 }
 
