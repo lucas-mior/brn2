@@ -413,11 +413,11 @@ main(void) {
     }{
         long a = MINOF(a);
         ulong b = MAXOF(b);
-        ASSERT_NOT_EQUAL(a, b - 1);
-        ASSERT_LESS(a, b - 1);
-        ASSERT_LESS_EQUAL(a, b - 1);
-        ASSERT_MORE(b - 1, a);
-        ASSERT_MORE_EQUAL(b - 1, a);
+        ASSERT_NOT_EQUAL(a, b);
+        ASSERT_LESS(a, b);
+        ASSERT_LESS_EQUAL(a, b);
+        ASSERT_MORE(b, a);
+        ASSERT_MORE_EQUAL(b, a);
     }{
         ulong a = MINOF(a);
         long b = MAXOF(b);
