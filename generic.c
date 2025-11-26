@@ -459,9 +459,11 @@ main(void) {
         float var_float = FLT_MAX;
         double var_double = DBL_MAX;
         long double var_longdouble = (ldouble)DBL_MAX;
+        char var_buffer[128] = "a nice buffer";
 
         PRINT(var_voidptr);
         PRINT(var_string);
+        PRINT(var_buffer);
         PRINT(var_bool);
         PRINT(var_char);
         PRINT(var_int8);
