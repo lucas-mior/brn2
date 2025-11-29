@@ -88,6 +88,10 @@
 #define FLAGS_HUGE_PAGES 0
 #endif
 
+#if !defined(DEBUGGING)
+#define DEBUGGING 0
+#endif
+
 #if !defined(INLINE)
 #if defined(__GNUC__)
 #define INLINE static inline __attribute__((always_inline))
@@ -96,15 +100,14 @@
 #endif
 #endif
 
-#if !defined(INTEGERS)
-#define INTEGERS
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
-typedef unsigned long long ulonglong;
+typedef unsigned long long ullong;
 
 typedef long long llong;
+typedef uintptr_t uintptr;
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -114,7 +117,6 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
-#endif
 
 typedef struct Arena {
     char *name;
@@ -376,11 +378,11 @@ arena_push_index32(Arena *arena, uint32 size) {
 
 static Arena *
 arena_of(Arena *arena, void *p) {
-    uintptr_t pointer_num = (uintptr_t)p;
+    uintptr pointer_num = (uintptr)p;
 
     while (arena) {
-        uintptr_t begin = (uintptr_t)arena->begin;
-        uintptr_t end = (uintptr_t)((char *)arena + arena->size);
+        uintptr begin = (uintptr)arena->begin;
+        uintptr end = (uintptr)((char *)arena + arena->size);
         if ((begin <= pointer_num) && (pointer_num < end)) {
             return arena;
         }
