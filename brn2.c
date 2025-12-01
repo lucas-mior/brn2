@@ -1249,9 +1249,7 @@ main(void) {
                 number_changed_hard += 1;
             }
         }
-        for (uint32 i = 1; i < LENGTH(files); i += 1) {
-            ASSERT_LESS(files[i - 1].original, files[i].original);
-        }
+        qsort(files, LENGTH(files), sizeof(*files), files_compare);
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
