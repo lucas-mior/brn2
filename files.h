@@ -1,8 +1,18 @@
-static struct {
+#include <string.h>
+
+typedef struct FileRename {
     char *original;
     char *renamed;
-} files[] = {
-    {"00a", "02c"},
+} FileRename;
+
+static int
+files_compare(const void *file1, const void *file2) {
+    const FileRename *file11 = file1;
+    const FileRename *file22 = file2;
+    return strcmp(file11->original, file22->original);
+}
+
+static FileRename files[] = {
     {"01b", "01bxx"},
     {"02c", "03d"},
     {"03d", "00a"},
