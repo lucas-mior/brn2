@@ -1385,9 +1385,7 @@ main(void) {
         char command_rmdir[128];
         FILE *args;
 
-        for (uint32 i = 1; i < LENGTH(files2); i += 1) {
-            ASSERT_LESS(files2[i - 1].original, files2[i].original);
-        }
+        qsort(files2, LENGTH(files2), sizeof(*files2), files_compare);
         error("brn2.c: test 4 ...\n");
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
@@ -1424,7 +1422,7 @@ main(void) {
 
         brn2_normalize_names(old, NULL);
         for (uint32 i = 0; i < LENGTH(files2); i += 1) {
-            ASSERT_EQUAL(files2[i].normalized, (char *)old->files[i]->name);
+            ASSERT_EQUAL(files2[i].renamed, (char *)old->files[i]->name);
         }
         brn2_free_list(old);
         arenas_destroy(old->arenas, nthreads);
