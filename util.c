@@ -1260,14 +1260,16 @@ util_equal_files(char *filename_a, char *filename_b) {
             void *map_a;
             void *map_b;
 
-            map_a = mmap(NULL, (size_t)stat_a.st_size, PROT_READ, MAP_PRIVATE,
-                         fd_a, 0);
+            // clang-format off
+            map_a = mmap(NULL, (size_t)stat_a.st_size,
+                         PROT_READ, MAP_PRIVATE, fd_a, 0);
             if (map_a == MAP_FAILED) {
                 error("Error in mmap(%s): %s\n", filename_a, strerror(errno));
                 break;
             }
-            map_b = mmap(NULL, (size_t)stat_a.st_size, PROT_READ, MAP_PRIVATE,
-                         fd_b, 0);
+            map_b = mmap(NULL, (size_t)stat_a.st_size,
+                         PROT_READ, MAP_PRIVATE, fd_b, 0);
+            // clang-format on
             if (map_b == MAP_FAILED) {
                 error("Error in mmap(%s): %s\n", filename_b, strerror(errno));
                 xmunmap(map_a, stat_a.st_size);
