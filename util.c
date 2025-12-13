@@ -731,7 +731,13 @@ util_command(int argc, char **argv) {
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
     int64 len = strlen64(argv[0]);
-    bool malloced_argv0 = false;
+    char argv0_windows[BUFSIZ];
+    char *argv0 = argv[0];
+
+    if (len >= BUFSIZ) {
+        error("Invalid arguments.\n");
+        fatal(EXIT_FAILURE);
+    }
 
     if (argc == 0 || argv == NULL) {
         error("Invalid arguments.\n");
@@ -741,13 +747,10 @@ util_command(int argc, char **argv) {
     {
         char *exe = ".exe";
         int64 exe_len = (int64)(strlen64(exe));
-        char *argv0_windows;
         if (memmem64(argv[0], len + 1, exe, exe_len + 1) == NULL) {
-            argv0_windows = xmalloc(len + exe_len + 1);
             memcpy64(argv0_windows, argv[0], len);
             memcpy64(argv0_windows + len, exe, exe_len + 1);
             argv[0] = argv0_windows;
-            malloced_argv0 = true;
         }
     }
 
@@ -769,9 +772,7 @@ util_command(int argc, char **argv) {
         cmdline[j - 1] = '\0';
     }
 
-    if (malloced_argv0) {
-        free(argv[0]);
-    }
+    argv[0] = argv0;
 
     if ((tty = freopen("CONIN$", "r", stdin)) == NULL) {
         error("Error reopening stdin: %s.\n", strerror(errno));
@@ -822,6 +823,7 @@ static int
 util_command(int argc, char **argv) {
     pid_t child;
     int status;
+    (void)argc;
 
     switch (child = fork()) {
     case 0:
@@ -829,12 +831,12 @@ util_command(int argc, char **argv) {
             error("Error reopening stdin: %s.\n", strerror(errno));
         }
         execvp(argv[0], argv);
-        error("Error running '%s", argv[0]);
-        for (int i = 1; i < argc; i += 1) {
-            error(" %s", argv[i]);
+        error("\nError executing '%s", argv[0]);
+        for (int j = 1; j < argc; j += 1) {
+            error(" %s", argv[j]);
         }
         error("': %s.\n", strerror(errno));
-        fatal(EXIT_FAILURE);
+        exit(2);
     case -1:
         error("Error forking: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
@@ -1207,6 +1209,62 @@ itoa2(long num, char *str) {
 long
 atoi2(char *str) {
     return atoi(str);
+}
+
+static bool
+util_equal_files(char *filename_a, char *filename_b) {
+    int fd_a;
+    int fd_b;
+    char buffer_a[BUFSIZ];
+    char buffer_b[BUFSIZ];
+    int64 total_r = 0;
+    int64 r;
+    struct stat stat_a;
+    struct stat stat_b;
+
+    if ((fd_a = open(filename_a, O_RDONLY)) < 0) {
+        error("Error opening %s: %s.\n", filename_a, strerror(errno));
+        return false;
+    }
+    if ((fd_b = open(filename_b, O_RDONLY)) < 0) {
+        close(fd_a);
+        error("Error opening %s: %s.\n", filename_b, strerror(errno));
+        return false;
+    }
+
+    if (fstat(fd_a, &stat_a) < 0) {
+        error("Error in stat(%s): %s.\n", filename_a, strerror(errno));
+        goto closefalse;
+    }
+    if (fstat(fd_b, &stat_b) < 0) {
+        error("Error in stat(%s): %s.\n", filename_b, strerror(errno));
+        goto closefalse;
+    }
+    if (stat_a.st_size != stat_b.st_size) {
+        goto closefalse;
+    }
+
+    while ((r = read64(fd_a, buffer_a, sizeof(buffer_a))) > 0) {
+        if (read64(fd_b, buffer_b, sizeof(buffer_b)) != r) {
+            goto closefalse;
+        }
+        if (memcmp64(buffer_a, buffer_b, r)) {
+            goto closefalse;
+        }
+        total_r += r;
+    }
+    if (r < 0) {
+        error("Error reading from %s: %s", filename_a, strerror(errno));
+    }
+    if (total_r == stat_a.st_size) {
+        close(fd_a);
+        close(fd_b);
+        return true;
+    }
+closefalse:
+    close(fd_a);
+    close(fd_b);
+    return false;
 }
 
 #if TESTING_util
