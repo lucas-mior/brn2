@@ -1255,6 +1255,45 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
 
+#if OS_UNIX
+    do {
+        if (stat_a.st_size > 0) {
+            void *map_a;
+            void *map_b;
+
+            map_a = mmap(NULL, stat_a.st_size, PROT_READ, MAP_PRIVATE, fd_a, 0);
+            if (map_a == MAP_FAILED) {
+                error("Error in mmap(%s): %s\n", filename_a, strerror(errno));
+                break;
+            }
+            map_b = mmap(NULL, stat_a.st_size, PROT_READ, MAP_PRIVATE, fd_b, 0);
+            if (map_b == MAP_FAILED) {
+                error("Error in mmap(%s): %s\n", filename_b, strerror(errno));
+                if (munmap(map_a, stat_a.st_size) < 0) {
+                    error("Error in munmap: %s.\n", strerror(errno));
+                }
+                break;
+            }
+
+            if (memcmp(map_a, map_b, stat_a.st_size)) {
+                result = false;
+            } else {
+                result = true;
+            }
+
+            if (munmap(map_a, stat_a.st_size) < 0) {
+                error("Error in munmap: %s.\n", strerror(errno));
+            }
+            if (munmap(map_b, stat_b.st_size) < 0) {
+                error("Error in munmap: %s.\n", strerror(errno));
+            }
+            goto out;
+        } else {
+            result = true;
+            goto out;
+        }
+    } while (0);
+#endif
     while ((ra = read64(fd_a, buffer_a, sizeof(buffer_a))) > 0) {
         if ((rb = read64(fd_b, buffer_b, sizeof(buffer_b))) != ra) {
             if (rb < 0) {
