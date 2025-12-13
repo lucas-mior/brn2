@@ -758,10 +758,25 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
             char *diff[] = {
                 "diff", "-q", newfile->name, oldfile->name, NULL,
             };
+            bool equal;
             error("Error: " RED "'%s'" RESET " repeats on line %u. ",
                   newfile->name, i + 1);
 
-            if (util_command(LENGTH(diff), diff) == 0) {
+            switch (util_command(LENGTH(diff), diff)) {
+            case 0:
+                equal = true;
+                break;
+            case -1:
+            case 2:
+                equal = util_equal_files(newfile->name, oldfile->name);
+                break;
+            default:
+                error("\n");
+                equal = false;
+                break;
+            }
+
+            if (equal) {
                 error("Old (%s) and new name (%s)"
                       " have exactly the same content.\n",
                       oldfile->name, newfile->name);
@@ -774,12 +789,10 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
                     }
                     continue;
                 }
-            } else {
-                error("\n");
             }
 
             failed = true;
-            if (brn2_options_fatal) {
+            if (false) {
                 fatal(EXIT_FAILURE);
             }
         }
