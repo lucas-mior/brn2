@@ -1214,7 +1214,7 @@ atoi2(char *str) {
 static bool
 util_equal_files(char *filename_a, char *filename_b) {
     int fd_a;
-    int fd_b;
+    int fd_b = -1;
     char buffer_a[BUFSIZ];
     char buffer_b[BUFSIZ];
     int64 total_r = 0;
