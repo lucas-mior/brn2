@@ -755,28 +755,10 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
         if (!hash_insert_pre_calc_set(repeated_set, newfile->name,
                                       newfile->hash, hashes_new[i])) {
             FileName *oldfile = old->files[i];
-            char *diff[] = {
-                "diff", "-q", newfile->name, oldfile->name, NULL,
-            };
-            bool equal;
             error("Error: " RED "'%s'" RESET " repeats on line %u. ",
                   newfile->name, i + 1);
 
-            switch (util_command(LENGTH(diff), diff)) {
-            case 0:
-                equal = true;
-                break;
-            case -1:
-            case 2:
-                equal = util_equal_files(newfile->name, oldfile->name);
-                break;
-            default:
-                error("\n");
-                equal = false;
-                break;
-            }
-
-            if (equal) {
+            if (util_equal_files(newfile->name, oldfile->name)) {
                 error("Old (%s) and new name (%s)"
                       " have exactly the same content.\n",
                       oldfile->name, newfile->name);
@@ -792,7 +774,7 @@ brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
             }
 
             failed = true;
-            if (false) {
+            if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
             }
         }
