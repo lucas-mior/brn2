@@ -1222,7 +1222,7 @@ util_equal_files(char *filename_a, char *filename_b) {
     int64 rb;
     struct stat stat_a;
     struct stat stat_b;
-    bool result;
+    bool result = false;
 
     if ((fd_a = open(filename_a, O_RDONLY)) < 0) {
         error("Error opening %s: %s.\n", filename_a, strerror(errno));
