@@ -1218,7 +1218,8 @@ util_equal_files(char *filename_a, char *filename_b) {
     char buffer_a[BUFSIZ];
     char buffer_b[BUFSIZ];
     int64 total_r = 0;
-    int64 r;
+    int64 ra;
+    int64 rb;
     struct stat stat_a;
     struct stat stat_b;
 
@@ -1244,16 +1245,19 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto closefalse;
     }
 
-    while ((r = read64(fd_a, buffer_a, sizeof(buffer_a))) > 0) {
-        if (read64(fd_b, buffer_b, sizeof(buffer_b)) != r) {
+    while ((ra = read64(fd_a, buffer_a, sizeof(buffer_a))) > 0) {
+        if ((rb = read64(fd_b, buffer_b, sizeof(buffer_b))) != ra) {
+            if (rb < 0) {
+                error("Error reading from %s: %s", filename_b, strerror(errno));
+            }
             goto closefalse;
         }
-        if (memcmp64(buffer_a, buffer_b, r)) {
+        if (memcmp64(buffer_a, buffer_b, ra)) {
             goto closefalse;
         }
-        total_r += r;
+        total_r += ra;
     }
-    if (r < 0) {
+    if (ra < 0) {
         error("Error reading from %s: %s", filename_a, strerror(errno));
     }
     if (total_r == stat_a.st_size) {
