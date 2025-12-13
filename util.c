@@ -1273,6 +1273,15 @@ closefalse:
 
 #if TESTING_util
 
+static void
+write_file(const char *path, const void *data, size_t len) {
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    assert(fd >= 0);
+    assert(write(fd, data, len) == (ssize_t)len);
+    close(fd);
+    return;
+}
+
 int
 main(void) {
     char buffer[32];
@@ -1310,6 +1319,34 @@ main(void) {
     if (OS_WINDOWS) {
         char *path2 = "aa\\cc";
         assert(!strcmp(basename2(path2), "cc"));
+    }
+
+    {
+#define USESTR(STR) STR, strlen(STR)
+        char *a = "/tmp/afile";
+        char *b = "/tmp/bfile";
+
+        write_file(a, USESTR("hello world"));
+        write_file(b, USESTR("hello world"));
+        assert(util_equal_files(a, b));
+
+        write_file(a, USESTR("hello world"));
+        write_file(b, USESTR("hello worlx"));
+        assert(!util_equal_files(a, b));
+
+        write_file(a, USESTR("short"));
+        write_file(b, USESTR("shorter"));
+        assert(!util_equal_files(a, b));
+
+        write_file(a, USESTR(""));
+        write_file(b, USESTR(""));
+        assert(util_equal_files(a, b));
+
+        write_file(a, USESTR("data"));
+        unlink(b);
+        error("Expected error below:\n");
+        assert(!util_equal_files(a, b));
+#undef USESTR
     }
 
     free(p1);
