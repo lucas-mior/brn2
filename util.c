@@ -1230,7 +1230,6 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
     if ((fd_b = open(filename_b, O_RDONLY)) < 0) {
-        close(fd_a);
         error("Error opening %s: %s.\n", filename_b, strerror(errno));
         result = false;
         goto out;
