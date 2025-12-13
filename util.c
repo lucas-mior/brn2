@@ -1222,35 +1222,35 @@ util_equal_files(char *filename_a, char *filename_b) {
     int64 rb;
     struct stat stat_a;
     struct stat stat_b;
-    bool result = false;
+    bool equal = false;
 
     if ((fd_a = open(filename_a, O_RDONLY)) < 0) {
         error("Error opening %s: %s.\n", filename_a, strerror(errno));
-        result = false;
+        equal = false;
         goto out;
     }
     if ((fd_b = open(filename_b, O_RDONLY)) < 0) {
         error("Error opening %s: %s.\n", filename_b, strerror(errno));
-        result = false;
+        equal = false;
         goto out;
     }
 
     if (fstat(fd_a, &stat_a) < 0) {
         error("Error in stat(%s): %s.\n", filename_a, strerror(errno));
-        result = false;
+        equal = false;
         goto out;
     }
     if (fstat(fd_b, &stat_b) < 0) {
         error("Error in stat(%s): %s.\n", filename_b, strerror(errno));
-        result = false;
+        equal = false;
         goto out;
     }
     if (stat_a.st_size != stat_b.st_size) {
-        result = false;
+        equal = false;
         goto out;
     }
     if (stat_a.st_dev == stat_b.st_dev && stat_a.st_ino == stat_b.st_ino) {
-        result = true;
+        equal = true;
         goto out;
     }
 
@@ -1277,16 +1277,16 @@ util_equal_files(char *filename_a, char *filename_b) {
             }
 
             if (memcmp64(map_a, map_b, stat_a.st_size)) {
-                result = false;
+                equal = false;
             } else {
-                result = true;
+                equal = true;
             }
 
             xmunmap(map_a, stat_a.st_size);
             xmunmap(map_b, stat_b.st_size);
             goto out;
         } else {
-            result = true;
+            equal = true;
             goto out;
         }
     } while (0);
@@ -1296,11 +1296,11 @@ util_equal_files(char *filename_a, char *filename_b) {
             if (rb < 0) {
                 error("Error reading from %s: %s", filename_b, strerror(errno));
             }
-            result = false;
+            equal = false;
             goto out;
         }
         if (memcmp64(buffer_a, buffer_b, ra)) {
-            result = false;
+            equal = false;
             goto out;
         }
         total_r += ra;
@@ -1309,13 +1309,13 @@ util_equal_files(char *filename_a, char *filename_b) {
         error("Error reading from %s: %s", filename_a, strerror(errno));
     }
     if (total_r == stat_a.st_size) {
-        result = true;
+        equal = true;
         goto out;
     }
 out:
     close(fd_a);
     close(fd_b);
-    return result;
+    return equal;
 }
 
 #if TESTING_util
