@@ -1098,34 +1098,36 @@ util_filename_from(char *buffer, int64 size, int fd) {
     ssize_t len;
 
     SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
-    if ((len = readlink(linkpath, buffer, size - 1)) < 0) {
-        memcpy(buffer, unknown, unknown_len + 1);
+    if ((len = readlink(linkpath, buffer, (size_t)(size - 1))) < 0) {
+        memcpy64(buffer, unknown, unknown_len + 1);
         return;
     }
     buffer[len] = '\0';
     return;
 #elif OS_MAC
     static char buffer2[PATH_MAX];
+    int64 len;
 
     if (fcntl(fd, F_GETPATH, buffer2) < 0) {
-        memcpy(buffer, unknown, unknown_len + 1);
+        memcpy64(buffer, unknown, unknown_len + 1);
         return;
     }
-    memcpy(buffer, buffer2, strlen64(buffer2) + 1);
+    len = MIN(strlen64(buffer2), size - 1);
+    memcpy64(buffer, buffer2, len + 1);
     return;
 #elif OS_WINDOWS
     HANDLE h;
     DWORD len;
 
     if ((h = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE) {
-        memcpy(buffer, unknown, unknown_len + 1);
+        memcpy64(buffer, unknown, unknown_len + 1);
         return;
     }
 
     len = GetFinalPathNameByHandleA(h, buffer, size, FILE_NAME_NORMALIZED);
 
     if ((len <= 0) || (len >= size)) {
-        memcpy(buffer, unknown, unknown_len + 1);
+        memcpy64(buffer, unknown, unknown_len + 1);
         return;
     }
 
@@ -1135,6 +1137,8 @@ util_filename_from(char *buffer, int64 size, int fd) {
 
     return buffer;
 #else
+    (void)size;
+    (void)fd;
     memcpy(buffer, unknown, unknown_len + 1);
     return;
 #endif
