@@ -190,7 +190,7 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
-static int xclose(int fd);
+static int xclose(int fd, char *filename);
 
 #if !defined(CAT)
 #define CAT_(a, b) a##b
@@ -1018,7 +1018,7 @@ util_copy_file_sync(char *destination, char *source) {
         < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
-        xclose(source_fd);
+        xclose(source_fd, source);
         return -1;
     }
 
@@ -1032,21 +1032,21 @@ util_copy_file_sync(char *destination, char *source) {
             }
             fprintf(stderr, ".\n");
 
-            xclose(source_fd);
-            xclose(destination_fd);
+            xclose(source_fd, source);
+            xclose(destination_fd, destination);
             return -1;
         }
     }
 
     if (r < 0) {
         error("Error reading data from %s: %s.\n", source, strerror(errno));
-        xclose(source_fd);
-        xclose(destination_fd);
+        xclose(source_fd, source);
+        xclose(destination_fd, destination);
         return -1;
     }
 
-    xclose(source_fd);
-    xclose(destination_fd);
+    xclose(source_fd, source);
+    xclose(destination_fd, destination);
     return 0;
 }
 
@@ -1071,7 +1071,7 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
         < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
-        xclose(source_fd);
+        xclose(source_fd, source);
         return -1;
     }
 
@@ -1134,15 +1134,24 @@ util_filename_from(char *buffer, int64 size, int fd) {
 }
 
 static int
-xclose(int fd) {
+xclose(int fd, char *filename) {
     if (close(fd) < 0) {
         char buffer[4096];
-        util_filename_from(buffer, sizeof(buffer), fd);
-        error("Error closing %s: %s.\n", buffer, strerror(errno));
+        if (filename == NULL) {
+            util_filename_from(buffer, sizeof(buffer), fd);
+            filename = buffer;
+        }
+        error("Error closing %s: %s.\n", filename, strerror(errno));
         return -1;
     }
     return 0;
 }
+
+#define XCLOSE_1(fd)           xclose((fd), NULL)
+#define XCLOSE_2(fd, filename) xclose((fd), (filename))
+
+#define XCLOSE_SELECT(_1, _2, NAME) NAME
+#define XCLOSE(...) XCLOSE_SELECT(__VA_ARGS__, XCLOSE_2, XCLOSE_1)(__VA_ARGS__)
 
 static void *
 util_copy_file_async_thread(void *arg) {
@@ -1180,8 +1189,8 @@ util_copy_file_async_thread(void *arg) {
                         if (w < 0) {
                             error("Error writing: %s.\n", strerror(errno));
                         }
-                        xclose(dests[i]);
-                        xclose(pipes[i].fd);
+                        XCLOSE(dests[i]);
+                        XCLOSE(pipes[i].fd);
 
                         dests[i] = -1;
                         pipes[i].fd = -1;
@@ -1193,8 +1202,8 @@ util_copy_file_async_thread(void *arg) {
                 if (r < 0) {
                     error("Error reading: %s.\n", strerror(errno));
                 }
-                xclose(dests[i]);
-                xclose(pipes[i].fd);
+                XCLOSE(dests[i]);
+                XCLOSE(pipes[i].fd);
 
                 dests[i] = -1;
                 pipes[i].fd = -1;
@@ -1206,6 +1215,7 @@ util_copy_file_async_thread(void *arg) {
         }
     }
     pthread_exit(NULL);
+    return NULL;
 }
 
 #endif
@@ -1247,10 +1257,10 @@ send_signal(char *executable, int32 signal_number) {
         errno = 0;
         if ((r = read64(cmdline, command, sizeof(command))) <= 0) {
             (void)r;
-            xclose(cmdline);
+            xclose(cmdline, buffer);
             continue;
         }
-        xclose(cmdline);
+        xclose(cmdline, buffer);
 
         if (memmem64(command, r, executable, len)) {
             if ((last = memchr64(command, '\0', r))) {
@@ -1440,19 +1450,19 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
 out:
-    xclose(fd_a);
-    xclose(fd_b);
+    xclose(fd_a, filename_a);
+    xclose(fd_b, filename_b);
     return equal;
 }
 
 #if TESTING_util
 
 static void
-write_file(const char *path, const void *data, size_t len) {
+write_file(char *path, void *data, size_t len) {
     int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     assert(fd >= 0);
     assert(write(fd, data, len) == (ssize_t)len);
-    xclose(fd);
+    xclose(fd, path);
     return;
 }
 
