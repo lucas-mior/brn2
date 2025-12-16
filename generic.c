@@ -27,7 +27,7 @@
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_generic 1
 #elif !defined(TESTING_generic)
 #define TESTING_generic 0
