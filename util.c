@@ -1467,12 +1467,18 @@ out:
 
 static void
 write_file(char *path, void *data, int64 len) {
-    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd;
+
+    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0) {
+        error("Error opening %s: %s.\n", path, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
     assert(fd >= 0);
-    assert(write(fd, data, len) == len);
+    assert(write(fd, data, (size_t)len) == len);
     XCLOSE(&fd, path);
     return;
 }
+#define WRITE_FILE(PATH, STRING) write_file(PATH, STRING, strlen64(STRING))
 
 int
 main(void) {
@@ -1514,32 +1520,30 @@ main(void) {
     }
 
     {
-#define USESTR(STR) STR, strlen64(STR)
         char *a = "/tmp/afile";
         char *b = "/tmp/bfile";
 
-        write_file(a, USESTR("hello world"));
-        write_file(b, USESTR("hello world"));
+        WRITE_FILE(a, "hello world");
+        WRITE_FILE(b, "hello world");
         assert(util_equal_files(a, b));
 
-        write_file(a, USESTR("hello world"));
-        write_file(b, USESTR("hello worlx"));
+        WRITE_FILE(a, "hello world");
+        WRITE_FILE(b, "hello worlx");
         assert(!util_equal_files(a, b));
 
-        write_file(a, USESTR("short"));
-        write_file(b, USESTR("shorter"));
+        WRITE_FILE(a, "short");
+        WRITE_FILE(b, "shorter");
         assert(!util_equal_files(a, b));
 
-        write_file(a, USESTR(""));
-        write_file(b, USESTR(""));
+        WRITE_FILE(a, "");
+        WRITE_FILE(b, "");
         assert(util_equal_files(a, b));
 
         /* Uncomment below to trigger error */
-        /* write_file(a, USESTR("data")); */
+        /* WRITE_FILE(a, "data"); */
         /* unlink(b); */
         /* error("Expected error below:\n"); */
         /* assert(!util_equal_files(a, b)); */
-#undef USESTR
     }
 
     {
