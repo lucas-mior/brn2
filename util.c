@@ -796,11 +796,15 @@ xclose(int fd, char *filename) {
     return 0;
 }
 
-#define XCLOSE_1(fd)           xclose((fd), NULL)
-#define XCLOSE_2(fd, filename) xclose((fd), (filename))
+#define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
+#define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
+#define CAT_2_(a, b) a##b
+#define CAT_2(a, b) CAT_2_(a, b)
+#define SELECT_ON_NUM_ARGS(macro, ...) CAT_2(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
-#define XCLOSE_SELECT(_1, _2, NAME) NAME
-#define XCLOSE(...) XCLOSE_SELECT(__VA_ARGS__, XCLOSE_2, XCLOSE_1)(__VA_ARGS__)
+#define foo_1(...) xclose(__VA_ARGS__, NULL)
+#define foo_2(...) xclose(__VA_ARGS__)
+#define XCLOSE(...) SELECT_ON_NUM_ARGS(foo_, __VA_ARGS__)
 
 #if OS_WINDOWS
 static int
@@ -1259,7 +1263,7 @@ send_signal(char *executable, int32 signal_number) {
         errno = 0;
         if ((r = read64(cmdline, command, sizeof(command))) <= 0) {
             (void)r;
-            xclose(cmdline, buffer);
+            XCLOSE(cmdline, buffer);
             continue;
         }
         xclose(cmdline, buffer);
