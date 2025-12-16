@@ -40,16 +40,12 @@
 #endif
 
 #if !defined(trap)
-#if TESTING_assert
-#define trap(...) raise(SIGILL)
-#else
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
 #define trap(...) __debugbreak()
 #else
 #define trap(...) *(volatile int *)0 = 0
-#endif
 #endif
 #endif
 

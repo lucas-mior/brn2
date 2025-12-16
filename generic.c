@@ -122,25 +122,37 @@ _Generic((VARIABLE), \
 )
 
 // clang-format off
-static ldouble ldouble_from_voidp(void* x) {
+static ldouble
+ldouble_from_voidp(void* x) {
     (void)x;
     trap();
+#if defined(__TINYC__)
     return 0.0l;
+#endif
 }
-static ldouble ldouble_from_charp(char* x) {
+static ldouble
+ldouble_from_charp(char* x) {
     (void)x;
     trap();
+#if defined(__TINYC__)
     return 0.0l;
+#endif
 }
-static ldouble ldouble_from_bool(bool x) {
+static ldouble
+ldouble_from_bool(bool x) {
     (void)x;
     trap();
+#if defined(__TINYC__)
     return 0.0l;
+#endif
 }
-static ldouble ldouble_from_char(char x) {
+static ldouble
+ldouble_from_char(char x) {
     (void)x;
     trap();
+#if defined(__TINYC__)
     return 0.0l;
+#endif
 }
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x; }
 static ldouble ldouble_from_short(short x)     { return (ldouble)x; }
@@ -223,7 +235,7 @@ union Primitive {
 
 static llong
 typebits(enum Type type) {
-    llong size;
+    llong size = 0;
     union Primitive primitive;
     void **pointer;
 
@@ -251,7 +263,7 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
-    default: trap(); return 0ll;
+    default: trap();
     }
     return size*CHAR_BIT;
 }
@@ -285,10 +297,10 @@ typename(enum Type type) {
 static ldouble
 ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
-    case TYPE_VOIDP:   trap(); return 0.0l;
-    case TYPE_CHARP:   trap(); return 0.0l;
-    case TYPE_BOOL:    trap(); return 0.0l;
-    case TYPE_CHAR:    trap(); return 0.0l;
+    case TYPE_VOIDP:   trap();
+    case TYPE_CHARP:   trap();
+    case TYPE_BOOL:    trap();
+    case TYPE_CHAR:    trap();
     case TYPE_SCHAR:   return (ldouble)var.aschar;
     case TYPE_SHORT:   return (ldouble)var.ashort;
     case TYPE_INT:     return (ldouble)var.aint;
@@ -302,8 +314,11 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_FLOAT:   return (ldouble)var.afloat;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
     case TYPE_LDOUBLE: return var.aldouble;
-    default:           trap(); return 0.0l;
+    default:           trap();
     }
+#if defined(__TINYC__)
+    return 0.0l;
+#endif
 }
 
 // clang-format on
