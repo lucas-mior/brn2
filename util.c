@@ -1061,6 +1061,13 @@ util_copy_file_sync(char *destination, char *source) {
     return 0;
 }
 
+typedef struct UtilCopyFilesAsync {
+    struct pollfd *pipes;
+    int *dests;
+    int32 nfds;
+    int32 unused;
+} UtilCopyFilesAsync;
+
 static int32
 util_copy_file_async(char *destination, char *source, int *dest_fd) {
     int32 source_fd;
@@ -1082,13 +1089,6 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
     return source_fd;
 }
 
-typedef struct UtilCopyFilesAsync {
-    struct pollfd *pipes;
-    int *dests;
-    int32 nfds;
-    int32 unused;
-} UtilCopyFilesAsync;
-
 static void *
 util_copy_file_async_thread(void *arg) {
     UtilCopyFilesAsync *pipe_thread = arg;
@@ -1104,18 +1104,24 @@ util_copy_file_async_thread(void *arg) {
         char buffer[BUFSIZ];
         int64 r;
         int64 w;
+        int64 n;
 
-        switch (poll(pipes, (nfds_t)nfds, 1000)) {
+        switch (n = poll(pipes, (nfds_t)nfds, 1000)) {
         case 0:
-            continue;
+            break;
         case -1:
             error("Error in polling: %s.\n", strerror(errno));
-            continue;
-        default:
             break;
-        }
-        for (int32 i = 0; i < nfds; i += 1) {
-            if (pipes[i].revents & POLL_IN) {
+        default:
+            for (int32 i = 0; i < nfds; i += 1) {
+                if (n <= 0) {
+                    break;
+                }
+                if (!(pipes[i].revents & POLL_IN)) {
+                    pipes[i].revents = 0;
+                    continue;
+                }
+                n -= 1;
                 while ((r = read64(pipes[i].fd, buffer, sizeof(buffer))) > 0) {
                     if ((w = write64(dests[i], buffer, r)) != r) {
                         if (w < 0) {
@@ -1142,8 +1148,8 @@ util_copy_file_async_thread(void *arg) {
                 left -= 1;
 
                 error("Finished saving file %d.\n", i);
+                pipes[i].revents = 0;
             }
-            pipes[i].revents = 0;
         }
     }
     pthread_exit(NULL);
