@@ -357,6 +357,11 @@ main(int argc, char **argv) {
         atexit(delete_brn2_buffer);
     }
 
+    if (old->length <= 0) {
+        error("Error: old list is empty\n");
+        fatal(EXIT_FAILURE);
+    }
+
     {
         char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
         char *args_shuf[]
@@ -422,6 +427,12 @@ main(int argc, char **argv) {
             }
             brn2_list_from_file(new, brn2_buffer.name, false);
 
+            if (old->length <= 0) {
+                // to please clang static analyzer
+                error("New list is empty. Exiting...\n");
+                fatal(EXIT_FAILURE);
+            }
+
             if (old->length != new->length) {
                 error("You are renaming " RED "%u" RESET " file%.*s "
                       "but buffer contains " RED "%u" RESET " file name%.*s\n",
@@ -435,12 +446,6 @@ main(int argc, char **argv) {
             }
 
             brn2_normalize_names(old, new);
-
-            if ((old->length <= 0) || (new->length <= 0)) {
-                // to please clang static analyzer
-                error("Error: old list is empty\n");
-                fatal(EXIT_FAILURE);
-            }
 
             if (newlist_set == NULL) {
                 newlist_set = hash_create_set(new->length);
