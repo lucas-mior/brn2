@@ -180,6 +180,11 @@ _Generic((SIZE), \
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
+#if !defined(MIN)
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 // clang-format on
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
@@ -1564,7 +1569,7 @@ main(void) {
         }
 
         util_filename_from(buffer2, sizeof(buffer2), fd);
-        ASSERT_EQUAL(filename, buffer2);
+        ASSERT_EQUAL(realpath(filename, buffer3), buffer2);
         unlink(filename);
 
         XCLOSE(&fd);
