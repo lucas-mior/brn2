@@ -725,6 +725,83 @@ snprintf2(char *buffer, int size, char *format, ...) {
     return n;
 }
 
+static void
+util_filename_from(char *buffer, int64 size, int fd) {
+    char *unknown = "<unknown filename>";
+    int64 unknown_len = strlen64(unknown);
+#if OS_LINUX
+    char linkpath[64];
+    ssize_t len;
+
+    SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
+    if ((len = readlink(linkpath, buffer, (size_t)(size - 1))) < 0) {
+        memcpy64(buffer, unknown, unknown_len + 1);
+        return;
+    }
+    buffer[len] = '\0';
+    return;
+#elif OS_MAC
+    static char buffer2[PATH_MAX];
+    int64 len;
+
+    if (fcntl(fd, F_GETPATH, buffer2) < 0) {
+        memcpy64(buffer, unknown, unknown_len + 1);
+        return;
+    }
+    len = MIN(strlen64(buffer2), size - 1);
+    memcpy64(buffer, buffer2, len + 1);
+    return;
+#elif OS_WINDOWS
+    HANDLE h;
+    DWORD len;
+    intptr_t h2 = _get_osfhandle(fd);
+
+    if ((h = (HANDLE)h2) == INVALID_HANDLE_VALUE) {
+        memcpy64(buffer, unknown, unknown_len + 1);
+        return;
+    }
+
+    len = GetFinalPathNameByHandleA(h, buffer, (DWORD)size,
+                                    FILE_NAME_NORMALIZED);
+
+    if ((len <= 0) || (len >= size)) {
+        memcpy64(buffer, unknown, unknown_len + 1);
+        return;
+    }
+
+    if (strncmp(buffer, "\\\\?\\", 4) == 0) {
+        memmove(buffer, buffer + 4, len - 3);
+    }
+
+    return;
+#else
+    (void)size;
+    (void)fd;
+    memcpy(buffer, unknown, unknown_len + 1);
+    return;
+#endif
+}
+
+static int
+xclose(int fd, char *filename) {
+    if (close(fd) < 0) {
+        char buffer[4096];
+        if (filename == NULL) {
+            util_filename_from(buffer, sizeof(buffer), fd);
+            filename = buffer;
+        }
+        error("Error closing %s: %s.\n", filename, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+#define XCLOSE_1(fd)           xclose((fd), NULL)
+#define XCLOSE_2(fd, filename) xclose((fd), (filename))
+
+#define XCLOSE_SELECT(_1, _2, NAME) NAME
+#define XCLOSE(...) XCLOSE_SELECT(__VA_ARGS__, XCLOSE_2, XCLOSE_1)(__VA_ARGS__)
+
 #if OS_WINDOWS
 static int
 util_command(int argc, char **argv) {
@@ -1077,81 +1154,6 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
 
     return source_fd;
 }
-
-static void
-util_filename_from(char *buffer, int64 size, int fd) {
-    char *unknown = "<unknown filename>";
-    int64 unknown_len = strlen64(unknown);
-#if OS_LINUX
-    char linkpath[64];
-    ssize_t len;
-
-    SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
-    if ((len = readlink(linkpath, buffer, (size_t)(size - 1))) < 0) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
-    }
-    buffer[len] = '\0';
-    return;
-#elif OS_MAC
-    static char buffer2[PATH_MAX];
-    int64 len;
-
-    if (fcntl(fd, F_GETPATH, buffer2) < 0) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
-    }
-    len = MIN(strlen64(buffer2), size - 1);
-    memcpy64(buffer, buffer2, len + 1);
-    return;
-#elif OS_WINDOWS
-    HANDLE h;
-    DWORD len;
-
-    if ((h = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
-    }
-
-    len = GetFinalPathNameByHandleA(h, buffer, size, FILE_NAME_NORMALIZED);
-
-    if ((len <= 0) || (len >= size)) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
-    }
-
-    if (strncmp(buffer, "\\\\?\\", 4) == 0) {
-        memmove(buffer, buffer + 4, len - 3);
-    }
-
-    return buffer;
-#else
-    (void)size;
-    (void)fd;
-    memcpy(buffer, unknown, unknown_len + 1);
-    return;
-#endif
-}
-
-static int
-xclose(int fd, char *filename) {
-    if (close(fd) < 0) {
-        char buffer[4096];
-        if (filename == NULL) {
-            util_filename_from(buffer, sizeof(buffer), fd);
-            filename = buffer;
-        }
-        error("Error closing %s: %s.\n", filename, strerror(errno));
-        return -1;
-    }
-    return 0;
-}
-
-#define XCLOSE_1(fd)           xclose((fd), NULL)
-#define XCLOSE_2(fd, filename) xclose((fd), (filename))
-
-#define XCLOSE_SELECT(_1, _2, NAME) NAME
-#define XCLOSE(...) XCLOSE_SELECT(__VA_ARGS__, XCLOSE_2, XCLOSE_1)(__VA_ARGS__)
 
 static void *
 util_copy_file_async_thread(void *arg) {
