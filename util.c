@@ -1473,8 +1473,10 @@ write_file(char *path, void *data, int64 len) {
         error("Error opening %s: %s.\n", path, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    assert(fd >= 0);
-    assert(write(fd, data, (size_t)len) == len);
+    if (write64(fd, data, len) != len) {
+        error("Error in write: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
     XCLOSE(&fd, path);
     return;
 }
