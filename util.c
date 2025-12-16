@@ -1089,40 +1089,44 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
     return source_fd;
 }
 
-static char *
-util_filename_from(int fd) {
+static void
+util_filename_from(char *buffer, int64 size, int fd) {
+    char *unknown = "<unknown filename>";
+    int64 unknown_len = strlen64(unknown);
 #if OS_LINUX
-    static char buffer[PATH_MAX];
     char linkpath[64];
     ssize_t len;
 
     SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
-    if ((len = readlink(linkpath, buffer, sizeof(buffer) - 1)) < 0) {
-        return "<unknown filename>";
+    if ((len = readlink(linkpath, buffer, size - 1)) < 0) {
+        memcpy(buffer, unknown, unknown_len + 1);
+        return;
     }
     buffer[len] = '\0';
-    return buffer;
+    return;
 #elif OS_MAC
-    static char buffer[PATH_MAX];
+    static char buffer2[PATH_MAX];
 
-    if (fcntl(fd, F_GETPATH, buffer) < 0) {
-        return "<unknown filename>";
+    if (fcntl(fd, F_GETPATH, buffer2) < 0) {
+        memcpy(buffer, unknown, unknown_len + 1);
+        return;
     }
-    return buffer;
+    memcpy(buffer, buffer2, strlen64(buffer2) + 1);
+    return;
 #elif OS_WINDOWS
-    static char buffer[MAX_PATH];
     HANDLE h;
     DWORD len;
 
     if ((h = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE) {
-        return "<unknown filename>";
+        memcpy(buffer, unknown, unknown_len + 1);
+        return;
     }
 
-    len = GetFinalPathNameByHandleA(h, buffer, sizeof(buffer),
-                                    FILE_NAME_NORMALIZED);
+    len = GetFinalPathNameByHandleA(h, buffer, size, FILE_NAME_NORMALIZED);
 
-    if (len == 0 || len >= sizeof(buffer)) {
-        return "<unknown filename>";
+    if ((len <= 0) || (len >= size)) {
+        memcpy(buffer, unknown, unknown_len + 1);
+        return;
     }
 
     if (strncmp(buffer, "\\\\?\\", 4) == 0) {
@@ -1131,15 +1135,17 @@ util_filename_from(int fd) {
 
     return buffer;
 #else
-    return "<unknown filename>";
+    memcpy(buffer, unknown, unknown_len + 1);
+    return;
 #endif
 }
 
 static void
 xclose(int fd) {
     if (close(fd) < 0) {
-        char *filename = util_filename_from(fd);
-        error("Error closing %s: %s.\n", filename, strerror(errno));
+        char buffer[4096];
+        util_filename_from(buffer, sizeof(buffer), fd);
+        error("Error closing %s: %s.\n", buffer, strerror(errno));
     }
     return;
 }
@@ -1524,8 +1530,8 @@ main(void) {
     }
 
     {
+        char buffer[4096];
         char *filename = "/tmp/test";
-        char *filename_from_fd;
         int fd;
 
         if ((fd
@@ -1535,8 +1541,8 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
 
-        filename_from_fd = util_filename_from(fd);
-        ASSERT_EQUAL(filename, filename_from_fd);
+        util_filename_from(buffer, sizeof(buffer), fd);
+        ASSERT_EQUAL(filename, buffer);
     }
 
     free(p1);
