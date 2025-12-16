@@ -34,7 +34,6 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <float.h>
-#include <poll.h>
 
 #include "generic.c"
 
@@ -74,6 +73,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <poll.h>
 #endif
 
 #if !defined(DEBUGGING)
