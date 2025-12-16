@@ -36,7 +36,7 @@
 #include "util.c"
 #include "assert.c"
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_hash 1
 #elif !defined(TESTING_hash)
 #define TESTING_hash 0
