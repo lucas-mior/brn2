@@ -39,6 +39,7 @@
 #define TESTING_assert 0
 #endif
 
+#if !defined(trap)
 #if TESTING_assert
 #define trap(...) raise(SIGILL)
 #else
@@ -48,6 +49,7 @@
 #define trap(...) __debugbreak()
 #else
 #define trap(...) *(volatile int *)0 = 0
+#endif
 #endif
 #endif
 
