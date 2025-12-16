@@ -1107,7 +1107,8 @@ util_copy_file_async_thread(void *arg) {
         case 0:
             break;
         case -1:
-            error("Error polling: %s.\n", strerror(errno));
+            error("Error in poll(nfds=%lld): %s.\n", (llong)nfds,
+                  strerror(errno));
             break;
         default:
             for (int32 i = 0; i < nfds; i += 1) {
