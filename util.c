@@ -1098,7 +1098,7 @@ util_copy_file_sync(char *destination, char *source) {
         < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
-        xclose(source_fd, source);
+        XCLOSE(source_fd, source);
         return -1;
     }
 
@@ -1112,21 +1112,21 @@ util_copy_file_sync(char *destination, char *source) {
             }
             fprintf(stderr, ".\n");
 
-            xclose(source_fd, source);
-            xclose(destination_fd, destination);
+            XCLOSE(source_fd, source);
+            XCLOSE(destination_fd, destination);
             return -1;
         }
     }
 
     if (r < 0) {
         error("Error reading data from %s: %s.\n", source, strerror(errno));
-        xclose(source_fd, source);
-        xclose(destination_fd, destination);
+        XCLOSE(source_fd, source);
+        XCLOSE(destination_fd, destination);
         return -1;
     }
 
-    xclose(source_fd, source);
-    xclose(destination_fd, destination);
+    XCLOSE(source_fd, source);
+    XCLOSE(destination_fd, destination);
     return 0;
 }
 
@@ -1151,7 +1151,7 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
         < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
-        xclose(source_fd, source);
+        XCLOSE(source_fd, source);
         return -1;
     }
 
@@ -1265,7 +1265,7 @@ send_signal(char *executable, int32 signal_number) {
             XCLOSE(cmdline, buffer);
             continue;
         }
-        xclose(cmdline, buffer);
+        XCLOSE(cmdline, buffer);
 
         if (memmem64(command, r, executable, len)) {
             if ((last = memchr64(command, '\0', r))) {
@@ -1455,8 +1455,8 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
 out:
-    xclose(fd_a, filename_a);
-    xclose(fd_b, filename_b);
+    XCLOSE(fd_a, filename_a);
+    XCLOSE(fd_b, filename_b);
     return equal;
 }
 
@@ -1467,7 +1467,7 @@ write_file(char *path, void *data, size_t len) {
     int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     assert(fd >= 0);
     assert(write(fd, data, len) == (ssize_t)len);
-    xclose(fd, path);
+    XCLOSE(fd, path);
     return;
 }
 
