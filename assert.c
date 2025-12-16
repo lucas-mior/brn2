@@ -29,8 +29,6 @@
 #include <assert.h>
 #include <signal.h>
 
-#include "generic.c"
-
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
@@ -39,10 +37,9 @@
 #define TESTING_assert 0
 #endif
 
-#if !defined(trap)
 #if TESTING_assert
 #define trap(...) raise(SIGILL)
-#else
+#elif !defined(trap)
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
@@ -51,7 +48,8 @@
 #define trap(...) *(volatile int *)0 = 0
 #endif
 #endif
-#endif
+
+#include "generic.c"
 
 #define ASSERT(C) do { \
     if (!(C)) { \
