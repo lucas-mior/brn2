@@ -186,6 +186,9 @@ main(int argc, char **argv) {
 
     switch (mode) {
     case FILES_FROM_FILE:
+        if (!lines) {
+            brn2_usage(stderr);
+        }
         brn2_list_from_file(old, lines, true);
         break;
     case FILES_FROM_ARGS:
@@ -432,6 +435,12 @@ main(int argc, char **argv) {
             }
 
             brn2_normalize_names(old, new);
+
+            if ((old->length <= 0) || (new->length <= 0)) {
+                // to please clang static analyzer
+                error("Error: old list is empty\n");
+                fatal(EXIT_FAILURE);
+            }
 
             if (newlist_set == NULL) {
                 newlist_set = hash_create_set(new->length);
