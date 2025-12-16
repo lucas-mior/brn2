@@ -1089,6 +1089,12 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
     return source_fd;
 }
 
+static void
+xclose(int fd) {
+    close(fd);
+    return;
+}
+
 static void *
 util_copy_file_async_thread(void *arg) {
     UtilCopyFilesAsync *pipe_thread = arg;
@@ -1125,8 +1131,8 @@ util_copy_file_async_thread(void *arg) {
                         if (w < 0) {
                             error("Error writing: %s.\n", strerror(errno));
                         }
-                        close(dests[i]);
-                        close(pipes[i].fd);
+                        xclose(dests[i]);
+                        xclose(pipes[i].fd);
 
                         dests[i] = -1;
                         pipes[i].fd = -1;
@@ -1138,8 +1144,8 @@ util_copy_file_async_thread(void *arg) {
                 if (r < 0) {
                     error("Error reading: %s.\n", strerror(errno));
                 }
-                close(dests[i]);
-                close(pipes[i].fd);
+                xclose(dests[i]);
+                xclose(pipes[i].fd);
 
                 dests[i] = -1;
                 pipes[i].fd = -1;
