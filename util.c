@@ -1096,9 +1096,8 @@ util_filename_from(int fd) {
     char linkpath[64];
     ssize_t len;
 
-    snprintf(linkpath, sizeof(linkpath), "/proc/self/fd/%d", fd);
-    len = readlink(linkpath, buf, sizeof(buf) - 1);
-    if (len < 0) {
+    SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
+    if ((len = readlink(linkpath, buf, sizeof(buf) - 1)) < 0) {
         return "<unknown filename>";
     }
     buf[len] = '\0';
