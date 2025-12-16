@@ -190,6 +190,7 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
+static int xclose(int fd);
 
 #if !defined(CAT)
 #define CAT_(a, b) a##b
@@ -1017,7 +1018,7 @@ util_copy_file_sync(char *destination, char *source) {
         < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
-        close(source_fd);
+        xclose(source_fd);
         return -1;
     }
 
@@ -1031,33 +1032,21 @@ util_copy_file_sync(char *destination, char *source) {
             }
             fprintf(stderr, ".\n");
 
-            if (close(source_fd) < 0) {
-                error("Error closing %s: %s.\n", source, strerror(errno));
-            }
-            if (close(destination_fd) < 0) {
-                error("Error closing %s: %s.\n", destination, strerror(errno));
-            }
+            xclose(source_fd);
+            xclose(destination_fd);
             return -1;
         }
     }
 
     if (r < 0) {
         error("Error reading data from %s: %s.\n", source, strerror(errno));
-        if (close(source_fd) < 0) {
-            error("Error closing %s: %s.\n", source, strerror(errno));
-        }
-        if (close(destination_fd) < 0) {
-            error("Error closing %s: %s.\n", destination, strerror(errno));
-        }
+        xclose(source_fd);
+        xclose(destination_fd);
         return -1;
     }
 
-    if (close(source_fd) < 0) {
-        error("Error closing %s: %s.\n", source, strerror(errno));
-    }
-    if (close(destination_fd) < 0) {
-        error("Error closing %s: %s.\n", destination, strerror(errno));
-    }
+    xclose(source_fd);
+    xclose(destination_fd);
     return 0;
 }
 
@@ -1082,7 +1071,7 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
         < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
-        close(source_fd);
+        xclose(source_fd);
         return -1;
     }
 
@@ -1144,14 +1133,15 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #endif
 }
 
-static void
+static int
 xclose(int fd) {
     if (close(fd) < 0) {
         char buffer[4096];
         util_filename_from(buffer, sizeof(buffer), fd);
         error("Error closing %s: %s.\n", buffer, strerror(errno));
+        return -1;
     }
-    return;
+    return 0;
 }
 
 static void *
@@ -1257,10 +1247,10 @@ send_signal(char *executable, int32 signal_number) {
         errno = 0;
         if ((r = read64(cmdline, command, sizeof(command))) <= 0) {
             (void)r;
-            close(cmdline);
+            xclose(cmdline);
             continue;
         }
-        close(cmdline);
+        xclose(cmdline);
 
         if (memmem64(command, r, executable, len)) {
             if ((last = memchr64(command, '\0', r))) {
@@ -1450,8 +1440,8 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
 out:
-    close(fd_a);
-    close(fd_b);
+    xclose(fd_a);
+    xclose(fd_b);
     return equal;
 }
 
@@ -1462,7 +1452,7 @@ write_file(const char *path, const void *data, size_t len) {
     int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     assert(fd >= 0);
     assert(write(fd, data, len) == (ssize_t)len);
-    close(fd);
+    xclose(fd);
     return;
 }
 
