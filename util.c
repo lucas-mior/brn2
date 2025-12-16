@@ -1105,7 +1105,7 @@ util_filename_from(int fd) {
 #elif OS_MAC
     static char buf[PATH_MAX];
 
-    if (fcntl(fd, F_GETPATH, buf) == -1) {
+    if (fcntl(fd, F_GETPATH, buf) < 0) {
         return "<unknown filename>";
     }
     return buf;
