@@ -1532,6 +1532,7 @@ main(void) {
         write_file(b, USESTR(""));
         assert(util_equal_files(a, b));
 
+        /* Uncomment below to trigger error */
         /* write_file(a, USESTR("data")); */
         /* unlink(b); */
         /* error("Expected error below:\n"); */
