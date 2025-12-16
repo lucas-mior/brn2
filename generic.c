@@ -22,6 +22,7 @@
 #include <float.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #if !defined(error2)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
@@ -34,12 +35,16 @@
 #endif
 
 #if !defined(trap)
+#if TESTING_generic
+#define trap(...) raise(SIGILL)
+#else
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
 #define trap(...) __debugbreak()
 #else
 #define trap(...) *(volatile int *)0 = 0
+#endif
 #endif
 #endif
 
@@ -126,33 +131,25 @@ static ldouble
 ldouble_from_voidp(void* x) {
     (void)x;
     trap();
-#if defined(__TINYC__)
     return 0.0l;
-#endif
 }
 static ldouble
 ldouble_from_charp(char* x) {
     (void)x;
     trap();
-#if defined(__TINYC__)
     return 0.0l;
-#endif
 }
 static ldouble
 ldouble_from_bool(bool x) {
     (void)x;
     trap();
-#if defined(__TINYC__)
     return 0.0l;
-#endif
 }
 static ldouble
 ldouble_from_char(char x) {
     (void)x;
     trap();
-#if defined(__TINYC__)
     return 0.0l;
-#endif
 }
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x; }
 static ldouble ldouble_from_short(short x)     { return (ldouble)x; }
@@ -297,10 +294,10 @@ typename(enum Type type) {
 static ldouble
 ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
-    case TYPE_VOIDP:   trap();
-    case TYPE_CHARP:   trap();
-    case TYPE_BOOL:    trap();
-    case TYPE_CHAR:    trap();
+    case TYPE_VOIDP:   trap(); break;
+    case TYPE_CHARP:   trap(); break;
+    case TYPE_BOOL:    trap(); break;
+    case TYPE_CHAR:    trap(); break;
     case TYPE_SCHAR:   return (ldouble)var.aschar;
     case TYPE_SHORT:   return (ldouble)var.ashort;
     case TYPE_INT:     return (ldouble)var.aint;
@@ -316,9 +313,7 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_LDOUBLE: return var.aldouble;
     default:           trap();
     }
-#if defined(__TINYC__)
     return 0.0l;
-#endif
 }
 
 // clang-format on
