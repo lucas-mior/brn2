@@ -200,7 +200,8 @@ static int xclose(int fd, char *filename);
 
 #define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
 #define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
-#define SELECT_ON_NUM_ARGS(macro, ...) CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+#define SELECT_ON_NUM_ARGS(macro, ...) \
+    CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
 #if OS_WINDOWS
 static void *
