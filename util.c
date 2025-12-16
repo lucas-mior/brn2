@@ -1097,9 +1097,6 @@ util_copy_file_async_thread(void *arg) {
     int *dests = pipe_thread->dests;
     int32 left = nfds;
 
-    error("IN SEPARATE THREAD:\n");
-    PRINTLN(nfds);
-
     while (left > 0) {
         char buffer[BUFSIZ];
         int64 r;
