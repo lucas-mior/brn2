@@ -33,9 +33,7 @@
 #define TESTING_generic 0
 #endif
 
-#if TESTING_generic
-#define trap(...) raise(SIGILL)
-#else
+#if !defined(trap)
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
