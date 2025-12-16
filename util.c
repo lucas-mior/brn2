@@ -1091,6 +1091,7 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
 
 char *
 util_filename_from(int fd) {
+    return "aaa";
 }
 
 static void
