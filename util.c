@@ -198,9 +198,15 @@ static int xclose(int fd, char *filename);
 #define CAT(a, b) CAT_(a, b)
 #endif
 
-#define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
-#define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
-#define SELECT_ON_NUM_ARGS(macro, ...) CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+#define GET_ARGS2(_1, _2, x, ...) x
+#define GET_ARGS3(_1, _2, _3, x, ...) x
+#define GET_ARGS4(_1, _2, _3, _4, x, ...) x
+#define GET_ARGS5(_1, _2, _3, _4, _5, x, ...) x
+
+/* #define foo(...) GET_ARGS3(__VA_ARGS__, \ */
+/*                           foo(__VA_ARGS__), \ */
+/*                           foo(__VA_ARGS__, 44), \ */
+/*                           foo(__VA_ARGS__, 44, 99),) */
 
 #if OS_WINDOWS
 static void *
@@ -801,9 +807,10 @@ xclose(int fd, char *filename) {
     return 0;
 }
 
-#define xclose_1(...) xclose(__VA_ARGS__, NULL)
-#define xclose_2(...) xclose(__VA_ARGS__)
-#define XCLOSE(...) SELECT_ON_NUM_ARGS(xclose_, __VA_ARGS__)
+#define XCLOSE(...) \
+    GET_ARGS2(__VA_ARGS__, \
+              xclose(__VA_ARGS__), \
+              xclose(__VA_ARGS__, NULL))
 
 #if OS_WINDOWS
 static int
