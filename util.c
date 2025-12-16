@@ -1561,8 +1561,6 @@ main(void) {
         XCLOSE(fd);
 
         for (int32 i = 0; i < (SIZEOF(filename2) - 1); i += 1) {
-            uint32 size;
-            uint32 len;
             uint32 c = (uint32)rand() % (sizeof(characters) - 1);
             filename2[i] = characters[c];
         }
