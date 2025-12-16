@@ -813,6 +813,15 @@ xclose(int *fd, char *filename) {
 #define xclose_2(...) xclose(__VA_ARGS__)
 #define XCLOSE(...) SELECT_ON_NUM_ARGS(xclose_, __VA_ARGS__)
 
+static int
+xunlink(char *filename) {
+    if (unlink(filename) < 0) {
+        error("Error in unlink(%s): %s.\n", filename, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
 #if OS_WINDOWS
 static int
 util_command(int argc, char **argv) {
@@ -1087,6 +1096,8 @@ util_memdup(void *source, int64 size) {
     return p;
 }
 
+// clang-format off
+
 #if OS_UNIX
 static int32
 util_copy_file_sync(char *destination, char *source) {
@@ -1102,8 +1113,8 @@ util_copy_file_sync(char *destination, char *source) {
     }
 
     if ((destination_fd
-         = open(destination, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
-        < 0) {
+             = open(destination,
+                    O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) < 0) {
         error("Error opening %s for writing: %s.\n", destination,
               strerror(errno));
         XCLOSE(&source_fd, source);
@@ -1138,9 +1149,15 @@ util_copy_file_sync(char *destination, char *source) {
     return 0;
 }
 
+// clang-format on
+
+#if !defined(MAX_FILES_COPY)
+#define MAX_FILES_COPY 256
+#endif
+
 typedef struct UtilCopyFilesAsync {
-    struct pollfd *pipes;
-    int *dests;
+    struct pollfd pipes[MAX_FILES_COPY];
+    int dests[MAX_FILES_COPY];
     int32 nfds;
     int32 unused;
 } UtilCopyFilesAsync;
@@ -1168,11 +1185,17 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
 
 static void *
 util_copy_file_async_thread(void *arg) {
-    UtilCopyFilesAsync *pipe_thread = arg;
-    int32 nfds = pipe_thread->nfds;
-    struct pollfd *pipes = pipe_thread->pipes;
-    int *dests = pipe_thread->dests;
-    int32 left = nfds;
+    UtilCopyFilesAsync *copy_files = arg;
+    struct pollfd *pipes = copy_files->pipes;
+    int *dests = copy_files->dests;
+    int32 left = copy_files->nfds;
+
+    if (copy_files->nfds >= LENGTH(copy_files->pipes)) {
+        error("Error in %s:"
+              " too many files for UtilCopyFilesAsync definition.\n",
+              __func__);
+        fatal(EXIT_FAILURE);
+    }
 
     while (left > 0) {
         char buffer[BUFSIZ];
@@ -1180,15 +1203,15 @@ util_copy_file_async_thread(void *arg) {
         int64 w;
         int64 n;
 
-        switch (n = poll(pipes, (nfds_t)nfds, 1000)) {
+        switch (n = poll(pipes, (nfds_t)copy_files->nfds, 1000)) {
         case 0:
             break;
         case -1:
-            error("Error in poll(nfds=%lld): %s.\n", (llong)nfds,
+            error("Error in poll(nfds=%lld): %s.\n", (llong)copy_files->nfds,
                   strerror(errno));
             break;
         default:
-            for (int32 i = 0; i < nfds; i += 1) {
+            for (int32 i = 0; i < copy_files->nfds; i += 1) {
                 if (n <= 0) {
                     break;
                 }
@@ -1202,31 +1225,22 @@ util_copy_file_async_thread(void *arg) {
                         if (w < 0) {
                             error("Error writing: %s.\n", strerror(errno));
                         }
-                        XCLOSE(&dests[i]);
-                        XCLOSE(&pipes[i].fd);
-
-                        dests[i] = -1;
-                        pipes[i].fd = -1;
-                        left -= 1;
-                        pipes[i].revents = 0;
-                        continue;
+                        goto next_file;
                     }
                 }
                 if (r < 0) {
                     error("Error reading: %s.\n", strerror(errno));
                 }
+            next_file:
                 XCLOSE(&dests[i]);
                 XCLOSE(&pipes[i].fd);
 
-                dests[i] = -1;
-                pipes[i].fd = -1;
                 left -= 1;
-
-                error("Finished saving file %d.\n", i);
                 pipes[i].revents = 0;
             }
         }
     }
+    free(copy_files);
     pthread_exit(NULL);
     return NULL;
 }
@@ -1548,49 +1562,49 @@ main(void) {
 
         /* Uncomment below to trigger error */
         /* WRITE_FILE(a, "data"); */
-        /* unlink(b); */
+        /* xunlink(b); */
         /* error("Expected error below:\n"); */
         /* assert(!util_equal_files(a, b)); */
     }
 
     {
+        // clang-format off
         const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
-        char filename2[256];
+        char name2[256];
         char buffer3[4096];
-        char *filename = "/tmp/test";
+        char *name = "/tmp/test";
         int fd;
 
-        if ((fd
-             = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
-            < 0) {
-            error("Error opening %s: %s.\n", filename, strerror(errno));
+        if ((fd = open(name,
+                       O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) < 0) {
+            error("Error opening %s: %s.\n", name, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
         util_filename_from(buffer2, sizeof(buffer2), fd);
-        ASSERT_EQUAL(realpath(filename, buffer3), buffer2);
-        unlink(filename);
+        ASSERT_EQUAL(realpath(name, buffer3), buffer2);
+        xunlink(name);
 
         XCLOSE(&fd);
 
-        for (int32 i = 0; i < (SIZEOF(filename2) - 1); i += 1) {
+        for (int32 i = 0; i < (SIZEOF(name2) - 1); i += 1) {
             uint32 c = (uint32)rand() % (sizeof(characters) - 1);
-            filename2[i] = characters[c];
+            name2[i] = characters[c];
         }
-        filename2[SIZEOF(filename2) - 1] = '\0';
+        name2[SIZEOF(name2) - 1] = '\0';
 
-        if ((fd
-             = open(filename2, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
-            < 0) {
-            error("Error opening %s: %s.\n", filename2, strerror(errno));
+        if ((fd = open(name2,
+                       O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) < 0) {
+            error("Error opening %s: %s.\n", name2, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
         util_filename_from(buffer2, sizeof(buffer2), fd);
-        ASSERT_EQUAL(realpath(filename2, buffer3), buffer2);
+        ASSERT_EQUAL(realpath(name2, buffer3), buffer2);
         XCLOSE(&fd);
-        unlink(filename2);
+        xunlink(name2);
+        // clang-format on
     }
 
     free(p1);
