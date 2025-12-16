@@ -1114,8 +1114,7 @@ util_filename_from(int fd) {
     HANDLE h;
     DWORD len;
 
-    h = (HANDLE)_get_osfhandle(fd);
-    if (h == INVALID_HANDLE_VALUE) {
+    if ((h = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE) {
         return "<unknown filename>";
     }
 
