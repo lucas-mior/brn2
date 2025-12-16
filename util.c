@@ -1530,7 +1530,7 @@ main(void) {
     }
 
     {
-        char buffer[4096];
+        char buffer2[4096];
         char *filename = "/tmp/test";
         int fd;
 
@@ -1541,8 +1541,8 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
 
-        util_filename_from(buffer, sizeof(buffer), fd);
-        ASSERT_EQUAL(filename, buffer);
+        util_filename_from(buffer2, sizeof(buffer2), fd);
+        ASSERT_EQUAL(filename, buffer2);
     }
 
     free(p1);
