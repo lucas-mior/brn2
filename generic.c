@@ -311,7 +311,7 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_FLOAT:   return (ldouble)var.afloat;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
     case TYPE_LDOUBLE: return var.aldouble;
-    default:           trap();
+    default:           trap(); break;
     }
     return 0.0l;
 }
