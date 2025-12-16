@@ -1466,10 +1466,10 @@ out:
 #if TESTING_util
 
 static void
-write_file(char *path, void *data, size_t len) {
+write_file(char *path, void *data, int64 len) {
     int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     assert(fd >= 0);
-    assert(write(fd, data, len) == (ssize_t)len);
+    assert(write(fd, data, len) == len);
     XCLOSE(&fd, path);
     return;
 }
@@ -1514,7 +1514,7 @@ main(void) {
     }
 
     {
-#define USESTR(STR) STR, strlen(STR)
+#define USESTR(STR) STR, strlen64(STR)
         char *a = "/tmp/afile";
         char *b = "/tmp/bfile";
 
