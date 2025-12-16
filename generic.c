@@ -34,17 +34,15 @@
 #define TESTING_generic 0
 #endif
 
-#if !defined(trap)
 #if TESTING_generic
 #define trap(...) raise(SIGILL)
-#else
+#elif !defined(trap)
 #if defined(__GNUC__) || defined(__clang__)
 #define trap(...) __builtin_trap()
 #elif defined(_MSC_VER)
 #define trap(...) __debugbreak()
 #else
 #define trap(...) *(volatile int *)0 = 0
-#endif
 #endif
 #endif
 
