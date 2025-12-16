@@ -90,7 +90,7 @@
 #define RUNNING_ON_VALGRIND 0
 #endif
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_util 1
 #elif !defined(TESTING_util)
 #define TESTING_util 0

@@ -53,7 +53,7 @@
 #include <unistd.h>
 #endif
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_arena 1
 #elif !defined(TESTING_arena)
 #define TESTING_arena 0

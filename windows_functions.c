@@ -33,7 +33,7 @@
 #define S_IFLNK 0120000
 #endif
 
-#if defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__ == 0
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_windows_functions 1
 #elif !defined(TESTING_windows_functions)
 #define TESTING_windows_functions 0
