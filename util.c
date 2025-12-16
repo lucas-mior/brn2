@@ -179,6 +179,13 @@ _Generic((SIZE), \
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
+
+#define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
+#define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
+#define CAT_2_(a, b) a##b
+#define CAT_2(a, b) CAT_2_(a, b)
+#define SELECT_ON_NUM_ARGS(macro, ...) CAT_2(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+
 // clang-format on
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
@@ -796,15 +803,9 @@ xclose(int fd, char *filename) {
     return 0;
 }
 
-#define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
-#define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
-#define CAT_2_(a, b) a##b
-#define CAT_2(a, b) CAT_2_(a, b)
-#define SELECT_ON_NUM_ARGS(macro, ...) CAT_2(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
-
-#define foo_1(...) xclose(__VA_ARGS__, NULL)
-#define foo_2(...) xclose(__VA_ARGS__)
-#define XCLOSE(...) SELECT_ON_NUM_ARGS(foo_, __VA_ARGS__)
+#define xclose_1(...) xclose(__VA_ARGS__, NULL)
+#define xclose_2(...) xclose(__VA_ARGS__)
+#define XCLOSE(...) SELECT_ON_NUM_ARGS(xclose_, __VA_ARGS__)
 
 #if OS_WINDOWS
 static int
