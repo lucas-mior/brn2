@@ -1089,9 +1089,16 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
     return source_fd;
 }
 
+char *
+util_filename_from(int fd) {
+}
+
 static void
 xclose(int fd) {
-    close(fd);
+    if (close(fd) < 0) {
+        char *filename = util_filename_from(fd);
+        error("Error closing %s: %s.\n", filename, strerror(errno));
+    }
     return;
 }
 
