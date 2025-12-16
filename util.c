@@ -1092,25 +1092,25 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
 static char *
 util_filename_from(int fd) {
 #if OS_LINUX
-    static char buf[PATH_MAX];
+    static char buffer[PATH_MAX];
     char linkpath[64];
     ssize_t len;
 
     SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
-    if ((len = readlink(linkpath, buf, sizeof(buf) - 1)) < 0) {
+    if ((len = readlink(linkpath, buffer, sizeof(buffer) - 1)) < 0) {
         return "<unknown filename>";
     }
-    buf[len] = '\0';
-    return buf;
+    buffer[len] = '\0';
+    return buffer;
 #elif OS_MAC
-    static char buf[PATH_MAX];
+    static char buffer[PATH_MAX];
 
-    if (fcntl(fd, F_GETPATH, buf) < 0) {
+    if (fcntl(fd, F_GETPATH, buffer) < 0) {
         return "<unknown filename>";
     }
-    return buf;
+    return buffer;
 #elif OS_WINDOWS
-    static char buf[MAX_PATH];
+    static char buffer[MAX_PATH];
     HANDLE h;
     DWORD len;
 
@@ -1119,17 +1119,18 @@ util_filename_from(int fd) {
         return "<unknown filename>";
     }
 
-    len = GetFinalPathNameByHandleA(h, buf, sizeof(buf), FILE_NAME_NORMALIZED);
+    len = GetFinalPathNameByHandleA(h, buffer, sizeof(buffer),
+                                    FILE_NAME_NORMALIZED);
 
-    if (len == 0 || len >= sizeof(buf)) {
+    if (len == 0 || len >= sizeof(buffer)) {
         return "<unknown filename>";
     }
 
-    if (strncmp(buf, "\\\\?\\", 4) == 0) {
-        memmove(buf, buf + 4, len - 3);
+    if (strncmp(buffer, "\\\\?\\", 4) == 0) {
+        memmove(buffer, buffer + 4, len - 3);
     }
 
-    return buf;
+    return buffer;
 #else
     return "<unknown filename>";
 #endif
