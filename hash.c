@@ -205,7 +205,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
             }
             break;
         default:
-            if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
+            if ((iterator->hash == hash) && (strcmp(iterator->key, key) == 0)) {
                 return false;
             }
             break;
@@ -261,7 +261,7 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
         case SLOT_DELETED:
             break;
         default:
-            if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
+            if ((iterator->hash == hash) && (strcmp(iterator->key, key) == 0)) {
 #if defined(HASH_VALUE_TYPE)
                 return &(iterator->value);
 #else
@@ -300,7 +300,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
         case SLOT_DELETED:
             break;
         default:
-            if (iterator->hash == hash && strcmp(iterator->key, key) == 0) {
+            if ((iterator->hash == hash) && (strcmp(iterator->key, key) == 0)) {
                 iterator->key = (char *)SLOT_DELETED;
                 map->length -= 1;
                 return true;

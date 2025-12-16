@@ -34,6 +34,7 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <float.h>
+#include <poll.h>
 
 #include "generic.c"
 
@@ -1080,6 +1081,74 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
 
     return source_fd;
 }
+
+typedef struct UtilCopyFilesAsync {
+    struct pollfd *pipes;
+    int *dests;
+    int32 nfds;
+    int32 unused;
+} UtilCopyFilesAsync;
+
+static void *
+util_copy_file_async_thread(void *arg) {
+    UtilCopyFilesAsync *pipe_thread = arg;
+    int32 nfds = pipe_thread->nfds;
+    struct pollfd *pipes = pipe_thread->pipes;
+    int *dests = pipe_thread->dests;
+    int32 left = nfds;
+
+    error("IN SEPARATE THREAD:\n");
+    PRINTLN(nfds);
+
+    while (left > 0) {
+        char buffer[BUFSIZ];
+        int64 r;
+        int64 w;
+
+        switch (poll(pipes, (nfds_t)nfds, 1000)) {
+        case 0:
+            continue;
+        case -1:
+            error("Error in polling: %s.\n", strerror(errno));
+            continue;
+        default:
+            break;
+        }
+        for (int32 i = 0; i < nfds; i += 1) {
+            if (pipes[i].revents & POLL_IN) {
+                while ((r = read64(pipes[i].fd, buffer, sizeof(buffer))) > 0) {
+                    if ((w = write64(dests[i], buffer, r)) != r) {
+                        if (w < 0) {
+                            error("Error writing: %s.\n", strerror(errno));
+                        }
+                        close(dests[i]);
+                        close(pipes[i].fd);
+
+                        dests[i] = -1;
+                        pipes[i].fd = -1;
+                        left -= 1;
+                        pipes[i].revents = 0;
+                        continue;
+                    }
+                }
+                if (r < 0) {
+                    error("Error reading: %s.\n", strerror(errno));
+                }
+                close(dests[i]);
+                close(pipes[i].fd);
+
+                dests[i] = -1;
+                pipes[i].fd = -1;
+                left -= 1;
+
+                error("Finished saving file %d.\n", i);
+            }
+            pipes[i].revents = 0;
+        }
+    }
+    pthread_exit(NULL);
+}
+
 #endif
 
 #if OS_LINUX
@@ -1122,6 +1191,7 @@ send_signal(char *executable, int32 signal_number) {
             close(cmdline);
             continue;
         }
+        close(cmdline);
 
         if (memmem64(command, r, executable, len)) {
             if ((last = memchr64(command, '\0', r))) {
@@ -1140,8 +1210,6 @@ send_signal(char *executable, int32 signal_number) {
                 }
             }
         }
-
-        close(cmdline);
     }
 
     closedir(processes);
