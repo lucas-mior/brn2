@@ -1541,7 +1541,10 @@ main(void) {
     }
 
     {
+        const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
+        char filename2[256];
+        char buffer3[4096];
         char *filename = "/tmp/test";
         int fd;
 
@@ -1554,6 +1557,27 @@ main(void) {
 
         util_filename_from(buffer2, sizeof(buffer2), fd);
         ASSERT_EQUAL(filename, buffer2);
+
+        XCLOSE(fd);
+
+        for (int32 i = 0; i < (SIZEOF(filename2) - 1); i += 1) {
+            uint32 size;
+            uint32 len;
+            uint32 c = (uint32)rand() % (sizeof(characters) - 1);
+            filename2[i] = characters[c];
+        }
+        filename2[SIZEOF(filename2) - 1] = '\0';
+
+        if ((fd
+             = open(filename2, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
+            < 0) {
+            error("Error opening %s: %s.\n", filename2, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+
+        util_filename_from(buffer2, sizeof(buffer2), fd);
+        ASSERT_EQUAL(realpath(filename2, buffer3), buffer2);
+        XCLOSE(fd);
     }
 
     free(p1);
