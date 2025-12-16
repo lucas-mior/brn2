@@ -18,7 +18,6 @@
 #if !defined(SORT_C)
 #define SORT_C
 
-#include <string.h>
 #include <stdlib.h>
 
 #include "util.c"
