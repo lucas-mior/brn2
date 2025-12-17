@@ -1523,9 +1523,16 @@ main(int argc, char **argv) {
     char *bases[] = {
         "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
+    struct sigaction signal_action;
 
     (void)argc;
-    signal(SIGUSR1, signal_handler);
+    signal_action.sa_handler = signal_handler;
+    sigemptyset(&signal_action.sa_mask);
+    signal_action.sa_flags = SA_RESTART;
+    if (sigaction(SIGUSR1, &signal_action, NULL) != 0) {
+        error2("Error in sigaction: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     send_signal(argv[0], SIGUSR1);
     ASSERT(received_signal);
 
