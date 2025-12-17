@@ -1503,6 +1503,7 @@ write_file(char *path, void *data, int64 len) {
 static volatile sig_atomic_t received_signal = false;
 static void
 signal_handler(int signal_number) {
+    (void)signal_number;
     received_signal = true;
     return;
 }
@@ -1523,6 +1524,7 @@ main(int argc, char **argv) {
         "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
 
+    (void)argc;
     signal(SIGUSR1, signal_handler);
     send_signal(argv[0], SIGUSR1);
     ASSERT(received_signal);
