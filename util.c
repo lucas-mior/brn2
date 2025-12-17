@@ -1500,8 +1500,15 @@ write_file(char *path, void *data, int64 len) {
 }
 #define WRITE_FILE(PATH, STRING) write_file(PATH, STRING, strlen64(STRING))
 
+static volatile sig_atomic_t received_signal = false;
+static void
+signal_handler(int signal_number) {
+    received_signal = true;
+    return;
+}
+
 int
-main(void) {
+main(int argc, char **argv) {
     char buffer[32];
     void *p1 = xmalloc(SIZEMB(1));
     void *p2 = xcalloc(10, SIZEMB(1));
@@ -1515,6 +1522,10 @@ main(void) {
     char *bases[] = {
         "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
     };
+
+    signal(SIGUSR1, signal_handler);
+    send_signal(argv[0], SIGUSR1);
+    ASSERT(received_signal);
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen64(string));
