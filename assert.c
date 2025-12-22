@@ -29,7 +29,9 @@
 #include <assert.h>
 #include <signal.h>
 
-#define error2(...) fprintf(stderr, __VA_ARGS__)
+#if !defined(error2)
+#define error2(FORMAT, ...) fprintf(stderr, FORMAT, __VA_ARGS__)
+#endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_assert 1
@@ -540,8 +542,8 @@ main(void) {
             exit(EXIT_FAILURE);
         }
 
-        error2("\nThe following assertions are supposed to fail");
-        error2("\nand then check the 'assertion_failed' variable\n");
+        error2("\nThe following assertions are supposed to fail", "");
+        error2("\nand then check the 'assertion_failed' variable\n", "");
 
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_EQUAL(a, b);

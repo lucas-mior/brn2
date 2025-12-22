@@ -91,8 +91,8 @@ main(int argc, char **argv) {
     FileList new_stack = {0};
     FileList *old;
     FileList *new;
-    HashMap *oldlist_map = NULL;
-    HashSet *newlist_set = NULL;
+    struct Hash_map *oldlist_map = NULL;
+    struct Hash_set *newlist_set = NULL;
     uint32 available_threads;
 #if OS_UNIX
     uint32 thread_ids[BRN2_MAX_THREADS];
@@ -484,7 +484,7 @@ main(int argc, char **argv) {
         uint32 number_renames = 0;
 
         if (number_changes) {
-            HashSet *names_renamed = hash_create_set(old->length);
+            struct Hash_set *names_renamed = hash_create_set(old->length);
 
             if (brn2_options_quiet) {
                 print = noop;

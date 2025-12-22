@@ -119,10 +119,12 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define SNPRINTF(BUFFER, FORMAT, ...)                                          \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #endif
-#if !defined(STRING_FROM_STRINGS)
-#define STRING_FROM_STRINGS(BUFFER, SEP, ARRAY, LENGTH)                        \
-    string_from_strings(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
-#endif
+
+#define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH) \
+_Generic((ARRAY), \
+    double *: string_from_doubles, \
+    char **: string_from_strings \
+)(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
@@ -717,7 +719,7 @@ xpthread_join(pthread_t thread, void **thread_return) {
 }
 
 static int32 __attribute__((format(printf, 3, 4)))
-snprintf2(char *buffer, int size, char *format, ...) {
+snprintf2(char *buffer, int64 size, char *format, ...) {
     int n;
     va_list args;
 
@@ -953,23 +955,26 @@ util_command(int argc, char **argv) {
 }
 #endif
 
-static void
-string_from_strings(char *buffer, int32 size, char *sep, char **array,
-                    int32 array_length) {
-    int32 n = 0;
-
-    for (int32 i = 0; i < (array_length - 1); i += 1) {
-        int32 space = size - n;
-        int32 m = snprintf2(buffer + n, space, "%s%s", array[i], sep);
-        n += m;
-    }
-    {
-        int32 i = array_length - 1;
-        int32 space = size - n;
-        snprintf2(buffer + n, space, "%s", array[i]);
-    }
-    return;
+#define GENERATE_STRING_FROM_ARRAY(NAME, TYPE, FORMAT) \
+static void \
+string_from_##NAME(char *buffer, int32 size, \
+                   char *sep, TYPE array, int32 array_length) { \
+    int32 n = 0; \
+    for (int32 i = 0; i < (array_length - 1); i += 1) { \
+        int32 space = size - n; \
+        int32 m = snprintf2(buffer + n, space, FORMAT"%s", array[i], sep); \
+        n += m; \
+    } \
+    { \
+        int32 i = array_length - 1; \
+        int32 space = size - n; \
+        snprintf2(buffer + n, space, FORMAT, array[i]); \
+    } \
+    return; \
 }
+
+GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
+GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
 void __attribute__((format(printf, 1, 2)))
 error(char *format, ...) {
@@ -1481,6 +1486,18 @@ out:
     return equal;
 }
 
+INLINE double
+rad2deg(double radians) {
+    const double RAD2DEG = 180.0 / 3.141592653589793;
+    return radians*RAD2DEG;
+}
+
+INLINE double
+deg2rad(double degrees) {
+    const double DEG2RAD = 3.141592653589793 / 180.0;
+    return degrees*DEG2RAD;
+}
+
 #if TESTING_util
 
 static void
@@ -1631,6 +1648,10 @@ main(int argc, char **argv) {
     free(p1);
     free(p2);
     free(p3);
+
+    ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
+    ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
+
     exit(EXIT_SUCCESS);
 }
 

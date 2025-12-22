@@ -44,6 +44,7 @@
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
+#define BLUE "\x1b[33m"
 #define RESET "\x1b[0m"
 
 #define BRN2_PATH_MAX 4096u
@@ -152,13 +153,13 @@ void brn2_list_from_file(FileList *, char *, bool);
 void brn2_list_from_args(FileList *, int, char **);
 void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);
-bool brn2_verify(FileList *, FileList *, HashSet *, uint32 *);
+bool brn2_verify(FileList *, FileList *, struct Hash_set *, uint32 *);
 uint32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
 void brn2_timings(char *, struct timespec, struct timespec, uint32);
 void brn2_print_list(FileList *);
 void brn2_execute2(FileList *, FileList *,
-                   HashMap *, HashSet *,
+                   struct Hash_map *, struct Hash_set *,
                    uint32, uint32 *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
