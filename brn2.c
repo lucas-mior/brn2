@@ -736,7 +736,7 @@ brn2_threads(void *(*function)(Work *), uint32 length, FileList *old,
 #endif
 
 bool
-brn2_verify(FileList *new, FileList *old, HashSet *repeated_set,
+brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
             uint32 *hashes_new) {
     bool failed = false;
 
@@ -791,8 +791,8 @@ noop(const char *unused, ...) {
 
 // clang-format off
 void
-brn2_execute2(FileList *old, FileList *new, HashMap *oldlist_map,
-              HashSet *names_renamed, uint32 i, uint32 *number_renames) {
+brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
+              struct Hash_set *names_renamed, uint32 i, uint32 *number_renames) {
     int renamed;
     uint32 *newname_index_on_oldlist;
     bool newname_exists;
@@ -1056,7 +1056,7 @@ main(void) {
         char command[256];
         char *filelist = "/tmp/brn2test";
         uint32 capacity_set;
-        HashMap *map;
+        struct Hash_map *map;
 
         SNPRINTF(command, "find . > %s", filelist);
 
@@ -1130,7 +1130,7 @@ main(void) {
         char command[256];
         char *filelist = "/tmp/brn2test";
         uint32 capacity_set;
-        HashMap *map;
+        struct Hash_map *map;
 
         SNPRINTF(command, "ls *.c > %s", filelist);
 
@@ -1228,8 +1228,8 @@ main(void) {
         FileList *old = &old_stack;
         FileList *new = &new_stack;
 
-        HashMap *oldlist_map;
-        HashSet *names_renamed;
+        struct Hash_map *oldlist_map;
+        struct Hash_set *names_renamed;
         uint32 number_renames = 0;
         uint32 number_changes;
         uint32 number_changed_hard = 0;
@@ -1318,7 +1318,7 @@ main(void) {
 
         {
             uint32 main_capacity;
-            HashSet *newlist_set = hash_create_set(new->length);
+            struct Hash_set *newlist_set = hash_create_set(new->length);
             new->indexes_size = new->length*sizeof(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             main_capacity = hash_capacity(newlist_set);

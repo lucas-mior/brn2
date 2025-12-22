@@ -51,8 +51,10 @@
 #define SLOT_FREE   0
 #define SLOT_DELETED -1
 
+#if !defined(GREEN)
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
+#endif
 
 #if !defined(ALIGNMENT)
 #define ALIGNMENT 16
@@ -63,9 +65,6 @@ uint32 hash_normal(void *map, uint64 hash);
 uint32 hash_capacity(void *map);
 uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
-
-typedef struct Hash_map HashMap;
-typedef struct Hash_set HashSet;
 
 #if !defined(INTEGERS)
 #define INTEGERS
@@ -94,8 +93,26 @@ typedef uint64_t uint64;
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
 #define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
 
+#if !defined(CAT)
 #define CAT_(a, b) a##b
 #define CAT(a, b) CAT_(a, b)
+#endif
+
+struct CommonBucket {
+    char *key;
+    uint64 hash;
+    uint32 value;
+    uint32 padding;
+};
+
+struct CommonMap {
+    int64 size;
+    uint32 capacity;
+    uint32 bitmask;
+    uint32 length;
+    uint32 padding;
+    struct CommonBucket array[];
+};
 
 #endif /* HASH_H */
 
@@ -245,6 +262,20 @@ CAT(hash_insert_, HASH_TYPE)(struct Map *map, char *key,
     );
 }
 
+static bool
+CAT(hash_insert2_, HASH_TYPE)(struct Map *map, char *key
+#if defined(HASH_VALUE_TYPE)
+                             , HASH_VALUE_TYPE value
+#endif
+) {
+    uint32 key_length = (uint32)strlen64(key);
+    return CAT(hash_insert_, HASH_TYPE)(map, key, key_length
+#if defined(HASH_VALUE_TYPE)
+                                        , value
+#endif
+    );
+}
+
 static void *
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
                                       char *key, uint64 hash, uint32 base_index) {
@@ -282,6 +313,12 @@ CAT(hash_lookup_, HASH_TYPE)(struct Map *map, char *key, uint32 key_length) {
     uint64 hash = hash_function(key, key_length);
     uint32 index = hash_normal(map, hash);
     return CAT(hash_lookup_pre_calc_, HASH_TYPE)(map, key, hash, index);
+}
+
+static void *
+CAT(hash_lookup2_, HASH_TYPE)(struct Map *map, char *key) {
+    uint32 key_length = (uint32)strlen64(key);
+    return CAT(hash_lookup_, HASH_TYPE)(map, key, key_length);
 }
 
 static bool
@@ -334,7 +371,7 @@ CAT(hash_print_summary_, HASH_TYPE)(struct Map *map, char *name) {
 
 static void
 CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
-    CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map);
+    /* CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map); */
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &map->array[i];
@@ -360,7 +397,7 @@ CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
         default:
             printf("'%s'", iterator->key);
 #if defined(HASH_VALUE_TYPE)
-            printf("=%u", iterator->value);
+            /* printf("=%u", iterator->value); */
 #endif
         }
     }
@@ -395,26 +432,26 @@ hash_function(char *key, uint32 key_length) {
 
 uint32
 hash_normal(void *map, uint64 hash) {
-    HashMap *map2 = map;
+    struct CommonMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
     return normal;
 }
 
 uint32
 hash_capacity(void *map) {
-    HashMap *map2 = map;
+    struct CommonMap *map2 = map;
     return map2->capacity;
 }
 
 uint32
 hash_length(void *map) {
-    HashMap *map2 = map;
+    struct CommonMap *map2 = map;
     return map2->length;
 }
 
 uint32
 hash_expected_collisions(void *map) {
-    HashMap *map2 = map;
+    struct CommonMap *map2 = map;
     long double n = map2->length;
     long double m = map2->capacity;
     long double result = n - m*(1 - powl((m - 1) / m, n));
@@ -483,7 +520,7 @@ int
 main(void) {
     struct timespec t0;
     struct timespec t1;
-    HashMap *map;
+    struct Hash_map *map;
     Arena *arena;
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 0};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 1};
