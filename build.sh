@@ -2,38 +2,40 @@
 
 # shellcheck disable=SC2086
 
+set -e
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
-. ./targets
-
+program=$(basename "$(readlink -f "$(dirname "$0")")")
+script=$(basename "$0")
 dir="$(realpath "$(dirname "$0")")"
 
+. ./targets
 target="${1:-build}"
 
 if ! grep -q "$target" ./targets; then
-    echo "usage: $(basename "$0") <targets>"
+    echo "usage: $script <targets>"
     cat targets
     exit 1
 fi
 
 cross="$2"
 
-printf "\n${0} ${RED}${1} ${2}$RES\n"
+printf "\n${script} ${RED}${1} ${2}$RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
 main="main.c"
-program="brn2"
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -std=c11"
+CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
+# CFLAGS="$CFLAGS -Werror"
 CFLAGS="$CFLAGS -Wno-format-pedantic"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
-CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
 CFLAGS="$CFLAGS -Wno-unused-macros"
 CFLAGS="$CFLAGS -Wno-unused-function"
@@ -44,6 +46,7 @@ LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
 
+CC="${CC:-cc}"
 if echo "$OS" | grep -q "Linux"; then
     if echo "$OS" | grep -q "GNU"; then
         GNUSOURCE="-D_GNU_SOURCE"
@@ -132,12 +135,22 @@ case "$target" in
     exit
     ;;
 "install")
-    if [ ! -f $program ]; then
+    trace_on
+    if [ ! -f "$program" ]; then
         $0 build
     fi
-    trace_on
     install -Dm755 bin/${program}   ${DESTDIR}${PREFIX}/bin/${program}
     install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    if [ -d "etc" ]; then
+        install -dm755 "$DESTDIR/etc/$program"
+        cp -rp etc/* "$DESTDIR/etc/$program/"
+    fi
+    if [ -f "$program.desktop" ]; then
+        install -Dm644 \
+            "$program.desktop" \
+            "$DESTDIR/usr/share/applications/$program.desktop"
+    fi
+    trace_off
     exit
     ;;
 "assembly")
