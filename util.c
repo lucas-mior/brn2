@@ -985,7 +985,6 @@ util_command(int argc, char **argv) {
         return WEXITSTATUS(status);
     }
 }
-
 static int
 util_command_launch(int argc, char **argv) {
     pid_t child;
