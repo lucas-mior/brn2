@@ -507,6 +507,10 @@ xmalloc(int64 size) {
         error("Failed to allocate %lld bytes.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
+
+    if (DEBUGGING && !RUNNING_ON_VALGRIND) {
+        memset64(p, 0xCD, size);
+    }
     return p;
 }
 
