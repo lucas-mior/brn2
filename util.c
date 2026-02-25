@@ -198,7 +198,7 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
-static int xclose(int *fd, char *filename);
+static int xclose(char *file, int line, int *fd, char *filename);
 
 #if !defined(CAT)
 #define CAT_(a, b) a##b
@@ -436,6 +436,33 @@ X64(fwrite)
 X64(fread)
 
 #undef X64
+
+static void
+qsort64(void *base, int64 n, int64 size,
+        int (*compar)(const void *, const void *)) {
+    if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
+        error("Error in %s: Overflow (%lld*%lld)\n", __func__, (llong)size,
+              (llong)n);
+        fatal(EXIT_FAILURE);
+    }
+    if ((size <= 0) || (n <= 0)) {
+        error("Error in %s: Invalid size(%lld) or n(%lld)\n", __func__,
+              (llong)size, (llong)n);
+        fatal(EXIT_FAILURE);
+    }
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+    if ((ullong)n >= (ullong)SIZE_MAX) {
+        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n", __func__,
+              (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+    qsort(base, (size_t)n, (size_t)size, compar);
+    return;
+}
 
 #if OS_WINDOWS
 static uint32
@@ -800,14 +827,15 @@ util_filename_from(char *buffer, int64 size, int fd) {
 }
 
 static int
-xclose(int *fd, char *filename) {
+xclose(char *file, int line, int *fd, char *filename) {
     if (close(*fd) < 0) {
         char buffer[4096];
         if (filename == NULL) {
             util_filename_from(buffer, sizeof(buffer), *fd);
             filename = buffer;
         }
-        error("Error closing %s: %s.\n", filename, strerror(errno));
+        error("%s:%d Error closing %s: %s.\n", file, line, filename,
+              strerror(errno));
         *fd = -1;
         return -1;
     }
@@ -815,8 +843,8 @@ xclose(int *fd, char *filename) {
     return 0;
 }
 
-#define xclose_1(...) xclose(__VA_ARGS__, NULL)
-#define xclose_2(...) xclose(__VA_ARGS__)
+#define xclose_1(...) xclose(__FILE__, __LINE__, __VA_ARGS__, NULL)
+#define xclose_2(...) xclose(__FILE__, __LINE__, __VA_ARGS__)
 #define XCLOSE(...) SELECT_ON_NUM_ARGS(xclose_, __VA_ARGS__)
 
 static int
@@ -955,6 +983,31 @@ util_command(int argc, char **argv) {
             return -1;
         }
         return WEXITSTATUS(status);
+    }
+}
+
+static int
+util_command_launch(int argc, char **argv) {
+    pid_t child;
+    (void)argc;
+
+    switch (child = fork()) {
+    case 0:
+        if (setsid() < 0) {
+            error("Error in setsid: %s.\n", strerror(errno));
+        }
+        execvp(argv[0], argv);
+        error("\nError executing '%s", argv[0]);
+        for (int j = 1; j < argc; j += 1) {
+            error(" %s", argv[j]);
+        }
+        error("': %s.\n", strerror(errno));
+        return -1;
+    case -1:
+        error("Error forking: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
+    default:
+        return 0;
     }
 }
 #endif
@@ -1500,6 +1553,44 @@ INLINE double
 deg2rad(double degrees) {
     const double DEG2RAD = 3.141592653589793 / 180.0;
     return degrees*DEG2RAD;
+}
+
+static char *
+bytes_pretty(int64 raw) {
+    char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB"};
+    char buffer[32];
+    double aux_pretty;
+    int i;
+    int32 n;
+    char *string;
+
+    if (raw <= 1023) {
+        n = SNPRINTF(buffer, "%lldB", (llong)raw);
+        string = xmalloc(n + 1);
+        memcpy64(string, buffer, n + 1);
+        return string;
+    }
+
+    aux_pretty = (double)raw;
+    i = 0;
+    while ((aux_pretty >= 1024) && (i < LENGTH(suffixes))) {
+        aux_pretty /= 1024;
+        i += 1;
+    }
+
+    if (aux_pretty >= 1000) {
+        n = SNPRINTF(buffer, "%.1f%s", aux_pretty, suffixes[i]);
+    } else if (aux_pretty >= 100) {
+        n = SNPRINTF(buffer, "%.2f%s", aux_pretty, suffixes[i]);
+    } else if (aux_pretty >= 10) {
+        n = SNPRINTF(buffer, "%.3f%s", aux_pretty, suffixes[i]);
+    } else {
+        n = SNPRINTF(buffer, "%.4f%s", aux_pretty, suffixes[i]);
+    }
+
+    string = xmalloc(n + 1);
+    memcpy64(string, buffer, n + 1);
+    return string;
 }
 
 #if TESTING_util
