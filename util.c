@@ -987,10 +987,9 @@ util_command(int argc, char **argv) {
 }
 static int
 util_command_launch(int argc, char **argv) {
-    pid_t child;
     (void)argc;
 
-    switch (child = fork()) {
+    switch (fork()) {
     case 0:
         if (setsid() < 0) {
             error("Error in setsid: %s.\n", strerror(errno));
@@ -1554,20 +1553,16 @@ deg2rad(double degrees) {
     return degrees*DEG2RAD;
 }
 
-static char *
-bytes_pretty(int64 raw) {
+static int64
+bytes_pretty(char *buffer, int64 raw) {
     char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB"};
-    char buffer[32];
     double aux_pretty;
     int i;
     int32 n;
-    char *string;
 
     if (raw <= 1023) {
-        n = SNPRINTF(buffer, "%lldB", (llong)raw);
-        string = xmalloc(n + 1);
-        memcpy64(string, buffer, n + 1);
-        return string;
+        n = snprintf2(buffer, 32, "%lldB", (llong)raw);
+        return n;
     }
 
     aux_pretty = (double)raw;
@@ -1578,18 +1573,47 @@ bytes_pretty(int64 raw) {
     }
 
     if (aux_pretty >= 1000) {
-        n = SNPRINTF(buffer, "%.1f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 32, "%.1f%s", aux_pretty, suffixes[i]);
     } else if (aux_pretty >= 100) {
-        n = SNPRINTF(buffer, "%.2f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 32, "%.2f%s", aux_pretty, suffixes[i]);
     } else if (aux_pretty >= 10) {
-        n = SNPRINTF(buffer, "%.3f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 32, "%.3f%s", aux_pretty, suffixes[i]);
     } else {
-        n = SNPRINTF(buffer, "%.4f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 32, "%.4f%s", aux_pretty, suffixes[i]);
     }
 
-    string = xmalloc(n + 1);
-    memcpy64(string, buffer, n + 1);
-    return string;
+    return n;
+}
+
+static char *
+shell_escape(char *path) {
+    int64 len;
+    int64 count;
+    char *escaped;
+    char *write_ptr;
+
+    len = strlen64(path);
+    count = 0;
+    for (int64 i = 0; i < len; i += 1) {
+        if (path[i] == '\'') {
+            count += 1;
+        }
+    }
+
+    escaped = xmalloc(len + (count*3) + 1);
+    write_ptr = escaped;
+
+    for (int64 i = 0; i < len; i += 1) {
+        if (path[i] == '\'') {
+            memcpy64(write_ptr, "'\\''", 4);
+            write_ptr += 4;
+        } else {
+            *write_ptr = path[i];
+            write_ptr += 1;
+        }
+    }
+    *write_ptr = '\0';
+    return escaped;
 }
 
 #if TESTING_util
@@ -1654,7 +1678,7 @@ main(int argc, char **argv) {
     memset64(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
-    assert(!strcmp(string, p3));
+    ASSERT_EQUAL(string, p3);
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
@@ -1664,12 +1688,12 @@ main(int argc, char **argv) {
 
     for (int64 i = 0; i < LENGTH(paths); i += 1) {
         char *path = paths[i];
-        assert(!strcmp(basename2(path), bases[i]));
+        ASSERT_EQUAL(basename2(path), bases[i]);
     }
 
     if (OS_WINDOWS) {
         char *path2 = "aa\\cc";
-        assert(!strcmp(basename2(path2), "cc"));
+        ASSERT_EQUAL(basename2(path2), "cc");
     }
 
     {

@@ -362,6 +362,28 @@ arenas_push(Arena **arenas, int64 number, int64 size) {
     return NULL;
 }
 
+static void *
+xarena_push(Arena *arena, int64 size) {
+    void *p;
+    if ((p = arena_push(arena, size)) == NULL) {
+        error2("Error allocating %lld bytes.\n", (llong)size);
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
+static void *
+xarenas_push(Arena **arenas, uint32 number, int64 size) {
+    void *p;
+
+    if ((p = arenas_push(arenas, number, size)) == NULL) {
+        error2("Error pushing %lld bytes into arenas %p: %s.", (llong)size,
+               (void *)arenas, arena_strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
 static uint32
 arena_push_index32(Arena *arena, uint32 size) {
     void *before;
