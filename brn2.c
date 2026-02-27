@@ -82,18 +82,6 @@ static struct WorkQueue {
 
 bool stop_threads = false;
 
-static void *
-xarena_push(Arena **arenas, uint32 number, int64 size) {
-    void *p;
-
-    if ((p = arenas_push(arenas, number, size)) == NULL) {
-        error("Error pushing %lld bytes into arenas %p: %s.", (llong)size,
-              (void *)arenas, arena_strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    return p;
-}
-
 int
 brn2_compare(const void *a, const void *b) {
     FileName *const *file_a = a;
@@ -130,7 +118,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         }
 
         size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
-        *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
+        *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
         file = *file_pointer;
 
         file->length = (uint32)name_length;
@@ -231,7 +219,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         if (directory_length) {
             size = STRUCT_ARRAY_SIZE(file, char,
                                      directory_length + 1 + name_length + 2);
-            *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
+            *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
             file->length = directory_length + 1 + (uint32)name_length;
@@ -240,7 +228,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             memcpy64(file->name + directory_length + 1, name, name_length + 1);
         } else {
             size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
-            *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
+            *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
             file->length = (uint32)name_length;
@@ -349,7 +337,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             }
 
             size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
-            *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
+            *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
 
             file = *file_pointer;
             file->length = (uint32)name_length;
@@ -442,7 +430,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
 
         file_pointer = &(list->files[length]);
-        *file_pointer = xarena_push(list->arenas, nthreads, ALIGN(size));
+        *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
         file = *file_pointer;
 
         file->length = name_length;
@@ -1291,7 +1279,7 @@ main(void) {
                 = (uint32)SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
             size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
-            *file_pointer = xarena_push(new->arenas, nthreads, ALIGN(size));
+            *file_pointer = xarenas_push(new->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
             file->length = name_length;

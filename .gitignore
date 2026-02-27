@@ -20,3 +20,5 @@ rename.txt
 bin/
 aaa
 bbb
+*.git/
+package/SRCINFO
