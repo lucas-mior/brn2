@@ -21,4 +21,4 @@ bin/
 aaa
 bbb
 *.git/
-package/SRCINFO
+package/.SRCINFO
