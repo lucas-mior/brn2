@@ -96,10 +96,10 @@
 #define TESTING_util 0
 #endif
 
-#if TESTING_util
-static char *program = __FILE__;
-#else
+#if !TESTING_util
 static char *program;
+#else
+static char *program = __FILE__;
 #endif
 
 static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
@@ -119,6 +119,15 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define SNPRINTF(BUFFER, FORMAT, ...)                                          \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
 #endif
+#if !defined(STRFTIME)
+#define STRFTIME(BUFFER, FORMAT, TIME) \
+    strftime2(BUFFER, sizeof(BUFFER), FORMAT, TIME)
+#endif
+
+#define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
+    (uint32)(SIZEOF(*(struct_object)) + (array_length*SIZEOF(ArrayType)))
+
+#define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
 #define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH) \
 _Generic((ARRAY), \
@@ -159,6 +168,7 @@ _Generic((ARRAY), \
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
+// Note: NEVER delete lines with // clang-format
 // clang-format off
 
 #endif
@@ -758,12 +768,20 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     n = vsnprintf(buffer, (size_t)size, format, args);
     va_end(args);
 
-    if (n <= 0) {
-        error("Error in snprintf %s.\n", format);
+    if ((n < 0) || (n >= size)) {
+        fprintf(stderr, "Error in vsnprintf(%s) (n = %lld\n", format, (llong)n);
         fatal(EXIT_FAILURE);
     }
-    if (n >= size) {
-        error("Error in snprintf %s: Buffer is too small.\n", format);
+    return n;
+}
+
+static int64
+strftime2(char *buffer, int64 size, char *format, struct tm *time_info) {
+    int64 n;
+
+    n = (int64)strftime(buffer, (size_t)size, format, time_info);
+    if ((n <= 0) || (n >= size)) {
+        error("Error in strftime(%s) (n = %lld).\n", format, (llong)n);
         fatal(EXIT_FAILURE);
     }
     return n;
@@ -1041,12 +1059,8 @@ error(char *format, ...) {
     n = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    if (n <= 0) {
-        fprintf(stderr, "Error in vsnprintf(%s)\n", format);
-        fatal(EXIT_FAILURE);
-    }
-    if (n >= SIZEOF(buffer)) {
-        fprintf(stderr, "Error in vsnprintf(%s): Buffer too small.\n", format);
+    if ((n < 0) || (n >= SIZEOF(buffer))) {
+        fprintf(stderr, "Error in vsnprintf(%s) (n = %lld\n", format, (llong)n);
         fatal(EXIT_FAILURE);
     }
 
@@ -1092,6 +1106,7 @@ fatal(int status) {
     }
 }
 
+// Note: NEVER delete lines with // clang-format
 // clang-format off
 void
 util_segv_handler(int32 unused) {
@@ -1133,10 +1148,7 @@ util_die_notify(char *program_name, char *format, ...) {
     n = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    if (n < 0) {
-        fatal(EXIT_FAILURE);
-    }
-    if (n >= SIZEOF(buffer)) {
+    if ((n < 0) || (n >= SIZEOF(buffer))) {
         fatal(EXIT_FAILURE);
     }
 
@@ -1156,6 +1168,7 @@ util_memdup(void *source, int64 size) {
     return p;
 }
 
+// Note: NEVER delete lines with // clang-format
 // clang-format off
 
 #if OS_UNIX
@@ -1483,6 +1496,7 @@ util_equal_files(char *filename_a, char *filename_b) {
             void *map_a;
             void *map_b;
 
+            // Note: NEVER delete lines with // clang-format
             // clang-format off
             map_a = mmap(NULL, (size_t)stat_a.st_size,
                          PROT_READ, MAP_PRIVATE, fd_a, 0);
@@ -1724,6 +1738,7 @@ main(int argc, char **argv) {
     }
 
     {
+        // Note: NEVER delete lines with // clang-format
         // clang-format off
         const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
