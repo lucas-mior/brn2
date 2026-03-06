@@ -208,7 +208,8 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
-static int xclose(char *file, int line, int *fd, char *filename);
+static int xclose(char *file, int line, int *fd, char *fd_var_name,
+                  char *filename);
 
 #if !defined(CAT)
 #define CAT_(a, b) a##b
@@ -787,71 +788,71 @@ strftime2(char *buffer, int64 size, char *format, struct tm *time_info) {
     return n;
 }
 
-static void
+static int32
 util_filename_from(char *buffer, int64 size, int fd) {
-    char *unknown = "<unknown filename>";
-    int64 unknown_len = strlen64(unknown);
 #if OS_LINUX
     char linkpath[64];
     ssize_t len;
 
     SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
     if ((len = readlink(linkpath, buffer, (size_t)(size - 1))) < 0) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
+        return -1;
     }
     buffer[len] = '\0';
-    return;
+    return 0;
 #elif OS_MAC
     static char buffer2[PATH_MAX];
     int64 len;
 
     if (fcntl(fd, F_GETPATH, buffer2) < 0) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
+        return -1;
     }
     len = MIN(strlen64(buffer2), size - 1);
     memcpy64(buffer, buffer2, len + 1);
-    return;
+    return 0;
 #elif OS_WINDOWS
     HANDLE h;
     DWORD len;
     intptr_t h2 = _get_osfhandle(fd);
 
     if ((h = (HANDLE)h2) == INVALID_HANDLE_VALUE) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
+        return -1;
     }
 
     len = GetFinalPathNameByHandleA(h, buffer, (DWORD)size,
                                     FILE_NAME_NORMALIZED);
 
     if ((len <= 0) || (len >= size)) {
-        memcpy64(buffer, unknown, unknown_len + 1);
-        return;
+        return -1;
     }
 
     if (strncmp(buffer, "\\\\?\\", 4) == 0) {
         memmove(buffer, buffer + 4, len - 3);
     }
 
-    return;
+    return 0;
 #else
     (void)size;
     (void)fd;
-    memcpy(buffer, unknown, unknown_len + 1);
-    return;
+    return -1;
 #endif
 }
 
 static int
-xclose(char *file, int line, int *fd, char *filename) {
-    if (close(*fd) < 0) {
-        char buffer[4096];
-        if (filename == NULL) {
-            util_filename_from(buffer, sizeof(buffer), *fd);
+xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
+#if DEBUGGING
+    char buffer[4096];
+    if (filename == NULL) {
+        if (util_filename_from(buffer, sizeof(buffer), *fd) < 0) {
+            filename = fd_var_name;
+        } else {
             filename = buffer;
         }
+    }
+#else
+    filename = fd_var_name;
+#endif
+    if (close(*fd) < 0) {
         error("%s:%d Error closing %s: %s.\n", file, line, filename,
               strerror(errno));
         *fd = -1;
@@ -861,8 +862,8 @@ xclose(char *file, int line, int *fd, char *filename) {
     return 0;
 }
 
-#define xclose_1(...) xclose(__FILE__, __LINE__, __VA_ARGS__, NULL)
-#define xclose_2(...) xclose(__FILE__, __LINE__, __VA_ARGS__)
+#define xclose_1(FD)       xclose(__FILE__, __LINE__, FD, #FD, NULL)
+#define xclose_2(FD, NAME) xclose(__FILE__, __LINE__, FD, #FD, NAME)
 #define XCLOSE(...) SELECT_ON_NUM_ARGS(xclose_, __VA_ARGS__)
 
 static int
