@@ -908,18 +908,19 @@ brn2_usage(FILE *stream) {
         "Rename filenames based on provided arguments.\n"
         "\n"
         "Options:\n"
-        "  -F, --fatal     : Exit on first renaming error.\n"
+        "  -D, --diff       : Use vimdiff to edit names.\n"
+        "  -F, --fatal      : Exit on first renaming error.\n"
         "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
-        "  -e, --explict   : Only rename files given in the list (default).\n"
-        "  -h, --help      : Display this help message and exit.\n"
-        "  -i, --implict   : Rename files not given in the list of files to "
+        "  -e, --explict    : Only rename files given in the list (default).\n"
+        "  -h, --help       : Display this help message and exit.\n"
+        "  -i, --implict    : Rename files not given in the list of files to "
         "rename.\n"
-        "  -q, --quiet     : Quiet mode; suppress output messages.\n"
-        "  -s, --sort      : Disable sorting of original list.\n"
-        "  -v, --verbose   : Verbose mode (default); output messages.\n"
+        "  -q, --quiet      : Quiet mode; suppress output messages.\n"
+        "  -s, --sort       : Disable sorting of original list.\n"
+        "  -v, --verbose    : Verbose mode (default); output messages.\n"
         "\n"
         "Arguments:\n"
-        "  No arguments             : Rename files of current working "
+        "  No arguments            : Rename files of current working "
         "directory.\n"
         "  1 or more arguments      : Rename filenames passed as arguments.\n"
         "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
@@ -938,6 +939,7 @@ bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_autosolve = false;
+bool brn2_options_diff = false;
 uint32 nthreads = 2;
 
 void
