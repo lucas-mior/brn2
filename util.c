@@ -834,6 +834,7 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #else
     (void)size;
     (void)fd;
+    (void)buffer;
     return -1;
 #endif
 }
