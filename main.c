@@ -405,7 +405,6 @@ main(int argc, char **argv) {
         };
         char *args_diff[] = {
             "vim",
-            "-d",
             brn2_diff_buffer.name,
             brn2_buffer.name,
             "-c",
