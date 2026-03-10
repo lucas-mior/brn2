@@ -397,18 +397,33 @@ main(int argc, char **argv) {
     }
 
     {
-        char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
-        char *args_diff[] = {"vim",
-                             "-d",
-                             brn2_diff_buffer.name,
-                             brn2_buffer.name,
-                             "-c",
-                             "wincmd h | set nomodifiable | wincmd l",
-                             NULL};
-        char *args_shuf[]
-            = {"shuf", brn2_buffer.name, "-o", brn2_buffer.name, NULL};
+        // clang-format off
+        char *args_edit[] = {
+            EDITOR,
+            brn2_buffer.name,
+            NULL
+        };
+        char *args_diff[] = {
+            "vim",
+            "-d",
+            brn2_diff_buffer.name,
+            brn2_buffer.name,
+            "-c",
+            "wincmd h | set nomodifiable | wincmd l",
+            NULL
+        };
+        char *args_shuf[] = {
+            "shuf",
+            brn2_buffer.name,
+            "-o",
+            brn2_buffer.name,
+            NULL
+        };
+
         (void)args_edit;
+        (void)args_diff;
         (void)args_shuf;
+        // clang-format on
 
 #if BRN2_BENCHMARK
         {
