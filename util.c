@@ -535,7 +535,7 @@ xmalloc(int64 size) {
             fatal(EXIT_FAILURE);
         }
         if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in xmalloc: Number (%lld) is bigger than SIZE_MAX\n",
+            error("Error in xmalloc: Number (%lld) is bigger than SIZEMAX\n",
                   (llong)size);
             fatal(EXIT_FAILURE);
         }
@@ -834,7 +834,6 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #else
     (void)size;
     (void)fd;
-    (void)buffer;
     return -1;
 #endif
 }
