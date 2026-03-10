@@ -354,7 +354,7 @@ main(int argc, char **argv) {
             j += 1;
 
             file->name[file->length] = '\n';
-            memcpy(pointer, file->name, file->length + 1);
+            memcpy64(pointer, file->name, file->length + 1);
             pointer += file->length + 1;
             file->name[file->length] = '\0';
         }
@@ -409,7 +409,7 @@ main(int argc, char **argv) {
             brn2_diff_buffer.name,
             brn2_buffer.name,
             "-c",
-            "wincmd h | set nomodifiable | wincmd l",
+            "wincmd h | set nomodifiable | wincmd l | au BufWinLeave <buffer> qa",
             NULL
         };
         char *args_shuf[] = {
@@ -460,7 +460,6 @@ main(int argc, char **argv) {
 #else
         while (true) {
             int32 editor_result;
-
             if (!isatty(fileno(stdin))) {
                 char *tty_path;
                 if (OS_WINDOWS) {
@@ -528,7 +527,6 @@ main(int argc, char **argv) {
             if (!brn2_verify(new, old, newlist_set, new->indexes)) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
-
                        " ENTER to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
