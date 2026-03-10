@@ -409,8 +409,9 @@ main(int argc, char **argv) {
             brn2_diff_buffer.name,
             brn2_buffer.name,
             "-c",
-            "wincmd h | set nomodifiable scrollbind"
-                " | wincmd l | set scrollbind | au QuitPre <buffer> quitall",
+            "wincmd h | set nomodifiable scrollbind cursorbind cursorline"
+            " | wincmd l | set scrollbind cursorbind"
+            " | au QuitPre brn2_diff.* quitall",
             NULL
         };
         char *args_shuf[] = {
