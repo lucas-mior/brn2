@@ -410,7 +410,7 @@ main(int argc, char **argv) {
             brn2_buffer.name,
             "-c",
             "wincmd h | set nomodifiable scrollbind"
-                " | wincmd l | set scrollbind | au BufWinLeave <buffer> qa",
+                " | wincmd l | set scrollbind | au QuitPre <buffer> quitall",
             NULL
         };
         char *args_shuf[] = {
