@@ -444,6 +444,8 @@ main(int argc, char **argv) {
         }
 #else
         while (true) {
+            int32 editor_result;
+
             if (!isatty(fileno(stdin))) {
                 char *tty_path;
                 if (OS_WINDOWS) {
@@ -457,7 +459,6 @@ main(int argc, char **argv) {
                 }
             }
 
-            int32 editor_result;
             if (brn2_options_diff) {
                 editor_result = util_command(LENGTH(args_diff), args_diff);
             } else {
