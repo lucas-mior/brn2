@@ -131,6 +131,7 @@ extern bool brn2_options_implicit;
 extern bool brn2_options_quiet;
 extern bool brn2_options_sort;
 extern bool brn2_options_autosolve;
+extern bool brn2_options_diff;
 extern uint32 nthreads;
 
 #if OS_UNIX
