@@ -535,7 +535,7 @@ xmalloc(int64 size) {
             fatal(EXIT_FAILURE);
         }
         if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in xmalloc: Number (%lld) is bigger than SIZEMAX\n",
+            error("Error in xmalloc: Number (%lld) is bigger than SIZE_MAX\n",
                   (llong)size);
             fatal(EXIT_FAILURE);
         }
