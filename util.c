@@ -850,7 +850,9 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
         }
     }
 #else
-    filename = fd_var_name;
+    if (filename == NULL) {
+        filename = fd_var_name;
+    }
 #endif
     if (close(*fd) < 0) {
         error("%s:%d Error closing %s: %s.\n", file, line, filename,
