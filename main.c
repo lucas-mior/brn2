@@ -32,6 +32,7 @@ bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
 bool brn2_options_autosolve = false;
+bool brn2_options_diff = false;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
@@ -47,6 +48,7 @@ static struct option options[] = {
     {"sort",     no_argument,       NULL, 's'},
     {"verbose",  no_argument,       NULL, 'v'},
     {"autosave", no_argument,       NULL, 'a'},
+    {"diff",     no_argument,       NULL, 'D'},
     {NULL,       0,                 NULL, 0}
 };
 // clang-format on
@@ -58,11 +60,15 @@ enum {
 };
 
 static File brn2_buffer;
+static File brn2_diff_buffer;
 
 static void
 delete_brn2_buffer(void) {
     if (!DEBUGGING) {
         unlink(brn2_buffer.name);
+        if (brn2_options_diff) {
+            unlink(brn2_diff_buffer.name);
+        }
     }
     return;
 }
@@ -114,7 +120,7 @@ main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsva", options, NULL))
+    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsvaD", options, NULL))
            != -1) {
         switch (opt) {
         case 'd':
@@ -157,6 +163,9 @@ main(int argc, char **argv) {
             break;
         case 'a':
             brn2_options_autosolve = true;
+            break;
+        case 'D':
+            brn2_options_diff = true;
             break;
         default:
             brn2_usage(stderr);
@@ -282,6 +291,15 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         }
 
+        if (brn2_options_diff) {
+            SNPRINTF(brn2_diff_buffer.name, "%s/%s", temp, "brn2_diff.XXXXXX");
+            if ((brn2_diff_buffer.fd = mkstemp(brn2_diff_buffer.name)) < 0) {
+                error("Error opening '%s': %s.\n", brn2_diff_buffer.name,
+                      strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
+        }
+
         oldlist_map = hash_create_map(old->length);
         capacity_set = hash_capacity(oldlist_map);
         old->indexes_size = old->length*sizeof(*(old->indexes));
@@ -323,6 +341,9 @@ main(int argc, char **argv) {
                     error(".\n");
                     fatal(EXIT_FAILURE);
                 }
+                if (brn2_options_diff) {
+                    write64(brn2_diff_buffer.fd, write_buffer, buffered);
+                }
                 pointer = write_buffer;
             }
 
@@ -348,12 +369,25 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         } else {
             old->length = j;
+            if (brn2_options_diff) {
+                write64(brn2_diff_buffer.fd, write_buffer, buffered);
+            }
         }
+
         if (close(brn2_buffer.fd) < 0) {
             error("Error closing buffer: %s\n", strerror(errno));
             fatal(EXIT_FAILURE);
         }
         brn2_buffer.fd = -1;
+
+        if (brn2_options_diff) {
+            if (close(brn2_diff_buffer.fd) < 0) {
+                error("Error closing diff buffer: %s\n", strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
+            brn2_diff_buffer.fd = -1;
+        }
+
         atexit(delete_brn2_buffer);
     }
 
@@ -364,6 +398,13 @@ main(int argc, char **argv) {
 
     {
         char *args_edit[] = {EDITOR, brn2_buffer.name, NULL};
+        char *args_diff[] = {"vim",
+                             "-d",
+                             brn2_diff_buffer.name,
+                             brn2_buffer.name,
+                             "-c",
+                             "wincmd h | set nomodifiable | wincmd l",
+                             NULL};
         char *args_shuf[]
             = {"shuf", brn2_buffer.name, "-o", brn2_buffer.name, NULL};
         (void)args_edit;
@@ -415,8 +456,16 @@ main(int argc, char **argv) {
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
-            if (util_command(LENGTH(args_edit), args_edit) < 0) {
-                if (OS_WINDOWS) {
+
+            int32 editor_result;
+            if (brn2_options_diff) {
+                editor_result = util_command(LENGTH(args_diff), args_diff);
+            } else {
+                editor_result = util_command(LENGTH(args_edit), args_edit);
+            }
+
+            if (editor_result < 0) {
+                if (OS_WINDOWS && !brn2_options_diff) {
                     args_edit[0] = "Notepad.exe";
                     if (util_command(LENGTH(args_edit), args_edit) < 0) {
                         fatal(EXIT_FAILURE);
