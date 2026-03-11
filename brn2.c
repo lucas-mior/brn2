@@ -103,7 +103,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
-        int64 name_length = strlen64(name);
+        int64 name_length = strlen32(name);
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         int64 size;
@@ -180,7 +180,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
     int number_files;
 
     if (strcmp(directory, ".")) {
-        int64 len = strlen64(directory);
+        int64 len = strlen32(directory);
         if (len >= MAXOF(directory_length)) {
             error("Error: directory name too long.\n");
             fatal(EXIT_FAILURE);
@@ -202,7 +202,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         char *name = directory_list[i]->d_name;
-        int64 name_length = strlen64(name);
+        int64 name_length = strlen32(name);
         int64 size;
 
         if (brn2_is_invalid_name(name)) {
