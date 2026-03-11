@@ -481,7 +481,7 @@ util_nthreads(void) {
     SYSTEM_INFO sysinfo;
     memset64(&sysinfo, 0, SIZEOF(sysinfo));
     GetSystemInfo(&sysinfo);
-    return sysinfo.dwNumberOfProcessors;
+    return (int32)sysinfo.dwNumberOfProcessors;
 }
 #else
 static int32
@@ -834,6 +834,7 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #else
     (void)size;
     (void)fd;
+    (void)buffer;
     return -1;
 #endif
 }

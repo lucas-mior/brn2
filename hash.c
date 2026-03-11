@@ -475,7 +475,7 @@ hash_expected_collisions(void *map) {
 typedef struct String {
     char *s;
     uint32 len;
-    uint32 value;
+    int32 value;
 } String;
 
 static String
@@ -495,7 +495,7 @@ random_string(Arena *arena, uint32 nbytes) {
     }
     string.s[len] = '\0';
     string.len = len;
-    string.value = (uint32)rand();
+    string.value = (int32)rand();
 
     return string;
 }

@@ -437,16 +437,16 @@ main(int argc, char **argv) {
                 if (x < 0.4f) {
                     for (int32 j = 0; j < length; j += 1) {
                         int32 y = (int32)rand();
-                        char c = allowed[y % (sizeof(allowed) - 1)];
+                        char c = allowed[y % (SIZEOF(allowed) - 1)];
                         new->files[i]->name[j] = c;
                     }
                 }
             }
             brn2_normalize_names(old, new);
 
-            newlist_set = hash_create_set(new->length);
+            newlist_set = hash_create_set((uint32)new->length);
             main_capacity = hash_capacity(newlist_set);
-            new->indexes_size = new->length*sizeof(*(new->indexes));
+            new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             brn2_create_hashes(new, main_capacity);
             brn2_verify(new, old, newlist_set, new->indexes);

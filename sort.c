@@ -247,8 +247,8 @@ static int32 dummy = INT32_MAX;
 
 static void
 test_sorting(int32 n, int32 p) {
-    int32 *array = xmalloc(n*sizeof(*array));
-    int32 *n_sub = xmalloc(p*sizeof(*n_sub));
+    int32 *array = xmalloc(n*SIZEOF(*array));
+    int32 *n_sub = xmalloc(p*SIZEOF(*n_sub));
 
     if (n < p*2) {
         fprintf(stderr, "n=%u must be larger than p*2=%u*2\n", n, p);
@@ -273,7 +273,7 @@ test_sorting(int32 n, int32 p) {
     {
         int32 off_set = 0;
         for (int32 i = 0; i < p; i += 1) {
-            qsort(&array[off_set], n_sub[i], sizeof(*array), compare_int);
+            qsort(&array[off_set], (size_t)n_sub[i], sizeof(*array), compare_int);
             off_set += n_sub[i];
         }
     }
