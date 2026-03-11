@@ -407,7 +407,7 @@ main(int argc, char **argv) {
             brn2_buffer.name,
             NULL
         };
-        char *args_diff[] = {
+        char *args_vim_split[] = {
             "vim",
             "-O",
             brn2_buffer_old.name,
@@ -427,7 +427,7 @@ main(int argc, char **argv) {
         };
 
         (void)args_edit;
-        (void)args_diff;
+        (void)args_vim_split;
         (void)args_shuf;
         // clang-format on
 
@@ -481,7 +481,7 @@ main(int argc, char **argv) {
             }
 
             if (brn2_options_vim_split) {
-                editor_result = util_command(LENGTH(args_diff), args_diff);
+                editor_result = util_command(LENGTH(args_vim_split), args_vim_split);
             } else {
                 editor_result = util_command(LENGTH(args_edit), args_edit);
             }
