@@ -465,7 +465,7 @@ main(int argc, char **argv) {
         }
 #else
         while (true) {
-            int32 editor_result;
+            int32 status;
 
             if (!isatty(fileno(stdin))) {
                 char *tty_path;
@@ -481,12 +481,12 @@ main(int argc, char **argv) {
             }
 
             if (brn2_options_vim_split) {
-                editor_result = util_command(LENGTH(args_vim_split), args_vim_split);
+                status = util_command(LENGTH(args_vim_split), args_vim_split);
             } else {
-                editor_result = util_command(LENGTH(args_edit), args_edit);
+                status = util_command(LENGTH(args_edit), args_edit);
             }
 
-            if (editor_result < 0) {
+            if (status < 0) {
                 if (OS_WINDOWS) {
                     args_edit[0] = "Notepad.exe";
                     if (util_command(LENGTH(args_edit), args_edit) < 0) {
