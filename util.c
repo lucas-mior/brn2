@@ -1720,19 +1720,19 @@ main(int argc, char **argv) {
 
         WRITE_FILE(a, "hello world");
         WRITE_FILE(b, "hello world");
-        assert(util_equal_files(a, b));
+        ASSERT(util_equal_files(a, b));
 
         WRITE_FILE(a, "hello world");
         WRITE_FILE(b, "hello worlx");
-        assert(!util_equal_files(a, b));
+        ASSERT(!util_equal_files(a, b));
 
         WRITE_FILE(a, "short");
         WRITE_FILE(b, "shorter");
-        assert(!util_equal_files(a, b));
+        ASSERT(!util_equal_files(a, b));
 
         WRITE_FILE(a, "");
         WRITE_FILE(b, "");
-        assert(util_equal_files(a, b));
+        ASSERT(util_equal_files(a, b));
 
         /* Uncomment below to trigger error */
         /* WRITE_FILE(a, "data"); */
