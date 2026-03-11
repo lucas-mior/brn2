@@ -140,7 +140,7 @@ brn2_threads_function(void *arg) {
         Work *work;
 
         xpthread_mutex_lock(&brn2_mutex);
-        while (work_queue.count == 0 && !stop_threads) {
+        while ((work_queue.count <= 0) && !stop_threads) {
             pthread_cond_wait(&brn2_new_work, &brn2_mutex);
         }
 
@@ -149,7 +149,7 @@ brn2_threads_function(void *arg) {
             pthread_exit(NULL);
         }
 
-        if (work_queue.count == 0) {
+        if (work_queue.count <= 0) {
             work = NULL;
         } else {
             work = work_queue.items[work_queue.head];
@@ -163,7 +163,7 @@ brn2_threads_function(void *arg) {
             work->function(work);
             xpthread_mutex_lock(&brn2_mutex);
             work_pending -= 1;
-            if (work_pending == 0 && (work_queue.count == 0)) {
+            if (work_pending <= 0 && (work_queue.count <= 0)) {
                 pthread_cond_signal(&brn2_done_work);
             }
             xpthread_mutex_unlock(&brn2_mutex);
@@ -690,7 +690,7 @@ brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
     }
 
     xpthread_mutex_lock(&brn2_mutex);
-    while (work_pending > 0 || (work_queue.count != 0)) {
+    while (work_pending > 0 || (work_queue.count > 0)) {
         pthread_cond_wait(&brn2_done_work, &brn2_mutex);
     }
     pthread_cond_signal(&brn2_new_work);
