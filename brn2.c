@@ -977,7 +977,7 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
-                          (list->length - i)*sizeof(*(list->files)));
+                          (list->length - i)*SIZEOF(*(list->files)));
             }
             return;
         }
@@ -1041,7 +1041,7 @@ main(void) {
     {
         char command[256];
         char *filelist = "/tmp/brn2test";
-        int32 capacity_set;
+        uint32 capacity_set;
         struct Hash_map *map;
 
         SNPRINTF(command, "find . > %s", filelist);
@@ -1069,9 +1069,9 @@ main(void) {
                                           list1->length < 9999);
         }
 
-        map = hash_create_map(list1->length);
+        map = hash_create_map((uint32)list1->length);
         capacity_set = hash_capacity(map);
-        list1->indexes_size = list1->length*sizeof(*(list1->indexes));
+        list1->indexes_size = list1->length*SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
         brn2_create_hashes(list1, capacity_set);
 
@@ -1172,7 +1172,7 @@ main(void) {
 
         map = hash_create_map(list1->length);
         capacity_set = hash_capacity(map);
-        list1->indexes_size = list1->length*sizeof(*(list1->indexes));
+        list1->indexes_size = list1->length*SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
         brn2_create_hashes(list1, capacity_set);
 
@@ -1264,7 +1264,7 @@ main(void) {
         brn2_normalize_names(old, NULL);
         sort(old);
 
-        new->files = xmalloc(old->length*sizeof(*(new->files)));
+        new->files = xmalloc(old->length*SIZEOF(*(new->files)));
         new->length = old->length;
         for (int32 i = 0; i < new->length; i += 1) {
             FileName **file_pointer = &(new->files[i]);
@@ -1290,7 +1290,7 @@ main(void) {
             int32 capacity_set;
             oldlist_map = hash_create_map((uint32)old->length);
             capacity_set = hash_capacity(oldlist_map);
-            old->indexes_size = old->length*sizeof(*(old->indexes));
+            old->indexes_size = old->length*SIZEOF(*(old->indexes));
             old->indexes = xmmap_commit(&(old->indexes_size));
             brn2_create_hashes(old, capacity_set);
         }
@@ -1305,7 +1305,7 @@ main(void) {
         {
             int32 main_capacity;
             struct Hash_set *newlist_set = hash_create_set(new->length);
-            new->indexes_size = new->length*sizeof(*(new->indexes));
+            new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             main_capacity = hash_capacity(newlist_set);
 
