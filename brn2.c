@@ -1270,7 +1270,7 @@ main(void) {
             FileName **file_pointer = &(new->files[i]);
             FileName *file;
             int32 name_length;
-            int32 size;
+            int64 size;
             char path[512];
 
             name_length
@@ -1303,7 +1303,7 @@ main(void) {
         }
 
         {
-            int32 main_capacity;
+            uint32 main_capacity;
             struct Hash_set *newlist_set;
 
             newlist_set = hash_create_set((uint32)new->length);
