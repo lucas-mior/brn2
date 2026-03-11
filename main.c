@@ -289,7 +289,6 @@ main(int argc, char **argv) {
         char *pointer = write_buffer;
         uint32 capacity_set;
         uint32 j = 0;
-        int64 w;
         int64 buffered;
 #if OS_UNIX
         char *temp = "/tmp";
