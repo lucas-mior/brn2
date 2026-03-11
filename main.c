@@ -300,7 +300,7 @@ main(int argc, char **argv) {
         }
 #endif
 
-        SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.XXXXXX");
+        SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.new.XXXXXX");
         if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
             error("Error opening '%s': %s.\n",
                   brn2_buffer.name, strerror(errno));
@@ -308,7 +308,7 @@ main(int argc, char **argv) {
         }
 
         if (brn2_options_vim_split) {
-            SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2_diff.XXXXXX");
+            SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2.old.XXXXXX");
             if ((brn2_buffer_old.fd = mkstemp(brn2_buffer_old.name)) < 0) {
                 error("Error opening '%s': %s.\n",
                       brn2_buffer_old.name, strerror(errno));
@@ -404,7 +404,7 @@ main(int argc, char **argv) {
             "-c",
             "wincmd h | set nomodifiable scrollbind cursorbind cursorline"
             " | wincmd l | set scrollbind cursorbind"
-            " | au QuitPre brn2.* quitall",
+            " | au QuitPre */brn2.* quitall",
             NULL
         };
         char *args_shuf[] = {
