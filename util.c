@@ -804,7 +804,7 @@ util_filename_from(char *buffer, int64 size, int fd) {
     buffer[len] = '\0';
     return 0;
 #elif OS_MAC
-    static char buffer2[PATH_MAX];
+    static char buffer2[MAXPATHLEN];
     int64 len;
 
     if (fcntl(fd, F_GETPATH, buffer2) < 0) {
