@@ -260,8 +260,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         return;
     }
     if ((fd = open(filename, O_RDWR)) < 0) {
-        error("Error opening '%s' for reading: %s.\n", filename,
-              strerror(errno));
+        error("Error opening '%s' for reading: %s.\n",
+              filename, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
