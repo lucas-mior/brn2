@@ -1064,7 +1064,7 @@ error(char *format, ...) {
     char *pbuffer = buffer;
     va_list args;
     int64 n;
-    int64 m = sizeof(buffer);
+    int64 m = SIZEOF(buffer);
 
     va_start(args, format);
     n = vsnprintf(buffer, (size_t)m, format, args);
