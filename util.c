@@ -32,7 +32,6 @@
 #include <pthread.h>
 #include <limits.h>
 #include <sys/stat.h>
-#include <assert.h>
 #include <float.h>
 
 #include "generic.c"
