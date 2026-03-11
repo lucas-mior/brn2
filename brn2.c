@@ -273,9 +273,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         }
         if ((lseek(fd, 0, SEEK_CUR) < 0) && (errno == ESPIPE)) {
             error("File is not seekable.\n");
-            if (close(fd) < 0) {
-                error("Error closing %s: %s.\n", filename, strerror(errno));
-            }
+            XCLOSE(&fd);
             brn2_list_from_lines(list, filename, is_old);
             return;
         }
@@ -372,8 +370,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     munmap(map, (size_t)map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
-        error("Error in ftruncate(%s, %lld): %s.\n", filename,
-              (llong)map_size - padding, strerror(errno));
+        error("Error in ftruncate(%s, %lld): %s.\n",
+              filename, (llong)map_size - padding, strerror(errno));
         fatal(EXIT_FAILURE);
     }
     if (close(fd) < 0) {
@@ -527,8 +525,8 @@ brn2_threads_work_normalization(Work *arg) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
                 if (errno != ENOENT) {
-                    error("Error in stat('%s'): %s.\n", file->name,
-                          strerror(errno));
+                    error("Error in stat('%s'): %s.\n",
+                          file->name, strerror(errno));
                 }
                 work->old_list->files[i]->type = TYPE_ERR;
                 continue;
@@ -732,8 +730,8 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
         FileName *newfile = new->files[i];
 
         if (newfile->length >= BRN2_PATH_MAX) {
-            error("Error: filename on line %u is longer than %u bytes", i + 1,
-                  BRN2_PATH_MAX);
+            error("Error: filename on line %u is longer than %u bytes",
+                  i + 1, BRN2_PATH_MAX);
             failed = true;
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
@@ -753,8 +751,8 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
                 if (brn2_options_autosolve) {
                     error("--autosolve is enabled: Deleting old file...\n");
                     if (unlink(newfile->name) < 0) {
-                        error("Error deleting %s: %s.\n", newfile->name,
-                              strerror(errno));
+                        error("Error deleting %s: %s.\n",
+                              newfile->name, strerror(errno));
                         fatal(EXIT_FAILURE);
                     }
                     continue;
@@ -1147,7 +1145,7 @@ main(void) {
 
         while (fgets(argv[argc], (int)capacity, args)) {
             if (argc >= capacity) {
-                error("Arguments file too long\n");
+                error("Arguments file too long.\n");
                 fatal(EXIT_FAILURE);
             }
             argv[argc][strcspn(argv[argc], "\n")] = '\0';
@@ -1239,8 +1237,8 @@ main(void) {
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
         if (mkdir(directory, 0777) < 0) {
-            error("Error creating directory %s: %s.\n", directory,
-                  strerror(errno));
+            error("Error creating directory %s: %s.\n",
+                  directory, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
@@ -1376,13 +1374,13 @@ main(void) {
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
         if (mkdir(directory, 0777) < 0) {
-            error("Error creating directory %s: %s.\n", directory,
-                  strerror(errno));
+            error("Error creating directory %s: %s.\n",
+                  directory, strerror(errno));
             fatal(EXIT_FAILURE);
         }
         if (chdir(directory) < 0) {
-            error("Error changing dir into %s: %s.\n", directory,
-                  strerror(errno));
+            error("Error changing dir into %s: %s.\n",
+                  directory, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
