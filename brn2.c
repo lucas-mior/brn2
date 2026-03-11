@@ -896,38 +896,38 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
     return;
 }
 
-// clang-format on
-
 void
 brn2_usage(FILE *stream) {
-    fprintf(
-        stream,
-        "usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
-        "usage: brn2 [OPTIONS] -f <filename>\n"
-        "usage: brn2 [OPTIONS] -d <dir>\n"
-        "Rename filenames based on provided arguments.\n"
-        "\n"
-        "Options:\n"
-        "  -V, --vim-split : Use vim in vertical split mode.\n"
-        "  -F, --fatal     : Exit on first renaming error.\n"
-        "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
-        "  -e, --explict   : Only rename files given in the list (default).\n"
-        "  -h, --help      : Display this help message and exit.\n"
-        "  -i, --implict   : Allow renaming files not given in the list of "
-        "files to rename.\n"
-        "  -q, --quiet     : Quiet mode; suppress output messages.\n"
-        "  -s, --sort      : Disable sorting of original list.\n"
-        "  -v, --verbose   : Verbose mode (default); output messages.\n"
-        "\n"
-        "Arguments:\n"
-        "  No arguments            : Rename files of current working "
-        "directory.\n"
-        "  1 or more arguments      : Rename filenames passed as arguments.\n"
-        "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
-        "  -f <file>, --file=<file> : Rename filenames listed in this "
-        "argument.\n");
+    fprintf(stream,
+
+"usage: brn2 [OPTIONS] -- <file1> <file2> ...\n"
+"usage: brn2 [OPTIONS] -f <filename>\n"
+"usage: brn2 [OPTIONS] -d <dir>\n"
+"Rename filenames based on provided arguments.\n"
+"\n"
+"Options:\n"
+"  -h, --help      : Display this help message and exit.\n"
+"  -v, --verbose   : Verbose mode (default); output messages.\n"
+"  -q, --quiet     : Quiet mode; suppress output messages.\n"
+"  -i, --implict   : Allow renaming files not given in the list of files.\n"
+"  -e, --explict   : Only rename files given in the list (default).\n"
+"  -F, --fatal     : Exit on first renaming error.\n"
+"  -a, --autosolve : Auto solve name conflicts for equal files.\n"
+"  -s, --sort      : Disable sorting of original list.\n"
+"  -V, --vim-split : Use vim in vertical split mode.\n"
+"\n"
+"Arguments:\n"
+"  No arguments             : Rename files of current working directory.\n"
+"  1 or more arguments      : Rename filenames passed as arguments.\n"
+"  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
+"  -f <file>, --file=<file> : Rename filenames listed in this argument.\n"
+
+    );
+
     exit((int)(stream == stderr));
 }
+
+// clang-format on
 
 #if TESTING_brn2
 #include <assert.h>
