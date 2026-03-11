@@ -913,8 +913,8 @@ brn2_usage(FILE *stream) {
         "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
         "  -e, --explict   : Only rename files given in the list (default).\n"
         "  -h, --help      : Display this help message and exit.\n"
-        "  -i, --implict   : Rename files not given in the list of files to "
-        "rename.\n"
+        "  -i, --implict   : Allow renaming files not given in the list of "
+        "files to rename.\n"
         "  -q, --quiet     : Quiet mode; suppress output messages.\n"
         "  -s, --sort      : Disable sorting of original list.\n"
         "  -v, --verbose   : Verbose mode (default); output messages.\n"
@@ -926,7 +926,7 @@ brn2_usage(FILE *stream) {
         "  -d <dir>, --dir=<dir>    : Rename files in directory.\n"
         "  -f <file>, --file=<file> : Rename filenames listed in this "
         "argument.\n");
-    exit((int)(stream != stdout));
+    exit((int)(stream == stderr));
 }
 
 #if TESTING_brn2
@@ -939,7 +939,7 @@ bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_autosolve = false;
-bool brn2_options_diff = false;
+bool brn2_options_vim_split = false;
 uint32 nthreads = 2;
 
 void
