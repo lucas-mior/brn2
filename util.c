@@ -1053,13 +1053,14 @@ GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
 GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
 #ifndef RELEASING
-#define RELEASING 0
+#define RELEASING 1
 #endif
 
 void __attribute__((format(printf, 1, 2)))
 error(char *format, ...) {
     char buffer[16];
     char *big_buffer = NULL;
+    char *pbuffer = buffer;
     va_list args;
     int64 n;
     int64 m = sizeof(buffer);
@@ -1072,6 +1073,7 @@ error(char *format, ...) {
             m = n + 1;
             big_buffer = xmalloc(m);
             n = vsnprintf(big_buffer, (size_t)m, format, args);
+            pbuffer = big_buffer;
         } else {
             fprintf(stderr,
                     "Error in vsnprintf(\"%s\") (n = %lld).\n",
@@ -1089,9 +1091,9 @@ error(char *format, ...) {
     }
 
 #if OS_WINDOWS
-    write(STDERR_FILENO, buffer, (uint)n);
+    write(STDERR_FILENO, pbuffer, (uint)n);
 #else
-    write(STDERR_FILENO, buffer, (size_t)n);
+    write(STDERR_FILENO, pbuffer, (size_t)n);
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
 #endif
@@ -1104,7 +1106,7 @@ error(char *format, ...) {
     case 0:
         for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
             execlp(notifiers[i], notifiers[i], "-u", "critical", program,
-                   buffer, NULL);
+                   pbuffer, NULL);
         }
         fprintf(stderr, "Error executing notifier: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
