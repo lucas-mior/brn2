@@ -137,7 +137,7 @@ main(int argc, char **argv) {
 
     program = basename(argv[0]);
 
-    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsvaD", options, NULL))
+    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsvaV", options, NULL))
            != -1) {
         switch (opt) {
         case 'd':
