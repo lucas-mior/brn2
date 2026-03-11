@@ -888,11 +888,11 @@ util_command(int argc, char **argv) {
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
-    int64 len = strlen64(argv[0]);
+    int64 len0 = strlen64(argv[0]);
     char argv0_windows[BUFSIZ];
     char *argv0 = argv[0];
 
-    if (len >= BUFSIZ) {
+    if (len0 >= BUFSIZ) {
         error("Invalid arguments.\n");
         fatal(EXIT_FAILURE);
     }
@@ -905,9 +905,9 @@ util_command(int argc, char **argv) {
     {
         char *exe = ".exe";
         int64 exe_len = (int64)(strlen64(exe));
-        if (memmem64(argv[0], len + 1, exe, exe_len + 1) == NULL) {
-            memcpy64(argv0_windows, argv[0], len);
-            memcpy64(argv0_windows + len, exe, exe_len + 1);
+        if (memmem64(argv[0], len0 + 1, exe, exe_len + 1) == NULL) {
+            memcpy64(argv0_windows, argv[0], len0);
+            memcpy64(argv0_windows + len0, exe, exe_len + 1);
             argv[0] = argv0_windows;
         }
     }
