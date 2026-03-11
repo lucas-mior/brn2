@@ -271,10 +271,10 @@ test_sorting(int32 n, int32 p) {
     }
 
     {
-        int32 off_set = 0;
+        int32 offset = 0;
         for (int32 i = 0; i < p; i += 1) {
-            qsort64(&array[off_set], n_sub[i], SIZEOF(*array), compare_int);
-            off_set += n_sub[i];
+            qsort64(&array[offset], n_sub[i], SIZEOF(*array), compare_int);
+            offset += n_sub[i];
         }
     }
 
