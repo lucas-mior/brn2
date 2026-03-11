@@ -1080,7 +1080,7 @@ main(void) {
             uint64 hash;
 
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, file->length);
+            hash = hash_function(file->name, (uint32)file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
@@ -1091,7 +1091,7 @@ main(void) {
             FileName *file = list1->files[i];
             uint64 hash;
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, file->length);
+            hash = hash_function(file->name, (uint32)file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
@@ -1115,7 +1115,7 @@ main(void) {
 
         char command[256];
         char *filelist = "/tmp/brn2test";
-        int32 capacity_set;
+        uint32 capacity_set;
         struct Hash_map *map;
 
         SNPRINTF(command, "ls *.c > %s", filelist);
@@ -1170,7 +1170,7 @@ main(void) {
         }
         printf(RESET);
 
-        map = hash_create_map(list1->length);
+        map = hash_create_map((uint32)list1->length);
         capacity_set = hash_capacity(map);
         list1->indexes_size = list1->length*SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
@@ -1181,7 +1181,7 @@ main(void) {
             uint64 hash;
 
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, file->length);
+            hash = hash_function(file->name, (uint32)file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
@@ -1192,7 +1192,7 @@ main(void) {
             FileName *file = list1->files[i];
             uint64 hash;
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, file->length);
+            hash = hash_function(file->name, (uint32)file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
@@ -1287,7 +1287,7 @@ main(void) {
         brn2_normalize_names(old, new);
 
         {
-            int32 capacity_set;
+            uint32 capacity_set;
             oldlist_map = hash_create_map((uint32)old->length);
             capacity_set = hash_capacity(oldlist_map);
             old->indexes_size = old->length*SIZEOF(*(old->indexes));
@@ -1304,7 +1304,9 @@ main(void) {
 
         {
             int32 main_capacity;
-            struct Hash_set *newlist_set = hash_create_set(new->length);
+            struct Hash_set *newlist_set;
+
+            newlist_set = hash_create_set((uint32)new->length);
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             main_capacity = hash_capacity(newlist_set);
