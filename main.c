@@ -67,8 +67,8 @@ write_fatal(int fd, char *buffer, int64 size, uint32 line) {
     int64 w;
 
     if ((w = write64(fd, buffer, size)) != size) {
-        error("Error writing %lld bytes to buffer (line %u)", (llong)size,
-              line);
+        error("Error writing %lld bytes to buffer (line %u)",
+              (llong)size, line);
         if (w < 0) {
             error(": %s", strerror(errno));
         }
@@ -101,8 +101,8 @@ static Arena *
 xarena_create(int64 size) {
     Arena *arena;
     if ((arena = arena_create(size)) == NULL) {
-        error("Error creating arena of size %lld: %s.\n", (llong)size,
-              arena_strerror(errno));
+        error("Error creating arena of size %lld: %s.\n",
+              (llong)size, arena_strerror(errno));
         fatal(EXIT_FAILURE);
     }
     return arena;
@@ -303,16 +303,16 @@ main(int argc, char **argv) {
 
         SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.XXXXXX");
         if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
-            error("Error opening '%s': %s.\n", brn2_buffer.name,
-                  strerror(errno));
+            error("Error opening '%s': %s.\n",
+                  brn2_buffer.name, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
         if (brn2_options_vim_split) {
             SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2_diff.XXXXXX");
             if ((brn2_buffer_old.fd = mkstemp(brn2_buffer_old.name)) < 0) {
-                error("Error opening '%s': %s.\n", brn2_buffer_old.name,
-                      strerror(errno));
+                error("Error opening '%s': %s.\n",
+                      brn2_buffer_old.name, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
         }
@@ -332,10 +332,9 @@ main(int argc, char **argv) {
                 || !hash_insert_pre_calc_map(oldlist_map, file->name,
                                              file->hash, index, i)) {
                 if (contains_newline) {
-                    error(RED "'%s'" RESET " contains new line.", file->name);
+                    error(RED"'%s'"RESET" contains new line.", file->name);
                 } else {
-                    error(RED "'%s'" RESET " repeated in the buffer.",
-                          file->name);
+                    error(RED"'%s'"RESET" repeated in the buffer.", file->name);
                 }
                 if (brn2_options_fatal) {
                     error("\n");
@@ -571,10 +570,10 @@ main(int argc, char **argv) {
             }
         }
         if (number_changes != number_renames) {
-            error("%u name%.*s changed but %u file%.*s renamed. "
-                  "Check your files.\n",
+            error("%u name%.*s changed but %u file%.*s renamed. ",
                   number_changes, number_changes != 1, "s", number_renames,
                   number_renames != 1, "s");
+            error("Check your files.\n");
             fatal(EXIT_FAILURE);
         } else {
             printf("%u file%.*s renamed.\n", number_renames,
