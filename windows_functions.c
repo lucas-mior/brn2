@@ -123,7 +123,6 @@ lstat(const char *path, struct stat *statbuf) {
         statbuf->st_mode = S_IFREG;
     }
 
-    // File size
     sz.LowPart = fd.nFileSizeLow;
     sz.HighPart = fd.nFileSizeHigh;
     if (sz.QuadPart > LONG_MAX) {
