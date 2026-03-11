@@ -75,6 +75,10 @@
 #include <poll.h>
 #endif
 
+#if OS_MAC
+#include <sys/param.h>
+#endif
+
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
