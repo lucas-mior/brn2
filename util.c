@@ -1062,16 +1062,16 @@ error(char *format, ...) {
     char *big_buffer = NULL;
     va_list args;
     int64 n;
-    int64 m = sizeof(buffer);;
+    int64 m = sizeof(buffer);
 
     va_start(args, format);
-    n = vsnprintf(buffer, m, format, args);
+    n = vsnprintf(buffer, (size_t)m, format, args);
 
     if (n >= SIZEOF(buffer)) {
         if (RELEASING) {
             m = n + 1;
             big_buffer = xmalloc(m);
-            n = vsnprintf(big_buffer, m, format, args);
+            n = vsnprintf(big_buffer, (size_t)m, format, args);
         } else {
             fprintf(stderr,
                     "Error in vsnprintf(\"%s\") (n = %lld).\n",
