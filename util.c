@@ -1055,6 +1055,7 @@ GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 void __attribute__((format(printf, 1, 2)))
 error(char *format, ...) {
     char buffer[BUFSIZ];
+    char *big_buffer = NULL;
     va_list args;
     int64 n;
 
@@ -1096,6 +1097,9 @@ error(char *format, ...) {
     }
 #endif
 
+    if (big_buffer) {
+        free(big_buffer);
+    }
     return;
 }
 
