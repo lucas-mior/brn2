@@ -231,8 +231,6 @@ sort(FileList *old) {
 
 #if TESTING_sort
 
-#include <assert.h>
-
 #define MAXI 10000
 static const int32 possibleN[] = {31, 32, 33, 50};
 static const int32 possibleP[] = {1, 2, 3, 8};
