@@ -63,6 +63,23 @@ static File brn2_buffer;
 static File brn2_buffer_old;
 
 static void
+write_fatal(int fd, char *buffer, int64 size, uint32 line) {
+    int64 w;
+
+    if ((w = write64(fd, buffer, size)) != size) {
+        error("Error writing %lld bytes to buffer (line %u)", (llong)size,
+              line);
+        if (w < 0) {
+            error(": %s", strerror(errno));
+        }
+        error(".\n");
+        fatal(EXIT_FAILURE);
+    }
+
+    return;
+}
+
+static void
 delete_brn2_buffer(void) {
     if (!DEBUGGING) {
         unlink(brn2_buffer.name);
@@ -331,18 +348,9 @@ main(int argc, char **argv) {
 
             buffered = pointer - write_buffer;
             if (buffered >= BRN2_PATH_MAX) {
-                if ((w = write64(brn2_buffer.fd, write_buffer, buffered))
-                    != buffered) {
-                    error("Error writing %lld bytes to buffer (line %u)",
-                          (llong)buffered, i);
-                    if (w < 0) {
-                        error(": %s", strerror(errno));
-                    }
-                    error(".\n");
-                    fatal(EXIT_FAILURE);
-                }
+                write_fatal(brn2_buffer.fd, write_buffer, buffered, i);
                 if (brn2_options_vim_split) {
-                    write64(brn2_buffer_old.fd, write_buffer, buffered);
+                    write_fatal(brn2_buffer_old.fd, write_buffer, buffered, i);
                 }
                 pointer = write_buffer;
             }
