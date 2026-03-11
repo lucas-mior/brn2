@@ -382,11 +382,9 @@ main(int argc, char **argv) {
             }
         }
 
-        if (close(brn2_buffer.fd) < 0) {
-            error("Error closing buffer: %s\n", strerror(errno));
+        if (XCLOSE(&(brn2_buffer.fd)) < 0) {
             fatal(EXIT_FAILURE);
         }
-        brn2_buffer.fd = -1;
 
         if (brn2_options_vim_split) {
             if (close(brn2_buffer_old.fd) < 0) {
