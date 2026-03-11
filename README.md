@@ -15,8 +15,8 @@ Options:
   -h, --help      : Display this help message and exit.
   -v, --verbose   : Verbose mode (default); output messages.
   -q, --quiet     : Quiet mode; suppress output messages.
-  -i, --implict   : Allow renaming files not given in the list of files.
-  -e, --explict   : Only rename files given in the list (default).
+  -i, --implicit   : Allow renaming files not given in the list of files.
+  -e, --explicit   : Only rename files given in the list (default).
   -F, --fatal     : Exit on first renaming error.
   -a, --autosolve : Auto solve name conflicts for equal files.
   -s, --sort      : Disable sorting of original list.
@@ -55,7 +55,7 @@ will take place when you save and exit.
   safely fail without renaming).
   * By default, files which were not specified in the rename list will be
     unaffected. If you try to rename `a` to `b`, but `b` was not specified in
-    the rename list, this rename won't happen. Supply the `--implict` command
+    the rename list, this rename won't happen. Supply the `--implicit` command
     line option to force this swap, then `a` will become `b` and `b` will become
     `a`.
   * New file names that match existing files will be compared against the
