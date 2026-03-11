@@ -63,11 +63,11 @@ static File brn2_buffer;
 static File brn2_buffer_old;
 
 static void
-write_fatal(int fd, char *buffer, int64 size, uint32 line) {
+write_fatal(int fd, char *buffer, int64 size, int32 line) {
     int64 w;
 
     if ((w = write64(fd, buffer, size)) != size) {
-        error("Error writing %lld bytes to buffer (line %u)",
+        error("Error writing %lld bytes to buffer (line %d)",
               (llong)size, line);
         if (w < 0) {
             error(": %s", strerror(errno));
