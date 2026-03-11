@@ -1,93 +1,132 @@
 .TH BRN2 1
 
 .SH NAME
-brn2 \- Bulk Rename Files
+brn2 \- Bulk Rename Files in your preferred text editor
 
 .SH SYNOPSIS
-brn2 [OPTIONS] -f <filename>
-.TP
-brn2 [OPTIONS] -- [<file1> <file2> ... ]
+.B brn2
+[\fIOPTIONS\fR]
+.br
+.B brn2
+[\fIOPTIONS\fR] \-\- \fI<file1>\fR [\fI<file2>\fR ...]
+.br
+.B brn2
+[\fIOPTIONS\fR] \fB\-f\fR \fI<filename>\fR
+.br
+.B brn2
+[\fIOPTIONS\fR] \fB\-d\fR \fI<dir>\fR
 
 .SH DESCRIPTION
-brn2 is a command line tool to easily mass-rename files in your preferred text
-editor (e.g., vim). It will open the filenames in your text editor of choice.
-You can then edit the filenames in the buffer, and the changes will take place
-when you save and exit.
+brn2 is a fork of brn, a command line tool used to easily mass-rename files 
+in your preferred text editor. It opens the filenames in a text buffer; 
+once you edit the names and save/exit the editor, the changes take place 
+atomically where supported.
 
 .SH OPTIONS
 .TP
-.BR -h
-.BR --help
-Display the help message and exit.
+.BR \-h ", " \-\-help
+Display this help message and exit.
 
 .TP
-.BR -q
-.BR --quiet
+.BR \-v ", " \-\-verbose
+Verbose mode; output messages (default).
+
+.TP
+.BR \-q ", " \-\-quiet
 Quiet mode; suppress output messages.
 
 .TP
-.BR -v
-.BR --verbose
-Verbose mode; output messages (this is the default).
+.BR \-i ", " \-\-implicit
+Allow renaming (swapping) files that were not explicitly provided in the 
+list of files.
 
 .TP
-.BR -s
-.BR --sort
-Disable sorting of original list.
+.BR \-e ", " \-\-explicit
+Only rename files given in the list (default).
 
 .TP
-.BR -F
-.BR --fatal
-Exit on first renaming error.
+.BR \-F ", " \-\-fatal
+Exit on the first renaming error encountered.
 
 .TP
-.BR -i
-.BR --implicit
-Allow swapping with files which were not specified in the rename list.
+.BR \-a ", " \-\-autosolve
+Auto solve name conflicts for files with identical content. If a new name 
+matches an existing file with the same content, the existing file is 
+removed to allow the rename.
 
 .TP
-.BR -a
-.BR --autosolve
-Auto solve name conflicts for equal files.
-
-.SH USAGE
-.TP
-.BR brn2
-Rename filenames in the current working directory.
+.BR \-s ", " \-\-sort
+Disable sorting of the original file list.
 
 .TP
-.BR brn2 " -f <filename>"
-Rename filenames listed in the specified file.
+.BR \-V ", " \-\-vim-split
+Use vim in vertical split mode.
+
+.SH ARGUMENTS
+.TP
+.B No arguments
+Rename files in the current working directory.
 
 .TP
-.BR brn2 " <file1> <file2> ..."
+.B 1 or more arguments
 Rename filenames passed as arguments.
+
+.TP
+.BR \-d " \fI<dir>\fR, " \-\-dir= \fI<dir>\fR
+Rename files within the specified directory.
+
+.TP
+.BR \-f " \fI<file>\fR, " \-\-file= \fI<file>\fR
+Rename filenames listed in the specified file. Use \fB-\fR or \fB/dev/stdin\fR 
+to read from standard input.
 
 .SH NOTES
 .TP
-By default, brn2 uses the $EDITOR environment variable. \
-If that is not set, it defaults to vim.
+.B Editor Selection
+Uses the \fB$EDITOR\fR environment variable. If not set, it defaults to \fBvim\fR.
 
 .TP
-.brn2 will not work for more than 2^32 renames at once.
+.B Normalization
+Filenames are normalized before being presented: 
+leading \fB./\fR is removed, consecutive slashes are bundled, 
+and trailing slashes are added to denote directories.
 
 .TP
-.brn2 will not work for filenames longer than 4096 \
-characters when reading from <filename>. Newlines in filenames are not allowed.
+.B Swapping
+On GNU/Linux, \fBbrn2\fR uses the \fBrenameat2\fR system call to atomically 
+swap filenames without temporary files. On other systems, swapping will 
+safely fail without renaming.
 
 .TP
-Filenames listed in <filename> or given as arguments that \
-do not correspond to existing files will generate errors while renaming.
+.B Limitations
+Does not support more than 2^32 renames at once. Filenames cannot exceed 
+4096 bytes. Newlines in filenames are strictly prohibited. 
+Filenames containing only dots and slashes are ignored.
 
 .TP
-Filenames . and .. are ignored, as well as any filename that \
-starts with .. even when listed in <filename>
+.B Renaming in Depth
+Exercise caution when renaming parent directories and their children 
+simultaneously (e.g., \fIdir/\fR and \fIdir/file\fR). Renaming a parent 
+directory first will cause subsequent renames of its children to fail. 
+It is recommended to rename regular files first, or operate in steps 
+from the deepest path upwards.
 
 .SH EXIT STATUS
-.BR 1
-if an error ocurred,
-.BR 0
-otherwise.
+.TP
+.B 0
+Success.
+.TP
+.B 1
+An error occurred (e.g., file not found, permission denied, or fatal error 
+triggered).
+
+.SH EXAMPLES
+.TP
+.B brn2 *.jpg
+Rename all JPG files in the current directory.
+.TP
+.B find . -type f | brn2 -f -
+Recursively find all regular files and rename them.
 
 .SH LICENSE
-.brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
