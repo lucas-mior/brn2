@@ -4,21 +4,23 @@ used to easily mass-rename files in your preferred text editor.
  
 ## Usage
 ```
-$ brn2 --help
+$ 
+brn2 --help
 usage: brn2 [OPTIONS] -- <file1> <file2> ...
 usage: brn2 [OPTIONS] -f <filename>
 usage: brn2 [OPTIONS] -d <dir>
 Rename filenames based on provided arguments.
 
 Options:
+  -h, --help      : Display this help message and exit.
+  -v, --verbose   : Verbose mode (default); output messages.
+  -q, --quiet     : Quiet mode; suppress output messages.
+  -i, --implict   : Allow renaming files not given in the list of files.
+  -e, --explict   : Only rename files given in the list (default).
   -F, --fatal     : Exit on first renaming error.
   -a, --autosolve : Auto solve name conflicts for equal files.
-  -e, --explict   : Only rename files given in the list (default).
-  -h, --help      : Display this help message and exit.
-  -i, --implict   : Rename files not given in the list of files to rename.
-  -q, --quiet     : Quiet mode; suppress output messages.
   -s, --sort      : Disable sorting of original list.
-  -v, --verbose   : Verbose mode (default); output messages.
+  -V, --vim-split : Use vim in vertical split mode.
 
 Arguments:
   No arguments             : Rename files of current working directory.
