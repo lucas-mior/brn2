@@ -282,7 +282,7 @@ test_sorting(int32 n, int32 p) {
 
     for (int32 i = 0; i < n; i += 1) {
         if (i < (n - 1)) {
-            assert(array[i] <= array[i + 1]);
+            ASSERT_LESS_EQUAL(array[i], array[i + 1]);
         }
     }
 
