@@ -1575,7 +1575,7 @@ static int64
 bytes_pretty(char *buffer, int64 raw) {
     char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB"};
     double aux_pretty;
-    int i;
+    int64 i;
     int32 n;
 
     if (raw <= 1023) {
@@ -1585,8 +1585,8 @@ bytes_pretty(char *buffer, int64 raw) {
 
     aux_pretty = (double)raw;
     i = 0;
-    while ((aux_pretty >= 1024) && (i < LENGTH(suffixes))) {
-        aux_pretty /= 1024;
+    while ((aux_pretty >= 1024.0) && (i < LENGTH(suffixes))) {
+        aux_pretty /= 1024.0;
         i += 1;
     }
 
