@@ -419,7 +419,7 @@ main(int argc, char **argv) {
             "-c",
             "wincmd h | set nomodifiable scrollbind cursorbind cursorline"
             " | wincmd l | set scrollbind cursorbind"
-            " | au QuitPre brn2_diff.* quitall",
+            " | au QuitPre brn2.* quitall",
             NULL
         };
         char *args_shuf[] = {
