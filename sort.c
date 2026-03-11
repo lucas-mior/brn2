@@ -46,8 +46,8 @@
 
 typedef struct HeapNode {
     void *value;
-    uint32 p_index;
-    uint32 unused;
+    int32 p_index;
+    int32 unused;
 } HeapNode;
 
 static void
@@ -71,13 +71,13 @@ sort_shuffle(void *array, int64 n, int64 size) {
 }
 
 static void
-sort_heapify(HeapNode *heap, uint32 p, uint32 i,
+sort_heapify(HeapNode *heap, int32 p, int32 i,
              int32 (*compare_func)(const void *a, const void *b)) {
     (void)compare_func;
     while (true) {
-        uint32 smallest = i;
-        uint32 left = 2*i + 1;
-        uint32 right = 2*i + 2;
+        int32 smallest = i;
+        int32 left = 2*i + 1;
+        int32 right = 2*i + 2;
 
         if (left >= p) {
             break;
@@ -106,43 +106,43 @@ sort_heapify(HeapNode *heap, uint32 p, uint32 i,
 }
 
 static void
-sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
+sort_merge_subsorted(void *array, int32 n, int32 p, int64 size,
                      void *dummy_last,
                      int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[MAX_NTHREADS];
-    uint32 n_sub[MAX_NTHREADS];
-    uint32 indices[MAX_NTHREADS] = {0};
-    uint32 offsets[MAX_NTHREADS];
+    int32 n_sub[MAX_NTHREADS];
+    int32 indices[MAX_NTHREADS] = {0};
+    int32 offsets[MAX_NTHREADS];
     int64 memory_size = size*n;
     char *output = xmalloc(memory_size);
     char *array2 = array;
 
-    for (uint32 k = 0; k < (p - 1); k += 1) {
+    for (int32 k = 0; k < (p - 1); k += 1) {
         n_sub[k] = n / p;
     }
     {
-        uint32 k = p - 1;
+        int32 k = p - 1;
         n_sub[k] = n / p + (n % p);
     }
 
     offsets[0] = 0;
-    for (uint32 k = 1; k < p; k += 1) {
+    for (int32 k = 1; k < p; k += 1) {
         offsets[k] = offsets[k - 1] + n_sub[k - 1];
     }
 
-    for (uint32 k = 0; k < p; k += 1) {
+    for (int32 k = 0; k < p; k += 1) {
         heap[k].value = xmalloc(size);
         memcpy64(heap[k].value, &array2[offsets[k]*size], size);
         heap[k].p_index = k;
     }
 
     for (int32 k = p / 2 - 1; k >= 0; k -= 1) {
-        sort_heapify(heap, p, (uint32)k, compare);
+        sort_heapify(heap, p, (int32)k, compare);
     }
 
-    for (uint32 i = 0; i < n; i += 1) {
-        uint32 k = heap[0].p_index;
-        uint32 i_sub = (indices[k] += 1);
+    for (int32 i = 0; i < n; i += 1) {
+        int32 k = heap[0].p_index;
+        int32 i_sub = (indices[k] += 1);
 
         memcpy64(&output[i*size], heap[0].value, size);
 
@@ -156,7 +156,7 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
 
     memcpy64(array2, output, n*size);
     free(output);
-    for (uint32 i = 0; i < p; i += 1) {
+    for (int32 i = 0; i < p; i += 1) {
         free(heap[i].value);
     }
     return;
@@ -167,12 +167,12 @@ sort_merge_subsorted(void *array, uint32 n, uint32 p, int64 size,
 #if !TESTING_sort || (defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__)
 static void
 sort(FileList *old) {
-    uint32 p;
+    int32 p;
 
     char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    uint32 last_length = (uint32)strlen64(last);
+    int32 last_length = (int32)strlen64(last);
     FileName *dummy_last;
 
     dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1));
@@ -209,7 +209,7 @@ sort(FileList *old) {
     qsort(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
     if (memcmp64(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
         error("Error in sorting.\n");
-        for (uint32 i = 0; i < old->length; i += 1) {
+        for (int32 i = 0; i < old->length; i += 1) {
             char *name1 = old->files[i]->name;
             char *name2 = copy.files[i]->name;
             if (strcmp(name1, name2)) {
@@ -234,8 +234,8 @@ sort(FileList *old) {
 #include <assert.h>
 
 #define MAXI 10000
-static const uint32 possibleN[] = {31, 32, 33, 50};
-static const uint32 possibleP[] = {1, 2, 3, 8};
+static const int32 possibleN[] = {31, 32, 33, 50};
+static const int32 possibleP[] = {1, 2, 3, 8};
 
 static int32
 compare_int(const void *a, const void *b) {
@@ -246,33 +246,33 @@ compare_int(const void *a, const void *b) {
 static int32 dummy = INT32_MAX;
 
 static void
-test_sorting(uint32 n, uint32 p) {
+test_sorting(int32 n, int32 p) {
     int32 *array = xmalloc(n*sizeof(*array));
-    uint32 *n_sub = xmalloc(p*sizeof(*n_sub));
+    int32 *n_sub = xmalloc(p*sizeof(*n_sub));
 
     if (n < p*2) {
         fprintf(stderr, "n=%u must be larger than p*2=%u*2\n", n, p);
         exit(EXIT_SUCCESS);
     }
 
-    for (uint32 i = 0; i < (p - 1); i += 1) {
+    for (int32 i = 0; i < (p - 1); i += 1) {
         n_sub[i] = n / p;
     }
     {
-        uint32 i = p - 1;
+        int32 i = p - 1;
         n_sub[i] = n / p + (n % p);
     }
 
     printf("n_sub[P - 1] = %u\n", n_sub[p - 1]);
 
     srand(42);
-    for (uint32 i = 0; i < n; i += 1) {
+    for (int32 i = 0; i < n; i += 1) {
         array[i] = rand() % MAXI;
     }
 
     {
-        uint32 off_set = 0;
-        for (uint32 i = 0; i < p; i += 1) {
+        int32 off_set = 0;
+        for (int32 i = 0; i < p; i += 1) {
             qsort(&array[off_set], n_sub[i], sizeof(*array), compare_int);
             off_set += n_sub[i];
         }
@@ -280,7 +280,7 @@ test_sorting(uint32 n, uint32 p) {
 
     sort_merge_subsorted(array, n, p, sizeof(dummy), &dummy, compare_int);
 
-    for (uint32 i = 0; i < n; i += 1) {
+    for (int32 i = 0; i < n; i += 1) {
         if (i < (n - 1)) {
             assert(array[i] <= array[i + 1]);
         }
@@ -293,8 +293,8 @@ test_sorting(uint32 n, uint32 p) {
 
 int
 main(void) {
-    for (uint32 in = 0; in < LENGTH(possibleN); in += 1) {
-        for (uint32 ip = 0; ip < LENGTH(possibleP); ip += 1) {
+    for (int32 in = 0; in < LENGTH(possibleN); in += 1) {
+        for (int32 ip = 0; ip < LENGTH(possibleP); ip += 1) {
             test_sorting(possibleN[in], possibleP[ip]);
         }
     }

@@ -43,7 +43,7 @@
 #endif
 
 #if TESTING_hash
-#define HASH_VALUE_TYPE uint32
+#define HASH_VALUE_TYPE int32
 #define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
 #endif
@@ -101,7 +101,7 @@ typedef uint64_t uint64;
 struct CommonBucket {
     char *key;
     uint64 hash;
-    uint32 value;
+    int32 value;
     uint32 padding;
 };
 

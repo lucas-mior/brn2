@@ -33,7 +33,7 @@ bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
 bool brn2_options_autosolve = false;
 bool brn2_options_vim_split = false;
-uint32 nthreads;
+int32 nthreads;
 int (*print)(const char *, ...);
 
 // clang-format off
@@ -116,9 +116,9 @@ main(int argc, char **argv) {
     FileList *new;
     struct Hash_map *oldlist_map = NULL;
     struct Hash_set *newlist_set = NULL;
-    uint32 available_threads;
+    int32 available_threads;
 #if OS_UNIX
-    uint32 thread_ids[BRN2_MAX_THREADS];
+    int32 thread_ids[BRN2_MAX_THREADS];
 #endif
 
     uint32 main_capacity;
@@ -205,7 +205,7 @@ main(int argc, char **argv) {
     old = &old_stack;
     new = &new_stack;
 
-    for (uint32 i = 0; i < nthreads; i += 1) {
+    for (int32 i = 0; i < nthreads; i += 1) {
         old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
         new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
     }
@@ -240,7 +240,7 @@ main(int argc, char **argv) {
         nthreads = 1;
     }
 
-    for (uint32 i = 0; i < nthreads; i += 1) {
+    for (int32 i = 0; i < nthreads; i += 1) {
         thread_ids[i] = i;
         xpthread_create(&thread_pool[i], NULL,
                         brn2_threads_function, &thread_ids[i]);
@@ -253,8 +253,8 @@ main(int argc, char **argv) {
     brn2_normalize_names(old, NULL);
 
     {
-        uint32 j = 0;
-        for (uint32 i = 0; i < old->length; i++) {
+        int32 j = 0;
+        for (int32 i = 0; i < old->length; i++) {
             FileName *file = old->files[i];
             if (file->type == TYPE_ERR) {
                 fprintf(stderr, "Removing '%s' from list.\n", file->name);
@@ -273,7 +273,7 @@ main(int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    old->files = xrealloc(old->files, old->length*sizeof(*(old->files)));
+    old->files = xrealloc(old->files, old->length*SIZEOF(*(old->files)));
 
     if (brn2_options_sort) {
         sort(old);
@@ -288,7 +288,7 @@ main(int argc, char **argv) {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
         uint32 capacity_set;
-        uint32 j = 0;
+        int32 j = 0;
         int64 buffered;
 #if OS_UNIX
         char *temp = "/tmp";
@@ -316,13 +316,13 @@ main(int argc, char **argv) {
             }
         }
 
-        oldlist_map = hash_create_map(old->length);
+        oldlist_map = hash_create_map((uint32)old->length);
         capacity_set = hash_capacity(oldlist_map);
-        old->indexes_size = old->length*sizeof(*(old->indexes));
+        old->indexes_size = old->length*SIZEOF(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
         brn2_create_hashes(old, capacity_set);
 
-        for (uint32 i = 0; i < old->length; i += 1) {
+        for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             uint32 index = old->indexes[i];
             bool contains_newline;
@@ -430,13 +430,13 @@ main(int argc, char **argv) {
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             srand(42);
-            for (uint32 i = 0; i < new->length; i += 1) {
+            for (int32 i = 0; i < new->length; i += 1) {
                 int32 rand1 = rand();
                 float x = (float)rand1 / (float)RAND_MAX;
-                uint32 length = new->files[i]->length;
+                int32 length = new->files[i]->length;
                 if (x < 0.4f) {
-                    for (uint32 j = 0; j < length; j += 1) {
-                        uint32 y = (uint32)rand();
+                    for (int32 j = 0; j < length; j += 1) {
+                        int32 y = (int32)rand();
                         char c = allowed[y % (sizeof(allowed) - 1)];
                         new->files[i]->name[j] = c;
                     }
@@ -494,8 +494,8 @@ main(int argc, char **argv) {
             }
 
             if (old->length != new->length) {
-                error("You are renaming " RED "%u" RESET " file%.*s "
-                      "but buffer contains " RED "%u" RESET " file name%.*s\n",
+                error("You are renaming " RED "%d" RESET " file%.*s "
+                      "but buffer contains " RED "%d" RESET " file name%.*s\n",
                       old->length, old->length != 1, "s", new->length,
                       new->length != 1, "s");
                 brn2_free_list(new);
@@ -508,12 +508,12 @@ main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_set == NULL) {
-                newlist_set = hash_create_set(new->length);
+                newlist_set = hash_create_set((uint32)new->length);
             } else {
                 hash_zero_set(newlist_set);
             }
             if (new->indexes == NULL) {
-                new->indexes_size = new->length*sizeof(*(new->indexes));
+                new->indexes_size = new->length*SIZEOF(*(new->indexes));
                 new->indexes = xmmap_commit(&(new->indexes_size));
             }
 
@@ -539,11 +539,11 @@ main(int argc, char **argv) {
 #endif
 
     {
-        uint32 number_changes = brn2_get_number_changes(old, new);
-        uint32 number_renames = 0;
+        int32 number_changes = brn2_get_number_changes(old, new);
+        int32 number_renames = 0;
 
         if (number_changes) {
-            struct Hash_set *names_renamed = hash_create_set(old->length);
+            struct Hash_set *names_renamed = hash_create_set((uint32)old->length);
 
             if (brn2_options_quiet) {
                 print = noop;
@@ -551,7 +551,7 @@ main(int argc, char **argv) {
                 print = printf;
             }
 
-            for (uint32 i = 0; i < old->length; i += 1) {
+            for (int32 i = 0; i < old->length; i += 1) {
                 brn2_execute2(old, new, oldlist_map, names_renamed, i,
                               &number_renames);
             }
@@ -560,13 +560,13 @@ main(int argc, char **argv) {
             }
         }
         if (number_changes != number_renames) {
-            error("%u name%.*s changed but %u file%.*s renamed. ",
+            error("%d name%.*s changed but %d file%.*s renamed. ",
                   number_changes, number_changes != 1, "s", number_renames,
                   number_renames != 1, "s");
             error("Check your files.\n");
             fatal(EXIT_FAILURE);
         } else {
-            printf("%u file%.*s renamed.\n", number_renames,
+            printf("%d file%.*s renamed.\n", number_renames,
                    number_renames != 1, "s");
         }
     }

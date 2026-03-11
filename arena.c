@@ -377,10 +377,10 @@ xarena_push(Arena *arena, int64 size) {
 }
 
 static void *
-xarenas_push(Arena **arenas, uint32 number, int64 size) {
+xarenas_push(Arena **arenas, int32 narenas, int64 size) {
     void *p;
 
-    if ((p = arenas_push(arenas, number, size)) == NULL) {
+    if ((p = arenas_push(arenas, narenas, size)) == NULL) {
         error2("Error pushing %lld bytes into arenas %p: %s.", (llong)size,
                (void *)arenas, arena_strerror(errno));
         exit(EXIT_FAILURE);
@@ -427,8 +427,8 @@ arena_of(Arena *arena, void *p) {
 }
 
 static bool
-arenas_pop(Arena **arenas, uint32 number, void *p) {
-    for (uint32 i = 0; i < number; i += 1) {
+arenas_pop(Arena **arenas, int32 narenas, void *p) {
+    for (int32 i = 0; i < narenas; i += 1) {
         if (arena_pop(arenas[i], p)) {
             return true;
         }

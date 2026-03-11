@@ -47,7 +47,7 @@
 #define BLUE "\x1b[33m"
 #define RESET "\x1b[0m"
 
-#define BRN2_PATH_MAX 4096u
+#define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16ul
@@ -62,7 +62,7 @@
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
 
-#define HASH_VALUE_TYPE uint32
+#define HASH_VALUE_TYPE int32
 #define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
 #include "hash.c"
@@ -112,7 +112,7 @@ enum {
 
 typedef struct FileName {
     uint64 hash;
-    uint32 length;
+    int32 length;
     uint32 type;
     char name[];
 } FileName;
@@ -121,7 +121,7 @@ typedef struct FileList {
     Arena *arenas[BRN2_MAX_THREADS];
     uint32 *indexes;
     int64 indexes_size;
-    uint32 length;
+    int32 length;
     uint32 unused;
     FileName **files;
 } FileList;
@@ -132,7 +132,7 @@ extern bool brn2_options_quiet;
 extern bool brn2_options_sort;
 extern bool brn2_options_autosolve;
 extern bool brn2_options_vim_split;
-extern uint32 nthreads;
+extern int32 nthreads;
 
 #if OS_UNIX
 extern pthread_t thread_pool[BRN2_MAX_THREADS];
@@ -150,13 +150,13 @@ void brn2_list_from_args(FileList *, int, char **);
 void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, struct Hash_set *, uint32 *);
-uint32 brn2_get_number_changes(FileList *, FileList *);
+int32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
-void brn2_timings(char *, struct timespec, struct timespec, uint32);
+void brn2_timings(char *, struct timespec, struct timespec, int32);
 void brn2_print_list(FileList *);
 void brn2_execute2(FileList *, FileList *,
                    struct Hash_map *, struct Hash_set *,
-                   uint32, uint32 *);
+                   int32, int32 *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
 
