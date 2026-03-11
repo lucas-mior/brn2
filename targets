@@ -1,6 +1,7 @@
 targets='
 test
 build
+release
 debug
 # install
 # uninstall
