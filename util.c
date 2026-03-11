@@ -333,10 +333,20 @@ memchr64(void *pointer, int32 value, int64 size) {
     return memchr(pointer, value, (size_t)size);
 }
 
-INLINE int64
-strlen64(char *string) {
+INLINE int32
+strlen32(char *string) {
+    int32 length;
     size_t len = strlen(string);
-    return (int64)len;
+
+    if (DEBUGGING) {
+        if (len >= MAXOF(length)) {
+            error("Error: string (%.*s ...) is too long.\n", 50, string);
+            fatal(EXIT_FAILURE);
+        }
+    }
+
+    length = (int32)len;
+    return length;
 }
 
 INLINE int64
@@ -503,7 +513,7 @@ util_nthreads(void) {
 
 static char *
 basename2(char *path) {
-    int64 left = strlen64(path);
+    int64 left = strlen32(path);
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
@@ -600,7 +610,7 @@ xstrdup(char *string) {
     char *p;
     int64 length;
 
-    length = strlen64(string) + 1;
+    length = strlen32(string) + 1;
     if ((p = malloc((size_t)length)) == NULL) {
         error("Error allocating %lld bytes to duplicate '%s': %s\n",
               (llong)length, string, strerror(errno));
@@ -814,7 +824,7 @@ util_filename_from(char *buffer, int64 size, int fd) {
     if (fcntl(fd, F_GETPATH, buffer2) < 0) {
         return -1;
     }
-    len = MIN(strlen64(buffer2), size - 1);
+    len = MIN(strlen32(buffer2), size - 1);
     memcpy64(buffer, buffer2, len + 1);
     return 0;
 #elif OS_WINDOWS
@@ -892,7 +902,7 @@ util_command(int argc, char **argv) {
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
-    int64 len0 = strlen64(argv[0]);
+    int64 len0 = strlen32(argv[0]);
     char argv0_windows[BUFSIZ];
     char *argv0 = argv[0];
 
@@ -908,7 +918,7 @@ util_command(int argc, char **argv) {
 
     {
         char *exe = ".exe";
-        int64 exe_len = (int64)(strlen64(exe));
+        int64 exe_len = (int64)(strlen32(exe));
         if (memmem64(argv[0], len0 + 1, exe, exe_len + 1) == NULL) {
             memcpy64(argv0_windows, argv[0], len0);
             memcpy64(argv0_windows + len0, exe, exe_len + 1);
@@ -919,7 +929,7 @@ util_command(int argc, char **argv) {
     {
         int64 j = 0;
         for (int i = 0; i < argc - 1; i += 1) {
-            int64 len2 = strlen64(argv[i]);
+            int64 len2 = strlen32(argv[i]);
             if ((j + len2) >= SIZEOF(cmdline)) {
                 error("Command line is too long.\n");
                 fatal(EXIT_FAILURE);
@@ -1080,9 +1090,8 @@ error(char *format, ...) {
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {
-            fprintf(stderr,
-                    "Error in vsnprintf(\"%s\") (n = %lld).\n",
-                    format, (llong)n);
+            fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld).\n", format,
+                    (llong)n);
             fatal(EXIT_FAILURE);
         }
     }
@@ -1090,8 +1099,8 @@ error(char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= m)) {
-        fprintf(stderr,
-                "Error in vsnprintf(\"%s\") (n = %lld).\n", format, (llong)n);
+        fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld).\n", format,
+                (llong)n);
         fatal(EXIT_FAILURE);
     }
 
@@ -1146,7 +1155,7 @@ util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
     (void)unused;
 
-    write64(STDERR_FILENO, message, (uint32)strlen64(message));
+    write64(STDERR_FILENO, message, (uint32)strlen32(message));
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i],
                notifiers[i], "-u", "critical", program, message, NULL);
@@ -1358,7 +1367,7 @@ static void
 send_signal(char *executable, int32 signal_number) {
     DIR *processes;
     struct dirent *process;
-    int64 len = strlen64(executable);
+    int64 len = strlen32(executable);
 
     if ((processes = opendir("/proc")) == NULL) {
         error("Error opening /proc: %s\n", strerror(errno));
@@ -1639,7 +1648,7 @@ shell_escape(char *path) {
     char *escaped;
     char *write_ptr;
 
-    len = strlen64(path);
+    len = strlen32(path);
     count = 0;
     for (int64 i = 0; i < len; i += 1) {
         if (path[i] == '\'') {
@@ -1680,7 +1689,7 @@ write_file(char *path, void *data, int64 len) {
     XCLOSE(&fd, path);
     return;
 }
-#define WRITE_FILE(PATH, STRING) write_file(PATH, STRING, strlen64(STRING))
+#define WRITE_FILE(PATH, STRING) write_file(PATH, STRING, strlen32(STRING))
 
 static volatile sig_atomic_t received_signal = false;
 static void
@@ -1721,7 +1730,7 @@ main(int argc, char **argv) {
     }
 
     memset64(p1, 0, SIZEMB(1));
-    memcpy64(p1, string, strlen64(string));
+    memcpy64(p1, string, strlen32(string));
     memset64(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 

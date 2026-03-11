@@ -61,7 +61,7 @@ scandir(const char *dir, struct dirent ***namelist,
     list = xmalloc(capacity*SIZEOF(*list));
     do {
         struct dirent *ent = xmalloc(sizeof(*ent));
-        int64 length = strlen64(find_data.cFileName);
+        int64 length = strlen32(find_data.cFileName);
 
         if (length > (SIZEOF(ent->d_name) - 1)) {
             error("Error scanning file %s. File name is too long.\n",
@@ -147,7 +147,7 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
     for (int32 i = 0; i < *nfiles; i += 1) {
         char *from_scan = dirent[i]->d_name;
 
-        if (strlen64(from_scan) != length) {
+        if (strlen32(from_scan) != length) {
             continue;
         }
 
@@ -168,7 +168,7 @@ int
 main(void) {
     {
         char *string = "aaa/bbb/ccc";
-        int64 length = strlen64(string);
+        int64 length = strlen32(string);
 
         assert(memmem64(string, length, "aaa", 3) == string);
         assert(memmem64(string, length, "bbb", 3) == string + 4);

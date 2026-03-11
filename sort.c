@@ -172,7 +172,7 @@ sort(FileList *old) {
     char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    int32 last_length = (int32)strlen64(last);
+    int32 last_length = strlen32(last);
     FileName *dummy_last;
 
     dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1));

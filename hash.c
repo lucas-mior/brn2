@@ -268,7 +268,7 @@ CAT(hash_insert2_, HASH_TYPE)(struct Map *map, char *key
                              , HASH_VALUE_TYPE value
 #endif
 ) {
-    uint32 key_length = (uint32)strlen64(key);
+    uint32 key_length = (uint32)strlen32(key);
     return CAT(hash_insert_, HASH_TYPE)(map, key, key_length
 #if defined(HASH_VALUE_TYPE)
                                         , value
@@ -317,7 +317,7 @@ CAT(hash_lookup_, HASH_TYPE)(struct Map *map, char *key, uint32 key_length) {
 
 static void *
 CAT(hash_lookup2_, HASH_TYPE)(struct Map *map, char *key) {
-    uint32 key_length = (uint32)strlen64(key);
+    uint32 key_length = (uint32)strlen32(key);
     return CAT(hash_lookup_, HASH_TYPE)(map, key, key_length);
 }
 
@@ -532,8 +532,8 @@ main(void) {
     ASSERT(map);
     ASSERT_LESS_EQUAL(NSTRINGS, hash_capacity(map));
 
-    str1.len = (uint32)strlen64(str1.s);
-    str2.len = (uint32)strlen64(str2.s);
+    str1.len = (uint32)strlen32(str1.s);
+    str2.len = (uint32)strlen32(str2.s);
 
     ASSERT(hash_insert_map(map, str1.s, str1.len, str1.value));
     ASSERT(!hash_insert_map(map, str1.s, str1.len, 1));
