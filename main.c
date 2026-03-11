@@ -366,19 +366,10 @@ main(int argc, char **argv) {
             file->name[file->length] = '\0';
         }
         buffered = pointer - write_buffer;
-        if ((w = write64(brn2_buffer.fd, write_buffer, buffered)) != buffered) {
-            error("Error writing %lld bytes to buffer (last line)",
-                  (llong)buffered);
-            if (w < 0) {
-                error(": %s", strerror(errno));
-            }
-            error(".\n");
-            fatal(EXIT_FAILURE);
-        } else {
-            old->length = j;
-            if (brn2_options_vim_split) {
-                write64(brn2_buffer_old.fd, write_buffer, buffered);
-            }
+        write_fatal(brn2_buffer.fd, write_buffer, buffered, -1);
+        old->length = j;
+        if (brn2_options_vim_split) {
+            write_fatal(brn2_buffer_old.fd, write_buffer, buffered, -1);
         }
 
         if (XCLOSE(&(brn2_buffer.fd)) < 0) {
