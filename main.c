@@ -32,24 +32,24 @@ bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
 bool brn2_options_autosolve = false;
-bool brn2_options_diff = false;
+bool brn2_options_vim_split = false;
 uint32 nthreads;
 int (*print)(const char *, ...);
 
 // clang-format off
 static struct option options[] = {
-    {"dir",      required_argument, NULL, 'd'},
-    {"file",     required_argument, NULL, 'f'},
-    {"explict",  no_argument,       NULL, 'e'},
-    {"fatal",    no_argument,       NULL, 'F'},
-    {"help",     no_argument,       NULL, 'h'},
-    {"implict",  no_argument,       NULL, 'i'},
-    {"quiet",    no_argument,       NULL, 'q'},
-    {"sort",     no_argument,       NULL, 's'},
-    {"verbose",  no_argument,       NULL, 'v'},
-    {"autosave", no_argument,       NULL, 'a'},
-    {"diff",     no_argument,       NULL, 'D'},
-    {NULL,       0,                 NULL, 0}
+    {"dir",       required_argument, NULL, 'd'},
+    {"file",      required_argument, NULL, 'f'},
+    {"explict",   no_argument,       NULL, 'e'},
+    {"fatal",     no_argument,       NULL, 'F'},
+    {"help",      no_argument,       NULL, 'h'},
+    {"implict",   no_argument,       NULL, 'i'},
+    {"quiet",     no_argument,       NULL, 'q'},
+    {"sort",      no_argument,       NULL, 's'},
+    {"verbose",   no_argument,       NULL, 'v'},
+    {"autosave",  no_argument,       NULL, 'a'},
+    {"vim-split", no_argument,       NULL, 'V'},
+    {NULL,        0,                 NULL, 0}
 };
 // clang-format on
 
@@ -60,14 +60,14 @@ enum {
 };
 
 static File brn2_buffer;
-static File brn2_diff_buffer;
+static File brn2_buffer_old;
 
 static void
 delete_brn2_buffer(void) {
     if (!DEBUGGING) {
         unlink(brn2_buffer.name);
-        if (brn2_options_diff) {
-            unlink(brn2_diff_buffer.name);
+        if (brn2_options_vim_split) {
+            unlink(brn2_buffer_old.name);
         }
     }
     return;
@@ -164,8 +164,8 @@ main(int argc, char **argv) {
         case 'a':
             brn2_options_autosolve = true;
             break;
-        case 'D':
-            brn2_options_diff = true;
+        case 'V':
+            brn2_options_vim_split = true;
             break;
         default:
             brn2_usage(stderr);
@@ -291,10 +291,10 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         }
 
-        if (brn2_options_diff) {
-            SNPRINTF(brn2_diff_buffer.name, "%s/%s", temp, "brn2_diff.XXXXXX");
-            if ((brn2_diff_buffer.fd = mkstemp(brn2_diff_buffer.name)) < 0) {
-                error("Error opening '%s': %s.\n", brn2_diff_buffer.name,
+        if (brn2_options_vim_split) {
+            SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2_diff.XXXXXX");
+            if ((brn2_buffer_old.fd = mkstemp(brn2_buffer_old.name)) < 0) {
+                error("Error opening '%s': %s.\n", brn2_buffer_old.name,
                       strerror(errno));
                 fatal(EXIT_FAILURE);
             }
@@ -341,8 +341,8 @@ main(int argc, char **argv) {
                     error(".\n");
                     fatal(EXIT_FAILURE);
                 }
-                if (brn2_options_diff) {
-                    write64(brn2_diff_buffer.fd, write_buffer, buffered);
+                if (brn2_options_vim_split) {
+                    write64(brn2_buffer_old.fd, write_buffer, buffered);
                 }
                 pointer = write_buffer;
             }
@@ -369,8 +369,8 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         } else {
             old->length = j;
-            if (brn2_options_diff) {
-                write64(brn2_diff_buffer.fd, write_buffer, buffered);
+            if (brn2_options_vim_split) {
+                write64(brn2_buffer_old.fd, write_buffer, buffered);
             }
         }
 
@@ -380,12 +380,12 @@ main(int argc, char **argv) {
         }
         brn2_buffer.fd = -1;
 
-        if (brn2_options_diff) {
-            if (close(brn2_diff_buffer.fd) < 0) {
+        if (brn2_options_vim_split) {
+            if (close(brn2_buffer_old.fd) < 0) {
                 error("Error closing diff buffer: %s\n", strerror(errno));
                 fatal(EXIT_FAILURE);
             }
-            brn2_diff_buffer.fd = -1;
+            brn2_buffer_old.fd = -1;
         }
 
         atexit(delete_brn2_buffer);
@@ -406,7 +406,7 @@ main(int argc, char **argv) {
         char *args_diff[] = {
             "vim",
             "-O",
-            brn2_diff_buffer.name,
+            brn2_buffer_old.name,
             brn2_buffer.name,
             "-c",
             "wincmd h | set nomodifiable scrollbind cursorbind cursorline"
@@ -462,6 +462,7 @@ main(int argc, char **argv) {
 #else
         while (true) {
             int32 editor_result;
+
             if (!isatty(fileno(stdin))) {
                 char *tty_path;
                 if (OS_WINDOWS) {
@@ -475,14 +476,14 @@ main(int argc, char **argv) {
                 }
             }
 
-            if (brn2_options_diff) {
+            if (brn2_options_vim_split) {
                 editor_result = util_command(LENGTH(args_diff), args_diff);
             } else {
                 editor_result = util_command(LENGTH(args_edit), args_edit);
             }
 
             if (editor_result < 0) {
-                if (OS_WINDOWS && !brn2_options_diff) {
+                if (OS_WINDOWS) {
                     args_edit[0] = "Notepad.exe";
                     if (util_command(LENGTH(args_edit), args_edit) < 0) {
                         fatal(EXIT_FAILURE);

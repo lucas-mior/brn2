@@ -908,7 +908,7 @@ brn2_usage(FILE *stream) {
         "Rename filenames based on provided arguments.\n"
         "\n"
         "Options:\n"
-        "  -D, --diff      : Open vim vimdiff to edit names.\n"
+        "  -V, --vim-split : Use vim in vertical split mode.\n"
         "  -F, --fatal     : Exit on first renaming error.\n"
         "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
         "  -e, --explict   : Only rename files given in the list (default).\n"
