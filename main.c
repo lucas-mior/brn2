@@ -387,11 +387,9 @@ main(int argc, char **argv) {
         }
 
         if (brn2_options_vim_split) {
-            if (close(brn2_buffer_old.fd) < 0) {
-                error("Error closing diff buffer: %s\n", strerror(errno));
+            if (XCLOSE(&(brn2_buffer_old.fd)) < 0) {
                 fatal(EXIT_FAILURE);
             }
-            brn2_buffer_old.fd = -1;
         }
 
         atexit(delete_brn2_buffer);
