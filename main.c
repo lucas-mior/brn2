@@ -40,10 +40,10 @@ int (*print)(const char *, ...);
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
     {"file",      required_argument, NULL, 'f'},
-    {"explict",   no_argument,       NULL, 'e'},
+    {"explicit",   no_argument,       NULL, 'e'},
     {"fatal",     no_argument,       NULL, 'F'},
     {"help",      no_argument,       NULL, 'h'},
-    {"implict",   no_argument,       NULL, 'i'},
+    {"implicit",   no_argument,       NULL, 'i'},
     {"quiet",     no_argument,       NULL, 'q'},
     {"sort",      no_argument,       NULL, 's'},
     {"verbose",   no_argument,       NULL, 'v'},

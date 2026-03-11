@@ -810,7 +810,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
               oldname, newname);
         error(RED"'%s'"RESET" already exists,"
               " but it was not given in the list of files to rename,"
-              " and --implict option is off.\n",
+              " and --implicit option is off.\n",
               newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
@@ -853,7 +853,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                       " '%s' was not in the list of files to rename.\n",
                       newname, oldname, newname);
                 error("To disable this behaviour,"
-                      " don't pass the --implict option.\n");
+                      " don't pass the --implicit option.\n");
                 hash_insert_pre_calc_map(oldlist_map,
                                          newname, newhash, newindex, i);
             }
@@ -909,8 +909,8 @@ brn2_usage(FILE *stream) {
 "  -h, --help      : Display this help message and exit.\n"
 "  -v, --verbose   : Verbose mode (default); output messages.\n"
 "  -q, --quiet     : Quiet mode; suppress output messages.\n"
-"  -i, --implict   : Allow renaming files not given in the list of files.\n"
-"  -e, --explict   : Only rename files given in the list (default).\n"
+"  -i, --implicit   : Allow renaming files not given in the list of files.\n"
+"  -e, --explicit   : Only rename files given in the list (default).\n"
 "  -F, --fatal     : Exit on first renaming error.\n"
 "  -a, --autosolve : Auto solve name conflicts for equal files.\n"
 "  -s, --sort      : Disable sorting of original list.\n"
