@@ -58,7 +58,7 @@ will take place when you save and exit.
     the rename list, this rename won't happen. Supply the `--implict` command
     line option to force this swap, then `a` will become `b` and `b` will become
     `a`.
-  * New file names that match existing files will be compared agains the
+  * New file names that match existing files will be compared against the
     current name. If they have the same content, it will be reported.
     + If the option `--autosolve` is suplied, then the existing file will be
       removed, making the rename work correctly. Otherwise, the user will be
