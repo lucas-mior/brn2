@@ -1052,19 +1052,39 @@ string_from_##NAME(char *buffer, int32 size, \
 GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
 GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
+#ifndef RELEASING
+#define RELEASING 0
+#endif
+
 void __attribute__((format(printf, 1, 2)))
 error(char *format, ...) {
     char buffer[BUFSIZ];
     char *big_buffer = NULL;
     va_list args;
     int64 n;
+    int64 m = sizeof(buffer);;
 
     va_start(args, format);
-    n = vsnprintf(buffer, sizeof(buffer), format, args);
+    n = vsnprintf(buffer, m, format, args);
+
+    if (n >= SIZEOF(buffer)) {
+        if (RELEASING) {
+            m = n + 1;
+            big_buffer = xmalloc(m);
+            n = vsnprintf(big_buffer, m, format, args);
+        } else {
+            fprintf(stderr,
+                    "Error in vsnprintf(\"%s\") (n = %lld).\n",
+                    format, (llong)n);
+            fatal(EXIT_FAILURE);
+        }
+    }
+
     va_end(args);
 
-    if ((n < 0) || (n >= SIZEOF(buffer))) {
-        fprintf(stderr, "Error in vsnprintf(%s) (n = %lld\n", format, (llong)n);
+    if ((n < 0) || (n >= m)) {
+        fprintf(stderr,
+                "Error in vsnprintf(\"%s\") (n = %lld).\n", format, (llong)n);
         fatal(EXIT_FAILURE);
     }
 
