@@ -1058,7 +1058,7 @@ GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
 void __attribute__((format(printf, 1, 2)))
 error(char *format, ...) {
-    char buffer[BUFSIZ];
+    char buffer[16];
     char *big_buffer = NULL;
     va_list args;
     int64 n;
@@ -1088,7 +1088,6 @@ error(char *format, ...) {
         fatal(EXIT_FAILURE);
     }
 
-    buffer[n] = '\0';
 #if OS_WINDOWS
     write(STDERR_FILENO, buffer, (uint)n);
 #else
