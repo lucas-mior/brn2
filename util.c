@@ -916,7 +916,7 @@ util_command(int argc, char **argv) {
         int64 j = 0;
         for (int i = 0; i < argc - 1; i += 1) {
             int64 len2 = strlen64(argv[i]);
-            if ((j + len2) >= (int64)sizeof(cmdline)) {
+            if ((j + len2) >= SIZEOF(cmdline)) {
                 error("Command line is too long.\n");
                 fatal(EXIT_FAILURE);
             }
