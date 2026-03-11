@@ -251,7 +251,7 @@ test_sorting(int32 n, int32 p) {
     int32 *n_sub = xmalloc(p*SIZEOF(*n_sub));
 
     if (n < p*2) {
-        fprintf(stderr, "n=%u must be larger than p*2=%u*2\n", n, p);
+        fprintf(stderr, "n=%d must be larger than p*2=%d*2\n", n, p);
         exit(EXIT_SUCCESS);
     }
 
