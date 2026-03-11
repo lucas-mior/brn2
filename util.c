@@ -884,7 +884,7 @@ xunlink(char *filename) {
 #if OS_WINDOWS
 static int
 util_command(int argc, char **argv) {
-    char cmdline[1024] = {0};
+    char cmdline[BUFSIZ] = {0};
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
