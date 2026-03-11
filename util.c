@@ -138,6 +138,10 @@ _Generic((ARRAY), \
 #define DEBUGGING 0
 #endif
 
+#ifndef RELEASING
+#define RELEASING 0
+#endif
+
 #include "assert.c"
 
 #if !defined(FLAGS_HUGE_PAGES)
@@ -1051,10 +1055,6 @@ string_from_##NAME(char *buffer, int32 size, \
 
 GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
 GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
-
-#ifndef RELEASING
-#define RELEASING 1
-#endif
 
 void __attribute__((format(printf, 1, 2)))
 error(char *format, ...) {
