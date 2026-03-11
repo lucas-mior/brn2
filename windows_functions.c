@@ -129,7 +129,7 @@ lstat(const char *path, struct stat *statbuf) {
         fprintf(stderr, "Error: file is too large to be represented in long\n");
         return -1;
     }
-    statbuf->st_size = (long)sz.QuadPart;
+    statbuf->st_size = (int64)sz.QuadPart;
 
     // Convert FILETIME -> time_t
     statbuf->st_mtime = filetime_to_time_t(&fd.ftLastWriteTime);
