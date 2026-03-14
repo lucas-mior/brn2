@@ -263,6 +263,22 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
+#if OS_WINDOWS
+static void *
+memrchr(void *memory_pointer, int32 character_to_find, int64 size) {
+    unsigned char *buffer = memory_pointer;
+    unsigned char target_byte = (unsigned char)character_to_find;
+
+    for (int64 i = size - 1; i >= 0; i -= 1) {
+        if (buffer[i] == target_byte) {
+            return (void *)(buffer + i);
+        }
+    }
+
+    return NULL;
+}
+#endif
+
 #define X64(func) \
 INLINE void \
 CAT(func, 64)(void *dest, void *source, int64 size) { \
@@ -325,12 +341,29 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
 INLINE void *
 memchr64(void *pointer, int32 value, int64 size) {
     if (DEBUGGING) {
-        if (size <= 0) {
+        if (size < 0) {
             error("Error in %s: Invalid size = %lld\n", __func__, (llong)size);
             fatal(EXIT_FAILURE);
         }
     }
+    if (size == 0) {
+        return 0;
+    }
     return memchr(pointer, value, (size_t)size);
+}
+
+INLINE void *
+memrchr64(void *pointer, int32 value, int64 size) {
+    if (DEBUGGING) {
+        if (size < 0) {
+            error("Error in %s: Invalid size = %lld\n", __func__, (llong)size);
+            fatal(EXIT_FAILURE);
+        }
+    }
+    if (size == 0) {
+        return 0;
+    }
+    return memrchr(pointer, value, (size_t)size);
 }
 
 INLINE int32
@@ -349,24 +382,6 @@ strlen32(char *string) {
     return length;
 }
 
-INLINE int64
-strnlen64(char *string, int64 size) {
-    size_t len;
-    if (DEBUGGING) {
-        if (size <= 0) {
-            error("Error in %s: Invalid size = %lld\n", __func__, (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-        if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
-                  (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-    }
-    len = strnlen(string, (size_t)size);
-    return (int64)len;
-}
-
 INLINE int
 strncmp64(char *left, char *right, int64 size) {
     int result;
@@ -382,6 +397,16 @@ strncmp64(char *left, char *right, int64 size) {
     }
     result = strncmp(left, right, (size_t)size);
     return result;
+}
+
+INLINE char *
+literal_match(char *string, char *literal) {
+    int64 n = strlen32(literal);
+    if (strncmp64(literal, string, n) == 0) {
+        return string + n;
+    } else {
+        return NULL;
+    }
 }
 
 INLINE int
@@ -514,9 +539,14 @@ util_nthreads(void) {
 static char *
 basename2(char *path) {
     int64 left = strlen32(path);
+    char *end = path + left - 1;
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
+
+    if (left == 1) {
+        return p;
+    }
 
     while (left > 0) {
         int64 length;
@@ -529,6 +559,9 @@ basename2(char *path) {
         if ((fslash == NULL) && (bslash == NULL)) {
             return p;
         }
+        if ((fslash == end) || (bslash == end)) {
+            return p;
+        }
         if (fslash > bslash) {
             length = fslash - p + 1;
             p = fslash + 1;
@@ -539,6 +572,7 @@ basename2(char *path) {
 
         left -= length;
     }
+
     return path;
 }
 
@@ -1083,7 +1117,7 @@ error(char *format, ...) {
     va_start(args, format);
     n = vsnprintf(buffer, (size_t)m, format, args);
 
-    if (n >= SIZEOF(buffer)) {
+    if (n >= m) {
         if (RELEASING) {
             m = n + 1;
             big_buffer = xmalloc(m);
@@ -1672,6 +1706,108 @@ shell_escape(char *path) {
     return escaped;
 }
 
+static void
+dirname2(char *buffer, int64 size, char *path) {
+    char *last_slash;
+    int64 dir_length;
+    int32 len = strlen32(path);
+
+    if (len == 1) {
+        if (*path == '/') {
+            snprintf2(buffer, size, "/");
+            return;
+        } else {
+            snprintf2(buffer, size, ".");
+            return;
+        }
+    }
+
+    if ((last_slash = memrchr64(path, '/', len - 1)) == NULL) {
+        snprintf2(buffer, size, ".");
+        return;
+    }
+
+    dir_length = (int64)(last_slash - path);
+    if (dir_length == 0) {
+        dir_length = 1;
+    }
+
+    if (dir_length >= size) {
+        error("Error in %s: path '%s' is too long.\n", __func__, path);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (buffer != path) {
+        memcpy64(buffer, path, dir_length);
+    }
+
+    {
+        char *p;
+        int64 off = 0;
+
+        while ((p = memmem64(buffer + off, dir_length - off, "//", 2))) {
+            off = p - buffer;
+
+            memmove64(&p[0], &p[1], dir_length - off);
+            dir_length -= 1;
+        }
+
+        off = 0;
+        while ((p = memmem64(buffer + off, dir_length - off, "/./", 3))) {
+            off = p - buffer;
+
+            memmove64(&p[1], &p[3], dir_length - off - 2);
+            dir_length -= 2;
+        }
+    }
+
+    buffer[dir_length] = '\0';
+    return;
+}
+
+static void
+normalize(char *path) {
+    char *p = path;
+    int64 off = 0;
+    int32 length = strlen32(path);
+
+    PRINTLN(path);
+
+    while ((p = memmem64(path + off, length - off, "//", 2))) {
+        off = p - path;
+
+        memmove64(&p[0], &p[1], length - off);
+        length -= 1;
+    }
+
+    off = 0;
+    while ((p = memmem64(path + off, length - off, "/./", 3))) {
+        off = p - path;
+
+        memmove64(&p[1], &p[3], length - off - 2);
+        length -= 2;
+    }
+
+    return;
+}
+
+#define DIRNAME(BUFFER, PATH) dirname2(BUFFER, sizeof(BUFFER), PATH)
+
+#if OS_UNIX
+static void
+xpipe(int array[2]) {
+    if (pipe(array) < 0) {
+        error("Error creating pipe: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+#endif
+
+#define HERE do { \
+    fprintf(stderr, "\n===== Here: %s:%d (%s)\n", __FILE__, __LINE__, __func__); \
+} while (0)
+
 #if TESTING_util
 
 static void
@@ -1707,13 +1843,6 @@ main(int argc, char **argv) {
     char *p3;
     char *string = __FILE__;
 
-    char *paths[] = {
-        "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
-        "a/b/cccc",        "a/bb/cccc", "aaaa/cccc",
-    };
-    char *bases[] = {
-        "cccc", "cc", "c", "c", "cccc", "cccc", "cccc",
-    };
     (void)argc;
 
     if (OS_LINUX) {
@@ -1742,9 +1871,44 @@ main(int argc, char **argv) {
         ASSERT_EQUAL(atoi2(itoa2(n, buffer)), n);
     }
 
-    for (int64 i = 0; i < LENGTH(paths); i += 1) {
-        char *path = paths[i];
-        ASSERT_EQUAL(basename2(path), bases[i]);
+    {
+        // Note: NEVER delete lines with // clang-format
+        // clang-format off
+        char *paths[] = {
+            "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
+            "a/b/cccc",        "a/bb/cccc", "aaaa/cccc", "/aaaa",
+            "/",               "//",        "/a/",       "/a/b/",
+            "./",              "..",        "././",      "./a/",
+        };
+        char *bases[] = {
+            "cccc",            "cc",        "c",         "c",
+            "cccc",            "cccc",      "cccc",      "aaaa",
+            "/",               "/",         "a/",        "b/",
+            "./",              "..",        "./",        "a/",
+        };
+        char *dirs[] = {
+            "/aaaa/bbbb",      "/aa/bb",    "/a/b",      "a/b",
+            "a/b",             "a/bb",      "aaaa",      "/",
+            "/",               "/",         "/",          "/a",
+            ".",               ".",         ".",         ".",
+        };
+        // clang-format on
+        for (int64 i = 0; i < LENGTH(paths); i += 1) {
+            char *path = paths[i];
+            char *base = bases[i];
+            ASSERT_EQUAL(basename2(path), base);
+        }
+
+        for (int64 i = 0; i < LENGTH(paths); i += 1) {
+            char dir_buffer[4096];
+            DIRNAME(dir_buffer, paths[i]);
+            ASSERT_EQUAL(dir_buffer, dirs[i]);
+        }
+        {
+            char dir_buffer[128] = "a/b/c";
+            DIRNAME(dir_buffer, dir_buffer);
+            ASSERT_EQUAL(dir_buffer, "a/b");
+        }
     }
 
     if (OS_WINDOWS) {
