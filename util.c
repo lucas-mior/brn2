@@ -268,7 +268,7 @@ memrchr(const void *memory_pointer, int32 character_to_find, size_t size) {
     uchar *buffer = (uchar *) memory_pointer;
     uchar target_byte = (uchar)character_to_find;
 
-    for (int64 i = size - 1; i >= 0; i -= 1) {
+    for (long i = (long)(size - 1); i >= 0; i -= 1) {
         if (buffer[i] == target_byte) {
             return (void *)(buffer + i);
         }
