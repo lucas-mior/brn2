@@ -263,6 +263,8 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
+extern void *memrchr(const void *memory_pointer,
+                     int32 character_to_find, size_t size);
 void *
 memrchr(const void *memory_pointer, int32 character_to_find, size_t size) {
     uchar *buffer = (uchar *) memory_pointer;
