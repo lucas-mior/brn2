@@ -1800,13 +1800,16 @@ normalize(char *path, int32 *length) {
         *length = strlen32(path);
     }
 
-    PRINTLN(path);
-
     while ((p = memmem64(path + off, *length - off, "//", 2))) {
         off = p - path;
 
         memmove64(&p[0], &p[1], *length - off);
         *length -= 1;
+    }
+
+    while ((path[0] == '.') && (path[1] == '/')) {
+        memmove64(&path[0], &path[2], *length - 1);
+        *length -= 2;
     }
 
     off = 0;
