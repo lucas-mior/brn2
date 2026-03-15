@@ -1807,7 +1807,7 @@ normalize(char *path, int32 *length) {
         *length -= 1;
     }
 
-    while ((path[0] == '.') && (path[1] == '/')) {
+    while ((path[0] == '.') && (path[1] == '/') && (*length > 2)) {
         memmove64(&path[0], &path[2], *length - 1);
         *length -= 2;
     }
