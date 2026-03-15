@@ -42,6 +42,7 @@ CFLAGS="$CFLAGS -Wno-unused-function"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-float-equal"
 CFLAGS="$CFLAGS -Wno-undefined-internal"
+CFLAGS="$CFLAGS -Wno-cast-qual"
 LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
