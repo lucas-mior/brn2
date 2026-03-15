@@ -127,6 +127,8 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
     strftime2(BUFFER, sizeof(BUFFER), FORMAT, TIME)
 #endif
 
+#define WRITE_ERROR(X) do { write(STDERR_FILENO, X, strlen(X)); } while (0)
+
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (int64)(SIZEOF(*(struct_object)) + (array_length*SIZEOF(ArrayType)))
 
@@ -263,11 +265,11 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
-extern void *memrchr(const void *memory_pointer,
-                     int32 character_to_find, size_t size);
+extern void *memrchr(const void *memory_pointer, int32 character_to_find,
+                     size_t size);
 void *
 memrchr(const void *memory_pointer, int32 character_to_find, size_t size) {
-    uchar *buffer = (uchar *) memory_pointer;
+    uchar *buffer = (uchar *)memory_pointer;
     uchar target_byte = (uchar)character_to_find;
 
     for (long i = (long)(size - 1); i >= 0; i -= 1) {
@@ -383,7 +385,7 @@ strlen32(char *string) {
 }
 
 INLINE int
-strncmp64(char *left, char *right, int64 size) {
+strncmp32(char *left, char *right, int64 size) {
     int result;
     if (size == 0) {
         return 0;
@@ -402,7 +404,7 @@ strncmp64(char *left, char *right, int64 size) {
 INLINE char *
 literal_match(char *string, char *literal) {
     int64 n = strlen32(literal);
-    if (strncmp64(literal, string, n) == 0) {
+    if (strncmp32(literal, string, n) == 0) {
         return string + n;
     } else {
         return NULL;
@@ -894,6 +896,7 @@ static int
 xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
 #if DEBUGGING
     char buffer[4096];
+
     if (filename == NULL) {
         if (util_filename_from(buffer, sizeof(buffer), *fd) < 0) {
             filename = fd_var_name;
@@ -906,9 +909,22 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
         filename = fd_var_name;
     }
 #endif
+
     if (close(*fd) < 0) {
-        error("%s:%d Error closing %s: %s.\n", file, line, filename,
-              strerror(errno));
+        char error_buffer[4096];
+        char itoa_buffer[32];
+
+        strerror_r(errno, error_buffer, sizeof(error_buffer));
+
+        WRITE_ERROR(file);
+        WRITE_ERROR(":");
+        WRITE_ERROR(itoa2(line, itoa_buffer));
+        WRITE_ERROR(" Error closing ");
+        WRITE_ERROR(filename);
+        WRITE_ERROR(": ");
+        WRITE_ERROR(error_buffer);
+        WRITE_ERROR(".\n");
+
         *fd = -1;
         return -1;
     }
@@ -1766,25 +1782,27 @@ dirname2(char *buffer, int64 size, char *path) {
 }
 
 static void
-normalize(char *path) {
+normalize(char *path, int32 *length) {
     char *p = path;
     int64 off = 0;
-    int32 length = strlen32(path);
+    if (*length < 0) {
+        *length = strlen32(path);
+    }
 
     PRINTLN(path);
 
-    while ((p = memmem64(path + off, length - off, "//", 2))) {
+    while ((p = memmem64(path + off, *length - off, "//", 2))) {
         off = p - path;
 
-        memmove64(&p[0], &p[1], length - off);
-        length -= 1;
+        memmove64(&p[0], &p[1], *length - off);
+        *length -= 1;
     }
 
     off = 0;
-    while ((p = memmem64(path + off, length - off, "/./", 3))) {
+    while ((p = memmem64(path + off, *length - off, "/./", 3))) {
         off = p - path;
 
-        memmove64(&p[1], &p[3], length - off - 2);
+        memmove64(&p[1], &p[3], *length - off - 2);
         length -= 2;
     }
 
