@@ -263,11 +263,10 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
-#if OS_WINDOWS
-static void *
-memrchr(void *memory_pointer, int32 character_to_find, int64 size) {
-    unsigned char *buffer = memory_pointer;
-    unsigned char target_byte = (unsigned char)character_to_find;
+void *
+memrchr(const void *memory_pointer, int32 character_to_find, size_t size) {
+    uchar *buffer = (uchar *) memory_pointer;
+    uchar target_byte = (uchar)character_to_find;
 
     for (int64 i = size - 1; i >= 0; i -= 1) {
         if (buffer[i] == target_byte) {
@@ -277,7 +276,6 @@ memrchr(void *memory_pointer, int32 character_to_find, int64 size) {
 
     return NULL;
 }
-#endif
 
 #define X64(func) \
 INLINE void \
