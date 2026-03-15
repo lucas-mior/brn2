@@ -1907,28 +1907,28 @@ main(int argc, char **argv) {
         // Note: NEVER delete lines with // clang-format
         // clang-format off
         char *paths[] = {
-            "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
+            "/aaaa/bbbb/cccc", "/aa/bb/cc",  "/a/b/c",    "a/b/c",
             "a/b/cccc",        "a/bb/cccc", "aaaa/cccc", "/aaaa",
-            "/",               "//",        "/a/",       "/a/b/",
-            "./",              "..",        "././",      "./a/",
+            "/",               "//",          "/a/",       "/a/b/",
+            "./",              "..",          "././",      "./a/",
         };
         char *bases[] = {
-            "cccc",            "cc",        "c",         "c",
-            "cccc",            "cccc",      "cccc",      "aaaa",
-            "/",               "/",         "a/",        "b/",
-            "./",              "..",        "./",        "a/",
+            "cccc",            "cc",          "c",         "c",
+            "cccc",            "cccc",        "cccc",      "aaaa",
+            "/",               "/",           "a/",        "b/",
+            "./",              "..",          "./",        "a/",
         };
         char *dirs[] = {
-            "/aaaa/bbbb",      "/aa/bb",    "/a/b",      "a/b",
-            "a/b",             "a/bb",      "aaaa",      "/",
-            "/",               "/",         "/",         "/a",
-            ".",               ".",         ".",         ".",
+            "/aaaa/bbbb",      "/aa/bb",      "/a/b",      "a/b",
+            "a/b",             "a/bb",        "aaaa",      "/",
+            "/",               "/",           "/",         "/a",
+            ".",               ".",           ".",         ".",
         };
         char *normalized[] = {
-            "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
-            "a/b/cccc",        "a/bb/cccc", "aaaa/cccc", "/aaaa",
-            "/",               "/",         "/a/",       "/a/b/",
-            "./",              "..",        "./",        "a/",
+            "/aaaa/bbbb/cccc", "/aa/bb/cc",   "/a/b/c",    "a/b/c",
+            "a/b/cccc",        "a/bb/cccc",   "aaaa/cccc", "/aaaa",
+            "/",               "/",           "/a/",       "/a/b/",
+            "./",              "..",          "./",        "a/",
         };
         // clang-format on
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
@@ -1941,6 +1941,7 @@ main(int argc, char **argv) {
             int len = strlen32(copy);
             normalize(copy, &len);
             ASSERT_EQUAL(copy, normalized[i]);
+            free(copy);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
