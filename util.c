@@ -892,6 +892,17 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #endif
 }
 
+#if OS_WINDOWS
+int strerror_r(int errnum, char *buffer, size_t size) {
+    char *error_message = strerror(errnum);
+    int32 len = strlen32(error_message);
+    memcpy64(buffer, error_message, MIN(len + 1, size - 1));
+    buffer[size] = '\0';
+    return 0;
+}
+
+#endif
+
 static int
 xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
 #if DEBUGGING
