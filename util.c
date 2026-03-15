@@ -1921,14 +1921,26 @@ main(int argc, char **argv) {
         char *dirs[] = {
             "/aaaa/bbbb",      "/aa/bb",    "/a/b",      "a/b",
             "a/b",             "a/bb",      "aaaa",      "/",
-            "/",               "/",         "/",          "/a",
+            "/",               "/",         "/",         "/a",
             ".",               ".",         ".",         ".",
+        };
+        char *normalized[] = {
+            "/aaaa/bbbb/cccc", "/aa/bb/cc", "/a/b/c",    "a/b/c",
+            "a/b/cccc",        "a/bb/cccc", "aaaa/cccc", "/aaaa",
+            "/",               "/",         "/a/",       "/a/b/",
+            "./",              "..",        "./",        "a/",
         };
         // clang-format on
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *path = paths[i];
             char *base = bases[i];
             ASSERT_EQUAL(basename2(path), base);
+        }
+        for (int64 i = 0; i < LENGTH(paths); i += 1) {
+            char *copy = xstrdup(paths[i]);
+            int len = strlen32(copy);
+            normalize(copy, &len);
+            ASSERT_EQUAL(copy, normalized[i]);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
