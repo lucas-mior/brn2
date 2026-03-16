@@ -78,6 +78,8 @@
 
 #if OS_MAC
 #include <sys/param.h>
+#undef MIN
+#undef MAX
 #endif
 
 #if !defined(DEBUGGING)
