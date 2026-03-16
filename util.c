@@ -1773,7 +1773,7 @@ basename2(char *path, int32 full_length, int32 *base_len) {
 }
 
 static int32
-dirname2(char *buffer, int64 size, char *path, int32 path_len) {
+dirname2(char *buffer, char *path, int32 path_len) {
     char *last_slash;
     int32 dir_length;
     if (path_len < 0) {
@@ -1782,26 +1782,21 @@ dirname2(char *buffer, int64 size, char *path, int32 path_len) {
 
     if (path_len == 1) {
         if (*path == '/') {
-            snprintf2(buffer, size, "/");
+            sprintf(buffer, "/");
         } else {
-            snprintf2(buffer, size, ".");
+            sprintf(buffer, ".");
         }
         return 1;
     }
 
     if ((last_slash = memrchr64(path, '/', path_len - 1)) == NULL) {
-        snprintf2(buffer, size, ".");
+        sprintf(buffer, ".");
         return 1;
     }
 
     dir_length = (int32)(last_slash - path);
     if (dir_length == 0) {
         dir_length = 1;
-    }
-
-    if (dir_length >= size) {
-        error("Error in %s: path '%s' is too long.\n", __func__, path);
-        fatal(EXIT_FAILURE);
     }
 
     if (buffer != path) {
@@ -1811,9 +1806,6 @@ dirname2(char *buffer, int64 size, char *path, int32 path_len) {
     buffer[dir_length] = '\0';
     return dir_length;
 }
-
-#define DIRNAME(BUFFER, PATH, PATH_LEN) \
-    dirname2(BUFFER, sizeof(BUFFER), PATH, PATH_LEN)
 
 #if OS_UNIX
 static void
@@ -1937,12 +1929,12 @@ main(int argc, char **argv) {
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char dir_buffer[4096];
-            DIRNAME(dir_buffer, paths[i], strlen32(paths[i]));
+            dirname2(dir_buffer, paths[i], strlen32(paths[i]));
             ASSERT_EQUAL(dir_buffer, dirs[i]);
         }
         {
             char dir_buffer[128] = "a/b/c";
-            DIRNAME(dir_buffer, dir_buffer, strlen32(dir_buffer));
+            dirname2(dir_buffer, dir_buffer, strlen32(dir_buffer));
             ASSERT_EQUAL(dir_buffer, "a/b");
         }
     }
