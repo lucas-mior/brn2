@@ -315,8 +315,8 @@ main(void) {
         ASSERT_EQUAL(max, 0);
     }{
         double a = 0.123;
-        double min = MIN(a, 0);
-        double max = MAX(a, 0);
+        ldouble min = MIN(a, 0);
+        ldouble max = MAX(a, 0);
         ASSERT_EQUAL(min, 0.0);
         ASSERT_EQUAL(max, a);
     }{
