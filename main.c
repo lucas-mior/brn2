@@ -199,7 +199,7 @@ main(int argc, char **argv) {
     if (available_threads <= 0) {
         nthreads = 1;
     } else {
-        nthreads = MIN(available_threads, BRN2_MAX_THREADS);
+        nthreads = (int32)MIN(available_threads, BRN2_MAX_THREADS);
     }
 
     old = &old_stack;
