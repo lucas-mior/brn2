@@ -116,7 +116,7 @@ get_signed_unsigned_##MODE(llong var1, ullong var2) { \
     if ((compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         return var1; \
     } else { \
-        return var2; \
+        return (llong)var2; \
     } \
 }
 
