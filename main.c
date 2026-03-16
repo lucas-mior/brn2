@@ -135,7 +135,8 @@ main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    program = basename2(argv[0], -1, NULL);
+    program_len = strlen32(argv[0]);
+    program = basename2(argv[0], &program_len, NULL);
 
     while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsvaV", options, NULL))
            != -1) {

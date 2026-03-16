@@ -107,6 +107,7 @@ static char *program;
 #else
 static char *program = __FILE__;
 #endif
+int32 program_len;
 
 static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
@@ -1724,16 +1725,16 @@ normalize(char *path, int32 *length) {
 }
 
 static char *
-basename2(char *path, int32 full_length, int32 *base_len) {
+basename2(char *path, int32 *full_length, int32 *base_len) {
     int32 left;
     char *end;
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
 
-    normalize(path, &full_length);
+    normalize(path, full_length);
 
-    left = full_length;
+    left = *full_length;
     end = path + left - 1;
 
     if (left == 1) {
@@ -1753,13 +1754,13 @@ basename2(char *path, int32 full_length, int32 *base_len) {
 
         if ((fslash == NULL) && (bslash == NULL)) {
             if (base_len) {
-                *base_len = full_length - (int32)(p - path);
+                *base_len = *full_length - (int32)(p - path);
             }
             return p;
         }
         if ((fslash == end) || (bslash == end)) {
             if (base_len) {
-                *base_len = full_length - (int32)(p - path);
+                *base_len = *full_length - (int32)(p - path);
             }
             return p;
         }
@@ -1778,16 +1779,16 @@ basename2(char *path, int32 full_length, int32 *base_len) {
 }
 
 static int32
-dirname2(char *buffer, char *path, int32 path_len) {
+dirname2(char *buffer, char *path, int32 *path_len) {
     char *last_slash;
     int32 dir_length;
-    if (path_len < 0) {
-        path_len = strlen32(path);
+    if (*path_len < 0) {
+        *path_len = strlen32(path);
     }
 
-    normalize(path, &path_len);
+    normalize(path, path_len);
 
-    if (path_len == 1) {
+    if (*path_len == 1) {
         if (*path == '/') {
             sprintf(buffer, "/");
         } else {
@@ -1796,7 +1797,7 @@ dirname2(char *buffer, char *path, int32 path_len) {
         return 1;
     }
 
-    if ((last_slash = memrchr64(path, '/', path_len - 1)) == NULL) {
+    if ((last_slash = memrchr64(path, '/', *path_len - 1)) == NULL) {
         sprintf(buffer, ".");
         return 1;
     }
@@ -1924,7 +1925,8 @@ main(int argc, char **argv) {
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *path = xstrdup(paths[i]);
             char *base = bases[i];
-            ASSERT_EQUAL(basename2(path, strlen32(path), NULL), base);
+            int32 path_len = strlen32(path);
+            ASSERT_EQUAL(basename2(path, &path_len, NULL), base);
             free(path);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
@@ -1937,19 +1939,22 @@ main(int argc, char **argv) {
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char dir_buffer[4096];
-            dirname2(dir_buffer, paths[i], strlen32(paths[i]));
+            int32 path_len = strlen32(paths[i]);
+            dirname2(dir_buffer, paths[i], &path_len);
             ASSERT_EQUAL(dir_buffer, dirs[i]);
         }
         {
             char dir_buffer[128] = "a/b/c";
-            dirname2(dir_buffer, dir_buffer, strlen32(dir_buffer));
+            int32 path_len = strlen32(dir_buffer);
+            dirname2(dir_buffer, dir_buffer, &path_len);
             ASSERT_EQUAL(dir_buffer, "a/b");
         }
     }
 
     if (OS_WINDOWS) {
         char *path2 = "aa\\cc";
-        ASSERT_EQUAL(basename2(path2, strlen32(path2), NULL), "cc");
+        int32 path_len;
+        ASSERT_EQUAL(basename2(path2, &path_len, NULL), "cc");
     }
 
     {
