@@ -1773,12 +1773,14 @@ basename2(char *path, int32 full_length, int32 *base_len) {
 }
 
 static void
-dirname2(char *buffer, int64 size, int32 *dir_length, char *path) {
+dirname2(char *buffer, int64 size, int32 *dir_length, char *path, int32 path_len) {
     char *last_slash;
     int32 dir_length0;
-    int32 len = strlen32(path);
+    if (path_len < 0) {
+        path_len = strlen32(path);
+    }
 
-    if (len == 1) {
+    if (path_len == 1) {
         if (*path == '/') {
             snprintf2(buffer, size, "/");
         } else {
@@ -1790,7 +1792,7 @@ dirname2(char *buffer, int64 size, int32 *dir_length, char *path) {
         return;
     }
 
-    if ((last_slash = memrchr64(path, '/', len - 1)) == NULL) {
+    if ((last_slash = memrchr64(path, '/', path_len - 1)) == NULL) {
         snprintf2(buffer, size, ".");
         if (dir_length) {
             *dir_length = 1;
@@ -1798,7 +1800,7 @@ dirname2(char *buffer, int64 size, int32 *dir_length, char *path) {
         return;
     }
 
-    dir_length0 = (int64)(last_slash - path);
+    dir_length0 = (int32)(last_slash - path);
     if (dir_length0 == 0) {
         dir_length0 = 1;
     }
