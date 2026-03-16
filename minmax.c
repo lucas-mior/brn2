@@ -293,8 +293,10 @@ main(void) {
     }{
         long a = -1;
         ulong b = 0;
-        ASSERT_EQUAL(MIN(a, b), a);
-        ASSERT_EQUAL(MAX(b, a), b);
+        long min = MIN(a, b);
+        long max = MAX(a, b);
+        ASSERT_EQUAL(min, a);
+        ASSERT_EQUAL(max, b);
     }{
         long a = MINOF(a);
         ulong b = MAXOF(b);
