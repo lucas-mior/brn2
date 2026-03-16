@@ -34,9 +34,6 @@
 #include <sys/stat.h>
 #include <float.h>
 
-#include "generic.c"
-#include "minmax.c"
-
 #if defined(__linux__)
 #define OS_LINUX 1
 #define OS_MAC 0
@@ -81,6 +78,9 @@
 #undef MIN
 #undef MAX
 #endif
+
+#include "generic.c"
+#include "minmax.c"
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
@@ -1717,7 +1717,7 @@ normalize(char *path, int32 *length) {
         off = p - path;
 
         memmove64(&p[1], &p[3], *length - off - 2);
-        length -= 2;
+        *length -= 2;
     }
 
     return;
@@ -1725,11 +1725,16 @@ normalize(char *path, int32 *length) {
 
 static char *
 basename2(char *path, int32 full_length, int32 *base_len) {
-    int32 left = full_length;
-    char *end = path + left - 1;
+    int32 left;
+    char *end;
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
+
+    normalize(path, &full_length);
+
+    left = full_length;
+    end = path + left - 1;
 
     if (left == 1) {
         if (base_len) {
@@ -1779,6 +1784,8 @@ dirname2(char *buffer, char *path, int32 path_len) {
     if (path_len < 0) {
         path_len = strlen32(path);
     }
+
+    normalize(path, &path_len);
 
     if (path_len == 1) {
         if (*path == '/') {
@@ -1860,7 +1867,7 @@ main(int argc, char **argv) {
     (void)argc;
     (void)argv;
 
-    if (OS_LINUX) {
+    if (OS_LINUX && !DEBUGGING) {
         struct sigaction signal_action;
         signal_action.sa_handler = signal_handler;
         sigemptyset(&signal_action.sa_mask);
@@ -1889,10 +1896,10 @@ main(int argc, char **argv) {
     {
         // Note: NEVER delete lines with // clang-format
         // clang-format off
-        char *paths[] = {
+        char paths[][30] = {
             "/aaaa/bbbb/cccc", "/aa/bb/cc",  "/a/b/c",    "a/b/c",
             "a/b/cccc",        "a/bb/cccc", "aaaa/cccc", "/aaaa",
-            "/",               "//",          "/a/",       "/a/b/",
+            "/",               "//",          "/a/",       "/a/b//",
             "./",              "..",          "././",      "./a/",
         };
         char *bases[] = {
@@ -1915,9 +1922,10 @@ main(int argc, char **argv) {
         };
         // clang-format on
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
-            char *path = paths[i];
+            char *path = xstrdup(paths[i]);
             char *base = bases[i];
             ASSERT_EQUAL(basename2(path, strlen32(path), NULL), base);
+            free(path);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
