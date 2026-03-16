@@ -536,55 +536,6 @@ util_nthreads(void) {
 #define basename basename2
 #endif
 
-static char *
-basename2(char *path, int32 full_length, int32 *base_len) {
-    int32 left = full_length;
-    char *end = path + left - 1;
-    char *fslash = NULL;
-    char *bslash = NULL;
-    char *p = path;
-
-    if (left == 1) {
-        if (base_len) {
-            *base_len = 1;
-        }
-        return p;
-    }
-
-    while (left > 0) {
-        int64 length;
-
-        fslash = memchr64(p, '/', left);
-        if (OS_WINDOWS) {
-            bslash = memchr64(p, '\\', left);
-        }
-
-        if ((fslash == NULL) && (bslash == NULL)) {
-            if (base_len) {
-                *base_len = full_length - (int32)(p - path);
-            }
-            return p;
-        }
-        if ((fslash == end) || (bslash == end)) {
-            if (base_len) {
-                *base_len = full_length - (int32)(p - path);
-            }
-            return p;
-        }
-        if (fslash > bslash) {
-            length = fslash - p + 1;
-            p = fslash + 1;
-        } else {
-            length = bslash - p + 1;
-            p = bslash + 1;
-        }
-
-        left -= length;
-    }
-
-    return path;
-}
-
 INLINE void *
 xmalloc(int64 size) {
     void *p;
@@ -1742,6 +1693,86 @@ shell_escape(char *path) {
 }
 
 static void
+normalize(char *path, int32 *length) {
+    char *p = path;
+    int64 off = 0;
+    if (*length < 0) {
+        *length = strlen32(path);
+    }
+
+    while ((p = memmem64(path + off, *length - off, "//", 2))) {
+        off = p - path;
+
+        memmove64(&p[0], &p[1], *length - off);
+        *length -= 1;
+    }
+
+    while ((path[0] == '.') && (path[1] == '/') && (*length > 2)) {
+        memmove64(&path[0], &path[2], *length - 1);
+        *length -= 2;
+    }
+
+    off = 0;
+    while ((p = memmem64(path + off, *length - off, "/./", 3))) {
+        off = p - path;
+
+        memmove64(&p[1], &p[3], *length - off - 2);
+        length -= 2;
+    }
+
+    return;
+}
+
+static char *
+basename2(char *path, int32 full_length, int32 *base_len) {
+    int32 left = full_length;
+    char *end = path + left - 1;
+    char *fslash = NULL;
+    char *bslash = NULL;
+    char *p = path;
+
+    if (left == 1) {
+        if (base_len) {
+            *base_len = 1;
+        }
+        return p;
+    }
+
+    while (left > 0) {
+        int64 length;
+
+        fslash = memchr64(p, '/', left);
+        if (OS_WINDOWS) {
+            bslash = memchr64(p, '\\', left);
+        }
+
+        if ((fslash == NULL) && (bslash == NULL)) {
+            if (base_len) {
+                *base_len = full_length - (int32)(p - path);
+            }
+            return p;
+        }
+        if ((fslash == end) || (bslash == end)) {
+            if (base_len) {
+                *base_len = full_length - (int32)(p - path);
+            }
+            return p;
+        }
+        if (fslash > bslash) {
+            length = fslash - p + 1;
+            p = fslash + 1;
+        } else {
+            length = bslash - p + 1;
+            p = bslash + 1;
+        }
+
+        left -= length;
+    }
+
+    return path;
+}
+
+static void
 dirname2(char *buffer, int64 size, char *path) {
     char *last_slash;
     int64 dir_length;
@@ -1776,58 +1807,7 @@ dirname2(char *buffer, int64 size, char *path) {
         memcpy64(buffer, path, dir_length);
     }
 
-    {
-        char *p;
-        int64 off = 0;
-
-        while ((p = memmem64(buffer + off, dir_length - off, "//", 2))) {
-            off = p - buffer;
-
-            memmove64(&p[0], &p[1], dir_length - off);
-            dir_length -= 1;
-        }
-
-        off = 0;
-        while ((p = memmem64(buffer + off, dir_length - off, "/./", 3))) {
-            off = p - buffer;
-
-            memmove64(&p[1], &p[3], dir_length - off - 2);
-            dir_length -= 2;
-        }
-    }
-
     buffer[dir_length] = '\0';
-    return;
-}
-
-static void
-normalize(char *path, int32 *length) {
-    char *p = path;
-    int64 off = 0;
-    if (*length < 0) {
-        *length = strlen32(path);
-    }
-
-    while ((p = memmem64(path + off, *length - off, "//", 2))) {
-        off = p - path;
-
-        memmove64(&p[0], &p[1], *length - off);
-        *length -= 1;
-    }
-
-    while ((path[0] == '.') && (path[1] == '/') && (*length > 2)) {
-        memmove64(&path[0], &path[2], *length - 1);
-        *length -= 2;
-    }
-
-    off = 0;
-    while ((p = memmem64(path + off, *length - off, "/./", 3))) {
-        off = p - path;
-
-        memmove64(&p[1], &p[3], *length - off - 2);
-        length -= 2;
-    }
-
     return;
 }
 
