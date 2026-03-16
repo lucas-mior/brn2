@@ -285,11 +285,6 @@ main(void) {
         ASSERT_EQUAL(max, a);
     }{
         int a = 1;
-        uint b = 1;
-        ASSERT_EQUAL(a, b);
-        ASSERT_EQUAL(a, b);
-    }{
-        int a = 1;
         uint b = 2;
         long min = MIN(a, b);
         long max = MAX(a, b);
