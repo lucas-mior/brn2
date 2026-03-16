@@ -1697,6 +1697,7 @@ static void
 normalize(char *path, int32 *length) {
     char *p = path;
     int64 off = 0;
+
     if (*length < 0) {
         *length = strlen32(path);
     }
