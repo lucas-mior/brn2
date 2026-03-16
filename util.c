@@ -539,14 +539,17 @@ util_nthreads(void) {
 #endif
 
 static char *
-basename2(char *path) {
-    int64 left = strlen32(path);
+basename2(char *path, int32 full_length, int32 *base_len) {
+    int32 left = full_length;
     char *end = path + left - 1;
     char *fslash = NULL;
     char *bslash = NULL;
     char *p = path;
 
     if (left == 1) {
+        if (base_len) {
+            *base_len = 1;
+        }
         return p;
     }
 
@@ -559,9 +562,15 @@ basename2(char *path) {
         }
 
         if ((fslash == NULL) && (bslash == NULL)) {
+            if (base_len) {
+                *base_len = full_length - (int32)(p - path);
+            }
             return p;
         }
         if ((fslash == end) || (bslash == end)) {
+            if (base_len) {
+                *base_len = full_length - (int32)(p - path);
+            }
             return p;
         }
         if (fslash > bslash) {
@@ -893,7 +902,8 @@ util_filename_from(char *buffer, int64 size, int fd) {
 }
 
 #if OS_WINDOWS
-int strerror_r(int errnum, char *buffer, size_t size) {
+int
+strerror_r(int errnum, char *buffer, size_t size) {
     char *error_message = strerror(errnum);
     int32 len = strlen32(error_message);
     memcpy64(buffer, error_message, MIN(len + 1, size - 1));
@@ -1876,6 +1886,7 @@ main(int argc, char **argv) {
     char *string = __FILE__;
 
     (void)argc;
+    (void)argv;
 
     if (OS_LINUX) {
         struct sigaction signal_action;
@@ -1934,7 +1945,7 @@ main(int argc, char **argv) {
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *path = paths[i];
             char *base = bases[i];
-            ASSERT_EQUAL(basename2(path), base);
+            ASSERT_EQUAL(basename2(path, strlen32(path), NULL), base);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
@@ -1958,7 +1969,7 @@ main(int argc, char **argv) {
 
     if (OS_WINDOWS) {
         char *path2 = "aa\\cc";
-        ASSERT_EQUAL(basename2(path2), "cc");
+        ASSERT_EQUAL(basename2(path2, strlen32(path2), NULL), "cc");
     }
 
     {
