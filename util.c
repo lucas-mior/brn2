@@ -1821,8 +1821,8 @@ dirname2(char *buffer, int64 size, int32 *dir_length, char *path, int32 path_len
     return;
 }
 
-#define DIRNAME(BUFFER, PATH, DIRLEN) \
-    dirname2(BUFFER, sizeof(BUFFER), DIRLEN, PATH)
+#define DIRNAME(BUFFER, DIRLEN, PATH, PATH_LEN) \
+    dirname2(BUFFER, sizeof(BUFFER), DIRLEN, PATH, PATH_LEN)
 
 #if OS_UNIX
 static void
@@ -1946,12 +1946,12 @@ main(int argc, char **argv) {
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char dir_buffer[4096];
-            DIRNAME(dir_buffer, paths[i], NULL);
+            DIRNAME(dir_buffer, NULL, paths[i], strlen32(paths[i]));
             ASSERT_EQUAL(dir_buffer, dirs[i]);
         }
         {
             char dir_buffer[128] = "a/b/c";
-            DIRNAME(dir_buffer, dir_buffer, NULL);
+            DIRNAME(dir_buffer, NULL, dir_buffer, strlen32(dir_buffer));
             ASSERT_EQUAL(dir_buffer, "a/b");
         }
     }
