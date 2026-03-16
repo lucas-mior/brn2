@@ -266,16 +266,23 @@ _Generic((VAR1), \
 int
 main(void) {
     {
-        ASSERT_EQUAL(MIN(0, 1), 0);
-        ASSERT_EQUAL(MIN(1, 1), 1);
-        ASSERT_EQUAL(MAX(1, 1), 1);
-        ASSERT_EQUAL(MAX(0, 1), 1);
+        long min01 = MIN(0, 1);
+        long min11 = MIN(1, 1);
+        long max11 = MAX(1, 1);
+        long max01 = MAX(0, 1);
+
+        ASSERT_EQUAL(min01, 0);
+        ASSERT_EQUAL(min11, 1);
+        ASSERT_EQUAL(max11, 1);
+        ASSERT_EQUAL(max01, 1);
     }
     {
         int a = 1;
         int b = 1;
-        ASSERT_EQUAL(MIN(a, b), a);
-        ASSERT_EQUAL(MAX(a, b), a);
+        int min = MIN(a, b);
+        int max = MAX(a, b);
+        ASSERT_EQUAL(min, a);
+        ASSERT_EQUAL(max, a);
     }{
         int a = 1;
         uint b = 1;
