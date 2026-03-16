@@ -278,8 +278,8 @@ main(void) {
     }{
         int a = 1;
         int b = 1;
-        int min = MIN(a, b);
-        int max = MAX(a, b);
+        long min = MIN(a, b);
+        long max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, a);
     }{
