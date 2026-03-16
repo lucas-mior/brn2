@@ -299,6 +299,7 @@ main(void) {
         long a = MINOF(a);
         ulong b = MAXOF(b);
         ASSERT_EQUAL(MIN(a, b), a);
+        ASSERT_EQUAL(MAX(a, b), (llong)b);
     }{
         ulong a = MINOF(a);
         long b = MAXOF(b);
@@ -322,8 +323,10 @@ main(void) {
         int array[100];
         void *a = &array[0];
         void *b = &array[1];
-        ASSERT_EQUAL(MIN(a, b), a);
-        ASSERT_EQUAL(MAX(a, b), b);
+        void *min = MIN(a, b);
+        void *max = MAX(a, b);
+        ASSERT_EQUAL(min, a);
+        ASSERT_EQUAL(max, b);
     }
     exit(EXIT_SUCCESS);
 }
