@@ -166,8 +166,8 @@ _Generic((VAR2), \
     uchar:   SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
     ushort:  SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ), \
     uint:    SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
-    ulong:   SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
-    ullong:  SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
+    ulong:   BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
+    ullong:  BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
     float:   BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
     double:  BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
     ldouble: BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
@@ -296,10 +296,10 @@ main(void) {
     }{
         long a = MINOF(a);
         ulong b = MAXOF(b);
-        long min = MIN(a, b);
-        long max = MAX(a, b);
+        double min = MIN(a, b);
+        double max = MAX(a, b);
         ASSERT_EQUAL(min, a);
-        ASSERT_EQUAL(max, (llong)b);
+        ASSERT_EQUAL(max, (double)b);
     }{
         ulong a = MINOF(a);
         long b = MAXOF(b);
