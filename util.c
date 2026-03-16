@@ -1776,6 +1776,9 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
         left -= length;
     }
 
+    if (base_len) {
+        *base_len = *full_length;
+    }
     return path;
 }
 
