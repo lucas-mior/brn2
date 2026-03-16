@@ -1897,24 +1897,24 @@ main(int argc, char **argv) {
         // Note: NEVER delete lines with // clang-format
         // clang-format off
         char paths[][30] = {
-            "/aaaa/bbbb/cccc", "/aa/bb/cc",  "/a/b/c",    "a/b/c",
-            "a/b/cccc",        "a/bb/cccc", "aaaa/cccc", "/aaaa",
-            "/",               "//",          "/a/",       "/a/b//",
+            "/aaaa/bbbb/cccc", "/aa/bb/cc",  "/a/b/c",    "a/b//c",
+            "a/b/cccc",        "a/bb/cccc", "aaaa//cccc", "/aaaa",
+            "/",               "//",          "//a/",       "/a/b///",
             "./",              "..",          "././",      "./a/",
         };
-        char *bases[] = {
+        char *bases[20] = {
             "cccc",            "cc",          "c",         "c",
             "cccc",            "cccc",        "cccc",      "aaaa",
             "/",               "/",           "a/",        "b/",
             "./",              "..",          "./",        "a/",
         };
-        char *dirs[] = {
+        char *dirs[20] = {
             "/aaaa/bbbb",      "/aa/bb",      "/a/b",      "a/b",
             "a/b",             "a/bb",        "aaaa",      "/",
             "/",               "/",           "/",         "/a",
             ".",               ".",           ".",         ".",
         };
-        char *normalized[] = {
+        char *normalized[20] = {
             "/aaaa/bbbb/cccc", "/aa/bb/cc",   "/a/b/c",    "a/b/c",
             "a/b/cccc",        "a/bb/cccc",   "aaaa/cccc", "/aaaa",
             "/",               "/",           "/a/",       "/a/b/",
