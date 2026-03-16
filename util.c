@@ -1773,45 +1773,54 @@ basename2(char *path, int32 full_length, int32 *base_len) {
 }
 
 static void
-dirname2(char *buffer, int64 size, char *path) {
+dirname2(char *buffer, int64 size, int32 *dir_length, char *path) {
     char *last_slash;
-    int64 dir_length;
+    int32 dir_length0;
     int32 len = strlen32(path);
 
     if (len == 1) {
         if (*path == '/') {
             snprintf2(buffer, size, "/");
-            return;
         } else {
             snprintf2(buffer, size, ".");
-            return;
         }
+        if (dir_length) {
+            *dir_length = 1;
+        }
+        return;
     }
 
     if ((last_slash = memrchr64(path, '/', len - 1)) == NULL) {
         snprintf2(buffer, size, ".");
+        if (dir_length) {
+            *dir_length = 1;
+        }
         return;
     }
 
-    dir_length = (int64)(last_slash - path);
-    if (dir_length == 0) {
-        dir_length = 1;
+    dir_length0 = (int64)(last_slash - path);
+    if (dir_length0 == 0) {
+        dir_length0 = 1;
     }
 
-    if (dir_length >= size) {
+    if (dir_length0 >= size) {
         error("Error in %s: path '%s' is too long.\n", __func__, path);
         fatal(EXIT_FAILURE);
     }
 
     if (buffer != path) {
-        memcpy64(buffer, path, dir_length);
+        memcpy64(buffer, path, dir_length0);
     }
 
-    buffer[dir_length] = '\0';
+    buffer[dir_length0] = '\0';
+    if (dir_length) {
+        *dir_length = dir_length0;
+    }
     return;
 }
 
-#define DIRNAME(BUFFER, PATH) dirname2(BUFFER, sizeof(BUFFER), PATH)
+#define DIRNAME(BUFFER, PATH, DIRLEN) \
+    dirname2(BUFFER, sizeof(BUFFER), DIRLEN, PATH)
 
 #if OS_UNIX
 static void
@@ -1935,12 +1944,12 @@ main(int argc, char **argv) {
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char dir_buffer[4096];
-            DIRNAME(dir_buffer, paths[i]);
+            DIRNAME(dir_buffer, paths[i], NULL);
             ASSERT_EQUAL(dir_buffer, dirs[i]);
         }
         {
             char dir_buffer[128] = "a/b/c";
-            DIRNAME(dir_buffer, dir_buffer);
+            DIRNAME(dir_buffer, dir_buffer, NULL);
             ASSERT_EQUAL(dir_buffer, "a/b");
         }
     }
