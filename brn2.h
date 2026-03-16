@@ -52,8 +52,6 @@
 #define BRN2_MIN_PARALLEL 64
 #define BRN2_ALIGNMENT 16ul
 #define ALIGNMENT BRN2_ALIGNMENT
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 #if !defined(ALIGNMENT)
 #define ALIGNMENT 16ul

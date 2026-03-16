@@ -35,6 +35,7 @@
 #include <float.h>
 
 #include "generic.c"
+#include "minmax.c"
 
 #if defined(__linux__)
 #define OS_LINUX 1
@@ -199,11 +200,6 @@ _Generic((SIZE), \
 #endif
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
-#endif
-
-#if !defined(MIN)
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 // clang-format on
