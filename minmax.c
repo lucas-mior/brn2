@@ -275,8 +275,7 @@ main(void) {
         ASSERT_EQUAL(min11, 1);
         ASSERT_EQUAL(max11, 1);
         ASSERT_EQUAL(max01, 1);
-    }
-    {
+    }{
         int a = 1;
         int b = 1;
         int min = MIN(a, b);
