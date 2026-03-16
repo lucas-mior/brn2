@@ -129,9 +129,9 @@ GENERATE_COMPARE_SIGNED_UNSIGNED(max, >)
 static llong \
 get_unsigned_signed_##MODE(ullong var1, llong var2) { \
     if (((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
-        return var1; \
+        return (llong)var1; \
     } else { \
-        return (llong)var2; \
+        return var2; \
     } \
 }
 
