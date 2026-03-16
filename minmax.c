@@ -300,8 +300,10 @@ main(void) {
     }{
         long a = MINOF(a);
         ulong b = MAXOF(b);
-        ASSERT_EQUAL(MIN(a, b), a);
-        ASSERT_EQUAL(MAX(a, b), (llong)b);
+        long min = MIN(a, b);
+        long max = MAX(a, b);
+        ASSERT_EQUAL(min, a);
+        ASSERT_EQUAL(max, (llong)b);
     }{
         ulong a = MINOF(a);
         long b = MAXOF(b);
