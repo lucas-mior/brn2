@@ -18,18 +18,14 @@
 #if !defined(HASH_H)
 #define HASH_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <sys/types.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <time.h>
 
 #include "rapidhash.h"
@@ -44,8 +40,13 @@
 
 #if TESTING_hash
 #define HASH_VALUE_TYPE int32
+#define HASH_VALUE_FORMATTER "%d"
 #define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
+#endif
+
+#if !defined(HASH_DUPLICATE_KEYS)
+#define HASH_DUPLICATE_KEYS 0
 #endif
 
 #define SLOT_FREE   0
@@ -180,6 +181,18 @@ CAT(hash_create_, HASH_TYPE)(uint32 length) {
 
 static void
 CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
+#if HASH_DUPLICATE_KEYS
+    for (uint32 i = 0; i < map->capacity; i += 1) {
+        switch ((int64)map->array[i].key) {
+        case SLOT_DELETED:
+        case SLOT_FREE:
+            break;
+        default:
+            free(map->array[i].key);
+            break;
+        }
+    }
+#endif
     xmunmap(map, map->size);
     return;
 }
@@ -208,7 +221,11 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
                 target = iterator;
             }
 
+#if HASH_DUPLICATE_KEYS
+            target->key = xstrdup(key);
+#else
             target->key = key;
+#endif
             target->hash = hash;
 #if defined(HASH_VALUE_TYPE)
             target->value = value;
@@ -276,7 +293,11 @@ CAT(hash_insert2_, HASH_TYPE)(struct Map *map, char *key
     );
 }
 
+#if defined(HASH_VALUE_TYPE)
+static HASH_VALUE_TYPE *
+#else
 static void *
+#endif
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
                                       char *key, uint64 hash, uint32 base_index) {
     uint32 capacity = map->capacity;
@@ -338,6 +359,9 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
             break;
         default:
             if ((iterator->hash == hash) && (strcmp(iterator->key, key) == 0)) {
+#if HASH_DUPLICATE_KEYS
+                free(iterator->key);
+#endif
                 iterator->key = (char *)SLOT_DELETED;
                 map->length -= 1;
                 return true;
@@ -371,7 +395,9 @@ CAT(hash_print_summary_, HASH_TYPE)(struct Map *map, char *name) {
 
 static void
 CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
-    /* CAT(HASH_PRINT_SUMMARY_, HASH_TYPE)(map); */
+    if (map == NULL) {
+        return;
+    }
 
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &map->array[i];
@@ -396,8 +422,8 @@ CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
             break;
         default:
             printf("'%s'", iterator->key);
-#if defined(HASH_VALUE_TYPE)
-            /* printf("=%u", iterator->value); */
+#if defined(HASH_VALUE_TYPE) && defined(HASH_VALUE_FORMATTER)
+            printf("="HASH_VALUE_FORMATTER, iterator->value);
 #endif
         }
     }
@@ -419,6 +445,8 @@ CAT(hash_ndeleted_, HASH_TYPE)(struct Map *map) {
 #undef HASH_VALUE_TYPE
 #undef HASH_PADDING_TYPE
 #undef HASH_TYPE
+#undef HASH_DUPLICATE_KEYS
+#undef HASH_VALUE_FORMATTER
 
 #if !defined(HASH_H2)
 #define HASH_H2
