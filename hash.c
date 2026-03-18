@@ -45,10 +45,6 @@
 #define HASH_TYPE map
 #endif
 
-#if !defined(HASH_DUPLICATE_KEYS)
-#define HASH_DUPLICATE_KEYS 0
-#endif
-
 #define SLOT_FREE   0
 #define SLOT_DELETED -1
 
@@ -119,6 +115,10 @@ struct CommonMap {
 
 #if !defined(HASH_TYPE)
 #error HASH_TYPE is undefined
+#endif
+
+#if !defined(HASH_DUPLICATE_KEYS)
+#define HASH_DUPLICATE_KEYS 0
 #endif
 
 #define Bucket CAT(Bucket_, HASH_TYPE)
