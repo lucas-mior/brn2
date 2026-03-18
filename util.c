@@ -107,7 +107,7 @@ static char *program;
 #else
 static char *program = __FILE__;
 #endif
-static int32 program_len;
+static int32 program_len __attribute__((unused));
 
 static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 
