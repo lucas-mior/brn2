@@ -401,8 +401,8 @@ strncmp32(char *left, char *right, int64 size) {
 }
 
 INLINE char *
-literal_match(char *string, char *literal) {
-    int64 n = strlen32(literal);
+begins_with(char *string, char *literal) {
+    int32 n = strlen32(literal);
     if (strncmp32(literal, string, n) == 0) {
         return string + n;
     } else {
@@ -1830,8 +1830,10 @@ xpipe(int array[2]) {
 }
 #endif
 
+static volatile ullong here_counter = 0; \
+
 #define HERE do { \
-    fprintf(stderr, "\n===== Here: %s:%d (%s)\n", __FILE__, __LINE__, __func__); \
+    fprintf(stderr, "\n===== Here(%llu): %s:%d (%s)\n", here_counter++, __FILE__, __LINE__, __func__); \
 } while (0)
 
 #if TESTING_util
