@@ -856,11 +856,10 @@ static int
 strerror_r(int errnum, char *buffer, size_t size) {
     char *error_message = strerror(errnum);
     int32 len = strlen32(error_message);
-    memcpy64(buffer, error_message, MIN(len + 1, size - 1));
+    memcpy64(buffer, error_message, (llong)MIN(len + 1, size - 1));
     buffer[size] = '\0';
     return 0;
 }
-
 #endif
 
 static int
