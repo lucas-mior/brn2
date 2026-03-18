@@ -102,6 +102,8 @@
 #define TESTING_util 0
 #endif
 
+#define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
+
 #if !TESTING_util
 static char *program;
 #else
@@ -109,7 +111,8 @@ static char *program = __FILE__;
 #endif
 static int32 program_len __attribute__((unused));
 
-static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
+static void __attribute__((format(printf, 3, 4))) 
+    error_impl(char *file, int32 line, char *format, ...);
 
 #define SIZEOF(X) ((int64)sizeof(X))
 
@@ -134,7 +137,7 @@ static void __attribute__((format(printf, 1, 2))) error(char *format, ...);
 #define WRITE_ERROR(X) do { write64(STDERR_FILENO, X, strlen32(X)); } while (0)
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
-    (int64)(SIZEOF(*(struct_object)) + (array_length*SIZEOF(ArrayType)))
+    (int64)(SIZEOF(*(struct_object)) + ((array_length)*SIZEOF(ArrayType)))
 
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
@@ -210,7 +213,7 @@ _Generic((SIZE), \
 static char *notifiers[2] = {"dunstify", "notify-send"};
 static int64 util_page_size = 0;
 
-static void error(char *, ...);
+static void error_impl(char *file, int32 line, char *, ...);
 static void fatal(int) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
@@ -1091,14 +1094,16 @@ string_from_##NAME(char *buffer, int32 size, \
 GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
 GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
-void __attribute__((format(printf, 1, 2)))
-error(char *format, ...) {
+void __attribute__((format(printf, 3, 4)))
+error_impl(char *file, int32 line, char *format, ...) {
     char buffer[BUFSIZ];
     char *big_buffer = NULL;
     char *pbuffer = buffer;
     va_list args;
-    int64 n;
-    int64 m = SIZEOF(buffer);
+    int32 n;
+    int32 m = SIZEOF(buffer);
+    int32 p;
+    char fileline[64];
 
     va_start(args, format);
     n = vsnprintf(buffer, (size_t)m, format, args);
@@ -1124,9 +1129,22 @@ error(char *format, ...) {
         fatal(EXIT_FAILURE);
     }
 
+    if (!RELEASING) {
+        p = SNPRINTF(fileline, "%s:%d: ", file, line);
+        write(STDERR_FILENO, fileline, p);
+    } else {
+        p = 0;
+    }
+
 #if OS_WINDOWS
+    if (p) {
+        write(STDERR_FILENO, fileline, (uint)p);
+    }
     write(STDERR_FILENO, pbuffer, (uint)n);
 #else
+    if (p) {
+        write(STDERR_FILENO, fileline, (uint)p);
+    }
     write(STDERR_FILENO, pbuffer, (size_t)n);
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
@@ -1832,7 +1850,8 @@ xpipe(int array[2]) {
 static volatile ullong here_counter = 0; \
 
 #define HERE do { \
-    fprintf(stderr, "\n===== Here(%llu): %s:%d (%s)\n", here_counter++, __FILE__, __LINE__, __func__); \
+    fprintf(stderr, "\n===== HERE(%llu): %s:%d (%s)\n", \
+                    here_counter++, __FILE__, __LINE__, __func__); \
 } while (0)
 
 #if TESTING_util
