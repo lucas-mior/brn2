@@ -134,8 +134,6 @@ static void __attribute__((format(printf, 3, 4)))
     strftime2(BUFFER, sizeof(BUFFER), FORMAT, TIME)
 #endif
 
-#define WRITE_ERROR(X) do { write64(STDERR_FILENO, X, strlen32(X)); } while (0)
-
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (int64)(SIZEOF(*(struct_object)) + ((array_length)*SIZEOF(ArrayType)))
 
@@ -214,23 +212,28 @@ static char *notifiers[2] = {"dunstify", "notify-send"};
 static int64 util_page_size = 0;
 
 static void error_impl(char *file, int32 line, char *, ...);
+static void error_async_safe(char *message);
 static void fatal(int) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
 static char *itoa2(long, char *);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
-static int xclose(char *file, int line, int *fd, char *fd_var_name,
-                  char *filename);
+static int xclose(char *file, int line,
+                  int *fd, char *fd_var_name, char *filename);
 
-#if !defined(CAT)
-#define CAT_(a, b) a##b
-#define CAT(a, b) CAT_(a, b)
+#if !defined(CAT) || !defined(CAT3)
+  #define CAT_(a, b)     a##b
+  #define CAT3_(a, b, c) a##b##c
+  #define CAT(a, b)      CAT_(a, b)
+  #define CAT3(a, b, c)  CAT3_(a, b, c)
 #endif
 
-#define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
-#define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
-#define SELECT_ON_NUM_ARGS(macro, ...) \
-    CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+#if !defined(SELECT_ON_NUM_ARGS)
+  #define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, n, ...) n
+  #define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, x)
+  #define SELECT_ON_NUM_ARGS(macro, ...) \
+      CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+#endif
 
 #if OS_WINDOWS
 static void *
@@ -267,11 +270,11 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
-extern void *memrchr(const void *memory_pointer, int32 character_to_find,
+extern void *memrchr(const void *pointer, int32 character_to_find,
                      size_t size);
 void *
-memrchr(const void *memory_pointer, int32 character_to_find, size_t size) {
-    uchar *buffer = (uchar *)memory_pointer;
+memrchr(const void *pointer, int32 character_to_find, size_t size) {
+    uchar *buffer = (uchar *)pointer;
     uchar target_byte = (uchar)character_to_find;
 
     for (long i = (long)(size - 1); i >= 0; i -= 1) {
@@ -285,21 +288,21 @@ memrchr(const void *memory_pointer, int32 character_to_find, size_t size) {
 
 #define X64(func) \
 INLINE void \
-CAT(func, 64)(void *dest, void *source, int64 size) { \
-    if (size == 0) \
+CAT(func, 64)(void *dest, void *source, int64 n) { \
+    if (n == 0) \
         return; \
     if (DEBUGGING) { \
-        if (size < 0) { \
-            error("Error in %s: Invalid size = %lld\n", __func__, (llong)size); \
+        if (n < 0) { \
+            error("Error in %s: Invalid n = %lld\n", __func__, (llong)n); \
             fatal(EXIT_FAILURE); \
         } \
-        if ((ullong)size >= (ullong)SIZE_MAX) { \
-            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", \
-                   __func__, (llong)size); \
+        if ((ullong)n >= (ullong)SIZE_MAX) { \
+            error("Error in %s: n (%lld) is bigger than SIZEMAX\n", \
+                   __func__, (llong)n); \
             fatal(EXIT_FAILURE); \
         } \
     } \
-    func(dest, source, (size_t)size); \
+    func(dest, source, (size_t)n); \
     return; \
 }
 
@@ -619,6 +622,17 @@ xstrdup(char *string) {
     return p;
 }
 
+static void
+xfree(char *file, int32 line, void *pointer) {
+    if (DEBUGGING) {
+        error_impl(file, line, "Freeing pointer %p\n", pointer);
+    }
+    free(pointer);
+    return;
+}
+
+#define XFREE(P) xfree(__FILE__, __LINE__, P)
+
 #if OS_UNIX
 static void *
 xmmap_commit(int64 *size) {
@@ -662,7 +676,7 @@ xmmap_commit(int64 *size) {
 static void
 xmunmap(void *p, int64 size) {
     if (RUNNING_ON_VALGRIND) {
-        free(p);
+        XFREE(p);
         return;
     }
     if (munmap(p, (size_t)size) < 0) {
@@ -704,7 +718,7 @@ static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        free(p);
+        XFREE(p);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -889,14 +903,14 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
 
         strerror_r(errno, error_buffer, sizeof(error_buffer));
 
-        WRITE_ERROR(file);
-        WRITE_ERROR(":");
-        WRITE_ERROR(itoa2(line, itoa_buffer));
-        WRITE_ERROR(" Error closing ");
-        WRITE_ERROR(filename);
-        WRITE_ERROR(": ");
-        WRITE_ERROR(error_buffer);
-        WRITE_ERROR(".\n");
+        error_async_safe(file);
+        error_async_safe(":");
+        error_async_safe(itoa2(line, itoa_buffer));
+        error_async_safe(" Error closing ");
+        error_async_safe(filename);
+        error_async_safe(": ");
+        error_async_safe(error_buffer);
+        error_async_safe(".\n");
 
         *fd = -1;
         return -1;
@@ -1131,7 +1145,6 @@ error_impl(char *file, int32 line, char *format, ...) {
 
     if (!RELEASING) {
         p = SNPRINTF(fileline, "%s:%d: ", file, line);
-        write(STDERR_FILENO, fileline, p);
     } else {
         p = 0;
     }
@@ -1171,8 +1184,15 @@ error_impl(char *file, int32 line, char *format, ...) {
 #endif
 
     if (big_buffer) {
-        free(big_buffer);
+        XFREE(big_buffer);
     }
+    return;
+}
+
+static void
+error_async_safe(char *message) {
+    int32 len = strlen32(message);
+    write(STDERR_FILENO, message, (size_t)len);
     return;
 }
 
@@ -1392,7 +1412,7 @@ util_copy_file_async_thread(void *arg) {
             pipes[i].revents = 0;
         }
     }
-    free(copy_files);
+    XFREE(copy_files);
     pthread_exit(NULL);
     return NULL;
 }
@@ -1836,11 +1856,37 @@ dirname2(char *buffer, char *path, int32 *path_len) {
     return dir_length;
 }
 
+static void
+print_timings(char *file, int32 line, int32 n,
+              char *name, struct timespec t0, struct timespec t1) {
+    long seconds = t1.tv_sec - t0.tv_sec;
+    long nanos = t1.tv_nsec - t0.tv_nsec;
+
+    double total_seconds = (double)seconds + (double)nanos / 1.0e9;
+    double micros_per = 1e6*(total_seconds / (double)n);
+
+    printf("\ntime elapsed %s:%d:%s\n", file, line, name);
+    printf("%gs = %gus per item.\n\n", total_seconds, micros_per);
+    return;
+}
+
+#define PRINT_TIMINGS(N, NAME, T0, T1) \
+    print_timings(__FILE__, __LINE__, N, NAME, T0, T1)
+
 #if OS_UNIX
 static void
 xpipe(int array[2]) {
     if (pipe(array) < 0) {
         error("Error creating pipe: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
+static void
+xdup2(int fd1, int fd2) {
+    if (dup2(fd1, fd2) < 0) {
+        error("Error in dup2: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
     return;
@@ -1855,6 +1901,47 @@ static volatile ullong here_counter = 0; \
 } while (0)
 
 #if TESTING_util
+
+#define DAYS_ENUM_LIST                \
+  BEGIN_ENUM(WEEK_DAY)                \
+    XENUM(SUNDAY, 0, "Sunday string") \
+    XENUM(MONDAY)                     \
+    XENUM(TUESDAY, 10)                \
+    XENUM(WEDNESDAY)                  \
+    XENUM(THURSDAY)                   \
+    XENUM(FRIDAY, 5, "Friday string") \
+    XENUM(SATURDAY, 20)               \
+  END_ENUM(WEEK_DAY)
+
+#define ENUM_NAME_LOCAL WEEK_DAY
+#include "enums.h"
+DAYS_ENUM_LIST
+
+#define ENUM_NAME_LOCAL WEEK_DAY
+#include "enums.h"
+DAYS_ENUM_LIST
+#undef DAYS_ENUM_LIST
+#undef ENUM_NAME_LOCAL
+
+#define POWERS_OF_TWO_LIST     \
+  BEGIN_ENUM(POWER_OF_TWO)    \
+    XENUM(ONE,     1 << 0)     \
+    XENUM(TWO,     1 << 1)     \
+    XENUM(FOUR,    1 << 2)     \
+    XENUM(EIGHT,   1 << 3)     \
+    XENUM(SIXTEEN, 1 << 4)     \
+    XENUM(THIRTY2, 1 << 5)     \
+    XENUM(SIXTY4,  1 << 6)     \
+  END_ENUM(POWER_OF_TWO)
+
+#define ENUM_NAME_LOCAL POWER_OF_TWO
+#include "enums.h"
+POWERS_OF_TWO_LIST
+
+#define ENUM_NAME_LOCAL POWER_OF_TWO
+#include "enums.h"
+POWERS_OF_TWO_LIST
+#undef ENUM_NAME_LOCAL
 
 static void
 write_file(char *path, void *data, int64 len) {
@@ -1891,6 +1978,19 @@ main(int argc, char **argv) {
 
     (void)argc;
     (void)argv;
+
+    for (int32 i = 0; i < WEEK_DAY_LAST; i += 1) {
+        printf("enum[%d] = %s\n", i, WEEK_DAY_string(i));
+    }
+
+    printf("\n");
+
+    for (int32 i = 0; i < POWER_OF_TWO_LAST; i += 1) {
+        char *value_name = POWER_OF_TWO_string(i);
+        if (!begins_with(value_name, "Unknown")) {
+            printf("enum[%d] = %s\n", i, value_name);
+        }
+    }
 
     if (OS_LINUX && !DEBUGGING) {
         struct sigaction signal_action;
@@ -1951,14 +2051,14 @@ main(int argc, char **argv) {
             char *base = bases[i];
             int32 path_len = strlen32(path);
             ASSERT_EQUAL(basename2(path, &path_len, NULL), base);
-            free(path);
+            XFREE(path);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
             int len = strlen32(copy);
             normalize(copy, &len);
             ASSERT_EQUAL(copy, normalized[i]);
-            free(copy);
+            XFREE(copy);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
@@ -2049,9 +2149,9 @@ main(int argc, char **argv) {
         // clang-format on
     }
 
-    free(p1);
-    free(p2);
-    free(p3);
+    XFREE(p1);
+    XFREE(p2);
+    XFREE(p3);
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);

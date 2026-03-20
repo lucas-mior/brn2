@@ -188,7 +188,7 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
         case SLOT_FREE:
             break;
         default:
-            free(map->array[i].key);
+            XFREE(map->array[i].key);
             break;
         }
     }
@@ -360,7 +360,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
         default:
             if ((iterator->hash == hash) && (strcmp(iterator->key, key) == 0)) {
 #if HASH_DUPLICATE_KEYS
-                free(iterator->key);
+                XFREE(iterator->key);
 #endif
                 iterator->key = (char *)SLOT_DELETED;
                 map->length -= 1;
@@ -528,21 +528,6 @@ random_string(Arena *arena, uint32 nbytes) {
     return string;
 }
 
-static void
-print_timings(char *name, struct timespec t0, struct timespec t1) {
-    long seconds = t1.tv_sec - t0.tv_sec;
-    long nanos = t1.tv_nsec - t0.tv_nsec;
-
-    double total_seconds = (double)seconds + (double)nanos / 1.0e9;
-    double micros_per_str = 1e6*(total_seconds / (double)(NSTRINGS));
-    double nanos_per_byte = 1e3*(micros_per_str / (double)(NBYTES));
-
-    printf("\ntime elapsed %s:%s\n", __FILE__, name);
-    printf("%gs = %gus per string = %gns per byte.\n\n", total_seconds,
-           micros_per_str, nanos_per_byte);
-    return;
-}
-
 // flags: -lm
 int
 main(void) {
@@ -582,7 +567,7 @@ main(void) {
                                strings[i].value));
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    print_timings("insertion", t0, t1);
+    PRINT_TIMINGS(NSTRINGS, "insertion", t0, t1);
 
     for (uint32 i = 0; i < NSTRINGS; i += 1) {
         uint32 *stored;
@@ -614,7 +599,7 @@ main(void) {
     }
 
     hash_destroy_map(map);
-    free(strings);
+    XFREE(strings);
 
     exit(EXIT_SUCCESS);
 }
