@@ -1261,7 +1261,7 @@ util_die_notify(char *program_name, char *format, ...) {
 }
 
 static void *
-util_memdup(void *source, int64 size) {
+xmemdup(void *source, int64 size) {
     void *p = xmalloc(size);
     memcpy64(p, source, size);
     return p;
