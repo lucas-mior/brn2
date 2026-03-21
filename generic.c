@@ -385,7 +385,11 @@ _Generic((VAR), \
     ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE)                 \
 )
 
-#define PRINTLN(VAR) do { PRINT(VAR); fprintf(stderr, "\n"); } while (0)
+#define PRINTLN(VAR) do { \
+    fprintf(stderr, "%s:%d ", __FILE__, __LINE__); \
+    PRINT(VAR); \
+    fprintf(stderr, "\n"); \
+} while (0)
 
 #if TESTING_generic
 #include <assert.h>
