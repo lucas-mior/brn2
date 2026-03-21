@@ -1,33 +1,30 @@
 #undef XENUM
 #undef XENUM_1
 #undef XENUM_2
-#undef XENUM_3
 #undef BEGIN_ENUM
 #undef END_ENUM
 
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ > 1)
-#if !defined(ENUM_NAME_LOCAL)
-#error "enums.h included but ENUM_NAME_LOCAL is not defined"
+#if !defined(__INCLUDE_LEVEL__) || (__INCLUDE_LEVEL__ >= 1)
+#if !defined(ENUM_PREFIX_)
+#error "enums.h included but ENUM_PREFIX_ is not defined"
 #endif
 #endif
 
+// use 1234 and 4321 to decrease the chance of someone else using this macro
+// (even though the compiler should emit a warning anyway)
 #if !defined(ENUM_GENERATE_STRINGS)
-#define ENUM_GENERATE_STRINGS 1
+#define ENUM_GENERATE_STRINGS 4321
 #endif
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmacro-redefined"
-
-#if ENUM_GENERATE_STRINGS == 0
-#define ENUM_GENERATE_STRINGS 1
+#if ENUM_GENERATE_STRINGS == 1234
+  #undef ENUM_GENERATE_STRINGS
+  #define ENUM_GENERATE_STRINGS 4321
+#elif ENUM_GENERATE_STRINGS == 4321
+  #undef ENUM_GENERATE_STRINGS
+  #define ENUM_GENERATE_STRINGS 1234
 #else
-#define ENUM_GENERATE_STRINGS 0
+  #error "ENUM_GENERATE_STRINGS must alternate between 1234 and 4321"
 #endif
-
-_Static_assert((ENUM_GENERATE_STRINGS == 0) || (ENUM_GENERATE_STRINGS == 1),
-               "ENUM_GENERATE_STRINGS must alternate between 0 and 1");
-
-#pragma clang diagnostic pop
 
 #if !defined(CAT) || !defined(CAT3)
   #define CAT_(a, b)     a##b
@@ -41,36 +38,70 @@ _Static_assert((ENUM_GENERATE_STRINGS == 0) || (ENUM_GENERATE_STRINGS == 1),
 #define SELECT_ON_NUM_ARGS(macro, ...) \
     CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
-#if !defined(Q)
-#define Q(x) #x
-#define QUOTE(x) Q(x)
+#if !defined(QUOTE)
+#define QUOTE_(x) #x
+#define QUOTE(x) QUOTE_(x)
 #endif
 
 #define XENUM(...) SELECT_ON_NUM_ARGS(XENUM_, __VA_ARGS__)
 
-#if ENUM_GENERATE_STRINGS == 0
-  #define BEGIN_ENUM(ENUM_NAME) enum ENUM_NAME {
+#if ENUM_GENERATE_STRINGS == 1234
+  #define BEGIN_ENUM(EnumName) enum EnumName {
 
-  #define XENUM_1(e)            CAT3(ENUM_NAME_LOCAL, _, e),
-  #define XENUM_2(e, v)         CAT3(ENUM_NAME_LOCAL, _, e) = v, 
-  #define XENUM_3(e, v, s)      CAT3(ENUM_NAME_LOCAL, _, e) = v,
+#if !defined(ENUM_IS_FLAGS) // don't allow automatic value in the flags case
+  #define XENUM_1(e)             CAT(ENUM_PREFIX_, e),
+#endif
+  #define XENUM_2(e, v)          CAT(ENUM_PREFIX_, e) = v, 
 
-  #define END_ENUM(ENUM_NAME)   CAT3(ENUM_NAME_LOCAL, _, LAST) \
-                                }; \
-                                char *ENUM_NAME##_string(int index);
+  #define END_ENUM(EnumName)     CAT(ENUM_PREFIX_, LAST) \
+                               }; \
+                               char *CAT(ENUM_PREFIX_, str)(enum EnumName v);
 #else
-  #define BEGIN_ENUM(ENUM_NAME) char *ENUM_NAME##_string(int index) { \
-                                switch (index) {
+#if !defined(ENUM_IS_FLAGS)
+  #define BEGIN_ENUM(EnumName) char *CAT(ENUM_PREFIX_, str)(enum EnumName v) { \
+                                 switch (v) {
 
-  #define XENUM_1(e)            case CAT3(ENUM_NAME_LOCAL, _, e): \
-                                    return QUOTE(ENUM_NAME_LOCAL) "_" #e;
-  #define XENUM_2(e, v)         case CAT3(ENUM_NAME_LOCAL, _, e): \
-                                    return QUOTE(ENUM_NAME_LOCAL) "_" #e;
-  #define XENUM_3(e, v, s)      case CAT3(ENUM_NAME_LOCAL, _, e): \
-                                    return s;
+  #define XENUM_1(e)               case CAT(ENUM_PREFIX_, e):                  \
+                                     return QUOTE(ENUM_PREFIX_) #e;
+  #define XENUM_2(e, v)            case CAT(ENUM_PREFIX_, e):                  \
+                                     return QUOTE(ENUM_PREFIX_) #e;
 
-  #define END_ENUM(ENUM_NAME)   default: \
-                                    return "Unknown value"; \
-                                } \
-  }
+  #define END_ENUM(EnumName)       case CAT(ENUM_PREFIX_, LAST):               \
+                                     return QUOTE(ENUM_PREFIX_) "LAST";        \
+                                   default:                                    \
+                                     return "Unknown value";                   \
+                                 }                                             \
+                               }
+#else
+  #define BEGIN_ENUM(EnumName) char *CAT(ENUM_PREFIX_, str)(enum EnumName x) { \
+                                 char buffer[4096];                            \
+                                 char *buffer_ptr = buffer;                    \
+                                 char *buffer_end = buffer + sizeof(buffer);   \
+                                 bool is_first_flag = true;                    \
+                                 int64 final_length;                           \
+                                 char *buffer_copy;
+
+  #define XENUM_2(e, v)          if (x & CAT(ENUM_PREFIX_, e)) {               \
+                                   char *flag = QUOTE(ENUM_PREFIX_) #e;        \
+                                   int32 len = strlen32(flag);                 \
+                                   if (is_first_flag == false) {               \
+                                     *buffer_ptr++ = '|';                      \
+                                   }                                           \
+                                   if (buffer_ptr + len < (buffer_end - 1)) {  \
+                                       memcpy64(buffer_ptr, flag, len);        \
+                                       buffer_ptr += len;                      \
+                                   }                                           \
+                                   is_first_flag = false;                      \
+                                 }
+
+  #define END_ENUM(EnumName)     if (buffer_ptr == buffer) {                   \
+                                   return "NONE";                              \
+                                 }                                             \
+                                 *buffer_ptr = '\0';                           \
+                                 final_length = buffer_ptr - buffer + 1;       \
+                                 buffer_copy = xmalloc(final_length);          \
+                                 memcpy64(buffer_copy, buffer, final_length);  \
+                                 return buffer_copy;                           \
+                               }
+#endif
 #endif
