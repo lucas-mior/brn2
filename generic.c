@@ -35,14 +35,14 @@
 #endif
 
 #if TESTING_generic
-#define trap(...) raise(SIGILL)
-#elif !defined(trap)
+#define TRAP(...) raise(SIGILL)
+#elif !defined(TRAP)
 #if defined(__GNUC__) || defined(__clang__)
-#define trap(...) __builtin_trap()
+#define TRAP(...) __builtin_trap()
 #elif defined(_MSC_VER)
-#define trap(...) __debugbreak()
+#define TRAP(...) __debugbreak()
 #else
-#define trap(...) *(volatile int *)0 = 0
+#define TRAP(...) *(volatile int *)0 = 0
 #endif
 #endif
 
@@ -129,25 +129,25 @@ _Generic((VARIABLE), \
 static ldouble
 ldouble_from_voidp(void* x) {
     (void)x;
-    trap();
+    TRAP();
     return 0.0l;
 }
 static ldouble
 ldouble_from_charp(char* x) {
     (void)x;
-    trap();
+    TRAP();
     return 0.0l;
 }
 static ldouble
 ldouble_from_bool(bool x) {
     (void)x;
-    trap();
+    TRAP();
     return 0.0l;
 }
 static ldouble
 ldouble_from_char(char x) {
     (void)x;
-    trap();
+    TRAP();
     return 0.0l;
 }
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x; }
@@ -260,7 +260,7 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
-    default: trap();
+    default: TRAP();
     }
     return size*CHAR_BIT;
 }
@@ -294,10 +294,10 @@ typename(enum Type type) {
 static ldouble
 ldouble_get(union Primitive var, enum Type type) {
     switch (type) {
-    case TYPE_VOIDP:   trap(); break;
-    case TYPE_CHARP:   trap(); break;
-    case TYPE_BOOL:    trap(); break;
-    case TYPE_CHAR:    trap(); break;
+    case TYPE_VOIDP:   TRAP(); break;
+    case TYPE_CHARP:   TRAP(); break;
+    case TYPE_BOOL:    TRAP(); break;
+    case TYPE_CHAR:    TRAP(); break;
     case TYPE_SCHAR:   return (ldouble)var.aschar;
     case TYPE_SHORT:   return (ldouble)var.ashort;
     case TYPE_INT:     return (ldouble)var.aint;
@@ -311,7 +311,7 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_FLOAT:   return (ldouble)var.afloat;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
     case TYPE_LDOUBLE: return var.aldouble;
-    default:           trap(); break;
+    default:           TRAP(); break;
     }
     return 0.0l;
 }

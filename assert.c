@@ -40,14 +40,14 @@
 #endif
 
 #if TESTING_assert
-#define trap(...) raise(SIGILL)
-#elif !defined(trap)
+#define TRAP(...) raise(SIGILL)
+#elif !defined(TRAP)
 #if defined(__GNUC__) || defined(__clang__)
-#define trap(...) __builtin_trap()
+#define TRAP(...) __builtin_trap()
 #elif defined(_MSC_VER)
-#define trap(...) __debugbreak()
+#define TRAP(...) __debugbreak()
 #else
-#define trap(...) *(volatile int *)0 = 0
+#define TRAP(...) *(volatile int *)0 = 0
 #endif
 #endif
 
@@ -56,7 +56,7 @@
 #define ASSERT(C) do { \
     if (!(C)) { \
         error2("Assertion '%s' failed at %s:%d\n", #C, __FILE__, __LINE__); \
-        trap(); \
+        TRAP(); \
     } \
 } while (0)
 
@@ -91,7 +91,7 @@ a_strings_##MODE(char *file, uint line, \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %s " #SYMBOL " %s = %s\n", \
                name1, var1, var2, name2); \
-        trap(); \
+        TRAP(); \
     } \
 }
 
@@ -113,7 +113,7 @@ a_pointers_##MODE(char *file, uint line, \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("%s = %p " #SYMBOL " %p = %s\n", \
                name1, var1, var2, name2); \
-        trap(); \
+        TRAP(); \
     } \
 }
 
@@ -135,7 +135,7 @@ a_both_##TYPE##_##MODE(char *file, uint line, \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
-        trap(); \
+        TRAP(); \
     } \
 }
 
@@ -186,7 +186,7 @@ a_signed_unsigned##MODE(char *file, uint line, \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
-        trap(); \
+        TRAP(); \
     } \
 }
 
@@ -210,7 +210,7 @@ a_unsigned_signed_##MODE(char *file, uint line, \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
-        trap(); \
+        TRAP(); \
     } \
 }
 
@@ -234,7 +234,7 @@ a_ldouble_##MODE(char *file, uint line, \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s%lld]%s = %Lf " #SYMBOL " %Lf = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
-        trap(); \
+        TRAP(); \
     } \
 }
 

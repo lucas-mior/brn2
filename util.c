@@ -1199,7 +1199,7 @@ void
 fatal(int status) {
     if (DEBUGGING) {
         (void)status;
-        trap();
+        TRAP();
     } else {
         exit(status);
     }
