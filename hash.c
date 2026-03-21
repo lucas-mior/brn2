@@ -85,8 +85,10 @@ typedef uint64_t uint64;
 
 // clang-format off
 
-#define Q(x) #x
-#define QUOTE(x) Q(x)
+#if !defined(QUOTE)
+#define QUOTE_(x) #x
+#define QUOTE(x) QUOTE_(x)
+#endif
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
 #define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
 
