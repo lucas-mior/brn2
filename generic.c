@@ -184,6 +184,7 @@ enum Type {
     TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_LDOUBLE,
+    TYPE_OTHER = 0,
 };
 
 // Note: NEVER delete lines with // clang-format
@@ -207,7 +208,8 @@ _Generic((VAR), \
     ullong:  TYPE_ULLONG, \
     float:   TYPE_FLOAT,  \
     double:  TYPE_DOUBLE, \
-    ldouble: TYPE_LDOUBLE \
+    ldouble: TYPE_LDOUBLE, \
+    default: TYPE_OTHER \
 )
 
 union Primitive {
@@ -260,6 +262,7 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
+    case TYPE_OTHER:
     default: TRAP();
     }
     return size*CHAR_BIT;
@@ -287,6 +290,7 @@ typename(enum Type type) {
     case TYPE_FLOAT:   return "float";
     case TYPE_DOUBLE:  return "double";
     case TYPE_LDOUBLE: return "ldouble";
+    case TYPE_OTHER:
     default:           return "unknown type";
     }
 }
