@@ -105,6 +105,9 @@ static char *program = __FILE__;
 #endif
 static int32 program_len __attribute__((unused));
 
+static bool timezone_initialized = false;
+static time_t timezone_offset = 0;
+
 #define SIZEOF(X) ((int64)sizeof(X))
 
 #if !defined(SIZEKB)
@@ -209,7 +212,7 @@ static int64 util_page_size = 0;
 static void error_async_safe(char *message);
 static void fatal(int) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
-static char *itoa2(long, char *);
+static long itoa2(char *, long);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
 static int xclose(char *file, int line,
@@ -899,12 +902,13 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
     if (close(*fd) < 0) {
         char error_buffer[4096];
         char itoa_buffer[32];
+        itoa2(itoa_buffer, line);
 
         strerror_r(errno, error_buffer, sizeof(error_buffer));
 
         error_async_safe(file);
         error_async_safe(":");
-        error_async_safe(itoa2(line, itoa_buffer));
+        error_async_safe(itoa_buffer);
         error_async_safe(" Error closing ");
         error_async_safe(filename);
         error_async_safe(": ");
@@ -1510,8 +1514,8 @@ send_signal(char *executable, int32 signal_number) {
 }
 #endif
 
-char *
-itoa2(long num, char *str) {
+long
+itoa2(char *str, long num) {
     int i = 0;
     bool negative = false;
 
@@ -1533,12 +1537,12 @@ itoa2(long num, char *str) {
 
     str[i] = '\0';
 
-    for (int j = 0; j < i / 2; j += 1) {
+    for (long j = 0; j < i / 2; j += 1) {
         char temp = str[j];
         str[j] = str[i - j - 1];
         str[i - j - 1] = temp;
     }
-    return str;
+    return i;
 }
 
 long
@@ -1673,8 +1677,13 @@ bytes_pretty(char *buffer, int64 raw) {
     int64 i;
     int32 n;
 
+    if (raw < 0) {
+        *buffer = '\0';
+        return 0;
+    }
+
     if (raw <= 1023) {
-        n = snprintf2(buffer, 32, "%lldB", (llong)raw);
+        n = snprintf2(buffer, 16, "%lldB", (llong)raw);
         return n;
     }
 
@@ -1686,13 +1695,13 @@ bytes_pretty(char *buffer, int64 raw) {
     }
 
     if (aux_pretty >= 1000) {
-        n = snprintf2(buffer, 32, "%.1f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 16, "%.1f%s", aux_pretty, suffixes[i]);
     } else if (aux_pretty >= 100) {
-        n = snprintf2(buffer, 32, "%.2f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 16, "%.2f%s", aux_pretty, suffixes[i]);
     } else if (aux_pretty >= 10) {
-        n = snprintf2(buffer, 32, "%.3f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 16, "%.3f%s", aux_pretty, suffixes[i]);
     } else {
-        n = snprintf2(buffer, 32, "%.4f%s", aux_pretty, suffixes[i]);
+        n = snprintf2(buffer, 16, "%.4f%s", aux_pretty, suffixes[i]);
     }
 
     return n;
@@ -1856,23 +1865,61 @@ dirname2(char *buffer, char *path, int32 *path_len) {
 }
 
 static void
-print_timings(char *file, int32 line, int32 n,
-              char *name, struct timespec t0, struct timespec t1) {
+print_timings(char *file, int32 line, const char *func,
+              int64 n, struct timespec t0, struct timespec t1) {
     long seconds = t1.tv_sec - t0.tv_sec;
     long nanos = t1.tv_nsec - t0.tv_nsec;
 
     double total_seconds = (double)seconds + (double)nanos / 1.0e9;
     double micros_per = 1e6*(total_seconds / (double)n);
 
-    printf("\ntime elapsed %s:%d:%s\n", file, line, name);
+    printf("\ntime elapsed %s:%d:%s\n", file, line, func);
     printf("%gs = %gus per item.\n\n", total_seconds, micros_per);
     return;
 }
-
-#define PRINT_TIMINGS(N, NAME, T0, T1) \
-    print_timings(__FILE__, __LINE__, N, NAME, T0, T1)
+#define PRINT_TIMINGS_3(N, T0, T1) \
+        print_timings(__FILE__, __LINE__, __func__, N, T0, T1)
+#define PRINT_TIMINGS_4(N, T0, T1, NAME) \
+        print_timings(__FILE__, __LINE__, NAME, N, T0, T1)
+#define PRINT_TIMINGS(...) SELECT_ON_NUM_ARGS(PRINT_TIMINGS_, __VA_ARGS__)
 
 #if OS_UNIX
+
+// clang-format off
+#define XSIGNAL(NAME) [NAME] = #NAME
+static char *signal_names[] = {
+    XSIGNAL(SIGABRT),
+    XSIGNAL(SIGALRM),
+    XSIGNAL(SIGVTALRM),
+    XSIGNAL(SIGPROF),
+    XSIGNAL(SIGBUS),
+    XSIGNAL(SIGCHLD),
+    XSIGNAL(SIGCONT),
+    XSIGNAL(SIGFPE),
+    XSIGNAL(SIGHUP),
+    XSIGNAL(SIGILL),
+    XSIGNAL(SIGINT),
+    XSIGNAL(SIGKILL),
+    XSIGNAL(SIGPIPE),
+    XSIGNAL(SIGPOLL),
+    XSIGNAL(SIGQUIT),
+    XSIGNAL(SIGSEGV),
+    XSIGNAL(SIGSTOP),
+    XSIGNAL(SIGSYS),
+    XSIGNAL(SIGTERM),
+    XSIGNAL(SIGTSTP),
+    XSIGNAL(SIGTTIN),
+    XSIGNAL(SIGTTOU),
+    XSIGNAL(SIGTRAP),
+    XSIGNAL(SIGURG),
+    XSIGNAL(SIGUSR1),
+    XSIGNAL(SIGUSR2),
+    XSIGNAL(SIGXCPU),
+    XSIGNAL(SIGXFSZ),
+};
+#undef XSIGNAL
+// clang-format on
+
 static void
 xpipe(int array[2]) {
     if (pipe(array) < 0) {
@@ -1890,6 +1937,44 @@ xdup2(int fd1, int fd2) {
     }
     return;
 }
+
+static void
+xkill(pid_t pid, int signum) {
+    if (kill(pid, signum) < 0) {
+        error("Error sending signal %d=%s to %d: %s.\n",
+              signum, signal_names[signum], pid, strerror(errno));
+    }
+    return;
+}
+#endif
+
+#if OS_UNIX
+static void
+timezone_init(void) {
+    time_t current_time;
+    struct tm local_tm;
+    struct tm gm_tm;
+
+    current_time = time(NULL);
+    localtime_r(&current_time, &local_tm);
+    gmtime_r(&current_time, &gm_tm);
+
+    timezone_offset = (local_tm.tm_hour - gm_tm.tm_hour)*3600;
+    timezone_offset += (local_tm.tm_min - gm_tm.tm_min)*60;
+
+    if (local_tm.tm_year < gm_tm.tm_year) {
+        timezone_offset -= 24*3600;
+    } else if (local_tm.tm_year > gm_tm.tm_year) {
+        timezone_offset += 24*3600;
+    } else if (local_tm.tm_yday < gm_tm.tm_yday) {
+        timezone_offset -= 24*3600;
+    } else if (local_tm.tm_yday > gm_tm.tm_yday) {
+        timezone_offset += 24*3600;
+    }
+
+    timezone_initialized = true;
+    return;
+}
 #endif
 
 static volatile ullong here_counter = 0; \
@@ -1899,52 +1984,87 @@ static volatile ullong here_counter = 0; \
                     here_counter++, __FILE__, __LINE__, __func__); \
 } while (0)
 
+#if 0 == TESTING_util
+static inline void
+util_functions_sink(void) {
+    (void)util_segv_handler;
+    (void)util_nthreads;
+    (void)util_filename_from;
+    (void)util_command;
+    (void)util_string_int32;
+    (void)util_die_notify;
+#if OS_UNIX
+    (void)util_copy_file_sync;
+    (void)util_copy_file_async;
+    (void)util_copy_file_async_thread;
+    (void)util_command_launch;
+#endif
+    (void)util_equal_files;
+
+    (void)send_signal;
+    (void)shell_escape;
+    (void)atoi2;
+#if OS_UNIX
+    (void)timezone_init;
+#endif
+    (void)dirname2;
+    (void)basename2;
+    (void)string_from_doubles;
+    (void)string_from_strings;
+    (void)strftime2;
+    (void)bytes_pretty;
+    (void)qsort64;
+
+    (void)xmmap_commit;
+    (void)xcalloc;
+    (void)xstrdup;
+#if OS_UNIX
+    (void)xkill;
+    (void)xdup2;
+    (void)xpipe;
+#endif
+    (void)xmemdup;
+    (void)xunlink;
+
+    (void)xpthread_mutex_lock;
+    (void)xpthread_mutex_unlock;
+    (void)xpthread_cond_destroy;
+    (void)xpthread_mutex_destroy;
+    (void)xpthread_create;
+    (void)xpthread_join;
+    return;
+}
+#endif
+
 #if TESTING_util
 
-#define DAYS_ENUM_LIST                 \
-  BEGIN_ENUM(WeekDay)                  \
-    XENUM(SUNDAY, 0)                   \
-    XENUM(MONDAY)                      \
-    XENUM(TUESDAY, 10)                 \
-    XENUM(WEDNESDAY)                   \
-    XENUM(THURSDAY)                    \
-    XENUM(FRIDAY, 5)                   \
-    XENUM(SATURDAY, 20)                \
-  END_ENUM(WeekDay)
-
+#define ENUM_NAME WeekDay
+#define ENUM_BITFLAGS 0
 #define ENUM_PREFIX_ WEEK_DAY_
-#include "enums.h"
-DAYS_ENUM_LIST
-#undef ENUM_PREFIX_
+#define ENUM_FIELDS \
+    X(SUNDAY, 0)                   \
+    X(MONDAY)                      \
+    X(TUESDAY, 10)                 \
+    X(WEDNESDAY)                   \
+    X(THURSDAY)                    \
+    X(FRIDAY, 5)                   \
+    X(SATURDAY, 20)
+#include "xenums.c"
 
-#define ENUM_PREFIX_ WEEK_DAY_
-#include "enums.h"
-DAYS_ENUM_LIST
-#undef DAYS_ENUM_LIST
-#undef ENUM_PREFIX_
 
-#define POWERS_OF_TWO_LIST             \
-  BEGIN_ENUM(PowerOfTwo)               \
-    XENUM(ONE,     1 << 0)             \
-    XENUM(TWO,     1 << 1)             \
-    XENUM(FOUR,    1 << 2)             \
-    XENUM(EIGHT,   1 << 3)             \
-    XENUM(SIXTEEN, 1 << 4)             \
-    XENUM(THIRTY2, 1 << 5)             \
-    XENUM(SIXTY4,  1 << 6)             \
-  END_ENUM(PowerOfTwo)
-
+#define ENUM_NAME PowerOfTwo
+#define ENUM_BITFLAGS 1
 #define ENUM_PREFIX_ POWER_OF2_
-#include "enums.h"
-POWERS_OF_TWO_LIST
-#undef ENUM_PREFIX_
+#define ENUM_FIELDS \
+    X(ONE,     1 << 0)             \
+    X(TWO,     1 << 1)             \
+    X(FOUR,    1 << 2)             \
+    X(EIGHT,   1 << 3)             \
+    X(SIXTEEN, 1 << 4)             \
+    X(THIRTY2, 1 << 5)             \
+    X(SIXTY4,  1 << 6)
+#include "xenums.c"
 
-#define ENUM_PREFIX_ POWER_OF2_
-#define ENUM_IS_FLAGS
-#include "enums.h"
-POWERS_OF_TWO_LIST
-#undef ENUM_PREFIX_
-#undef POWERS_OF_TWO_LIST
 
 static void
 write_file(char *path, void *data, int64 len) {
@@ -1978,9 +2098,16 @@ main(int argc, char **argv) {
     void *p2 = xcalloc(10, SIZEMB(1));
     char *p3;
     char *string = __FILE__;
+    struct timespec t0;
+    struct timespec t1;
 
     (void)argc;
     (void)argv;
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+#if OS_UNIX
+    timezone_init();
+#endif
 
     for (enum WeekDay day = WEEK_DAY_MONDAY; day <= WEEK_DAY_LAST; day += 1) {
         printf("enum[%d] = %s\n", day, WEEK_DAY_str(day));
@@ -2016,7 +2143,9 @@ main(int argc, char **argv) {
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
         int n = rand() - RAND_MAX / 2;
-        ASSERT_EQUAL(atoi2(itoa2(n, buffer)), n);
+        char itoa_buffer[32];
+        itoa2(itoa_buffer, n);
+        ASSERT_EQUAL(atoi2(itoa_buffer), n);
     }
 
     {
@@ -2157,6 +2286,43 @@ main(int argc, char **argv) {
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
 
+    (void)util_segv_handler;
+    (void)util_nthreads;
+    (void)util_command;
+    (void)util_string_int32;
+    (void)util_die_notify;
+#if OS_UNIX
+    (void)util_copy_file_sync;
+    (void)util_copy_file_async;
+    (void)util_copy_file_async_thread;
+#endif
+    (void)util_command_launch;
+
+    (void)send_signal;
+    (void)shell_escape;
+    (void)timezone_init;
+    (void)string_from_doubles;
+    (void)string_from_strings;
+    (void)strftime2;
+    (void)bytes_pretty;
+    (void)qsort64;
+
+    (void)xmmap_commit;
+    (void)xkill;
+    (void)xdup2;
+    (void)xpipe;
+    (void)xmemdup;
+    (void)xunlink;
+
+    (void)xpthread_mutex_lock;
+    (void)xpthread_mutex_unlock;
+    (void)xpthread_cond_destroy;
+    (void)xpthread_mutex_destroy;
+    (void)xpthread_create;
+    (void)xpthread_join;
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    PRINT_TIMINGS(1, t0, t1);
     exit(EXIT_SUCCESS);
 }
 
