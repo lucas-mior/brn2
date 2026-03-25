@@ -43,6 +43,7 @@
 #define HASH_VALUE_FORMATTER "%d"
 #define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
+#define HASH_AUTO_RESIZE 1
 #endif
 
 #define SLOT_FREE   0
@@ -117,6 +118,10 @@ struct CommonMap {
 
 #if !defined(HASH_TYPE)
 #error HASH_TYPE is undefined
+#endif
+
+#if !defined(HASH_AUTO_RESIZE)
+#error HASH_AUTO_RESIZE is undefined
 #endif
 
 #if !defined(HASH_DUPLICATE_KEYS)
@@ -213,7 +218,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
     uint32 probe;
     int32 first_tombstone;
 
-    if ((map->length*100) >= (map->capacity*75)) {
+    if (HASH_AUTO_RESIZE && (map->length*100 >= map->capacity*75)) {
         uint32 new_capacity = map->capacity*2;
         uint32 new_bitmask = (new_capacity - 1);
         int64 new_size = new_capacity*sizeof(Bucket);
