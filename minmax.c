@@ -256,6 +256,25 @@ _Generic((VAR1), \
 
 // clang-format on
 
+#if 0 == TESTING_minmax
+static inline void
+minmax_functions_sink(void) {
+    (void)get_pointer_min;
+    (void)get_pointer_max;
+    (void)get_both_signed_min;
+    (void)get_both_signed_max;
+    (void)get_both_unsigned_min;
+    (void)get_both_unsigned_max;
+    (void)get_signed_unsigned_min;
+    (void)get_signed_unsigned_max;
+    (void)get_unsigned_signed_min;
+    (void)get_unsigned_signed_max;
+    (void)get_ldouble_min;
+    (void)get_ldouble_max;
+    return;
+}
+#endif
+
 #if TESTING_minmax
 
 // Note: NEVER delete lines with // clang-format
