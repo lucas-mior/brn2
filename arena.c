@@ -496,6 +496,20 @@ arenas_destroy(Arena **arenas, int64 number) {
     return;
 }
 
+/* #if 0 == TESTING_arena */
+static inline void
+arena_functions_sink(void) {
+    (void)arena_print;
+    (void)xarenas_push;
+    (void)xarena_push;
+    (void)arena_push_index32;
+    (void)arenas_pop;
+    (void)arena_narenas;
+    (void)arenas_reset;
+    (void)arenas_destroy;
+}
+/* #endif */
+
 #if TESTING_arena
 #include "assert.c"
 #include <stdio.h>

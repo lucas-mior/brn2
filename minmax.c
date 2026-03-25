@@ -36,7 +36,7 @@
 #define TESTING_minmax 0
 #endif
 
-#if TESTING_minmax
+#if 1 == TESTING_minmax
 #define TRAP(...) raise(SIGILL)
 #elif !defined(TRAP)
 #if defined(__GNUC__) || defined(__clang__)
