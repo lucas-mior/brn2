@@ -100,9 +100,9 @@ typedef uint64_t uint64;
 
 struct CommonBucket {
     char *key;
+    uint32 key_len;
     uint64 hash;
     int32 value;
-    uint32 padding;
 };
 
 struct CommonMap {
@@ -110,7 +110,7 @@ struct CommonMap {
     uint32 capacity;
     uint32 bitmask;
     uint32 length;
-    uint32 padding;
+    uint32 occupied;
     struct CommonBucket *array;
 };
 
@@ -129,10 +129,11 @@ struct CommonMap {
 #endif
 
 #define Bucket CAT(Bucket_, HASH_TYPE)
-#define Map CAT(Hash_, HASH_TYPE) 
+#define Map CAT(Hash_, HASH_TYPE)
 
 typedef struct Bucket {
     char *key;
+    int32 key_len;
     uint64 hash;
 #if defined(HASH_VALUE_TYPE)
     HASH_VALUE_TYPE value;
@@ -147,13 +148,14 @@ struct Map {
     uint32 capacity;
     uint32 bitmask;
     uint32 length;
-    uint32 padding;
+    uint32 occupied;
     Bucket *array;
 };
 
 static void
 CAT(hash_zero_, HASH_TYPE)(struct Map *map) {
     map->length = 0;
+    map->occupied = 0;
     memset64(map->array, 0, map->capacity*sizeof(Bucket));
     return;
 }
@@ -184,11 +186,15 @@ CAT(hash_create_, HASH_TYPE)(uint32 length) {
     map->bitmask = (1 << power) - 1;
     map->size = array_size;
     map->length = 0;
+    map->occupied = 0;
     return map;
 }
 
 static void
 CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
+    if (map == NULL) {
+        return;
+    }
 #if HASH_DUPLICATE_KEYS
     for (uint32 i = 0; i < map->capacity; i += 1) {
         switch ((int64)map->array[i].key) {
@@ -196,13 +202,13 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
         case SLOT_FREE:
             break;
         default:
-            XFREE(map->array[i].key);
+            XFREE(map->array[i].key, map->array[i].key_len);
             break;
         }
     }
 #endif
     xmunmap(map->array, map->size);
-    XFREE(map);
+    XFREE(map, sizeof(*map));
     return;
 }
 
@@ -218,7 +224,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
     uint32 probe;
     int32 first_tombstone;
 
-    if (HASH_AUTO_RESIZE && (map->length*100 >= map->capacity*75)) {
+    if (HASH_AUTO_RESIZE && (map->occupied*100 >= map->capacity*75)) {
         uint32 new_capacity = map->capacity*2;
         uint32 new_bitmask = (new_capacity - 1);
         int64 new_size = new_capacity*sizeof(Bucket);
@@ -253,9 +259,9 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
                 }
 
                 rehash_step += 1;
-                rehash_probe = (rehash_base
-                                + (rehash_step
-                                   + rehash_step*rehash_step) / 2) & new_bitmask;
+                rehash_probe = (uint32)(rehash_base
+                                + ((uint64)rehash_step
+                                   + (uint64)rehash_step*rehash_step) / 2) & new_bitmask;
             }
         }
 
@@ -264,6 +270,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
         map->capacity = new_capacity;
         map->bitmask = new_bitmask;
         map->size = new_size;
+        map->occupied = map->length;
 
         base_index = hash & map->bitmask;
     }
@@ -283,6 +290,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
                 target = &map->array[first_tombstone];
             } else {
                 target = iterator;
+                map->occupied += 1;
             }
 
 #if HASH_DUPLICATE_KEYS
@@ -310,7 +318,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
         }
 
         i += 1;
-        probe = (base_index + (i + i*i) / 2) & map->bitmask;
+        probe = (uint32)(base_index + ((uint64)i + (uint64)i*i) / 2) & map->bitmask;
     }
 
     if (first_tombstone >= 0) {
@@ -385,13 +393,13 @@ CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
 #if defined(HASH_VALUE_TYPE)
                 return &(iterator->value);
 #else
-                return key;
+                return iterator->key;
 #endif
             }
         }
 
         i += 1;
-        probe = (base_index + (i + i*i) / 2) & map->bitmask;
+        probe = (uint32)(base_index + ((uint64)i + (uint64)i*i) / 2) & map->bitmask;
     }
 
     return NULL;
@@ -438,7 +446,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
         }
 
         i += 1;
-        probe = (base_index + (i + i*i) / 2) & map->bitmask;
+        probe = (uint32)(base_index + ((uint64)i + (uint64)i*i) / 2) & map->bitmask;
     }
 
     return false;
@@ -587,7 +595,7 @@ hash_expected_collisions(void *map) {
 #include <assert.h>
 #include "arena.c"
 
-#define NSTRINGS 100
+#define NSTRINGS 500
 #define NBYTES ALIGNMENT
 
 typedef struct String {
@@ -598,7 +606,7 @@ typedef struct String {
 
 static String
 random_string(Arena *arena, uint32 nbytes) {
-    const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+    char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
     String string;
     uint32 size;
     uint32 len;
@@ -627,12 +635,15 @@ main(void) {
     Arena *arena;
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 0};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 1};
-    String *strings = xmalloc(NSTRINGS*sizeof(*strings));
+    String *strings;
+    uint32 initial_capacity;
 
-    map = hash_create_map(NSTRINGS);
+    map = hash_create_map(100);
     arena = arena_create(NBYTES*NSTRINGS);
+    strings = xmalloc(NSTRINGS*sizeof(*strings));
 
     ASSERT(map);
+    initial_capacity = map->capacity;
 
     str1.len = (uint32)strlen32(str1.s);
     str2.len = (uint32)strlen32(str2.s);
@@ -642,10 +653,10 @@ main(void) {
     ASSERT(hash_insert_map(map, str2.s, str2.len, str2.value));
 
     ASSERT_EQUAL(hash_length(map), 2u);
-    hash_print_map(map, false);
+
+    ASSERT_NULL(hash_lookup_map(map, "does_not_exist", 14));
 
     srand(42);
-
     for (uint32 i = 0; i < NSTRINGS; i += 1) {
         strings[i] = random_string(arena, NBYTES);
     }
@@ -656,39 +667,32 @@ main(void) {
                                strings[i].value));
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    PRINT_TIMINGS(NSTRINGS, t0, t1, "insertion");
+    PRINT_TIMINGS(NSTRINGS, t0, t1, "insertion with resizes");
+
+    ASSERT(map->capacity > initial_capacity);
 
     for (uint32 i = 0; i < NSTRINGS; i += 1) {
-        uint32 *stored;
+        int32 *stored;
         stored = hash_lookup_map(map, strings[i].s, strings[i].len);
+        ASSERT(stored);
         ASSERT_EQUAL(*stored, strings[i].value);
     }
+
     ASSERT(hash_remove_map(map, strings[0].s, strings[0].len));
     ASSERT_EQUAL(hash_ndeleted_map(map), 1);
 
-    if (NSTRINGS <= 10) {
-        hash_print_map(map, true);
-    } else {
-        HASH_PRINT_SUMMARY_map(map);
-    }
-
-    ASSERT(hash_insert_map(map, strings[0].s, strings[0].len,
-                           strings[0].value));
+    hash_zero_map(map);
+    ASSERT_EQUAL(hash_length(map), 0);
     ASSERT_EQUAL(hash_ndeleted_map(map), 0);
+    ASSERT_EQUAL(map->occupied, 0);
 
-    for (uint i = 0; i < NSTRINGS; i += 1) {
-        ASSERT(hash_remove_map(map, strings[i].s, strings[i].len));
+    for (uint32 i = 0; i < 10; i += 1) {
+        ASSERT(hash_insert_map(map, strings[i].s, strings[i].len, strings[i].value));
     }
-    ASSERT_EQUAL(hash_ndeleted_map(map), NSTRINGS);
-
-    if (NSTRINGS <= 10) {
-        hash_print_map(map, true);
-    } else {
-        HASH_PRINT_SUMMARY_map(map);
-    }
+    ASSERT_EQUAL(hash_length(map), 10);
 
     hash_destroy_map(map);
-    XFREE(strings);
+    XFREE(strings, 0);
 
     exit(EXIT_SUCCESS);
 }

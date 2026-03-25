@@ -94,7 +94,10 @@
 #define TESTING_util 0
 #endif
 
-static void __attribute__((format(printf, 3, 4))) 
+#define MEM_FREED 0xDC
+#define MEM_MALLOCED_UNINITIALIZED 0xCD
+
+static void __attribute__((format(printf, 3, 4)))
     error_impl(char *file, int32 line, char *format, ...);
 #define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
 
@@ -194,7 +197,7 @@ _Generic((SIZE), \
     uint:   UTIL_ALIGN_UINT((uint)SIZE,   (uint)A),   \
     llong:  UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
     long:   UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
-    int:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)   \
+    int:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)    \
 )
 
 #if !defined(ALIGNMENT)
@@ -567,7 +570,7 @@ xmalloc(int64 size) {
     }
 
     if (DEBUGGING && !RUNNING_ON_VALGRIND) {
-        memset64(p, 0xCD, size);
+        memset64(p, MEM_MALLOCED_UNINITIALIZED, size);
     }
     return p;
 }
@@ -625,15 +628,17 @@ xstrdup(char *string) {
 }
 
 static void
-xfree(char *file, int32 line, void *pointer) {
+xfree(char *file, int32 line, void *pointer, int64 size) {
     if (DEBUGGING) {
-        error_impl(file, line, "Freeing pointer %p\n", pointer);
+        error_impl(file, line,
+                   "Freeing pointer of size %lld [%p]\n", (llong)size, pointer);
+        memset64(pointer, MEM_FREED, size);
     }
     free(pointer);
     return;
 }
 
-#define XFREE(P) xfree(__FILE__, __LINE__, P)
+#define XFREE(POINTER, SIZE) xfree(__FILE__, __LINE__, POINTER, SIZE)
 
 #if OS_UNIX
 static void *
@@ -678,7 +683,7 @@ xmmap_commit(int64 *size) {
 static void
 xmunmap(void *p, int64 size) {
     if (RUNNING_ON_VALGRIND) {
-        XFREE(p);
+        XFREE(p, size);
         return;
     }
     if (munmap(p, (size_t)size) < 0) {
@@ -720,7 +725,7 @@ static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        XFREE(p);
+        XFREE(p, size);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -1187,7 +1192,7 @@ error_impl(char *file, int32 line, char *format, ...) {
 #endif
 
     if (big_buffer) {
-        XFREE(big_buffer);
+        XFREE(big_buffer, m);
     }
     return;
 }
@@ -1415,7 +1420,7 @@ util_copy_file_async_thread(void *arg) {
             pipes[i].revents = 0;
         }
     }
-    XFREE(copy_files);
+    XFREE(copy_files, sizeof(*copy_files));
     pthread_exit(NULL);
     return NULL;
 }
@@ -1979,7 +1984,7 @@ timezone_init(void) {
 }
 #endif
 
-static volatile ullong here_counter = 0; \
+static volatile ullong here_counter = 0;
 
 #define HERE do { \
     fprintf(stderr, "\n===== HERE(%llu): %s:%d (%s)\n", \
@@ -2094,6 +2099,19 @@ signal_handler(int signal_number) {
     return;
 }
 
+static int
+util_test_qsort_cmp(const void *a, const void *b) {
+    int32 va = *(int32 *)a;
+    int32 vb = *(int32 *)b;
+    if (va < vb) {
+        return -1;
+    }
+    if (va > vb) {
+        return 1;
+    }
+    return 0;
+}
+
 int
 main(int argc, char **argv) {
     char buffer[32];
@@ -2111,6 +2129,18 @@ main(int argc, char **argv) {
 #if OS_UNIX
     timezone_init();
 #endif
+
+    {
+        ASSERT_EQUAL(ALIGN(7), 16);
+        ASSERT_EQUAL(ALIGN(16), 16);
+        ASSERT_EQUAL(ALIGN(17), 32);
+
+        int a = 10;
+        int b = 20;
+        SWAP(a, b);
+        ASSERT_EQUAL(a, 20);
+        ASSERT_EQUAL(b, 10);
+    }
 
     for (enum WeekDay day = WEEK_DAY_MONDAY; day <= WEEK_DAY_LAST; day += 1) {
         printf("enum[%d] = %s\n", day, WEEK_DAY_str(day));
@@ -2142,6 +2172,7 @@ main(int argc, char **argv) {
     p3 = xstrdup(p1);
 
     ASSERT_EQUAL(string, p3);
+    XFREE(p3, strlen32(p3) + 1);
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
@@ -2152,12 +2183,79 @@ main(int argc, char **argv) {
     }
 
     {
+        int32 n;
+        ASSERT_EQUAL(util_string_int32(&n, "12345"), 0);
+        ASSERT_EQUAL(n, 12345);
+        ASSERT_EQUAL(util_string_int32(&n, "-54321"), 0);
+        ASSERT_EQUAL(n, -54321);
+        ASSERT_EQUAL(util_string_int32(&n, "2147483648"), -1);
+        ASSERT_EQUAL(util_string_int32(&n, "notanumber"), -1);
+    }
+
+    {
+        char b[32];
+        bytes_pretty(b, 512);
+        ASSERT_EQUAL(b, "512B");
+        bytes_pretty(b, 1024);
+        ASSERT_EQUAL(b, "1.0000kB");
+        bytes_pretty(b, SIZEMB(2));
+        ASSERT_EQUAL(b, "2.0000MB");
+    }
+
+    {
+        char *path = "path'with'quotes";
+        char *escaped = shell_escape(path);
+        ASSERT_EQUAL(escaped, "path'\\''with'\\''quotes");
+        XFREE(escaped, strlen32(escaped) + 1);
+    }
+
+    {
+        int32 arr[] = {10, 5, 20, 1};
+        qsort64(arr, 4, sizeof(int32), util_test_qsort_cmp);
+        ASSERT_EQUAL(arr[0], 1);
+        ASSERT_EQUAL(arr[1], 5);
+        ASSERT_EQUAL(arr[2], 10);
+        ASSERT_EQUAL(arr[3], 20);
+    }
+
+    {
+        char b[64];
+        char *strs[] = {"one", "two", "three"};
+        double dbls[] = {1.1, 2.2};
+        string_from_strings(b, sizeof(b), "|", strs, 3);
+        ASSERT_EQUAL(b, "one|two|three");
+        string_from_doubles(b, sizeof(b), ",", dbls, 2);
+        ASSERT_NOT_EQUAL(strlen(b), 0);
+    }
+
+    {
+        char *src = "memdup_test";
+        char *dup = xmemdup(src, 12);
+        ASSERT_EQUAL(src, dup);
+        ASSERT_NOT_EQUAL((void *)src, (void *)dup);
+        XFREE(dup, 12);
+    }
+
+    {
+        char b[128];
+        struct tm fixed_time;
+        fixed_time.tm_year = 126; // 2026
+        fixed_time.tm_mon = 2;   // March
+        fixed_time.tm_mday = 25;
+        fixed_time.tm_hour = 12;
+        fixed_time.tm_min = 0;
+        fixed_time.tm_sec = 0;
+        strftime2(b, sizeof(b), "%Y-%m-%d", &fixed_time);
+        ASSERT_EQUAL(b, "2026-03-25");
+    }
+
+    {
         // Note: NEVER delete lines with // clang-format
         // clang-format off
         char paths[][30] = {
             "/aaaa/bbbb/cccc", "/aa/bb/cc",  "/a/b/c",    "a/b//c",
             "a/b/cccc",        "a/bb/cccc", "aaaa//cccc", "/aaaa",
-            "/",               "//",          "//a/",       "/a/b///",
+            "/",               "//",          "//a/",        "/a/b///",
             "./",              "..",          "././",      "./a/",
         };
         char *bases[20] = {
@@ -2168,14 +2266,14 @@ main(int argc, char **argv) {
         };
         char *dirs[20] = {
             "/aaaa/bbbb",      "/aa/bb",      "/a/b",      "a/b",
-            "a/b",             "a/bb",        "aaaa",      "/",
+            "a/b",              "a/bb",        "aaaa",      "/",
             "/",               "/",           "/",         "/a",
             ".",               ".",           ".",         ".",
         };
         char *normalized[20] = {
             "/aaaa/bbbb/cccc", "/aa/bb/cc",   "/a/b/c",    "a/b/c",
             "a/b/cccc",        "a/bb/cccc",   "aaaa/cccc", "/aaaa",
-            "/",               "/",           "/a/",       "/a/b/",
+            "/",               "/",           "/a/",        "/a/b/",
             "./",              "..",          "./",        "a/",
         };
         // clang-format on
@@ -2184,14 +2282,14 @@ main(int argc, char **argv) {
             char *base = bases[i];
             int32 path_len = strlen32(path);
             ASSERT_EQUAL(basename2(path, &path_len, NULL), base);
-            XFREE(path);
+            XFREE(path, path_len + 1);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
             int len = strlen32(copy);
             normalize(copy, &len);
             ASSERT_EQUAL(copy, normalized[i]);
-            XFREE(copy);
+            XFREE(copy, len + 1);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
@@ -2233,12 +2331,6 @@ main(int argc, char **argv) {
         WRITE_FILE(a, "");
         WRITE_FILE(b, "");
         ASSERT(util_equal_files(a, b));
-
-        /* Uncomment below to trigger error */
-        /* WRITE_FILE(a, "data"); */
-        /* xunlink(b); */
-        /* error("Expected error below:\n"); */
-        /* assert(!util_equal_files(a, b)); */
     }
 
     {
@@ -2282,17 +2374,15 @@ main(int argc, char **argv) {
         // clang-format on
     }
 
-    XFREE(p1);
-    XFREE(p2);
-    XFREE(p3);
+    XFREE(p1, SIZEMB(1));
+    XFREE(p2, 10*SIZEMB(1));
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
+    ASSERT_MORE(util_nthreads(), 0);
 
     (void)util_segv_handler;
-    (void)util_nthreads;
     (void)util_command;
-    (void)util_string_int32;
     (void)util_die_notify;
 #if OS_UNIX
     (void)util_copy_file_sync;
@@ -2301,20 +2391,10 @@ main(int argc, char **argv) {
 #endif
     (void)util_command_launch;
 
-    (void)send_signal;
-    (void)shell_escape;
-    (void)timezone_init;
-    (void)string_from_doubles;
-    (void)string_from_strings;
-    (void)strftime2;
-    (void)bytes_pretty;
-    (void)qsort64;
-
     (void)xmmap_commit;
     (void)xkill;
     (void)xdup2;
     (void)xpipe;
-    (void)xmemdup;
     (void)xunlink;
 
     (void)xpthread_mutex_lock;
