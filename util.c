@@ -1901,7 +1901,9 @@ static char *signal_names[] = {
     XSIGNAL(SIGINT),
     XSIGNAL(SIGKILL),
     XSIGNAL(SIGPIPE),
+#if defined(SIGPOLL)
     XSIGNAL(SIGPOLL),
+#endif
     XSIGNAL(SIGQUIT),
     XSIGNAL(SIGSEGV),
     XSIGNAL(SIGSTOP),
