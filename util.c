@@ -2016,6 +2016,7 @@ util_functions_sink(void) {
     (void)strftime2;
     (void)bytes_pretty;
     (void)qsort64;
+    (void)print_timings;
 
     (void)xmmap_commit;
     (void)xcalloc;
@@ -2323,7 +2324,7 @@ main(int argc, char **argv) {
     (void)xpthread_create;
     (void)xpthread_join;
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     PRINT_TIMINGS(1, t0, t1);
     exit(EXIT_SUCCESS);
 }
