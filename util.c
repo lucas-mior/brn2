@@ -602,22 +602,6 @@ xrealloc(void *old, int64 size) {
     return p;
 }
 
-static char *
-xstrdup(char *string) {
-    char *p;
-    int64 length;
-
-    length = strlen32(string) + 1;
-    if ((p = malloc((size_t)length)) == NULL) {
-        error("Error allocating %lld bytes to duplicate '%s': %s\n",
-              (llong)length, string, strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-
-    memcpy64(p, string, length);
-    return p;
-}
-
 static void
 xfree(char *file, int32 line, void *pointer, int64 size) {
     if (DEBUGGING) {
@@ -640,6 +624,22 @@ xfree(char *file, int32 line, void *pointer, int64 size) {
 }
 
 #define XFREE(POINTER, SIZE) xfree(__FILE__, __LINE__, POINTER, SIZE)
+
+static char *
+xstrdup(char *string) {
+    char *p;
+    int64 length;
+
+    length = strlen32(string) + 1;
+    if ((p = malloc((size_t)length)) == NULL) {
+        error("Error allocating %lld bytes to duplicate '%s': %s\n",
+              (llong)length, string, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    memcpy64(p, string, length);
+    return p;
+}
 
 #if OS_UNIX
 static void *
