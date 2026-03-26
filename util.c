@@ -94,9 +94,6 @@
 #define TESTING_util 0
 #endif
 
-#define MEM_FREED 0xDC
-#define MEM_MALLOCED_UNINITIALIZED 0xCD
-
 static void __attribute__((format(printf, 3, 4)))
     error_impl(char *file, int32 line, char *format, ...);
 #define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
@@ -549,6 +546,9 @@ util_nthreads(void) {
 #define basename basename2
 #endif
 
+#define MEM_FREED 0xDC
+#define MEM_MALLOCED_UNINITIALIZED 0xCD
+
 INLINE void *
 xmalloc(int64 size) {
     void *p;
@@ -599,16 +599,6 @@ xrealloc(void *old, int64 size) {
         fatal(EXIT_FAILURE);
     }
 
-    return p;
-}
-
-static void *
-xcalloc(size_t nmemb, size_t size) {
-    void *p;
-    if ((p = calloc(nmemb, size)) == NULL) {
-        error("Error allocating %zu members of %zu bytes each.\n", nmemb, size);
-        fatal(EXIT_FAILURE);
-    }
     return p;
 }
 
@@ -2035,7 +2025,6 @@ util_functions_sink(void) {
     (void)print_timings;
 
     (void)xmmap_commit;
-    (void)xcalloc;
     (void)xstrdup;
 #if OS_UNIX
     (void)xkill;
@@ -2127,7 +2116,6 @@ int
 main(int argc, char **argv) {
     char buffer[32];
     void *p1 = xmalloc(SIZEMB(1));
-    void *p2 = xcalloc(10, SIZEMB(1));
     char *p3;
     char *string = __FILE__;
     struct timespec t0;
@@ -2181,7 +2169,6 @@ main(int argc, char **argv) {
 
     memset64(p1, 0, SIZEMB(1));
     memcpy64(p1, string, strlen32(string));
-    memset64(p2, 0, SIZEMB(1));
     p3 = xstrdup(p1);
 
     ASSERT_EQUAL(string, p3);
@@ -2388,7 +2375,6 @@ main(int argc, char **argv) {
     }
 
     XFREE(p1, SIZEMB(1));
-    XFREE(p2, 10*SIZEMB(1));
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
