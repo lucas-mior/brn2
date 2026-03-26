@@ -549,32 +549,55 @@ util_nthreads(void) {
 #define MEM_FREED 0xDC
 #define MEM_MALLOCED_UNINITIALIZED 0xCD
 
+#if !defined(DEBUGGING_MEMORY)
+#define DEBUGGING_MEMORY DEBUGGING
+#else
+#define DEBUGGING_MEMORY 0
+#endif
+
 INLINE void *
 xmalloc(int64 size) {
     void *p;
-
-    if (DEBUGGING) {
-        if (size <= 0) {
-            error("Error in xmalloc: invalid size = %lld.\n", (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-        if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in xmalloc: Number (%lld) is bigger than SIZEMAX\n",
-                  (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-    }
-
     if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %lld bytes.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
+    return p;
+}
 
-    if (DEBUGGING && !RUNNING_ON_VALGRIND) {
+INLINE void *
+malloc_debug(char *file, int32 line, int64 size) {
+    void *p;
+
+    if (size <= 0) {
+        error_impl(file, line,
+                   "Error in malloc: invalid size = %lld.\n", (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error_impl(file, line,
+                   "Error in malloc: Number (%lld) is bigger than SIZEMAX\n",
+                   (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+
+    if ((p = malloc((size_t)size)) == NULL) {
+        error_impl(file, line,
+                   "Failed to allocate %lld bytes.\n", (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (!RUNNING_ON_VALGRIND) {
         memset64(p, MEM_MALLOCED_UNINITIALIZED, size);
     }
     return p;
 }
+
+#if DEBUGGING_MEMORY
+#define malloc(size) malloc_debug(__FILE__, __LINE__, size)
+#else
+#define malloc(size) xmalloc(size)
+#endif
 
 INLINE void *
 xrealloc(void *old, int64 size) {
@@ -631,7 +654,7 @@ xstrdup(char *string) {
     int64 length;
 
     length = strlen32(string) + 1;
-    if ((p = malloc((size_t)length)) == NULL) {
+    if ((p = malloc(length)) == NULL) {
         error("Error allocating %lld bytes to duplicate '%s': %s\n",
               (llong)length, string, strerror(errno));
         fatal(EXIT_FAILURE);
