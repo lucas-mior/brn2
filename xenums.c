@@ -218,17 +218,17 @@ main(void) {
 
         if ((s = TEST_FLAGS_str(TEST_FLAGS_READ))) {
             ASSERT_EQUAL(s, "TEST_FLAGS_READ");
-            free(s);
+            free(s, strlen(s) + 1);
         }
 
         if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_EXEC))) {
             ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_EXEC");
-            free(s);
+            free(s, strlen(s) + 1);
         }
 
         if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_WRITE | TEST_FLAGS_EXEC))) {
             ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_WRITE|TEST_FLAGS_EXEC");
-            free(s);
+            free(s, strlen(s) + 1);
         }
 
         ASSERT_EQUAL(TEST_FLAGS_str(0), "NONE");

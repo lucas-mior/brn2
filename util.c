@@ -635,7 +635,7 @@ realloc_debug(char *file, int32 line, void *old, int64 size) {
 }
 
 static void
-xfree_debug(char *file, int32 line, void *pointer, int64 size) {
+free_debug(char *file, int32 line, void *pointer, int64 size) {
     if (size < 0) {
         error_impl(file, line,
                    "Error: freeing allocation of negative size = %lld.\n",
