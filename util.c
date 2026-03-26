@@ -654,12 +654,12 @@ xfree_debug(char *file, int32 line, void *pointer, int64 size) {
 }
 
 #if DEBUGGING_MEMORY
-#define malloc(size) malloc_debug(__FILE__, __LINE__, size)
-#define realloc(size, old) realloc_debug(__FILE__, __LINE__, size, old)
+#define malloc(size)        malloc_debug(__FILE__, __LINE__, size)
+#define realloc(size, old)  realloc_debug(__FILE__, __LINE__, size, old)
 #define free(pointer, size) free_debug(__FILE__, __LINE__, pointer, size)
 #else
-#define malloc(size) xmalloc(size)
-#define realloc(size, old) xrealloc(size, old)
+#define malloc(size)        xmalloc(size)
+#define realloc(size, old)  xrealloc(size, old)
 #define free(pointer, size) free(pointer)
 #endif
 
