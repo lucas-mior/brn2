@@ -200,9 +200,9 @@ _Generic((SIZE), \
     int:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)    \
 )
 
-#if !defined(ALIGNMENT)
+/* #if !defined(ALIGNMENT) */
 #define ALIGNMENT 16ul
-#endif
+/* #endif */
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
