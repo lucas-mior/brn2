@@ -215,7 +215,7 @@ static int64 util_page_size = 0;
 static void error_async_safe(char *message);
 static void fatal(int) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
-static long itoa2(char *, long);
+static int32 itoa2(char *, long);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
 static int xclose(char *file, int line,
@@ -636,10 +636,12 @@ xfree(char *file, int32 line, void *pointer, int64 size) {
                        (llong)size);
             fatal(EXIT_FAILURE);
         }
-        error_impl(file, line,
-                   "Freeing pointer of size %lld [%p]\n", (llong)size, pointer);
-        if (pointer) {
-            memset64(pointer, MEM_FREED, size);
+        if (pointer && size) {
+            error_impl(file, line,
+                       "Freeing pointer of size %lld [%p]\n", (llong)size, pointer);
+            if (pointer && !RUNNING_ON_VALGRIND) {
+                memset64(pointer, MEM_FREED, size);
+            }
         }
     }
     free(pointer);
@@ -1527,7 +1529,7 @@ send_signal(char *executable, int32 signal_number) {
 }
 #endif
 
-long
+int32
 itoa2(char *str, long num) {
     int i = 0;
     bool negative = false;
