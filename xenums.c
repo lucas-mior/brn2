@@ -41,14 +41,13 @@
       CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 #endif
 
-/* #if !defined(ENUM_UNDERLYING_TYPE) */
-/*   #if __clang__ */
-/*     #define ENUM_UNDERLYING_TYPE : int32 */
-/*   #else */
-/*     #define ENUM_UNDERLYING_TYPE */
-/*   #endif */
-/* #endif */
-#define ENUM_UNDERLYING_TYPE
+#if !defined(ENUM_UNDERLYING_TYPE)
+  #if __clang__
+    #define ENUM_UNDERLYING_TYPE : uint32
+  #else
+    #define ENUM_UNDERLYING_TYPE
+  #endif
+#endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
   #define TESTING_xenums 1
