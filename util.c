@@ -608,7 +608,7 @@ xrealloc(void *old, int64 size) {
 }
 
 static void *
-realloc_debug(char *file, int32 line, int64 size, void *old) {
+realloc_debug(char *file, int32 line, void *old, int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
 
@@ -655,7 +655,7 @@ xfree_debug(char *file, int32 line, void *pointer, int64 size) {
 
 #if DEBUGGING_MEMORY
 #define malloc(size)        malloc_debug(__FILE__, __LINE__, size)
-#define realloc(size, old)  realloc_debug(__FILE__, __LINE__, size, old)
+#define realloc(size, old)  realloc_debug(__FILE__, __LINE__, old, size, old)
 #define free(pointer, size) free_debug(__FILE__, __LINE__, pointer, size)
 #else
 #define malloc(size)        xmalloc(size)
