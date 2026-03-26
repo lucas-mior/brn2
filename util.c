@@ -2149,11 +2149,9 @@ main(int argc, char **argv) {
         ASSERT_EQUAL(a, 20);
         ASSERT_EQUAL(b, 10);
 
-#if !OS_MAC
-        ASSERT_EQUAL(ALIGN(7), 16);
-        ASSERT_EQUAL(ALIGN(16), 16);
-        ASSERT_EQUAL(ALIGN(17), 32);
-#endif
+        ASSERT_EQUAL(UTIL_ALIGN(7, 16), 16);
+        ASSERT_EQUAL(UTIL_ALIGN(16, 16), 16);
+        ASSERT_EQUAL(UTIL_ALIGN(17, 16), 32);
         ASSERT_EQUAL(ALIGN16(7), 16);
     }
 
