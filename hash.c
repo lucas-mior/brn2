@@ -41,7 +41,6 @@
 #if 1 == TESTING_hash
 #define HASH_VALUE_TYPE int32
 #define HASH_VALUE_FORMATTER "%d"
-#define HASH_PADDING_TYPE uint32
 #define HASH_TYPE map
 #define HASH_AUTO_RESIZE 1
 #endif
@@ -613,12 +612,12 @@ random_string(Arena *arena, uint32 nbytes) {
     int32 size;
     int32 len;
 
-    len = nbytes + rand() % 16u;
+    len = (int32)(nbytes + (uint)rand() % 16u);
     size = len + 1;
     string.s = arena_push(arena, size);
 
     for (int32 i = 0; i < len; i += 1) {
-        int32 c = rand() % (sizeof(characters) - 1);
+        int32 c = (int32)((size_t)rand() % (sizeof(characters) - 1));
         string.s[i] = characters[c];
     }
     string.s[len] = '\0';
