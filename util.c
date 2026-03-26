@@ -189,6 +189,7 @@ _Generic((ARRAY), \
 #endif
 
 #define UTIL_ALIGN_UINT(SIZE, A) (int64)(((SIZE) + ((A) - 1)) & ~((A) - 1))
+#define ALIGN16(x) (((x) + 15) & ~15)
 
 #define UTIL_ALIGN(SIZE, A) \
 _Generic((SIZE), \
@@ -2150,9 +2151,10 @@ main(int argc, char **argv) {
 
 #if !OS_MAC
         ASSERT_EQUAL(ALIGN(7), 16);
-#endif
         ASSERT_EQUAL(ALIGN(16), 16);
         ASSERT_EQUAL(ALIGN(17), 32);
+#endif
+        ASSERT_EQUAL(ALIGN16(7), 16);
     }
 
     for (enum WeekDay day = WEEK_DAY_MONDAY; day <= WEEK_DAY_LAST; day += 1) {
