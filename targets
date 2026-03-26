@@ -5,7 +5,7 @@ release
 debug
 # install
 # uninstall
-benchmark
+# benchmark
 # perf
 # valgrind
 # test_all

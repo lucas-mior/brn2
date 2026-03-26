@@ -764,7 +764,7 @@ static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        free(p, size);
+        free(p, (int64)size);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -1239,7 +1239,11 @@ error_impl(char *file, int32 line, char *format, ...) {
 static void
 error_async_safe(char *message) {
     int32 len = strlen32(message);
+#if OS_WINDOWS
+    write(STDERR_FILENO, message, (uint)len);
+#else
     write(STDERR_FILENO, message, (size_t)len);
+#endif
     return;
 }
 
@@ -1911,8 +1915,8 @@ dirname2(char *buffer, char *path, int32 *path_len) {
 static void
 print_timings(char *file, int32 line, const char *func,
               int64 n, struct timespec t0, struct timespec t1) {
-    long seconds = t1.tv_sec - t0.tv_sec;
-    long nanos = t1.tv_nsec - t0.tv_nsec;
+    llong seconds = t1.tv_sec - t0.tv_sec;
+    llong nanos = t1.tv_nsec - t0.tv_nsec;
 
     double total_seconds = (double)seconds + (double)nanos / 1.0e9;
     double micros_per = 1e6*(total_seconds / (double)n);
@@ -2187,8 +2191,8 @@ main(int argc, char **argv) {
 
     printf("\n");
 
-    for (enum PowerOfTwo x = 0; x < POWER_OF2_LAST; x += 1) {
-        char *value_name = POWER_OF2_str(x);
+    for (uint x = 0; x < POWER_OF2_LAST; x += 1) {
+        char *value_name = POWER_OF2_str((enum PowerOfTwo)x);
         printf("enum[%d] = %s\n", x, value_name);
     }
 

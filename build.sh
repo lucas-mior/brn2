@@ -131,6 +131,7 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-ignored-attributes"
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
+    CFLAGS="$CFLAGS -Wno-c23-extensions"
 fi
 
 case "$target" in

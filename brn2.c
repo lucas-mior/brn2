@@ -868,6 +868,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 #else
     (void)newname_index_on_oldlist;
     (void)oldfile;
+    (void)newlen;
     if (newname_exists) {
         error("Error renaming "RED"'%s'"RESET" to '%s': File already exists.\n",
               oldname, newname);
