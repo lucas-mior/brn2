@@ -569,7 +569,7 @@ brn2_threads_work_hashes(Work *arg) {
     for (int32 i = work->start; i < work->end; i += 1) {
         FileList *list = work->old_list;
         FileName *newfile = list->files[i];
-        newfile->hash = hash_function(newfile->name, (uint32)newfile->length);
+        newfile->hash = hash_function(newfile->name, newfile->length);
         list->indexes[i] = newfile->hash % work->map_capacity;
     }
     return 0;
@@ -736,7 +736,8 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
             }
         }
 
-        if (!hash_insert_pre_calc_set(repeated_set, newfile->name,
+        if (!hash_insert_pre_calc_set(repeated_set,
+                                      newfile->name, newfile->length,
                                       newfile->hash, hashes_new[i])) {
             FileName *oldfile = old->files[i];
             error("Error: " RED "'%s'" RESET " repeats on line %d. ",
@@ -785,6 +786,8 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 
     char *oldname = old->files[i]->name;
     char *newname = new->files[i]->name;
+    int32 oldlen = old->files[i]->length;
+    int32 newlen = new->files[i]->length;
 
     uint64 newhash = new->files[i]->hash;
     uint32 newindex = new->indexes[i];
@@ -818,11 +821,11 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                             AT_FDCWD, newname, RENAME_EXCHANGE);
         if (renamed >= 0) {
             if (hash_insert_pre_calc_set(names_renamed,
-                                         oldname, oldhash, oldindex)) {
+                                         oldname, oldlen, oldhash, oldindex)) {
                 *number_renames += 1;
             }
             if (hash_insert_pre_calc_set(names_renamed,
-                                         newname, newhash, newindex)) {
+                                         newname, newlen, newhash, newindex)) {
                 *number_renames += 1;
             }
             print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname,
@@ -838,9 +841,9 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                                          oldname, oldhash, oldindex);
 
                 hash_insert_pre_calc_map(oldlist_map,
-                                         newname, newhash, newindex, i);
+                                         newname, newlen, newhash, newindex, i);
                 hash_insert_pre_calc_map(oldlist_map,
-                                         oldname, oldhash, oldindex, next);
+                                         oldname, oldlen, oldhash, oldindex, next);
 
                 SWAP(*file_j, *oldfile);
                 SWAP(old->indexes[i], old->indexes[next]);
@@ -851,7 +854,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                 error("To disable this behaviour,"
                       " don't pass the --implicit option.\n");
                 hash_insert_pre_calc_map(oldlist_map,
-                                         newname, newhash, newindex, i);
+                                         newname, newlen, newhash, newindex, i);
             }
             return;
         } else if (errno != ENOENT) {
@@ -884,7 +887,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
         return;
     } else {
         if (hash_insert_pre_calc_set(names_renamed,
-                                     oldname, oldhash, oldindex)) {
+                                     oldname, oldlen, oldhash, oldindex)) {
             *number_renames += 1;
         }
         print("%s -> "GREEN"%s"RESET"\n", oldname, newname);
@@ -1080,18 +1083,19 @@ main(void) {
             uint64 hash;
 
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, (uint32)file->length);
+            hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_insert_pre_calc_map(map, file->name, hash,
+            ASSERT(hash_insert_pre_calc_map(map,
+                                            file->name, file->length, hash,
                                             list1->indexes[i], 0));
         }
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, (uint32)file->length);
+            hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
@@ -1181,18 +1185,19 @@ main(void) {
             uint64 hash;
 
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, (uint32)file->length);
+            hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_insert_pre_calc_map(map, file->name, hash,
+            ASSERT(hash_insert_pre_calc_map(map,
+                                            file->name, file->length, hash,
                                             list1->indexes[i], 0));
         }
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
             ASSERT_EQUAL(file->length, strlen(file->name));
-            hash = hash_function(file->name, (uint32)file->length);
+            hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
@@ -1298,8 +1303,9 @@ main(void) {
         for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             uint32 *index = &(old->indexes[i]);
-            ASSERT(hash_insert_pre_calc_map(oldlist_map, file->name, file->hash,
-                                            *index, i));
+            ASSERT(hash_insert_pre_calc_map(oldlist_map,
+                                            file->name, file->length,
+                                            file->hash, *index, i));
         }
 
         {

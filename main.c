@@ -329,7 +329,8 @@ main(int argc, char **argv) {
             bool contains_newline;
 
             if ((contains_newline = memchr64(file->name, '\n', file->length))
-                || !hash_insert_pre_calc_map(oldlist_map, file->name,
+                || !hash_insert_pre_calc_map(oldlist_map,
+                                             file->name, file->length,
                                              file->hash, index, i)) {
                 if (contains_newline) {
                     error(RED"'%s'"RESET" contains new line.", file->name);
