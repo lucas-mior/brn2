@@ -565,7 +565,7 @@ xmalloc(int64 size) {
     return p;
 }
 
-INLINE void *
+static void *
 malloc_debug(char *file, int32 line, int64 size) {
     void *p;
 
@@ -593,28 +593,10 @@ malloc_debug(char *file, int32 line, int64 size) {
     return p;
 }
 
-#if DEBUGGING_MEMORY
-#define malloc(size) malloc_debug(__FILE__, __LINE__, size)
-#else
-#define malloc(size) xmalloc(size)
-#endif
-
 INLINE void *
 xrealloc(void *old, int64 size) {
     void *p;
     uint64 old_save = (uint64)old;
-
-    if (DEBUGGING) {
-        if (size <= 0) {
-            error("Error in xrealloc: invalid size = %lld.\n", (long long)size);
-            fatal(EXIT_FAILURE);
-        }
-        if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in xrealloc: Number (%lld) is bigger than SIZEMAX\n",
-                  (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-    }
 
     if ((p = realloc(old, (size_t)size)) == NULL) {
         error("Failed to reallocate %lld bytes from %llx.\n", (llong)size,
@@ -625,28 +607,61 @@ xrealloc(void *old, int64 size) {
     return p;
 }
 
+static void *
+realloc_debug(char *file, int32 line, int64 size, void *old) {
+    void *p;
+    uint64 old_save = (uint64)old;
+
+    if (size <= 0) {
+        error_impl(file, line,
+                   "Error in realloc: invalid size = %lld.\n", (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error_impl(file, line,
+                   "Error in realloc: Number (%lld) is bigger than SIZEMAX\n",
+                   (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+
+    if ((p = realloc(old, (size_t)size)) == NULL) {
+        error_impl(file, line,
+                   "Failed to reallocate %lld bytes from %llx.\n", (llong)size,
+                   (ullong)old_save);
+        fatal(EXIT_FAILURE);
+    }
+
+    return p;
+}
+
 static void
-xfree(char *file, int32 line, void *pointer, int64 size) {
-    if (DEBUGGING) {
-        if (size < 0) {
-            error_impl(file, line,
-                       "Error: freeing allocation of negative size = %lld.\n",
-                       (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-        if (pointer && size) {
-            error_impl(file, line,
-                       "Freeing pointer of size %lld [%p]\n", (llong)size, pointer);
-            if (pointer && !RUNNING_ON_VALGRIND) {
-                memset64(pointer, MEM_FREED, size);
-            }
+xfree_debug(char *file, int32 line, void *pointer, int64 size) {
+    if (size < 0) {
+        error_impl(file, line,
+                   "Error: freeing allocation of negative size = %lld.\n",
+                   (llong)size);
+        fatal(EXIT_FAILURE);
+    }
+    if (pointer && size) {
+        error_impl(file, line,
+                   "Freeing pointer of size %lld [%p]\n", (llong)size, pointer);
+        if (!RUNNING_ON_VALGRIND) {
+            memset64(pointer, MEM_FREED, size);
         }
     }
     free(pointer);
     return;
 }
 
-#define XFREE(POINTER, SIZE) xfree(__FILE__, __LINE__, POINTER, SIZE)
+#if DEBUGGING_MEMORY
+#define malloc(size) malloc_debug(__FILE__, __LINE__, size)
+#define realloc(size, old) realloc_debug(__FILE__, __LINE__, size, old)
+#define free(pointer, size) free_debug(__FILE__, __LINE__, pointer, size)
+#else
+#define malloc(size) xmalloc(size)
+#define realloc(size, old) xrealloc(size, old)
+#define free(pointer, size) free(pointer)
+#endif
 
 static char *
 xstrdup(char *string) {
@@ -707,7 +722,7 @@ xmmap_commit(int64 *size) {
 static void
 xmunmap(void *p, int64 size) {
     if (RUNNING_ON_VALGRIND) {
-        XFREE(p, size);
+        free(p, size);
         return;
     }
     if (munmap(p, (size_t)size) < 0) {
@@ -749,7 +764,7 @@ static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        XFREE(p, size);
+        free(p, size);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -1216,7 +1231,7 @@ error_impl(char *file, int32 line, char *format, ...) {
 #endif
 
     if (big_buffer) {
-        XFREE(big_buffer, m);
+        free(big_buffer, m);
     }
     return;
 }
@@ -1444,7 +1459,7 @@ util_copy_file_async_thread(void *arg) {
             pipes[i].revents = 0;
         }
     }
-    XFREE(copy_files, sizeof(*copy_files));
+    free(copy_files, sizeof(*copy_files));
     pthread_exit(NULL);
     return NULL;
 }
@@ -2195,7 +2210,7 @@ main(int argc, char **argv) {
     p3 = xstrdup(p1);
 
     ASSERT_EQUAL(string, p3);
-    XFREE(p3, strlen32(p3) + 1);
+    free(p3, strlen32(p3) + 1);
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
@@ -2229,7 +2244,7 @@ main(int argc, char **argv) {
         char *path = "path'with'quotes";
         char *escaped = shell_escape(path);
         ASSERT_EQUAL(escaped, "path'\\''with'\\''quotes");
-        XFREE(escaped, strlen32(escaped) + 1);
+        free(escaped, strlen32(escaped) + 1);
     }
 
     {
@@ -2256,7 +2271,7 @@ main(int argc, char **argv) {
         char *dup = xmemdup(src, 12);
         ASSERT_EQUAL(src, dup);
         ASSERT_NOT_EQUAL((void *)src, (void *)dup);
-        XFREE(dup, 12);
+        free(dup, 12);
     }
 
     {
@@ -2305,14 +2320,14 @@ main(int argc, char **argv) {
             char *base = bases[i];
             int32 path_len = strlen32(path);
             ASSERT_EQUAL(basename2(path, &path_len, NULL), base);
-            XFREE(path, path_len + 1);
+            free(path, path_len + 1);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
             int len = strlen32(copy);
             normalize(copy, &len);
             ASSERT_EQUAL(copy, normalized[i]);
-            XFREE(copy, len + 1);
+            free(copy, len + 1);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
@@ -2397,7 +2412,7 @@ main(int argc, char **argv) {
         // clang-format on
     }
 
-    XFREE(p1, SIZEMB(1));
+    free(p1, SIZEMB(1));
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);

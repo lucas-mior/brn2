@@ -66,7 +66,7 @@ sort_shuffle(void *array, int64 n, int64 size) {
         }
     }
 
-    free(tmp);
+    free(tmp, size);
     return;
 }
 
@@ -106,14 +106,14 @@ sort_heapify(HeapNode *heap, int32 p, int32 i,
 }
 
 static void
-sort_merge_subsorted(void *array, int32 n, int32 p, int64 size,
+sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
                      void *dummy_last,
                      int32 (*compare)(const void *a, const void *b)) {
     HeapNode heap[MAX_NTHREADS];
     int32 n_sub[MAX_NTHREADS];
     int32 indices[MAX_NTHREADS] = {0};
     int32 offsets[MAX_NTHREADS];
-    int64 memory_size = size*n;
+    int64 memory_size = obj_size*n;
     char *output = xmalloc(memory_size);
     char *array2 = array;
 
@@ -131,8 +131,8 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 size,
     }
 
     for (int32 k = 0; k < p; k += 1) {
-        heap[k].value = xmalloc(size);
-        memcpy64(heap[k].value, &array2[offsets[k]*size], size);
+        heap[k].value = xmalloc(obj_size);
+        memcpy64(heap[k].value, &array2[offsets[k]*obj_size], obj_size);
         heap[k].p_index = k;
     }
 
@@ -144,20 +144,20 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 size,
         int32 k = heap[0].p_index;
         int32 i_sub = (indices[k] += 1);
 
-        memcpy64(&output[i*size], heap[0].value, size);
+        memcpy64(&output[i*obj_size], heap[0].value, obj_size);
 
         if (i_sub < n_sub[k]) {
-            memcpy64(heap[0].value, &array2[(offsets[k] + i_sub)*size], size);
+            memcpy64(heap[0].value, &array2[(offsets[k] + i_sub)*obj_size], obj_size);
         } else {
-            memcpy64(heap[0].value, dummy_last, size);
+            memcpy64(heap[0].value, dummy_last, obj_size);
         }
         sort_heapify(heap, p, 0, compare);
     }
 
-    memcpy64(array2, output, n*size);
-    free(output);
+    memcpy64(array2, output, n*obj_size);
+    free(output, memory_size);
     for (int32 i = 0; i < p; i += 1) {
-        free(heap[i].value);
+        free(heap[i].value, obj_size);
     }
     return;
 }
@@ -174,8 +174,9 @@ sort(FileList *old) {
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
     int32 last_length = strlen32(last);
     FileName *dummy_last;
+    int64 dummy_size = STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1);
 
-    dummy_last = xmalloc(STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1));
+    dummy_last = xmalloc(dummy_size);
     memset64(dummy_last, 0, sizeof(*dummy_last));
     memcpy64(dummy_last, last, last_length + 1);
 
@@ -195,7 +196,7 @@ sort(FileList *old) {
     p = brn2_threads(brn2_threads_work_sort, old->length, old, NULL, NULL, 0,
                      NULL);
     if (p == 1) {
-        free(dummy_last);
+        free(dummy_last, dummy_size);
         return;
     }
 
@@ -224,7 +225,7 @@ sort(FileList *old) {
     exit(EXIT_SUCCESS);
 #endif
 
-    free(dummy_last);
+    free(dummy_last, dummy_size);
     return;
 }
 #endif
@@ -284,8 +285,8 @@ test_sorting(int32 n, int32 p) {
         }
     }
 
-    free(array);
-    free(n_sub);
+    free(array, n*SIZEOF(*array));
+    free(n_sub, p*SIZEOF(*n_sub));
     return;
 }
 

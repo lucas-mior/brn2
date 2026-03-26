@@ -207,7 +207,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
 
         if (brn2_is_invalid_name(name)) {
             if (DEBUGGING) {
-                free(directory_list[i]);
+                free(directory_list[i], sizeof(*directory_list));
             }
             continue;
         }
@@ -236,11 +236,11 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
 
         if (DEBUGGING) {
-            free(directory_list[i]);
+            free(directory_list[i], sizeof(*directory_list));
         }
         length += 1;
     }
-    free(directory_list);
+    free(directory_list, sizeof(*directory_list));
     list->length = length;
     return;
 }
@@ -475,7 +475,7 @@ brn2_free_list(FileList *list) {
             ASSERT(arenas_pop(list->arenas, nthreads, file));
         }
     }
-    free(list->files);
+    free(list->files, list->length*SIZEOF(*(list->files)));
     arenas_reset(list->arenas, nthreads);
     return;
 }
