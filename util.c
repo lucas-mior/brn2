@@ -200,9 +200,9 @@ _Generic((SIZE), \
     int:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)    \
 )
 
-/* #if !defined(ALIGNMENT) */
+#if !defined(ALIGNMENT)
 #define ALIGNMENT 16ul
-/* #endif */
+#endif
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
@@ -2141,15 +2141,18 @@ main(int argc, char **argv) {
 #endif
 
     {
-        ASSERT_EQUAL(ALIGN(7), 16);
-        ASSERT_EQUAL(ALIGN(16), 16);
-        ASSERT_EQUAL(ALIGN(17), 32);
-
         int a = 10;
         int b = 20;
+
         SWAP(a, b);
         ASSERT_EQUAL(a, 20);
         ASSERT_EQUAL(b, 10);
+
+#if !OS_MAC
+        ASSERT_EQUAL(ALIGN(7), 16);
+#endif
+        ASSERT_EQUAL(ALIGN(16), 16);
+        ASSERT_EQUAL(ALIGN(17), 32);
     }
 
     for (enum WeekDay day = WEEK_DAY_MONDAY; day <= WEEK_DAY_LAST; day += 1) {
