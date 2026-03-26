@@ -202,13 +202,13 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
         case HASH_SLOT_FREE:
             break;
         default:
-            XFREE(map->array[i].key, map->array[i].key_len);
+            free(map->array[i].key, map->array[i].key_len);
             break;
         }
     }
 #endif
     xmunmap(map->array, map->size);
-    XFREE(map, sizeof(*map));
+    free(map, sizeof(*map));
     return;
 }
 
@@ -440,7 +440,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
         default:
             if ((iterator->hash == hash) && (strcmp(iterator->key, key) == 0)) {
 #if HASH_DUPLICATE_KEYS
-                XFREE(iterator->key, iterator->key_len);
+                free(iterator->key, iterator->key_len);
 #endif
                 iterator->key = (char *)HASH_SLOT_DELETED;
                 map->length -= 1;
@@ -694,7 +694,7 @@ main(void) {
     ASSERT_EQUAL(hash_length(map), 10);
 
     hash_destroy_map(map);
-    XFREE(strings, NSTRINGS*sizeof(*strings));
+    free(strings, NSTRINGS*sizeof(*strings));
 
     exit(EXIT_SUCCESS);
 }
