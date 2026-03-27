@@ -653,14 +653,20 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
     return;
 }
 
+INLINE void
+free2(void *pointer, int64 size) {
+    (void)size;
+    free(pointer);
+}
+
 #if DEBUGGING_MEMORY
 #define malloc(size)        malloc_debug(__FILE__, __LINE__, size)
-#define realloc(size, old)  realloc_debug(__FILE__, __LINE__, old, size, old)
+#define realloc(old, size)  realloc_debug(__FILE__, __LINE__, old, size)
 #define free(pointer, size) free_debug(__FILE__, __LINE__, pointer, size)
 #else
 #define malloc(size)        xmalloc(size)
 #define realloc(size, old)  xrealloc(size, old)
-#define free(pointer, size) free(pointer)
+#define free(pointer, size) free2(pointer, size)
 #endif
 
 static char *
@@ -2037,6 +2043,7 @@ static volatile ullong here_counter = 0;
 #if 0 == TESTING_util
 static inline void
 util_functions_sink(void) {
+    (void)here_counter;
     (void)util_segv_handler;
     (void)util_nthreads;
     (void)util_filename_from;
@@ -2050,6 +2057,10 @@ util_functions_sink(void) {
     (void)util_command_launch;
 #endif
     (void)util_equal_files;
+
+    (void)malloc_debug;
+    (void)realloc_debug;
+    (void)free_debug;
 
     (void)send_signal;
     (void)shell_escape;
@@ -2156,15 +2167,20 @@ util_test_qsort_cmp(const void *a, const void *b) {
 
 int
 main(int argc, char **argv) {
-    char buffer[32];
     void *p1 = xmalloc(SIZEMB(1));
+    void *p2 = malloc(SIZEMB(2));
     char *p3;
     char *string = __FILE__;
+    char *s1 = "aaaabbbb";
     struct timespec t0;
     struct timespec t1;
 
     (void)argc;
     (void)argv;
+
+    p2 = realloc(p2, SIZEMB(2));
+    ASSERT(BEGINS_WITH(s1, "aaaa"));
+    ASSERT(BEGINS_WITH(s1, "aaaabbbb"));
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #if OS_UNIX
@@ -2431,6 +2447,10 @@ main(int argc, char **argv) {
     (void)util_copy_file_async_thread;
 #endif
     (void)util_command_launch;
+
+    (void)malloc_debug;
+    (void)realloc_debug;
+    (void)free_debug;
 
     (void)xmmap_commit;
     (void)xkill;
