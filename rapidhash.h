@@ -101,7 +101,9 @@ typedef uint64_t uint64;
       || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
     #define RAPIDHASH_BIG_ENDIAN
   #else
+#if defined(__GNUC__) || defined(__clang__)
     #warning "could not determine endianness! Falling back to little endian."
+#endif
     #define RAPIDHASH_LITTLE_ENDIAN
   #endif
 #endif
