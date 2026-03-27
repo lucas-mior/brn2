@@ -44,6 +44,17 @@
 
 #define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
 
+#if defined(__GNUC__)
+#define COMPILER_GCC 1
+#define COMPILER_CLANG 0
+#elif defined(__clang__)
+#define COMPILER_GCC 0
+#define COMPILER_CLANG 1
+#else
+#define COMPILER_GCC 0
+#define COMPILER_CLANG 0
+#endif
+
 #define BYTE_POPED 0xDC
 #define BYTE_PUSHED_UNINITIALIZED 0xCD
 
