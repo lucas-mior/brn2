@@ -136,6 +136,24 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-assign-enum"
 fi
 
+compile_with_chibicc () {
+    args="$*"
+    while ! problem=$(chibicc $args 2>&1); do
+        trace_off
+        if [ "$CC" = "chibicc" ] \
+            && echo "$problem" | grep -q "unknown argument:"; then
+            arg=$(echo "$problem" | awk '{print $NF}')
+            echo "Removing argument $arg..."
+            args=$(option_remove "$args" "$arg")
+        else
+            printf "\nproblem=\n$problem\n"
+            break
+        fi
+        trace_on
+    done
+}
+
+
 case "$target" in
 "uninstall")
     trace_on
@@ -189,12 +207,14 @@ case "$target" in
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1"
             cmdline="$cmdline $flags -o /tmp/$src.exe $src"
         else
-            cmdline="$CC $CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
+            cmdline="$CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
             cmdline="$cmdline $flags -o /tmp/$src.exe $src"
         fi
 
         trace_on
-        if $cmdline; then
+        if [ "$CC" = "chibicc" ]; then
+            compile_with_chibicc $cmdline && /tmp/$src.exe
+        elif $CC $cmdline; then
             /tmp/$src.exe || gdb /tmp/$src.exe -ex run
         else
             trace_off
@@ -213,7 +233,11 @@ case "$target" in
     trace_on
     ctags --kinds-C=+l+d ./*.h ./*.c 2> /dev/null || true
     vtags.sed tags | sort | uniq > .tags.vim       2> /dev/null || true
-    $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+    if [ "$CC" = "chibicc" ]; then
+        compile_with_chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+    else
+        $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+    fi
     trace_off
     ;;
 esac
@@ -282,7 +306,7 @@ if [ "$target" = "test_all" ]; then
             $0 $target
             continue
         fi
-        for compiler in gcc tcc clang "zig cc" ; do
+        for compiler in chibicc gcc tcc clang "zig cc" ; do
             CC=$compiler $0 $target || exit
         done
     done

@@ -60,6 +60,17 @@
 
 #define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
 
+#if defined(__GNUC__)
+#define COMPILER_GCC 1
+#define COMPILER_CLANG 0
+#elif defined(__clang__)
+#define COMPILER_GCC 0
+#define COMPILER_CLANG 1
+#else
+#define COMPILER_GCC 0
+#define COMPILER_CLANG 0
+#endif
+
 #if OS_WINDOWS
 #include <windows.h>
 #endif
@@ -82,10 +93,14 @@
 #include "generic.c"
 #include "minmax.c"
 
-#if defined(__has_include) && __has_include(<valgrind/valgrind.h>)
-#include <valgrind/valgrind.h>
+#if COMPILER_GCC || COMPILER_CLANG
+  #if defined(__has_include) && __has_include(<valgrind/valgrind.h>)
+    #include <valgrind/valgrind.h>
+  #else
+    #define RUNNING_ON_VALGRIND 0
+  #endif
 #else
-#define RUNNING_ON_VALGRIND 0
+    #define RUNNING_ON_VALGRIND 0
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
