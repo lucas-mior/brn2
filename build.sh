@@ -207,14 +207,15 @@ case "$target" in
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1"
             cmdline="$cmdline $flags -o /tmp/$src.exe $src"
         else
-            cmdline="$CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
+            cmdline="$CC $CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
             cmdline="$cmdline $flags -o /tmp/$src.exe $src"
         fi
 
         trace_on
         if [ "$CC" = "chibicc" ]; then
+            cmdline=$(option_remove "$cmdline" "$CC")
             compile_with_chibicc $cmdline && /tmp/$src.exe
-        elif $CC $cmdline; then
+        elif $cmdline; then
             /tmp/$src.exe || gdb /tmp/$src.exe -ex run
         else
             trace_off

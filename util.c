@@ -684,6 +684,13 @@ free2(void *pointer, int64 size) {
 #define free(pointer, size) free2(pointer, size)
 #endif
 
+static void *
+xmemdup(void *source, int64 size) {
+    void *p = xmalloc(size);
+    memcpy64(p, source, size);
+    return p;
+}
+
 static char *
 xstrdup(char *string) {
     char *p;
@@ -1331,13 +1338,6 @@ util_die_notify(char *program_name, char *format, ...) {
                buffer, NULL);
     }
     fatal(EXIT_FAILURE);
-}
-
-static void *
-xmemdup(void *source, int64 size) {
-    void *p = xmalloc(size);
-    memcpy64(p, source, size);
-    return p;
 }
 
 // Note: NEVER delete lines with // clang-format
@@ -2055,6 +2055,15 @@ static volatile ullong here_counter = 0;
                     here_counter++, __FILE__, __LINE__, __func__); \
 } while (0)
 
+#define NCALLS(INTERVAL) do { \
+    static int64 ncalls_ncalls = 1; \
+    if ((ncalls_ncalls % INTERVAL) == 0) { \
+        fprintf(stderr, "%s:%d:%s: called %lld times\n", \
+                        __FILE__, __LINE__, __func__, (llong)ncalls_ncalls); \
+    } \
+    ncalls_ncalls += 1; \
+} while (0)
+
 #if 0 == TESTING_util
 static inline void
 util_functions_sink(void) {
@@ -2452,6 +2461,8 @@ main(int argc, char **argv) {
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
     ASSERT_MORE(util_nthreads(), 0);
+
+    NCALLS(1);
 
     (void)util_segv_handler;
     (void)util_command;

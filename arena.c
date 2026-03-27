@@ -355,14 +355,17 @@ arena_push(Arena *arena, int64 size) {
     }
     arena->pos = (char *)arena->pos + size;
     arena->npushed += 1;
+#if COMPILER_GCC || COMPILER_CLANG
+    before = __builtin_assume_aligned(before, ALIGNMENT);
+#endif
     return before;
 }
 
 static void *
 arenas_push(Arena **arenas, int64 number, int64 size) {
     for (uint32 i = 0; i < number; i += 1) {
-        void *p = arena_push(arenas[i], size);
-        if (p) {
+        void *p;
+        if ((p = arena_push(arenas[i], size))) {
             return p;
         }
     }
@@ -373,7 +376,7 @@ static void *
 xarena_push(Arena *arena, int64 size) {
     void *p;
     if ((p = arena_push(arena, size)) == NULL) {
-        error2("Error allocating %lld bytes.\n", (llong)size);
+        error2("Error allocating %lld bytes: %s.\n", (llong)size, arena_strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;

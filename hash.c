@@ -424,11 +424,14 @@ CAT(hash_lookup2_, HASH_TYPE)(struct Map *map, char *key) {
 static bool
 CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
                                       char *key, uint64 hash, uint32 base_index) {
-    uint32 capacity = map->capacity;
     uint32 i = 0;
     uint32 probe = base_index;
 
-    while (i < capacity) {
+    if (map == NULL) {
+        return false;
+    }
+
+    while (i < map->capacity) {
         Bucket *iterator = &map->array[probe];
 
         switch ((int64)iterator->key) {
