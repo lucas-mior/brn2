@@ -237,4 +237,5 @@ main(void) {
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
 }
-#endif
+
+#endif /* TESTING_xenums */

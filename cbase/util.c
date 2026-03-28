@@ -228,7 +228,7 @@ static int64 util_page_size = 0;
 static void error_async_safe(char *message);
 static void fatal(int) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
-static int32 itoa2(char *, long);
+static int32 itoa2(char *, int32, llong);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
 static int xclose(char *file, int line,
@@ -622,6 +622,13 @@ xrealloc(void *old, int64 size) {
     return p;
 }
 
+INLINE void *
+xrealloc2(void *old, int64 old_len, int64 new_len, int64 obj_size) {
+    int64 size = new_len*obj_size;
+    (void)old_len;
+    return xrealloc(old, size);
+}
+
 static void *
 realloc_debug(char *file, int32 line, void *old, int64 size) {
     void *p;
@@ -879,6 +886,49 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     return n;
 }
 
+int32
+itoa2(char *str, int32 size, llong num) {
+    int i = 0;
+    bool negative = false;
+
+    if (size < 22) {
+        error("Error in itoa2: buffer is too small.\n");
+        fatal(EXIT_FAILURE);
+    }
+
+    if (num < 0) {
+        negative = true;
+        num = -num;
+    }
+
+    do {
+        str[i] = num % 10 + '0';
+        i += 1;
+        num /= 10;
+    } while (num > 0);
+
+    if (negative) {
+        str[i] = '-';
+        i += 1;
+    }
+
+    str[i] = '\0';
+
+    for (long j = 0; j < i / 2; j += 1) {
+        char temp = str[j];
+        str[j] = str[i - j - 1];
+        str[i - j - 1] = temp;
+    }
+    return i;
+}
+
+#define ITOA(buffer, num) itoa2(buffer, sizeof(buffer), num)
+
+long
+atoi2(char *str) {
+    return atoi(str);
+}
+
 static int64
 strftime2(char *buffer, int64 size, char *format, struct tm *time_info) {
     int64 n;
@@ -974,7 +1024,7 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
     if (close(*fd) < 0) {
         char error_buffer[4096];
         char itoa_buffer[32];
-        itoa2(itoa_buffer, line);
+        ITOA(itoa_buffer, line);
 
         strerror_r(errno, error_buffer, sizeof(error_buffer));
 
@@ -1582,42 +1632,6 @@ send_signal(char *executable, int32 signal_number) {
     return;
 }
 #endif
-
-int32
-itoa2(char *str, long num) {
-    int i = 0;
-    bool negative = false;
-
-    if (num < 0) {
-        negative = true;
-        num = -num;
-    }
-
-    do {
-        str[i] = num % 10 + '0';
-        i += 1;
-        num /= 10;
-    } while (num > 0);
-
-    if (negative) {
-        str[i] = '-';
-        i += 1;
-    }
-
-    str[i] = '\0';
-
-    for (long j = 0; j < i / 2; j += 1) {
-        char temp = str[j];
-        str[j] = str[i - j - 1];
-        str[i - j - 1] = temp;
-    }
-    return i;
-}
-
-long
-atoi2(char *str) {
-    return atoi(str);
-}
 
 static bool
 util_equal_files(char *filename_a, char *filename_b) {
@@ -2260,7 +2274,7 @@ main(int argc, char **argv) {
     for (int i = 0; i < 10; i += 1) {
         int n = rand() - RAND_MAX / 2;
         char itoa_buffer[32];
-        itoa2(itoa_buffer, n);
+        ITOA(itoa_buffer, n);
         ASSERT_EQUAL(atoi2(itoa_buffer), n);
     }
 
@@ -2498,4 +2512,4 @@ main(int argc, char **argv) {
 
 #endif
 
-#endif
+#endif /* UTIL_C */
