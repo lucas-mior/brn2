@@ -28,8 +28,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "cbase/util.c"
-#include "cbase/arena.c"
+#include "util.c"
+#include "arena.c"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_brn2 1
@@ -931,8 +931,8 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_brn2
 #include <assert.h>
-#include "cbase/assert.c"
-#include "cbase/sort.c"
+#include "assert.c"
+#include "sort.c"
 #include "files.h"
 
 bool brn2_options_fatal = false;
