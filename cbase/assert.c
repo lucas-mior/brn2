@@ -709,4 +709,4 @@ main(void) {
 // clang-format on
 #endif
 
-#endif
+#endif /* ASSERT_C */

@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "generic.c"
+#include "cbase/generic.c"
 
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
@@ -63,12 +63,12 @@
 #define HASH_VALUE_TYPE int32
 #define HASH_AUTO_RESIZE 0
 #define HASH_TYPE map
-#include "hash.c"
+#include "cbase/hash.c"
 
 #define HASH_PADDING_TYPE uint32
 #define HASH_TYPE set
 #define HASH_AUTO_RESIZE 0
-#include "hash.c"
+#include "cbase/hash.c"
 
 #if defined(__GNUC__)
 #define BRN2_ASSUME_ALIGNED(X) do { \
@@ -96,7 +96,7 @@
 #define INLINE BRN2_INLINE
 #endif
 
-#include "arena.c"
+#include "cbase/arena.c"
 
 typedef struct File {
     char name[124];

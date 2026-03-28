@@ -83,8 +83,6 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 #endif
 
-// clang-format off
-
 #if !defined(QUOTE)
 #define QUOTE_(x) #x
 #define QUOTE(x) QUOTE_(x)
@@ -588,7 +586,7 @@ hash_expected_collisions(void *map) {
     return (uint32)(roundl(result));
 }
 
-#endif
+#endif /* HASH_H2 */
 
 #if TESTING_hash
 
@@ -700,6 +698,5 @@ main(void) {
 
     exit(EXIT_SUCCESS);
 }
-#endif
 
-// clang-format on
+#endif /* TESTING_hash */

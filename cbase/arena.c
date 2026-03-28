@@ -722,4 +722,4 @@ main(void) {
 }
 #endif
 
-#endif
+#endif /* ARENA_C */

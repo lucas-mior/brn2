@@ -352,4 +352,4 @@ main(void) {
 // clang-format on
 #endif
 
-#endif
+#endif /* MINMAX_C */

@@ -559,4 +559,4 @@ main(void) {
 
 #endif
 
-#endif
+#endif /* GENERIC_C */
