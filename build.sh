@@ -12,6 +12,7 @@ script=$(basename "$0")
 
 dir=$(dirname "$(readlink -f "$0")")
 cbase="cbase"
+
 CPPFLAGS="$CPPFLAGS -I "$dir/$cbase""
 
 . ./targets
