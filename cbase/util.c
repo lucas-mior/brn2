@@ -609,13 +609,13 @@ malloc_debug(char *file, int32 line, int64 size) {
 }
 
 INLINE void *
-xrealloc(void *old, int64 size) {
+xrealloc(void *old, int64 new_size) {
     void *p;
     uint64 old_save = (uint64)old;
 
-    if ((p = realloc(old, (size_t)size)) == NULL) {
-        error("Failed to reallocate %lld bytes from %llx.\n", (llong)size,
-              (ullong)old_save);
+    if ((p = realloc(old, (size_t)new_size)) == NULL) {
+        error("Failed to reallocate %lld bytes from %llx.\n",
+              (llong)new_size, (ullong)old_save);
         fatal(EXIT_FAILURE);
     }
 
@@ -623,37 +623,41 @@ xrealloc(void *old, int64 size) {
 }
 
 INLINE void *
-xrealloc2(void *old, int64 old_len, int64 new_len, int64 obj_size) {
-    int64 size = new_len*obj_size;
-    (void)old_len;
-    return xrealloc(old, size);
+xrealloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
+    int64 new_size = new_capacity*obj_size;
+
+    if (DEBUGGING_MEMORY) {
+        error("Reallocating %p: %lld to %lld objects of size %lld.\n",
+              old, (llong)old_capacity, (llong)new_capacity, (llong)obj_size);
+    }
+
+    return xrealloc(old, new_size);
 }
 
 static void *
-realloc_debug(char *file, int32 line, void *old, int64 size) {
-    void *p;
-    uint64 old_save = (uint64)old;
-
-    if (size <= 0) {
+realloc_debug(char *file, int32 line,
+              void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
+    int64 new_size;
+    if (obj_size <= 0) {
         error_impl(file, line,
-                   "Error in realloc: invalid size = %lld.\n", (llong)size);
+                   "Error in realloc: invalid object size = %lld.\n",
+                   (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
-    if ((ullong)size >= (ullong)SIZE_MAX) {
+    if ((ullong)SIZE_MAX / (ullong)obj_size < (ullong)new_capacity) {
         error_impl(file, line,
                    "Error in realloc: Number (%lld) is bigger than SIZEMAX\n",
-                   (llong)size);
+                   (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
-
-    if ((p = realloc(old, (size_t)size)) == NULL) {
+    if (DEBUGGING_MEMORY) {
         error_impl(file, line,
-                   "Failed to reallocate %lld bytes from %llx.\n", (llong)size,
-                   (ullong)old_save);
-        fatal(EXIT_FAILURE);
+                   "Reallocating %p: %lld to %lld objects of size %lld.\n",
+                   old, (llong)old_capacity, (llong)new_capacity, (llong)obj_size);
     }
 
-    return p;
+    new_size = new_capacity*obj_size;
+    return xrealloc(old, new_size);
 }
 
 static void
@@ -678,17 +682,25 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
 INLINE void
 free2(void *pointer, int64 size) {
     (void)size;
-    free(pointer);
+    if (pointer) {
+        free(pointer);
+    }
 }
 
 #if DEBUGGING_MEMORY
-#define malloc(size)        malloc_debug(__FILE__, __LINE__, size)
-#define realloc(old, size)  realloc_debug(__FILE__, __LINE__, old, size)
-#define free(pointer, size) free_debug(__FILE__, __LINE__, pointer, size)
+#define malloc(size) \
+    malloc_debug(__FILE__, __LINE__, size)
+#define realloc(old, old_capacity, new_capacity, obj_size) \
+    realloc_debug(__FILE__, __LINE__, old, obj_size)
+#define free(pointer, size) \
+    free_debug(__FILE__, __LINE__, pointer, size)
 #else
-#define malloc(size)        xmalloc(size)
-#define realloc(size, old)  xrealloc(size, old)
-#define free(pointer, size) free2(pointer, size)
+#define malloc(size) \
+    xmalloc(size)
+#define realloc(old, old_capacity, new_capacity, obj_size) \
+    xrealloc4(old, old_capacity, new_capacity, obj_size)
+#define free(pointer, size) \
+    free2(pointer, size)
 #endif
 
 static void *
@@ -2216,7 +2228,7 @@ main(int argc, char **argv) {
     (void)argc;
     (void)argv;
 
-    p2 = realloc(p2, SIZEMB(2));
+    p2 = realloc(p2, 0, 1, SIZEMB(2));
     ASSERT(BEGINS_WITH(s1, "aaaa"));
     ASSERT(BEGINS_WITH(s1, "aaaabbbb"));
 
