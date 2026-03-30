@@ -27,6 +27,7 @@ fi
 cross="$2"
 
 printf "\n${script} ${RED}${1} ${2}$RES\n"
+
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
