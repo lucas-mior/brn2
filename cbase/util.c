@@ -691,7 +691,7 @@ free2(void *pointer, int64 size) {
 #define malloc(size) \
     malloc_debug(__FILE__, __LINE__, size)
 #define realloc(old, old_capacity, new_capacity, obj_size) \
-    realloc_debug(__FILE__, __LINE__, old, obj_size)
+    realloc_debug(__FILE__, __LINE__, old, old_capacity, new_capacity, obj_size)
 #define free(pointer, size) \
     free_debug(__FILE__, __LINE__, pointer, size)
 #else
