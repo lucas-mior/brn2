@@ -93,8 +93,8 @@
 #include "generic.c"
 #include "minmax.c"
 
-#if COMPILER_GCC || COMPILER_CLANG
-  #if defined(__has_include) && __has_include(<valgrind/valgrind.h>)
+#if defined(__has_include)
+  #if __has_include(<valgrind/valgrind.h>)
     #include <valgrind/valgrind.h>
   #else
     #define RUNNING_ON_VALGRIND 0
@@ -283,8 +283,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
-extern void *memrchr(const void *pointer, int32 character_to_find,
-                     size_t size);
+extern void *memrchr(const void *pointer, int32 character_to_find, size_t size);
 void *
 memrchr(const void *pointer, int32 character_to_find, size_t size) {
     uchar *buffer = (uchar *)pointer;
