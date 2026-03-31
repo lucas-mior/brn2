@@ -9,16 +9,21 @@ error () {
     return
 }
 
+if [ -n "$BASH_VERSION" ]; then
+    # shellcheck disable=SC3044
+    shopt -s expand_aliases
+fi
+
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
-program=$(basename "$(readlink -f "$(dirname "$0")")")
-script=$(basename "$0")
 
 dir=$(dirname "$(readlink -f "$0")")
 cbase="cbase"
-
-CPPFLAGS="$CPPFLAGS -I"$dir/$cbase""
+CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
+cd "$dir" || exit
+program=$(basename "$(readlink -f "$(dirname "$0")")")
+script=$(basename "$0")
 
 . ./targets
 target="${1:-build}"
@@ -28,8 +33,6 @@ if ! grep -q "$target" ./targets; then
     cat targets
     exit 1
 fi
-
-cross="$2"
 
 printf "\n${script} ${RED}${1} ${2}$RES\n"
 
@@ -67,14 +70,35 @@ if echo "$OS" | grep -q "Linux"; then
 fi
 
 option_remove() {
-    echo "$1" | sed "s/$2//g"
+    echo "$1" | sed -E "s| *$2 +| |g"
 }
 
-CC=${CC:-cc}
+compile_with_chibicc () {
+    args="$*"
+    while ! problem=$(chibicc $args 2>&1); do
+        trace_off
+        sleep 0.4
+        if echo "$problem" | grep -q "unknown argument:"; then
+            arg=$(echo "$problem" | awk '{print $NF}')
+            printf "\nRemoving argument $arg...\n"
+            args=$(option_remove "$args" "$arg")
+        elif echo "$problem" | grep -q "unknown file extension:"; then
+            arg=$(echo "$problem" | awk '{print $NF}')
+            printf "\nRemoving argument $arg...\n"
+            args=$(option_remove "$args" "$arg")
+        else
+            printf "\n\nError compiling with chibicc:\n\n${problem}\n\n"
+            return 1
+        fi
+        printf "\n"
+        trace_on
+    done
+    return 0
+}
 
 case "$target" in
 "debug")
-    CFLAGS="$CFLAGS -g -fsanitize=undefined"
+    CFLAGS="$CFLAGS -g3 -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     exe="bin/${program}_debug"
     ;;
@@ -92,6 +116,10 @@ case "$target" in
     CFLAGS="$CFLAGS -g -O0 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
+"callgrind") 
+    CFLAGS="$CFLAGS -g -O2 -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE"
+    ;;
 "test")
     CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined"
     ;;
@@ -105,12 +133,18 @@ case "$target" in
 "release") 
     CFLAGS="$CFLAGS $GNUSOURCE -DRELEASING=1 -O2 -flto -march=native -ftree-vectorize"
     ;;
+"fast_feedback")
+    CC=clang
+    CFLAGS="$CFLAGS $GNUSOURCE -Werror"
+    ;;
+
 *)
     CFLAGS="$CFLAGS -O2"
     ;;
 esac
 
 if [ "$target" = "cross" ]; then
+    cross="$2"
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
     CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
@@ -147,25 +181,13 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-assign-enum"
 fi
 
-compile_with_chibicc () {
-    args="$*"
-    while ! problem=$(chibicc $args 2>&1); do
-        trace_off
-        if [ "$CC" = "chibicc" ] \
-            && echo "$problem" | grep -q "unknown argument:"; then
-            arg=$(echo "$problem" | awk '{print $NF}')
-            echo "Removing argument $arg..."
-            args=$(option_remove "$args" "$arg")
-        else
-            printf "\nproblem=\n$problem\n"
-            break
-        fi
-        trace_on
-    done
-}
-
 
 case "$target" in
+"fast_feedback")
+    trace_on
+    $CC $CPPFLAGS $CFLAGS src/main.c -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
+    trace_off
+    ;;
 "uninstall")
     trace_on
     rm -f ${DESTDIR}${PREFIX}/bin/${program}
@@ -184,7 +206,7 @@ case "$target" in
         cp -rp etc/* "$DESTDIR/etc/$program/"
     fi
     if [ -f "$program.desktop" ]; then
-        install -Dm644 \
+        install -Dm755 \
             "$program.desktop" \
             "$DESTDIR/usr/share/applications/$program.desktop"
     fi
@@ -223,7 +245,7 @@ case "$target" in
         fi
 
         trace_on
-        if [ "$CC" = "chibicc" ]; then
+        if [ $src != "windows_functions.c" ] && [ "$CC" = "chibicc" ]; then
             cmdline=$(option_remove "$cmdline" "$CC")
             compile_with_chibicc $cmdline && /tmp/$src.exe
         elif $cmdline; then
