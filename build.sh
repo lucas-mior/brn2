@@ -4,6 +4,11 @@
 
 set -e
 
+error () {
+    >&2 printf "$@"
+    return
+}
+
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
@@ -13,7 +18,7 @@ script=$(basename "$0")
 dir=$(dirname "$(readlink -f "$0")")
 cbase="cbase"
 
-CPPFLAGS="$CPPFLAGS -I "$dir/$cbase""
+CPPFLAGS="$CPPFLAGS -I"$dir/$cbase""
 
 . ./targets
 target="${1:-build}"
