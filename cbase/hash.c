@@ -526,6 +526,7 @@ CAT(hash_ndeleted_, HASH_TYPE)(struct Map *map) {
 
 static inline void
 CAT(hash_functions_sink_, HASH_TYPE)(void) {
+    (void)CAT(hash_functions_sink_, HASH_TYPE);
     (void)CAT(hash_zero_, HASH_TYPE);
     (void)CAT(hash_create_, HASH_TYPE);
     (void)CAT(hash_destroy_, HASH_TYPE);
