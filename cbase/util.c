@@ -562,12 +562,19 @@ util_nthreads(void) {
 
 #define MEM_FREED 0xDC
 #define MEM_MALLOCED_UNINITIALIZED 0xCD
+#define MEM_DONT_READ 0xBD
 
 #if !defined(DEBUGGING_MEMORY)
 #define DEBUGGING_MEMORY DEBUGGING
 #else
 #define DEBUGGING_MEMORY 0
 #endif
+
+INLINE void
+dont_read(void *pointer, int64 size) {
+    memset64(pointer, MEM_DONT_READ, size);
+    return;
+}
 
 INLINE void *
 xmalloc(int64 size) {
@@ -930,6 +937,10 @@ itoa2(char *str, int32 size, llong num) {
         str[j] = str[i - j - 1];
         str[i - j - 1] = temp;
     }
+
+    // this is here because of gcc -fanalyzer
+    assert(i < 22);
+
     return i;
 }
 
@@ -1766,7 +1777,7 @@ deg2rad(double degrees) {
 
 static int64
 bytes_pretty(char *buffer, int64 raw) {
-    char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB"};
+    char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
     double aux_pretty;
     int64 i;
     int32 n;
@@ -2499,9 +2510,13 @@ main(int argc, char **argv) {
 #endif
     (void)util_command_launch;
 
+    (void)dont_read;
+
     (void)malloc_debug;
     (void)realloc_debug;
     (void)free_debug;
+    (void)xrealloc4;
+    (void)free2;
 
     (void)xmmap_commit;
     (void)xkill;
@@ -2515,6 +2530,9 @@ main(int argc, char **argv) {
     (void)xpthread_mutex_destroy;
     (void)xpthread_create;
     (void)xpthread_join;
+
+    (void)fwrite64;
+    (void)fread64;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     PRINT_TIMINGS(1, t0, t1);
