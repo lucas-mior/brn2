@@ -740,7 +740,7 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
                                       newfile->name, newfile->length,
                                       newfile->hash, hashes_new[i])) {
             FileName *oldfile = old->files[i];
-            error("Error: " RED "'%s'" RESET " repeats on line %d. ",
+            error("Error: " RED("'%s'") " repeats on line %d. ",
                   newfile->name, i + 1);
 
             if (util_equal_files(newfile->name, oldfile->name)) {
@@ -808,9 +808,9 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 
 #if defined(_GNU_SOURCE)
     if (newname_exists && !found && !brn2_options_implicit) {
-        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
+        error("Error renaming " RED("'%s'") " to " RED("'%s'") ":\n",
               oldname, newname);
-        error(RED"'%s'"RESET" already exists,"
+        error(RED("'%s'")" already exists,"
               " but it was not given in the list of files to rename,"
               " and --implicit option is off.\n",
               newname);
@@ -831,8 +831,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                                          newname, newlen, newhash, newindex)) {
                 *number_renames += 1;
             }
-            print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname,
-                  newname);
+            print(GREEN("%s")" <-> "GREEN("%s")"\n", oldname, newname);
 
             if (found) {
                 int32 next = next_on_oldlist;
@@ -861,7 +860,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
             }
             return;
         } else if (errno != ENOENT) {
-            error("Error swapping "RED"'%s'"RESET" and "RED"'%s'"RESET": %s.\n",
+            error("Error swapping " RED("'%s'") " and " RED("'%s'")": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
@@ -874,7 +873,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
     (void)oldfile;
     (void)newlen;
     if (newname_exists) {
-        error("Error renaming "RED"'%s'"RESET" to '%s': File already exists.\n",
+        error("Error renaming "RED("'%s'")" to '%s': File already exists.\n",
               oldname, newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
@@ -884,7 +883,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 #endif
     renamed = rename(oldname, newname);
     if (renamed < 0) {
-        error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET": %s.\n",
+        error("Error renaming "RED("'%s'")" to "RED("'%s'")": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
@@ -895,7 +894,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                                      oldname, oldlen, oldhash, oldindex)) {
             *number_renames += 1;
         }
-        print("%s -> "GREEN"%s"RESET"\n", oldname, newname);
+        print("%s -> "GREEN("%s")"\n", oldname, newname);
     }
     return;
 }
@@ -1037,7 +1036,7 @@ main(void) {
 
         for (int32 i = 0; i < list1->length; i += 1) {
             bool verbose;
-            printf(RED "%d / %d\n" RESET, i + 1, list1->length);
+            printf(RED( "%d / %d\n" ), i + 1, list1->length);
             if (list1->length < 9999) {
                 verbose = true;
             } else {
@@ -1080,7 +1079,7 @@ main(void) {
 
         for (int32 i = 0; i < list1->length; i += 1) {
             bool verbose;
-            printf(RED "%d / %d\n" RESET, i + 1, list1->length);
+            printf(RED( "%d / %d\n" ), i + 1, list1->length);
             if (list1->length < 9999) {
                 verbose = true;
             } else {
@@ -1193,7 +1192,7 @@ main(void) {
 
         for (int32 i = 0; i < list1->length; i += 1) {
             bool verbose;
-            printf(RED "%d / %d\n" RESET, i + 1, list1->length);
+            printf(RED("%d / %d\n"), i + 1, list1->length);
             if (list1->length < 9999) {
                 verbose = true;
             } else {
