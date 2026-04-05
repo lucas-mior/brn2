@@ -42,11 +42,6 @@
 
 #include "generic.c"
 
-#define RED "\x1b[31m"
-#define GREEN "\x1b[32m"
-#define BLUE "\x1b[33m"
-#define RESET "\x1b[0m"
-
 #define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
 #define BRN2_MIN_PARALLEL 64

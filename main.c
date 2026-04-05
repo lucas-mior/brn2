@@ -333,9 +333,9 @@ main(int argc, char **argv) {
                                              file->name, file->length,
                                              file->hash, index, i)) {
                 if (contains_newline) {
-                    error(RED"'%s'"RESET" contains new line.", file->name);
+                    error(RED("'%s'")" contains new line.", file->name);
                 } else {
-                    error(RED"'%s'"RESET" repeated in the buffer.", file->name);
+                    error(RED("'%s'")" repeated in the buffer.", file->name);
                 }
                 if (brn2_options_fatal) {
                     error("\n");
@@ -496,8 +496,8 @@ main(int argc, char **argv) {
             }
 
             if (old->length != new->length) {
-                error("You are renaming " RED "%d" RESET " file%.*s "
-                      "but buffer contains " RED "%d" RESET " file name%.*s\n",
+                error("You are renaming " RED("%d") " file%.*s "
+                      "but buffer contains " RED("%d") " file name%.*s\n",
                       old->length, old->length != 1, "s", new->length,
                       new->length != 1, "s");
                 brn2_free_list(new);
