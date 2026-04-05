@@ -185,7 +185,7 @@ fi
 case "$target" in
 "fast_feedback")
     trace_on
-    $CC $CPPFLAGS $CFLAGS src/main.c -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
+    $CC $CPPFLAGS $CFLAGS main.c -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
     trace_off
     ;;
 "uninstall")

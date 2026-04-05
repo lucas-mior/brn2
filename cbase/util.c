@@ -60,6 +60,7 @@
 
 #define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
 
+
 #if defined(__GNUC__)
 #define COMPILER_GCC 1
 #define COMPILER_CLANG 0
@@ -644,6 +645,7 @@ static void *
 realloc_debug(char *file, int32 line,
               void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size;
+    (void)old_capacity;
     if (obj_size <= 0) {
         error_impl(file, line,
                    "Error in realloc: invalid object size = %lld.\n",
@@ -781,6 +783,7 @@ xmunmap(void *p, int64 size) {
     if (munmap(p, (size_t)size) < 0) {
         error("Error in munmap(%p, %lld): %s.\n", p, (llong)size,
               strerror(errno));
+        fatal(EXIT_FAILURE);
     }
     return;
 }
@@ -879,12 +882,13 @@ xpthread_create(pthread_t *thread, pthread_attr_t *attr,
 }
 
 static void
-xpthread_join(pthread_t thread, void **thread_return) {
+xpthread_join(pthread_t *thread, void **thread_return) {
     int err;
-    if ((err = pthread_join(thread, thread_return))) {
+    if ((err = pthread_join(*thread, thread_return))) {
         error("Error joining thread: %s.\n", strerror(err));
         fatal(EXIT_FAILURE);
     }
+    *thread = 0;
     return;
 }
 
@@ -898,7 +902,7 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= size)) {
-        fprintf(stderr, "Error in vsnprintf(%s) (n = %lld\n", format, (llong)n);
+        fprintf(stderr, "Error in vsnprintf(%s) (n = %lld)\n", format, (llong)n);
         fatal(EXIT_FAILURE);
     }
     return n;
@@ -1864,6 +1868,11 @@ normalize(char *path, int32 *length) {
         *length -= 2;
     }
 
+    while ((*length >= 2) && (path[*length - 2] == '/') && (path[*length - 1] == '.')) {
+        path[*length - 1] = '\0';
+        *length -= 1;
+    }
+
     off = 0;
     while ((p = memmem64(path + off, *length - off, "/./", 3))) {
         off = p - path;
@@ -1971,12 +1980,12 @@ dirname2(char *buffer, char *path, int32 *path_len) {
 
 static void
 print_timings(char *file, int32 line, const char *func,
-              int64 n, struct timespec t0, struct timespec t1) {
+              int64 nitems, struct timespec t0, struct timespec t1) {
     llong seconds = t1.tv_sec - t0.tv_sec;
     llong nanos = t1.tv_nsec - t0.tv_nsec;
 
     double total_seconds = (double)seconds + (double)nanos / 1.0e9;
-    double micros_per = 1e6*(total_seconds / (double)n);
+    double micros_per = 1e6*(total_seconds / (double)nitems);
 
     printf("\ntime elapsed %s:%d:%s\n", file, line, func);
     printf("%gs = %gus per item.\n\n", total_seconds, micros_per);

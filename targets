@@ -1,4 +1,5 @@
 targets='
+fast_feedback
 test
 build
 release
