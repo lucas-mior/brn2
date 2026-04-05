@@ -570,7 +570,7 @@ brn2_threads_work_hashes(Work *arg) {
         FileList *list = work->old_list;
         FileName *newfile = list->files[i];
         newfile->hash = hash_function(newfile->name, newfile->length);
-        list->indexes[i] = newfile->hash % work->map_capacity;
+        list->indexes[i] = (uint32)(newfile->hash % work->map_capacity);
     }
     return 0;
 }
@@ -642,7 +642,7 @@ brn2_threads_join(void) {
     xpthread_mutex_unlock(&brn2_mutex);
 
     for (int32 i = 0; i < nthreads; i += 1) {
-        xpthread_join(thread_pool[i], NULL);
+        xpthread_join(&thread_pool[i], NULL);
     }
 
     xpthread_mutex_destroy(&brn2_mutex);
@@ -779,7 +779,8 @@ void
 brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
               struct Hash_set *names_renamed, int32 i, int32 *number_renames) {
     int renamed;
-    int32 *newname_index_on_oldlist;
+    int32 next_on_oldlist;
+    bool found;
     bool newname_exists;
 
     FileName **oldfile = &(old->files[i]);
@@ -800,11 +801,13 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
             return;
         }
     }
-    newname_index_on_oldlist
-        = hash_lookup_pre_calc_map(oldlist_map, newname, newhash, newindex);
+
+    found = hash_lookup_pre_calc_map(oldlist_map, newname, newlen, newhash,
+                                     newindex, &next_on_oldlist);
     newname_exists = !access(newname, F_OK);
+
 #if defined(_GNU_SOURCE)
-    if (newname_exists && !newname_index_on_oldlist && !brn2_options_implicit) {
+    if (newname_exists && !found && !brn2_options_implicit) {
         error("Error renaming "RED"'%s'"RESET" to "RED"'%s'"RESET":\n",
               oldname, newname);
         error(RED"'%s'"RESET" already exists,"
@@ -831,14 +834,14 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
             print(GREEN"%s"RESET" <-> "GREEN"%s"RESET"\n", oldname,
                   newname);
 
-            if (newname_index_on_oldlist) {
-                int32 next = *newname_index_on_oldlist;
+            if (found) {
+                int32 next = next_on_oldlist;
                 FileName **file_j = &(old->files[next]);
 
                 hash_remove_pre_calc_map(oldlist_map,
-                                         newname, newhash, newindex);
+                                         newname, newlen, newhash, newindex);
                 hash_remove_pre_calc_map(oldlist_map,
-                                         oldname, oldhash, oldindex);
+                                         oldname, oldlen, oldhash, oldindex);
 
                 hash_insert_pre_calc_map(oldlist_map,
                                          newname, newlen, newhash, newindex, i);
@@ -866,7 +869,8 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
         }
     }
 #else
-    (void)newname_index_on_oldlist;
+    (void)found;
+    (void)next_on_oldlist;
     (void)oldfile;
     (void)newlen;
     if (newname_exists) {
