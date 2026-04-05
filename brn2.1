@@ -17,9 +17,9 @@ brn2 \- Bulk Rename Files in your preferred text editor
 [\fIOPTIONS\fR] \fB\-d\fR \fI<dir>\fR
 
 .SH DESCRIPTION
-brn2 is a fork of brn, a command line tool used to easily mass-rename files 
-in your preferred text editor. It opens the filenames in a text buffer; 
-once you edit the names and save/exit the editor, the changes take place 
+brn2 is a fork of brn, a command line tool used to easily mass-rename files
+in your preferred text editor. It opens the filenames in a text buffer;
+once you edit the names and save/exit the editor, the changes take place
 atomically where supported.
 
 .SH OPTIONS
@@ -37,7 +37,7 @@ Quiet mode; suppress output messages.
 
 .TP
 .BR \-i ", " \-\-implicit
-Allow renaming (swapping) files that were not explicitly provided in the 
+Allow renaming (swapping) files that were not explicitly provided in the
 list of files.
 
 .TP
@@ -50,8 +50,8 @@ Exit on the first renaming error encountered.
 
 .TP
 .BR \-a ", " \-\-autosolve
-Auto solve name conflicts for files with identical content. If a new name 
-matches an existing file with the same content, the existing file is 
+Auto solve name conflicts for files with identical content. If a new name
+matches an existing file with the same content, the existing file is
 removed to allow the rename.
 
 .TP
@@ -77,7 +77,7 @@ Rename files within the specified directory.
 
 .TP
 .BR \-f " \fI<file>\fR, " \-\-file= \fI<file>\fR
-Rename filenames listed in the specified file. Use \fB-\fR or \fB/dev/stdin\fR 
+Rename filenames listed in the specified file. Use \fB-\fR or \fB/dev/stdin\fR
 to read from standard input.
 
 .SH NOTES
@@ -87,28 +87,28 @@ Uses the \fB$EDITOR\fR environment variable. If not set, it defaults to \fBvim\f
 
 .TP
 .B Normalization
-Filenames are normalized before being presented: 
-leading \fB./\fR is removed, consecutive slashes are bundled, 
+Filenames are normalized before being presented:
+leading \fB./\fR is removed, consecutive slashes are bundled,
 and trailing slashes are added to denote directories.
 
 .TP
 .B Swapping
-On GNU/Linux, \fBbrn2\fR uses the \fBrenameat2\fR system call to atomically 
-swap filenames without temporary files. On other systems, swapping will 
+On GNU/Linux, \fBbrn2\fR uses the \fBrenameat2\fR system call to atomically
+swap filenames without temporary files. On other systems, swapping will
 safely fail without renaming.
 
 .TP
 .B Limitations
-Does not support more than 2^31 renames at once. Filenames cannot exceed 
-4096 bytes. Newlines in filenames are strictly prohibited. 
+Does not support more than 2^31 renames at once. Filenames cannot exceed
+4096 bytes. Newlines in filenames are strictly prohibited.
 Filenames containing only dots and slashes are ignored.
 
 .TP
 .B Renaming in Depth
-Exercise caution when renaming parent directories and their children 
-simultaneously (e.g., \fIdir/\fR and \fIdir/file\fR). Renaming a parent 
-directory first will cause subsequent renames of its children to fail. 
-It is recommended to rename regular files first, or operate in steps 
+Exercise caution when renaming parent directories and their children
+simultaneously (e.g., \fIdir/\fR and \fIdir/file\fR). Renaming a parent
+directory first will cause subsequent renames of its children to fail.
+It is recommended to rename regular files first, or operate in steps
 from the deepest path upwards.
 
 .SH EXIT STATUS
@@ -117,7 +117,7 @@ from the deepest path upwards.
 Success.
 .TP
 .B 1
-An error occurred (e.g., file not found, permission denied, or fatal error 
+An error occurred (e.g., file not found, permission denied, or fatal error
 triggered).
 
 .SH EXAMPLES

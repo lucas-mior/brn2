@@ -1,10 +1,10 @@
 # brn2
 brn2 is a fork of [brn](https://github.com/nimaipatel/brn), a command line tool
 used to easily mass-rename files in your preferred text editor.
- 
+
 ## Usage
 ```
-$ 
+$
 brn2 --help
 usage: brn2 [OPTIONS] -- <file1> <file2> ...
 usage: brn2 [OPTIONS] -f <filename>
@@ -87,9 +87,9 @@ There is no good default way to deal with this, because you can either:
 Both alternatives are cumbersome and error prone to implement.  So the best
 thing to do is to launch brn2 multiple times and operate in steps. Try renaming
 the regular files first, and then directories, starting from the most deep.
- 
+
 ## Install
- 
+
 ### AUR
 ```
 $ yay -S brn2-git
@@ -139,7 +139,7 @@ $ brn2 --file rename
 ```
 $ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -s -f -
 ```
- 
+
 ## Changes over original brn
 - Option to rename files listed in file or passed as arguments.
   * By default, won't swap files which were not specified in the rename list.
@@ -147,6 +147,6 @@ $ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -s -f -
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
 - Check if original files exist.
- 
+
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.

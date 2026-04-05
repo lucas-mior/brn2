@@ -103,7 +103,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
-        int64 name_length = strlen32(name);
+        int32 name_length = strlen32(name);
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         int64 size;
@@ -121,7 +121,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
         file = *file_pointer;
 
-        file->length = (int32)name_length;
+        file->length = name_length;
         memcpy64(file->name, name, name_length + 1);
 
         length += 1;
@@ -202,7 +202,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
         char *name = directory_list[i]->d_name;
-        int64 name_length = strlen32(name);
+        int32 name_length = strlen32(name);
         int64 size;
 
         if (brn2_is_invalid_name(name)) {
@@ -222,7 +222,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = directory_length + 1 + (int32)name_length;
+            file->length = directory_length + 1 + name_length;
             memcpy64(file->name, directory, directory_length);
             file->name[directory_length] = '/';
             memcpy64(file->name + directory_length + 1, name, name_length + 1);
@@ -231,7 +231,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
             file = *file_pointer;
 
-            file->length = (int32)name_length;
+            file->length = name_length;
             memcpy64(file->name, name, file->length + 1);
         }
 
@@ -320,7 +320,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
             int64 size;
-            int64 name_length = pointer - begin;
+            int64 name_length = (int32)(pointer - begin);
             if (name_length >= MAXOF(file->length)) {
                 error("Too long line. Skipping...\n");
                 begin = pointer + 1;
@@ -338,7 +338,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             *file_pointer = xarenas_push(list->arenas, nthreads, ALIGN(size));
 
             file = *file_pointer;
-            file->length = (int32)name_length;
+            file->length = name_length;
             memcpy64(file->name, begin, name_length + 1);
             file->name[name_length] = '\0';
 
@@ -933,6 +933,8 @@ brn2_usage(FILE *stream) {
 
 // clang-format on
 
+// flags: -lm
+
 #if TESTING_brn2
 #include <assert.h>
 #include "assert.c"
@@ -954,10 +956,11 @@ brn2_print_list(FileList *list) {
     error(" indexes_size = %lld\n", (llong)list->indexes_size);
     error(" length = %d\n", list->length);
 
-    for (int32 i = 0; i < list->length;) {
+    for (int32 i = 0; i < list->length; i += 1) {
         FileName *file = list->files[i];
         if (file) {
-            ASSERT_EQUAL(file->length, strlen(file->name));
+            int32 name_length = strlen32(file->name);
+            ASSERT_EQUAL(file->length, name_length);
             error("[%d] = %s\n", i, file->name);
         } else {
             error("[%d]", i);
@@ -967,10 +970,10 @@ brn2_print_list(FileList *list) {
             }
             error(" ... [%d] = NULL\n", i);
         }
-        i += 1;
     }
 
     error("}\n");
+    return;
 }
 
 static void
@@ -979,13 +982,13 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
         if (list->files[i]->length != file->length) {
             continue;
         }
-        if (!memcmp64(list->files[i]->name, file->name, file->length)) {
+        if (!memcmp64(list->files[i]->name, file->name, (int64)file->length)) {
             printf(GREEN "%s == %s" RESET "\n", file->name,
                    list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
-                          (list->length - i)*SIZEOF(*(list->files)));
+                          (int64)(list->length - i) * SIZEOF(*(list->files)));
             }
             return;
         }
@@ -996,8 +999,8 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
     }
     error("List does not contain '%s'\n", file->name);
     fatal(EXIT_FAILURE);
+    return;
 }
-// flags: -lm
 
 int (*print)(const char *, ...) = printf;
 
@@ -1034,9 +1037,14 @@ main(void) {
         brn2_normalize_names(list2, NULL);
 
         for (int32 i = 0; i < list1->length; i += 1) {
+            bool verbose;
             printf(RED "%d / %d\n" RESET, i + 1, list1->length);
-            brn2_assert_contains_filename(list2, list1->files[i],
-                                          list1->length < 9999);
+            if (list1->length < 9999) {
+                verbose = true;
+            } else {
+                verbose = false;
+            }
+            brn2_assert_contains_filename(list2, list1->files[i], verbose);
         }
 
         brn2_free_list(list1);
@@ -1072,40 +1080,49 @@ main(void) {
         brn2_normalize_names(list2, NULL);
 
         for (int32 i = 0; i < list1->length; i += 1) {
+            bool verbose;
             printf(RED "%d / %d\n" RESET, i + 1, list1->length);
-            brn2_assert_contains_filename(list2, list1->files[i],
-                                          list1->length < 9999);
+            if (list1->length < 9999) {
+                verbose = true;
+            } else {
+                verbose = false;
+            }
+            brn2_assert_contains_filename(list2, list1->files[i], verbose);
         }
 
         map = hash_create_map((uint32)list1->length);
         capacity_set = hash_capacity(map);
-        list1->indexes_size = list1->length*SIZEOF(*(list1->indexes));
+        list1->indexes_size = (int64)list1->length * SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
         brn2_create_hashes(list1, capacity_set);
 
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
+            int32 name_length;
 
-            ASSERT_EQUAL(file->length, strlen(file->name));
+            name_length = strlen32(file->name);
+            ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_insert_pre_calc_map(map,
-                                            file->name, file->length, hash,
-                                            list1->indexes[i], 0));
+            ASSERT(hash_insert_pre_calc_map(map, file->name, file->length,
+                                             hash, list1->indexes[i], 0));
         }
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
-            ASSERT_EQUAL(file->length, strlen(file->name));
+            int32 name_length;
+
+            name_length = strlen32(file->name);
+            ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_remove_pre_calc_map(map, file->name, hash,
-                                            list1->indexes[i]));
+            ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
+                                             hash, list1->indexes[i]));
         }
 
         brn2_free_list(list1);
@@ -1116,6 +1133,7 @@ main(void) {
         hash_destroy_map(map);
         unlink(filelist);
     }
+
     {
         int argc = 0;
         int64 capacity = 128;
@@ -1140,9 +1158,9 @@ main(void) {
 
         brn2_list_from_file(list1, filelist, true);
 
-        argv = xmalloc(capacity*SIZEOF(*argv));
+        argv = xmalloc(capacity * SIZEOF(*argv));
         for (int i = 0; i < capacity; i += 1) {
-            argv[i] = xmalloc(capacity*SIZEOF(*argv[i]));
+            argv[i] = xmalloc(capacity * SIZEOF(*argv[i]));
         }
 
         if ((args = fopen(filelist, "r")) == NULL) {
@@ -1151,11 +1169,13 @@ main(void) {
         }
 
         while (fgets(argv[argc], (int)capacity, args)) {
+            int64 line_length;
             if (argc >= capacity) {
                 error("Arguments file too long.\n");
                 fatal(EXIT_FAILURE);
             }
-            argv[argc][strcspn(argv[argc], "\n")] = '\0';
+            line_length = strcspn(argv[argc], "\n");
+            argv[argc][line_length] = '\0';
             argc += 1;
         }
         if (fclose(args) != 0) {
@@ -1165,49 +1185,58 @@ main(void) {
         brn2_list_from_args(list2, argc, argv);
 
         for (int i = 0; i < capacity; i += 1) {
-            free(argv[i], capacity*SIZEOF(*argv[i]));
+            free(argv[i], (int64)capacity * SIZEOF(*argv[i]));
         }
-        free(argv, capacity*SIZEOF(*argv));
+        free(argv, (int64)capacity * SIZEOF(*argv));
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
 
         for (int32 i = 0; i < list1->length; i += 1) {
+            bool verbose;
             printf(RED "%d / %d\n" RESET, i + 1, list1->length);
-            brn2_assert_contains_filename(list2, list1->files[i],
-                                          list1->length < 9999);
+            if (list1->length < 9999) {
+                verbose = true;
+            } else {
+                verbose = false;
+            }
+            brn2_assert_contains_filename(list2, list1->files[i], verbose);
         }
         printf(RESET);
 
         map = hash_create_map((uint32)list1->length);
         capacity_set = hash_capacity(map);
-        list1->indexes_size = list1->length*SIZEOF(*(list1->indexes));
+        list1->indexes_size = (int64)list1->length * SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
         brn2_create_hashes(list1, capacity_set);
 
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
+            int32 name_length;
 
-            ASSERT_EQUAL(file->length, strlen(file->name));
+            name_length = strlen32(file->name);
+            ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_insert_pre_calc_map(map,
-                                            file->name, file->length, hash,
-                                            list1->indexes[i], 0));
+            ASSERT(hash_insert_pre_calc_map(map, file->name, file->length,
+                                             hash, list1->indexes[i], 0));
         }
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
             uint64 hash;
-            ASSERT_EQUAL(file->length, strlen(file->name));
+            int32 name_length;
+
+            name_length = strlen32(file->name);
+            ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_remove_pre_calc_map(map, file->name, hash,
-                                            list1->indexes[i]));
+            ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
+                                             hash, list1->indexes[i]));
         }
 
         hash_destroy_map(map);
@@ -1219,8 +1248,8 @@ main(void) {
         unlink(filelist);
     }
     if (OS_LINUX) {
-        FileList old_stack;
-        FileList new_stack;
+        FileList old_stack = {0};
+        FileList new_stack = {0};
         FileList *old = &old_stack;
         FileList *new = &new_stack;
 
@@ -1235,7 +1264,7 @@ main(void) {
 
         error("brn2.c: test 3 (linux only)...\n");
 
-        for (int32 i = 0; i < LENGTH(files); i += 1) {
+        for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
             if (strcmp(files[i].original, files[i].renamed)) {
                 number_changed_hard += 1;
             }
@@ -1255,7 +1284,7 @@ main(void) {
             new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
         }
 
-        for (int32 i = 0; i < LENGTH(files); i += 1) {
+        for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
             char path[512];
             FILE *file;
             SNPRINTF(path, "%s/%s", directory, files[i].original);
@@ -1274,7 +1303,7 @@ main(void) {
         brn2_normalize_names(old, NULL);
         sort(old);
 
-        new->files = xmalloc(old->length*SIZEOF(*(new->files)));
+        new->files = xmalloc((int64)old->length * SIZEOF(*(new->files)));
         new->length = old->length;
         for (int32 i = 0; i < new->length; i += 1) {
             FileName **file_pointer = &(new->files[i]);
@@ -1291,7 +1320,7 @@ main(void) {
             file = *file_pointer;
 
             file->length = name_length;
-            memcpy64(file->name, path, name_length + 1);
+            memcpy64(file->name, path, (int64)name_length + 1);
         }
 
         brn2_normalize_names(old, new);
@@ -1300,7 +1329,7 @@ main(void) {
             uint32 capacity_set;
             oldlist_map = hash_create_map((uint32)old->length);
             capacity_set = hash_capacity(oldlist_map);
-            old->indexes_size = old->length*SIZEOF(*(old->indexes));
+            old->indexes_size = (int64)old->length * SIZEOF(*(old->indexes));
             old->indexes = xmmap_commit(&(old->indexes_size));
             brn2_create_hashes(old, capacity_set);
         }
@@ -1308,9 +1337,8 @@ main(void) {
         for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             uint32 *index = &(old->indexes[i]);
-            ASSERT(hash_insert_pre_calc_map(oldlist_map,
-                                            file->name, file->length,
-                                            file->hash, *index, i));
+            ASSERT(hash_insert_pre_calc_map(oldlist_map, file->name, file->length,
+                                             file->hash, *index, i));
         }
 
         {
@@ -1318,7 +1346,7 @@ main(void) {
             struct Hash_set *newlist_set;
 
             newlist_set = hash_create_set((uint32)new->length);
-            new->indexes_size = new->length*SIZEOF(*(new->indexes));
+            new->indexes_size = (int64)new->length * SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             main_capacity = hash_capacity(newlist_set);
 
@@ -1339,9 +1367,9 @@ main(void) {
         }
 
         ASSERT_EQUAL(number_renames, number_changes);
-        for (int32 i = 0; i < LENGTH(files); i += 1) {
+        for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
             char path[512];
-            char renamed[512];
+            char renamed_buffer[512];
             FILE *file;
             SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
@@ -1350,11 +1378,11 @@ main(void) {
                 fatal(EXIT_FAILURE);
             }
 
-            if (fgets(renamed, sizeof(renamed), file) == NULL) {
+            if (fgets(renamed_buffer, sizeof(renamed_buffer), file) == NULL) {
                 error("Error in fgets from %s: %s.\n", path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
-            ASSERT_EQUAL(renamed, files[i].renamed);
+            ASSERT_EQUAL(renamed_buffer, files[i].renamed);
 
             if (fclose(file) != 0) {
                 error("Error closing %s: %s.\n", path, strerror(errno));
@@ -1371,7 +1399,7 @@ main(void) {
         hash_destroy_set(names_renamed);
     }
     {
-        FileList old_stack;
+        FileList old_stack = {0};
         FileList *old = &old_stack;
 
         char *directory = "/tmp/brn2_abcd";
@@ -1404,7 +1432,7 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
 
-        for (int32 i = 0; i < LENGTH(files2); i += 1) {
+        for (int32 i = 0; i < (int32)LENGTH(files2); i += 1) {
             fprintf(args, "%s\n", files2[i].original);
         }
         if (fclose(args) != 0) {
@@ -1415,7 +1443,7 @@ main(void) {
         brn2_list_from_file(old, filelist, true);
 
         brn2_normalize_names(old, NULL);
-        for (int32 i = 0; i < LENGTH(files2); i += 1) {
+        for (int32 i = 0; i < (int32)LENGTH(files2); i += 1) {
             ASSERT_EQUAL(files2[i].renamed, (char *)old->files[i]->name);
         }
         brn2_free_list(old);
@@ -1427,4 +1455,4 @@ main(void) {
 }
 #endif
 
-#endif
+#endif /* BRN2_C */

@@ -112,25 +112,25 @@ case "$target" in
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
-"valgrind") 
+"valgrind")
     CFLAGS="$CFLAGS -g -O0 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
-"callgrind") 
+"callgrind")
     CFLAGS="$CFLAGS -g -O2 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE"
     ;;
 "test")
     CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined"
     ;;
-"check") 
+"check")
     CC=gcc
     CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer"
     ;;
-"build") 
+"build")
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
-"release") 
+"release")
     CFLAGS="$CFLAGS $GNUSOURCE -DRELEASING=1 -O2 -flto -march=native -ftree-vectorize"
     ;;
 "fast_feedback")
@@ -286,7 +286,7 @@ create_temp_files() {
 }
 
 case "$target" in
-"benchmark") 
+"benchmark")
     create_temp_files
     ls > "rename"
 
@@ -297,7 +297,7 @@ case "$target" in
     rm $dir/$exe
     exit
     ;;
-"valgrind") 
+"valgrind")
     create_temp_files
     ls > rename
 
