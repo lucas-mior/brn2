@@ -982,7 +982,7 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             continue;
         }
         if (!memcmp64(list->files[i]->name, file->name, (int64)file->length)) {
-            printf(GREEN "%s == %s" RESET "\n", file->name,
+            printf(GREEN("%s == %s")"\n", file->name,
                    list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
