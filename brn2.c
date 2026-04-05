@@ -320,7 +320,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
             int64 size;
-            int64 name_length = (int32)(pointer - begin);
+            int32 name_length = (int32)(pointer - begin);
             if (name_length >= MAXOF(file->length)) {
                 error("Too long line. Skipping...\n");
                 begin = pointer + 1;
@@ -999,7 +999,6 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
     }
     error("List does not contain '%s'\n", file->name);
     fatal(EXIT_FAILURE);
-    return;
 }
 
 int (*print)(const char *, ...) = printf;
@@ -1174,7 +1173,7 @@ main(void) {
                 error("Arguments file too long.\n");
                 fatal(EXIT_FAILURE);
             }
-            line_length = strcspn(argv[argc], "\n");
+            line_length = (int64)strcspn(argv[argc], "\n");
             argv[argc][line_length] = '\0';
             argc += 1;
         }

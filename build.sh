@@ -47,7 +47,7 @@ CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
-# CFLAGS="$CFLAGS -Werror"
+CFLAGS="$CFLAGS -Werror"
 CFLAGS="$CFLAGS -Wno-format-pedantic"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
@@ -334,6 +334,10 @@ esac
 
 trace_off
 if [ "$target" = "test_all" ]; then
+    for compiler in gcc tcc clang "zig cc" chibicc ; do
+        CC=$compiler $0 test || exit
+    done
+    exit
     printf '%s\n' "$targets" | while IFS= read -r target; do
         echo "$target" | grep -Eq "^(# |$)" && continue
         if echo "$target" | grep "cross"; then
