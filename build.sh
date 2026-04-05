@@ -334,10 +334,6 @@ esac
 
 trace_off
 if [ "$target" = "test_all" ]; then
-    for compiler in gcc tcc clang "zig cc" chibicc ; do
-        CC=$compiler $0 test || exit
-    done
-    exit
     printf '%s\n' "$targets" | while IFS= read -r target; do
         echo "$target" | grep -Eq "^(# |$)" && continue
         if echo "$target" | grep "cross"; then
