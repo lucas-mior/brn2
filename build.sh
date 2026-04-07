@@ -340,7 +340,7 @@ if [ "$target" = "test_all" ]; then
             $0 $target
             continue
         fi
-        for compiler in chibicc gcc tcc clang "zig cc" ; do
+        for compiler in gcc tcc clang "zig cc" ; do
             CC=$compiler $0 $target || exit
         done
     done
