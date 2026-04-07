@@ -40,15 +40,15 @@
 #endif
 
 #if 1 == TESTING_assert
-#define TRAP(...) raise(SIGILL)
+  #define TRAP(...) raise(SIGILL)
 #elif !defined(TRAP)
-#if defined(__GNUC__) || defined(__clang__)
-#define TRAP(...) __builtin_trap()
-#elif defined(_MSC_VER)
-#define TRAP(...) __debugbreak()
-#else
-#define TRAP(...) *(volatile int *)0 = 0
-#endif
+  #if defined(__GNUC__) || defined(__clang__)
+  #define TRAP(...) __builtin_trap()
+  #elif defined(_MSC_VER)
+  #define TRAP(...) __debugbreak()
+  #else
+  #define TRAP(...) *(volatile int *)0 = 0
+  #endif
 #endif
 
 #include "generic.c"
