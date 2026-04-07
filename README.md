@@ -15,8 +15,8 @@ Options:
   -h, --help      : Display this help message and exit.
   -v, --verbose   : Verbose mode (default); output messages.
   -q, --quiet     : Quiet mode; suppress output messages.
-  -i, --implicit   : Allow renaming files not given in the list of files.
-  -e, --explicit   : Only rename files given in the list (default).
+  -i, --implicit  : Allow renaming files not given in the list of files.
+  -e, --explicit  : Only rename files given in the list (default).
   -F, --fatal     : Exit on first renaming error.
   -a, --autosolve : Auto solve name conflicts for equal files.
   -s, --sort      : Disable sorting of original list.
