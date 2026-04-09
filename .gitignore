@@ -22,3 +22,4 @@ aaa
 bbb
 *.git/
 .SRCINFO
+temp_delete_me
