@@ -85,9 +85,6 @@ typedef uint64_t uint64;
 // function in the error log, pass `__func__` from the caller macro down as an
 // argument just like `file` and `line`.
 
-// TODO: Consider adding your `INLINE` or `static inline` declaration to these
-// generated helper functions to avoid compiler warnings about unused static
-// functions when this file is included in multiple translation units.
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
 a_strings_##MODE(char *file, uint line, \
@@ -142,8 +139,7 @@ GENERATE_ASSERT_POINTERS(not_equal,  !=)
 GENERATE_ASSERT_POINTERS(more,       >)
 GENERATE_ASSERT_POINTERS(more_equal, >=)
 
-// TODO: Missing `#undef GENERATE_ASSERT_POINTERS` here. All other GENERATE_*
-// macros are properly `#undef`ed after use.
+#undef GENERATE_ASSERT_POINTERS
 
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
