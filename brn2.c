@@ -54,7 +54,7 @@ typedef struct Work {
 } Work;
 
 int32 brn2_threads(void *(*function)(Work *), int32, FileList *old,
-                    FileList *new, int32 *numbers, uint32 map_size, char *map);
+                   FileList *new, int32 *numbers, uint32 map_size, char *map);
 
 static void *brn2_threads_work_hashes(Work *);
 static void *brn2_threads_work_normalization(Work *);

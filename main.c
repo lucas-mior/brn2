@@ -255,7 +255,7 @@ main(int argc, char **argv) {
 
     {
         int32 j = 0;
-        for (int32 i = 0; i < old->length; i++) {
+        for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             if (file->type == TYPE_ERR) {
                 fprintf(stderr, "Removing '%s' from list.\n", file->name);
