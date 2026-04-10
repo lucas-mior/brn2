@@ -70,9 +70,6 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
-// Note: NEVER delete lines with // clang-format
-// clang-format off
-
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL) \
 static void * \
 get_pointer_##MODE(void *var1, void *var2) { \
@@ -254,8 +251,6 @@ _Generic((VAR1), \
 #define MAX(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
 #endif
 
-// clang-format on
-
 #if 0 == TESTING_minmax
 static inline void
 minmax_functions_sink(void) {
@@ -277,8 +272,6 @@ minmax_functions_sink(void) {
 
 #if TESTING_minmax
 
-// Note: NEVER delete lines with // clang-format
-// clang-format off
 int
 main(void) {
     {
@@ -349,7 +342,6 @@ main(void) {
     }
     exit(EXIT_SUCCESS);
 }
-// clang-format on
 #endif
 
 #endif /* MINMAX_C */
