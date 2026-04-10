@@ -565,8 +565,8 @@ static void *
 brn2_threads_work_sort(Work *arg) {
     Work *work = arg;
     FileName **files = &(work->old_list->files[work->start]);
-    qsort64(files, work->end - work->start, SIZEOF(*files), brn2_compare);
-    /* compare_filename_sort(files, work->end - work->start); */
+    /* qsort64(files, work->end - work->start, SIZEOF(*files), brn2_compare); */
+    compare_filename_sort(files, work->end - work->start);
     return 0;
 }
 
