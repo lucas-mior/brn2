@@ -1519,8 +1519,6 @@ util_copy_file_async_thread(void *arg) {
 
     while (left > 0) {
         char buffer[BUFSIZ];
-        // TODO: Avoid abbreviated variable names 'r', 'w', and 'n'. Prefer
-        // 'bytes_read', 'bytes_written', and 'events_count'.
         int64 r;
         int64 w;
         int64 n;
@@ -1668,9 +1666,6 @@ util_equal_files(char *filename_a, char *filename_b) {
     char buffer_b[BUFSIZ];
     int64 total_r = 0;
     int64 ra;
-    // TODO: Reduce variable scope. 'rb' is only used inside the while loop
-    // block. Declare it at the top of the innermost block that uses it.
-    int64 rb;
     struct stat stat_a;
     struct stat stat_b;
     bool equal = false;
@@ -1741,6 +1736,7 @@ util_equal_files(char *filename_a, char *filename_b) {
     } while (0);
 #endif
     while ((ra = read64(fd_a, buffer_a, sizeof(buffer_a))) > 0) {
+        int64 rb;
         if ((rb = read64(fd_b, buffer_b, sizeof(buffer_b))) != ra) {
             if (rb < 0) {
                 error("Error reading from %s: %s", filename_b, strerror(errno));
@@ -1769,17 +1765,13 @@ out:
 
 INLINE double
 rad2deg(double radians) {
-    // TODO: Do not use the 'const' qualifier for variables per your codebase
-    // rules.
-    const double RAD2DEG = 180.0 / 3.141592653589793;
+    double RAD2DEG = 180.0 / 3.141592653589793;
     return radians*RAD2DEG;
 }
 
 INLINE double
 deg2rad(double degrees) {
-    // TODO: Do not use the 'const' qualifier for variables per your codebase
-    // rules.
-    const double DEG2RAD = 3.141592653589793 / 180.0;
+    double DEG2RAD = 3.141592653589793 / 180.0;
     return degrees*DEG2RAD;
 }
 
@@ -2360,8 +2352,7 @@ main(int argc, char **argv) {
         string_from_strings(b, sizeof(b), "|", strs, 3);
         ASSERT_EQUAL(b, "one|two|three");
         string_from_doubles(b, sizeof(b), ",", dbls, 2);
-        // TODO: Prefer strlen32 instead of strlen per your codebase rules.
-        ASSERT_NOT_EQUAL(strlen(b), 0);
+        ASSERT_NOT_EQUAL(strlen32(b), 0);
     }
 
     {
@@ -2467,9 +2458,7 @@ main(int argc, char **argv) {
     }
 
     {
-        // TODO: Do not use the 'const' qualifier for variables per your
-        // codebase rules.
-        const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+        char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
         char name2[256];
         char buffer3[4096];
