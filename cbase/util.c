@@ -245,8 +245,6 @@ INLINE void *memchr64(void *pointer, int32 value, int64 size);
 #if OS_WINDOWS
 static void *
 memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
-    // TODO: Avoid abbreviation for variable names. Prefer descriptive names
-    // like 'haystack_ptr' and 'needle_ptr'.
     uchar *h = haystack;
     uchar *n = needle;
     uchar *end = h + hay_len;
@@ -269,8 +267,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
             return NULL;
         }
 
-        // TODO: Prefer memcmp64 over memcmp per your codebase rules.
-        if (memcmp(p, n, needle_len) == 0) {
+        if (memcmp64(p, n, needle_len) == 0) {
             return (void *)p;
         }
         h = p + 1;
@@ -689,8 +686,7 @@ free2(void *pointer, int64 size) {
     if (pointer) {
         free(pointer);
     }
-// TODO: Missing `return;` statement at the end of this void function per your
-// codebase rules.
+    return;
 }
 
 #if DEBUGGING_MEMORY
@@ -1003,10 +999,8 @@ util_filename_from(char *buffer, int64 size, int fd) {
         return -1;
     }
 
-    // TODO: Prefer strncmp32 over strncmp.
-    if (strncmp(buffer, "\\\\?\\", 4) == 0) {
-        // TODO: Prefer memmove64 over memmove per your codebase rules.
-        memmove(buffer, buffer + 4, len - 3);
+    if (strncmp32(buffer, "\\\\?\\", 4) == 0) {
+        memmove64(buffer, buffer + 4, len - 3);
     }
 
     return 0;
@@ -1265,8 +1259,6 @@ error_impl(char *file, int32 line, char *format, ...) {
     char *big_buffer = NULL;
     char *pbuffer = buffer;
     va_list args;
-    // TODO: Avoid abbreviated variable names like 'n', 'm', 'p'. Prefer
-    // descriptive names like 'written_bytes', 'buffer_size', 'prefix_len'.
     int32 n;
     int32 m = SIZEOF(buffer);
     int32 p;
