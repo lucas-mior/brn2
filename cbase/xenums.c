@@ -148,9 +148,6 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
             return "Unknown value";
     }
 #else
-    // TODO: If BIT_COUNT is large (e.g., 64), this allocates 16KB+ directly on
-    // the stack. In a deeply nested call chain or a thread with a small stack
-    // size, this could cause a stack overflow.
     char buffer[CAT(ENUM_PREFIX_, BIT_COUNT)*256 + 1];
     char *buffer_ptr = buffer;
     char *buffer_end = buffer + sizeof(buffer);
@@ -158,12 +155,10 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     int64 final_len;
     char *copy;
 
-    // TODO: Use your codebase convention `strlen32(name)` instead of
-    // `(int32)strlen(name)`.
     #define XENUM(e) \
         if (val & CAT(ENUM_PREFIX_, e)) { \
             char *name = QUOTE(ENUM_PREFIX_) #e; \
-            int32 len = (int32)strlen(name); \
+            int32 len = (int32)strlen32(name); \
             if (is_first == 0) { \
                 if (buffer_ptr < (buffer_end - 1)) { \
                     *buffer_ptr = '|'; \
@@ -195,11 +190,6 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM
 
     if (buffer_ptr == buffer) {
-        // TODO: Memory trap. Since successful bitflag parses return dynamically
-        // allocated memory, returning a string literal for "NONE" means if the
-        // caller calls `free()` on this specific result, the program will
-        // crash. Dynamically allocate "NONE" to maintain consistent memory
-        // ownership.
         return "NONE";
     }
 
