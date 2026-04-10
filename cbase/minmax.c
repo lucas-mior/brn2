@@ -153,11 +153,6 @@ GENERATE_COMPARE_LDOUBLE(max, >)
 #define SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     get_signed_unsigned_##MODE((llong)(VAR1), (ullong)(VAR2))
 
-// TODO: Precision loss hazard. In the `ulong` and `ullong` cases below,
-// comparing a 64-bit integer by casting to `long double` in `BOTH_LDOUBLE` can
-// lose exact precision if the platform uses 64-bit IEEE 754 for `long double`
-// (e.g., MSVC or some ARM architectures).
-
 #define FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
     schar:   BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
@@ -227,21 +222,7 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_LDOUBLE(void);
 #define POINTERS(MODE, VAR1, VAR2) \
     get_pointer_##MODE((void *)(uintptr_t)(VAR1), (void *)(uintptr_t)(VAR2))
 
-// TODO: The function prototype below is declared but never actually used in the
-// _Generic tree block below it.
-void UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE_CHARP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE_VOIDP(void);
-
-// TODO: Missing default pointer fallback. If a specific pointer type like `int
-// *` or `struct MyStruct *` is passed as VAR1, it will not match `void *` or
-// `char *`, and because there is no `default:` association at the top level of
-// this _Generic, compilation will fail.
-
-// TODO: Double evaluation hazard. VAR1 and VAR2 are passed directly into the
-// _Generic branches. If the caller uses side effects (e.g., `MIN(i++, j++)`),
-// those side effects will execute multiple times. If compiling purely under
-// GCC/Clang, wrapping this in statement expressions (e.g., `({ __typeof__(VAR1)
-// _v1 = (VAR1); ... })`) would eliminate this danger.
 
 #define MINMAX_COMPARE(MODE, VAR1, VAR2) \
 _Generic((VAR1), \
