@@ -265,11 +265,6 @@ GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
 #undef GENERATE_ASSERT_LDOUBLE
 
-// TODO: Per your convention, initialize upon declaration to reduce
-// uninitialized state branching: `char *s1 = "false"; char *s2 =
-// "false";` and only write the `if (varX) { sX = "true"; }`
-// conditionals.
-
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL) \
 static void \
 a_bool_##MODE(char *file, uint line, \
@@ -278,17 +273,13 @@ a_bool_##MODE(char *file, uint line, \
               llong bits1, llong bits2, \
               bool var1, bool var2) { \
     if (!(var1 SYMBOL var2)) { \
-        char *s1; \
-        char *s2; \
+        char *s1 = "false"; \
+        char *s2 = "false"; \
         if (var1) { \
             s1 = "true"; \
-        } else { \
-            s1 = "false"; \
         } \
         if (var2) { \
             s2 = "true"; \
-        } else { \
-            s2 = "false"; \
         } \
         error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
         error2("[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n", \
