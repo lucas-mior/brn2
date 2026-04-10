@@ -161,6 +161,7 @@ arena_strerror(int arena_errno) {
     case EARENA_SIZE:
         return "Invalid size";
     case EARENA_MORE_THAN_4GB:
+        // TODO: Typo: "Tryed" should be "Tried".
         return "Tryed to get 32 bit index on arena larger than 4GB of space";
     default:
         return strerror(arena_errno);
@@ -169,6 +170,8 @@ arena_strerror(int arena_errno) {
 
 static Arena *
 arena_create(int64 size) {
+    // TODO: Reduce variable scope by declaring `p` and `arena` closer to where
+    // they are actually populated/used.
     void *p;
     Arena *arena;
 
@@ -193,6 +196,8 @@ arena_create(int64 size) {
 
 static void
 arena_destroy(Arena *arena) {
+    // TODO: Reduce variable scope by declaring `next` inside the do-while loop
+    // block.
     Arena *next;
 
     do {
@@ -337,9 +342,15 @@ arena_push(Arena *arena, int64 size) {
     return before;
 }
 
+// TODO: Consider defining this function with `INLINE` if it is only ever called
+// by `xarenas_push`.
 static void *
 arenas_push(Arena **arenas, int64 number, int64 size) {
+    // TODO: Loop variable `i` is `uint32`, but limit `number` is `int64`. This
+    // can cause a signed/unsigned mismatch or truncation.
     for (uint32 i = 0; i < number; i += 1) {
+        // TODO: Combine declaration and assignment to reduce variable scope:
+        // `void *p = arena_push(arenas[i], size);`
         void *p;
         if ((p = arena_push(arenas[i], size))) {
             return p;
@@ -350,6 +361,8 @@ arenas_push(Arena **arenas, int64 number, int64 size) {
 
 static void *
 xarena_push(Arena *arena, int64 size) {
+    // TODO: Combine declaration and assignment to reduce variable scope: `void
+    // *p = arena_push(arena, size);`
     void *p;
     if ((p = arena_push(arena, size)) == NULL) {
         error2("Error allocating %lld bytes: %s.\n", (llong)size, arena_strerror(errno));
@@ -360,9 +373,12 @@ xarena_push(Arena *arena, int64 size) {
 
 static void *
 xarenas_push(Arena **arenas, int32 narenas, int64 size) {
+    // TODO: Combine declaration and assignment to reduce variable scope: `void
+    // *p = arenas_push(arenas, narenas, size);`
     void *p;
 
     if ((p = arenas_push(arenas, narenas, size)) == NULL) {
+        // TODO: Missing newline `\n` at the end of the error string.
         error2("Error pushing %lld bytes into arenas %p: %s.", (llong)size,
                (void *)arenas, arena_strerror(errno));
         exit(EXIT_FAILURE);
@@ -372,14 +388,25 @@ xarenas_push(Arena **arenas, int32 narenas, int64 size) {
 
 static uint32
 arena_push_index32(Arena *arena, uint32 size) {
+    // TODO: Combine declaration and assignment `void *before = arena->pos;`
+    // after the `arena_with_space` check.
     void *before;
 
+    // TODO: If `arena_with_space` traverses to a chained block (`arena->next`),
+    // the returned index will be relative to the chained block's `begin`
+    // pointer, rendering the offset useless to the caller since they only hold
+    // the head arena pointer.
     if ((arena = arena_with_space(arena, size)) == NULL) {
         return UINT32_MAX;
     }
 
     before = arena->pos;
     arena->pos = (char *)arena->pos + size;
+
+    // TODO: This capacity check occurs *after* modifying `arena->pos` but
+    // *before* incrementing `arena->npushed`. If it triggers, it corrupts the
+    // allocator's internal state. This should be validated before modifying
+    // `arena->pos`.
     if (arena->size >= UINT32_MAX) {
         errno = EARENA_MORE_THAN_4GB;
         return UINT32_MAX;
@@ -411,6 +438,9 @@ arena_of(Arena *arena, void *p) {
 
 static bool
 arenas_pop(Arena **arenas, int32 narenas, void *p) {
+    // TODO: `narenas` is `int32` here, but in `arenas_push`, it was defined as
+    // `int64` (`number`). Be consistent with the integer size for array
+    // lengths.
     for (int32 i = 0; i < narenas; i += 1) {
         if (arena_pop(arenas[i], p)) {
             return true;
@@ -421,6 +451,10 @@ arenas_pop(Arena **arenas, int32 narenas, void *p) {
 
 // Note that arena_pop
 // does NOT have to happen in reverse order of arena_push
+// TODO: Naming convention. Because this acts as a reference decrementer and
+// only reclaims space when the block is completely empty (`npushed == 0`),
+// calling this `arena_pop` implies a LIFO stack behavior which isn't happening.
+// Consider renaming to something like `arena_release` or `arena_decref`.
 static bool
 arena_pop(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
@@ -469,6 +503,8 @@ arena_reset(Arena *arena) {
 
 static void *
 arenas_reset(Arena **arenas, int64 number) {
+    // TODO: Loop variable `i` is `uint32`, but limit `number` is `int64`. This
+    // can cause a signed/unsigned mismatch.
     for (uint32 i = 0; i < number; i += 1) {
         arena_reset(arenas[i]);
     }
@@ -477,6 +513,8 @@ arenas_reset(Arena **arenas, int64 number) {
 
 static void
 arenas_destroy(Arena **arenas, int64 number) {
+    // TODO: Loop variable `i` is `uint32`, but limit `number` is `int64`. This
+    // can cause a signed/unsigned mismatch.
     for (uint32 i = 0; i < number; i += 1) {
         arena_destroy(arenas[i]);
     }
@@ -544,6 +582,8 @@ main(void) {
         int64 total_size = 0;
         int64 total_pushed = 0;
 
+        // TODO: `LENGTH()` macro evaluates to `int64`, but the loop utilizes
+        // `uint32`. This causes a signed/unsigned arithmetic mismatch.
         for (uint32 i = 0; i < LENGTH(objs); i += 1) {
             int64 size = ALIGN(1ul + (ulong)(rand() % 10000));
             ASSERT((objs[i] = arena_push(arena, size)));
@@ -567,9 +607,13 @@ main(void) {
 
     {
         int aux;
+        // TODO: The variable `nallocated` is tracked as `uint32`, but
+        // `LENGTH(objs)` evaluates to `int64`. 
         uint32 nallocated = LENGTH(objs);
 
         while (nallocated > 0) {
+            // TODO: Modulo arithmetic using mixed types (`uint32` and `int64`
+            // from `LENGTH`).
             uint32 j = (uint32)rand() % LENGTH(objs);
             uint32 k = (uint32)rand() % LENGTH(objs);
             if (objs[j]) {
