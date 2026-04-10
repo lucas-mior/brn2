@@ -743,8 +743,8 @@ brn2_sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    p = brn2_threads(brn2_threads_work_sort, old->length, old, NULL, NULL, 0,
-                     NULL);
+    p = brn2_threads(brn2_threads_work_sort,
+                     old->length, old, NULL, NULL, 0, NULL);
     if (p == 1) {
         free(dummy_last, dummy_size);
         return;
