@@ -36,7 +36,6 @@ bool brn2_options_vim_split = false;
 int32 nthreads;
 int (*print)(const char *, ...);
 
-// clang-format off
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
     {"file",      required_argument, NULL, 'f'},
@@ -51,7 +50,6 @@ static struct option options[] = {
     {"vim-split", no_argument,       NULL, 'V'},
     {NULL,        0,                 NULL, 0}
 };
-// clang-format on
 
 enum {
     FILES_FROM_FILE,
@@ -392,7 +390,6 @@ main(int argc, char **argv) {
     }
 
     {
-        // clang-format off
         char *args_edit[] = {
             EDITOR,
             brn2_buffer.name,
@@ -422,7 +419,6 @@ main(int argc, char **argv) {
         (void)args_edit;
         (void)args_vim_split;
         (void)args_shuf;
-        // clang-format on
 
 #if BRN2_BENCHMARK
         {

@@ -841,7 +841,6 @@ noop(const char *unused, ...) {
     return 0;
 }
 
-// clang-format off
 void
 brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
               struct Hash_set *names_renamed, int32 i, int32 *number_renames) {
@@ -996,8 +995,6 @@ brn2_usage(FILE *stream) {
 
     exit((int)(stream == stderr));
 }
-
-// clang-format on
 
 // flags: -lm
 
