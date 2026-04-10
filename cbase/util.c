@@ -268,7 +268,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
             return NULL;
         }
 
-        if (memcmp64(p, n, needle_len) == 0) {
+        if (memcmp64(p, n, (int64)needle_len) == 0) {
             return (void *)p;
         }
         h = p + 1;
