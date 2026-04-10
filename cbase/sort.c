@@ -165,6 +165,9 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
 #define SORT_BENCHMARK 0
 
 #if !TESTING_sort || (defined(__INCLUDE_LEVEL__) && __INCLUDE_LEVEL__)
+// TODO: To make this file independent from brn2, extract this entire function
+// into a brn2-specific file (e.g., brn2.c) because it heavily depends on
+// `FileList`, `FileName`, `brn2_threads`, `brn2_compare`, and `brn2_timings`.
 static void
 sort(FileList *old) {
     int32 p;
@@ -244,8 +247,8 @@ sort_functions_sink(void) {
 #if TESTING_sort
 
 #define MAXI 10000
-static const int32 possibleN[] = {31, 32, 33, 50};
-static const int32 possibleP[] = {1, 2, 3, 8};
+static int32 possibleN[] = {31, 32, 33, 50};
+static int32 possibleP[] = {1, 2, 3, 8};
 
 static int32
 compare_int(const void *a, const void *b) {
