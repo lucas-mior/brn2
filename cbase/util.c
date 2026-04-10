@@ -196,8 +196,6 @@ _Generic((ARRAY), \
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
-// Note: NEVER delete lines with // clang-format
-
 #endif
 
 #define UTIL_ALIGN_UINT(SIZE, A) (int64)(((SIZE) + ((A) - 1)) & ~((A) - 1))
@@ -219,7 +217,6 @@ _Generic((SIZE), \
 #if !defined(ALIGN)
 #define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
 #endif
-
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 static int64 util_page_size = 0;
@@ -1357,7 +1354,6 @@ fatal(int status) {
     }
 }
 
-// Note: NEVER delete lines with // clang-format
 void
 util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
@@ -1409,8 +1405,6 @@ util_die_notify(char *program_name, char *format, ...) {
     }
     fatal(EXIT_FAILURE);
 }
-
-// Note: NEVER delete lines with // clang-format
 
 #if OS_UNIX
 static int32
@@ -1700,7 +1694,6 @@ util_equal_files(char *filename_a, char *filename_b) {
             void *map_a;
             void *map_b;
 
-            // Note: NEVER delete lines with // clang-format
             map_a = mmap(NULL, (size_t)stat_a.st_size,
                          PROT_READ, MAP_PRIVATE, fd_a, 0);
             if (map_a == MAP_FAILED) {
@@ -2371,7 +2364,6 @@ main(int argc, char **argv) {
     }
 
     {
-        // Note: NEVER delete lines with // clang-format
         char paths[][30] = {
             "/aaaa/bbbb/cccc", "/aa/bb/cc",  "/a/b/c",    "a/b//c",
             "a/b/cccc",        "a/bb/cccc", "aaaa//cccc", "/aaaa",
@@ -2453,7 +2445,6 @@ main(int argc, char **argv) {
     }
 
     {
-        // Note: NEVER delete lines with // clang-format
         const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
         char name2[256];
