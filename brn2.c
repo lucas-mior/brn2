@@ -565,8 +565,8 @@ static void *
 brn2_threads_work_sort(Work *arg) {
     Work *work = arg;
     FileName **files = &(work->old_list->files[work->start]);
-    /* qsort64(files, work->end - work->start, SIZEOF(*files), brn2_compare); */
-    compare_filename_sort(files, work->end - work->start);
+    qsort64(files, work->end - work->start, SIZEOF(*files), brn2_compare);
+    /* compare_filename_sort(files, work->end - work->start); */
     return 0;
 }
 
@@ -727,7 +727,7 @@ brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
 }
 #endif
 
-#define SORT_BENCHMARK 0
+#define SORT_BENCHMARK 1
 
 static void
 brn2_sort(FileList *old) {
@@ -752,8 +752,8 @@ brn2_sort(FileList *old) {
     sort_shuffle(old->files, old->length, SIZEOF(*(old->files)));
 
     memcpy64(&copy, old, sizeof(*old));
-    copy.files = xmalloc(copy.length*sizeof(*(old->files)));
-    memcpy64(copy.files, old->files, copy.length*sizeof(*(old->files)));
+    copy.files = xmalloc(copy.length*SIZEOF(*(old->files)));
+    memcpy64(copy.files, old->files, copy.length*SIZEOF(*(old->files)));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
@@ -772,20 +772,23 @@ brn2_sort(FileList *old) {
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    qsort(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
-    if (memcmp64(copy.files, old->files, copy.length*sizeof(*(copy.files)))) {
-        error("Error in sorting.\n");
+    qsort64(copy.files, copy.length, sizeof(*(copy.files)), brn2_compare);
+    {
+        bool sort_wrong = false;
         for (int32 i = 0; i < old->length; i += 1) {
             char *name1 = old->files[i]->name;
             char *name2 = copy.files[i]->name;
             if (strcmp(name1, name2)) {
-                error("[%u] = %s != %s\n", i, name1, name2);
+                error("Error in sorting:");
+                error(" [%d] = %s != %s\n", i, name1, name2);
+                sort_wrong = true;
             }
         }
-        fatal(EXIT_FAILURE);
-    } else {
-        error("Sorting successful.\n");
+        if (sort_wrong) {
+            fatal(EXIT_FAILURE);
+        }
     }
+
     brn2_timings("sorting", t0, t1, old->length);
     exit(EXIT_SUCCESS);
 #endif
