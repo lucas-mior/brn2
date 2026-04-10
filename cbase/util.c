@@ -227,6 +227,7 @@ static void util_segv_handler(int32) __attribute__((noreturn));
 static int32 itoa2(char *, int32, llong);
 static long atoi2(char *);
 INLINE void *memchr64(void *pointer, int32 value, int64 size);
+INLINE int memcmp64(void *left, void *right, int64 size);
 
 #if !defined(CAT) || !defined(CAT3)
   #define CAT_(a, b)     a##b
