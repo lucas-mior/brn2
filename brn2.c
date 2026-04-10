@@ -717,7 +717,7 @@ brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
 
 static void
 brn2_sort(FileList *old) {
-    int32 p;
+    int32 partitions;
 
     char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
@@ -743,16 +743,17 @@ brn2_sort(FileList *old) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    p = brn2_threads(brn2_threads_work_sort,
-                     old->length, old, NULL, NULL, 0, NULL);
-    if (p == 1) {
+    partitions = brn2_threads(brn2_threads_work_sort,
+                              old->length, old, NULL, NULL, 0, NULL);
+    if (partitions == 1) {
         free(dummy_last, dummy_size);
         return;
     }
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), * brn2_compare); */
     /* stc_sort_list_sort(old->files, old->length); */
-    sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
+    sort_merge_subsorted(old->files, old->length, partitions,
+                         sizeof(*(old->files)),
                          &dummy_last, brn2_compare);
 
 #if SORT_BENCHMARK
