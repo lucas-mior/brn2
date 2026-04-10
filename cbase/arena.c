@@ -111,7 +111,7 @@ static Arena *global_arena = NULL;
 
 static void *arena_allocate(int64 *);
 static bool arena_free(Arena *);
-static bool arena_pop(Arena *arena, void *p);
+static bool arena_decr(Arena *arena, void *p);
 
 static int64 arena_page_size = 0;
 
@@ -434,21 +434,15 @@ arena_of(Arena *arena, void *p) {
 static bool
 arenas_pop(Arena **arenas, int32 narenas, void *p) {
     for (int32 i = 0; i < narenas; i += 1) {
-        if (arena_pop(arenas[i], p)) {
+        if (arena_decr(arenas[i], p)) {
             return true;
         }
     }
     return false;
 }
 
-// Note that arena_pop
-// does NOT have to happen in reverse order of arena_push
-// TODO: Naming convention. Because this acts as a reference decrementer and
-// only reclaims space when the block is completely empty (`npushed == 0`),
-// calling this `arena_pop` implies a LIFO stack behavior which isn't happening.
-// Consider renaming to something like `arena_release` or `arena_decref`.
 static bool
-arena_pop(Arena *arena, void *p) {
+arena_decr(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
         return false;
     }
@@ -599,7 +593,7 @@ main(void) {
             uint32 j = (uint32)rand() % LENGTH(objs);
             uint32 k = (uint32)rand() % LENGTH(objs);
             if (objs[j]) {
-                ASSERT(arena_pop(arena, objs[j]));
+                ASSERT(arena_decr(arena, objs[j]));
                 objs[j] = NULL;
                 nallocated -= 1;
             }
@@ -612,7 +606,7 @@ main(void) {
             ASSERT_EQUAL(a->npushed, 0);
         }
 
-        ASSERT(!arena_pop(arena, &aux));
+        ASSERT(!arena_decr(arena, &aux));
     }
 
     arena_reset(arena);
@@ -628,8 +622,8 @@ main(void) {
         ASSERT(arena->next);
         ASSERT(arena_of(arena, p1) != arena_of(arena, p2));
 
-        ASSERT(arena_pop(arena, p1));
-        ASSERT(arena_pop(arena, p2));
+        ASSERT(arena_decr(arena, p1));
+        ASSERT(arena_decr(arena, p2));
         ASSERT_EQUAL(arena->npushed, 0);
     }
 
@@ -648,9 +642,9 @@ main(void) {
         ASSERT_EQUAL(arena->npushed, 2);
         ASSERT(arena_of(arena, p3) == arena_of(arena, p4));
 
-        ASSERT(arena_pop(arena, p3));
+        ASSERT(arena_decr(arena, p3));
         ASSERT_EQUAL(arena->npushed, 1);
-        ASSERT(arena_pop(arena, p4));
+        ASSERT(arena_decr(arena, p4));
         ASSERT_EQUAL(arena->npushed, 0);
     }
 

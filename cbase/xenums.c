@@ -236,15 +236,15 @@ main(void) {
 
     s = TEST_FLAGS_str(TEST_FLAGS_READ);
     ASSERT_EQUAL(s, "TEST_FLAGS_READ");
-    ASSERT(arena_pop(global_arena, s));
+    ASSERT(arena_decr(global_arena, s));
 
     s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_EXEC);
     ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_EXEC");
-    ASSERT(arena_pop(global_arena, s));
+    ASSERT(arena_decr(global_arena, s));
 
     s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_WRITE | TEST_FLAGS_EXEC);
     ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_WRITE|TEST_FLAGS_EXEC");
-    ASSERT(arena_pop(global_arena, s));
+    ASSERT(arena_decr(global_arena, s));
 
     ASSERT_EQUAL(TEST_FLAGS_str(0), "NONE");
 
