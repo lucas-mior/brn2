@@ -174,8 +174,6 @@ GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llu", >=, more_equal)
 
 static int
 compare_sign_with_unsign(llong s, ullong u) {
-    // TODO: Per your codebase convention, reduce variable scope: `ullong saux`
-    // can be declared and initialized after the `if (s < 0)` block.
     ullong saux;
     if (s < 0) {
         return -1;
