@@ -341,9 +341,11 @@ CAT(hash_probe_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
 #endif
 
         if (state == HASH_SLOT_FREE) {
-            // TODO: Do not use the ternary operator per your codebase rules.
-            // Prefer if/else blocks.
-            *out_idx = (first_tombstone >= 0) ? (uint32)first_tombstone : probe;
+            if (first_tombstone >= 0) {
+                *out_idx = (uint32)first_tombstone;
+            } else {
+                *out_idx = probe;
+            }
             return false;
         } else if (state == HASH_SLOT_DELETED) {
             if (first_tombstone < 0) {
