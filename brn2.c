@@ -558,7 +558,7 @@ brn2_slash_add(FileName *file) {
 
 #define i_key FileName *
 #define i_cmp(a,b) brn2_compare(a,b)
-#define T compare_filename
+#define T stc_sort_list
 #include "stc/sort.h"
 
 static void *
@@ -566,7 +566,7 @@ brn2_threads_work_sort(Work *arg) {
     Work *work = arg;
     FileName **files = &(work->old_list->files[work->start]);
     /* qsort64(files, work->end - work->start, SIZEOF(*files), brn2_compare); */
-    compare_filename_sort(files, work->end - work->start);
+    stc_sort_list_sort(files, work->end - work->start);
     return 0;
 }
 
@@ -752,7 +752,7 @@ brn2_sort(FileList *old) {
 
     /* qsort(old->files, old->length, sizeof(*(old->files)),
      * brn2_compare); */
-    /* compare_filename_sort(old->files, old->length); */
+    /* stc_sort_list_sort(old->files, old->length); */
     sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
                          &dummy_last, brn2_compare);
 
