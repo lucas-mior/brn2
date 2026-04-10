@@ -101,6 +101,9 @@ typedef uint64_t uint64;
 
 struct CommonBucket;
 
+// TODO: Struct `CommonMap` is not typedef'd. Per your codebase rules ("do
+// typedef structs"), define it as `typedef struct CommonMap { ... }
+// CommonMap;`.
 struct CommonMap {
     int64 size;
     uint32 capacity;
@@ -148,6 +151,8 @@ typedef struct Bucket {
 #endif
 } Bucket;
 
+// TODO: Struct `Map` is not typedef'd. Per your codebase rules ("do typedef
+// structs"), define it as `typedef struct Map { ... } Map;`.
 struct Map {
     int64 size;
     uint32 capacity;
@@ -244,6 +249,8 @@ CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
 
     for (uint32 j = 0; j < old_capacity; j += 1) {
         Bucket *iterator = &old_array[j];
+        // TODO: Initialize `rehash_base` and `rehash_probe` at declaration
+        // below to reduce uninitialized state branching.
         uint32 rehash_base;
         uint32 rehash_probe;
         uint32 rehash_step = 0;
@@ -334,6 +341,8 @@ CAT(hash_probe_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
 #endif
 
         if (state == HASH_SLOT_FREE) {
+            // TODO: Do not use the ternary operator per your codebase rules.
+            // Prefer if/else blocks.
             *out_idx = (first_tombstone >= 0) ? (uint32)first_tombstone : probe;
             return false;
         } else if (state == HASH_SLOT_DELETED) {
@@ -590,6 +599,8 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
                                       , uint64 hash, uint32 base_index)
 {
     uint32 target_idx;
+    // TODO: Reduce variable scope. `target` is only used inside the if blocks
+    // below. Declare it at the top of the innermost block that uses it.
     Bucket *target;
 
     if (map == NULL) {
@@ -742,6 +753,8 @@ CAT(hash_functions_sink_, HASH_TYPE)(void) {
     (void)CAT(hash_print_summary_, HASH_TYPE);
     (void)CAT(hash_print_, HASH_TYPE);
     (void)CAT(hash_ndeleted_, HASH_TYPE);
+    // TODO: Missing `return;` statement at the end of this void function per
+    // your codebase rules.
 }
 
 #undef HASH_VALUE_TYPE
@@ -763,6 +776,10 @@ hash_function(void *key, int32 key_length) {
     return hash;
 }
 
+// TODO: Avoid defining functions that are only called once. Mark these small
+// utility functions (`hash_normal`, `hash_capacity`, `hash_length`,
+// `hash_expected_collisions`) with `inline` or `INLINE` to avoid unnecessary
+// function call overhead.
 uint32
 hash_normal(void *map, uint64 hash) {
     struct CommonMap *map2 = map;
@@ -785,6 +802,8 @@ hash_length(void *map) {
 uint32
 hash_expected_collisions(void *map) {
     struct CommonMap *map2 = map;
+    // TODO: Avoid abbreviations for variable names (e.g., `n`, `m`). Use
+    // descriptive names like `length` and `capacity`.
     long double n = map2->length;
     long double m = map2->capacity;
     long double result = n - m*(1 - powl((m - 1) / m, n));
@@ -840,6 +859,8 @@ random_string(Arena *arena, uint32 nbytes) {
     string.s = arena_push(arena, size);
 
     for (int32 i = 0; i < len; i += 1) {
+        // TODO: Avoid abbreviation `c`. Use a descriptive name like
+        // `char_index` per your guidelines.
         int32 c = (int32)((size_t)rand() % (sizeof(characters) - 1));
         string.s[i] = characters[c];
     }
