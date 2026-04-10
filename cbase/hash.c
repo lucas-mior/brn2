@@ -136,6 +136,7 @@ typedef struct Bucket {
 #if HASH_KEY_FIXED_LEN
     HASH_KEY_TYPE key;
     int8 slot_state;
+    uint8 padding2[3];
 #else
     HASH_KEY_TYPE *key;
     int32 key_len;
