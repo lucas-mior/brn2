@@ -44,7 +44,6 @@
 #define HASH_VALUE_TYPE int32
 #define HASH_VALUE_FORMATTER "%d"
 #define HASH_TYPE map
-#define HASH_AUTO_RESIZE 1
 #endif
 
 #define HASH_SLOT_USED     1
@@ -129,10 +128,6 @@ struct CommonMap {
 #define HASH_DUPLICATE_KEYS 0
 #endif
 
-#if !defined(HASH_AUTO_RESIZE)
-#error HASH_AUTO_RESIZE is undefined
-#endif
-
 #define Bucket CAT(Bucket_, HASH_TYPE)
 #define Map CAT(Hash_, HASH_TYPE)
 
@@ -171,6 +166,8 @@ CHECK_COMMON_MAP(capacity);
 CHECK_COMMON_MAP(bitmask);
 CHECK_COMMON_MAP(length);
 CHECK_COMMON_MAP(occupied);
+
+#undef CHECK_COMMON_MAP
 
 static void
 CAT(hash_zero_, HASH_TYPE)(struct Map *map) {
@@ -345,6 +342,7 @@ CAT(hash_probe_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
             }
         } else {
 #if HASH_KEY_FIXED_LEN
+            (void)hash;
             if (!memcmp64(&iterator->key, key, sizeof(HASH_KEY_TYPE)))
 #else
             if ((iterator->hash == hash)
@@ -383,7 +381,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
     uint32 target_idx = MAXOF(target_idx);
     Bucket *target;
 
-    if (HASH_AUTO_RESIZE && (map->occupied*100 >= map->capacity*75)) {
+    if (map->occupied*100 >= map->capacity*75) {
         CAT(hash_resize_, HASH_TYPE)(map);
         base_index = hash & map->bitmask;
     }
@@ -465,7 +463,7 @@ CAT(hash_overwrite_pre_calc_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
     uint32 target_idx = MAXOF(target_idx);
     Bucket *target;
 
-    if (HASH_AUTO_RESIZE && (map->occupied*100 >= map->capacity*75)) {
+    if (map->occupied*100 >= map->capacity*75) {
         CAT(hash_resize_, HASH_TYPE)(map);
         base_index = hash & map->bitmask;
     }
@@ -820,7 +818,6 @@ static bool hash_remove_map_by_value(struct Hash_map_by_value *, int64 *);
 #define HASH_VALUE_TYPE int32
 #define HASH_VALUE_FORMATTER "%d"
 #define HASH_TYPE map_by_value
-#define HASH_AUTO_RESIZE 1
 #define HASH_DUPLICATE_KEYS 0
 #include "hash.c"
 

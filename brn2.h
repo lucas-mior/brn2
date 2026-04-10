@@ -57,14 +57,12 @@
 
 #define HASH_KEY_TYPE char
 #define HASH_VALUE_TYPE int32
-#define HASH_AUTO_RESIZE 0
 #define HASH_TYPE map
 #include "hash.c"
 
 #define HASH_KEY_TYPE char
 #define HASH_PADDING_TYPE uint32
 #define HASH_TYPE set
-#define HASH_AUTO_RESIZE 0
 #include "hash.c"
 
 #if defined(__GNUC__)
