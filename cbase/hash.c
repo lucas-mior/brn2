@@ -861,10 +861,8 @@ random_string(Arena *arena, uint32 nbytes) {
     string.s = arena_push(arena, size);
 
     for (int32 i = 0; i < len; i += 1) {
-        // TODO: Avoid abbreviation `c`. Use a descriptive name like
-        // `char_index` per your guidelines.
-        int32 c = (int32)((size_t)rand() % (sizeof(characters) - 1));
-        string.s[i] = characters[c];
+        int32 ci = (int32)((size_t)rand() % (sizeof(characters) - 1));
+        string.s[i] = characters[ci];
     }
     string.s[len] = '\0';
     string.len = len;
