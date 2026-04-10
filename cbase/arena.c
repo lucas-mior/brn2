@@ -30,6 +30,7 @@
 #if OS_UNIX
 #include <sys/mman.h>
 #include <unistd.h>
+#include <pthread.h>
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
@@ -105,6 +106,8 @@ typedef struct Arena {
     int64 npushed;
     struct Arena *next;
 } Arena;
+
+static Arena *global_arena = NULL;
 
 static void *arena_allocate(int64 *);
 static bool arena_free(Arena *);
@@ -361,9 +364,18 @@ arenas_push(Arena **arenas, int64 number, int64 size) {
 
 static void *
 xarena_push(Arena *arena, int64 size) {
-    // TODO: Combine declaration and assignment to reduce variable scope: `void
-    // *p = arena_push(arena, size);`
     void *p;
+
+    if (arena == NULL) {
+        if (global_arena == NULL) {
+            global_arena = arena_create(SIZEMB(2));
+            arena = global_arena;
+        } else {
+            error2("Error in %s: arena is NULL.\n", __func__);
+            fatal(EXIT_FAILURE);
+        }
+    }
+
     if ((p = arena_push(arena, size)) == NULL) {
         error2("Error allocating %lld bytes: %s.\n", (llong)size, arena_strerror(errno));
         exit(EXIT_FAILURE);
