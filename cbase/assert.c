@@ -484,15 +484,11 @@ _Generic((VAR1), \
 #define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more,       VAR1, VAR2)
 #define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
 
-// TODO: Double evaluation hazard. If `VAR1` contains an expression with side
-// effects (e.g., `ASSERT_NULL(ptr++)`), the side effect will be evaluated twice
-// upon failure (once in the `if`, once in the `error2` log). This won't impact
-// execution since the failure ends in a `TRAP()`, but the log will print the
-// post-incremented state.
 #define ASSERT_NULL(VAR1) do { \
-    if ((void *)VAR1 != NULL) { \
+    void *p = VAR1; \
+    if (p != NULL) { \
         error2("\n%s: Assertion failed at %s:%d\n", __func__, __FILE__, __LINE__); \
-        error2("%s = %p == NULL\n", #VAR1, (void *)VAR1); \
+        error2("%s = %p == NULL\n", #VAR1, p); \
         TRAP(); \
     } \
 } while (0)
