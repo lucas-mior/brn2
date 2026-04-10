@@ -93,9 +93,11 @@ typedef uint64_t uint64;
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
 #define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
 
-#if !defined(CAT)
-#define CAT_(a, b) a##b
-#define CAT(a, b) CAT_(a, b)
+#if !defined(CAT) || !defined(CAT3)
+  #define CAT_(a, b)     a##b
+  #define CAT3_(a, b, c) a##b##c
+  #define CAT(a, b)      CAT_(a, b)
+  #define CAT3(a, b, c)  CAT3_(a, b, c)
 #endif
 
 struct CommonBucket;
