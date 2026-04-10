@@ -750,8 +750,7 @@ brn2_sort(FileList *old) {
         return;
     }
 
-    /* qsort(old->files, old->length, sizeof(*(old->files)),
-     * brn2_compare); */
+    /* qsort(old->files, old->length, sizeof(*(old->files)), * brn2_compare); */
     /* stc_sort_list_sort(old->files, old->length); */
     sort_merge_subsorted(old->files, old->length, p, sizeof(*(old->files)),
                          &dummy_last, brn2_compare);
