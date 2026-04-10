@@ -404,8 +404,10 @@ main(int argc, char **argv) {
             brn2_buffer_old.name,
             brn2_buffer.name,
             "-c",
-            "wincmd h | set nomodifiable scrollbind cursorbind cursorline"
-            " | wincmd l | set scrollbind cursorbind"
+            "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
+            "-c",
+            "wincmd l | set scrollbind cursorbind",
+            "-c",
             " | au QuitPre */brn2.* quitall",
             NULL
         };
