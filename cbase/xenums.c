@@ -56,7 +56,7 @@
   #define TESTING_xenums 0
 #endif
 
-#if TESTING_xenums
+#if TESTING_xenums && !defined(ENUM_NAME)
 #define ENUM_NAME TestFlags
 #define ENUM_PREFIX_ TEST_FLAGS_
 #define ENUM_BITFLAGS 1
@@ -152,8 +152,6 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     char *buffer_ptr = buffer;
     char *buffer_end = buffer + sizeof(buffer);
     int32 is_first = 1;
-    int64 final_len;
-    char *copy;
 
     #define XENUM(e) \
         if (val & CAT(ENUM_PREFIX_, e)) { \
@@ -194,13 +192,17 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     }
 
     *buffer_ptr = '\0';
-    final_len = (int64)(buffer_ptr - buffer) + 1;
 
-    if ((copy = xarena_push(global_arena, final_len))) {
-        memcpy64(copy, buffer, final_len);
+    {
+        int64 final_len = (int64)(buffer_ptr - buffer) + 1;
+        char *copy;
+
+        if ((copy = xarena_push(global_arena, final_len))) {
+            memcpy64(copy, buffer, final_len);
+        }
+
+        return copy;
     }
-
-    return copy;
 #endif
 }
 
@@ -217,8 +219,19 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #undef ENUM_FIELDS
 #undef ENUM_BITFLAGS
 
-#if TESTING_xenums
+#if TESTING_xenums && !defined(TESTING_xenums_started)
+#define TESTING_xenums_started
+
 #include "assert.c"
+
+#define ENUM_NAME TestNormal
+#define ENUM_PREFIX_ TEST_NORMAL_
+#define ENUM_BITFLAGS 0
+#define ENUM_FIELDS \
+    X(APPLE) \
+    X(BANANA) \
+    X(CHERRY, 10)
+#include "xenums.c"
 
 int
 main(void) {
@@ -242,8 +255,20 @@ main(void) {
 
     ASSERT_EQUAL(TEST_FLAGS_str(0), "NONE");
 
+    s = TEST_NORMAL_str(TEST_NORMAL_APPLE);
+    ASSERT_EQUAL(s, "TEST_NORMAL_APPLE");
+
+    s = TEST_NORMAL_str(TEST_NORMAL_BANANA);
+    ASSERT_EQUAL(s, "TEST_NORMAL_BANANA");
+
+    s = TEST_NORMAL_str(TEST_NORMAL_CHERRY);
+    ASSERT_EQUAL(s, "TEST_NORMAL_CHERRY");
+
+    s = TEST_NORMAL_str(999);
+    ASSERT_EQUAL(s, "Unknown value");
+
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
 }
 
-#endif /* TESTING_xenums */
+#endif /* TESTING_xenums && !defined(TESTING_xenums_started) */
