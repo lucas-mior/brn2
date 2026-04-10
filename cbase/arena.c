@@ -149,6 +149,7 @@ enum ArenaErrors {
     EARENA_INVALID_OBJECT,
     EARENA_OBJECT_SIZE,
     EARENA_MORE_THAN_4GB,
+    EARENA_LINKED,
     EARENA_SIZE,
 };
 
@@ -164,8 +165,9 @@ arena_strerror(int arena_errno) {
     case EARENA_SIZE:
         return "Invalid size";
     case EARENA_MORE_THAN_4GB:
-        // TODO: Typo: "Tryed" should be "Tried".
-        return "Tryed to get 32 bit index on arena larger than 4GB of space";
+        return "Tried to get 32 bit index on arena larger than 4GB of space";
+    case EARENA_LINKED:
+        return "Tried to get 32 bit index but arena has links";
     default:
         return strerror(arena_errno);
     }
@@ -173,8 +175,6 @@ arena_strerror(int arena_errno) {
 
 static Arena *
 arena_create(int64 size) {
-    // TODO: Reduce variable scope by declaring `p` and `arena` closer to where
-    // they are actually populated/used.
     void *p;
     Arena *arena;
 
@@ -199,8 +199,6 @@ arena_create(int64 size) {
 
 static void
 arena_destroy(Arena *arena) {
-    // TODO: Reduce variable scope by declaring `next` inside the do-while loop
-    // block.
     Arena *next;
 
     do {
@@ -345,15 +343,9 @@ arena_push(Arena *arena, int64 size) {
     return before;
 }
 
-// TODO: Consider defining this function with `INLINE` if it is only ever called
-// by `xarenas_push`.
 static void *
 arenas_push(Arena **arenas, int64 number, int64 size) {
-    // TODO: Loop variable `i` is `uint32`, but limit `number` is `int64`. This
-    // can cause a signed/unsigned mismatch or truncation.
-    for (uint32 i = 0; i < number; i += 1) {
-        // TODO: Combine declaration and assignment to reduce variable scope:
-        // `void *p = arena_push(arenas[i], size);`
+    for (int64 i = 0; i < number; i += 1) {
         void *p;
         if ((p = arena_push(arenas[i], size))) {
             return p;
@@ -385,13 +377,10 @@ xarena_push(Arena *arena, int64 size) {
 
 static void *
 xarenas_push(Arena **arenas, int32 narenas, int64 size) {
-    // TODO: Combine declaration and assignment to reduce variable scope: `void
-    // *p = arenas_push(arenas, narenas, size);`
     void *p;
 
     if ((p = arenas_push(arenas, narenas, size)) == NULL) {
-        // TODO: Missing newline `\n` at the end of the error string.
-        error2("Error pushing %lld bytes into arenas %p: %s.", (llong)size,
+        error2("Error pushing %lld bytes into arenas %p: %s.\n", (llong)size,
                (void *)arenas, arena_strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -400,16 +389,15 @@ xarenas_push(Arena **arenas, int32 narenas, int64 size) {
 
 static uint32
 arena_push_index32(Arena *arena, uint32 size) {
-    // TODO: Combine declaration and assignment `void *before = arena->pos;`
-    // after the `arena_with_space` check.
     void *before;
+    Arena *arena_save = arena;
 
-    // TODO: If `arena_with_space` traverses to a chained block (`arena->next`),
-    // the returned index will be relative to the chained block's `begin`
-    // pointer, rendering the offset useless to the caller since they only hold
-    // the head arena pointer.
     if ((arena = arena_with_space(arena, size)) == NULL) {
         return UINT32_MAX;
+    }
+
+    if (arena != arena_save) {
+        return EARENA_LINKED;
     }
 
     before = arena->pos;
