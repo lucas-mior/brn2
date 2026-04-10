@@ -61,6 +61,8 @@
 
 uint64 hash_function(void *key, int32 key_length);
 uint32 hash_normal(void *map, uint64 hash);
+uint32 hash_capacity(void *map);
+uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
 
 #if !defined(INTEGERS)
@@ -771,13 +773,26 @@ hash_function(void *key, int32 key_length) {
 }
 
 // TODO: Avoid defining functions that are only called once. Mark these small
-// utility functions (`hash_normal`, `hash_expected_collisions`)
-// with `inline` or `INLINE` to avoid unnecessary function call overhead.
+// utility functions (`hash_normal`, `hash_capacity`, `hash_length`,
+// `hash_expected_collisions`) with `inline` or `INLINE` to avoid unnecessary
+// function call overhead.
 uint32
 hash_normal(void *map, uint64 hash) {
     CommonMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
     return normal;
+}
+
+uint32
+hash_capacity(void *map) {
+    CommonMap *map2 = map;
+    return map2->capacity;
+}
+
+uint32
+hash_length(void *map) {
+    CommonMap *map2 = map;
+    return map2->length;
 }
 
 uint32
@@ -871,17 +886,17 @@ main(void) {
     ASSERT(hash_insert_map(map, str1.s, str1.len, str1.value));
     ASSERT(!hash_insert_map(map, str1.s, str1.len, 1));
     ASSERT(hash_insert_map(map, str2.s, str2.len, str2.value));
-    ASSERT_EQUAL(map->length, 2u);
+    ASSERT_EQUAL(hash_length(map), 2u);
 
     // Test overwrite (existing key)
     ASSERT(hash_overwrite_map(map, str1.s, str1.len, 555));
-    ASSERT_EQUAL(map->length, 2u);
+    ASSERT_EQUAL(hash_length(map), 2u);
     ASSERT(hash_lookup_map(map, str1.s, str1.len, &test));
     ASSERT_EQUAL(test, 555);
 
     // Test overwrite (new key / upsert)
     ASSERT(hash_overwrite_map(map, "new_key", 7, 777));
-    ASSERT_EQUAL(map->length, 3u);
+    ASSERT_EQUAL(hash_length(map), 3u);
     ASSERT(hash_lookup_map(map, "new_key", 7, &test));
     ASSERT_EQUAL(test, 777);
 
@@ -912,14 +927,14 @@ main(void) {
     ASSERT_EQUAL(hash_ndeleted_map(map), 1);
 
     hash_zero_map(map);
-    ASSERT_EQUAL(map->length, 0);
+    ASSERT_EQUAL(hash_length(map), 0);
     ASSERT_EQUAL(hash_ndeleted_map(map), 0);
     ASSERT_EQUAL(map->occupied, 0);
 
     for (uint32 i = 0; i < 10; i += 1) {
         ASSERT(hash_insert_map(map, strings[i].s, strings[i].len, strings[i].value));
     }
-    ASSERT_EQUAL(map->length, 10);
+    ASSERT_EQUAL(hash_length(map), 10);
 
     hash_destroy_map(map);
     free(strings, NSTRINGS*sizeof(*strings));
@@ -938,17 +953,17 @@ main(void) {
         ASSERT(!hash_insert_map_by_value(map2, &key1, 1));
         ASSERT(hash_insert_map_by_value(map2, &key2, value2));
 
-        ASSERT_EQUAL(map2->length, 2u);
+        ASSERT_EQUAL(hash_length(map2), 2u);
 
         // Test overwrite map_by_value (update)
         ASSERT(hash_overwrite_map_by_value(map2, &key1, 888));
-        ASSERT_EQUAL(map2->length, 2u);
+        ASSERT_EQUAL(hash_length(map2), 2u);
         ASSERT(hash_lookup_map_by_value(map2, &key1, &test2));
         ASSERT_EQUAL(test2, 888);
 
         // Test overwrite map_by_value (insert)
         ASSERT(hash_overwrite_map_by_value(map2, &key3, 333));
-        ASSERT_EQUAL(map2->length, 3u);
+        ASSERT_EQUAL(hash_length(map2), 3u);
         ASSERT(hash_lookup_map_by_value(map2, &key3, &test2));
         ASSERT_EQUAL(test2, 333);
 
