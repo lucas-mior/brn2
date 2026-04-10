@@ -79,9 +79,6 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
-// Note: NEVER delete lines with // clang-format
-// clang-format off
-
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
 a_strings_##MODE(char *file, uint line, \
@@ -166,8 +163,6 @@ GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", >=, more_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llu", >=, more_equal)
 
 #undef GENERATE_ASSERT_INTEGERS_SAME_SIGN
-
-// clang-format on
 
 static int
 compare_sign_with_unsign(llong s, ullong u) {
