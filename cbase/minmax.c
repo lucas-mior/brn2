@@ -70,10 +70,6 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
-// TODO: Per your codebase rules, avoid defining small functions that are only
-// called from one place (the _Generic dispatch) without making them inline. Add
-// 'inline' or your 'INLINE' macro to these static function definitions to
-// prevent unnecessary function call overhead.
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL) \
 static void * \
 get_pointer_##MODE(void *var1, void *var2) { \
@@ -151,11 +147,6 @@ GENERATE_COMPARE_LDOUBLE(max, >)
 
 #undef GENERATE_COMPARE_LDOUBLE
 
-// TODO: Return type widening. Since `get_both_signed_##MODE` explicitly returns
-// `long long`, expressions like `MIN(int, int)` will evaluate to a `long long`
-// rather than preserving the original `int` type. This can cause implicit
-// conversion warnings down the line.
-
 #define BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     get_both_signed_##MODE((llong)(VAR1), (llong)(VAR2))
 
@@ -177,8 +168,8 @@ _Generic((VAR2), \
     uchar:   SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
     ushort:  SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ), \
     uint:    SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
-    ulong:   BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
-    ullong:  BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
+    ulong:   SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
+    ullong:  SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
     float:   BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
     double:  BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
     ldouble: BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
@@ -338,8 +329,8 @@ main(void) {
         ulong b = MAXOF(b);
         long double min = MIN(a, b);
         long double max = MAX(a, b);
-        ASSERT_EQUAL(min, a);
-        ASSERT_EQUAL(max, (long double)b);
+        ASSERT_EQUAL((long)min, a);
+        ASSERT_EQUAL((ulong)max, b);
     }{
         ulong a = MINOF(a);
         long b = MAXOF(b);
