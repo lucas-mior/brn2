@@ -400,17 +400,12 @@ arena_push_index32(Arena *arena, uint32 size) {
         return EARENA_LINKED;
     }
 
-    before = arena->pos;
-    arena->pos = (char *)arena->pos + size;
-
-    // TODO: This capacity check occurs *after* modifying `arena->pos` but
-    // *before* incrementing `arena->npushed`. If it triggers, it corrupts the
-    // allocator's internal state. This should be validated before modifying
-    // `arena->pos`.
     if (arena->size >= UINT32_MAX) {
         errno = EARENA_MORE_THAN_4GB;
         return UINT32_MAX;
     }
+    before = arena->pos;
+    arena->pos = (char *)arena->pos + size;
     arena->npushed += 1;
 
     return (uint32)((char *)before - (char *)arena->begin);
