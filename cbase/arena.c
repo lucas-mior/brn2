@@ -344,8 +344,8 @@ arena_push(Arena *arena, int64 size) {
 }
 
 static void *
-arenas_push(Arena **arenas, int64 number, int64 size) {
-    for (int64 i = 0; i < number; i += 1) {
+arenas_push(Arena **arenas, int32 number, int64 size) {
+    for (int32 i = 0; i < number; i += 1) {
         void *p;
         if ((p = arena_push(arenas[i], size))) {
             return p;
@@ -433,9 +433,6 @@ arena_of(Arena *arena, void *p) {
 
 static bool
 arenas_pop(Arena **arenas, int32 narenas, void *p) {
-    // TODO: `narenas` is `int32` here, but in `arenas_push`, it was defined as
-    // `int64` (`number`). Be consistent with the integer size for array
-    // lengths.
     for (int32 i = 0; i < narenas; i += 1) {
         if (arena_pop(arenas[i], p)) {
             return true;
@@ -470,9 +467,9 @@ arena_pop(Arena *arena, void *p) {
     return true;
 }
 
-static int64
+static int32
 arena_nlinked(Arena *arena) {
-    int64 n = 0;
+    int32 n = 0;
     while (arena) {
         n += 1;
         arena = arena->next;
@@ -692,7 +689,7 @@ main(void) {
         void *first_pointer;
         void *second_pointer;
         void *third_pointer;
-        int64 arena_count;
+        int32 arena_count;
         int64 first_arena_capacity;
         char *error_message;
 
