@@ -21,6 +21,7 @@
 
 #include "generic.c"
 #include "util.c"
+#include "arena.c"
 
 #if !defined(CAT) || !defined(CAT3)
   #define CAT_(a, b)     a##b
@@ -205,7 +206,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     *buffer_ptr = '\0';
     final_len = (int64)(buffer_ptr - buffer) + 1;
 
-    if ((copy = xmalloc(final_len))) {
+    if ((copy = xarena_push(global_arena, final_len))) {
         memcpy64(copy, buffer, final_len);
     }
 
@@ -239,17 +240,17 @@ main(void) {
 
     if ((s = TEST_FLAGS_str(TEST_FLAGS_READ))) {
         ASSERT_EQUAL(s, "TEST_FLAGS_READ");
-        free(s, strlen32(s) + 1);
+        ASSERT(arena_pop(global_arena, s));
     }
 
     if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_EXEC))) {
         ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_EXEC");
-        free(s, strlen32(s) + 1);
+        ASSERT(arena_pop(global_arena, s));
     }
 
     if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_WRITE | TEST_FLAGS_EXEC))) {
         ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_WRITE|TEST_FLAGS_EXEC");
-        free(s, strlen32(s) + 1);
+        ASSERT(arena_pop(global_arena, s));
     }
 
     ASSERT_EQUAL(TEST_FLAGS_str(0), "NONE");
