@@ -23,9 +23,9 @@
 #include "util.c"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_sort 1
-#elif !defined(TESTING_sort)
-#define TESTING_sort 0
+#define TESTING_sort_merge_subsorted 1
+#elif !defined(TESTING_sort_merge_subsorted)
+#define TESTING_sort_merge_subsorted 0
 #endif
 
 #if !defined(SORT_MERGE_SUBSORTED_COMPARE)
@@ -162,7 +162,7 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     return;
 }
 
-#if 0 == TESTING_sort
+#if 0 == TESTING_sort_merge_subsorted
 static inline void
 sort_functions_sink(void) {
     (void)sort_shuffle;
@@ -172,7 +172,7 @@ sort_functions_sink(void) {
 }
 #endif
 
-#if TESTING_sort
+#if TESTING_sort_merge_subsorted
 
 #define MAXI 10000
 static int32 possibleN[] = {31, 32, 33, 50};
