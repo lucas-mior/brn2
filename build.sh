@@ -219,45 +219,62 @@ case "$target" in
     exit
     ;;
 "test")
-    for src in *.c; do
-        if [ -n "$2" ] && [ $src != "$2" ]; then
+    find . -iname "*.c" | sort | while read -r src; do
+        trace_off
+        name=$(basename "$src")
+
+        if [ -n "$2" ] && [ "$name" != "$2" ]; then
             continue
         fi
-        if [ "$src" = "$main" ]; then
+        if [ "$name" = "$main" ]; then
             continue
         fi
+        if echo "$src" | grep -q "stc/"; then
+            continue
+        fi
+        name=$(echo "$name" | sed 's/\.c//')
+        test_exe="/tmp/${name}_test"
+
         printf "\nTesting ${RED}${src}${RES} ...\n"
-        name="$(echo "$src" | sed 's/\.c//g')"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        if [ $src = "windows_functions.c" ]; then
+        if [ $src = "src/windows_functions.c" ]; then
             if ! zig version; then
                 continue
             fi
             cmdline="zig cc $CPPFLAGS $CFLAGS"
             cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
             cmdline="$cmdline -target x86_64-windows-gnu"
-            cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1"
-            cmdline="$cmdline $flags -o /tmp/$src.exe $src"
+            cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
+            cmdline="$cmdline $flags -o $test_exe $src"
         else
-            cmdline="$CC $CPPFLAGS $CFLAGS -Wno-unused-variable -DTESTING_$name=1"
-            cmdline="$cmdline $flags -o /tmp/$src.exe $src"
+            cmdline="$CC $CPPFLAGS $CFLAGS"
+            cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
+            cmdline="$cmdline $flags -o $test_exe $src"
         fi
 
-        trace_on
-        if [ $src != "windows_functions.c" ] && [ "$CC" = "chibicc" ]; then
-            cmdline=$(option_remove "$cmdline" "$CC")
-            compile_with_chibicc $cmdline && /tmp/$src.exe
-        elif $cmdline; then
-            /tmp/$src.exe || gdb /tmp/$src.exe -ex run
+        if [ "$CC" = "chibicc" ]; then
+            cmdline_no_cc=$(option_remove "$cmdline" "$CC")
+            trace_on
+            if with_chibicc "$cmdline_no_cc"; then
+                /tmp/${name}_test
+            else
+                exit 1
+            fi
         else
-            trace_off
-            exit 1
+            trace_on
+            if $cmdline; then
+                if ! $test_exe; then
+                    gdb --quiet \
+                        -ex run -ex backtrace -ex quit \
+                        $test_exe 2>&1 | xsel -b
+                    exit 1
+                fi
+            else
+                exit 1
+            fi
         fi
         trace_off
-        if [ -n "$2" ] && [ $src = "$2" ]; then
-            exit
-        fi
     done
     exit
     ;;
