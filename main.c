@@ -277,7 +277,7 @@ main(int argc, char **argv) {
     old->files = xrealloc(old->files, old->length*SIZEOF(*(old->files)));
 
     if (brn2_options_sort) {
-        sort(old);
+        brn2_sort(old);
     }
 
     if (!(EDITOR = getenv("EDITOR"))) {
