@@ -494,20 +494,16 @@ arena_reset(Arena *arena) {
 }
 
 static void *
-arenas_reset(Arena **arenas, int64 number) {
-    // TODO: Loop variable `i` is `uint32`, but limit `number` is `int64`. This
-    // can cause a signed/unsigned mismatch.
-    for (uint32 i = 0; i < number; i += 1) {
+arenas_reset(Arena **arenas, int32 number) {
+    for (int32 i = 0; i < number; i += 1) {
         arena_reset(arenas[i]);
     }
     return NULL;
 }
 
 static void
-arenas_destroy(Arena **arenas, int64 number) {
-    // TODO: Loop variable `i` is `uint32`, but limit `number` is `int64`. This
-    // can cause a signed/unsigned mismatch.
-    for (uint32 i = 0; i < number; i += 1) {
+arenas_destroy(Arena **arenas, int32 number) {
+    for (int32 i = 0; i < number; i += 1) {
         arena_destroy(arenas[i]);
     }
     return;
@@ -574,9 +570,7 @@ main(void) {
         int64 total_size = 0;
         int64 total_pushed = 0;
 
-        // TODO: `LENGTH()` macro evaluates to `int64`, but the loop utilizes
-        // `uint32`. This causes a signed/unsigned arithmetic mismatch.
-        for (uint32 i = 0; i < LENGTH(objs); i += 1) {
+        for (int32 i = 0; i < LENGTH(objs); i += 1) {
             int64 size = ALIGN(1ul + (ulong)(rand() % 10000));
             ASSERT((objs[i] = arena_push(arena, size)));
 
@@ -599,13 +593,9 @@ main(void) {
 
     {
         int aux;
-        // TODO: The variable `nallocated` is tracked as `uint32`, but
-        // `LENGTH(objs)` evaluates to `int64`. 
-        uint32 nallocated = LENGTH(objs);
+        int32 nallocated = LENGTH(objs);
 
         while (nallocated > 0) {
-            // TODO: Modulo arithmetic using mixed types (`uint32` and `int64`
-            // from `LENGTH`).
             uint32 j = (uint32)rand() % LENGTH(objs);
             uint32 k = (uint32)rand() % LENGTH(objs);
             if (objs[j]) {
@@ -613,7 +603,7 @@ main(void) {
                 objs[j] = NULL;
                 nallocated -= 1;
             }
-            if ((k + 1) < (nallocated / 2)) {
+            if ((k + 1) < (uint32)(nallocated / 2)) {
                 ASSERT((objs[j] = arena_push(arena, ALIGNMENT)));
                 nallocated += 1;
             }
