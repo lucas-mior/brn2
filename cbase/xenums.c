@@ -113,6 +113,19 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE {
     CAT(ENUM_PREFIX_, LAST)
 };
 
+// TODO: API Memory Inconsistency. When ENUM_BITFLAGS == 0, this returns a
+// string literal (cannot be freed). When ENUM_BITFLAGS == 1, it returns
+// dynamically allocated memory via `xmalloc` (requires freeing). Callers must
+// know the internal macro state to avoid memory leaks or segfaults. Consider
+// allocating from your arena (arena.c) to unify the API and completely
+// eliminate the need for callers to call `free()`.
+
+// TODO: When ENUM_BITFLAGS == 1, passing bitwise OR'd integers into a strict
+// `enum ENUM_NAME` type could trigger compiler warnings or undefined behavior
+// in pedantic modes since the result isn't explicitly defined in the enum.
+// Consider changing the parameter type to an integer (e.g., uint32) for
+// bitflags.
+
 static char *
 CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
@@ -134,6 +147,9 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
             return "Unknown value";
     }
 #else
+    // TODO: If BIT_COUNT is large (e.g., 64), this allocates 16KB+ directly on
+    // the stack. In a deeply nested call chain or a thread with a small stack
+    // size, this could cause a stack overflow.
     char buffer[CAT(ENUM_PREFIX_, BIT_COUNT)*256 + 1];
     char *buffer_ptr = buffer;
     char *buffer_end = buffer + sizeof(buffer);
@@ -141,6 +157,8 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     int64 final_len;
     char *copy;
 
+    // TODO: Use your codebase convention `strlen32(name)` instead of
+    // `(int32)strlen(name)`.
     #define XENUM(e) \
         if (val & CAT(ENUM_PREFIX_, e)) { \
             char *name = QUOTE(ENUM_PREFIX_) #e; \
@@ -176,6 +194,11 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM
 
     if (buffer_ptr == buffer) {
+        // TODO: Memory trap. Since successful bitflag parses return dynamically
+        // allocated memory, returning a string literal for "NONE" means if the
+        // caller calls `free()` on this specific result, the program will
+        // crash. Dynamically allocate "NONE" to maintain consistent memory
+        // ownership.
         return "NONE";
     }
 
@@ -208,31 +231,28 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 
 int
 main(void) {
+    char *s;
     ASSERT_EQUAL(TEST_FLAGS_READ_BIT_IDX, 0);
     ASSERT_EQUAL(TEST_FLAGS_READ, 1 << 0);
     ASSERT_EQUAL(TEST_FLAGS_WRITE, 1 << 1);
     ASSERT_EQUAL(TEST_FLAGS_EXEC, 1 << 2);
 
-    {
-        char *s;
-
-        if ((s = TEST_FLAGS_str(TEST_FLAGS_READ))) {
-            ASSERT_EQUAL(s, "TEST_FLAGS_READ");
-            free(s, strlen32(s) + 1);
-        }
-
-        if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_EXEC))) {
-            ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_EXEC");
-            free(s, strlen32(s) + 1);
-        }
-
-        if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_WRITE | TEST_FLAGS_EXEC))) {
-            ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_WRITE|TEST_FLAGS_EXEC");
-            free(s, strlen32(s) + 1);
-        }
-
-        ASSERT_EQUAL(TEST_FLAGS_str(0), "NONE");
+    if ((s = TEST_FLAGS_str(TEST_FLAGS_READ))) {
+        ASSERT_EQUAL(s, "TEST_FLAGS_READ");
+        free(s, strlen32(s) + 1);
     }
+
+    if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_EXEC))) {
+        ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_EXEC");
+        free(s, strlen32(s) + 1);
+    }
+
+    if ((s = TEST_FLAGS_str(TEST_FLAGS_READ | TEST_FLAGS_WRITE | TEST_FLAGS_EXEC))) {
+        ASSERT_EQUAL(s, "TEST_FLAGS_READ|TEST_FLAGS_WRITE|TEST_FLAGS_EXEC");
+        free(s, strlen32(s) + 1);
+    }
+
+    ASSERT_EQUAL(TEST_FLAGS_str(0), "NONE");
 
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
