@@ -1055,7 +1055,6 @@ main(void) {
     {
         char command[256];
         char *filelist = "/tmp/brn2test";
-        uint32 capacity_set;
         struct Hash_map *map;
 
         SNPRINTF(command, "find . > %s", filelist);
@@ -1089,10 +1088,9 @@ main(void) {
         }
 
         map = hash_create_map((uint32)list1->length);
-        capacity_set = hash_capacity(map);
         list1->indexes_size = (int64)list1->length * SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
-        brn2_create_hashes(list1, capacity_set);
+        brn2_create_hashes(list1, map->capacity);
 
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
@@ -1103,7 +1101,7 @@ main(void) {
             ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
-            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQUAL(file->hash % map->capacity, hash & map->bitmask);
 
             ASSERT(hash_insert_pre_calc_map(map, file->name, file->length,
                                              hash, list1->indexes[i], 0));
@@ -1117,7 +1115,7 @@ main(void) {
             ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
-            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQUAL(file->hash % map->capacity, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
                                              hash, list1->indexes[i]));
@@ -1140,7 +1138,6 @@ main(void) {
 
         char command[256];
         char *filelist = "/tmp/brn2test";
-        uint32 capacity_set;
         struct Hash_map *map;
 
         SNPRINTF(command, "ls *.c > %s", filelist);
@@ -1203,10 +1200,9 @@ main(void) {
         printf(RESET);
 
         map = hash_create_map((uint32)list1->length);
-        capacity_set = hash_capacity(map);
         list1->indexes_size = (int64)list1->length * SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
-        brn2_create_hashes(list1, capacity_set);
+        brn2_create_hashes(list1, map->capacity);
 
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
@@ -1217,7 +1213,7 @@ main(void) {
             ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
-            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQUAL(file->hash % map->capacity, hash & map->bitmask);
 
             ASSERT(hash_insert_pre_calc_map(map, file->name, file->length,
                                              hash, list1->indexes[i], 0));
@@ -1231,7 +1227,7 @@ main(void) {
             ASSERT_EQUAL(file->length, name_length);
             hash = hash_function(file->name, file->length);
             ASSERT_EQUAL(file->hash, hash);
-            ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQUAL(file->hash % map->capacity, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
                                              hash, list1->indexes[i]));
@@ -1324,12 +1320,10 @@ main(void) {
         brn2_normalize_names(old, new);
 
         {
-            uint32 capacity_set;
             oldlist_map = hash_create_map((uint32)old->length);
-            capacity_set = hash_capacity(oldlist_map);
             old->indexes_size = (int64)old->length * SIZEOF(*(old->indexes));
             old->indexes = xmmap_commit(&(old->indexes_size));
-            brn2_create_hashes(old, capacity_set);
+            brn2_create_hashes(old, oldlist_map->capacity);
         }
 
         for (int32 i = 0; i < old->length; i += 1) {
@@ -1340,15 +1334,13 @@ main(void) {
         }
 
         {
-            uint32 main_capacity;
             struct Hash_set *newlist_set;
 
             newlist_set = hash_create_set((uint32)new->length);
             new->indexes_size = (int64)new->length * SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
-            main_capacity = hash_capacity(newlist_set);
 
-            brn2_create_hashes(new, main_capacity);
+            brn2_create_hashes(new, newlist_set->capacity);
 
             ASSERT(brn2_verify(new, old, newlist_set, new->indexes));
             hash_destroy_set(newlist_set);
