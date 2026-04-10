@@ -121,7 +121,6 @@ main(int argc, char **argv) {
     int32 thread_ids[BRN2_MAX_THREADS];
 #endif
 
-    uint32 main_capacity;
     char *EDITOR;
     int opt;
 
@@ -318,7 +317,7 @@ main(int argc, char **argv) {
         }
 
         oldlist_map = hash_create_map((uint32)old->length);
-        capacity_set = hash_capacity(oldlist_map);
+        capacity_set = oldlist_map->capacity;
         old->indexes_size = old->length*SIZEOF(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
         brn2_create_hashes(old, capacity_set);
@@ -449,10 +448,9 @@ main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             newlist_set = hash_create_set((uint32)new->length);
-            main_capacity = hash_capacity(newlist_set);
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
-            brn2_create_hashes(new, main_capacity);
+            brn2_create_hashes(new, newlist_set->capacity);
             brn2_verify(new, old, newlist_set, new->indexes);
             hash_print_summary_set(newlist_set, "newlist_set");
         }
@@ -521,8 +519,7 @@ main(int argc, char **argv) {
                 new->indexes = xmmap_commit(&(new->indexes_size));
             }
 
-            main_capacity = hash_capacity(newlist_set);
-            brn2_create_hashes(new, main_capacity);
+            brn2_create_hashes(new, newlist_set->capacity);
 
             if (!brn2_verify(new, old, newlist_set, new->indexes)) {
                 brn2_free_list(new);
