@@ -59,10 +59,10 @@
 #define ALIGNMENT 16
 #endif
 
-uint64 hash_function(void *key, int32 key_length);
-uint32 hash_normal(void *map, uint64 hash);
-uint32 hash_capacity(void *map);
-uint32 hash_length(void *map);
+INLINE uint64 hash_function(void *key, int32 key_length);
+INLINE uint32 hash_normal(void *map, uint64 hash);
+INLINE uint32 hash_capacity(void *map);
+INLINE uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
 
 #if !defined(INTEGERS)
@@ -765,31 +765,27 @@ CAT(hash_functions_sink_, HASH_TYPE)(void) {
 #if !defined(HASH_H2)
 #define HASH_H2
 
-uint64
+INLINE uint64
 hash_function(void *key, int32 key_length) {
     uint64 hash;
     hash = rapidhash(key, (size_t)key_length);
     return hash;
 }
 
-// TODO: Avoid defining functions that are only called once. Mark these small
-// utility functions (`hash_normal`, `hash_capacity`, `hash_length`,
-// `hash_expected_collisions`) with `inline` or `INLINE` to avoid unnecessary
-// function call overhead.
-uint32
+INLINE uint32
 hash_normal(void *map, uint64 hash) {
     CommonMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
     return normal;
 }
 
-uint32
+INLINE uint32
 hash_capacity(void *map) {
     CommonMap *map2 = map;
     return map2->capacity;
 }
 
-uint32
+INLINE uint32
 hash_length(void *map) {
     CommonMap *map2 = map;
     return map2->length;
