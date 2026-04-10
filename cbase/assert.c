@@ -79,6 +79,15 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
+// TODO: The `__func__` macro inside these generated functions will evaluate to
+// the name of the generated function (e.g., "a_strings_equal"), not the
+// function where the assertion was actually called. To show the user's caller
+// function in the error log, pass `__func__` from the caller macro down as an
+// argument just like `file` and `line`.
+
+// TODO: Consider adding your `INLINE` or `static inline` declaration to these
+// generated helper functions to avoid compiler warnings about unused static
+// functions when this file is included in multiple translation units.
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
 a_strings_##MODE(char *file, uint line, \
@@ -133,6 +142,9 @@ GENERATE_ASSERT_POINTERS(not_equal,  !=)
 GENERATE_ASSERT_POINTERS(more,       >)
 GENERATE_ASSERT_POINTERS(more_equal, >=)
 
+// TODO: Missing `#undef GENERATE_ASSERT_POINTERS` here. All other GENERATE_*
+// macros are properly `#undef`ed after use.
+
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
 a_both_##TYPE##_##MODE(char *file, uint line, \
@@ -166,6 +178,8 @@ GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llu", >=, more_equal)
 
 static int
 compare_sign_with_unsign(llong s, ullong u) {
+    // TODO: Per your codebase convention, reduce variable scope: `ullong saux`
+    // can be declared and initialized after the `if (s < 0)` block.
     ullong saux;
     if (s < 0) {
         return -1;
@@ -254,6 +268,11 @@ GENERATE_ASSERT_LDOUBLE(more,       >)
 GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
 #undef GENERATE_ASSERT_LDOUBLE
+
+// TODO: Per your convention, initialize upon declaration to reduce
+// uninitialized state branching: `char *s1 = "false"; char *s2 =
+// "false";` and only write the `if (varX) { sX = "true"; }`
+// conditionals.
 
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL) \
 static void \
@@ -465,6 +484,11 @@ _Generic((VAR1), \
 #define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more,       VAR1, VAR2)
 #define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
 
+// TODO: Double evaluation hazard. If `VAR1` contains an expression with side
+// effects (e.g., `ASSERT_NULL(ptr++)`), the side effect will be evaluated twice
+// upon failure (once in the `if`, once in the `error2` log). This won't impact
+// execution since the failure ends in a `TRAP()`, but the log will print the
+// post-incremented state.
 #define ASSERT_NULL(VAR1) do { \
     if ((void *)VAR1 != NULL) { \
         error2("\n%s: Assertion failed at %s:%d\n", __func__, __FILE__, __LINE__); \
