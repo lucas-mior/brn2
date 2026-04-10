@@ -79,29 +79,23 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
-// TODO: The `__func__` macro inside these generated functions will evaluate to
-// the name of the generated function (e.g., "a_strings_equal"), not the
-// function where the assertion was actually called. To show the user's caller
-// function in the error log, pass `__func__` from the caller macro down as an
-// argument just like `file` and `line`.
-
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
-a_strings_##MODE(char *file, uint line, \
+a_strings_##MODE(char *file, uint line, char *func, \
                  char *name1, char *name2, \
                  char *var1, char *var2) { \
     if (var1 == NULL) { \
-        error2("\n%s: Error in assertion at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Error in assertion at %s:%u\n", func, file, line); \
         error2("%s is NULL\n", name1); \
         TRAP(); \
     } \
     if (var2 == NULL) { \
-        error2("\n%s: Error in assertion at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Error in assertion at %s:%u\n", func, file, line); \
         error2("%s is NULL\n", name2); \
         TRAP(); \
     } \
     if (!(strcmp(var1, var2) SYMBOL 0)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("%s = %s " #SYMBOL " %s = %s\n", \
                name1, var1, var2, name2); \
         TRAP(); \
@@ -109,22 +103,22 @@ a_strings_##MODE(char *file, uint line, \
     return; \
 }
 
-GENERATE_ASSERT_STRINGS(less,       <)
+GENERATE_ASSERT_STRINGS(less,        <)
 GENERATE_ASSERT_STRINGS(less_equal, <=)
 GENERATE_ASSERT_STRINGS(equal,      ==)
 GENERATE_ASSERT_STRINGS(not_equal,  !=)
-GENERATE_ASSERT_STRINGS(more,       >)
+GENERATE_ASSERT_STRINGS(more,        >)
 GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
 
 #define GENERATE_ASSERT_POINTERS(MODE, SYMBOL) \
 static void \
-a_pointers_##MODE(char *file, uint line, \
+a_pointers_##MODE(char *file, uint line, char *func, \
                   char *name1, char *name2, \
                   void *var1, void *var2) { \
     if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("%s = %p " #SYMBOL " %p = %s\n", \
                name1, var1, var2, name2); \
         TRAP(); \
@@ -132,24 +126,24 @@ a_pointers_##MODE(char *file, uint line, \
     return; \
 }
 
-GENERATE_ASSERT_POINTERS(less,       <)
+GENERATE_ASSERT_POINTERS(less,        <)
 GENERATE_ASSERT_POINTERS(less_equal, <=)
 GENERATE_ASSERT_POINTERS(equal,      ==)
 GENERATE_ASSERT_POINTERS(not_equal,  !=)
-GENERATE_ASSERT_POINTERS(more,       >)
+GENERATE_ASSERT_POINTERS(more,        >)
 GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE) \
 static void \
-a_both_##TYPE##_##MODE(char *file, uint line, \
+a_both_##TYPE##_##MODE(char *file, uint line, char *func, \
                        char *name1, char *name2, \
                        char *type1, char *type2, \
                        llong bits1, llong bits2, \
                        TYPE long long var1, TYPE long long var2) { \
     if (!(var1 SYMBOL var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         TRAP(); \
@@ -190,13 +184,13 @@ compare_sign_with_unsign(llong s, ullong u) {
 
 #define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL) \
 static void \
-a_signed_unsigned##MODE(char *file, uint line, \
+a_signed_unsigned##MODE(char *file, uint line, char *func, \
                         char *name1, char *name2, \
                         char *type1, char *type2, \
                         llong bits1, llong bits2, \
                         llong var1, ullong var2) { \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         TRAP(); \
@@ -206,22 +200,22 @@ a_signed_unsigned##MODE(char *file, uint line, \
 
 GENERATE_ASSERT_SIGNED_UNSIGNED(equal,      ==)
 GENERATE_ASSERT_SIGNED_UNSIGNED(not_equal,  !=)
-GENERATE_ASSERT_SIGNED_UNSIGNED(less,       <)
+GENERATE_ASSERT_SIGNED_UNSIGNED(less,        <)
 GENERATE_ASSERT_SIGNED_UNSIGNED(less_equal, <=)
-GENERATE_ASSERT_SIGNED_UNSIGNED(more,       >)
+GENERATE_ASSERT_SIGNED_UNSIGNED(more,        >)
 GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_SIGNED_UNSIGNED
 
 #define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL) \
 static void \
-a_unsigned_signed_##MODE(char *file, uint line, \
+a_unsigned_signed_##MODE(char *file, uint line, char *func, \
                          char *name1, char *name2, \
                          char *type1, char *type2, \
                          llong bits1, llong bits2, \
                          ullong var1, llong var2) { \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         TRAP(); \
@@ -231,22 +225,22 @@ a_unsigned_signed_##MODE(char *file, uint line, \
 
 GENERATE_ASSERT_UNSIGNED_SIGNED(equal,      ==)
 GENERATE_ASSERT_UNSIGNED_SIGNED(not_equal,  !=)
-GENERATE_ASSERT_UNSIGNED_SIGNED(less,       <)
+GENERATE_ASSERT_UNSIGNED_SIGNED(less,        <)
 GENERATE_ASSERT_UNSIGNED_SIGNED(less_equal, <=)
-GENERATE_ASSERT_UNSIGNED_SIGNED(more,       >)
+GENERATE_ASSERT_UNSIGNED_SIGNED(more,        >)
 GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_UNSIGNED_SIGNED
 
 #define GENERATE_ASSERT_LDOUBLE(MODE, SYMBOL) \
 static void \
-a_ldouble_##MODE(char *file, uint line, \
+a_ldouble_##MODE(char *file, uint line, char *func, \
                  char *name1, char *name2, \
                  char *type1, char *type2, \
                  llong bits1, llong bits2, \
                  ldouble var1, ldouble var2) { \
     if (!(var1 SYMBOL var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("[%s%lld]%s = %Lf " #SYMBOL " %Lf = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2); \
         TRAP(); \
@@ -256,16 +250,16 @@ a_ldouble_##MODE(char *file, uint line, \
 
 GENERATE_ASSERT_LDOUBLE(equal,      ==)
 GENERATE_ASSERT_LDOUBLE(not_equal,  !=)
-GENERATE_ASSERT_LDOUBLE(less,       <)
+GENERATE_ASSERT_LDOUBLE(less,        <)
 GENERATE_ASSERT_LDOUBLE(less_equal, <=)
-GENERATE_ASSERT_LDOUBLE(more,       >)
+GENERATE_ASSERT_LDOUBLE(more,        >)
 GENERATE_ASSERT_LDOUBLE(more_equal, >=)
 
 #undef GENERATE_ASSERT_LDOUBLE
 
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL) \
 static void \
-a_bool_##MODE(char *file, uint line, \
+a_bool_##MODE(char *file, uint line, char *func, \
               char *name1, char *name2, \
               char *type1, char *type2, \
               llong bits1, llong bits2, \
@@ -279,7 +273,7 @@ a_bool_##MODE(char *file, uint line, \
         if (var2) { \
             s2 = "true"; \
         } \
-        error2("\n%s: Assertion failed at %s:%u\n", __func__, file, line); \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
         error2("[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n", \
                type1, bits1, name1, s1, s2, name2, type2, bits2); \
         TRAP(); \
@@ -289,22 +283,22 @@ a_bool_##MODE(char *file, uint line, \
 
 GENERATE_ASSERT_BOOLS(equal,      ==)
 GENERATE_ASSERT_BOOLS(not_equal,  !=)
-GENERATE_ASSERT_BOOLS(less,       <)
+GENERATE_ASSERT_BOOLS(less,        <)
 GENERATE_ASSERT_BOOLS(less_equal, <=)
-GENERATE_ASSERT_BOOLS(more,       >)
+GENERATE_ASSERT_BOOLS(more,        >)
 GENERATE_ASSERT_BOOLS(more_equal, >=)
 
 #undef GENERATE_ASSERT_BOOLS
 
 #define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_both_signed_##MODE(__FILE__, __LINE__,               \
+    a_both_signed_##MODE(__FILE__, __LINE__, (char *)__func__,       \
                          #VAR1, #VAR2,                     \
                          typename(TYPE1), typename(TYPE2), \
                          typebits(TYPE1), typebits(TYPE2), \
                          (llong)(VAR1), (llong)(VAR2))
 
 #define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_signed_unsigned##MODE(__FILE__, __LINE__,               \
+    a_signed_unsigned##MODE(__FILE__, __LINE__, (char *)__func__,       \
                             #VAR1, #VAR2,                     \
                             typename(TYPE1), typename(TYPE2), \
                             typebits(TYPE1), typebits(TYPE2), \
@@ -351,14 +345,14 @@ _Generic((VAR2), \
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_both_unsigned_##MODE(__FILE__, __LINE__,               \
+    a_both_unsigned_##MODE(__FILE__, __LINE__, (char *)__func__,       \
                            #VAR1, #VAR2,                     \
                            typename(TYPE1), typename(TYPE2), \
                            typebits(TYPE1), typebits(TYPE2), \
                            (ullong)(VAR1), (ullong)(VAR2))
 
 #define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_unsigned_signed_##MODE(__FILE__, __LINE__,               \
+    a_unsigned_signed_##MODE(__FILE__, __LINE__, (char *)__func__,       \
                              #VAR1, #VAR2,                     \
                              typename(TYPE1), typename(TYPE2), \
                              typebits(TYPE1), typebits(TYPE2), \
@@ -385,7 +379,7 @@ _Generic((VAR2), \
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 
 #define A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_ldouble_##MODE(__FILE__, __LINE__,               \
+    a_ldouble_##MODE(__FILE__, __LINE__, (char *)__func__,       \
                      #VAR1, #VAR2,                     \
                      typename(TYPE1), typename(TYPE2), \
                      typebits(TYPE1), typebits(TYPE2), \
@@ -413,7 +407,7 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE(void);
 
 #define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-    bool: a_bool_##MODE(__FILE__, __LINE__, \
+    bool: a_bool_##MODE(__FILE__, __LINE__, (char *)__func__, \
                         #VAR1, #VAR2, \
                         typename(TYPE1), typename(TYPE_BOOL), \
                         typebits(TYPE1), typebits(TYPE_BOOL), \
@@ -423,7 +417,7 @@ _Generic((VAR2), \
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL(void);
 
 #define A_POINTERS(MODE, VAR1, VAR2) \
-    a_pointers_##MODE(__FILE__, __LINE__, \
+    a_pointers_##MODE(__FILE__, __LINE__, (char *)__func__, \
                       #VAR1, #VAR2, \
                       (void *)(uintptr_t)(VAR1), \
                       (void *)(uintptr_t)(VAR2))
@@ -438,7 +432,7 @@ _Generic((VAR1), \
         default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP() \
     ), \
     char *: _Generic((VAR2), \
-        char *: a_strings_##MODE(__FILE__, __LINE__, \
+        char *: a_strings_##MODE(__FILE__, __LINE__, (char *)__func__, \
                                  #VAR1, #VAR2, \
                                  (char *)(uintptr_t)(VAR1), \
                                  (char *)(uintptr_t)(VAR2)), \
