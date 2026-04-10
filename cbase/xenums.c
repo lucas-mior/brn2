@@ -114,13 +114,6 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE {
     CAT(ENUM_PREFIX_, LAST)
 };
 
-// TODO: API Memory Inconsistency. When ENUM_BITFLAGS == 0, this returns a
-// string literal (cannot be freed). When ENUM_BITFLAGS == 1, it returns
-// dynamically allocated memory via `xmalloc` (requires freeing). Callers must
-// know the internal macro state to avoid memory leaks or segfaults. Consider
-// allocating from your arena (arena.c) to unify the API and completely
-// eliminate the need for callers to call `free()`.
-
 // TODO: When ENUM_BITFLAGS == 1, passing bitwise OR'd integers into a strict
 // `enum ENUM_NAME` type could trigger compiler warnings or undefined behavior
 // in pedantic modes since the result isn't explicitly defined in the enum.
