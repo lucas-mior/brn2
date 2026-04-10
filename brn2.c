@@ -55,8 +55,9 @@ typedef struct Work {
     char *map;
 } Work;
 
-int32 brn2_threads(void *(*function)(Work *), int32, FileList *old,
-                   FileList *new, int32 *numbers, uint32 map_size, char *map);
+int32 brn2_threads(void *(*function)(Work *),
+                   int32, FileList *old, FileList *new,
+                   int32 *numbers, uint32 map_size, char *map);
 
 static void *brn2_threads_work_hashes(Work *);
 static void *brn2_threads_work_normalization(Work *);
@@ -602,15 +603,15 @@ brn2_threads_work_changes(Work *arg) {
 
 void
 brn2_normalize_names(FileList *old, FileList *new) {
-    brn2_threads(brn2_threads_work_normalization, old->length, old, new, NULL,
-                 0, NULL);
+    brn2_threads(brn2_threads_work_normalization,
+                 old->length, old, new, NULL, 0, NULL);
     return;
 }
 
 void
 brn2_create_hashes(FileList *list, uint32 map_capacity) {
-    brn2_threads(brn2_threads_work_hashes, list->length, list, NULL, NULL,
-                 map_capacity, NULL);
+    brn2_threads(brn2_threads_work_hashes,
+                 list->length, list, NULL, NULL, map_capacity, NULL);
     return;
 }
 
@@ -618,8 +619,8 @@ int32
 brn2_get_number_changes(FileList *old, FileList *new) {
     int32 total = 0;
     int32 numbers[BRN2_MAX_THREADS] = {0};
-    brn2_threads(brn2_threads_work_changes, old->length, old, new, numbers, 0,
-                 NULL);
+    brn2_threads(brn2_threads_work_changes,
+                 old->length, old, new, numbers, 0, NULL);
 
     for (int32 i = 0; i < BRN2_MAX_THREADS; i += 1) {
         total += numbers[i];
@@ -646,8 +647,9 @@ brn2_threads_join(void) {
 }
 
 int32
-brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
-             FileList *new, int32 *numbers, uint32 map_size, char *map) {
+brn2_threads(void *(*function)(Work *),
+             int32 length, FileList *old, FileList *new,
+             int32 *numbers, uint32 map_size, char *map) {
     static Work slices[BRN2_MAX_THREADS];
     int32 range;
 
@@ -694,8 +696,9 @@ brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
 }
 #else
 int32
-brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
-             FileList *new, int32 *numbers, uint32 map_size, char *map) {
+brn2_threads(void *(*function)(Work *),
+             int32 length, FileList *old, FileList *new,
+             int32 *numbers, uint32 map_size, char *map) {
     Work slices[1];
 
     slices[0].start = 0;
