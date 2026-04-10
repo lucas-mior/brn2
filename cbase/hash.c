@@ -232,9 +232,9 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
 
 static void
 CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
-    uint32 new_capacity = map->capacity * 2;
+    uint32 new_capacity = map->capacity*2;
     uint32 new_bitmask = (new_capacity - 1);
-    int64 new_size = new_capacity * sizeof(Bucket);
+    int64 new_size = new_capacity*sizeof(Bucket);
     Bucket *new_array = xmmap_commit(&new_size);
     Bucket *old_array = map->array;
     uint32 old_capacity = map->capacity;
