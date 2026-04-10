@@ -23,8 +23,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <signal.h>
-// TODO: Include <stdio.h> at the top of the file to ensure fprintf and stderr
-// are declared before error2 is expanded or used in macros.
+#include <stdio.h>
 
 #if !defined(error2)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
@@ -134,8 +133,6 @@ _Generic((VARIABLE), \
     ldouble: LDBL_MAX    \
 )
 
-// TODO: Avoid defining functions that are only called once. Mark them as inline
-// (e.g., INLINE or static inline) to eliminate unnecessary function overhead.
 static ldouble
 ldouble_from_voidp(void* x) {
     (void)x;
@@ -240,22 +237,15 @@ union Primitive {
 static llong
 typebits(enum Type type) {
     llong size = 0;
-    // TODO: Reduce variable scope. 'primitive' and 'pointer' are only used in
-    // two switch cases. Consider removing them entirely (see below) or placing
-    // them inside specific block scopes `{}` in the cases.
     union Primitive primitive;
     void **pointer;
 
     switch (type) {
     case TYPE_VOIDP:
-        // TODO: This runtime pointer arithmetic is unnecessary and overly
-        // complicated for computing pointer sizes. Simply use 'sizeof(void*)'.
         pointer = &(primitive.avoidp);
         size = ((char*)(pointer + 1)) - (char*)pointer;
         break;
     case TYPE_CHARP:
-        // TODO: Use 'sizeof(char*)' instead of pointer arithmetic on the union
-        // layout.
         pointer = (void*)&(primitive.acharp);
         size = ((char*)(pointer + 1)) - (char*)pointer;
         break;
@@ -372,9 +362,6 @@ _Generic((x), \
   fprintf(stderr, "["GREEN("%s%lld")"]%s = %Lf ", \
                   typename(TYPE), typebits(TYPE), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
-// TODO: Casting char/bool dynamically through `uintptr_t` is a circuitous way
-// to prevent integer-to-pointer conversion warnings. Ensure this does not mask
-// authentic type mismatch issues across platforms.
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
   fprintf(stderr, "["GREEN("%s%lld")"]%s = "FORMAT" ", \
                   typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr_t)(VAR))
@@ -568,9 +555,6 @@ main(void) {
 
         PRINTLN(*var_string);
         PRINTLN(var_uint - (uint)var_int);
-        // TODO: Casting a function pointer `main` to a standard object `void*`
-        // pointer is technically undefined behavior in strict standard C.
-        PRINTLN((void*)main);
     }
 }
 
