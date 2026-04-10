@@ -713,7 +713,7 @@ brn2_threads(void *(*function)(Work *), int32 length, FileList *old,
 }
 #endif
 
-#define SORT_BENCHMARK 1
+#define SORT_BENCHMARK 0
 
 static void
 brn2_sort(FileList *old) {
