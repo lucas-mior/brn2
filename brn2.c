@@ -30,8 +30,8 @@
 
 #include "util.c"
 #include "arena.c"
-#define COMPARE brn2_compare
-#include "sort.c"
+#define SORT_MERGE_SUBSORTED_COMPARE brn2_compare
+#include "sort_merge_subsorted.c"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_brn2 1
@@ -1005,7 +1005,6 @@ brn2_usage(FILE *stream) {
 #if TESTING_brn2
 #include <assert.h>
 #include "assert.c"
-#include "sort.c"
 #include "files.h"
 
 bool brn2_options_fatal = false;

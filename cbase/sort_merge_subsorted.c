@@ -28,8 +28,8 @@
 #define TESTING_sort 0
 #endif
 
-#if !defined(COMPARE)
-#define COMPARE(A, B) compare_func(A, B)
+#if !defined(SORT_MERGE_SUBSORTED_COMPARE)
+#define SORT_MERGE_SUBSORTED_COMPARE(A, B) compare_func(A, B)
 #endif
 
 #ifndef MAX_NTHREADS
@@ -83,11 +83,11 @@ sort_heapify(HeapNode *heap, int32 p, int32 i,
             break;
         }
 
-        if (COMPARE(heap[left].value, heap[smallest].value) < 0) {
+        if (SORT_MERGE_SUBSORTED_COMPARE(heap[left].value, heap[smallest].value) < 0) {
             smallest = left;
         }
         if ((right < p)
-            && COMPARE(heap[right].value, heap[smallest].value) < 0) {
+            && SORT_MERGE_SUBSORTED_COMPARE(heap[right].value, heap[smallest].value) < 0) {
             smallest = right;
         }
 
