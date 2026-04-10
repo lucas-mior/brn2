@@ -44,7 +44,7 @@ scandir(const char *dir, struct dirent ***namelist,
         int (*filter)(const struct dirent *),
         int (*compar)(const struct dirent **, const struct dirent **)) {
     WIN32_FIND_DATAA find_data;
-    HANDLE hFind;
+    HANDLE find_handle;
     char buffer[MAX_PATH];
     struct dirent **list;
     int64 count = 0;
@@ -54,61 +54,61 @@ scandir(const char *dir, struct dirent ***namelist,
 
     SNPRINTF(buffer, "%s/*", dir);
 
-    if ((hFind = FindFirstFileA(buffer, &find_data)) == INVALID_HANDLE_VALUE) {
+    if ((find_handle = FindFirstFileA(buffer, &find_data)) == INVALID_HANDLE_VALUE) {
         return -1;
     }
 
     list = xmalloc(capacity*SIZEOF(*list));
     do {
-        struct dirent *ent = xmalloc(sizeof(*ent));
+        struct dirent *dir_entry = xmalloc(sizeof(*dir_entry));
         int64 length = strlen32(find_data.cFileName);
 
-        if (length > (SIZEOF(ent->d_name) - 1)) {
+        if (length > (SIZEOF(dir_entry->d_name) - 1)) {
             error("Error scanning file %s. File name is too long.\n",
                   find_data.cFileName);
             fatal(EXIT_FAILURE);
         }
 
-        memcpy64(ent->d_name, find_data.cFileName, length + 1);
+        memcpy64(dir_entry->d_name, find_data.cFileName, length + 1);
 
         if (count >= capacity) {
             capacity *= 2;
             list = xrealloc(list, capacity*SIZEOF(*list));
         }
-        list[count] = ent;
+        list[count] = dir_entry;
         count += 1;
-    } while (FindNextFileA(hFind, &find_data));
-    FindClose(hFind);
+    } while (FindNextFileA(find_handle, &find_data));
+    FindClose(find_handle);
 
     *namelist = list;
     return (int)count;
 }
 
 static time_t
-filetime_to_time_t(const FILETIME *ft) {
-    ULARGE_INTEGER ull;
-    ull.LowPart = ft->dwLowDateTime;
-    ull.HighPart = ft->dwHighDateTime;
+filetime_to_time_t(const FILETIME *filetime) {
+    ULARGE_INTEGER u_large_integer;
+    u_large_integer.LowPart = filetime->dwLowDateTime;
+    u_large_integer.HighPart = filetime->dwHighDateTime;
     // Convert from Windows epoch (1601) to Unix epoch (1970)
-    return (time_t)((ull.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    return (time_t)((u_large_integer.QuadPart - 116444736000000000ULL) / 10000000ULL);
 }
 
 static int
 lstat(const char *path, struct stat *statbuf) {
-    wchar_t wpath[MAX_PATH];
+    wchar_t wide_path[MAX_PATH];
     WIN32_FILE_ATTRIBUTE_DATA fd;
-    ULARGE_INTEGER sz;
+    ULARGE_INTEGER ull_size;
 
     if (path == NULL || statbuf == NULL) {
         fprintf(stderr, "lstat: Invalid argument.\n");
         return -1;
     }
 
-    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, MAX_PATH) == 0) {
+    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wide_path, MAX_PATH) == 0) {
         return -1;
     }
 
-    if (!GetFileAttributesExW(wpath, GetFileExInfoStandard, &fd)) {
+    if (!GetFileAttributesExW(wide_path, GetFileExInfoStandard, &fd)) {
         return -1;
     }
 
@@ -123,13 +123,13 @@ lstat(const char *path, struct stat *statbuf) {
         statbuf->st_mode = S_IFREG;
     }
 
-    sz.LowPart = fd.nFileSizeLow;
-    sz.HighPart = fd.nFileSizeHigh;
-    if (sz.QuadPart > LONG_MAX) {
+    ull_size.LowPart = fd.nFileSizeLow;
+    ull_size.HighPart = fd.nFileSizeHigh;
+    if (ull_size.QuadPart > LONG_MAX) {
         fprintf(stderr, "Error: file is too large to be represented in long\n");
         return -1;
     }
-    statbuf->st_size = (long)sz.QuadPart;
+    statbuf->st_size = (long)ull_size.QuadPart;
 
     // Convert FILETIME -> time_t
     statbuf->st_mtime = filetime_to_time_t(&fd.ftLastWriteTime);
