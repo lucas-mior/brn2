@@ -101,17 +101,14 @@ typedef uint64_t uint64;
 
 struct CommonBucket;
 
-// TODO: Struct `CommonMap` is not typedef'd. Per your codebase rules ("do
-// typedef structs"), define it as `typedef struct CommonMap { ... }
-// CommonMap;`.
-struct CommonMap {
+typedef struct CommonMap {
     int64 size;
     uint32 capacity;
     uint32 bitmask;
     uint32 length;
     uint32 occupied;
     struct CommonBucket *array;
-};
+} CommonMap;
 
 #endif /* HASH_H */
 
@@ -163,7 +160,7 @@ struct Map {
 };
 
 #define CHECK_COMMON_MAP(FIELD) \
-    _Static_assert(offsetof(struct Map, FIELD) == offsetof(struct CommonMap, FIELD), \
+    _Static_assert(offsetof(struct Map, FIELD) == offsetof(CommonMap, FIELD), \
                    "CommonMap and new Map must have the same offset for " #FIELD)
 
 CHECK_COMMON_MAP(size);
@@ -781,26 +778,26 @@ hash_function(void *key, int32 key_length) {
 // function call overhead.
 uint32
 hash_normal(void *map, uint64 hash) {
-    struct CommonMap *map2 = map;
+    CommonMap *map2 = map;
     uint32 normal = hash & map2->bitmask;
     return normal;
 }
 
 uint32
 hash_capacity(void *map) {
-    struct CommonMap *map2 = map;
+    CommonMap *map2 = map;
     return map2->capacity;
 }
 
 uint32
 hash_length(void *map) {
-    struct CommonMap *map2 = map;
+    CommonMap *map2 = map;
     return map2->length;
 }
 
 uint32
 hash_expected_collisions(void *map) {
-    struct CommonMap *map2 = map;
+    CommonMap *map2 = map;
     long double n = map2->length;
     long double m = map2->capacity;
     long double result = n - m*(1 - powl((m - 1) / m, n));
