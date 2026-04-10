@@ -245,6 +245,8 @@ INLINE void *memchr64(void *pointer, int32 value, int64 size);
 #if OS_WINDOWS
 static void *
 memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
+    // TODO: Avoid abbreviation for variable names. Prefer descriptive names
+    // like 'haystack_ptr' and 'needle_ptr'.
     uchar *h = haystack;
     uchar *n = needle;
     uchar *end = h + hay_len;
@@ -267,6 +269,7 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
             return NULL;
         }
 
+        // TODO: Prefer memcmp64 over memcmp per your codebase rules.
         if (memcmp(p, n, needle_len) == 0) {
             return (void *)p;
         }
@@ -686,6 +689,8 @@ free2(void *pointer, int64 size) {
     if (pointer) {
         free(pointer);
     }
+// TODO: Missing `return;` statement at the end of this void function per your
+// codebase rules.
 }
 
 #if DEBUGGING_MEMORY
@@ -998,7 +1003,9 @@ util_filename_from(char *buffer, int64 size, int fd) {
         return -1;
     }
 
+    // TODO: Prefer strncmp32 over strncmp.
     if (strncmp(buffer, "\\\\?\\", 4) == 0) {
+        // TODO: Prefer memmove64 over memmove per your codebase rules.
         memmove(buffer, buffer + 4, len - 3);
     }
 
@@ -1258,6 +1265,8 @@ error_impl(char *file, int32 line, char *format, ...) {
     char *big_buffer = NULL;
     char *pbuffer = buffer;
     va_list args;
+    // TODO: Avoid abbreviated variable names like 'n', 'm', 'p'. Prefer
+    // descriptive names like 'written_bytes', 'buffer_size', 'prefix_len'.
     int32 n;
     int32 m = SIZEOF(buffer);
     int32 p;
@@ -1295,13 +1304,17 @@ error_impl(char *file, int32 line, char *format, ...) {
 
 #if OS_WINDOWS
     if (p) {
+        // TODO: Prefer write64 over write per your codebase rules.
         write(STDERR_FILENO, fileline, (uint)p);
     }
+    // TODO: Prefer write64 over write.
     write(STDERR_FILENO, pbuffer, (uint)n);
 #else
     if (p) {
+        // TODO: Prefer write64 over write per your codebase rules.
         write(STDERR_FILENO, fileline, (uint)p);
     }
+    // TODO: Prefer write64 over write.
     write(STDERR_FILENO, pbuffer, (size_t)n);
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
@@ -1337,8 +1350,10 @@ static void
 error_async_safe(char *message) {
     int32 len = strlen32(message);
 #if OS_WINDOWS
+    // TODO: Prefer write64 over write per your codebase rules.
     write(STDERR_FILENO, message, (uint)len);
 #else
+    // TODO: Prefer write64 over write per your codebase rules.
     write(STDERR_FILENO, message, (size_t)len);
 #endif
     return;
@@ -1506,6 +1521,8 @@ util_copy_file_async_thread(void *arg) {
 
     while (left > 0) {
         char buffer[BUFSIZ];
+        // TODO: Avoid abbreviated variable names 'r', 'w', and 'n'. Prefer
+        // 'bytes_read', 'bytes_written', and 'events_count'.
         int64 r;
         int64 w;
         int64 n;
@@ -1653,6 +1670,8 @@ util_equal_files(char *filename_a, char *filename_b) {
     char buffer_b[BUFSIZ];
     int64 total_r = 0;
     int64 ra;
+    // TODO: Reduce variable scope. 'rb' is only used inside the while loop
+    // block. Declare it at the top of the innermost block that uses it.
     int64 rb;
     struct stat stat_a;
     struct stat stat_b;
@@ -1752,12 +1771,16 @@ out:
 
 INLINE double
 rad2deg(double radians) {
+    // TODO: Do not use the 'const' qualifier for variables per your codebase
+    // rules.
     const double RAD2DEG = 180.0 / 3.141592653589793;
     return radians*RAD2DEG;
 }
 
 INLINE double
 deg2rad(double degrees) {
+    // TODO: Do not use the 'const' qualifier for variables per your codebase
+    // rules.
     const double DEG2RAD = 3.141592653589793 / 180.0;
     return degrees*DEG2RAD;
 }
@@ -2339,6 +2362,7 @@ main(int argc, char **argv) {
         string_from_strings(b, sizeof(b), "|", strs, 3);
         ASSERT_EQUAL(b, "one|two|three");
         string_from_doubles(b, sizeof(b), ",", dbls, 2);
+        // TODO: Prefer strlen32 instead of strlen per your codebase rules.
         ASSERT_NOT_EQUAL(strlen(b), 0);
     }
 
@@ -2445,6 +2469,8 @@ main(int argc, char **argv) {
     }
 
     {
+        // TODO: Do not use the 'const' qualifier for variables per your
+        // codebase rules.
         const char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
         char name2[256];
