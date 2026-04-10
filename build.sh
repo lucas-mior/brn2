@@ -238,7 +238,7 @@ case "$target" in
         printf "\nTesting ${RED}${src}${RES} ...\n"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        if [ $src = "src/windows_functions.c" ]; then
+        if [ "$name" = "windows_functions" ]; then
             if ! zig version; then
                 continue
             fi
