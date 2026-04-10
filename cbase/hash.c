@@ -601,8 +601,6 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
                                       , uint64 hash, uint32 base_index)
 {
     uint32 target_idx;
-    // TODO: Reduce variable scope. `target` is only used inside the if blocks
-    // below. Declare it at the top of the innermost block that uses it.
     Bucket *target;
 
     if (map == NULL) {
@@ -755,8 +753,7 @@ CAT(hash_functions_sink_, HASH_TYPE)(void) {
     (void)CAT(hash_print_summary_, HASH_TYPE);
     (void)CAT(hash_print_, HASH_TYPE);
     (void)CAT(hash_ndeleted_, HASH_TYPE);
-    // TODO: Missing `return;` statement at the end of this void function per
-    // your codebase rules.
+    return;
 }
 
 #undef HASH_VALUE_TYPE
@@ -804,8 +801,6 @@ hash_length(void *map) {
 uint32
 hash_expected_collisions(void *map) {
     struct CommonMap *map2 = map;
-    // TODO: Avoid abbreviations for variable names (e.g., `n`, `m`). Use
-    // descriptive names like `length` and `capacity`.
     long double n = map2->length;
     long double m = map2->capacity;
     long double result = n - m*(1 - powl((m - 1) / m, n));
