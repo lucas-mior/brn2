@@ -475,6 +475,27 @@ X64(read, size_t)
 
 #undef X64
 
+static void
+write_all(int fd, char *buffer, int64 left) {
+    int64 written = 0;
+    int64 w;
+
+    while (left > 0) {
+#if OS_WINDOWS
+        if ((w = write(fd, buffer + written, (uint)left)) <= 0)
+#else
+        if ((w = write(fd, buffer + written, (size_t)left)) <= 0)
+#endif
+        {
+            fprintf(stderr, "Error writing: %s.\n", strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        left -= w;
+        written += w;
+    }
+    return;
+}
+
 #define X64(func) \
 INLINE int64 \
 CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
@@ -1294,20 +1315,11 @@ error_impl(char *file, int32 line, char *format, ...) {
         p = 0;
     }
 
-#if OS_WINDOWS
     if (p) {
-        // TODO: Prefer write64 over write per your codebase rules.
-        write(STDERR_FILENO, fileline, (uint)p);
+        write_all(STDERR_FILENO, fileline, p);
     }
-    // TODO: Prefer write64 over write.
-    write(STDERR_FILENO, pbuffer, (uint)n);
-#else
-    if (p) {
-        // TODO: Prefer write64 over write per your codebase rules.
-        write(STDERR_FILENO, fileline, (uint)p);
-    }
-    // TODO: Prefer write64 over write.
-    write(STDERR_FILENO, pbuffer, (size_t)n);
+    write_all(STDERR_FILENO, pbuffer, n);
+#if OS_UNIX
     fsync(STDERR_FILENO);
     fsync(STDOUT_FILENO);
 #endif
@@ -1341,13 +1353,7 @@ error_impl(char *file, int32 line, char *format, ...) {
 static void
 error_async_safe(char *message) {
     int32 len = strlen32(message);
-#if OS_WINDOWS
-    // TODO: Prefer write64 over write per your codebase rules.
-    write(STDERR_FILENO, message, (uint)len);
-#else
-    // TODO: Prefer write64 over write per your codebase rules.
-    write(STDERR_FILENO, message, (size_t)len);
-#endif
+    write_all(STDERR_FILENO, message, len);
     return;
 }
 
