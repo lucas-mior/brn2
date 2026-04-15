@@ -2213,7 +2213,7 @@ write_file(char *path, void *data, int64 len) {
 }
 #define WRITE_FILE(PATH, STRING) write_file(PATH, STRING, strlen32(STRING))
 
-static volatile sig_atomic_t received_signal = false;
+static sig_atomic_t received_signal = false;
 static void
 signal_handler(int signal_number) {
     (void)signal_number;
