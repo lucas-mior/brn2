@@ -254,6 +254,7 @@ case "$target" in
             cmdline="$cmdline -target x86_64-windows-gnu"
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
             cmdline="$cmdline $flags -o $test_exe $src"
+            CC="zig cc"
         else
             cmdline="$CC $CPPFLAGS $CFLAGS"
             cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
