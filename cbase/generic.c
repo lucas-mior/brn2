@@ -74,26 +74,26 @@ _Generic((VAR),              \
     )                        \
 )
 
-#define MINOF(VARIABLE) \
-_Generic((VARIABLE), \
-    schar:   SCHAR_MIN, \
-    short:   SHRT_MIN,  \
-    int:     INT_MIN,   \
-    long:    LONG_MIN,  \
-    llong:   LLONG_MIN, \
-    uchar:   0,         \
-    ushort:  0,         \
-    uint:    0u,        \
-    ulong:   0ul,       \
-    ullong:  0ull,      \
-    char:    CHAR_MIN,  \
-    bool:    0,         \
-    float:   -FLT_MAX,  \
-    double:  -DBL_MAX,  \
+#define MINOF(VARIABLE)           \
+_Generic((VARIABLE),              \
+    schar:   SCHAR_MIN,           \
+    short:   SHRT_MIN,            \
+    int:     INT_MIN,             \
+    long:    LONG_MIN,            \
+    llong:   LLONG_MIN,           \
+    uchar:   0,                   \
+    ushort:  0,                   \
+    uint:    0u,                  \
+    ulong:   0ul,                 \
+    ullong:  0ull,                \
+    char:    CHAR_MIN,            \
+    bool:    0,                   \
+    float:   -FLT_MAX,            \
+    double:  -DBL_MAX,            \
     default: _Generic((VARIABLE), \
-        ldouble: -LDBL_MAX, \
-        default: 0 \
-    ) \
+        ldouble: -LDBL_MAX,       \
+        default: 0                \
+    )                             \
 )
 
 #define MAXOF(VARIABLE) \
