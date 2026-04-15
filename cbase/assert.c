@@ -54,7 +54,6 @@
 #include "generic.c"
 #include "primitives.h"
 
-
 #define ASSERT(C) do {                                 \
     if (!(C)) {                                        \
         error2("%s: Assertion '%s' failed at %s:%d\n", \
