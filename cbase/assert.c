@@ -55,11 +55,12 @@
 #include "primitives.h"
 
 
-#define ASSERT(C) do { \
-    if (!(C)) { \
-        error2("Assertion '%s' failed at %s:%d\n", #C, __FILE__, __LINE__); \
-        TRAP(); \
-    } \
+#define ASSERT(C) do {                                 \
+    if (!(C)) {                                        \
+        error2("%s: Assertion '%s' failed at %s:%d\n", \
+               __func__, #C, __FILE__, __LINE__);      \
+        TRAP();                                        \
+    }                                                  \
 } while (0)
 
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                            \
