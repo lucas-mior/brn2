@@ -563,8 +563,6 @@ main(void) {
 #else
         double var_double = 1e300;
 #endif
-        /* ldouble var_longdouble = (ldouble)DBL_MAX; */
-        /* ldouble var_longdouble2 = LDOUBLE_GET(var_longdouble); */
 
         PRINTLN(var_voidptr);
         PRINTLN(var_string);
@@ -583,8 +581,14 @@ main(void) {
         PRINTLN(var_uint64);
         PRINTLN(var_float);
         PRINTLN(var_double);
-        /* PRINTLN(var_longdouble); */
-        /* PRINTLN(var_longdouble2); */
+#if !defined(__CPROC__)
+        {
+            ldouble var_longdouble = (ldouble)DBL_MAX;
+            ldouble var_longdouble2 = LDOUBLE_GET(var_longdouble);
+            PRINTLN(var_longdouble);
+            PRINTLN(var_longdouble2);
+        }
+#endif
 
         PRINTLN(*var_string);
         PRINTLN(var_uint - (uint)var_int);
