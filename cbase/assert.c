@@ -414,39 +414,39 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE(void);
-#define ASSERT_COMPARE(MODE, VAR1, VAR2) \
-_Generic((VAR1), \
-    void *: _Generic((VAR2), \
-        char *: A_POINTERS(MODE, VAR1, VAR2), \
-        void *: A_POINTERS(MODE, VAR1, VAR2), \
-        default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP() \
-    ), \
-    char *: _Generic((VAR2), \
-        char *: a_strings_##MODE(__FILE__, __LINE__, (char *)__func__, \
-                                 #VAR1, #VAR2, \
-                                 (char *)(uintptr_t)(VAR1), \
-                                 (char *)(uintptr_t)(VAR2)), \
-        void *: A_POINTERS(MODE, VAR1, VAR2), \
-        default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP() \
-    ), \
-    char:    A_FIRST_CHAR(MODE,     VAR1, VAR2),               \
-    schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ), \
-    short:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ), \
-    int:     A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_INT    ), \
-    long:    A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LONG   ), \
-    llong:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LLONG  ), \
-    uchar:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR  ), \
-    ushort:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_USHORT ), \
-    uint:    A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ), \
-    ulong:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ), \
-    ullong:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ), \
-    float:   A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ), \
-    double:  A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ), \
-    bool:    A_FIRST_BOOL(MODE,     VAR1, VAR2, TYPE_BOOL),    \
-    default: _Generic((VAR1), \
-      ldouble: A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_LDOUBLE), \
-      default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE() \
-    ) \
+#define ASSERT_COMPARE(MODE, VAR1, VAR2)                                \
+_Generic((VAR1),                                                        \
+    void *: _Generic((VAR2),                                            \
+        char *: A_POINTERS(MODE, VAR1, VAR2),                           \
+        void *: A_POINTERS(MODE, VAR1, VAR2),                           \
+        default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP()    \
+    ),                                                                  \
+    char *: _Generic((VAR2),                                            \
+        char *: a_strings_##MODE(__FILE__, __LINE__, (char *)__func__,  \
+                                 #VAR1, #VAR2,                          \
+                                 (char *)(uintptr_t)(VAR1),             \
+                                 (char *)(uintptr_t)(VAR2)),            \
+        void *: A_POINTERS(MODE, VAR1, VAR2),                           \
+        default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP()    \
+    ),                                                                  \
+    char:    A_FIRST_CHAR(MODE,     VAR1, VAR2),                        \
+    schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ),          \
+    short:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ),          \
+    int:     A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_INT    ),          \
+    long:    A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LONG   ),          \
+    llong:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LLONG  ),          \
+    uchar:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR  ),          \
+    ushort:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_USHORT ),          \
+    uint:    A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ),          \
+    ulong:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ),          \
+    ullong:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ),          \
+    float:   A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ),          \
+    double:  A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ),          \
+    bool:    A_FIRST_BOOL(MODE,     VAR1, VAR2, TYPE_BOOL),             \
+    default: _Generic((VAR1),                                           \
+      ldouble: A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_LDOUBLE),        \
+      default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()            \
+    )                                                                   \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal,      VAR1, VAR2)
