@@ -143,14 +143,6 @@ _Generic((ARRAY), \
 #define MAP_POPULATE 0
 #endif
 
-#if !defined(INLINE)
-#if defined(__GNUC__)
-#define INLINE static inline __attribute__((always_inline))
-#else
-#define INLINE static inline
-#endif
-#endif
-
 #if DEBUGGING || TESTING_util
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wc11-extensions"
