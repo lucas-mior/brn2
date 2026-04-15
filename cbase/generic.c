@@ -327,7 +327,7 @@ ldouble_get(union Primitive var, enum Type type) {
     return (ldouble)0.0;
 }
 
-void UNSUPPORTED_TYPE(union Primitive p);
+void UNSUPPORTED_TYPE(void);
 
 #define LDOUBLE_GET(x) \
 _Generic((x), \
