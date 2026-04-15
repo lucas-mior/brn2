@@ -1194,7 +1194,8 @@ error_impl(char *file, int32 line, char *format, ...) {
     if (n >= m) {
         if (RELEASING) {
             m = n + 1;
-            big_buffer = malloc2(m);
+            big_buffer = malloc((size_t)m);
+            assert(big_buffer);
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {
