@@ -459,9 +459,9 @@ write_all(int fd, char *buffer, int64 left) {
     return;
 }
 
-#define X64(func) \
+#define X64(FUNC) \
 INLINE int64 \
-CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
+CAT(FUNC, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
     size_t rw; \
     if ((size_t)size >= (SIZE_MAX/(size_t)n)) { \
         error("Error in %s: Overflow (%lld*%lld)\n", \
@@ -483,7 +483,7 @@ CAT(func, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
               __func__, (llong)size); \
         fatal(EXIT_FAILURE); \
     } \
-    rw = func(buffer, (size_t)size, (size_t)n, file); \
+    rw = FUNC(buffer, (size_t)size, (size_t)n, file); \
     return (int64)rw; \
 }
 
