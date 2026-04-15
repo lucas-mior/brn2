@@ -77,14 +77,6 @@ _Generic((VAR), \
     double:  "double", \
     default: _Generic((VAR), \
         ldouble: "ldouble", \
-        int8:    "int8",     \
-        int16:   "int16",    \
-        int32:   "int32",    \
-        int64:   "int64",    \
-        uint8:   "uint8",    \
-        uint16:  "uint16",   \
-        uint32:  "uint32",   \
-        uint64:  "uint64",   \
         default: "unknown" \
     ) \
 )
@@ -107,14 +99,6 @@ _Generic((VARIABLE), \
     double:  -DBL_MAX,  \
     default: _Generic((VARIABLE), \
         ldouble: -LDBL_MAX, \
-        int8:   INT8_MIN,  \
-        int16:  INT16_MIN, \
-        int32:  INT32_MIN, \
-        int64:  INT64_MIN, \
-        uint8:  0,         \
-        uint16: 0,         \
-        uint32: 0u,        \
-        uint64: 0ull,       \
         default: 0 \
     ) \
 )
@@ -137,14 +121,6 @@ _Generic((VARIABLE), \
     double:  DBL_MAX,    \
     default: _Generic((VARIABLE), \
         ldouble: LDBL_MAX,   \
-        int8:   INT8_MAX,   \
-        int16:  INT16_MAX,  \
-        int32:  INT32_MAX,  \
-        int64:  INT64_MAX,  \
-        uint8:  UINT8_MAX,  \
-        uint16: UINT16_MAX, \
-        uint32: UINT32_MAX, \
-        uint64: UINT64_MAX, \
         default: 1 \
     ) \
 )
@@ -186,14 +162,6 @@ static ldouble ldouble_from_ullong(ullong x)   { return (ldouble)x; }
 static ldouble ldouble_from_float(float x)     { return (ldouble)x; }
 static ldouble ldouble_from_double(double x)   { return (ldouble)x; }
 static ldouble ldouble_from_ldouble(ldouble x) { return x;          }
-static ldouble ldouble_from_int8(int8 x)       { return (ldouble)x; }
-static ldouble ldouble_from_int16(int16 x)     { return (ldouble)x; }
-static ldouble ldouble_from_int32(int32 x)     { return (ldouble)x; }
-static ldouble ldouble_from_int64(int64 x)     { return (ldouble)x; }
-static ldouble ldouble_from_uint8(uint8 x)     { return (ldouble)x; }
-static ldouble ldouble_from_uint16(uint16 x)   { return (ldouble)x; }
-static ldouble ldouble_from_uint32(uint32 x)   { return (ldouble)x; }
-static ldouble ldouble_from_uint64(uint64 x)   { return (ldouble)x; }
 
 enum Type {
     TYPE_VOIDP = 1,
@@ -213,14 +181,6 @@ enum Type {
     TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_LDOUBLE,
-    TYPE_INT8,
-    TYPE_INT16,
-    TYPE_INT32,
-    TYPE_INT64,
-    TYPE_UINT8,
-    TYPE_UINT16,
-    TYPE_UINT32,
-    TYPE_UINT64,
     TYPE_OTHER = 0,
 };
 
@@ -244,14 +204,6 @@ _Generic((VAR), \
     double:  TYPE_DOUBLE, \
     default: _Generic((VAR), \
         ldouble: TYPE_LDOUBLE, \
-        int8:    TYPE_INT8,   \
-        int16:   TYPE_INT16,  \
-        int32:   TYPE_INT32,  \
-        int64:   TYPE_INT64,  \
-        uint8:   TYPE_UINT8,  \
-        uint16:  TYPE_UINT16, \
-        uint32:  TYPE_UINT32, \
-        uint64:  TYPE_UINT64, \
         default: TYPE_OTHER  \
     ) \
 )
@@ -314,14 +266,6 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
-    case TYPE_INT8:    size = sizeof(int8);    break;
-    case TYPE_INT16:   size = sizeof(int16);   break;
-    case TYPE_INT32:   size = sizeof(int32);   break;
-    case TYPE_INT64:   size = sizeof(int64);   break;
-    case TYPE_UINT8:   size = sizeof(uint8);   break;
-    case TYPE_UINT16:  size = sizeof(uint16);  break;
-    case TYPE_UINT32:  size = sizeof(uint32);  break;
-    case TYPE_UINT64:  size = sizeof(uint64);  break;
     case TYPE_OTHER:
     default: TRAP();
     }
@@ -350,14 +294,6 @@ typename(enum Type type) {
     case TYPE_FLOAT:  return "float";
     case TYPE_DOUBLE: return "double";
     case TYPE_LDOUBLE: return "ldouble";
-    case TYPE_INT8:    return "int8";
-    case TYPE_INT16:   return "int16";
-    case TYPE_INT32:   return "int32";
-    case TYPE_INT64:   return "int64";
-    case TYPE_UINT8:   return "uint8";
-    case TYPE_UINT16:  return "uint16";
-    case TYPE_UINT32:  return "uint32";
-    case TYPE_UINT64:  return "uint64";
     case TYPE_OTHER:
     default:           return "unknown type";
     }
@@ -385,14 +321,6 @@ ldouble_get(union Primitive var, enum Type type) {
 #if !defined(__CPROC__)
     case TYPE_LDOUBLE: return var.aldouble;
 #endif
-    case TYPE_INT8:    return (ldouble)var.aint8;
-    case TYPE_INT16:   return (ldouble)var.aint16;
-    case TYPE_INT32:   return (ldouble)var.aint32;
-    case TYPE_INT64:   return (ldouble)var.aint64;
-    case TYPE_UINT8:   return (ldouble)var.auint8;
-    case TYPE_UINT16:  return (ldouble)var.auint16;
-    case TYPE_UINT32:  return (ldouble)var.auint32;
-    case TYPE_UINT64:  return (ldouble)var.auint64;
     case TYPE_OTHER:
     default:           TRAP(); break;
     }
@@ -421,14 +349,6 @@ _Generic((x), \
     double:  ldouble_from_double, \
     default: _Generic((x), \
         ldouble: ldouble_from_ldouble, \
-        int8:    ldouble_from_int8,    \
-        int16:   ldouble_from_int16,   \
-        int32:   ldouble_from_int32,   \
-        int64:   ldouble_from_int64,   \
-        uint8:   ldouble_from_uint8,   \
-        uint16:  ldouble_from_uint16,  \
-        uint32:  ldouble_from_uint32,  \
-        uint64:  ldouble_from_uint64,  \
         default: UNSUPPORTED_TYPE \
     ) \
 )(x)
@@ -481,14 +401,6 @@ _Generic((VAR), \
     double:  PRINT_LDOUBLE(VAR,  TYPE_DOUBLE),                         \
     default: _Generic((VAR), \
         ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE),                        \
-        int8:    PRINT_SIGNED(VAR,   TYPE_INT8),   \
-        int16:   PRINT_SIGNED(VAR,   TYPE_INT16),  \
-        int32:   PRINT_SIGNED(VAR,   TYPE_INT32),  \
-        int64:   PRINT_SIGNED(VAR,   TYPE_INT64),  \
-        uint8:   PRINT_UNSIGNED(VAR, TYPE_UINT8),  \
-        uint16:  PRINT_UNSIGNED(VAR, TYPE_UINT16), \
-        uint32:  PRINT_UNSIGNED(VAR, TYPE_UINT32), \
-        uint64:  PRINT_UNSIGNED(VAR, TYPE_UINT64), \
         default: 0\
     ) \
 )
@@ -519,15 +431,6 @@ generic_functions_sink(void) {
     (void)ldouble_from_float;
     (void)ldouble_from_double;
     (void)ldouble_from_ldouble;
-
-    (void)ldouble_from_int8;
-    (void)ldouble_from_int16;
-    (void)ldouble_from_int32;
-    (void)ldouble_from_int64;
-    (void)ldouble_from_uint8;
-    (void)ldouble_from_uint16;
-    (void)ldouble_from_uint32;
-    (void)ldouble_from_uint64;
 
     (void)typebits;
     (void)typename;
