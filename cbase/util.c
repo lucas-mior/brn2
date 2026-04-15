@@ -92,12 +92,6 @@ static time_t timezone_offset = 0;
 
 #define SIZEOF(X) ((int64)sizeof(X))
 
-#if !defined(SIZEKB)
-#define SIZEKB(X) ((int64)(X)*1024ll)
-#define SIZEMB(X) ((int64)(X)*1024ll*1024ll)
-#define SIZEGB(X) ((int64)(X)*1024ll*1024ll*1024ll)
-#endif
-
 #if !defined(LENGTH)
 #define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
 #endif

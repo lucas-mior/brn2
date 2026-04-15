@@ -22,4 +22,8 @@
 #define YELLOW(S) "\x1b[33m"   S RESET
 #define BLUE(S)   "\x1b[1;34m" S RESET
 
+#define SIZEKB(X) ((int64)(X)*1024ll)
+#define SIZEMB(X) ((int64)(X)*1024ll*1024ll)
+#define SIZEGB(X) ((int64)(X)*1024ll*1024ll*1024ll)
+
 #endif /* BASE_MACROS_H */
