@@ -48,12 +48,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#if !defined(SIZEKB)
-#define SIZEKB(X) ((int64)(X)*1024l)
-#define SIZEMB(X) ((int64)(X)*1024l*1024l)
-#define SIZEGB(X) ((int64)(X)*1024l*1024l*1024l)
-#endif
-
 #define ARENA_ALIGN(S, A) (int64)(((S) + ((A) - 1)) & ~((A) - 1))
 #if !defined(ALIGNMENT)
 #define ALIGNMENT 16ul
