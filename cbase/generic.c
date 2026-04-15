@@ -29,14 +29,6 @@
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
-#if !defined(RED) || !defined(GREEN) || !defined(YELLOW) || !defined(RESET)
-#define RESET     "\x1b[0m"
-#define RED(S)    "\x1b[31m"   S RESET
-#define GREEN(S)  "\x1b[32m"   S RESET
-#define YELLOW(S) "\x1b[33m"   S RESET
-#define BLUE(S)   "\x1b[1;34m" S RESET
-#endif
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_generic 1
 #elif !defined(TESTING_generic)
@@ -56,6 +48,7 @@
 #endif
 
 #include "primitives.h"
+#include "base_macros.h"
 
 #define TYPENAME(VAR) \
 _Generic((VAR), \
