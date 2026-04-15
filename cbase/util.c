@@ -504,8 +504,6 @@ util_nthreads(void) {
 
 #if !defined(DEBUGGING_MEMORY)
 #define DEBUGGING_MEMORY DEBUGGING
-#else
-#define DEBUGGING_MEMORY 0
 #endif
 
 INLINE void
@@ -618,7 +616,7 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
                    (llong)size);
         fatal(EXIT_FAILURE);
     }
-    if (pointer && size) {
+    if (DEBUGGING_MEMORY && pointer && size) {
         error_impl(file, line,
                    "Freeing %p of size %lld\n", pointer, (llong)size);
         if (!RUNNING_ON_VALGRIND) {
