@@ -407,9 +407,9 @@ memcmp64(void *left, void *right, int64 size) {
     return result;
 }
 
-#define X64(func, TYPE) \
+#define X64(FUNC, TYPE) \
 INLINE int64 \
-CAT(func, 64)(int fd, void *buffer, int64 size) { \
+CAT(FUNC, 64)(int fd, void *buffer, int64 size) { \
     TYPE instance = 0; \
     ssize_t w; \
     (void)instance; \
@@ -421,10 +421,10 @@ CAT(func, 64)(int fd, void *buffer, int64 size) { \
     } \
     if ((ullong)size >= (ullong)MAXOF(instance)) { \
         error("Error in %s: Size (%lld) is too big for %s\n", __func__, \
-              (llong)size, #func); \
+              (llong)size, #FUNC); \
         fatal(EXIT_FAILURE); \
     } \
-    w = func(fd, buffer, (TYPE)size); \
+    w = FUNC(fd, buffer, (TYPE)size); \
     return (int64)w; \
 }
 
