@@ -120,25 +120,25 @@ static ldouble
 ldouble_from_voidp(void* x) {
     (void)x;
     TRAP();
-    return 0.0l;
+    return (ldouble)0.0;
 }
 static ldouble
 ldouble_from_charp(char* x) {
     (void)x;
     TRAP();
-    return 0.0l;
+    return (ldouble)0.0;
 }
 static ldouble
 ldouble_from_bool(bool x) {
     (void)x;
     TRAP();
-    return 0.0l;
+    return (ldouble)0.0;
 }
 static ldouble
 ldouble_from_char(char x) {
     (void)x;
     TRAP();
-    return 0.0l;
+    return (ldouble)0.0;
 }
 static ldouble ldouble_from_schar(schar x)     { return (ldouble)x; }
 static ldouble ldouble_from_short(short x)     { return (ldouble)x; }
@@ -303,7 +303,7 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_OTHER:
     default:           TRAP(); break;
     }
-    return 0.0l;
+    return (ldouble)0.0;
 }
 
 #define LDOUBLE_GET(x) \
