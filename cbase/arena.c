@@ -313,9 +313,7 @@ arena_push(Arena *arena, int64 size) {
     }
     arena->pos = (char *)arena->pos + size;
     arena->npushed += 1;
-#if COMPILER_GCC || COMPILER_CLANG
-    before = __builtin_assume_aligned(before, ALIGNMENT);
-#endif
+    ASSUME_ALIGNED(before);
     return before;
 }
 

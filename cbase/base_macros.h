@@ -51,6 +51,14 @@ _Generic((SIZE), \
 #define ALIGNMENT 16ul
 #define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
 
+#if defined(__GNUC__)
+#define ASSUME_ALIGNED(X) do { \
+    X = __builtin_assume_aligned(X, ALIGNMENT); \
+} while (0)
+#else
+#define ASSUME_ALIGNED(X) do {} while (0)
+#endif
+
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
