@@ -43,11 +43,7 @@ _Generic((SIZE), \
     int:    ALIGN_POWER_OF_2_((uint)SIZE,   (uint)A)    \
 )
 
-#if !defined(ALIGNMENT)
 #define ALIGNMENT 16ul
-#endif
-#if !defined(ALIGN)
 #define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
-#endif
 
 #endif /* BASE_MACROS_H */
