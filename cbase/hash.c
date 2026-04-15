@@ -434,6 +434,7 @@ CAT(hash_insert_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
 
 
 #if defined(HASH_VALUE_TYPE)
+/* only define overwrite functions for HashMaps, not for HashSets */
 
 static bool
 CAT(hash_overwrite_pre_calc_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
@@ -507,7 +508,7 @@ CAT(hash_overwrite_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
                                                     , hash, index, value);
 }
 
-#endif /* HASH_VALUE_TYPE (only define overwrite functions for HashMaps, not for HashSets */
+#endif /* HASH_VALUE_TYPE (only define overwrite functions for HashMaps, not for HashSets) */
 
 static bool
 CAT(hash_lookup_pre_calc_, HASH_TYPE)(struct Map *map,
