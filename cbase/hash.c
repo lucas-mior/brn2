@@ -50,10 +50,6 @@
 #define HASH_SLOT_FREE     0
 #define HASH_SLOT_DELETED -1
 
-#if !defined(ALIGNMENT)
-#define ALIGNMENT 16
-#endif
-
 INLINE uint64 hash_function(void *key, int32 key_length);
 INLINE uint32 hash_normal(void *map, uint64 hash);
 INLINE uint32 hash_capacity(void *map);
