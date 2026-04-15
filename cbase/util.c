@@ -1388,8 +1388,8 @@ util_copy_file_sync(char *destination, char *source) {
     if ((destination_fd
              = open(destination,
                     O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) < 0) {
-        error("Error opening %s for writing: %s.\n", destination,
-              strerror(errno));
+        error("Error opening %s for writing: %s.\n",
+              destination, strerror(errno));
         XCLOSE(&source_fd, source);
         return -1;
     }
