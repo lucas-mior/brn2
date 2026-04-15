@@ -56,14 +56,6 @@
 #define HASH_TYPE set
 #include "hash.c"
 
-#if defined(__GNUC__)
-#define BRN2_ASSUME_ALIGNED(X) do { \
-    X = __builtin_assume_aligned(X, BRN2_ALIGNMENT); \
-} while (0)
-#else
-#define BRN2_ASSUME_ALIGNED(X) do {} while (0)
-#endif
-
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
 #endif
