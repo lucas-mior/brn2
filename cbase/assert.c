@@ -273,18 +273,18 @@ GENERATE_ASSERT_BOOLS(more_equal, >=)
 
 #undef GENERATE_ASSERT_BOOLS
 
-#define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_both_signed_##MODE(__FILE__, __LINE__, (char *)__func__,       \
-                         #VAR1, #VAR2,                     \
-                         typename(TYPE1), typename(TYPE2), \
-                         typebits(TYPE1), typebits(TYPE2), \
+#define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
+    a_both_signed_##MODE(__FILE__, __LINE__, (char *)__func__,    \
+                         #VAR1, #VAR2,                            \
+                         typename(TYPE1), typename(TYPE2),        \
+                         typebits(TYPE1), typebits(TYPE2),        \
                          (llong)(VAR1), (llong)(VAR2))
 
-#define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_signed_unsigned##MODE(__FILE__, __LINE__, (char *)__func__,       \
-                            #VAR1, #VAR2,                     \
-                            typename(TYPE1), typename(TYPE2), \
-                            typebits(TYPE1), typebits(TYPE2), \
+#define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)         \
+    a_signed_unsigned##MODE(__FILE__, __LINE__, (char *)__func__, \
+                            #VAR1, #VAR2,                         \
+                            typename(TYPE1), typename(TYPE2),     \
+                            typebits(TYPE1), typebits(TYPE2),     \
                             (llong)(VAR1), (ullong)(VAR2))
 
 #if CHAR_MIN < 0
