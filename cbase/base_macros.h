@@ -15,4 +15,4 @@
       CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 #endif
 
-#endif
+#endif /* BASE_MACROS_H */
