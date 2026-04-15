@@ -120,15 +120,15 @@ case "$target" in
     exe="bin/${program}_perf"
     ;;
 "valgrind")
-    CFLAGS="$CFLAGS -g -O0 -ftree-vectorize"
+    CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "callgrind")
-    CFLAGS="$CFLAGS -g -O2 -ftree-vectorize"
+    CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE"
     ;;
 "test")
-    CFLAGS="$CFLAGS -g $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined -Wno-address"
+    CFLAGS="$CFLAGS -g3 $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined -Wno-address"
     ;;
 "check")
     CC=gcc
