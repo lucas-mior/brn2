@@ -540,6 +540,10 @@ malloc_debug(char *file, int32 line, int64 size) {
         fatal(EXIT_FAILURE);
     }
 
+    if (DEBUGGING_MEMORY) {
+        error_impl(file, line, "Allocating %lld bytes...\n", (llong)size);
+    }
+
     if ((p = malloc((size_t)size)) == NULL) {
         error_impl(file, line,
                    "Failed to allocate %lld bytes.\n", (llong)size);
