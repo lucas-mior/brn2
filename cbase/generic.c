@@ -96,26 +96,26 @@ _Generic((VARIABLE),              \
     )                             \
 )
 
-#define MAXOF(VARIABLE) \
-_Generic((VARIABLE), \
-    schar:   SCHAR_MAX,  \
-    short:   SHRT_MAX,   \
-    int:     INT_MAX,    \
-    long:    LONG_MAX,   \
-    llong:   LLONG_MAX,  \
-    uchar:   UCHAR_MAX,  \
-    ushort:  USHRT_MAX,  \
-    uint:    UINT_MAX,   \
-    ulong:   ULONG_MAX,  \
-    ullong:  ULLONG_MAX, \
-    char:    CHAR_MAX,   \
-    bool:    1,          \
-    float:   FLT_MAX,    \
-    double:  DBL_MAX,    \
+#define MAXOF(VARIABLE)           \
+_Generic((VARIABLE),              \
+    schar:   SCHAR_MAX,           \
+    short:   SHRT_MAX,            \
+    int:     INT_MAX,             \
+    long:    LONG_MAX,            \
+    llong:   LLONG_MAX,           \
+    uchar:   UCHAR_MAX,           \
+    ushort:  USHRT_MAX,           \
+    uint:    UINT_MAX,            \
+    ulong:   ULONG_MAX,           \
+    ullong:  ULLONG_MAX,          \
+    char:    CHAR_MAX,            \
+    bool:    1,                   \
+    float:   FLT_MAX,             \
+    double:  DBL_MAX,             \
     default: _Generic((VARIABLE), \
-        ldouble: LDBL_MAX,   \
-        default: 1 \
-    ) \
+        ldouble: LDBL_MAX,        \
+        default: 1                \
+    )                             \
 )
 
 static ldouble
