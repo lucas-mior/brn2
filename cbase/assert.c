@@ -760,6 +760,7 @@ main(void) {
     }
     ASSERT(true);
     ASSERT(!false);
+    ASSERT_EQUAL(true, true);
     exit(EXIT_SUCCESS);
 }
 #endif
