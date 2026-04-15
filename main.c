@@ -257,7 +257,9 @@ main(int argc, char **argv) {
     brn2_normalize_names(old, NULL);
 
     {
+        int64 length_before;
         int32 j = 0;
+
         for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             if (file->type == TYPE_ERR) {
@@ -269,15 +271,19 @@ main(int argc, char **argv) {
             }
             j += 1;
         }
+
+        length_before = old->length;
         old->length = j;
-    }
 
-    if (old->length == 0) {
-        error("No files to rename.\n");
-        fatal(EXIT_FAILURE);
-    }
+        if (old->length == 0) {
+            error("No files to rename.\n");
+            fatal(EXIT_FAILURE);
+        }
 
-    old->files = xrealloc(old->files, old->length*SIZEOF(*(old->files)));
+        old->files
+            = realloc2(old->files,
+                       length_before, old->length, SIZEOF(*(old->files)));
+    }
 
     if (brn2_options_sort) {
         brn2_sort(old);
