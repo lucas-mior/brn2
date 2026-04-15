@@ -160,26 +160,6 @@ _Generic((ARRAY), \
 
 #endif
 
-#define UTIL_ALIGN_UINT(SIZE, A) (int64)(((SIZE) + ((A) - 1)) & ~((A) - 1))
-#define ALIGN16(x) (((x) + 15) & ~15)
-
-#define UTIL_ALIGN(SIZE, A) \
-_Generic((SIZE), \
-    ullong: UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
-    ulong:  UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
-    uint:   UTIL_ALIGN_UINT((uint)SIZE,   (uint)A),   \
-    llong:  UTIL_ALIGN_UINT((ullong)SIZE, (ullong)A), \
-    long:   UTIL_ALIGN_UINT((ulong)SIZE,  (ulong)A),  \
-    int:    UTIL_ALIGN_UINT((uint)SIZE,   (uint)A)    \
-)
-
-#if !defined(ALIGNMENT)
-#define ALIGNMENT 16ul
-#endif
-#if !defined(ALIGN)
-#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
-#endif
-
 static char *notifiers[2] = {"dunstify", "notify-send"};
 static int64 util_page_size = 0;
 
@@ -726,13 +706,13 @@ xmmap_commit(int64 *size) {
                          | FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
-                *size = UTIL_ALIGN(*size, SIZEMB(2));
+                *size = ALIGN_POWER_OF_2(*size, SIZEMB(2));
                 break;
             }
         }
         p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
-        *size = UTIL_ALIGN(*size, util_page_size);
+        *size = ALIGN_POWER_OF_2(*size, util_page_size);
     } while (0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%lld): %s.\n", (llong)*size, strerror(errno));
