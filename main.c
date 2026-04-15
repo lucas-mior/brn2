@@ -88,7 +88,7 @@ delete_brn2_buffer(void) {
     return;
 }
 
-static void __attribute__((noreturn))
+static void __attribute((noreturn))
 handler_segv(int unused) {
     (void)unused;
     error("%s: Memory error. Please file a bug report.\n", program);

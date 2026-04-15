@@ -135,7 +135,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
 }
 
 #if OS_UNIX
-static void *__attribute__((noreturn))
+static void *__attribute((noreturn))
 brn2_threads_function(void *arg) {
     (void)arg;
 
