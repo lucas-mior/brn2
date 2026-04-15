@@ -91,4 +91,8 @@ _Generic((SIZE), \
 #endif
 #endif
 
+#if !defined(MAP_POPULATE)
+#define MAP_POPULATE 0
+#endif
+
 #endif /* BASE_MACROS_H */

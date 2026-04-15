@@ -103,10 +103,6 @@ _Generic((ARRAY), \
 #define ERROR_NOTIFY 0
 #endif
 
-#if !defined(MAP_POPULATE)
-#define MAP_POPULATE 0
-#endif
-
 #if DEBUGGING || TESTING_util
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wc11-extensions"
