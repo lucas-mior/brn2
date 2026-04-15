@@ -761,7 +761,7 @@ static void
 xmunmap(void *p, size_t size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        free(p, (int64)size);
+        free2(p, (int64)size);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
