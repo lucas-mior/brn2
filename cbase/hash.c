@@ -61,10 +61,6 @@ INLINE uint32 hash_capacity(void *map);
 INLINE uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
 
-#if !defined(QUOTE)
-#define QUOTE_(x) #x
-#define QUOTE(x) QUOTE_(x)
-#endif
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
 #define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
 
