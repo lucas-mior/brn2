@@ -472,6 +472,7 @@ CAT(hash_overwrite_pre_calc_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
     }
   #if HASH_DUPLICATE_KEYS
     target->key = xarena_push(map->arena_keys, key_length + 1);
+    memcpy64(target->key, key, key_length + 1);
   #else
     target->key = key;
   #endif
