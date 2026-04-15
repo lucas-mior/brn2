@@ -290,8 +290,8 @@ memset64(void *buffer, int value, int64 size) {
             fatal(EXIT_FAILURE);
         }
         if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
-                  (llong)size);
+            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n",
+                  __func__, (llong)size);
             fatal(EXIT_FAILURE);
         }
     }
