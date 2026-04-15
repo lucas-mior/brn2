@@ -2138,7 +2138,6 @@ util_test_qsort_cmp(const void *a, const void *b) {
 
 int
 main(int argc, char **argv) {
-    char *string = __FILE__;
     char *s1 = "aaaabbbb";
     struct timespec t0;
     struct timespec t1;
