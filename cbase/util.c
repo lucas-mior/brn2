@@ -1640,7 +1640,7 @@ util_equal_files(char *filename_a, char *filename_b) {
         equal = false;
         goto out;
     }
-    if (stat_a.st_dev == stat_b.st_dev && stat_a.st_ino == stat_b.st_ino) {
+    if ((stat_a.st_dev == stat_b.st_dev) && (stat_a.st_ino == stat_b.st_ino)) {
         equal = true;
         goto out;
     }
