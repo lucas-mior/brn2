@@ -75,10 +75,12 @@ option_remove() {
 
 with_other () {
     compiler="$1"
+    compiler_macro=$(echo "$compiler" | tr '[:lower:]' '[:upper:]')
+    compiler_macro="__${compiler_macro}__"
     shift
     args="$*"
     trace_on
-    while ! problem=$($compiler $args 2>&1); do
+    while ! problem=$($compiler "-D${compiler_macro}" $args 2>&1); do
         trace_off
         problem=$(echo "$problem" | head -n 1 | tr -d "'")
 

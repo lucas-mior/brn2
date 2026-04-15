@@ -94,7 +94,7 @@
 #include "generic.c"
 #include "minmax.c"
 
-#if defined(__has_include)
+#if !defined(__CPROC__) && defined(__has_include)
   #if __has_include(<valgrind/valgrind.h>)
     #include <valgrind/valgrind.h>
   #else

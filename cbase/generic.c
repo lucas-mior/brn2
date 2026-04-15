@@ -51,28 +51,11 @@
 #elif defined(_MSC_VER)
 #define TRAP(...) __debugbreak()
 #else
-#define TRAP(...) *(volatile int *)0 = 0
+#define TRAP(...) *(int *)0 = 0
 #endif
 #endif
 
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
-
-typedef signed char schar;
-typedef long long llong;
-typedef long double ldouble;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
+#include "primitives.h"
 
 #define TYPENAME(VAR) \
 _Generic((VAR), \
@@ -530,8 +513,8 @@ main(void) {
         uint64 var_uint64 = UINT64_MAX;
         float var_float = FLT_MAX;
         double var_double = DBL_MAX;
-        long double var_longdouble = (ldouble)DBL_MAX;
-        long double var_longdouble2 = LDOUBLE_GET(var_longdouble);
+        ldouble var_longdouble = (ldouble)DBL_MAX;
+        ldouble var_longdouble2 = LDOUBLE_GET(var_longdouble);
 
         PRINTLN(var_voidptr);
         PRINTLN(var_string);
