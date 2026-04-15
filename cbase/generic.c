@@ -50,28 +50,28 @@
 #include "primitives.h"
 #include "base_macros.h"
 
-#define TYPENAME(VAR) \
-_Generic((VAR), \
-    void*:   "void*",  \
-    char*:   "char*",  \
-    bool:    "bool",   \
-    char:    "char",   \
-    schar:   "schar",  \
-    short:   "short",  \
-    int:     "int",    \
-    long:    "long",   \
-    llong:   "llong",  \
-    uchar:   "uchar",  \
-    ushort:  "ushort", \
-    uint:    "uint",   \
-    ulong:   "ulong",  \
-    ullong:  "ullong", \
-    float:   "float",  \
-    double:  "double", \
+#define TYPENAME(VAR)        \
+_Generic((VAR),              \
+    void*:   "void*",        \
+    char*:   "char*",        \
+    bool:    "bool",         \
+    char:    "char",         \
+    schar:   "schar",        \
+    short:   "short",        \
+    int:     "int",          \
+    long:    "long",         \
+    llong:   "llong",        \
+    uchar:   "uchar",        \
+    ushort:  "ushort",       \
+    uint:    "uint",         \
+    ulong:   "ulong",        \
+    ullong:  "ullong",       \
+    float:   "float",        \
+    double:  "double",       \
     default: _Generic((VAR), \
-        ldouble: "ldouble", \
-        default: "unknown" \
-    ) \
+        ldouble: "ldouble",  \
+        default: "unknown"   \
+    )                        \
 )
 
 #define MINOF(VARIABLE) \
