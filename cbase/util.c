@@ -543,12 +543,7 @@ malloc_debug(char *file, int32 line, int64 size) {
         error_impl(file, line, "Allocating %lld bytes...\n", (llong)size);
     }
 
-    if ((p = malloc((size_t)size)) == NULL) {
-        error_impl(file, line,
-                   "Error in %s: Failed to allocate %lld bytes.\n",
-                   __func__, (llong)size);
-        fatal(EXIT_FAILURE);
-    }
+    p = xmalloc(size);
 
     if (!RUNNING_ON_VALGRIND) {
         memset64(p, MEM_MALLOCED_UNINITIALIZED, size);
