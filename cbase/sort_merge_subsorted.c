@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(SORT_C)
-#define SORT_C
+#if !defined(SORT_MERGE_SUBSORTED_C)
+#define SORT_MERGE_SUBSORTED_C
 
 #include <stdlib.h>
 
@@ -236,6 +236,6 @@ main(void) {
     exit(EXIT_SUCCESS);
 }
 
-#endif
+#endif /* TESTING_sort_merge_subsorted */
 
-#endif
+#endif /* SORT_MERGE_SUBSORTED_C */
