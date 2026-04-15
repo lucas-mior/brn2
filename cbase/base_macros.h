@@ -14,4 +14,6 @@
 #define SELECT_ON_NUM_ARGS(macro, ...) \
   CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
+#define OFFSET_OF(STRUCT, FIELD) ((size_t)&(((STRUCT *)0)->FIELD))
+
 #endif /* BASE_MACROS_H */
