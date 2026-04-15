@@ -450,10 +450,10 @@ int
 main(void) {
     union Primitive primitive;
 
-    /* assert(MINOF(primitive.adouble)  == -DBL_MAX); */
     assert(MINOF(primitive.afloat)   == -FLT_MAX);
     assert(MINOF(primitive.aint)     == INT_MIN);
 #if !defined(__CPROC__)
+    assert(MINOF(primitive.adouble)  == -DBL_MAX);
     assert(MINOF(primitive.aldouble) == -LDBL_MAX);
 #endif
     assert(MINOF(primitive.allong)   == LLONG_MIN);
@@ -468,8 +468,8 @@ main(void) {
 
 #if !defined(__CPROC__)
     assert(MAXOF(primitive.aldouble) == LDBL_MAX);
+    assert(MAXOF(primitive.adouble)  == DBL_MAX);
 #endif
-    /* assert(MAXOF(primitive.adouble)  == DBL_MAX); */
     assert(MAXOF(primitive.afloat)   == FLT_MAX);
     assert(MAXOF(primitive.aschar)   == SCHAR_MAX);
     assert(MAXOF(primitive.ashort)   == SHRT_MAX);
@@ -511,8 +511,8 @@ main(void) {
                    typename(TYPEID(primitive.aullong))));
     assert(!strcmp(TYPENAME(primitive.afloat),
                    typename(TYPEID(primitive.afloat))));
-    /* assert(!strcmp(TYPENAME(primitive.adouble), */
-    /*                typename(TYPEID(primitive.adouble)))); */
+    assert(!strcmp(TYPENAME(primitive.adouble),
+                   typename(TYPEID(primitive.adouble))));
 #if !defined(__CPROC__)
     assert(!strcmp(TYPENAME(primitive.aldouble),
                    typename(TYPEID(primitive.aldouble))));
