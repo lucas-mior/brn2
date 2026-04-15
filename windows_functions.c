@@ -58,9 +58,9 @@ scandir(const char *dir, struct dirent ***namelist,
         return -1;
     }
 
-    list = xmalloc(capacity*SIZEOF(*list));
+    list = malloc2(capacity*SIZEOF(*list));
     do {
-        struct dirent *dir_entry = xmalloc(sizeof(*dir_entry));
+        struct dirent *dir_entry = malloc2(sizeof(*dir_entry));
         int64 length = strlen32(find_data.cFileName);
 
         if (length > (SIZEOF(dir_entry->d_name) - 1)) {

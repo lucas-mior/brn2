@@ -102,7 +102,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    list->files = xmalloc(argc*SIZEOF(*(list->files)));
+    list->files = malloc2(argc*SIZEOF(*(list->files)));
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -199,7 +199,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         fatal(EXIT_FAILURE);
     }
 
-    list->files = xmalloc(number_files*SIZEOF(*(list->files)));
+    list->files = malloc2(number_files*SIZEOF(*(list->files)));
 
     for (int i = 0; i < number_files; i += 1) {
         FileName **file_pointer = &(list->files[length]);
@@ -210,7 +210,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
 
         if (brn2_is_invalid_name(name)) {
             if (DEBUGGING) {
-                free(directory_list[i], sizeof(*directory_list));
+                free2(directory_list[i], sizeof(*directory_list));
             }
             continue;
         }
@@ -239,11 +239,11 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
 
         if (DEBUGGING) {
-            free(directory_list[i], sizeof(*directory_list));
+            free2(directory_list[i], sizeof(*directory_list));
         }
         length += 1;
     }
-    free(directory_list, sizeof(*directory_list));
+    free2(directory_list, sizeof(*directory_list));
     list->length = length;
     return;
 }
@@ -311,7 +311,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             error("Error: Too large file.\n");
             fatal(EXIT_FAILURE);
         }
-        list->files = xmalloc(capacity*SIZEOF(*(list->files)));
+        list->files = malloc2(capacity*SIZEOF(*(list->files)));
     }
 
     {
@@ -405,7 +405,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
     }
 
-    list->files = xmalloc(capacity*SIZEOF(*(list->files)));
+    list->files = malloc2(capacity*SIZEOF(*(list->files)));
 
     errno = 0;
     while (fgets(buffer, sizeof(buffer), lines)) {
@@ -478,7 +478,7 @@ brn2_free_list(FileList *list) {
             ASSERT(arenas_pop(list->arenas, nthreads, file));
         }
     }
-    free(list->files, list->length*SIZEOF(*(list->files)));
+    free2(list->files, list->length*SIZEOF(*(list->files)));
     arenas_reset(list->arenas, nthreads);
     return;
 }
@@ -729,7 +729,7 @@ brn2_sort(FileList *old) {
     FileName *dummy_last;
     int64 dummy_size = STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1);
 
-    dummy_last = xmalloc(dummy_size);
+    dummy_last = malloc2(dummy_size);
     memset64(dummy_last, 0, sizeof(*dummy_last));
     memcpy64(dummy_last, last, last_length + 1);
 
@@ -741,7 +741,7 @@ brn2_sort(FileList *old) {
     sort_shuffle(old->files, old->length, SIZEOF(*(old->files)));
 
     memcpy64(&copy, old, sizeof(*old));
-    copy.files = xmalloc(copy.length*SIZEOF(*(old->files)));
+    copy.files = malloc2(copy.length*SIZEOF(*(old->files)));
     memcpy64(copy.files, old->files, copy.length*SIZEOF(*(old->files)));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
@@ -749,7 +749,7 @@ brn2_sort(FileList *old) {
     partitions = brn2_threads(brn2_threads_work_sort,
                               old->length, old, NULL, NULL, 0, NULL);
     if (partitions == 1) {
-        free(dummy_last, dummy_size);
+        free2(dummy_last, dummy_size);
         return;
     }
 
@@ -782,7 +782,7 @@ brn2_sort(FileList *old) {
     exit(EXIT_SUCCESS);
 #endif
 
-    free(dummy_last, dummy_size);
+    free2(dummy_last, dummy_size);
     return;
 }
 
@@ -1234,9 +1234,9 @@ main(void) {
 
         brn2_list_from_file(list1, filelist, true);
 
-        argv = xmalloc(capacity * SIZEOF(*argv));
+        argv = malloc2(capacity * SIZEOF(*argv));
         for (int i = 0; i < capacity; i += 1) {
-            argv[i] = xmalloc(capacity * SIZEOF(*argv[i]));
+            argv[i] = malloc2(capacity * SIZEOF(*argv[i]));
         }
 
         if ((args = fopen(filelist, "r")) == NULL) {
@@ -1261,9 +1261,9 @@ main(void) {
         brn2_list_from_args(list2, argc, argv);
 
         for (int i = 0; i < capacity; i += 1) {
-            free(argv[i], (int64)capacity * SIZEOF(*argv[i]));
+            free2(argv[i], (int64)capacity * SIZEOF(*argv[i]));
         }
-        free(argv, (int64)capacity * SIZEOF(*argv));
+        free2(argv, (int64)capacity * SIZEOF(*argv));
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1384,7 +1384,7 @@ main(void) {
         brn2_normalize_names(old, NULL);
         brn2_sort(old);
 
-        new->files = xmalloc((int64)old->length * SIZEOF(*(new->files)));
+        new->files = malloc2((int64)old->length * SIZEOF(*(new->files)));
         new->length = old->length;
         for (int32 i = 0; i < new->length; i += 1) {
             FileName **file_pointer = &(new->files[i]);

@@ -169,7 +169,7 @@ CAT(hash_create_, HASH_TYPE)(uint32 length, char *name) {
 
     array_size = capacity*sizeof(Bucket);
 
-    map = xmalloc(sizeof(*map));
+    map = malloc2(sizeof(*map));
     map->name = xstrdup(name);
     map->array = xmmap_commit(&array_size);
     map->capacity = capacity;
@@ -196,7 +196,7 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
     arena_destroy(map->arena_keys);
 #endif
     xmunmap(map->array, map->size);
-    free(map, sizeof(*map));
+    free2(map, sizeof(*map));
     return;
 }
 
@@ -842,7 +842,7 @@ main(void) {
     struct timespec t1;
     struct Hash_map *map = hash_create_map(100, "strings_map");
     Arena *arena = arena_create(NBYTES*NSTRINGS, "strings_arena");
-    String *strings = xmalloc(NSTRINGS*sizeof(*strings));
+    String *strings = malloc2(NSTRINGS*sizeof(*strings));
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 10};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 20};
     uint32 initial_capacity;
@@ -910,7 +910,7 @@ main(void) {
     ASSERT_EQUAL(hash_length(map), 10);
 
     hash_destroy_map(map);
-    free(strings, NSTRINGS*sizeof(*strings));
+    free2(strings, NSTRINGS*sizeof(*strings));
 
     {
         struct Hash_map_by_value *map2;
