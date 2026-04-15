@@ -75,7 +75,18 @@ _Generic((VAR), \
     ullong:  "ullong", \
     float:   "float",  \
     double:  "double", \
-    ldouble: "ldouble" \
+    default: _Generic((VAR), \
+        ldouble: "ldouble", \
+        int8:    "int8",     \
+        int16:   "int16",    \
+        int32:   "int32",    \
+        int64:   "int64",    \
+        uint8:   "uint8",    \
+        uint16:  "uint16",   \
+        uint32:  "uint32",   \
+        uint64:  "uint64",   \
+        default: "unknown" \
+    ) \
 )
 
 #define MINOF(VARIABLE) \
@@ -94,7 +105,18 @@ _Generic((VARIABLE), \
     bool:    0,         \
     float:   -FLT_MAX,  \
     double:  -DBL_MAX,  \
-    ldouble: -LDBL_MAX  \
+    default: _Generic((VARIABLE), \
+        ldouble: -LDBL_MAX, \
+        int8:   INT8_MIN,  \
+        int16:  INT16_MIN, \
+        int32:  INT32_MIN, \
+        int64:  INT64_MIN, \
+        uint8:  0,         \
+        uint16: 0,         \
+        uint32: 0u,        \
+        uint64: 0ull,       \
+        default: 0 \
+    ) \
 )
 
 #define MAXOF(VARIABLE) \
@@ -113,7 +135,18 @@ _Generic((VARIABLE), \
     bool:    1,          \
     float:   FLT_MAX,    \
     double:  DBL_MAX,    \
-    ldouble: LDBL_MAX    \
+    default: _Generic((VARIABLE), \
+        ldouble: LDBL_MAX,   \
+        int8:   INT8_MAX,   \
+        int16:  INT16_MAX,  \
+        int32:  INT32_MAX,  \
+        int64:  INT64_MAX,  \
+        uint8:  UINT8_MAX,  \
+        uint16: UINT16_MAX, \
+        uint32: UINT32_MAX, \
+        uint64: UINT64_MAX, \
+        default: 1 \
+    ) \
 )
 
 static ldouble
@@ -153,6 +186,14 @@ static ldouble ldouble_from_ullong(ullong x)   { return (ldouble)x; }
 static ldouble ldouble_from_float(float x)     { return (ldouble)x; }
 static ldouble ldouble_from_double(double x)   { return (ldouble)x; }
 static ldouble ldouble_from_ldouble(ldouble x) { return x;          }
+static ldouble ldouble_from_int8(int8 x)       { return (ldouble)x; }
+static ldouble ldouble_from_int16(int16 x)     { return (ldouble)x; }
+static ldouble ldouble_from_int32(int32 x)     { return (ldouble)x; }
+static ldouble ldouble_from_int64(int64 x)     { return (ldouble)x; }
+static ldouble ldouble_from_uint8(uint8 x)     { return (ldouble)x; }
+static ldouble ldouble_from_uint16(uint16 x)   { return (ldouble)x; }
+static ldouble ldouble_from_uint32(uint32 x)   { return (ldouble)x; }
+static ldouble ldouble_from_uint64(uint64 x)   { return (ldouble)x; }
 
 enum Type {
     TYPE_VOIDP = 1,
@@ -172,6 +213,14 @@ enum Type {
     TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_LDOUBLE,
+    TYPE_INT8,
+    TYPE_INT16,
+    TYPE_INT32,
+    TYPE_INT64,
+    TYPE_UINT8,
+    TYPE_UINT16,
+    TYPE_UINT32,
+    TYPE_UINT64,
     TYPE_OTHER = 0,
 };
 
@@ -193,28 +242,46 @@ _Generic((VAR), \
     ullong:  TYPE_ULLONG, \
     float:   TYPE_FLOAT,  \
     double:  TYPE_DOUBLE, \
-    ldouble: TYPE_LDOUBLE, \
-    default: TYPE_OTHER \
+    default: _Generic((VAR), \
+        ldouble: TYPE_LDOUBLE, \
+        int8:    TYPE_INT8,   \
+        int16:   TYPE_INT16,  \
+        int32:   TYPE_INT32,  \
+        int64:   TYPE_INT64,  \
+        uint8:   TYPE_UINT8,  \
+        uint16:  TYPE_UINT16, \
+        uint32:  TYPE_UINT32, \
+        uint64:  TYPE_UINT64, \
+        default: TYPE_OTHER  \
+    ) \
 )
 
 union Primitive {
-    void*   avoidp;
-    char*   acharp;
-    bool    abool;
-    char    achar;
-    schar   aschar;
-    short   ashort;
-    int     aint;
-    long    along;
-    llong   allong;
-    uchar   auchar;
-    ushort  aushort;
-    uint    auint;
-    ulong   aulong;
-    ullong  aullong;
-    float   afloat;
-    double  adouble;
-    ldouble aldouble;
+    void*    avoidp;
+    char*    acharp;
+    bool     abool;
+    char     achar;
+    schar    aschar;
+    short    ashort;
+    int      aint;
+    long     along;
+    llong    allong;
+    uchar    auchar;
+    ushort   aushort;
+    uint     auint;
+    ulong    aulong;
+    ullong   aullong;
+    float    afloat;
+    double   adouble;
+    ldouble  aldouble;
+    int8     aint8;
+    int16    aint16;
+    int32    aint32;
+    int64    aint64;
+    uint8    auint8;
+    uint16   auint16;
+    uint32   auint32;
+    uint64   auint64;
 };
 
 static llong
@@ -247,6 +314,14 @@ typebits(enum Type type) {
     case TYPE_FLOAT:   size = sizeof(float);   break;
     case TYPE_DOUBLE:  size = sizeof(double);  break;
     case TYPE_LDOUBLE: size = sizeof(ldouble); break;
+    case TYPE_INT8:    size = sizeof(int8);    break;
+    case TYPE_INT16:   size = sizeof(int16);   break;
+    case TYPE_INT32:   size = sizeof(int32);   break;
+    case TYPE_INT64:   size = sizeof(int64);   break;
+    case TYPE_UINT8:   size = sizeof(uint8);   break;
+    case TYPE_UINT16:  size = sizeof(uint16);  break;
+    case TYPE_UINT32:  size = sizeof(uint32);  break;
+    case TYPE_UINT64:  size = sizeof(uint64);  break;
     case TYPE_OTHER:
     default: TRAP();
     }
@@ -258,23 +333,31 @@ typebits(enum Type type) {
 static char *
 typename(enum Type type) {
     switch (type) {
-    case TYPE_VOIDP:   return "void*";
-    case TYPE_CHARP:   return "char*";
-    case TYPE_BOOL:    return "bool";
-    case TYPE_CHAR:    return "char";
-    case TYPE_SCHAR:   return "schar";
-    case TYPE_SHORT:   return "short";
-    case TYPE_INT:     return "int";
-    case TYPE_LONG:    return "long";
-    case TYPE_LLONG:   return "llong";
-    case TYPE_UCHAR:   return "uchar";
-    case TYPE_USHORT:  return "ushort";
-    case TYPE_UINT:    return "uint";
-    case TYPE_ULONG:   return "ulong";
-    case TYPE_ULLONG:  return "ullong";
-    case TYPE_FLOAT:   return "float";
-    case TYPE_DOUBLE:  return "double";
+    case TYPE_VOIDP:  return "void*";
+    case TYPE_CHARP:  return "char*";
+    case TYPE_BOOL:   return "bool";
+    case TYPE_CHAR:   return "char";
+    case TYPE_SCHAR:  return "schar";
+    case TYPE_SHORT:  return "short";
+    case TYPE_INT:    return "int";
+    case TYPE_LONG:   return "long";
+    case TYPE_LLONG:  return "llong";
+    case TYPE_UCHAR:  return "uchar";
+    case TYPE_USHORT: return "ushort";
+    case TYPE_UINT:   return "uint";
+    case TYPE_ULONG:  return "ulong";
+    case TYPE_ULLONG: return "ullong";
+    case TYPE_FLOAT:  return "float";
+    case TYPE_DOUBLE: return "double";
     case TYPE_LDOUBLE: return "ldouble";
+    case TYPE_INT8:    return "int8";
+    case TYPE_INT16:   return "int16";
+    case TYPE_INT32:   return "int32";
+    case TYPE_INT64:   return "int64";
+    case TYPE_UINT8:   return "uint8";
+    case TYPE_UINT16:  return "uint16";
+    case TYPE_UINT32:  return "uint32";
+    case TYPE_UINT64:  return "uint64";
     case TYPE_OTHER:
     default:           return "unknown type";
     }
@@ -300,11 +383,21 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_FLOAT:   return (ldouble)var.afloat;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
     case TYPE_LDOUBLE: return var.aldouble;
+    case TYPE_INT8:    return (ldouble)var.aint8;
+    case TYPE_INT16:   return (ldouble)var.aint16;
+    case TYPE_INT32:   return (ldouble)var.aint32;
+    case TYPE_INT64:   return (ldouble)var.aint64;
+    case TYPE_UINT8:   return (ldouble)var.auint8;
+    case TYPE_UINT16:  return (ldouble)var.auint16;
+    case TYPE_UINT32:  return (ldouble)var.auint32;
+    case TYPE_UINT64:  return (ldouble)var.auint64;
     case TYPE_OTHER:
     default:           TRAP(); break;
     }
     return (ldouble)0.0;
 }
+
+void UNSUPPORTED_TYPE(union Primitive p);
 
 #define LDOUBLE_GET(x) \
 _Generic((x), \
@@ -324,7 +417,18 @@ _Generic((x), \
     ullong:  ldouble_from_ullong, \
     float:   ldouble_from_float,  \
     double:  ldouble_from_double, \
-    ldouble: ldouble_from_ldouble \
+    default: _Generic((x), \
+        ldouble: ldouble_from_ldouble, \
+        int8:    ldouble_from_int8,    \
+        int16:   ldouble_from_int16,   \
+        int32:   ldouble_from_int32,   \
+        int64:   ldouble_from_int64,   \
+        uint8:   ldouble_from_uint8,   \
+        uint16:  ldouble_from_uint16,  \
+        uint32:  ldouble_from_uint32,  \
+        uint64:  ldouble_from_uint64,  \
+        default: UNSUPPORTED_TYPE \
+    ) \
 )(x)
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -341,8 +445,14 @@ _Generic((x), \
   fprintf(stderr, "["GREEN("%s%lld")"]%s = %llu ", \
                   typename(TYPE), typebits(TYPE), #VAR, (ullong)(VAR))
 
+#if defined(__CPROC__)
+#define LDOUBLE_FORMAT "%f"
+#else
+#define LDOUBLE_FORMAT "%Lf"
+#endif
+
 #define PRINT_LDOUBLE(VAR, TYPE) \
-  fprintf(stderr, "["GREEN("%s%lld")"]%s = %Lf ", \
+  fprintf(stderr, "["GREEN("%s%lld")"]%s = "LDOUBLE_FORMAT" ", \
                   typename(TYPE), typebits(TYPE), #VAR, LDOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
@@ -367,7 +477,18 @@ _Generic((VAR), \
     ullong:  PRINT_UNSIGNED(VAR, TYPE_ULLONG),                         \
     float:   PRINT_LDOUBLE(VAR,  TYPE_FLOAT),                          \
     double:  PRINT_LDOUBLE(VAR,  TYPE_DOUBLE),                         \
-    ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE)                         \
+    default: _Generic((VAR), \
+        ldouble: PRINT_LDOUBLE(VAR,  TYPE_LDOUBLE),                        \
+        int8:    PRINT_SIGNED(VAR,   TYPE_INT8),   \
+        int16:   PRINT_SIGNED(VAR,   TYPE_INT16),  \
+        int32:   PRINT_SIGNED(VAR,   TYPE_INT32),  \
+        int64:   PRINT_SIGNED(VAR,   TYPE_INT64),  \
+        uint8:   PRINT_UNSIGNED(VAR, TYPE_UINT8),  \
+        uint16:  PRINT_UNSIGNED(VAR, TYPE_UINT16), \
+        uint32:  PRINT_UNSIGNED(VAR, TYPE_UINT32), \
+        uint64:  PRINT_UNSIGNED(VAR, TYPE_UINT64), \
+        default: 0\
+    ) \
 )
 
 #define PRINTLN(VAR) do { \
@@ -397,6 +518,15 @@ generic_functions_sink(void) {
     (void)ldouble_from_double;
     (void)ldouble_from_ldouble;
 
+    (void)ldouble_from_int8;
+    (void)ldouble_from_int16;
+    (void)ldouble_from_int32;
+    (void)ldouble_from_int64;
+    (void)ldouble_from_uint8;
+    (void)ldouble_from_uint16;
+    (void)ldouble_from_uint32;
+    (void)ldouble_from_uint64;
+
     (void)typebits;
     (void)typename;
     (void)ldouble_get;
@@ -415,22 +545,25 @@ int
 main(void) {
     union Primitive primitive;
 
-    assert(MINOF(primitive.aldouble) == -LDBL_MAX);
     assert(MINOF(primitive.adouble)  == -DBL_MAX);
     assert(MINOF(primitive.afloat)   == -FLT_MAX);
+    assert(MINOF(primitive.aint)     == INT_MIN);
+#if !defined(__CPROC__)
+    assert(MINOF(primitive.aldouble) == -LDBL_MAX);
+#endif
+    assert(MINOF(primitive.allong)   == LLONG_MIN);
+    assert(MINOF(primitive.along)    == LONG_MIN);
     assert(MINOF(primitive.aschar)   == SCHAR_MIN);
     assert(MINOF(primitive.ashort)   == SHRT_MIN);
-    assert(MINOF(primitive.aint)     == INT_MIN);
-    assert(MINOF(primitive.along)    == LONG_MIN);
-    assert(MINOF(primitive.allong)   == LLONG_MIN);
     assert(MINOF(primitive.auchar)   == 0);
-    assert(MINOF(primitive.aushort)  == 0);
     assert(MINOF(primitive.auint)    == 0u);
-    assert(MINOF(primitive.aulong)   == 0ul);
     assert(MINOF(primitive.aullong)  == 0ull);
-    assert(MINOF(primitive.abool)    == 0);
+    assert(MINOF(primitive.aulong)   == 0ul);
+    assert(MINOF(primitive.aushort)  == 0);
 
+#if !defined(__CPROC__)
     assert(MAXOF(primitive.aldouble) == LDBL_MAX);
+#endif
     assert(MAXOF(primitive.adouble)  == DBL_MAX);
     assert(MAXOF(primitive.afloat)   == FLT_MAX);
     assert(MAXOF(primitive.aschar)   == SCHAR_MAX);
@@ -475,8 +608,10 @@ main(void) {
                    typename(TYPEID(primitive.afloat))));
     assert(!strcmp(TYPENAME(primitive.adouble),
                    typename(TYPEID(primitive.adouble))));
+#if !defined(__CPROC__)
     assert(!strcmp(TYPENAME(primitive.aldouble),
                    typename(TYPEID(primitive.aldouble))));
+#endif
 
     {
         int32 var_int32;
