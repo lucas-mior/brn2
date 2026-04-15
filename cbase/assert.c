@@ -95,18 +95,18 @@ GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
 
-#define GENERATE_ASSERT_POINTERS(MODE, SYMBOL) \
-static void \
-a_pointers_##MODE(char *file, uint line, char *func, \
-                  char *name1, char *name2, \
-                  void *var1, void *var2) { \
-    if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
-        error2("%s = %p " #SYMBOL " %p = %s\n", \
-               name1, var1, var2, name2); \
-        TRAP(); \
-    } \
-    return; \
+#define GENERATE_ASSERT_POINTERS(MODE, SYMBOL)                           \
+static void                                                              \
+a_pointers_##MODE(char *file, uint line, char *func,                     \
+                  char *name1, char *name2,                              \
+                  void *var1, void *var2) {                              \
+    if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) {                     \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line);   \
+        error2("%s = %p " #SYMBOL " %p = %s\n",                          \
+               name1, var1, var2, name2);                                \
+        TRAP();                                                          \
+    }                                                                    \
+    return;                                                              \
 }
 
 GENERATE_ASSERT_POINTERS(less,        <)
@@ -118,20 +118,20 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
-#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE) \
-static void \
-a_both_##TYPE##_##MODE(char *file, uint line, char *func, \
-                       char *name1, char *name2, \
-                       char *type1, char *type2, \
-                       llong bits1, llong bits2, \
-                       TYPE long long var1, TYPE long long var2) { \
-    if (!(var1 SYMBOL var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
+#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE)      \
+static void                                                                 \
+a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
+                       char *name1, char *name2,                            \
+                       char *type1, char *type2,                            \
+                       llong bits1, llong bits2,                            \
+                       TYPE long long var1, TYPE long long var2) {          \
+    if (!(var1 SYMBOL var2)) {                                              \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line);      \
         error2("[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
-               type1, bits1, name1, var1, var2, name2, type2, bits2); \
-        TRAP(); \
-    } \
-    return; \
+               type1, bits1, name1, var1, var2, name2, type2, bits2);       \
+        TRAP();                                                             \
+    }                                                                       \
+    return;                                                                 \
 }
 
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", ==, equal)
