@@ -56,7 +56,7 @@ _Generic((SIZE), \
 #endif
 
 #if DEBUGGING
-  #define INLINE
+  #define INLINE static
 #else
   #if defined(__GNUC__)
     #define INLINE static inline __attribute__((always_inline))
