@@ -90,11 +90,6 @@ static int32 program_len __attribute__((unused));
 static bool timezone_initialized = false;
 static time_t timezone_offset = 0;
 
-#define SIZEOF(X) ((int64)sizeof(X))
-
-#if !defined(LENGTH)
-#define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
-#endif
 #if !defined(SNPRINTF)
 #define SNPRINTF(BUFFER, FORMAT, ...) \
     snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
@@ -106,8 +101,6 @@ static time_t timezone_offset = 0;
 
 #define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
     (int64)(SIZEOF(*(struct_object)) + ((array_length)*SIZEOF(ArrayType)))
-
-#define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
 #define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH) \
 _Generic((ARRAY), \

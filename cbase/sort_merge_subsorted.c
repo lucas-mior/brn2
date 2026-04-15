@@ -36,14 +36,6 @@
 #define MAX_NTHREADS 64
 #endif
 
-#if !defined(LENGTH)
-#define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
-#endif
-
-#if !defined(SIZEOF)
-#define SIZEOF(X) (int64)sizeof(X)
-#endif
-
 typedef struct HeapNode {
     void *value;
     int32 p_index;
