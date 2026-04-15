@@ -157,9 +157,9 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
             printf("%s == %s\n", buffer, from_scan);
             if (i < (*nfiles - 1)) {
                 *nfiles -= 1;
-                free2(dirent[i], sizeof(*(dirent[i])));
+                free2(dirent[i], sizeof(**dirent));
                 memmove(&dirent[i], &dirent[i + 1],
-                        (size_t)(*nfiles - i)*sizeof(*(dirent)));
+                        (size_t)(*nfiles - i)*sizeof(*dirent));
             }
             return true;
         }
@@ -211,7 +211,7 @@ main(void) {
         }
 
         for (int32 i = 0; i < nfiles; i += 1) {
-            free2(dirent[i], sizeof(*(dirent[i])));
+            free2(dirent[i], sizeof(**dirent));
         }
     }
 
