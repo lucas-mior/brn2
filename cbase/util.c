@@ -121,26 +121,15 @@ _Generic((ARRAY), \
     char **: string_from_strings \
 )(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
 
-#define GENERATE_STRING_FROM_ARRAY(NAME, TYPE, FORMAT) \
-static void \
-string_from_##NAME(char *buffer, int32 size, \
-                   char *sep, TYPE array, int32 array_length) { \
-    int32 n = 0; \
-    for (int32 i = 0; i < (array_length - 1); i += 1) { \
-        int32 space = size - n; \
-        int32 m = snprintf2(buffer + n, space, FORMAT"%s", array[i], sep); \
-        n += m; \
-    } \
-    { \
-        int32 i = array_length - 1; \
-        int32 space = size - n; \
-        snprintf2(buffer + n, space, FORMAT, array[i]); \
-    } \
-    return; \
-}
+#define SFA_TYPE char *
+#define SFA_NAME strings
+#define SFA_FORMAT "%s"
+#include "sfa.h"
 
-GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
-GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
+#define SFA_TYPE double
+#define SFA_NAME doubles
+#define SFA_FORMAT "%f"
+#include "sfa.h"
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
