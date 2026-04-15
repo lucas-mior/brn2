@@ -255,9 +255,9 @@ memrchr(const void *pointer, int32 character_to_find, size_t size) {
     return NULL;
 }
 
-#define X64(func) \
+#define X64(FUNC) \
 INLINE void \
-CAT(func, 64)(void *dest, void *source, int64 n) { \
+CAT(FUNC, 64)(void *dest, void *source, int64 n) { \
     if (n == 0) \
         return; \
     if (DEBUGGING) { \
@@ -271,7 +271,7 @@ CAT(func, 64)(void *dest, void *source, int64 n) { \
             fatal(EXIT_FAILURE); \
         } \
     } \
-    func(dest, source, (size_t)n); \
+    FUNC(dest, source, (size_t)n); \
     return; \
 }
 
