@@ -94,7 +94,7 @@ with_other () {
             printf "\nRemoving argument $arg...\n"
             args=$(option_remove "$args" "$arg")
         else
-            printf "\n\nError compiling with $compiler:\n\n${problem}\n\n"
+            printf "\n\nError compiling with $compiler:\n\n%s" "${problem}\n\n"
             return 1
         fi
         printf "\n"
