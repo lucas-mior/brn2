@@ -1247,8 +1247,8 @@ error_impl(char *file, int32 line, char *format, ...) {
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {
-            fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld).\n", format,
-                    (llong)n);
+            fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld).\n",
+                            format, (llong)n);
             fatal(EXIT_FAILURE);
         }
     }
@@ -1256,8 +1256,8 @@ error_impl(char *file, int32 line, char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= m)) {
-        fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld).\n", format,
-                (llong)n);
+        fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld).\n",
+                        format, (llong)n);
         fatal(EXIT_FAILURE);
     }
 
@@ -1283,8 +1283,8 @@ error_impl(char *file, int32 line, char *format, ...) {
     switch (fork()) {
     case 0:
         for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
-            execlp(notifiers[i], notifiers[i], "-u", "critical", program,
-                   pbuffer, NULL);
+            execlp(notifiers[i],
+                   notifiers[i], "-u", "critical", program, pbuffer, NULL);
         }
         fprintf(stderr, "Error executing notifier: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
