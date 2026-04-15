@@ -853,19 +853,16 @@ main(void) {
     str1.len = strlen32(str1.s);
     str2.len = strlen32(str2.s);
 
-    // Initial insertions
     ASSERT(hash_insert_map(map, str1.s, str1.len, str1.value));
     ASSERT(!hash_insert_map(map, str1.s, str1.len, 1));
     ASSERT(hash_insert_map(map, str2.s, str2.len, str2.value));
     ASSERT_EQUAL(hash_length(map), 2u);
 
-    // Test overwrite (existing key)
     ASSERT(hash_overwrite_map(map, str1.s, str1.len, 555));
     ASSERT_EQUAL(hash_length(map), 2u);
     ASSERT(hash_lookup_map(map, str1.s, str1.len, &test));
     ASSERT_EQUAL(test, 555);
 
-    // Test overwrite (new key / upsert)
     ASSERT(hash_overwrite_map(map, "new_key", 7, 777));
     ASSERT_EQUAL(hash_length(map), 3u);
     ASSERT(hash_lookup_map(map, "new_key", 7, &test));
