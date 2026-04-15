@@ -44,6 +44,7 @@
 #define HASH_VALUE_TYPE int32
 #define HASH_VALUE_FORMATTER "%d"
 #define HASH_TYPE map
+#define HASH_DUPLICATE_KEYS 1
 #endif
 
 #define HASH_SLOT_USED     1
@@ -839,8 +840,8 @@ int
 main(void) {
     struct timespec t0;
     struct timespec t1;
-    struct Hash_map *map = hash_create_map(100, "strings map");
-    Arena *arena = arena_create(NBYTES*NSTRINGS, "strings arena");
+    struct Hash_map *map = hash_create_map(100, "strings_map");
+    Arena *arena = arena_create(NBYTES*NSTRINGS, "strings_arena");
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 10};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 20};
@@ -867,6 +868,9 @@ main(void) {
     ASSERT_EQUAL(hash_length(map), 3u);
     ASSERT(hash_lookup_map(map, "new_key", 7, &test));
     ASSERT_EQUAL(test, 777);
+    arena_print(map->arena_keys);
+    hash_print_summary_map(map);
+    ASSERT_EQUAL(map->arena_keys->npushed, map->length);
 
     ASSERT(!hash_lookup_map(map, "does_not_exist", 14, &test));
 
