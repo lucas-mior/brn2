@@ -805,10 +805,10 @@ hash_length(void *map) {
 uint32
 hash_expected_collisions(void *map) {
     CommonMap *map2 = map;
-    long double n = map2->length;
-    long double m = map2->capacity;
-    long double result = n - m*(1 - powl((m - 1) / m, n));
-    return (uint32)(roundl(result));
+    double n = map2->length;
+    double m = map2->capacity;
+    double result = n - m*(1 - pow((m - 1) / m, n));
+    return (uint32)(round(result));
 }
 
 #endif /* HASH_H2 */

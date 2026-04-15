@@ -44,31 +44,14 @@
 #elif defined(_MSC_VER)
 #define TRAP(...) __debugbreak()
 #else
-#define TRAP(...) *(volatile int *)0 = 0
+#define TRAP(...) *(int *)0 = 0
 #endif
 #endif
 
 #include "generic.c"
 #include "assert.c"
 
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
-
-typedef signed char schar;
-typedef long long llong;
-typedef long double ldouble;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
+#include "primitives.h"
 
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL) \
 static void * \
@@ -301,14 +284,14 @@ main(void) {
     }{
         long a = -1;
         ulong b = 0;
-        long double min = MIN(a, b);
-        long double max = MAX(a, b);
+        ldouble min = MIN(a, b);
+        ldouble max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     }{
         long a = MINOF(a);
         ulong b = MAXOF(b);
-        long double min = MIN(a, b);
+        ldouble min = MIN(a, b);
         ullong max = (ullong)MAX(a, b);
         ASSERT_EQUAL((long)min, a);
         ASSERT_EQUAL(max, b);
