@@ -30,4 +30,24 @@
 #define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
+#define ALIGN_POWER_OF_2_(SIZE, A) (int64)(((SIZE) + ((A) - 1)) & ~((A) - 1))
+#define ALIGN16(x) (((x) + 15) & ~15)
+
+#define ALIGN_POWER_OF_2(SIZE, A) \
+_Generic((SIZE), \
+    ullong: ALIGN_POWER_OF_2_((ullong)SIZE, (ullong)A), \
+    ulong:  ALIGN_POWER_OF_2_((ulong)SIZE,  (ulong)A),  \
+    uint:   ALIGN_POWER_OF_2_((uint)SIZE,   (uint)A),   \
+    llong:  ALIGN_POWER_OF_2_((ullong)SIZE, (ullong)A), \
+    long:   ALIGN_POWER_OF_2_((ulong)SIZE,  (ulong)A),  \
+    int:    ALIGN_POWER_OF_2_((uint)SIZE,   (uint)A)    \
+)
+
+#if !defined(ALIGNMENT)
+#define ALIGNMENT 16ul
+#endif
+#if !defined(ALIGN)
+#define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
+#endif
+
 #endif /* BASE_MACROS_H */
