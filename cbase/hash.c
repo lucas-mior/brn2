@@ -904,7 +904,8 @@ main(void) {
     ASSERT_EQUAL(map->occupied, 0);
 
     for (uint32 i = 0; i < 10; i += 1) {
-        ASSERT(hash_insert_map(map, strings[i].s, strings[i].len, strings[i].value));
+        ASSERT(hash_insert_map(map,
+                               strings[i].s, strings[i].len, strings[i].value));
     }
     ASSERT_EQUAL(hash_length(map), 10);
 
@@ -912,7 +913,7 @@ main(void) {
     free(strings, NSTRINGS*sizeof(*strings));
 
     {
-        struct Hash_map_by_value *map2 = hash_create_map_by_value(16, "value map");
+        struct Hash_map_by_value *map2;
         int64 key1 = 12345;
         int64 key2 = 67890;
         int64 key3 = 55555;
@@ -921,6 +922,7 @@ main(void) {
         int32 test2 = 0;
         int64 missing_key = 999;
 
+        map2 = hash_create_map_by_value(16, "value_map");
         ASSERT(hash_insert_map_by_value(map2, &key1, value1));
         ASSERT(!hash_insert_map_by_value(map2, &key1, 1));
         ASSERT(hash_insert_map_by_value(map2, &key2, value2));
