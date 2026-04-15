@@ -495,25 +495,27 @@ X64(fread)
 static void
 qsort64(void *base, int64 n, int64 size,
         int (*compar)(const void *, const void *)) {
-    if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
-        error("Error in %s: Overflow (%lld*%lld)\n",
-              __func__, (llong)size, (llong)n);
-        fatal(EXIT_FAILURE);
-    }
-    if ((size <= 0) || (n <= 0)) {
-        error("Error in %s: Invalid size(%lld) or n(%lld)\n",
-              __func__, (llong)size, (llong)n);
-        fatal(EXIT_FAILURE);
-    }
-    if ((ullong)size >= (ullong)SIZE_MAX) {
-        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n",
-              __func__, (llong)size);
-        fatal(EXIT_FAILURE);
-    }
-    if ((ullong)n >= (ullong)SIZE_MAX) {
-        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n",
-              __func__, (llong)size);
-        fatal(EXIT_FAILURE);
+    if (DEBUGGING) {
+        if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
+            error("Error in %s: Overflow (%lld*%lld)\n",
+                  __func__, (llong)size, (llong)n);
+            fatal(EXIT_FAILURE);
+        }
+        if ((size <= 0) || (n <= 0)) {
+            error("Error in %s: Invalid size(%lld) or n(%lld)\n",
+                  __func__, (llong)size, (llong)n);
+            fatal(EXIT_FAILURE);
+        }
+        if ((ullong)size >= (ullong)SIZE_MAX) {
+            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n",
+                  __func__, (llong)size);
+            fatal(EXIT_FAILURE);
+        }
+        if ((ullong)n >= (ullong)SIZE_MAX) {
+            error("Error in %s: Number (%lld) is bigger than SIZEMAX\n",
+                  __func__, (llong)size);
+            fatal(EXIT_FAILURE);
+        }
     }
     qsort(base, (size_t)n, (size_t)size, compar);
     return;
