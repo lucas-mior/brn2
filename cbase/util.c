@@ -528,13 +528,14 @@ malloc_debug(char *file, int32 line, int64 size) {
 
     if (size <= 0) {
         error_impl(file, line,
-                   "Error in malloc: invalid size = %lld.\n", (llong)size);
+                   "Error in %s: invalid size = %lld.\n",
+                   __func__, (llong)size);
         fatal(EXIT_FAILURE);
     }
     if ((ullong)size >= (ullong)SIZE_MAX) {
         error_impl(file, line,
-                   "Error in malloc: Number (%lld) is bigger than SIZEMAX\n",
-                   (llong)size);
+                   "Error in %s: Number (%lld) is bigger than SIZEMAX\n",
+                   __func__, (llong)size);
         fatal(EXIT_FAILURE);
     }
 
@@ -544,7 +545,8 @@ malloc_debug(char *file, int32 line, int64 size) {
 
     if ((p = malloc((size_t)size)) == NULL) {
         error_impl(file, line,
-                   "Failed to allocate %lld bytes.\n", (llong)size);
+                   "Error in %s: Failed to allocate %lld bytes.\n",
+                   __func__, (llong)size);
         fatal(EXIT_FAILURE);
     }
 
