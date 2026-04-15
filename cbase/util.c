@@ -448,7 +448,7 @@ memcmp64(void *left, void *right, int64 size) {
 #define X64(func, TYPE) \
 INLINE int64 \
 CAT(func, 64)(int fd, void *buffer, int64 size) { \
-    TYPE instance; \
+    TYPE instance = 0; \
     ssize_t w; \
     (void)instance; \
     if (size == 0) \
