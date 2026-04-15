@@ -652,29 +652,6 @@ free2_(void *pointer, int64 size) {
     free2_(pointer, size)
 #endif
 
-static void *
-xmemdup(void *source, int64 size) {
-    void *p = malloc2(size);
-    memcpy64(p, source, size);
-    return p;
-}
-
-static char *
-xstrdup(char *string) {
-    char *p;
-    int64 length;
-
-    length = strlen32(string) + 1;
-    if ((p = malloc2(length)) == NULL) {
-        error("Error allocating %lld bytes to duplicate '%s': %s\n",
-              (llong)length, string, strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-
-    memcpy64(p, string, length);
-    return p;
-}
-
 #if OS_UNIX
 static void *
 xmmap_commit(int64 *size) {
@@ -770,6 +747,29 @@ xmunmap(void *p, size_t size) {
     return;
 }
 #endif
+
+static void *
+xmemdup(void *source, int64 size) {
+    void *p = malloc2(size);
+    memcpy64(p, source, size);
+    return p;
+}
+
+static char *
+xstrdup(char *string) {
+    char *p;
+    int64 length;
+
+    length = strlen32(string) + 1;
+    if ((p = malloc2(length)) == NULL) {
+        error("Error allocating %lld bytes to duplicate '%s': %s\n",
+              (llong)length, string, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    memcpy64(p, string, length);
+    return p;
+}
 
 static void
 xpthread_mutex_lock(pthread_mutex_t *mutex) {
