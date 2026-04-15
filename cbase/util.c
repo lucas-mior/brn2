@@ -1720,37 +1720,6 @@ bytes_pretty(char *buffer, int64 raw) {
     return n;
 }
 
-static char *
-shell_escape(char *path) {
-    int64 len;
-    int64 count;
-    char *escaped;
-    char *write_ptr;
-
-    len = strlen32(path);
-    count = 0;
-    for (int64 i = 0; i < len; i += 1) {
-        if (path[i] == '\'') {
-            count += 1;
-        }
-    }
-
-    escaped = malloc2(len + (count*3) + 1);
-    write_ptr = escaped;
-
-    for (int64 i = 0; i < len; i += 1) {
-        if (path[i] == '\'') {
-            memcpy64(write_ptr, "'\\''", 4);
-            write_ptr += 4;
-        } else {
-            *write_ptr = path[i];
-            write_ptr += 1;
-        }
-    }
-    *write_ptr = '\0';
-    return escaped;
-}
-
 static void
 normalize(char *path, int32 *length) {
     char *p;
@@ -2034,7 +2003,6 @@ util_functions_sink(void) {
     (void)free_debug;
 
     (void)send_signal;
-    (void)shell_escape;
     (void)atoi2;
 #if OS_UNIX
     (void)timezone_init;
@@ -2217,13 +2185,6 @@ main(int argc, char **argv) {
         ASSERT_EQUAL((char *)b, "1.0000kB");
         bytes_pretty(b, SIZEMB(2));
         ASSERT_EQUAL((char *)b, "2.0000MB");
-    }
-
-    {
-        char *path = "path'with'quotes";
-        char *escaped = shell_escape(path);
-        ASSERT_EQUAL(escaped, "path'\\''with'\\''quotes");
-        free2(escaped, strlen32(escaped) + 1);
     }
 
     {
