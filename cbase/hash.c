@@ -20,7 +20,6 @@
 
 #include <math.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,7 +130,7 @@ struct Map {
 };
 
 #define CHECK_COMMON_MAP(FIELD) \
-    _Static_assert(offsetof(struct Map, FIELD) == offsetof(CommonMap, FIELD), \
+    _Static_assert(OFFSET_OF(struct Map, FIELD) == OFFSET_OF(CommonMap, FIELD), \
                    "CommonMap and new Map must have the same offset for " #FIELD)
 
 CHECK_COMMON_MAP(size);
@@ -183,9 +182,9 @@ CAT(hash_create_, HASH_TYPE)(uint32 length, char *name) {
     map->occupied = 0;
 #if HASH_DUPLICATE_KEYS
     {
-        char name[256];
-        SNPRINTF(name, "%s->arena_keys", map->name);
-        map->arena_keys = arena_create(SIZEMB(2), name);
+        char buffer[256];
+        SNPRINTF(buffer, "%s->arena_keys", map->name);
+        map->arena_keys = arena_create(SIZEMB(2), buffer);
     }
 #endif
     return map;
