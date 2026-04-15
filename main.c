@@ -96,9 +96,9 @@ handler_segv(int unused) {
 }
 
 static Arena *
-xarena_create(int64 size) {
+xarena_create(int64 size, char *name) {
     Arena *arena;
-    if ((arena = arena_create(size)) == NULL) {
+    if ((arena = arena_create(size, name)) == NULL) {
         error("Error creating arena of size %lld: %s.\n",
               (llong)size, arena_strerror(errno));
         fatal(EXIT_FAILURE);
@@ -205,8 +205,13 @@ main(int argc, char **argv) {
     new = &new_stack;
 
     for (int32 i = 0; i < nthreads; i += 1) {
-        old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
-        new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+        char buffer_old[256];
+        char buffer_new[256];
+
+        SNPRINTF(buffer_old, "arena_old[%d]", i);
+        SNPRINTF(buffer_new, "arena_new[%d]", i);
+        old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
+        new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
     }
 
     switch (mode) {
@@ -315,7 +320,7 @@ main(int argc, char **argv) {
             }
         }
 
-        oldlist_map = hash_create_map((uint32)old->length);
+        oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
         capacity_set = hash_capacity(oldlist_map);
         old->indexes_size = old->length*SIZEOF(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
@@ -508,7 +513,7 @@ main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_set == NULL) {
-                newlist_set = hash_create_set((uint32)new->length);
+                newlist_set = hash_create_set((uint32)new->length, "newlist_set");
             } else {
                 hash_zero_set(newlist_set);
             }
@@ -543,7 +548,8 @@ main(int argc, char **argv) {
         int32 number_renames = 0;
 
         if (number_changes) {
-            struct Hash_set *names_renamed = hash_create_set((uint32)old->length);
+            struct Hash_set *names_renamed = hash_create_set((uint32)old->length,
+                                                             "names_renamed");
 
             if (brn2_options_quiet) {
                 print = noop;
