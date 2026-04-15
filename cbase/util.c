@@ -625,7 +625,7 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
 }
 
 INLINE void
-free2(void *pointer, int64 size) {
+free2_(void *pointer, int64 size) {
     (void)size;
     if (pointer) {
         free(pointer);
@@ -634,19 +634,19 @@ free2(void *pointer, int64 size) {
 }
 
 #if DEBUGGING_MEMORY
-#define malloc(size) \
+#define malloc2(size) \
     malloc_debug(__FILE__, __LINE__, size)
-#define realloc(old, old_capacity, new_capacity, obj_size) \
+#define realloc2(old, old_capacity, new_capacity, obj_size) \
     realloc_debug(__FILE__, __LINE__, old, old_capacity, new_capacity, obj_size)
-#define free(pointer, size) \
+#define free2(pointer, size) \
     free_debug(__FILE__, __LINE__, pointer, size)
 #else
-#define malloc(size) \
+#define malloc2(size) \
     xmalloc(size)
-#define realloc(old, old_capacity, new_capacity, obj_size) \
+#define realloc2(old, old_capacity, new_capacity, obj_size) \
     xrealloc4(old, old_capacity, new_capacity, obj_size)
-#define free(pointer, size) \
-    free2(pointer, size)
+#define free2(pointer, size) \
+    free2_(pointer, size)
 #endif
 
 static void *
@@ -662,7 +662,7 @@ xstrdup(char *string) {
     int64 length;
 
     length = strlen32(string) + 1;
-    if ((p = malloc(length)) == NULL) {
+    if ((p = malloc2(length)) == NULL) {
         error("Error allocating %lld bytes to duplicate '%s': %s\n",
               (llong)length, string, strerror(errno));
         fatal(EXIT_FAILURE);
@@ -715,7 +715,7 @@ xmmap_commit(int64 *size) {
 static void
 xmunmap(void *p, int64 size) {
     if (RUNNING_ON_VALGRIND) {
-        free(p, size);
+        free2(p, size);
         return;
     }
     if (munmap(p, (size_t)size) < 0) {
@@ -1248,7 +1248,7 @@ error_impl(char *file, int32 line, char *format, ...) {
 #endif
 
     if (big_buffer) {
-        free(big_buffer, m);
+        free2(big_buffer, m);
     }
     return;
 }
@@ -1462,7 +1462,7 @@ util_copy_file_async_thread(void *arg) {
             pipes[i].revents = 0;
         }
     }
-    free(copy_files, sizeof(*copy_files));
+    free2(copy_files, sizeof(*copy_files));
     pthread_exit(NULL);
     return NULL;
 }
@@ -2150,7 +2150,7 @@ main(int argc, char **argv) {
     (void)argv;
     (void)here_counter;
 
-    p2 = realloc(p2, 0, 1, SIZEMB(2));
+    p2 = realloc2(p2, 0, 1, SIZEMB(2));
     ASSERT(BEGINS_WITH(s1, "aaaa"));
     ASSERT(BEGINS_WITH(s1, "aaaabbbb"));
 
@@ -2202,7 +2202,7 @@ main(int argc, char **argv) {
     p3 = xstrdup(p1);
 
     ASSERT_EQUAL(string, p3);
-    free(p3, strlen32(p3) + 1);
+    free2(p3, strlen32(p3) + 1);
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
@@ -2236,7 +2236,7 @@ main(int argc, char **argv) {
         char *path = "path'with'quotes";
         char *escaped = shell_escape(path);
         ASSERT_EQUAL(escaped, "path'\\''with'\\''quotes");
-        free(escaped, strlen32(escaped) + 1);
+        free2(escaped, strlen32(escaped) + 1);
     }
 
     {
@@ -2263,7 +2263,7 @@ main(int argc, char **argv) {
         char *dup = xmemdup(src, 12);
         ASSERT_EQUAL(src, dup);
         ASSERT_NOT_EQUAL((void *)src, (void *)dup);
-        free(dup, 12);
+        free2(dup, 12);
     }
 
     {
@@ -2309,14 +2309,14 @@ main(int argc, char **argv) {
             char *base = bases[i];
             int32 path_len = strlen32(path);
             ASSERT_EQUAL(basename2(path, &path_len, NULL), base);
-            free(path, path_len + 1);
+            free2(path, path_len + 1);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
             int len = strlen32(copy);
             normalize(copy, &len);
             ASSERT_EQUAL(copy, normalized[i]);
-            free(copy, len + 1);
+            free2(copy, len + 1);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
@@ -2398,7 +2398,7 @@ main(int argc, char **argv) {
         xunlink(name2);
     }
 
-    free(p1, SIZEMB(1));
+    free2(p1, SIZEMB(1));
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);

@@ -44,7 +44,7 @@ typedef struct HeapNode {
 
 static void
 sort_shuffle(void *array, int64 n, int64 size) {
-    char *tmp = xmalloc(size);
+    char *tmp = malloc2(size);
     char *arr = array;
 
     if (n > 1) {
@@ -58,7 +58,7 @@ sort_shuffle(void *array, int64 n, int64 size) {
         }
     }
 
-    free(tmp, size);
+    free2(tmp, size);
     return;
 }
 
@@ -106,7 +106,7 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     int32 indices[MAX_NTHREADS] = {0};
     int32 offsets[MAX_NTHREADS];
     int64 memory_size = obj_size*n;
-    char *output = xmalloc(memory_size);
+    char *output = malloc2(memory_size);
     char *array2 = array;
 
     for (int32 k = 0; k < (p - 1); k += 1) {
@@ -123,7 +123,7 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     }
 
     for (int32 k = 0; k < p; k += 1) {
-        heap[k].value = xmalloc(obj_size);
+        heap[k].value = malloc2(obj_size);
         memcpy64(heap[k].value, &array2[offsets[k]*obj_size], obj_size);
         heap[k].p_index = k;
     }
@@ -147,9 +147,9 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     }
 
     memcpy64(array2, output, n*obj_size);
-    free(output, memory_size);
+    free2(output, memory_size);
     for (int32 i = 0; i < p; i += 1) {
-        free(heap[i].value, obj_size);
+        free2(heap[i].value, obj_size);
     }
     return;
 }
@@ -180,8 +180,8 @@ static int32 dummy = INT32_MAX;
 
 static void
 test_sorting(int32 n, int32 p) {
-    int32 *array = xmalloc(n*SIZEOF(*array));
-    int32 *n_sub = xmalloc(p*SIZEOF(*n_sub));
+    int32 *array = malloc2(n*SIZEOF(*array));
+    int32 *n_sub = malloc2(p*SIZEOF(*n_sub));
 
     if (n < p*2) {
         fprintf(stderr, "n=%d must be larger than p*2=%d*2\n", n, p);
@@ -221,8 +221,8 @@ test_sorting(int32 n, int32 p) {
         }
     }
 
-    free(array, n*SIZEOF(*array));
-    free(n_sub, p*SIZEOF(*n_sub));
+    free2(array, n*SIZEOF(*array));
+    free2(n_sub, p*SIZEOF(*n_sub));
     return;
 }
 
