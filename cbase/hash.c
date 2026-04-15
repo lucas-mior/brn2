@@ -51,11 +51,6 @@
 #define HASH_SLOT_FREE     0
 #define HASH_SLOT_DELETED -1
 
-#if !defined(GREEN)
-#define GREEN "\x1b[32m"
-#define RESET "\x1b[0m"
-#endif
-
 #if !defined(ALIGNMENT)
 #define ALIGNMENT 16
 #endif
