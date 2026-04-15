@@ -66,39 +66,12 @@ INLINE uint32 hash_capacity(void *map);
 INLINE uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
 
-#if !defined(INTEGERS)
-#define INTEGERS
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
-
-typedef long long llong;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-#endif
-
 #if !defined(QUOTE)
 #define QUOTE_(x) #x
 #define QUOTE(x) QUOTE_(x)
 #endif
 #define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
 #define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
-
-#if !defined(CAT) || !defined(CAT3)
-  #define CAT_(a, b)     a##b
-  #define CAT3_(a, b, c) a##b##c
-  #define CAT(a, b)      CAT_(a, b)
-  #define CAT3(a, b, c)  CAT3_(a, b, c)
-#endif
 
 struct CommonBucket;
 
