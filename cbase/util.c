@@ -2138,7 +2138,6 @@ util_test_qsort_cmp(const void *a, const void *b) {
 
 int
 main(int argc, char **argv) {
-    char *p3;
     char *string = __FILE__;
     char *s1 = "aaaabbbb";
     struct timespec t0;
@@ -2193,9 +2192,6 @@ main(int argc, char **argv) {
         send_signal(argv[0], SIGUSR1);
         ASSERT(received_signal);
     }
-
-    ASSERT_EQUAL(string, p3);
-    free2(p3, strlen32(p3) + 1);
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
