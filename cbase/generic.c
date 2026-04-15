@@ -226,14 +226,6 @@ union Primitive {
     float   afloat;
     double  adouble;
     ldouble aldouble;
-    int8    aint8;
-    int16   aint16;
-    int32   aint32;
-    int64   aint64;
-    uint8   auint8;
-    uint16  auint16;
-    uint32  auint32;
-    uint64  auint64;
 };
 
 static llong
