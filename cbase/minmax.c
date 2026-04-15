@@ -239,10 +239,8 @@ _Generic((VAR1), \
     ) \
 )
 
-#if !defined(MIN)
 #define MIN(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
 #define MAX(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
-#endif
 
 #if 0 == TESTING_minmax
 static inline void

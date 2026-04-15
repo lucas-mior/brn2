@@ -1,3 +1,6 @@
+#if !defined(PLATFORM_DETECTION_H)
+#define PLATFORM_DETECTION_H
+
 #if defined(__linux__)
 #define OS_LINUX 1
 #define OS_MAC 0
@@ -53,3 +56,5 @@
 #undef MIN
 #undef MAX
 #endif
+
+#endif /* PLATFORM_DETECTION_H */
