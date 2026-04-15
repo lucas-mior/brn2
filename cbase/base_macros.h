@@ -26,4 +26,8 @@
 #define SIZEMB(X) ((int64)(X)*1024ll*1024ll)
 #define SIZEGB(X) ((int64)(X)*1024ll*1024ll*1024ll)
 
+#define SIZEOF(X) ((int64)sizeof(X))
+#define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
+#define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
+
 #endif /* BASE_MACROS_H */
