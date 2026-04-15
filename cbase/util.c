@@ -355,8 +355,8 @@ strncmp32(char *left, char *right, int64 size) {
     }
     if (DEBUGGING) {
         if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
-                  (llong)size);
+            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n",
+                  __func__, (llong)size);
             fatal(EXIT_FAILURE);
         }
     }
@@ -387,8 +387,8 @@ memcmp64(void *left, void *right, int64 size) {
     }
     if (DEBUGGING) {
         if ((ullong)size >= (ullong)SIZE_MAX) {
-            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
-                  (llong)size);
+            error("Error in %s: Size (%lld) is bigger than SIZEMAX\n",
+                  __func__, (llong)size);
             fatal(EXIT_FAILURE);
         }
     }
@@ -485,23 +485,23 @@ static void
 qsort64(void *base, int64 n, int64 size,
         int (*compar)(const void *, const void *)) {
     if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
-        error("Error in %s: Overflow (%lld*%lld)\n", __func__, (llong)size,
-              (llong)n);
+        error("Error in %s: Overflow (%lld*%lld)\n",
+              __func__, (llong)size, (llong)n);
         fatal(EXIT_FAILURE);
     }
     if ((size <= 0) || (n <= 0)) {
-        error("Error in %s: Invalid size(%lld) or n(%lld)\n", __func__,
-              (llong)size, (llong)n);
+        error("Error in %s: Invalid size(%lld) or n(%lld)\n",
+              __func__, (llong)size, (llong)n);
         fatal(EXIT_FAILURE);
     }
     if ((ullong)size >= (ullong)SIZE_MAX) {
-        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n", __func__,
-              (llong)size);
+        error("Error in %s: Size (%lld) is bigger than SIZEMAX\n",
+              __func__, (llong)size);
         fatal(EXIT_FAILURE);
     }
     if ((ullong)n >= (ullong)SIZE_MAX) {
-        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n", __func__,
-              (llong)size);
+        error("Error in %s: Number (%lld) is bigger than SIZEMAX\n",
+              __func__, (llong)size);
         fatal(EXIT_FAILURE);
     }
     qsort(base, (size_t)n, (size_t)size, compar);
@@ -748,8 +748,8 @@ xmunmap(void *p, int64 size) {
         return;
     }
     if (munmap(p, (size_t)size) < 0) {
-        error("Error in munmap(%p, %lld): %s.\n", p, (llong)size,
-              strerror(errno));
+        error("Error in munmap(%p, %lld): %s.\n",
+              p, (llong)size, strerror(errno));
         fatal(EXIT_FAILURE);
     }
     return;
@@ -777,8 +777,8 @@ xmmap_commit(int64 *size) {
     p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
                      PAGE_READWRITE);
     if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n", (llong)*size,
-                GetLastError());
+        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n",
+                        (llong)*size, GetLastError());
         fatal(EXIT_FAILURE);
     }
     return p;
