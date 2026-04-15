@@ -394,21 +394,21 @@ _Generic((VAR2), \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE(void);
 
-#define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1) \
-_Generic((VAR2), \
-    bool: a_bool_##MODE(__FILE__, __LINE__, (char *)__func__, \
-                        #VAR1, #VAR2, \
-                        typename(TYPE1), typename(TYPE_BOOL), \
-                        typebits(TYPE1), typebits(TYPE_BOOL), \
-                        (VAR1), (VAR2)), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL() \
+#define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                  \
+_Generic((VAR2),                                               \
+    bool: a_bool_##MODE(__FILE__, __LINE__, (char *)__func__,  \
+                        #VAR1, #VAR2,                          \
+                        typename(TYPE1), typename(TYPE_BOOL),  \
+                        typebits(TYPE1), typebits(TYPE_BOOL),  \
+                        (VAR1), (VAR2)),                       \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL()       \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL(void);
 
-#define A_POINTERS(MODE, VAR1, VAR2) \
-    a_pointers_##MODE(__FILE__, __LINE__, (char *)__func__, \
-                      #VAR1, #VAR2, \
-                      (void *)(uintptr_t)(VAR1), \
+#define A_POINTERS(MODE, VAR1, VAR2)                           \
+    a_pointers_##MODE(__FILE__, __LINE__, (char *)__func__,    \
+                      #VAR1, #VAR2,                            \
+                      (void *)(uintptr_t)(VAR1),               \
                       (void *)(uintptr_t)(VAR2))
 
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP(void);
