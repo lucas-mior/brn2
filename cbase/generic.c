@@ -310,9 +310,7 @@ ldouble_get(union Primitive var, enum Type type) {
     case TYPE_ULLONG:  return (ldouble)var.aullong;
     case TYPE_FLOAT:   return (ldouble)var.afloat;
     case TYPE_DOUBLE:  return (ldouble)var.adouble;
-#if !defined(__CPROC__)
     case TYPE_LDOUBLE: return var.aldouble;
-#endif
     case TYPE_OTHER:
     default:           TRAP(); break;
     }
