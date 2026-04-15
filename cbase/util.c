@@ -2175,9 +2175,9 @@ main(int argc, char **argv) {
         ASSERT_EQUAL(a, 20);
         ASSERT_EQUAL(b, 10);
 
-        ASSERT_EQUAL(UTIL_ALIGN(7, 16), 16);
-        ASSERT_EQUAL(UTIL_ALIGN(16, 16), 16);
-        ASSERT_EQUAL(UTIL_ALIGN(17, 16), 32);
+        ASSERT_EQUAL(ALIGN_POWER_OF_2(7, 16), 16);
+        ASSERT_EQUAL(ALIGN_POWER_OF_2(16, 16), 16);
+        ASSERT_EQUAL(ALIGN_POWER_OF_2(17, 16), 32);
         ASSERT_EQUAL(ALIGN16(7), 16);
     }
 
