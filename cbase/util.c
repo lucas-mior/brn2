@@ -567,7 +567,7 @@ xrealloc(void *old, int64 new_size) {
 }
 
 INLINE void *
-xrealloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
+realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size = new_capacity*obj_size;
 
     if (DEBUGGING_MEMORY) {
@@ -644,7 +644,7 @@ free2_(void *pointer, int64 size) {
 #define malloc2(size) \
     xmalloc(size)
 #define realloc2(old, old_capacity, new_capacity, obj_size) \
-    xrealloc4(old, old_capacity, new_capacity, obj_size)
+    realloc4(old, old_capacity, new_capacity, obj_size)
 #define free2(pointer, size) \
     free2_(pointer, size)
 #endif
@@ -2421,8 +2421,7 @@ main(int argc, char **argv) {
     (void)malloc_debug;
     (void)realloc_debug;
     (void)free_debug;
-    (void)xrealloc4;
-    (void)free2;
+    (void)free2_;
 
     (void)xmmap_commit;
     (void)xkill;

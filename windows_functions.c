@@ -72,8 +72,10 @@ scandir(const char *dir, struct dirent ***namelist,
         memcpy64(dir_entry->d_name, find_data.cFileName, length + 1);
 
         if (count >= capacity) {
+            int64 old_capacity = capacity; 
             capacity *= 2;
-            list = xrealloc(list, capacity*SIZEOF(*list));
+            list = realloc2(list,
+                            old_capacity, capacity, SIZEOF(*list));
         }
         list[count] = dir_entry;
         count += 1;

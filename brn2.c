@@ -255,6 +255,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     int32 length = 0;
     int64 map_size;
     int32 padding;
+    int64 capacity;
     int fd;
 
     if (!strcmp(filename, "-")) {
@@ -306,7 +307,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
 
     {
-        int64 capacity = map_size / 2;
+        capacity = map_size / 2;
         if (capacity >= MAXOF(list->length)) {
             error("Error: Too large file.\n");
             fatal(EXIT_FAILURE);
@@ -368,7 +369,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     if (length == 0) {
         return;
     }
-    list->files = xrealloc(list->files, length*SIZEOF(*(list->files)));
+    list->files = realloc2(list->files,
+                           capacity, length, SIZEOF(*(list->files)));
     list->length = length;
     munmap(map, (size_t)map_size);
 
@@ -421,9 +423,11 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
 
         if (length >= capacity) {
+            int64 old_capacity = capacity;
             capacity *= 2;
             list->files
-                = xrealloc(list->files, capacity*SIZEOF(*(list->files)));
+                = realloc2(list->files,
+                           old_capacity, capacity, SIZEOF(*(list->files)));
         }
 
         size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
@@ -453,7 +457,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     if (length == 0) {
         return;
     }
-    list->files = xrealloc(list->files, length*SIZEOF(*(list->files)));
+    list->files = realloc2(list->files,
+                           capacity, length, SIZEOF(*(list->files)));
     list->length = length;
     return;
 }
