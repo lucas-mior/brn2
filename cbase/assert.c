@@ -62,28 +62,28 @@
     } \
 } while (0)
 
-#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
-static void \
-a_strings_##MODE(char *file, uint line, char *func, \
-                 char *name1, char *name2, \
-                 char *var1, char *var2) { \
-    if (var1 == NULL) { \
+#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                            \
+static void                                                              \
+a_strings_##MODE(char *file, uint line, char *func,                      \
+                 char *name1, char *name2,                               \
+                 char *var1, char *var2) {                               \
+    if (var1 == NULL) {                                                  \
         error2("\n%s: Error in assertion at %s:%u\n", func, file, line); \
-        error2("%s is NULL\n", name1); \
-        TRAP(); \
-    } \
-    if (var2 == NULL) { \
+        error2("%s is NULL\n", name1);                                   \
+        TRAP();                                                          \
+    }                                                                    \
+    if (var2 == NULL) {                                                  \
         error2("\n%s: Error in assertion at %s:%u\n", func, file, line); \
-        error2("%s is NULL\n", name2); \
-        TRAP(); \
-    } \
-    if (!(strcmp(var1, var2) SYMBOL 0)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
-        error2("%s = %s " #SYMBOL " %s = %s\n", \
-               name1, var1, var2, name2); \
-        TRAP(); \
-    } \
-    return; \
+        error2("%s is NULL\n", name2);                                   \
+        TRAP();                                                          \
+    }                                                                    \
+    if (!(strcmp(var1, var2) SYMBOL 0)) {                                \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line);   \
+        error2("%s = %s " #SYMBOL " %s = %s\n",                          \
+               name1, var1, var2, name2);                                \
+        TRAP();                                                          \
+    }                                                                    \
+    return;                                                              \
 }
 
 GENERATE_ASSERT_STRINGS(less,        <)
