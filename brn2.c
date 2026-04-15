@@ -1084,8 +1084,13 @@ main(void) {
         error("brn2.c: test 0...\n");
 
         for (int32 i = 0; i < nthreads; i += 1) {
-            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
-            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            char buffer_old[256];
+            char buffer_new[256];
+
+            SNPRINTF(buffer_old, "arena_old[%d]", i);
+            SNPRINTF(buffer_new, "arena_new[%d]", i);
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
         system(command);
@@ -1126,8 +1131,13 @@ main(void) {
         error("brn2.c: test 1...\n");
 
         for (int32 i = 0; i < nthreads; i += 1) {
-            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
-            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            char buffer_old[256];
+            char buffer_new[256];
+
+            SNPRINTF(buffer_old, "arena_old[%d]", i);
+            SNPRINTF(buffer_new, "arena_new[%d]", i);
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
         system(command);
@@ -1151,7 +1161,7 @@ main(void) {
             brn2_assert_contains_filename(list2, list1->files[i], verbose);
         }
 
-        map = hash_create_map((uint32)list1->length);
+        map = hash_create_map((uint32)list1->length, "map");
         capacity_set = hash_capacity(map);
         list1->indexes_size = (int64)list1->length * SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
@@ -1211,8 +1221,13 @@ main(void) {
         error("brn2.c: test 2...\n");
 
         for (int32 i = 0; i < nthreads; i += 1) {
-            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
-            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            char buffer_old[256];
+            char buffer_new[256];
+
+            SNPRINTF(buffer_old, "arena_old[%d]", i);
+            SNPRINTF(buffer_new, "arena_new[%d]", i);
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
         system(command);
@@ -1265,7 +1280,7 @@ main(void) {
         }
         printf(RESET);
 
-        map = hash_create_map((uint32)list1->length);
+        map = hash_create_map((uint32)list1->length, "map");
         capacity_set = hash_capacity(map);
         list1->indexes_size = (int64)list1->length * SIZEOF(*(list1->indexes));
         list1->indexes = xmmap_commit(&(list1->indexes_size));
@@ -1341,8 +1356,13 @@ main(void) {
         }
 
         for (int32 i = 0; i < nthreads; i += 1) {
-            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
-            new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            char buffer_old[256];
+            char buffer_new[256];
+
+            SNPRINTF(buffer_old, "arena_old[%d]", i);
+            SNPRINTF(buffer_new, "arena_new[%d]", i);
+            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
+            new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
         for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
@@ -1388,7 +1408,7 @@ main(void) {
 
         {
             uint32 capacity_set;
-            oldlist_map = hash_create_map((uint32)old->length);
+            oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
             capacity_set = hash_capacity(oldlist_map);
             old->indexes_size = (int64)old->length * SIZEOF(*(old->indexes));
             old->indexes = xmmap_commit(&(old->indexes_size));
@@ -1406,7 +1426,7 @@ main(void) {
             uint32 main_capacity;
             struct Hash_set *newlist_set;
 
-            newlist_set = hash_create_set((uint32)new->length);
+            newlist_set = hash_create_set((uint32)new->length, "newlist_set");
             new->indexes_size = (int64)new->length * SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             main_capacity = hash_capacity(newlist_set);
@@ -1420,7 +1440,7 @@ main(void) {
         number_changes = brn2_get_number_changes(old, new);
         ASSERT_EQUAL(number_changes, number_changed_hard);
 
-        names_renamed = hash_create_set((uint32)old->length);
+        names_renamed = hash_create_set((uint32)old->length, "names_renamed");
 
         for (int32 i = 0; i < old->length; i += 1) {
             brn2_execute2(old, new, oldlist_map, names_renamed, i,
@@ -1485,7 +1505,9 @@ main(void) {
         }
 
         for (int32 i = 0; i < nthreads; i += 1) {
-            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads);
+            char buffer_old[256];
+            SNPRINTF(buffer_old, "arena_old[%d]", i);
+            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
         }
 
         if ((args = fopen(filelist, "w")) == NULL) {
