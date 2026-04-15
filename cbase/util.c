@@ -58,6 +58,7 @@
 #include "generic.c"
 #include "minmax.c"
 #include "base_macros.h"
+#include "assert.c"
 
 #if !defined(__CPROC__) && defined(__has_include)
   #if __has_include(<valgrind/valgrind.h>)
@@ -129,8 +130,6 @@ _Generic((ARRAY), \
 #if !defined(ERROR_NOTIFY)
 #define ERROR_NOTIFY 0
 #endif
-
-#include "assert.c"
 
 #if !defined(FLAGS_HUGE_PAGES)
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
