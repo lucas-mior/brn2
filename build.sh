@@ -73,7 +73,7 @@ option_remove() {
     echo "$1" | sed -E "s| *$2 +| |g"
 }
 
-compile_with_chibicc () {
+with_chibicc () {
     args="$*"
     while ! problem=$(chibicc $args 2>&1); do
         trace_off
@@ -285,7 +285,7 @@ case "$target" in
     find . -iname "*.[ch]" | xargs ctags --kinds-C=+l+d 2> /dev/null || true
     vtags.sed tags | sort | uniq > .tags.vim       2> /dev/null || true
     if [ "$CC" = "chibicc" ]; then
-        compile_with_chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+        with_chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     else
         $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     fi

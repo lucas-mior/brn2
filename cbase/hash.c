@@ -31,6 +31,7 @@
 #include "rapidhash.h"
 #include "util.c"
 #include "assert.c"
+#include "arena.c"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_hash 1
@@ -102,6 +103,7 @@ typedef uint64_t uint64;
 struct CommonBucket;
 
 typedef struct CommonMap {
+    char *name;
     int64 size;
     uint32 capacity;
     uint32 bitmask;
@@ -152,11 +154,15 @@ typedef struct Bucket {
 // TODO: Struct `Map` is not typedef'd. Per your codebase rules ("do typedef
 // structs"), define it as `typedef struct Map { ... } Map;`.
 struct Map {
+    char *name;
     int64 size;
     uint32 capacity;
     uint32 bitmask;
     uint32 length;
     uint32 occupied;
+#if HASH_DUPLICATE_KEYS
+    Arena *arena_keys;
+#endif
     Bucket *array;
 };
 
@@ -177,11 +183,14 @@ CAT(hash_zero_, HASH_TYPE)(struct Map *map) {
     map->length = 0;
     map->occupied = 0;
     memset64(map->array, 0, map->capacity*sizeof(Bucket));
+#if HASH_DUPLICATE_KEYS
+    arena_reset(map->arena_keys);
+#endif
     return;
 }
 
 static struct Map *
-CAT(hash_create_, HASH_TYPE)(uint32 length) {
+CAT(hash_create_, HASH_TYPE)(uint32 length, char *name) {
     struct Map *map;
     int64 array_size;
     uint32 capacity = 1;
@@ -201,12 +210,20 @@ CAT(hash_create_, HASH_TYPE)(uint32 length) {
     array_size = capacity*sizeof(Bucket);
 
     map = xmalloc(sizeof(*map));
+    map->name = xstrdup(name);
     map->array = xmmap_commit(&array_size);
     map->capacity = capacity;
     map->bitmask = (1 << power) - 1;
     map->size = array_size;
     map->length = 0;
     map->occupied = 0;
+#if HASH_DUPLICATE_KEYS
+    {
+        char name[256];
+        SNPRINTF(name, "%s->arena_keys", map->name);
+        map->arena_keys = arena_create(SIZEMB(2), name);
+    }
+#endif
     return map;
 }
 
@@ -216,16 +233,7 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
         return;
     }
 #if !HASH_KEY_FIXED_LEN && HASH_DUPLICATE_KEYS
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        switch ((int64)map->array[i].key) {
-        case HASH_SLOT_DELETED:
-        case HASH_SLOT_FREE:
-            break;
-        default:
-            free(map->array[i].key, map->array[i].key_len);
-            break;
-        }
-    }
+    arena_destroy(map->arena_keys);
 #endif
     xmunmap(map->array, map->size);
     free(map, sizeof(*map));
@@ -418,7 +426,8 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
         map->occupied += 1;
     }
   #if HASH_DUPLICATE_KEYS
-    target->key = xmemdup(key, key_length + 1);
+    target->key = xarena_push(map->arena_keys, key_length + 1);
+    memcpy64(target->key, key, key_length + 1);
   #else
     target->key = key;
   #endif
@@ -616,7 +625,7 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
     if (CAT(hash_probe_, HASH_TYPE)(map, key, key_length, hash, base_index, &target_idx)) {
         target = &map->array[target_idx];
   #if HASH_DUPLICATE_KEYS
-        free(target->key, target->key_len);
+        arena_decr(map->arena_keys, target->key);
   #endif
         target->key = (HASH_KEY_TYPE *)(int64)HASH_SLOT_DELETED;
         map->length -= 1;
@@ -646,8 +655,9 @@ CAT(hash_remove_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
 }
 
 static void
-CAT(hash_print_summary_, HASH_TYPE)(struct Map *map, char *name) {
-    printf("struct Hash%s %s {\n", QUOTE(HASH_TYPE), name);
+CAT(hash_print_summary_, HASH_TYPE)(struct Map *map) {
+    printf("struct Hash%s {\n", QUOTE(HASH_TYPE));
+    printf("  name: %s\n", map->name);
     printf("  capacity: %u\n", map->capacity);
     printf("  length: %u\n", map->length);
     printf("  expected collisions: %u\n", hash_expected_collisions(map));
@@ -815,7 +825,7 @@ hash_expected_collisions(void *map) {
 
 // Have to add these declarations so that clangd does not complain
 struct Hash_map_by_value;
-static struct Hash_map_by_value *hash_create_map_by_value(uint32);
+static struct Hash_map_by_value *hash_create_map_by_value(uint32, char *);
 static void hash_destroy_map_by_value(struct Hash_map_by_value *);
 static uint32 hash_ndeleted_map_by_value(struct Hash_map_by_value *);
 static bool hash_insert_map_by_value(struct Hash_map_by_value *, int64 *, int32);
@@ -865,8 +875,8 @@ int
 main(void) {
     struct timespec t0;
     struct timespec t1;
-    struct Hash_map *map = hash_create_map(100);
-    Arena *arena = arena_create(NBYTES*NSTRINGS);
+    struct Hash_map *map = hash_create_map(100, "strings map");
+    Arena *arena = arena_create(NBYTES*NSTRINGS, "strings arena");
     String *strings = xmalloc(NSTRINGS*sizeof(*strings));
     String str1 = {.s = "aaaaaaaaaaaaaaaa", .value = 10};
     String str2 = {.s = "bbbbbbbbbbbbbbb", .value = 20};
@@ -937,7 +947,7 @@ main(void) {
     free(strings, NSTRINGS*sizeof(*strings));
 
     {
-        struct Hash_map_by_value *map2 = hash_create_map_by_value(16);
+        struct Hash_map_by_value *map2 = hash_create_map_by_value(16, "value map");
         int64 key1 = 12345;
         int64 key2 = 67890;
         int64 key3 = 55555;
