@@ -616,7 +616,7 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
     }
     if (pointer && size) {
         error_impl(file, line,
-                   "Freeing pointer of size %lld [%p]\n", (llong)size, pointer);
+                   "Freeing %p of size %lld\n", pointer, (llong)size);
         if (!RUNNING_ON_VALGRIND) {
             memset64(pointer, MEM_FREED, size);
         }
