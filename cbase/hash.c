@@ -927,13 +927,11 @@ main(void) {
 
         ASSERT_EQUAL(hash_length(map2), 2u);
 
-        // Test overwrite map_by_value (update)
         ASSERT(hash_overwrite_map_by_value(map2, &key1, 888));
         ASSERT_EQUAL(hash_length(map2), 2u);
         ASSERT(hash_lookup_map_by_value(map2, &key1, &test2));
         ASSERT_EQUAL(test2, 888);
 
-        // Test overwrite map_by_value (insert)
         ASSERT(hash_overwrite_map_by_value(map2, &key3, 333));
         ASSERT_EQUAL(hash_length(map2), 3u);
         ASSERT(hash_lookup_map_by_value(map2, &key3, &test2));
