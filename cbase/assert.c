@@ -309,7 +309,7 @@ GENERATE_ASSERT_BOOLS(more_equal, >=)
 
 #define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-    char:    A_CHAR_SECOND_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1), \
+    char:    A_CHAR_SECOND_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1),        \
     schar:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
     short:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
     int:     A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_INT    ), \
