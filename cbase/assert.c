@@ -456,13 +456,14 @@ _Generic((VAR1),                                                        \
 #define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more,       VAR1, VAR2)
 #define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
 
-#define ASSERT_NULL(VAR1) do { \
-    void *p = VAR1; \
-    if (p != NULL) { \
-        error2("\n%s: Assertion failed at %s:%d\n", __func__, __FILE__, __LINE__); \
-        error2("%s = %p == NULL\n", #VAR1, p); \
-        TRAP(); \
-    } \
+#define ASSERT_NULL(VAR1) do {                                          \
+    void *p = VAR1;                                                     \
+    if (p != NULL) {                                                    \
+        error2("\n%s: Assertion failed at %s:%d\n",                     \
+               __func__, __FILE__, __LINE__);                           \
+        error2("%s = %p == NULL\n", #VAR1, p);                          \
+        TRAP();                                                         \
+    }                                                                   \
 } while (0)
 
 #if 0 == TESTING_assert
