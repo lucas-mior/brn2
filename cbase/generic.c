@@ -179,26 +179,26 @@ enum Type {
 
 #define TYPEID(VAR) \
 _Generic((VAR), \
-    void*:   TYPE_VOIDP,  \
-    char*:   TYPE_CHARP,  \
-    bool:    TYPE_BOOL,   \
-    char:    TYPE_CHAR,   \
-    schar:   TYPE_SCHAR,  \
-    short:   TYPE_SHORT,  \
-    int:     TYPE_INT,    \
-    long:    TYPE_LONG,   \
-    llong:   TYPE_LLONG,  \
-    uchar:   TYPE_UCHAR,  \
-    ushort:  TYPE_USHORT, \
-    uint:    TYPE_UINT,   \
-    ulong:   TYPE_ULONG,  \
-    ullong:  TYPE_ULLONG, \
-    float:   TYPE_FLOAT,  \
-    double:  TYPE_DOUBLE, \
-    default: _Generic((VAR), \
+    void*:   TYPE_VOIDP,       \
+    char*:   TYPE_CHARP,       \
+    bool:    TYPE_BOOL,        \
+    char:    TYPE_CHAR,        \
+    schar:   TYPE_SCHAR,       \
+    short:   TYPE_SHORT,       \
+    int:     TYPE_INT,         \
+    long:    TYPE_LONG,        \
+    llong:   TYPE_LLONG,       \
+    uchar:   TYPE_UCHAR,       \
+    ushort:  TYPE_USHORT,      \
+    uint:    TYPE_UINT,        \
+    ulong:   TYPE_ULONG,       \
+    ullong:  TYPE_ULLONG,      \
+    float:   TYPE_FLOAT,       \
+    double:  TYPE_DOUBLE,      \
+    default: _Generic((VAR),   \
         ldouble: TYPE_LDOUBLE, \
-        default: TYPE_OTHER  \
-    ) \
+        default: TYPE_OTHER    \
+    )                          \
 )
 
 union Primitive {
