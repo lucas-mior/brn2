@@ -2088,13 +2088,12 @@ util_functions_sink(void) {
 #define ENUM_BITFLAGS 1
 #define ENUM_PREFIX_ POWER_OF2_
 #define ENUM_FIELDS \
-    X(ONE,     1 << 0)             \
-    X(TWO,     1 << 1)             \
-    X(FOUR,    1 << 2)             \
-    X(EIGHT,   1 << 3)             \
-    X(SIXTEEN, 1 << 4)             \
-    X(THIRTY2, 1 << 5)             \
-    X(SIXTY4,  1 << 6)
+    X(ONE)          \
+    X(TWO)          \
+    X(FOUR)         \
+    X(EIGHT)        \
+    X(SIXTEEN)      \
+    X(THIRTY2)
 #include "xenums.c"
 
 
