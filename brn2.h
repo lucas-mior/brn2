@@ -120,7 +120,6 @@ void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, struct Hash_set *, uint32 *);
 int32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
-void brn2_timings(char *, struct timespec, struct timespec, int32);
 void brn2_print_list(FileList *);
 void brn2_execute2(FileList *, FileList *,
                    struct Hash_map *, struct Hash_set *,
