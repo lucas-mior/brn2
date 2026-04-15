@@ -739,6 +739,9 @@ CAT(hash_functions_sink_, HASH_TYPE)(void) {
 INLINE uint64
 hash_function(void *key, int32 key_length) {
     uint64 hash;
+    if (DEBUGGING) {
+        ASSERT_MORE(key_length, 0);
+    }
     hash = rapidhash(key, (size_t)key_length);
     return hash;
 }
