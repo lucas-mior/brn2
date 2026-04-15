@@ -52,6 +52,8 @@
 #endif
 
 #include "generic.c"
+#include "primitives.h"
+
 
 #define ASSERT(C) do { \
     if (!(C)) { \
@@ -59,8 +61,6 @@
         TRAP(); \
     } \
 } while (0)
-
-#include "primitives.h"
 
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL) \
 static void \
