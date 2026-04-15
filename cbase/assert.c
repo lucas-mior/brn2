@@ -761,6 +761,7 @@ main(void) {
     ASSERT(true);
     ASSERT(!false);
     ASSERT_EQUAL(true, true);
+    ASSERT_EQUAL(0 < 1, 1 < 2);
     exit(EXIT_SUCCESS);
 }
 #endif
