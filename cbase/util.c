@@ -1446,8 +1446,8 @@ util_copy_file_async(char *destination, char *source, int *dest_fd) {
     if ((*dest_fd
          = open(destination, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR))
         < 0) {
-        error("Error opening %s for writing: %s.\n", destination,
-              strerror(errno));
+        error("Error opening %s for writing: %s.\n",
+              destination, strerror(errno));
         XCLOSE(&source_fd, source);
         return -1;
     }
@@ -1480,8 +1480,8 @@ util_copy_file_async_thread(void *arg) {
             break;
         }
         if (n < 0) {
-            error("Error in poll(nfds=%lld): %s.\n", (llong)copy_files->nfds,
-                  strerror(errno));
+            error("Error in poll(nfds=%lld): %s.\n",
+                  (llong)copy_files->nfds, strerror(errno));
             break;
         }
         for (int32 i = 0; i < copy_files->nfds; i += 1) {
