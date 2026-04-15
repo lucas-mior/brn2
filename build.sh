@@ -260,10 +260,10 @@ case "$target" in
             cmdline="$cmdline $flags -o $test_exe $src"
         fi
 
-        if [ "$CC" = "chibicc" ]; then
+        if [ "$CC" = "chibicc" ] || [ "$CC"  = "cproc" ]; then
             cmdline_no_cc=$(option_remove "$cmdline" "$CC")
             trace_on
-            if with_other "$cmdline_no_cc"; then
+            if with_other "$CC" "$cmdline_no_cc"; then
                 /tmp/${name}_test
             else
                 exit 1
@@ -294,7 +294,7 @@ case "$target" in
     if [ "$CC" = "chibicc" ]; then
         with_other chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     elif [ "$CC" = "cproc" ]; then
-        with_other cproc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+        with_other cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     else
         $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     fi
