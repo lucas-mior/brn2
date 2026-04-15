@@ -291,7 +291,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         }
         map_size = lines_stat.st_size;
     }
-    padding = BRN2_ALIGNMENT - ((uint64)map_size % BRN2_ALIGNMENT);
+    padding = ALIGNMENT - ((uint64)map_size % ALIGNMENT);
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n",

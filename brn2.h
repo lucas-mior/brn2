@@ -45,15 +45,6 @@
 #define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
 #define BRN2_MIN_PARALLEL 64
-#define BRN2_ALIGNMENT 16ul
-#define ALIGNMENT BRN2_ALIGNMENT
-
-#if !defined(ALIGNMENT)
-#define ALIGNMENT 16ul
-#endif
-#if !defined(ALIGN)
-#define ALIGN(x) UTIL_ALIGN(x, ALIGNMENT)
-#endif
 
 #define HASH_KEY_TYPE char
 #define HASH_VALUE_TYPE int32
