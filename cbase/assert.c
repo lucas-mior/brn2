@@ -329,18 +329,18 @@ _Generic((VAR2), \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 
-#define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_both_unsigned_##MODE(__FILE__, __LINE__, (char *)__func__,       \
-                           #VAR1, #VAR2,                     \
-                           typename(TYPE1), typename(TYPE2), \
-                           typebits(TYPE1), typebits(TYPE2), \
+#define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
+    a_both_unsigned_##MODE(__FILE__, __LINE__, (char *)__func__,    \
+                           #VAR1, #VAR2,                            \
+                           typename(TYPE1), typename(TYPE2),        \
+                           typebits(TYPE1), typebits(TYPE2),        \
                            (ullong)(VAR1), (ullong)(VAR2))
 
-#define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_unsigned_signed_##MODE(__FILE__, __LINE__, (char *)__func__,       \
-                             #VAR1, #VAR2,                     \
-                             typename(TYPE1), typename(TYPE2), \
-                             typebits(TYPE1), typebits(TYPE2), \
+#define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)           \
+    a_unsigned_signed_##MODE(__FILE__, __LINE__, (char *)__func__,  \
+                             #VAR1, #VAR2,                          \
+                             typename(TYPE1), typename(TYPE2),      \
+                             typebits(TYPE1), typebits(TYPE2),      \
                              (ullong)(VAR1), (llong)(VAR2))
 
 #define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
