@@ -1,6 +1,11 @@
 #if !defined(BASE_MACROS_H)
 #define BASE_MACROS_H
 
+#if !defined(QUOTE)
+#define QUOTE_(x) #x
+#define QUOTE(x) QUOTE_(x)
+#endif
+
 #if !defined(CAT) || !defined(CAT3)
   #define CAT_(a, b)     a##b
   #define CAT3_(a, b, c) a##b##c
