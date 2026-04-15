@@ -759,6 +759,7 @@ main(void) {
         assertion_failed = false;
     }
     ASSERT(true);
+    ASSERT(!false);
     exit(EXIT_SUCCESS);
 }
 #endif
