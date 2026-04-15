@@ -880,7 +880,8 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= size)) {
-        fprintf(stderr, "Error in vsnprintf(%s) (n = %lld)\n", format, (llong)n);
+        fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %lld)\n",
+                        format, (llong)n);
         fatal(EXIT_FAILURE);
     }
     return n;
