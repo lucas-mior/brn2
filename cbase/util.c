@@ -75,6 +75,7 @@
 #define TESTING_util 0
 #endif
 
+static int32 snprintf2(char *buffer, int64 size, char *format, ...);
 static void __attribute__((format(printf, 3, 4)))
     error_impl(char *file, int32 line, char *format, ...);
 #define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
@@ -119,6 +120,27 @@ _Generic((ARRAY), \
     double *: string_from_doubles, \
     char **: string_from_strings \
 )(BUFFER, sizeof(BUFFER), SEP, ARRAY, LENGTH)
+
+#define GENERATE_STRING_FROM_ARRAY(NAME, TYPE, FORMAT) \
+static void \
+string_from_##NAME(char *buffer, int32 size, \
+                   char *sep, TYPE array, int32 array_length) { \
+    int32 n = 0; \
+    for (int32 i = 0; i < (array_length - 1); i += 1) { \
+        int32 space = size - n; \
+        int32 m = snprintf2(buffer + n, space, FORMAT"%s", array[i], sep); \
+        n += m; \
+    } \
+    { \
+        int32 i = array_length - 1; \
+        int32 space = size - n; \
+        snprintf2(buffer + n, space, FORMAT, array[i]); \
+    } \
+    return; \
+}
+
+GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
+GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
 #if !defined(DEBUGGING)
 #define DEBUGGING 0
@@ -1204,27 +1226,6 @@ util_command_launch(int argc, char **argv) {
     }
 }
 #endif
-
-#define GENERATE_STRING_FROM_ARRAY(NAME, TYPE, FORMAT) \
-static void \
-string_from_##NAME(char *buffer, int32 size, \
-                   char *sep, TYPE array, int32 array_length) { \
-    int32 n = 0; \
-    for (int32 i = 0; i < (array_length - 1); i += 1) { \
-        int32 space = size - n; \
-        int32 m = snprintf2(buffer + n, space, FORMAT"%s", array[i], sep); \
-        n += m; \
-    } \
-    { \
-        int32 i = array_length - 1; \
-        int32 space = size - n; \
-        snprintf2(buffer + n, space, FORMAT, array[i]); \
-    } \
-    return; \
-}
-
-GENERATE_STRING_FROM_ARRAY(strings, char **, "%s")
-GENERATE_STRING_FROM_ARRAY(doubles, double *, "%f")
 
 void __attribute__((format(printf, 3, 4)))
 error_impl(char *file, int32 line, char *format, ...) {
