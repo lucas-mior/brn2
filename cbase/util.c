@@ -80,6 +80,7 @@ static int32 snprintf2(char *buffer, int64 size, char *format, ...);
 static void __attribute__((format(printf, 3, 4)))
     error_impl(char *file, int32 line, char *format, ...);
 #define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
+INLINE void *xmalloc(int64 size);
 
 #if !TESTING_util
 static char *program;
@@ -1194,7 +1195,7 @@ error_impl(char *file, int32 line, char *format, ...) {
     if (n >= m) {
         if (RELEASING) {
             m = n + 1;
-            big_buffer = malloc2(m);
+            big_buffer = xmalloc(m);
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {
