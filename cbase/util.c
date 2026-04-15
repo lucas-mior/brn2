@@ -585,14 +585,14 @@ realloc_debug(char *file, int32 line,
     (void)old_capacity;
     if (obj_size <= 0) {
         error_impl(file, line,
-                   "Error in realloc: invalid object size = %lld.\n",
-                   (llong)obj_size);
+                   "Error in %s: invalid object size = %lld.\n",
+                   __func__, (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
     if ((ullong)SIZE_MAX / (ullong)obj_size < (ullong)new_capacity) {
         error_impl(file, line,
-                   "Error in realloc: Number (%lld) is bigger than SIZEMAX\n",
-                   (llong)obj_size);
+                   "Error in %s: Number (%lld) is bigger than SIZEMAX\n",
+                   __func__, (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
     if (DEBUGGING_MEMORY) {
