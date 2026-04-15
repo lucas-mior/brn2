@@ -583,6 +583,7 @@ realloc_debug(char *file, int32 line,
               void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size;
     (void)old_capacity;
+
     if (obj_size <= 0) {
         error_impl(file, line,
                    "Error in %s: invalid object size = %lld.\n",
