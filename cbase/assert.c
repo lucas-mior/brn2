@@ -215,20 +215,20 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_UNSIGNED_SIGNED
 
-#define GENERATE_ASSERT_LDOUBLE(MODE, SYMBOL) \
-static void \
-a_ldouble_##MODE(char *file, uint line, char *func, \
-                 char *name1, char *name2, \
-                 char *type1, char *type2, \
-                 llong bits1, llong bits2, \
-                 ldouble var1, ldouble var2) { \
-    if (!(var1 SYMBOL var2)) { \
-        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
+#define GENERATE_ASSERT_LDOUBLE(MODE, SYMBOL)                                         \
+static void                                                                           \
+a_ldouble_##MODE(char *file, uint line, char *func,                                   \
+                 char *name1, char *name2,                                            \
+                 char *type1, char *type2,                                            \
+                 llong bits1, llong bits2,                                            \
+                 ldouble var1, ldouble var2) {                                        \
+    if (!(var1 SYMBOL var2)) {                                                        \
+        error2("\n%s: Assertion failed at %s:%u\n", func, file, line);                \
         error2("[%s%lld]%s = "LDOUBLE_FORMAT #SYMBOL LDOUBLE_FORMAT" = %s[%s%lld]\n", \
-               type1, bits1, name1, var1, var2, name2, type2, bits2); \
-        TRAP(); \
-    } \
-    return; \
+               type1, bits1, name1, var1, var2, name2, type2, bits2);                 \
+        TRAP();                                                                       \
+    }                                                                                 \
+    return;                                                                           \
 }
 
 GENERATE_ASSERT_LDOUBLE(equal,      ==)
