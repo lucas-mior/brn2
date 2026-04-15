@@ -24,6 +24,10 @@
 #ifndef _i_template
 #define _i_template
 
+#if !defined(i_opt)
+#define i_opt 0
+#endif
+
 #ifndef STC_TEMPLATE_H_INCLUDED
 #define STC_TEMPLATE_H_INCLUDED
 

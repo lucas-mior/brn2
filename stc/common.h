@@ -331,8 +331,10 @@ STC_INLINE size_t c_hash_mix_n(size_t h[], isize_t n) {
 // get next power of two
 STC_INLINE isize_t c_next_pow2(isize_t n) {
     n--;
-    n |= n >> 1, n |= n >> 2;
-    n |= n >> 4, n |= n >> 8;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
     n |= n >> 16;
     #if INTPTR_MAX == INT64_MAX
     n |= n >> 32;

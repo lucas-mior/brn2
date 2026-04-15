@@ -14,7 +14,12 @@
 #define SELECT_ON_NUM_ARGS(macro, ...) \
   CAT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
+#include <stddef.h>
+#if !defined(offsetof)
 #define OFFSET_OF(STRUCT, FIELD) ((size_t)&(((STRUCT *)0)->FIELD))
+#else
+#define OFFSET_OF(STRUCT, FIELD) offsetof(STRUCT, FIELD)
+#endif
 
 #define RESET     "\x1b[0m"
 #define RED(S)    "\x1b[31m"   S RESET
