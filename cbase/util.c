@@ -2138,8 +2138,6 @@ util_test_qsort_cmp(const void *a, const void *b) {
 
 int
 main(int argc, char **argv) {
-    void *p1 = malloc2(SIZEMB(1));
-    void *p2 = malloc(SIZEMB(2));
     char *p3;
     char *string = __FILE__;
     char *s1 = "aaaabbbb";
@@ -2150,7 +2148,6 @@ main(int argc, char **argv) {
     (void)argv;
     (void)here_counter;
 
-    p2 = realloc2(p2, 0, 1, SIZEMB(2));
     ASSERT(BEGINS_WITH(s1, "aaaa"));
     ASSERT(BEGINS_WITH(s1, "aaaabbbb"));
 
@@ -2196,10 +2193,6 @@ main(int argc, char **argv) {
         send_signal(argv[0], SIGUSR1);
         ASSERT(received_signal);
     }
-
-    memset64(p1, 0, SIZEMB(1));
-    memcpy64(p1, string, strlen32(string));
-    p3 = xstrdup(p1);
 
     ASSERT_EQUAL(string, p3);
     free2(p3, strlen32(p3) + 1);
@@ -2397,8 +2390,6 @@ main(int argc, char **argv) {
         XCLOSE(&fd);
         xunlink(name2);
     }
-
-    free2(p1, SIZEMB(1));
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
