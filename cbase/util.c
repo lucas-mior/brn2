@@ -651,7 +651,7 @@ free2_(void *pointer, int64 size) {
 
 static void *
 xmemdup(void *source, int64 size) {
-    void *p = xmalloc(size);
+    void *p = malloc2(size);
     memcpy64(p, source, size);
     return p;
 }
@@ -678,7 +678,7 @@ xmmap_commit(int64 *size) {
     void *p;
 
     if (RUNNING_ON_VALGRIND) {
-        p = xmalloc(*size);
+        p = malloc2(*size);
         memset64(p, 0, *size);
         return p;
     }
@@ -731,7 +731,7 @@ xmmap_commit(int64 *size) {
     void *p;
 
     if (RUNNING_ON_VALGRIND) {
-        p = xmalloc(*size);
+        p = malloc2(*size);
         memset64(p, 0, *size);
         return p;
     }
@@ -1194,7 +1194,7 @@ error_impl(char *file, int32 line, char *format, ...) {
     if (n >= m) {
         if (RELEASING) {
             m = n + 1;
-            big_buffer = xmalloc(m);
+            big_buffer = malloc2(m);
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {
@@ -1735,7 +1735,7 @@ shell_escape(char *path) {
         }
     }
 
-    escaped = xmalloc(len + (count*3) + 1);
+    escaped = malloc2(len + (count*3) + 1);
     write_ptr = escaped;
 
     for (int64 i = 0; i < len; i += 1) {
@@ -2138,7 +2138,7 @@ util_test_qsort_cmp(const void *a, const void *b) {
 
 int
 main(int argc, char **argv) {
-    void *p1 = xmalloc(SIZEMB(1));
+    void *p1 = malloc2(SIZEMB(1));
     void *p2 = malloc(SIZEMB(2));
     char *p3;
     char *string = __FILE__;
