@@ -73,4 +73,22 @@ _Generic((SIZE), \
   #endif
 #endif
 
+#if !defined(__CPROC__) && defined(__has_include)
+  #if __has_include(<valgrind/valgrind.h>)
+    #include <valgrind/valgrind.h>
+  #else
+    #define RUNNING_ON_VALGRIND 0
+  #endif
+#else
+    #define RUNNING_ON_VALGRIND 0
+#endif
+
+#if !defined(FLAGS_HUGE_PAGES)
+#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
+#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
+#else
+#define FLAGS_HUGE_PAGES 0
+#endif
+#endif
+
 #endif /* BASE_MACROS_H */

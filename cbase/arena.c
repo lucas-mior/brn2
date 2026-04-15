@@ -48,12 +48,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#if OS_LINUX && defined(MAP_HUGE_2MB)
-#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
-#else
-#define FLAGS_HUGE_PAGES 0
-#endif
-
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
