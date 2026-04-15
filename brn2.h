@@ -64,16 +64,6 @@
 #define BRN2_BENCHMARK 0
 #endif
 
-#if 0
-#define BRN2_INLINE __attribute__((noinline))
-#else
-#define BRN2_INLINE static inline __attribute__((always_inline))
-#endif
-
-#if !defined(INLINE)
-#define INLINE BRN2_INLINE
-#endif
-
 #include "arena.c"
 
 typedef struct File {

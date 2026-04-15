@@ -46,4 +46,18 @@ _Generic((SIZE), \
 #define ALIGNMENT 16ul
 #define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
 
+#if !defined(DEBUGGING)
+#define DEBUGGING 0
+#endif
+
+#if DEBUGGING
+  #define INLINE
+#else
+  #if defined(__GNUC__)
+    #define INLINE static inline __attribute__((always_inline))
+  #else
+    #define INLINE static inline
+  #endif
+#endif
+
 #endif /* BASE_MACROS_H */
