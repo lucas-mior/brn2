@@ -506,10 +506,6 @@ memset64(void *buffer, int value, int64 size) {
 }
 #endif
 
-#if !defined(LENGTH)
-#define LENGTH(X) ((int64)(sizeof(X) / sizeof(*X)))
-#endif
-
 int
 main(void) {
     Arena *arena;
