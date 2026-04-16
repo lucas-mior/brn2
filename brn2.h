@@ -125,6 +125,6 @@ void brn2_execute2(FileList *, FileList *,
                    struct Hash_map *, struct Hash_set *,
                    int32, int32 *);
 
-void brn2_usage(FILE *) __attribute((noreturn));
+void brn2_usage(FILE *) __attribute__((noreturn));
 
 #endif
