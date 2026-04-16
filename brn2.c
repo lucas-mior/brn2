@@ -1183,8 +1183,9 @@ main(void) {
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_insert_pre_calc_map(map, file->name, file->length,
-                                             hash, list1->indexes[i], 0));
+            ASSERT(hash_insert_pre_calc_map(map,
+                                            file->name, file->length,
+                                            hash, list1->indexes[i], 0));
         }
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
@@ -1302,8 +1303,9 @@ main(void) {
             ASSERT_EQUAL(file->hash, hash);
             ASSERT_EQUAL(file->hash % capacity_set, hash & map->bitmask);
 
-            ASSERT(hash_insert_pre_calc_map(map, file->name, file->length,
-                                             hash, list1->indexes[i], 0));
+            ASSERT(hash_insert_pre_calc_map(map,
+                                            file->name, file->length,
+                                            hash, list1->indexes[i], 0));
         }
         for (int32 i = 0; i < list1->length; i += 1) {
             FileName *file = list1->files[i];
@@ -1423,8 +1425,9 @@ main(void) {
         for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
             uint32 *index = &(old->indexes[i]);
-            ASSERT(hash_insert_pre_calc_map(oldlist_map, file->name, file->length,
-                                             file->hash, *index, i));
+            ASSERT(hash_insert_pre_calc_map(oldlist_map,
+                                            file->name, file->length,
+                                            file->hash, *index, i));
         }
 
         {
