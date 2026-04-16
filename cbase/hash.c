@@ -359,7 +359,7 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
     uint32 target_idx = MAXOF(target_idx);
     Bucket *target;
 
-    if (map->occupied*100 >= map->capacity*75) {
+    if (map->occupied*100ll >= map->capacity*75ll) {
         CAT(hash_resize_, HASH_TYPE)(map);
         base_index = hash & map->bitmask;
     }
@@ -443,7 +443,7 @@ CAT(hash_overwrite_pre_calc_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
     uint32 target_idx = MAXOF(target_idx);
     Bucket *target;
 
-    if (map->occupied*100 >= map->capacity*75) {
+    if (map->occupied*100ll >= map->capacity*75ll) {
         CAT(hash_resize_, HASH_TYPE)(map);
         base_index = hash & map->bitmask;
     }
