@@ -139,6 +139,81 @@ CHECK_COMMON_MAP(occupied);
 #undef CHECK_COMMON_MAP
 
 static void
+CAT(hash_print_summary_, HASH_TYPE)(struct Map *map) {
+    printf("struct Hash%s {\n", QUOTE(HASH_TYPE));
+    printf("  name: %s\n", map->name);
+    printf("  size: %lldB\n", (llong)map->size);
+    printf("  capacity: %u\n", map->capacity);
+    printf("  bitmask: %u\n", map->bitmask);
+    printf("  length: %u\n", map->length);
+#if HASH_DUPLICATE_KEYS
+    printf("  arena:\n");
+    arena_print(map->arena_keys);
+#endif
+    printf("  expected collisions: %u\n", hash_expected_collisions(map));
+    printf("}\n");
+    return;
+}
+
+static void
+CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
+    if (map == NULL) {
+        return;
+    }
+
+    for (uint32 i = 0; i < map->capacity; i += 1) {
+        Bucket *iterator = &map->array[i];
+
+        if (!verbose) {
+#if HASH_KEY_FIXED_LEN
+            if (iterator->slot_state == HASH_SLOT_FREE) {
+                continue;
+            }
+            if (iterator->slot_state == HASH_SLOT_DELETED) {
+                continue;
+            }
+#else
+            if ((int64)iterator->key == HASH_SLOT_FREE) {
+                continue;
+            }
+            if ((int64)iterator->key == HASH_SLOT_DELETED) {
+                continue;
+            }
+#endif
+        }
+
+        printf("\n%03u: ", i);
+
+#if HASH_KEY_FIXED_LEN
+        switch (iterator->slot_state)
+#else
+        switch ((int64)iterator->key)
+#endif
+        {
+        case HASH_SLOT_FREE:
+            printf("[empty]");
+            break;
+        case HASH_SLOT_DELETED:
+            printf("[deleted]");
+            break;
+        default:
+#if defined(HASH_KEY_FORMATTER)
+            printf("'" HASH_KEY_FORMATTER "'", iterator->key);
+#else
+            printf("key");
+#endif
+#if defined(HASH_VALUE_TYPE) && defined(HASH_VALUE_FORMATTER)
+            printf("=" HASH_VALUE_FORMATTER, iterator->value);
+#endif
+            break;
+        }
+    }
+
+    printf("\n");
+    return;
+}
+
+static void
 CAT(hash_zero_, HASH_TYPE)(struct Map *map) {
     map->length = 0;
     map->occupied = 0;
@@ -184,6 +259,9 @@ CAT(hash_create_, HASH_TYPE)(uint32 length, char *name) {
         map->arena_keys = arena_create(SIZEMB(2), buffer);
     }
 #endif
+    if (DEBUGGING) {
+        CAT(hash_print_summary_, HASH_TYPE)(map);
+    }
     return map;
 }
 
@@ -615,81 +693,6 @@ CAT(hash_remove_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
                                                  , key_length
 #endif
                                                  , hash, index);
-}
-
-static void
-CAT(hash_print_summary_, HASH_TYPE)(struct Map *map) {
-    printf("struct Hash%s {\n", QUOTE(HASH_TYPE));
-    printf("  name: %s\n", map->name);
-    printf("  size: %lldB\n", (llong)map->size);
-    printf("  capacity: %u\n", map->capacity);
-    printf("  bitmask: %u\n", map->bitmask);
-    printf("  length: %u\n", map->length);
-#if HASH_DUPLICATE_KEYS
-    printf("  arena:\n");
-    arena_print(map->arena_keys);
-#endif
-    printf("  expected collisions: %u\n", hash_expected_collisions(map));
-    printf("}\n");
-    return;
-}
-
-static void
-CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
-    if (map == NULL) {
-        return;
-    }
-
-    for (uint32 i = 0; i < map->capacity; i += 1) {
-        Bucket *iterator = &map->array[i];
-
-        if (!verbose) {
-#if HASH_KEY_FIXED_LEN
-            if (iterator->slot_state == HASH_SLOT_FREE) {
-                continue;
-            }
-            if (iterator->slot_state == HASH_SLOT_DELETED) {
-                continue;
-            }
-#else
-            if ((int64)iterator->key == HASH_SLOT_FREE) {
-                continue;
-            }
-            if ((int64)iterator->key == HASH_SLOT_DELETED) {
-                continue;
-            }
-#endif
-        }
-
-        printf("\n%03u: ", i);
-
-#if HASH_KEY_FIXED_LEN
-        switch (iterator->slot_state)
-#else
-        switch ((int64)iterator->key)
-#endif
-        {
-        case HASH_SLOT_FREE:
-            printf("[empty]");
-            break;
-        case HASH_SLOT_DELETED:
-            printf("[deleted]");
-            break;
-        default:
-#if defined(HASH_KEY_FORMATTER)
-            printf("'" HASH_KEY_FORMATTER "'", iterator->key);
-#else
-            printf("key");
-#endif
-#if defined(HASH_VALUE_TYPE) && defined(HASH_VALUE_FORMATTER)
-            printf("=" HASH_VALUE_FORMATTER, iterator->value);
-#endif
-            break;
-        }
-    }
-
-    printf("\n");
-    return;
 }
 
 static uint32
