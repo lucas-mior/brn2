@@ -620,8 +620,14 @@ static void
 CAT(hash_print_summary_, HASH_TYPE)(struct Map *map) {
     printf("struct Hash%s {\n", QUOTE(HASH_TYPE));
     printf("  name: %s\n", map->name);
+    printf("  size: %lldB\n", (llong)map->size);
     printf("  capacity: %u\n", map->capacity);
+    printf("  bitmask: %u\n", map->bitmask);
     printf("  length: %u\n", map->length);
+#if HASH_DUPLICATE_KEYS
+    printf("  arena:\n");
+    arena_print(map->arena_keys);
+#endif
     printf("  expected collisions: %u\n", hash_expected_collisions(map));
     printf("}\n");
     return;
