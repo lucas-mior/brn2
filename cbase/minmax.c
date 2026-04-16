@@ -239,6 +239,13 @@ _Generic((VAR1), \
     ) \
 )
 
+#if defined(MIN)
+#undef MIN
+#endif
+#if defined(MAX)
+#undef MAX
+#endif
+
 #define MIN(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
 #define MAX(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
 
