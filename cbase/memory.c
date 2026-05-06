@@ -228,7 +228,8 @@ realloc_debug(char *file, int32 line,
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
-                error_impl(file, line, "Reallocation old size does not match size"
+                error_impl(file, line,
+                           "Reallocation old size does not match size"
                            " allocated on %s:%d: %lld != %lld\n",
                            old_info.file, old_info.line,
                            (llong)old_info.size, (llong)old_size);
