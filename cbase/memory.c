@@ -214,12 +214,18 @@ realloc_debug(char *file, int32 line,
         info.line = line;
 
         pthread_mutex_lock(&allocations_mutex);
-        if (allocations) {
-            if (old != NULL) {
-                hash_remove_alloc_map(allocations, &old);
-            }
-            hash_insert_alloc_map(allocations, &p, info);
+
+        if ((p != NULL) && (allocations == NULL)) {
+            error_impl(file, line, "Reallocating invalid pointer %p.", p);
+            fatal(EXIT_FAILURE);
+        } else if (allocations == NULL) {
+            allocations = hash_create_alloc_map(1024, "DebugAllocations");
         }
+        if (old != NULL) {
+            hash_remove_alloc_map(allocations, &old);
+        }
+        hash_insert_alloc_map(allocations, &p, info);
+
         pthread_mutex_unlock(&allocations_mutex);
     }
 
@@ -235,24 +241,29 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
         fatal(EXIT_FAILURE);
     }
 
-    if (pointer != NULL) {
+    if (pointer) {
+        DebugAllocInfo info;
         pthread_mutex_lock(&allocations_mutex);
-        if (allocations) {
-            DebugAllocInfo info;
-            if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
-                if (info.size != size) {
-                    error_impl(file, line, 
-                               "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
-                               pointer, (llong)info.size, (llong)size);
-                    error_impl(info.file, info.line, "Memory was allocated here.\n");
-                    fatal(EXIT_FAILURE);
-                }
-                hash_remove_alloc_map(allocations, &pointer);
-            } else {
-                error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
+
+        if (allocations == NULL) {
+            error_impl(file, line,
+                       "Called free without having called malloc or realloc.\n");
+            fatal(EXIT_FAILURE);
+        }
+        if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
+            if (info.size != size) {
+                error_impl(file, line, 
+                           "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
+                           pointer, (llong)info.size, (llong)size);
+                error_impl(info.file, info.line, "Memory was allocated here.\n");
                 fatal(EXIT_FAILURE);
             }
+            hash_remove_alloc_map(allocations, &pointer);
+        } else {
+            error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
+            fatal(EXIT_FAILURE);
         }
+
         pthread_mutex_unlock(&allocations_mutex);
     }
 
