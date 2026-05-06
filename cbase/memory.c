@@ -407,7 +407,46 @@ xstrdup(char *string) {
 #if TESTING_memory
 #include "util.c"
 int main(void) {
-    exit(EXIT_SUCCESS);
+    {
+        int64 size = 128;
+        char *p = malloc2(size);
+        ASSERT(p != NULL);
+
+        if (DEBUGGING_MEMORY && !RUNNING_ON_VALGRIND) {
+            for (int32 i = 0; i < size; i += 1) {
+                ASSERT((unsigned char)p[i] == MEM_MALLOCED_UNINITIALIZED);
+            }
+        }
+        free2(p, size);
+    }
+
+    {
+        int64 old_count = 10;
+        int64 new_count = 20;
+        int64 obj_size = sizeof(int64);
+        int64 *arr = malloc2(old_count * obj_size);
+
+        for (int32 i = 0; i < old_count; i += 1) {
+            arr[i] = (int64)i;
+        }
+
+        arr = realloc2(arr, old_count, new_count, obj_size);
+        for (int32 i = 0; i < old_count; i += 1) {
+            ASSERT(arr[i] == (int64)i);
+        }
+        free2(arr, new_count * obj_size);
+    }
+
+    {
+        char *src = "Gemini Memory Test";
+        char *dup = xstrdup(src);
+        ASSERT(dup != src);
+        ASSERT(strcmp(dup, src) == 0);
+        free2(dup, strlen32(src) + 1);
+    }
+
+    printf("All memory tests passed.\n");
+    return EXIT_SUCCESS;
 }
 #endif
 
