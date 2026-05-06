@@ -149,10 +149,6 @@ malloc_debug(char *file, int32 line, int64 size) {
         fatal(EXIT_FAILURE);
     }
 
-    if (DEBUGGING_MEMORY) {
-        error_impl(file, line, "Allocating %lld bytes...\n", (llong)size);
-    }
-
     p = xmalloc(size + 1);
     ptr = (uchar *)p;
     ptr[size] = 0xDC;
@@ -195,11 +191,6 @@ xrealloc(void *old, int64 new_size) {
 INLINE void *
 realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size = new_capacity*obj_size;
-
-    if (DEBUGGING_MEMORY) {
-        error("Reallocating %p: %lld to %lld objects of size %lld.\n",
-              old, (llong)old_capacity, (llong)new_capacity, (llong)obj_size);
-    }
 
     return xrealloc(old, new_size);
 }
