@@ -21,6 +21,10 @@ static int64 memory_page_size = 0;
 #define TESTING_memory 0
 #endif
 
+#if TESTING_memory
+#define DEBUGGING_MEMORY 1
+#endif
+
 #if !defined(DEBUGGING_MEMORY)
 #define DEBUGGING_MEMORY DEBUGGING
 #endif
@@ -434,48 +438,147 @@ xstrdup(char *string) {
 }
 
 #if TESTING_memory
+#include <signal.h>
+#include <setjmp.h>
 #include "util.c"
 
+static sigjmp_buf test_jump_env;
+static bool caught_expected_fail = false;
+
+static void
+test_expected_fail_handler(int sig) {
+    (void)sig;
+    caught_expected_fail = true;
+    siglongjmp(test_jump_env, 1);
+}
+
+#define ASSERT_EXPECTED_FATAL(BLOCK) do { \
+    caught_expected_fail = false; \
+    if (sigsetjmp(test_jump_env, 1) == 0) { \
+        BLOCK; \
+        fprintf(stderr, "Error: Code block at %s:%d did not fail as expected.\n", \
+                __FILE__, __LINE__); \
+        exit(EXIT_FAILURE); \
+    } \
+    ASSERT(caught_expected_fail); \
+    printf("Successfully caught expected failure at %s:%d\n", __FILE__, __LINE__); \
+} while (0)
+
 int main(void) {
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = test_expected_fail_handler;
+    sigemptyset(&sa.sa_mask);
+
+    if (sigaction(SIGILL, &sa, NULL) != 0) {
+        perror("sigaction");
+        return EXIT_FAILURE;
+    }
+
+    printf("--- Starting Comprehensive Memory Tests ---\n");
+
     {
-        int64 size = 128;
+        int64 size = 256;
         char *p = malloc2(size);
         ASSERT(p != NULL);
+        printf("malloc2(256) successful.\n");
 
         if (DEBUGGING_MEMORY && !RUNNING_ON_VALGRIND) {
             for (int32 i = 0; i < size; i += 1) {
                 ASSERT((unsigned char)p[i] == MEM_MALLOCED_UNINITIALIZED);
             }
+            printf("Memory correctly initialized with debug byte.\n");
         }
         free2(p, size);
+        printf("free2(256) successful.\n");
     }
 
     {
-        int64 old_count = 10;
-        int64 new_count = 20;
-        int64 obj_size = sizeof(int64);
-        int64 *arr = malloc2(old_count * obj_size);
+        int64 count = 100;
+        int64 grow = 200;
+        int64 shrink = 50;
+        int64 *arr = malloc2(count * sizeof(int64));
 
-        for (int32 i = 0; i < old_count; i += 1) {
+        for (int32 i = 0; i < count; i += 1) {
             arr[i] = (int64)i;
         }
 
-        arr = realloc2(arr, old_count, new_count, obj_size);
-        for (int32 i = 0; i < old_count; i += 1) {
+        arr = realloc2(arr, count, grow, sizeof(int64));
+        for (int32 i = 0; i < count; i += 1) {
             ASSERT(arr[i] == (int64)i);
         }
-        free2(arr, new_count * obj_size);
+        printf("realloc2 (grow) preserved data.\n");
+
+        arr = realloc2(arr, grow, shrink, sizeof(int64));
+        for (int32 i = 0; i < shrink; i += 1) {
+            ASSERT(arr[i] == (int64)i);
+        }
+        printf("realloc2 (shrink) successful.\n");
+
+        free2(arr, shrink * sizeof(int64));
     }
 
     {
-        char *src = "Gemini Memory Test";
-        char *dup = xstrdup(src);
-        ASSERT(dup != src);
-        ASSERT(strcmp(dup, src) == 0);
-        free2(dup, strlen32(src) + 1);
+        char *original = "Comprehensive memory test string";
+        char *dup = xstrdup(original);
+        int64 len = strlen32(original) + 1;
+
+        ASSERT(dup != original);
+        ASSERT(strcmp(dup, original) == 0);
+        printf("xstrdup successful.\n");
+
+        char *mem_dup = xmemdup(dup, len);
+        ASSERT(mem_dup != dup);
+        ASSERT(memcmp(mem_dup, dup, (size_t)len) == 0);
+        printf("xmemdup successful.\n");
+
+        free2(dup, len);
+        free2(mem_dup, len);
     }
 
-    printf("All memory tests passed.\n");
+    printf("\n--- Starting Failure Case Tests ---\n");
+
+    {
+        void *untracked = (void *)0xDEADBEEF;
+        ASSERT_EXPECTED_FATAL({
+            free2(untracked, 16);
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+    }
+
+    {
+        int64 size = 64;
+        void *p = malloc2(size);
+        ASSERT_EXPECTED_FATAL({
+            free2(p, size + 1); // Incorrect size
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+        // Cleanup since the jump skipped the actual free in the block
+        free(p); 
+    }
+
+    {
+        int64 size = 16;
+        void *p = malloc2(size);
+        free2(p, size);
+        ASSERT_EXPECTED_FATAL({
+            free2(p, size); // Double free
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+    }
+
+    {
+        int64 count = 10;
+        int64 *arr = malloc2(count * sizeof(int64));
+        ASSERT_EXPECTED_FATAL({
+            // Realloc with wrong old size
+            realloc2(arr, count + 5, 20, sizeof(int64));
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+        free2(arr, count * sizeof(int64));
+    }
+
+    printf("\nAll memory tests (including expected failures) passed.\n");
     return EXIT_SUCCESS;
 }
 
