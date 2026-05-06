@@ -39,7 +39,11 @@ typedef struct DebugAllocInfo {
     int64 size;
     char *file;
     int32 line;
-    int32 is_freed;
+    int32 reallocated; /* -1 : freed
+                          0  : malloced once
+                          1  : realloced once
+                          2  : realloced twice
+                          and so on */
 } DebugAllocInfo;
 
 #define HASH_KEY_TYPE void *
@@ -109,6 +113,10 @@ xmalloc(int64 size) {
 
 static void
 check_overflow_memory(void) {
+    if (RUNNING_ON_VALGRIND) {
+        return;
+    }
+
     pthread_mutex_lock(&allocations_mutex);
     if (allocations) {
         for (uint32 i = 0; i < allocations->capacity; i += 1) {
@@ -118,15 +126,13 @@ check_overflow_memory(void) {
                 uchar *p = (uchar *)bucket->key;
                 int64 size = bucket->value.size;
 
-                if (bucket->value.is_freed) {
-                    if (!RUNNING_ON_VALGRIND) {
-                        for (int64 j = 0; j < size; j += 1) {
-                            if (p[j] != 0xCD) {
-                                error_impl(bucket->value.file, bucket->value.line,
-                                           "Use after free detected in pointer %p (size %lld).\n",
-                                           (void *)p, (llong)size);
-                                fatal(EXIT_FAILURE);
-                            }
+                if (bucket->value.reallocated == -1) {
+                    for (int64 j = 0; j < size; j += 1) {
+                        if (p[j] != 0xCD) {
+                            error_impl(bucket->value.file, bucket->value.line,
+                                       "Use after free detected in pointer %p (size %lld).\n",
+                                       (void *)p, (llong)size);
+                            fatal(EXIT_FAILURE);
                         }
                     }
                 } else {
@@ -149,6 +155,10 @@ malloc_debug(char *file, int32 line, int64 size) {
     void *p;
     uchar *ptr;
 
+    if (RUNNING_ON_VALGRIND) {
+        return malloc((size_t)size);
+    }
+
     if (size <= 0) {
         error_impl(file, line,
                    "Error in %s: invalid size = %lld.\n",
@@ -166,16 +176,14 @@ malloc_debug(char *file, int32 line, int64 size) {
     ptr = (uchar *)p;
     ptr[size] = 0xDC;
 
-    if (!RUNNING_ON_VALGRIND) {
-        memset64(p, 0xCD, size);
-    }
+    memset64(p, 0xCD, size);
 
     {
         DebugAllocInfo info;
         info.size = size;
         info.file = file;
         info.line = line;
-        info.is_freed = 0;
+        info.reallocated = 0;
 
         pthread_mutex_lock(&allocations_mutex);
         if (allocations == NULL) {
@@ -219,6 +227,10 @@ realloc_debug(char *file, int32 line,
     uchar *ptr;
     (void)old_capacity;
 
+    if (RUNNING_ON_VALGRIND) {
+        return realloc(old, (size_t)(new_capacity*obj_size));
+    }
+
     if (obj_size <= 0) {
         error_impl(file, line,
                    "Error in %s: invalid object size = %lld.\n",
@@ -240,7 +252,7 @@ realloc_debug(char *file, int32 line,
         info.size = new_size;
         info.file = file;
         info.line = line;
-        info.is_freed = 0;
+        info.reallocated = 0;
 
         pthread_mutex_lock(&allocations_mutex);
 
@@ -256,7 +268,7 @@ realloc_debug(char *file, int32 line,
                 error_impl(file, line, "Reallocating invalid pointer %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
-            if (old_info.is_freed) {
+            if (old_info.reallocated == -1) {
                 error_impl(file, line, "Reallocating freed pointer %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
@@ -273,6 +285,8 @@ realloc_debug(char *file, int32 line,
                            "Memory overflow detected before realloc in %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
+
+            info.reallocated = old_info.reallocated + 1;
             hash_remove_alloc_map(allocations, &old);
         }
 
@@ -290,6 +304,11 @@ realloc_debug(char *file, int32 line,
 
 static void
 free_debug(char *file, int32 line, void *pointer, int64 size) {
+    if (RUNNING_ON_VALGRIND) {
+        free(pointer);
+        return;
+    }
+
     if (size < 0) {
         error_impl(file, line,
                    "Error: freeing allocation of negative size = %lld.\n",
@@ -308,7 +327,7 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
             fatal(EXIT_FAILURE);
         }
         if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
-            if (info.is_freed) {
+            if (info.reallocated == -1) {
                 error_impl(file, line, "Error: double free of pointer %p.\n", pointer);
                 fatal(EXIT_FAILURE);
             }
@@ -327,13 +346,11 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
                 fatal(EXIT_FAILURE);
             }
 
-            info.is_freed = 1;
+            info.reallocated = -1;
             hash_remove_alloc_map(allocations, &pointer);
             hash_insert_alloc_map(allocations, &pointer, info);
             
-            if (!RUNNING_ON_VALGRIND) {
-                memset64(pointer, 0xCD, size);
-            }
+            memset64(pointer, 0xCD, size);
         } else {
             error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
             fatal(EXIT_FAILURE);
