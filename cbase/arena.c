@@ -242,7 +242,7 @@ arena_allocate(int64 *size) {
     }
 
     if ((p
-         = VirtualAlloc(NULL, *size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))
+         = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))
         == NULL) {
         error2("Error in VirtualAlloc(%lld): %lu.\n", (llong)*size,
                GetLastError());
