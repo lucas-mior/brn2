@@ -894,6 +894,7 @@ fatal(int status) {
     if (DEBUGGING) {
         (void)status;
         raise(SIGILL);
+        exit(status);
     } else {
         exit(status);
     }
