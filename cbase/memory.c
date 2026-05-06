@@ -424,6 +424,7 @@ xstrdup(char *string) {
 
 #if TESTING_memory
 #include "util.c"
+
 int main(void) {
     {
         int64 size = 128;
@@ -466,6 +467,7 @@ int main(void) {
     printf("All memory tests passed.\n");
     return EXIT_SUCCESS;
 }
+
 #endif
 
 #endif /* MEMORY_C */
