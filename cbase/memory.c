@@ -209,8 +209,6 @@ realloc_debug(char *file, int32 line,
                    (llong)old_size, (llong)new_size);
     }
 
-    p = xrealloc(old, new_size);
-
     {
         DebugAllocInfo info;
         info.size = new_size;
@@ -219,8 +217,8 @@ realloc_debug(char *file, int32 line,
 
         pthread_mutex_lock(&allocations_mutex);
 
-        if ((p != NULL) && (allocations == NULL)) {
-            error_impl(file, line, "Reallocating invalid pointer %p.", p);
+        if ((old != NULL) && (allocations == NULL)) {
+            error_impl(file, line, "Reallocating invalid pointer %p.", old);
             fatal(EXIT_FAILURE);
         } else if (allocations == NULL) {
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
@@ -241,6 +239,8 @@ realloc_debug(char *file, int32 line,
             }
             hash_remove_alloc_map(allocations, &old);
         }
+        p = xrealloc(old, new_size);
+
         hash_insert_alloc_map(allocations, &p, info);
 
         pthread_mutex_unlock(&allocations_mutex);
@@ -577,6 +577,15 @@ int main(void) {
         });
         pthread_mutex_unlock(&allocations_mutex);
         free2(arr, count*SIZEOF(int64));
+    }
+
+    {
+        void *invalid_ptr = (void *)0xBAADF00D;
+        ASSERT_EXPECTED_FATAL({
+            // Realloc with untracked pointer
+            realloc2(invalid_ptr, 1, 10, SIZEOF(int64));
+        });
+        pthread_mutex_unlock(&allocations_mutex);
     }
 
     printf("\nAll memory tests (including expected failures) passed.\n");
