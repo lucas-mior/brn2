@@ -97,7 +97,6 @@ memset64(void *buffer, int value, int64 size) {
     return;
 }
 
-
 INLINE void *
 xmalloc(int64 size) {
     void *p;
@@ -108,9 +107,34 @@ xmalloc(int64 size) {
     return p;
 }
 
+static void
+check_overflow_memory(void) {
+    pthread_mutex_lock(&allocations_mutex);
+    if (allocations) {
+        for (uint32 i = 0; i < allocations->capacity; i += 1) {
+            Bucket_alloc_map *bucket = &allocations->array[i];
+
+            if (bucket->slot_state == HASH_SLOT_USED) {
+                uchar *p = (uchar *)bucket->key;
+                int64 size = bucket->value.size;
+
+                if (p[size] != 0xDC) {
+                    error_impl(bucket->value.file, bucket->value.line,
+                               "Memory overflow detected in pointer %p (size %lld).\n",
+                               (void *)p, (llong)size);
+                    fatal(EXIT_FAILURE);
+                }
+            }
+        }
+    }
+    pthread_mutex_unlock(&allocations_mutex);
+    return;
+}
+
 static void *
 malloc_debug(char *file, int32 line, int64 size) {
     void *p;
+    uchar *ptr;
 
     if (size <= 0) {
         error_impl(file, line,
@@ -129,10 +153,12 @@ malloc_debug(char *file, int32 line, int64 size) {
         error_impl(file, line, "Allocating %lld bytes...\n", (llong)size);
     }
 
-    p = xmalloc(size);
+    p = xmalloc(size + 1);
+    ptr = (uchar *)p;
+    ptr[size] = 0xDC;
 
     if (!RUNNING_ON_VALGRIND) {
-        memset64(p, MEM_MALLOCED_UNINITIALIZED, size);
+        memset64(p, 0xCD, size);
     }
 
     {
@@ -184,6 +210,7 @@ realloc_debug(char *file, int32 line,
     int64 old_size;
     int64 new_size;
     void *p;
+    uchar *ptr;
     (void)old_capacity;
 
     if (obj_size <= 0) {
@@ -237,9 +264,17 @@ realloc_debug(char *file, int32 line,
                            (llong)old_info.size, (llong)old_size);
                 fatal(EXIT_FAILURE);
             }
+            if (((uchar *)old)[old_size] != 0xDC) {
+                error_impl(old_info.file, old_info.line,
+                           "Memory overflow detected before realloc in %p.\n", old);
+                fatal(EXIT_FAILURE);
+            }
             hash_remove_alloc_map(allocations, &old);
         }
-        p = xrealloc(old, new_size);
+
+        p = xrealloc(old, new_size + 1);
+        ptr = (uchar *)p;
+        ptr[new_size] = 0xDC;
 
         hash_insert_alloc_map(allocations, &p, info);
 
@@ -260,6 +295,7 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
 
     if (pointer) {
         DebugAllocInfo info;
+        uchar *ptr;
         pthread_mutex_lock(&allocations_mutex);
 
         if (allocations == NULL) {
@@ -275,6 +311,14 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
                 error_impl(info.file, info.line, "Memory was allocated here.\n");
                 fatal(EXIT_FAILURE);
             }
+            
+            ptr = (uchar *)pointer;
+            if (ptr[size] != 0xDC) {
+                error_impl(info.file, info.line,
+                           "Memory overflow detected during free of %p.\n", pointer);
+                fatal(EXIT_FAILURE);
+            }
+
             hash_remove_alloc_map(allocations, &pointer);
         } else {
             error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
@@ -286,7 +330,7 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
 
     if (DEBUGGING_MEMORY && pointer && size) {
         if (!RUNNING_ON_VALGRIND) {
-            memset64(pointer, MEM_FREED, size);
+            memset64(pointer, 0xDC, size);
         }
     }
     free(pointer);
@@ -485,10 +529,11 @@ int main(void) {
 
         if (DEBUGGING_MEMORY && !RUNNING_ON_VALGRIND) {
             for (int32 i = 0; i < size; i += 1) {
-                ASSERT((unsigned char)p[i] == MEM_MALLOCED_UNINITIALIZED);
+                ASSERT((uchar)p[i] == 0xCD);
             }
             printf("Memory correctly initialized with debug byte.\n");
         }
+        check_overflow_memory();
         free2(p, size);
         printf("free2(256) successful.\n");
     }
@@ -503,12 +548,14 @@ int main(void) {
             arr[i] = (int64)i;
         }
 
+        check_overflow_memory();
         arr = realloc2(arr, count, grow, SIZEOF(int64));
         for (int32 i = 0; i < count; i += 1) {
             ASSERT(arr[i] == (int64)i);
         }
         printf("realloc2 (grow) preserved data.\n");
 
+        check_overflow_memory();
         arr = realloc2(arr, grow, shrink, SIZEOF(int64));
         for (int32 i = 0; i < shrink; i += 1) {
             ASSERT(arr[i] == (int64)i);
@@ -554,7 +601,6 @@ int main(void) {
             free2(p, size + 1); // Incorrect size
         });
         pthread_mutex_unlock(&allocations_mutex);
-        // Cleanup since the jump skipped the actual free in the block
         free(p); 
     }
 
@@ -586,6 +632,28 @@ int main(void) {
             realloc2(invalid_ptr, 1, 10, SIZEOF(int64));
         });
         pthread_mutex_unlock(&allocations_mutex);
+    }
+
+    {
+        int64 size = 64;
+        uchar *p = malloc2(size);
+        ASSERT_EXPECTED_FATAL({
+            p[size] = 0x00; // Corrupt canary
+            check_overflow_memory();
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+        free(p); 
+    }
+
+    {
+        int64 size = 32;
+        uchar *p = malloc2(size);
+        ASSERT_EXPECTED_FATAL({
+            p[size] = 0xFF; // Corrupt canary
+            free2(p, size);
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+        free(p);
     }
 
     printf("\nAll memory tests (including expected failures) passed.\n");
