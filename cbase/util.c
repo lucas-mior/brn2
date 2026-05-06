@@ -48,11 +48,6 @@
 #define TESTING_util 0
 #endif
 
-static int32 snprintf2(char *buffer, int64 size, char *format, ...);
-static void __attribute__((format(printf, 3, 4)))
-    error_impl(char *file, int32 line, char *format, ...);
-#define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
-
 #if !TESTING_util
 static char *program;
 #else
@@ -62,18 +57,6 @@ static int32 program_len __attribute__((unused));
 
 static bool timezone_initialized = false;
 static time_t timezone_offset = 0;
-
-#if !defined(SNPRINTF)
-#define SNPRINTF(BUFFER, FORMAT, ...) \
-    snprintf2(BUFFER, sizeof(BUFFER), FORMAT, __VA_ARGS__)
-#endif
-#if !defined(STRFTIME)
-#define STRFTIME(BUFFER, FORMAT, TIME) \
-    strftime2(BUFFER, sizeof(BUFFER), FORMAT, TIME)
-#endif
-
-#define STRUCT_ARRAY_SIZE(struct_object, ArrayType, array_length) \
-    (int64)(SIZEOF(*(struct_object)) + ((array_length)*SIZEOF(ArrayType)))
 
 #define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH) \
 _Generic((ARRAY), \
@@ -1525,11 +1508,6 @@ print_timings(char *file, int32 line, char *func,
     printf("%gs = %gus per item.\n\n", total_seconds, micros_per);
     return;
 }
-#define PRINT_TIMINGS_3(N, T0, T1) \
-        print_timings(__FILE__, __LINE__, (char *)__func__, N, T0, T1)
-#define PRINT_TIMINGS_4(N, T0, T1, NAME) \
-        print_timings(__FILE__, __LINE__, NAME, N, T0, T1)
-#define PRINT_TIMINGS(...) SELECT_ON_NUM_ARGS(PRINT_TIMINGS_, __VA_ARGS__)
 
 #if OS_UNIX
 
@@ -1624,22 +1602,6 @@ timezone_init(void) {
     return;
 }
 #endif
-
-static ullong here_counter = 0;
-
-#define HERE do { \
-    fprintf(stderr, "\n===== HERE(%llu): %s:%d (%s)\n", \
-                    here_counter++, __FILE__, __LINE__, __func__); \
-} while (0)
-
-#define NCALLS(INTERVAL) do { \
-    static int64 ncalls_ncalls = 1; \
-    if ((ncalls_ncalls % INTERVAL) == 0) { \
-        fprintf(stderr, "%s:%d:%s: called %lld times\n", \
-                        __FILE__, __LINE__, __func__, (llong)ncalls_ncalls); \
-    } \
-    ncalls_ncalls += 1; \
-} while (0)
 
 #if 0 == TESTING_util
 static inline void

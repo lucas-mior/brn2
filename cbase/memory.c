@@ -6,10 +6,12 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "platform_detection.h"
 #include "base_macros.h"
 #include "primitives.h"
+#include "rapidhash.h"
 
 static int64 memory_page_size = 0;
 
@@ -18,10 +20,6 @@ static int64 memory_page_size = 0;
 #elif !defined(TESTING_memory)
 #define TESTING_memory 0
 #endif
-
-#define MEM_FREED 0xDC
-#define MEM_MALLOCED_UNINITIALIZED 0xCD
-#define MEM_DONT_READ 0xBD
 
 #if !defined(DEBUGGING_MEMORY)
 #define DEBUGGING_MEMORY DEBUGGING
@@ -32,6 +30,23 @@ static void __attribute__((format(printf, 3, 4)))
 #define error(...) error_impl(__FILE__, __LINE__, __VA_ARGS__)
 static void fatal(int status);
 INLINE int32 strlen32(char *string);
+
+typedef struct DebugAllocInfo {
+    int64 size;
+    char *file;
+    int32 line;
+    int32 padding;
+} DebugAllocInfo;
+
+#define HASH_KEY_TYPE void *
+#define HASH_KEY_FIXED_LEN 1
+#define HASH_VALUE_TYPE DebugAllocInfo
+#define HASH_TYPE alloc_map
+#define HASH_PADDING_TYPE uint32
+#include "hash.c"
+
+static struct Hash_alloc_map *allocations = NULL;
+static pthread_mutex_t allocations_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define X64(FUNC) \
 INLINE void \
@@ -114,6 +129,21 @@ malloc_debug(char *file, int32 line, int64 size) {
     if (!RUNNING_ON_VALGRIND) {
         memset64(p, MEM_MALLOCED_UNINITIALIZED, size);
     }
+
+    {
+        DebugAllocInfo info;
+        info.size = size;
+        info.file = file;
+        info.line = line;
+
+        pthread_mutex_lock(&allocations_mutex);
+        if (allocations == NULL) {
+            allocations = hash_create_alloc_map(1024, "DebugAllocations");
+        }
+        hash_insert_alloc_map(allocations, &p, info);
+        pthread_mutex_unlock(&allocations_mutex);
+    }
+
     return p;
 }
 
@@ -147,6 +177,7 @@ static void *
 realloc_debug(char *file, int32 line,
               void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size;
+    void *p;
     (void)old_capacity;
 
     if (obj_size <= 0) {
@@ -168,7 +199,25 @@ realloc_debug(char *file, int32 line,
     }
 
     new_size = new_capacity*obj_size;
-    return xrealloc(old, new_size);
+    p = xrealloc(old, new_size);
+
+    {
+        DebugAllocInfo info;
+        info.size = new_size;
+        info.file = file;
+        info.line = line;
+
+        pthread_mutex_lock(&allocations_mutex);
+        if (allocations) {
+            if (old != NULL) {
+                hash_remove_alloc_map(allocations, &old);
+            }
+            hash_insert_alloc_map(allocations, &p, info);
+        }
+        pthread_mutex_unlock(&allocations_mutex);
+    }
+
+    return p;
 }
 
 static void
@@ -179,6 +228,26 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
                    (llong)size);
         fatal(EXIT_FAILURE);
     }
+
+    if (pointer != NULL) {
+        pthread_mutex_lock(&allocations_mutex);
+        if (allocations) {
+            DebugAllocInfo info;
+            if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
+                if (info.size != size) {
+                    error_impl(file, line, 
+                               "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
+                               pointer, (llong)info.size, (llong)size);
+                    error_impl(info.file, info.line, "Memory was allocated here.\n");
+                }
+                hash_remove_alloc_map(allocations, &pointer);
+            } else {
+                error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
+            }
+        }
+        pthread_mutex_unlock(&allocations_mutex);
+    }
+
     if (DEBUGGING_MEMORY && pointer && size) {
         error_impl(file, line,
                    "Freeing %p of size %lld\n", pointer, (llong)size);
@@ -298,7 +367,7 @@ xmmap_commit(int64 *size) {
     return p;
 }
 static void
-xmunmap(void *p, size_t size) {
+xmunmap(void *p, int64 size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
         free2(p, (int64)size);
