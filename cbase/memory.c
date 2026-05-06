@@ -43,6 +43,7 @@ typedef struct DebugAllocInfo {
 #define HASH_VALUE_TYPE DebugAllocInfo
 #define HASH_TYPE alloc_map
 #define HASH_PADDING_TYPE2 uint32
+#define HASH_PADDING_TYPE uint32
 #include "hash.c"
 
 static struct Hash_alloc_map *allocations = NULL;
