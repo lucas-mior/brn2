@@ -222,6 +222,18 @@ realloc_debug(char *file, int32 line,
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
         }
         if (old != NULL) {
+            DebugAllocInfo old_info;
+            if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
+                error_impl(file, line, "Reallocating invalid pointer %p.\n", old);
+                fatal(EXIT_FAILURE);
+            }
+            if (old_info.size != old_size) {
+                error_impl(file, line, "Reallocation old size does not match size"
+                           " allocated on %s:%d: %lld != %lld\n",
+                           old_info.file, old_info.line,
+                           (llong)old_info.size, (llong)old_size);
+                fatal(EXIT_FAILURE);
+            }
             hash_remove_alloc_map(allocations, &old);
         }
         hash_insert_alloc_map(allocations, &p, info);
@@ -268,8 +280,6 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
     }
 
     if (DEBUGGING_MEMORY && pointer && size) {
-        error_impl(file, line,
-                   "Freeing %p of size %lld\n", pointer, (llong)size);
         if (!RUNNING_ON_VALGRIND) {
             memset64(pointer, MEM_FREED, size);
         }
