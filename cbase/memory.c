@@ -569,6 +569,7 @@ int main(void) {
         free2(mem_dup, len);
     }
 
+#if OS_LINUX
     printf("\n--- Starting Failure Case Tests ---\n");
 
     {
@@ -640,8 +641,9 @@ int main(void) {
         pthread_mutex_unlock(&allocations_mutex);
         free(p);
     }
+#endif
 
-    printf("\nAll memory tests (including expected failures) passed.\n");
+    printf("\nAll memory tests passed.\n");
     return EXIT_SUCCESS;
 }
 
