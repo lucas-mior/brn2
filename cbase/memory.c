@@ -121,27 +121,31 @@ check_overflow_memory(void) {
     if (allocations) {
         for (uint32 i = 0; i < allocations->capacity; i += 1) {
             Bucket_alloc_map *bucket = &allocations->array[i];
+            uchar *p;
+            int64 size;
 
-            if (bucket->slot_state == HASH_SLOT_USED) {
-                uchar *p = (uchar *)bucket->key;
-                int64 size = bucket->value.size;
+            if (bucket->slot_state != HASH_SLOT_USED) {
+                continue;
+            }
 
-                if (bucket->value.reallocated == -1) {
-                    for (int64 j = 0; j < size; j += 1) {
-                        if (p[j] != 0xCD) {
-                            error_impl(bucket->value.file, bucket->value.line,
-                                       "Use after free detected in pointer %p (size %lld).\n",
-                                       (void *)p, (llong)size);
-                            fatal(EXIT_FAILURE);
-                        }
-                    }
-                } else {
-                    if (p[size] != 0xDC) {
+            p = (uchar *)bucket->key;
+            size = bucket->value.size;
+
+            if (bucket->value.reallocated == -1) {
+                for (int64 j = 0; j < size; j += 1) {
+                    if (p[j] != 0xCD) {
                         error_impl(bucket->value.file, bucket->value.line,
-                                   "Memory overflow detected in pointer %p (size %lld).\n",
+                                   "Use after free detected in pointer %p (size %lld).\n",
                                    (void *)p, (llong)size);
                         fatal(EXIT_FAILURE);
                     }
+                }
+            } else {
+                if (p[size] != 0xDC) {
+                    error_impl(bucket->value.file, bucket->value.line,
+                               "Memory overflow detected in pointer %p (size %lld).\n",
+                               (void *)p, (llong)size);
+                    fatal(EXIT_FAILURE);
                 }
             }
         }
