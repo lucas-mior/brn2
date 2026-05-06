@@ -1876,18 +1876,20 @@ main(int argc, char **argv) {
             "./",              "..",          "./",        "a/",
         };
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
+            int32 path_len0 = strlen32(paths[i]);
             char *path = xstrdup(paths[i]);
             char *base = bases[i];
             int32 path_len = strlen32(path);
             ASSERT_EQUAL(basename2(path, &path_len, NULL), base);
-            free2(path, path_len + 1);
+            free2(path, path_len0 + 1);
         }
         for (int64 i = 0; i < LENGTH(paths); i += 1) {
             char *copy = xstrdup(paths[i]);
             int len = strlen32(copy);
+            int len0 = strlen32(copy);
             normalize(copy, &len);
             ASSERT_EQUAL(copy, normalized[i]);
-            free2(copy, len + 1);
+            free2(copy, len0 + 1);
         }
 
         for (int64 i = 0; i < LENGTH(paths); i += 1) {

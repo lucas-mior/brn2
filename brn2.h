@@ -90,7 +90,7 @@ typedef struct FileList {
     uint32 *indexes;
     int64 indexes_size;
     int32 length;
-    uint32 unused;
+    int32 capacity;
     FileName **files;
 } FileList;
 
