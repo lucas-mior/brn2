@@ -466,7 +466,7 @@ test_expected_fail_handler(int sig) {
 
 int main(void) {
     struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
+    memset(&sa, 0, SIZEOF(sa));
     sa.sa_handler = test_expected_fail_handler;
     sigemptyset(&sa.sa_mask);
 
@@ -497,25 +497,25 @@ int main(void) {
         int64 count = 100;
         int64 grow = 200;
         int64 shrink = 50;
-        int64 *arr = malloc2(count * sizeof(int64));
+        int64 *arr = malloc2(count*SIZEOF(int64));
 
         for (int32 i = 0; i < count; i += 1) {
             arr[i] = (int64)i;
         }
 
-        arr = realloc2(arr, count, grow, sizeof(int64));
+        arr = realloc2(arr, count, grow, SIZEOF(int64));
         for (int32 i = 0; i < count; i += 1) {
             ASSERT(arr[i] == (int64)i);
         }
         printf("realloc2 (grow) preserved data.\n");
 
-        arr = realloc2(arr, grow, shrink, sizeof(int64));
+        arr = realloc2(arr, grow, shrink, SIZEOF(int64));
         for (int32 i = 0; i < shrink; i += 1) {
             ASSERT(arr[i] == (int64)i);
         }
         printf("realloc2 (shrink) successful.\n");
 
-        free2(arr, shrink * sizeof(int64));
+        free2(arr, shrink*SIZEOF(int64));
     }
 
     {
@@ -573,7 +573,7 @@ int main(void) {
         int64 *arr = malloc2(count*SIZEOF(int64));
         ASSERT_EXPECTED_FATAL({
             // Realloc with wrong old size
-            realloc2(arr, count + 5, 20, sizeof(int64));
+            realloc2(arr, count + 5, 20, SIZEOF(int64));
         });
         pthread_mutex_unlock(&allocations_mutex);
         free2(arr, count*SIZEOF(int64));
