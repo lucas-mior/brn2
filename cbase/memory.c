@@ -220,13 +220,6 @@ realloc_debug(char *file, int32 line,
 
     old_size = old_capacity*obj_size;
     new_size = new_capacity*obj_size;
-    if (DEBUGGING_MEMORY) {
-        error_impl(file, line,
-                   "Reallocating %p: %lld to %lld objects of size %lld ("
-                   "old_size = %lld, new_size = %lld).\n",
-                   old, (llong)old_capacity, (llong)new_capacity, (llong)obj_size,
-                   (llong)old_size, (llong)new_size);
-    }
 
     {
         DebugAllocInfo info;
