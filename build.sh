@@ -63,7 +63,7 @@ LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
 
-if [ "$target" = "test" ] && [ -z "$CC" ]; then
+if [ "$target" = "test" ] && [ -z "$CC" ] && command tcc; then
     CC=tcc
 else
     CC="${CC:-cc}"
