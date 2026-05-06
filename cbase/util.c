@@ -893,7 +893,7 @@ void
 fatal(int status) {
     if (DEBUGGING) {
         (void)status;
-        TRAP();
+        raise(SIGILL);
     } else {
         exit(status);
     }
