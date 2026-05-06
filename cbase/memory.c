@@ -177,6 +177,7 @@ realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
 static void *
 realloc_debug(char *file, int32 line,
               void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
+    int64 old_size;
     int64 new_size;
     void *p;
     (void)old_capacity;
@@ -193,13 +194,17 @@ realloc_debug(char *file, int32 line,
                    __func__, (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
+
+    old_size = old_capacity*obj_size;
+    new_size = new_capacity*obj_size;
     if (DEBUGGING_MEMORY) {
         error_impl(file, line,
-                   "Reallocating %p: %lld to %lld objects of size %lld.\n",
-                   old, (llong)old_capacity, (llong)new_capacity, (llong)obj_size);
+                   "Reallocating %p: %lld to %lld objects of size %lld ("
+                   "old_size = %lld, new_size = %lld).\n",
+                   old, (llong)old_capacity, (llong)new_capacity, (llong)obj_size,
+                   (llong)old_size, (llong)new_size);
     }
 
-    new_size = new_capacity*obj_size;
     p = xrealloc(old, new_size);
 
     {
@@ -240,10 +245,12 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
                                "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
                                pointer, (llong)info.size, (llong)size);
                     error_impl(info.file, info.line, "Memory was allocated here.\n");
+                    fatal(EXIT_FAILURE);
                 }
                 hash_remove_alloc_map(allocations, &pointer);
             } else {
                 error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
+                fatal(EXIT_FAILURE);
             }
         }
         pthread_mutex_unlock(&allocations_mutex);

@@ -103,6 +103,7 @@ brn2_list_from_args(FileList *list, int argc, char **argv) {
     }
 
     list->files = malloc2(argc*SIZEOF(*(list->files)));
+    list->capacity = argc;
 
     for (int i = 0; i < argc; i += 1) {
         char *name = argv[i];
@@ -200,6 +201,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
     }
 
     list->files = malloc2(number_files*SIZEOF(*(list->files)));
+    list->capacity = number_files;
 
     for (int i = 0; i < number_files; i += 1) {
         FileName **file_pointer = &(list->files[length]);
@@ -210,7 +212,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
 
         if (brn2_is_invalid_name(name)) {
             if (DEBUGGING) {
-                free2(directory_list[i], sizeof(*directory_list));
+                free(directory_list[i]);
             }
             continue;
         }
@@ -238,13 +240,14 @@ brn2_list_from_dir(FileList *list, char *directory) {
             memcpy64(file->name, name, file->length + 1);
         }
 
-        if (DEBUGGING) {
-            free2(directory_list[i], sizeof(*directory_list));
-        }
+        free(directory_list[i]);
         length += 1;
     }
-    free2(directory_list, sizeof(*directory_list));
+    free(directory_list);
+    list->files = realloc2(list->files,
+                           number_files, length, SIZEOF(*list->files));
     list->length = length;
+    list->capacity = length;
     return;
 }
 
@@ -313,6 +316,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             fatal(EXIT_FAILURE);
         }
         list->files = malloc2(capacity*SIZEOF(*(list->files)));
+        list->capacity = capacity;
     }
 
     {
@@ -372,6 +376,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     list->files = realloc2(list->files,
                            capacity, length, SIZEOF(*(list->files)));
     list->length = length;
+    list->capacity = length;
     munmap(map, (size_t)map_size);
 
     if (ftruncate(fd, map_size - padding) < 0) {
@@ -408,6 +413,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     }
 
     list->files = malloc2(capacity*SIZEOF(*(list->files)));
+    list->capacity = capacity;
 
     errno = 0;
     while (fgets(buffer, sizeof(buffer), lines)) {
@@ -459,6 +465,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     }
     list->files = realloc2(list->files,
                            capacity, length, SIZEOF(*(list->files)));
+    list->capacity = length;
     list->length = length;
     return;
 }
@@ -483,7 +490,7 @@ brn2_free_list(FileList *list) {
             ASSERT(arenas_pop(list->arenas, nthreads, file));
         }
     }
-    free2(list->files, list->length*SIZEOF(*(list->files)));
+    free2(list->files, list->capacity*SIZEOF(*(list->files)));
     arenas_reset(list->arenas, nthreads);
     return;
 }
@@ -1391,8 +1398,9 @@ main(void) {
         brn2_normalize_names(old, NULL);
         brn2_sort(old);
 
-        new->files = malloc2((int64)old->length * SIZEOF(*(new->files)));
+        new->files = malloc2((int64)old->length*SIZEOF(*(new->files)));
         new->length = old->length;
+        new->capacity = old->length;
         for (int32 i = 0; i < new->length; i += 1) {
             FileName **file_pointer = &(new->files[i]);
             FileName *file;
