@@ -63,7 +63,12 @@ LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
 
-CC="${CC:-cc}"
+if [ "$target" = "test" ] && [ -z "$CC" ]; then
+    CC=tcc
+else
+    CC="${CC:-cc}"
+fi
+
 if echo "$OS" | grep -q "Linux"; then
     if echo "$OS" | grep -q "GNU"; then
         GNUSOURCE="-D_GNU_SOURCE"
