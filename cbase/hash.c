@@ -103,6 +103,9 @@ typedef struct Bucket {
     HASH_KEY_TYPE *key;
     int32 key_len;
 #endif
+#if defined(HASH_PADDING_TYPE2)
+    HASH_PADDING_TYPE2 padding;
+#endif
 #if defined(HASH_VALUE_TYPE)
     HASH_VALUE_TYPE value;
 #endif
