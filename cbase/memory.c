@@ -39,7 +39,7 @@ typedef struct DebugAllocInfo {
     int64 size;
     char *file;
     int32 line;
-    int32 padding;
+    int32 is_freed;
 } DebugAllocInfo;
 
 #define HASH_KEY_TYPE void *
@@ -118,11 +118,24 @@ check_overflow_memory(void) {
                 uchar *p = (uchar *)bucket->key;
                 int64 size = bucket->value.size;
 
-                if (p[size] != 0xDC) {
-                    error_impl(bucket->value.file, bucket->value.line,
-                               "Memory overflow detected in pointer %p (size %lld).\n",
-                               (void *)p, (llong)size);
-                    fatal(EXIT_FAILURE);
+                if (bucket->value.is_freed) {
+                    if (!RUNNING_ON_VALGRIND) {
+                        for (int64 j = 0; j < size; j += 1) {
+                            if (p[j] != 0xCD) {
+                                error_impl(bucket->value.file, bucket->value.line,
+                                           "Use after free detected in pointer %p (size %lld).\n",
+                                           (void *)p, (llong)size);
+                                fatal(EXIT_FAILURE);
+                            }
+                        }
+                    }
+                } else {
+                    if (p[size] != 0xDC) {
+                        error_impl(bucket->value.file, bucket->value.line,
+                                   "Memory overflow detected in pointer %p (size %lld).\n",
+                                   (void *)p, (llong)size);
+                        fatal(EXIT_FAILURE);
+                    }
                 }
             }
         }
@@ -162,6 +175,7 @@ malloc_debug(char *file, int32 line, int64 size) {
         info.size = size;
         info.file = file;
         info.line = line;
+        info.is_freed = 0;
 
         pthread_mutex_lock(&allocations_mutex);
         if (allocations == NULL) {
@@ -226,6 +240,7 @@ realloc_debug(char *file, int32 line,
         info.size = new_size;
         info.file = file;
         info.line = line;
+        info.is_freed = 0;
 
         pthread_mutex_lock(&allocations_mutex);
 
@@ -239,6 +254,10 @@ realloc_debug(char *file, int32 line,
             DebugAllocInfo old_info;
             if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
                 error_impl(file, line, "Reallocating invalid pointer %p.\n", old);
+                fatal(EXIT_FAILURE);
+            }
+            if (old_info.is_freed) {
+                error_impl(file, line, "Reallocating freed pointer %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
@@ -289,6 +308,10 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
             fatal(EXIT_FAILURE);
         }
         if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
+            if (info.is_freed) {
+                error_impl(file, line, "Error: double free of pointer %p.\n", pointer);
+                fatal(EXIT_FAILURE);
+            }
             if (info.size != size) {
                 error_impl(file, line, 
                            "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
@@ -304,7 +327,13 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
                 fatal(EXIT_FAILURE);
             }
 
+            info.is_freed = 1;
             hash_remove_alloc_map(allocations, &pointer);
+            hash_insert_alloc_map(allocations, &pointer, info);
+            
+            if (!RUNNING_ON_VALGRIND) {
+                memset64(pointer, 0xCD, size);
+            }
         } else {
             error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
             fatal(EXIT_FAILURE);
@@ -313,12 +342,6 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
         pthread_mutex_unlock(&allocations_mutex);
     }
 
-    if (DEBUGGING_MEMORY && pointer && size) {
-        if (!RUNNING_ON_VALGRIND) {
-            memset64(pointer, 0xDC, size);
-        }
-    }
-    free(pointer);
     return;
 }
 
@@ -640,6 +663,17 @@ int main(void) {
         });
         pthread_mutex_unlock(&allocations_mutex);
         free(p);
+    }
+
+    {
+        int64 size = 32;
+        uchar *p = malloc2(size);
+        free2(p, size);
+        ASSERT_EXPECTED_FATAL({
+            p[0] = 0xAA; // Use after free
+            check_overflow_memory();
+        });
+        pthread_mutex_unlock(&allocations_mutex);
     }
 #endif
 
