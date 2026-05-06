@@ -191,6 +191,7 @@ xrealloc(void *old, int64 new_size) {
 INLINE void *
 realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size = new_capacity*obj_size;
+    (void)old_capacity;
 
     return xrealloc(old, new_size);
 }
