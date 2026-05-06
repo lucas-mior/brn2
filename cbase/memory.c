@@ -445,7 +445,7 @@ xstrdup(char *string) {
 static sigjmp_buf test_jump_env;
 static bool caught_expected_fail = false;
 
-static void
+static void __attribute((noreturn))
 test_expected_fail_handler(int sig) {
     (void)sig;
     caught_expected_fail = true;
@@ -520,6 +520,7 @@ int main(void) {
 
     {
         char *original = "Comprehensive memory test string";
+        char *mem_dup;
         char *dup = xstrdup(original);
         int64 len = strlen32(original) + 1;
 
@@ -527,7 +528,7 @@ int main(void) {
         ASSERT(strcmp(dup, original) == 0);
         printf("xstrdup successful.\n");
 
-        char *mem_dup = xmemdup(dup, len);
+        mem_dup = xmemdup(dup, len);
         ASSERT(mem_dup != dup);
         ASSERT(memcmp(mem_dup, dup, (size_t)len) == 0);
         printf("xmemdup successful.\n");
@@ -569,13 +570,13 @@ int main(void) {
 
     {
         int64 count = 10;
-        int64 *arr = malloc2(count * sizeof(int64));
+        int64 *arr = malloc2(count*SIZEOF(int64));
         ASSERT_EXPECTED_FATAL({
             // Realloc with wrong old size
             realloc2(arr, count + 5, 20, sizeof(int64));
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free2(arr, count * sizeof(int64));
+        free2(arr, count*SIZEOF(int64));
     }
 
     printf("\nAll memory tests (including expected failures) passed.\n");
