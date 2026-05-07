@@ -25,6 +25,8 @@ static int64 memory_page_size = 0;
 #define DEBUGGING_MEMORY 1
 #endif
 
+#define MEMORY_CHECK_USE_AFTER_FREE 0
+
 #if !defined(DEBUGGING_MEMORY)
 #define DEBUGGING_MEMORY DEBUGGING
 #endif
@@ -40,10 +42,10 @@ typedef struct DebugAllocInfo {
     char *file;
     int32 line;
     int32 reallocated; /* -1 : freed
-                          0  : malloced once
-                          1  : realloced once
-                          2  : realloced twice
-                          and so on */
+                        *  0 : malloced once
+                        *  1 : realloced once
+                        *  2 : realloced twice
+                        * and so on */
 } DebugAllocInfo;
 
 #define HASH_KEY_TYPE void *
@@ -112,7 +114,7 @@ xmalloc(int64 size) {
 }
 
 static void
-check_overflow_memory(void) {
+memory_check(void) {
     if (RUNNING_ON_VALGRIND) {
         return;
     }
@@ -131,7 +133,8 @@ check_overflow_memory(void) {
             p = (uchar *)bucket->key;
             size = bucket->value.size;
 
-            if (bucket->value.reallocated == -1) {
+            if (MEMORY_CHECK_USE_AFTER_FREE
+                    && (bucket->value.reallocated == -1)) {
                 for (int64 j = 0; j < size; j += 1) {
                     if (p[j] != 0xCD) {
                         error_impl(bucket->value.file, bucket->value.line,
@@ -308,6 +311,8 @@ realloc_debug(char *file, int32 line,
 
 static void
 free_debug(char *file, int32 line, void *pointer, int64 size) {
+    DebugAllocInfo info;
+
     if (RUNNING_ON_VALGRIND) {
         free(pointer);
         return;
@@ -320,48 +325,54 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
         fatal(EXIT_FAILURE);
     }
 
-    if (pointer) {
-        DebugAllocInfo info;
-        uchar *ptr;
-        pthread_mutex_lock(&allocations_mutex);
-
-        if (allocations == NULL) {
-            error_impl(file, line,
-                       "Called free without having called malloc or realloc.\n");
-            fatal(EXIT_FAILURE);
-        }
-        if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
-            if (info.reallocated == -1) {
-                error_impl(file, line, "Error: double free of pointer %p.\n", pointer);
-                fatal(EXIT_FAILURE);
-            }
-            if (info.size != size) {
-                error_impl(file, line, 
-                           "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
-                           pointer, (llong)info.size, (llong)size);
-                error_impl(info.file, info.line, "Memory was allocated here.\n");
-                fatal(EXIT_FAILURE);
-            }
-            
-            ptr = (uchar *)pointer;
-            if (ptr[size] != 0xDC) {
-                error_impl(info.file, info.line,
-                           "Memory overflow detected during free of %p.\n", pointer);
-                fatal(EXIT_FAILURE);
-            }
-
-            info.reallocated = -1;
-            hash_remove_alloc_map(allocations, &pointer);
-            hash_insert_alloc_map(allocations, &pointer, info);
-            
-            memset64(pointer, 0xCD, size);
-        } else {
-            error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
-            fatal(EXIT_FAILURE);
-        }
-
-        pthread_mutex_unlock(&allocations_mutex);
+    if (pointer == NULL) {
+        return;
     }
+
+    pthread_mutex_lock(&allocations_mutex);
+
+    if (allocations == NULL) {
+        error_impl(file, line,
+                   "Called free without having called malloc or realloc.\n");
+        fatal(EXIT_FAILURE);
+    }
+    if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
+        uchar *ptr;
+
+        if (info.reallocated == -1) {
+            error_impl(file, line, "Error: double free of pointer %p.\n", pointer);
+            fatal(EXIT_FAILURE);
+        }
+        if (info.size != size) {
+            error_impl(file, line, 
+                       "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
+                       pointer, (llong)info.size, (llong)size);
+            error_impl(info.file, info.line, "Memory was allocated here.\n");
+            fatal(EXIT_FAILURE);
+        }
+        
+        ptr = (uchar *)pointer;
+        if (ptr[size] != 0xDC) {
+            error_impl(info.file, info.line,
+                       "Memory overflow detected during free of %p.\n", pointer);
+            fatal(EXIT_FAILURE);
+        }
+
+        info.file = file;
+        info.line = line;
+        info.reallocated = -1;
+        hash_remove_alloc_map(allocations, &pointer);
+        hash_insert_alloc_map(allocations, &pointer, info);
+        
+        if (MEMORY_CHECK_USE_AFTER_FREE) {
+            memset64(pointer, 0xCD, size);
+        }
+    } else {
+        error_impl(file, line, "Error: freeing untracked pointer %p.\n", pointer);
+        fatal(EXIT_FAILURE);
+    }
+
+    pthread_mutex_unlock(&allocations_mutex);
 
     return;
 }
@@ -562,7 +573,7 @@ int main(void) {
             }
             printf("Memory correctly initialized with debug byte.\n");
         }
-        check_overflow_memory();
+        memory_check();
         free2(p, size);
         printf("free2(256) successful.\n");
     }
@@ -577,14 +588,14 @@ int main(void) {
             arr[i] = (int64)i;
         }
 
-        check_overflow_memory();
+        memory_check();
         arr = realloc2(arr, count, grow, SIZEOF(int64));
         for (int32 i = 0; i < count; i += 1) {
             ASSERT(arr[i] == (int64)i);
         }
         printf("realloc2 (grow) preserved data.\n");
 
-        check_overflow_memory();
+        memory_check();
         arr = realloc2(arr, grow, shrink, SIZEOF(int64));
         for (int32 i = 0; i < shrink; i += 1) {
             ASSERT(arr[i] == (int64)i);
@@ -669,7 +680,7 @@ int main(void) {
         uchar *p = malloc2(size);
         ASSERT_EXPECTED_FATAL({
             p[size] = 0x00; // Corrupt canary
-            check_overflow_memory();
+            memory_check();
         });
         pthread_mutex_unlock(&allocations_mutex);
         free(p); 
@@ -692,7 +703,7 @@ int main(void) {
         free2(p, size);
         ASSERT_EXPECTED_FATAL({
             p[0] = 0xAA; // Use after free
-            check_overflow_memory();
+            memory_check();
         });
         pthread_mutex_unlock(&allocations_mutex);
     }
