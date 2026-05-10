@@ -25,12 +25,12 @@ cd "$dir" || exit
 program=$(basename "$(readlink -f "$(dirname "$0")")")
 script=$(basename "$0")
 
-. ./targets
+targets="$(sort ./targets)"
 target="${1:-build}"
 
 if ! grep -q "$target" ./targets; then
     echo "usage: $script <targets>"
-    cat targets
+    cat ./targets
     exit 1
 fi
 
@@ -377,15 +377,19 @@ esac
 
 trace_off
 if [ "$target" = "test_all" ]; then
-    printf '%s\n' "$targets" | while IFS= read -r target; do
-        echo "$target" | grep -Eq "^(# |$)" && continue
-        if echo "$target" | grep "cross"; then
-            $0 $target
+    while IFS= read -r t <&3; do
+        echo "t=$t"
+
+        echo "$t" | grep -Eq "^(# |$)" && continue
+
+        if echo "$t" | grep -q "cross"; then
+            $0 $t
             continue
         fi
-        for compiler in gcc tcc clang "zig cc" ; do
+
+        for compiler in gcc tcc clang "zig cc"; do
             printf "\nCC=${RED}${compiler}${RES}\n"
-            CC=$compiler $0 $target || exit 3
+            CC="$compiler" $0 "$t" || exit 3
         done
-    done
+    done 3< ./targets
 fi
