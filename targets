@@ -1,5 +1,5 @@
 targets='
-fast_feedback
+# fast_feedback
 test
 build
 release
