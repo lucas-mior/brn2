@@ -1,4 +1,3 @@
-targets='
 # fast_feedback
 # test
 # build
@@ -39,4 +38,3 @@ cross x86_64-freebsd-none
 cross x86_64-netbsd-none
 cross x86-freebsd-none
 cross x86-netbsd-none
-'
