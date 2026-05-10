@@ -23,6 +23,7 @@ static int64 memory_page_size = 0;
 
 #if TESTING_memory
 #define DEBUGGING_MEMORY 1
+#define MEMORY_CHECK_USE_AFTER_FREE 1
 #endif
 
 #if !defined(MEMORY_CHECK_USE_AFTER_FREE)
@@ -311,6 +312,82 @@ realloc_debug(char *file, int32 line,
     return p;
 }
 
+static void *
+realloc_flex_debug(char *file, int32 line,
+                   void *old, int64 struct_size,
+                   int64 old_capacity, int64 new_capacity, int64 obj_size) {
+    void *p;
+    int64 total_size = struct_size + new_capacity*obj_size;
+    int64 old_size = struct_size + old_capacity*obj_size;
+
+    if (RUNNING_ON_VALGRIND) {
+        return realloc(old, (size_t)total_size);
+    }
+
+    if (new_capacity <= 0) {
+        error_impl(file, line,
+                   "Error in %s: invalid object size = %lld.\n",
+                   __func__, (llong)new_capacity);
+        fatal(EXIT_FAILURE);
+    }
+
+    {
+        DebugAllocInfo info;
+        uchar *ptr;
+
+        info.size = total_size;
+        info.file = file;
+        info.line = line;
+        info.reallocated = 0;
+
+        pthread_mutex_lock(&allocations_mutex);
+
+        if ((old != NULL) && (allocations == NULL)) {
+            error_impl(file, line, "Reallocating invalid pointer %p.", old);
+            fatal(EXIT_FAILURE);
+        } else if (allocations == NULL) {
+            allocations = hash_create_alloc_map(1024, "DebugAllocations");
+        }
+        if (old != NULL) {
+            DebugAllocInfo old_info;
+            if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
+                error_impl(file, line, "Reallocating invalid pointer %p.\n", old);
+                fatal(EXIT_FAILURE);
+            }
+            if (old_info.reallocated == -1) {
+                error_impl(file, line, "Reallocating freed pointer %p.\n", old);
+                fatal(EXIT_FAILURE);
+            }
+            if (old_info.size != old_size) {
+                error_impl(file, line,
+                           "Reallocation old size does not match size"
+                           " allocated on %s:%d: %lld != %lld\n",
+                           old_info.file, old_info.line,
+                           (llong)old_info.size, (llong)old_size);
+                fatal(EXIT_FAILURE);
+            }
+            if (((uchar *)old)[old_size] != 0xDC) {
+                error_impl(old_info.file, old_info.line,
+                           "Memory overflow detected before realloc in %p.\n", old);
+                fatal(EXIT_FAILURE);
+            }
+
+            info.reallocated = old_info.reallocated + 1;
+            hash_remove_alloc_map(allocations, &old);
+        }
+
+        p = xrealloc(old, total_size + 1);
+        ptr = (uchar *)p;
+        ptr[total_size] = 0xDC;
+
+        hash_insert_alloc_map(allocations, &p, info);
+
+        pthread_mutex_unlock(&allocations_mutex);
+    }
+
+    return p;
+}
+
 static void
 free_debug(char *file, int32 line, void *pointer, int64 size) {
     DebugAllocInfo info;
@@ -349,7 +426,9 @@ free_debug(char *file, int32 line, void *pointer, int64 size) {
             error_impl(file, line, 
                        "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
                        pointer, (llong)info.size, (llong)size);
-            error_impl(info.file, info.line, "Memory was allocated here.\n");
+            error_impl(info.file, info.line,
+                       "Memory was allocated here. (reallocated = %d)\n",
+                       info.reallocated);
             fatal(EXIT_FAILURE);
         }
         
@@ -393,6 +472,8 @@ free2_(void *pointer, int64 size) {
     malloc_debug(__FILE__, __LINE__, size)
 #define realloc2(old, old_capacity, new_capacity, obj_size) \
     realloc_debug(__FILE__, __LINE__, old, old_capacity, new_capacity, obj_size)
+#define realloc_flex(old, old_capacity, new_capacity, obj_size) \
+    realloc_flex_debug(__FILE__, __LINE__, old, SIZEOF(*old), old_capacity, new_capacity, obj_size)
 #define free2(pointer, size) \
     free_debug(__FILE__, __LINE__, pointer, size)
 #else
@@ -400,6 +481,8 @@ free2_(void *pointer, int64 size) {
     xmalloc(size)
 #define realloc2(old, old_capacity, new_capacity, obj_size) \
     realloc4(old, old_capacity, new_capacity, obj_size)
+#define realloc_flex(old, old_capacity, new_capacity, obj_size) \
+    xrealloc(old, SIZEOF(*old) + obj_size*new_capacity)
 #define free2(pointer, size) \
     free2_(pointer, size)
 #endif
@@ -538,6 +621,11 @@ test_expected_fail_handler(int sig) {
     siglongjmp(test_jump_env, 1);
 }
 
+typedef struct TestFlex {
+    int32 count;
+    int64 items[];
+} TestFlex;
+
 #define ASSERT_EXPECTED_FATAL(BLOCK) do { \
     caught_expected_fail = false; \
     if (sigsetjmp(test_jump_env, 1) == 0) { \
@@ -608,6 +696,40 @@ int main(void) {
     }
 
     {
+        int64 count = 5;
+        int64 grow = 10;
+        int64 shrink = 3;
+        int64 initial_size;
+        TestFlex *flex;
+
+        initial_size = SIZEOF(TestFlex) + (count * SIZEOF(int64));
+        flex = malloc2(initial_size);
+        flex->count = (int32)count;
+
+        for (int32 i = 0; i < count; i += 1) {
+            flex->items[i] = (int64)(i * 10);
+        }
+
+        memory_check();
+        flex = realloc_flex(flex, count, grow, SIZEOF(int64));
+        flex->count = (int32)grow;
+        for (int32 i = 0; i < count; i += 1) {
+            ASSERT(flex->items[i] == (int64)(i * 10));
+        }
+        printf("realloc_flex (grow) preserved data.\n");
+
+        memory_check();
+        flex = realloc_flex(flex, grow, shrink, SIZEOF(int64));
+        flex->count = (int32)shrink;
+        for (int32 i = 0; i < shrink; i += 1) {
+            ASSERT(flex->items[i] == (int64)(i * 10));
+        }
+        printf("realloc_flex (shrink) successful.\n");
+
+        free2(flex, SIZEOF(*flex) + (shrink*SIZEOF(int64)));
+    }
+
+    {
         char *original = "Comprehensive memory test string";
         char *mem_dup;
         char *dup = xstrdup(original);
@@ -669,6 +791,22 @@ int main(void) {
     }
 
     {
+        int64 count = 5;
+        int64 initial_size;
+        TestFlex *flex;
+
+        initial_size = SIZEOF(TestFlex) + (count * SIZEOF(int64));
+        flex = malloc2(initial_size);
+
+        ASSERT_EXPECTED_FATAL({
+            // Realloc flex with wrong old capacity
+            realloc_flex(flex, count + 2, 10, SIZEOF(int64));
+        });
+        pthread_mutex_unlock(&allocations_mutex);
+        free2(flex, initial_size);
+    }
+
+    {
         void *invalid_ptr = (void *)0xBAADF00D;
         ASSERT_EXPECTED_FATAL({
             // Realloc with untracked pointer
@@ -711,6 +849,8 @@ int main(void) {
     }
 #endif
 
+    fsync(STDOUT_FILENO);
+    fsync(STDERR_FILENO);
     printf("\nAll memory tests passed.\n");
     return EXIT_SUCCESS;
 }
