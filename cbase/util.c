@@ -246,6 +246,26 @@ begins_with(char *string, char *literal, int32 length) {
         begins_with(LONG, SHORT, LEN)
 #define BEGINS_WITH(...) SELECT_ON_NUM_ARGS(BEGINS_WITH_, __VA_ARGS__)
 
+INLINE char *
+ends_with(char *string, char *literal, int32 length) {
+    int32 string_len = strlen32(string);
+    if (string_len < length) {
+        return NULL;
+    }
+    string += (string_len - length);
+    if (strncmp32(literal, string, length) == 0) {
+        return string;
+    } else {
+        return NULL;
+    }
+}
+
+#define ENDS_WITH_2(LONG, SHORT) \
+        ends_with(LONG, SHORT, strlen32(SHORT))
+#define ENDS_WITH_3(LONG, SHORT, LEN) \
+        ends_with(LONG, SHORT, LEN)
+#define ENDS_WITH(...) SELECT_ON_NUM_ARGS(ENDS_WITH_, __VA_ARGS__)
+
 INLINE int
 memcmp64(void *left, void *right, int64 size) {
     int result;
@@ -1507,6 +1527,28 @@ print_timings(char *file, int32 line, char *func,
 
     printf("\ntime elapsed %s:%d:%s\n", file, line, func);
     printf("%gs = %gus per item.\n\n", total_seconds, micros_per);
+    return;
+}
+
+static void
+catfile(int where, char *file) {
+    int fd;
+    char buffer[4096];
+    int64 r;
+
+    if ((fd = open(file, O_RDONLY)) < 0) {
+        error("Error opening %s: %s.\n", file, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    printf("\n");
+    while ((r = read64(fd, buffer, SIZEOF(buffer))) > 0) {
+        write_all(where, buffer, r);
+    }
+    if (r < 0) {
+        error("Error reading %s: %s.\n", file, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
     return;
 }
 
