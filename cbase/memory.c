@@ -25,7 +25,9 @@ static int64 memory_page_size = 0;
 #define DEBUGGING_MEMORY 1
 #endif
 
+#if !defined(MEMORY_CHECK_USE_AFTER_FREE)
 #define MEMORY_CHECK_USE_AFTER_FREE 0
+#endif
 
 #if !defined(DEBUGGING_MEMORY)
 #define DEBUGGING_MEMORY DEBUGGING

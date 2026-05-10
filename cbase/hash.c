@@ -293,10 +293,10 @@ CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
     Bucket *old_array = map->array;
     uint32 old_capacity = map->capacity;
 
-    if (DEBUGGING) {
-        error("Resizing hash table \"%s\"... %u -> %u\n",
-              map->name, old_capacity, new_capacity);
-    }
+    /* if (DEBUGGING) { */
+    /*     error("Resizing hash table \"%s\"... %u -> %u\n", */
+    /*           map->name, old_capacity, new_capacity); */
+    /* } */
 
     for (uint32 j = 0; j < old_capacity; j += 1) {
         Bucket *iterator = &old_array[j];
@@ -364,9 +364,9 @@ CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
     map->size = new_size;
     map->occupied = map->length;
 
-    if (DEBUGGING) {
-        error("Hash table resized.\n");
-    }
+    /* if (DEBUGGING) { */
+    /*     error("Hash table resized.\n"); */
+    /* } */
 
     return;
 }

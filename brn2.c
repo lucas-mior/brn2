@@ -316,7 +316,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             fatal(EXIT_FAILURE);
         }
         list->files = malloc2(capacity*SIZEOF(*(list->files)));
-        list->capacity = capacity;
+        list->capacity = (int32)capacity;
     }
 
     {

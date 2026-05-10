@@ -36,8 +36,21 @@ static void memmove64(void *dest, void *source, int64 n);
 static ullong here_counter = 0;
 
 #define HERE do { \
+    char HEREbuffer[4096]; \
     fprintf(stderr, "\n===== HERE(%llu): %s:%d (%s)\n", \
                     here_counter++, __FILE__, __LINE__, __func__); \
+    SNPRINTF(HEREbuffer, "%s:%d:%s\n", __FILE__, __LINE__, __func__); \
+    switch (fork()) { \
+    case -1: \
+        error("Error forking: %s.\n", strerror(errno)); \
+        fatal(EXIT_FAILURE); \
+    case 0: \
+        execlp("dunstify", "dunstify", program, HEREbuffer, NULL); \
+        error("Error executing dunstify: %s.\n", strerror(errno)); \
+        exit(EXIT_FAILURE); \
+    default: \
+        break; \
+    } \
 } while (0)
 
 #define NCALLS(INTERVAL) do { \
