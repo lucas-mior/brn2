@@ -377,19 +377,19 @@ esac
 
 trace_off
 if [ "$target" = "test_all" ]; then
-    while IFS= read -r t <&3; do
-        echo "t=$t"
+    while IFS= read -r target <&3; do
+        echo "target=$target"
 
-        echo "$t" | grep -Eq "^(# |$)" && continue
+        echo "$target" | grep -Eq "^(# |$)" && continue
 
-        if echo "$t" | grep -q "cross"; then
-            $0 $t
+        if echo "$target" | grep -q "cross"; then
+            $0 $target
             continue
         fi
 
         for compiler in gcc tcc clang "zig cc"; do
             printf "\nCC=${RED}${compiler}${RES}\n"
-            CC="$compiler" $0 "$t" || exit 3
+            CC="$compiler" $0 "$target" || exit 3
         done
     done 3< ./targets
 fi
