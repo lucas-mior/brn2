@@ -386,7 +386,7 @@ if [ "$target" = "test_all" ]; then
             continue
         fi
         for compiler in gcc tcc clang "zig cc" ; do
-            CC=$compiler $0 $target || exit
+            CC=$compiler $0 $target || exit 3
         done
     done
 fi
