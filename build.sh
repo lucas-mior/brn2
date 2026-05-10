@@ -205,7 +205,6 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-assign-enum"
 fi
 
-
 case "$target" in
 "fast_feedback")
     trace_on
