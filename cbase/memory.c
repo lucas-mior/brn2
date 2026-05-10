@@ -710,6 +710,7 @@ test_expected_fail_handler(int sig) {
 
 typedef struct TestFlex {
     int32 count;
+    int32 padding;
     int64 items[];
 } TestFlex;
 
