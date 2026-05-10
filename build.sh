@@ -162,7 +162,6 @@ case "$target" in
     CC=clang
     CFLAGS="$CFLAGS $GNUSOURCE -Werror"
     ;;
-
 *)
     CFLAGS="$CFLAGS -O2"
     ;;
