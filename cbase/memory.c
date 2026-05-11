@@ -26,6 +26,10 @@ static int64 memory_page_size = 0;
 #define MEMORY_CHECK_USE_AFTER_FREE 1
 #endif
 
+#if !defined(MEMORY_LEAK_EVERYTHING_TO_AVOID_UB)
+#define MEMORY_LEAK_EVERYTHING_TO_AVOID_UB 1
+#endif
+
 #if !defined(MEMORY_CHECK_USE_AFTER_FREE)
 #define MEMORY_CHECK_USE_AFTER_FREE 0
 #endif
@@ -530,6 +534,17 @@ free_debug(char *file, int32 line, char *func,
         
         if (MEMORY_CHECK_USE_AFTER_FREE) {
             memset64(pointer, 0xCD, size);
+        } else {
+            // Note: it is undefined behaviour to use a pointer value whose
+            // object it points to has been freed.
+            // How to avoid memory leaks in this case?
+            // I guess the answer is praying that the compiler
+            // does not explore this UB when optimizations are disabled.
+            // The same is true of realloc, but currently the old pointers are
+            // not kept in the allocations hash table so its not a problem.
+            if (!MEMORY_LEAK_EVERYTHING_TO_AVOID_UB) {
+                free(pointer);
+            }
         }
     } else {
         error_impl(file, line, func,
@@ -553,13 +568,17 @@ free2_(void *pointer, int64 size) {
 
 #if DEBUGGING_MEMORY
 #define malloc2(size) \
-    malloc_debug(__FILE__, __LINE__, (char *)__func__, size)
+    malloc_debug(__FILE__, __LINE__, (char *)__func__, \
+                 size)
 #define realloc2(old, old_capacity, new_capacity, obj_size) \
-    realloc_debug(__FILE__, __LINE__, (char *)__func__, old, old_capacity, new_capacity, obj_size)
+    realloc_debug(__FILE__, __LINE__, (char *)__func__, \
+                  old, old_capacity, new_capacity, obj_size)
 #define realloc_flex(old, old_capacity, new_capacity, obj_size) \
-    realloc_flex_debug(__FILE__, __LINE__, (char *)__func__, old, SIZEOF(*old), old_capacity, new_capacity, obj_size)
+    realloc_flex_debug(__FILE__, __LINE__, (char *)__func__, \
+                       old, SIZEOF(*old), old_capacity, new_capacity, obj_size)
 #define free2(pointer, size) \
-    free_debug(__FILE__, __LINE__, (char *)__func__, pointer, size)
+    free_debug(__FILE__, __LINE__, (char *)__func__, \
+               pointer, size)
 #else
 #define malloc2(size) \
     xmalloc(size)
