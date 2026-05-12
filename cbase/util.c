@@ -1770,6 +1770,8 @@ main(int argc, char **argv) {
 
     ASSERT(BEGINS_WITH(s1, strlen32(s1), "aaaa"));
     ASSERT(BEGINS_WITH(s1, strlen32(s1), "aaaabbbb"));
+    ASSERT(!BEGINS_WITH(s1, strlen32(s1), "bbbb"));
+    ASSERT(!BEGINS_WITH(s1, strlen32(s1), "aaaabbbbb"));
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #if OS_UNIX
