@@ -31,7 +31,7 @@ cross arm-freebsd-eabihf
 cross arm-netbsd-eabi
 cross mips-netbsd-eabi
 cross powerpc64-freebsd-none
-cross powerpc-freebsd-eabihf
+# cross powerpc-freebsd-eabihf
 cross powerpc-netbsd-eabi
 cross riscv64-freebsd-none
 cross x86_64-freebsd-none
