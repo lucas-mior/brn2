@@ -86,9 +86,9 @@ static struct WorkQueue {
 bool stop_threads = false;
 
 INLINE int
-brn2_compare(const void *a, const void *b) {
-    FileName *const *file_a = a;
-    FileName *const *file_b = b;
+brn2_compare(void *a, void *b) {
+    FileName **file_a = a;
+    FileName **file_b = b;
     return strcmp((*file_a)->name, (*file_b)->name);
 }
 

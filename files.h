@@ -23,9 +23,9 @@ typedef struct FileRename {
 } FileRename;
 
 static int
-files_compare(const void *file1, const void *file2) {
-    const FileRename *file11 = file1;
-    const FileRename *file22 = file2;
+files_compare(void *file1, void *file2) {
+    FileRename *file11 = file1;
+    FileRename *file22 = file2;
     return strcmp(file11->original, file22->original);
 }
 
