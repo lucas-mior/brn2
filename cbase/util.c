@@ -269,18 +269,19 @@ ends_with(char *string, int32 string_len, char *literal, int32 length) {
 
 INLINE int
 memcmp64(void *left, void *right, int64 size) {
-    int result;
     if (size == 0) {
         return 0;
     }
     if (DEBUGGING) {
+        if (size < 0) {
+            error("Error: size=%lld < 0.\n", (llong)size);
+        }
         if ((ullong)size >= (ullong)SIZE_MAX) {
             error("Error: Size (%lld) is bigger than SIZEMAX\n", (llong)size);
             fatal(EXIT_FAILURE);
         }
     }
-    result = memcmp(left, right, (size_t)size);
-    return result;
+    return memcmp(left, right, (size_t)size);
 }
 
 #define X64(FUNC, TYPE) \
@@ -365,7 +366,9 @@ X64(fread)
 
 static void
 qsort64(void *base, int64 n, int64 size,
-        int (*compar)(const void *, const void *)) {
+        int (*compar)(void *, void *)) {
+    int (*compar_consted)(const void *, const void *);
+    compar_consted = (int (*)(const void *, const void *))compar;
     if (DEBUGGING) {
         if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
             error("Error: Overflow (%lld*%lld)\n", (llong)size, (llong)n);
@@ -384,7 +387,7 @@ qsort64(void *base, int64 n, int64 size,
             fatal(EXIT_FAILURE);
         }
     }
-    qsort(base, (size_t)n, (size_t)size, compar);
+    qsort(base, (size_t)n, (size_t)size, compar_consted);
     return;
 }
 
