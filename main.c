@@ -289,7 +289,8 @@ main(int argc, char **argv) {
         brn2_sort(old);
     }
 
-    if (!(EDITOR = getenv("EDITOR"))) {
+    GETENV(EDITOR);
+    if (EDITOR == NULL) {
         EDITOR = "vim";
         error("EDITOR variable is not set. Using %s by default.\n", EDITOR);
     }
