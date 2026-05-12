@@ -1359,7 +1359,7 @@ main(void) {
                 number_changed_hard += 1;
             }
         }
-        qsort(files, LENGTH(files), sizeof(*files), files_compare);
+        qsort64(files, LENGTH(files), sizeof(*files), files_compare);
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
@@ -1504,7 +1504,7 @@ main(void) {
         char command_rmdir[128];
         FILE *args;
 
-        qsort(files2, LENGTH(files2), sizeof(*files2), files_compare);
+        qsort64(files2, LENGTH(files2), sizeof(*files2), files_compare);
         error("brn2.c: test 4 ...\n");
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
