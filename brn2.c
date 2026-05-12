@@ -663,9 +663,7 @@ brn2_threads(void *(*function)(Work *),
              int32 length, FileList *old, FileList *new,
              int32 *numbers, uint32 map_size, char *map) {
     static Work slices[BRN2_MAX_THREADS];
-    int32 range;
-
-    range = length / nthreads;
+    int32 range = length / nthreads;
 
     for (int32 i = 0; i < nthreads; i += 1) {
         slices[i].start = i*range;
