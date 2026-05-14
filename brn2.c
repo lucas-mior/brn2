@@ -599,6 +599,7 @@ brn2_threads_work_hashes(Work *arg) {
 void *
 brn2_threads_work_changes(Work *arg) {
     Work *work = arg;
+    int32 local = 0;
 
     for (int32 i = work->start; i < work->end; i += 1) {
         FileName *oldfile = work->old_list->files[i];
@@ -608,8 +609,9 @@ brn2_threads_work_changes(Work *arg) {
                 continue;
             }
         }
-        work->numbers[work->id] += 1;
+        local += 1;
     }
+    work->numbers[work->id] += local;
     return 0;
 }
 

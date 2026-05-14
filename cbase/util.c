@@ -858,7 +858,7 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     if (n >= m) {
         if (RELEASING) {
             m = n + 1;
-            big_buffer = xmalloc(m);
+            big_buffer = xmalloc(m, false);
             n = vsnprintf(big_buffer, (size_t)m, format, args);
             pbuffer = big_buffer;
         } else {
