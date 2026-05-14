@@ -139,8 +139,8 @@ memory_check(void) {
             for (int32 j = 0; j < 8; j += 1) {
                 if (p[-8 + j] != 0xDC) {
                     error_impl(bucket->value.file, bucket->value.line, bucket->value.func,
-                               "Memory underflow detected in pointer %p (size %lld).\n",
-                               (void *)p, (llong)size);
+                               "Memory underflow detected (size %lld).\n",
+                               (llong)size);
                     fatal(EXIT_FAILURE);
                 }
             }
@@ -148,8 +148,8 @@ memory_check(void) {
             for (int32 j = 0; j < 8; j += 1) {
                 if (p[size + j] != 0xDC) {
                     error_impl(bucket->value.file, bucket->value.line, bucket->value.func,
-                               "Memory overflow detected in pointer %p (size %lld).\n",
-                               (void *)p, (llong)size);
+                               "Memory overflow detected (size %lld).\n",
+                               (llong)size);
                     fatal(EXIT_FAILURE);
                 }
             }
@@ -159,8 +159,8 @@ memory_check(void) {
                 for (int64 j = 0; j < size; j += 1) {
                     if (p[j] != 0xCD) {
                         error_impl(bucket->value.file, bucket->value.line, bucket->value.func,
-                                   "Use after free detected in pointer %p (size %lld).\n",
-                                   (void *)p, (llong)size);
+                                   "Use after free detected (size %lld).\n",
+                                   (llong)size);
                         fatal(EXIT_FAILURE);
                     }
                 }
@@ -293,7 +293,7 @@ realloc_debug(char *file, int32 line, char *func,
 
         if ((old != NULL) && (allocations == NULL)) {
             error_impl(file, line, func,
-                       "Reallocating invalid pointer %p.", old);
+                       "Tried to reallocate invalid pointer: %p.", old);
             fatal(EXIT_FAILURE);
         } else if (allocations == NULL) {
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
@@ -302,12 +302,12 @@ realloc_debug(char *file, int32 line, char *func,
             DebugAllocInfo old_info;
             if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
                 error_impl(file, line, func,
-                           "Reallocating invalid pointer %p.\n", old);
+                           "Tried to reallocate invalid pointer: %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
             if (old_info.reallocated == -1) {
                 error_impl(file, line, func,
-                           "Reallocating freed pointer %p.\n", old);
+                           "Tried to reallocate freed pointer: %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
@@ -398,7 +398,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
         if ((old != NULL) && (allocations == NULL)) {
             error_impl(file, line, func,
-                       "Reallocating invalid pointer %p.", old);
+                       "Tried to reallocate invalid pointer: %p.\n", old);
             fatal(EXIT_FAILURE);
         } else if (allocations == NULL) {
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
@@ -407,12 +407,12 @@ realloc_flex_debug(char *file, int32 line, char *func,
             DebugAllocInfo old_info;
             if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
                 error_impl(file, line, func,
-                           "Reallocating invalid pointer %p.\n", old);
+                           "Tried to reallocate invalid pointer: %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
             if (old_info.reallocated == -1) {
                 error_impl(file, line, func,
-                           "Reallocating freed pointer %p.\n", old);
+                           "Tried to reallocate freed pointer: %p.\n", old);
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
