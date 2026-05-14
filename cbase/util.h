@@ -1,7 +1,6 @@
 #if !defined(UTIL_H)
 #define UTIL_H
 
-#include "stdbool.h"
 #include "primitives.h"
 
 static void __attribute__((format(printf, 4, 5)))
