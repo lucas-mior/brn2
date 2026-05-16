@@ -92,6 +92,63 @@ utf8_encode(uint32 u, char *c) {
     return len;
 }
 
+static int32
+random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
+    if (capacity <= 0) {
+        return 0;
+    }
+
+    int32 max_len = capacity - 1;
+    int32 target_len = min_len;
+
+    if (target_len > max_len) {
+        target_len = max_len;
+    }
+
+    int32 range = max_len - target_len + 1;
+
+    if (range > 1) {
+        target_len = target_len + (rand() % range);
+    }
+
+    int32 current_byte_len = 0;
+
+    while (current_byte_len < target_len) {
+        uint32 u = (uint32)(rand() % 0x10FFFF);
+
+        if (u >= 0xD800 && u <= 0xDFFF) {
+            continue;
+        }
+        if (u == 0) {
+            continue;
+        }
+
+        char temp_buf[4];
+        int64 encoded_len = utf8_encode(u, temp_buf);
+
+        if (encoded_len > 0) {
+            if (current_byte_len + encoded_len <= max_len) {
+                for (int32 i = 0; i < encoded_len; i += 1) {
+                    buffer[current_byte_len] = temp_buf[i];
+                    current_byte_len += 1;
+                }
+            } else {
+                if (current_byte_len + 1 <= max_len) {
+                    int32 ascii_val = 32 + (rand() % 95);
+
+                    buffer[current_byte_len] = (char)ascii_val;
+                    current_byte_len += 1;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+    buffer[current_byte_len] = '\0';
+
+    return current_byte_len;
+}
+
 #if TESTING_utf8
 
 #include <stdbool.h>
@@ -164,7 +221,8 @@ main(void) {
             uint32 u;
             int64 len;
 
-            len = utf8_decode(test_str + consumed_total, &u, str_len - consumed_total);
+            len = utf8_decode(test_str + consumed_total, &u,
+                              str_len - consumed_total);
             
             ASSERT_EQUAL(u, expected[expected_idx]);
             
@@ -190,6 +248,33 @@ main(void) {
         u = 0xD800;
         len = utf8_validate(&u, 3);
         ASSERT_EQUAL(u, UTF_INVALID);
+    }
+
+    /* Test random_utf8_string generation and decoding validation */
+    {
+        char test_buf[256];
+        srand(42);
+
+        for (int32 i = 0; i < 50; i += 1) {
+            int32 gen_len = random_utf8_string(test_buf, 256, 10);
+
+            ASSERT(gen_len >= 10);
+            ASSERT(gen_len < 256);
+            ASSERT(test_buf[gen_len] == '\0');
+
+            int64 consumed = 0;
+
+            while (consumed < gen_len) {
+                uint32 u;
+                int64 dec_len = utf8_decode(test_buf + consumed, &u,
+                                            gen_len - consumed);
+                ASSERT(dec_len > 0);
+                ASSERT(u != UTF_INVALID);
+                consumed += dec_len;
+            }
+            ASSERT_EQUAL(consumed, gen_len);
+        }
+        printf("random_utf8_string validation successful.\n");
     }
 
     exit(EXIT_SUCCESS);
