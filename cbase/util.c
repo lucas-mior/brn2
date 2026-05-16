@@ -302,19 +302,19 @@ memcmp64(void *left, void *right, int64 size) {
 
 static int32
 random_ascii_string(char *buffer, int32 capacity, int32 min_len) {
+    int32 max_len = capacity - 1;
+    int32 len = min_len;
+    int32 range;
+
     if (capacity <= 0) {
         return 0;
     }
-
-    int32 max_len = capacity - 1;
-    int32 len = min_len;
 
     if (len > max_len) {
         len = max_len;
     }
 
-    int32 range = max_len - len + 1;
-
+    range = max_len - len + 1;
     if (range > 1) {
         len = len + (rand() % range);
     }
