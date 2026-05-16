@@ -24,10 +24,17 @@ static int64 memory_page_size = 0;
 #if TESTING_memory
 #define DEBUGGING_MEMORY 1
 #define MEMORY_CHECK_USE_AFTER_FREE 1
+#define MEMORY_CHECK_DOUBLE_FREE 1
 #endif
 
 #if !defined(MEMORY_CHECK_USE_AFTER_FREE)
+// this option makes every pointer leak and makes things extremely slow
 #define MEMORY_CHECK_USE_AFTER_FREE 0
+#endif
+
+#if !defined(MEMORY_CHECK_DOUBLE_FREE)
+// this option makes every pointer leak
+#define MEMORY_CHECK_DOUBLE_FREE 1
 #endif
 
 #if !defined(DEBUGGING_MEMORY)
@@ -546,9 +553,11 @@ free_debug(char *file, int32 line, char *func,
         info.reallocated = -1;
         hash_remove_alloc_map(allocations, &pointer_key);
         
-        if (MEMORY_CHECK_USE_AFTER_FREE) {
+        if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
             hash_insert_alloc_map(allocations, &pointer_key, info);
-            memset64(pointer, 0xCD, size);
+            if (MEMORY_CHECK_USE_AFTER_FREE) {
+                 memset64(pointer, 0xCD, size);
+            }
         } else {
             free(ptr - 8);
         }
