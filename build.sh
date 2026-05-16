@@ -125,6 +125,7 @@ case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g3 -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
+    LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
     ;;
 "benchmark")
@@ -147,6 +148,7 @@ case "$target" in
     ;;
 "test")
     CFLAGS="$CFLAGS -g3 $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined -Wno-address"
+    LDFLAGS="$LDFLAGS -lm"
     ;;
 "check")
     CC=gcc
