@@ -60,7 +60,6 @@ CFLAGS="$CFLAGS -Wno-undefined-internal"
 CFLAGS="$CFLAGS -Wno-cast-qual"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wno-c23-compat"
-LDFLAGS="$LDFLAGS -lm"
 
 OS=$(uname -a)
 
