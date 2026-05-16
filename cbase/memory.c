@@ -277,7 +277,7 @@ realloc_debug(char *file, int32 line, char *func,
                    "realloc: invalid object size = %lld.\n", (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
-    if ((ullong)SIZE_MAX / (ullong)obj_size < (ullong)new_capacity) {
+    if (((ullong)SIZE_MAX / (ullong)obj_size) < (ullong)new_capacity) {
         error_impl(file, line, func,
                    "realloc: allocation size (%lld) is bigger than SIZEMAX\n",
                    (llong)obj_size);
