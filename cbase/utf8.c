@@ -114,13 +114,20 @@ random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
     int32 current_byte_len = 0;
 
     while (current_byte_len < target_len) {
-        uint32 u = (uint32)(rand() % 0x10FFFF);
+        int32 choice = rand() % 4;
+        uint32 u = 0;
 
-        if (u >= 0xD800 && u <= 0xDFFF) {
-            continue;
-        }
-        if (u == 0) {
-            continue;
+        if (choice == 0) {
+            u = (uint32)(1 + (rand() % 0x7F));
+        } else if (choice == 1) {
+            u = (uint32)(0x80 + (rand() % (0x7FF - 0x80 + 1)));
+        } else if (choice == 2) {
+            u = (uint32)(0x800 + (rand() % (0xFFFF - 0x800 + 1)));
+            if (u >= 0xD800 && u <= 0xDFFF) {
+                continue;
+            }
+        } else {
+            u = (uint32)(0x10000 + (rand() % (0x10FFFF - 0x10000 + 1)));
         }
 
         char temp_buf[4];
@@ -273,6 +280,7 @@ main(void) {
                 consumed += dec_len;
             }
             ASSERT_EQUAL(consumed, gen_len);
+            PRINTLN(test_buf);
         }
         printf("random_utf8_string validation successful.\n");
     }
