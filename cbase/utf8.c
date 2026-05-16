@@ -16,7 +16,7 @@ static uint32 utf8_min[] = {0, 0, 0x80, 0x800, 0x10000};
 static uint32 utf8_max[] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
 
 static uint32
-utf8_decode_byte(char c, int64 *i) {
+utf8_decode_byte(char c, int32 *i) {
     for (*i = 0; *i < LENGTH(utf8_mask); ++(*i)) {
         if (((uchar)c & utf8_mask[*i]) == utf8_byte[*i]) {
             return (uchar)c & ~utf8_mask[*i];
@@ -27,12 +27,12 @@ utf8_decode_byte(char c, int64 *i) {
 }
 
 static char
-utf8_encode_byte(uint32 u, int64 i) {
+utf8_encode_byte(uint32 u, int32 i) {
     return (char)(utf8_byte[i] | (u & (uint32)~utf8_mask[i]));
 }
 
-static int64
-utf8_validate(uint32 *u, int64 i) {
+static int32
+utf8_validate(uint32 *u, int32 i) {
     if (!BETWEEN(*u, utf8_min[i], utf8_max[i]) || BETWEEN(*u, 0xD800, 0xDFFF)) {
         *u = UTF_INVALID;
     }
@@ -42,10 +42,10 @@ utf8_validate(uint32 *u, int64 i) {
     return i;
 }
 
-static int64
-utf8_decode(char *c, uint32 *u, int64 clen) {
-    int64 len;
-    int64 type;
+static int32
+utf8_decode(char *c, uint32 *u, int32 clen) {
+    int32 len;
+    int32 type;
     uint32 rune_decoded;
 
     *u = UTF_INVALID;
@@ -57,8 +57,8 @@ utf8_decode(char *c, uint32 *u, int64 clen) {
         return 1;
     }
     {
-        int64 j = 1;
-        for (int64 i = 1; i < clen && j < len; i += 1, j += 1) {
+        int32 j = 1;
+        for (int32 i = 1; i < clen && j < len; i += 1, j += 1) {
             rune_decoded = (rune_decoded << 6) | utf8_decode_byte(c[i], &type);
             if (type != 0) {
                 return j;
@@ -74,16 +74,16 @@ utf8_decode(char *c, uint32 *u, int64 clen) {
     return len;
 }
 
-static int64
+static int32
 utf8_encode(uint32 u, char *c) {
-    int64 len;
+    int32 len;
 
     len = utf8_validate(&u, 0);
     if (len > 4) {
         return 0;
     }
 
-    for (int64 i = len - 1; i != 0; --i) {
+    for (int32 i = len - 1; i != 0; --i) {
         c[i] = utf8_encode_byte(u, 0);
         u >>= 6;
     }
@@ -134,7 +134,7 @@ random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
             u = (uint32)(0x10000 + (rand() % (0x10FFFF - 0x10000 + 1)));
         }
 
-        encoded_len = utf8_encode(u, temp_buf);
+        encoded_len = (int32)utf8_encode(u, temp_buf);
 
         if (encoded_len > 0) {
             if (current_byte_len + encoded_len <= max_len) {
@@ -172,7 +172,7 @@ main(void) {
     {
         char buf[5];
         uint32 u;
-        int64 len;
+        int32 len;
 
         /* Test 1-byte ASCII */
         len = utf8_encode(0x41, buf);
@@ -223,13 +223,13 @@ main(void) {
             0x1F1E9, // Regional Indicator D
             0x1F1EA  // Regional Indicator E
         };
-        int64 str_len = (int64)strlen(test_str);
-        int64 consumed_total = 0;
-        int64 expected_idx = 0;
+        int32 str_len = (int32)strlen(test_str);
+        int32 consumed_total = 0;
+        int32 expected_idx = 0;
 
         while (consumed_total < str_len) {
             uint32 u;
-            int64 len;
+            int32 len;
 
             len = utf8_decode(test_str + consumed_total, &u,
                               str_len - consumed_total);
@@ -246,7 +246,7 @@ main(void) {
 
     {
         uint32 u;
-        int64 len;
+        int32 len;
 
         /* Valid character */
         u = 0x41;
@@ -263,20 +263,20 @@ main(void) {
     /* Test random_utf8_string generation and decoding validation */
     {
         char test_buf[256];
-        srand(42);
+        srand(time(NULL));
 
         for (int32 i = 0; i < 50; i += 1) {
             int32 gen_len = random_utf8_string(test_buf, 256, 10);
+            int32 consumed = 0;
 
             ASSERT(gen_len >= 10);
             ASSERT(gen_len < 256);
             ASSERT(test_buf[gen_len] == '\0');
 
-            int64 consumed = 0;
 
             while (consumed < gen_len) {
                 uint32 u;
-                int64 dec_len = utf8_decode(test_buf + consumed, &u,
+                int32 dec_len = utf8_decode(test_buf + consumed, &u,
                                             gen_len - consumed);
                 ASSERT(dec_len > 0);
                 ASSERT(u != UTF_INVALID);
