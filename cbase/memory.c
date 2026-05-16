@@ -122,41 +122,41 @@ memory_check(void) {
     if (allocations) {
         for (uint32 i = 0; i < allocations->capacity; i += 1) {
             Bucket_alloc_map *bucket = &allocations->array[i];
+            DebugAllocInfo info;
             uchar *p;
-            int64 size;
 
             if (bucket->slot_state != HASH_SLOT_USED) {
                 continue;
             }
 
+            info = bucket->value;
             p = (uchar *)bucket->key;
-            size = bucket->value.size;
 
             for (int32 j = 0; j < 8; j += 1) {
                 if (p[-8 + j] != 0xDC) {
-                    error_impl(bucket->value.file, bucket->value.line, bucket->value.func,
+                    error_impl(info.file, info.line, info.func,
                                "Memory underflow detected (size %lld).\n",
-                               (llong)size);
+                               (llong)info.size);
                     fatal(EXIT_FAILURE);
                 }
             }
 
             for (int32 j = 0; j < 8; j += 1) {
-                if (p[size + j] != 0xDC) {
-                    error_impl(bucket->value.file, bucket->value.line, bucket->value.func,
+                if (p[info.size + j] != 0xDC) {
+                    error_impl(info.file, info.line, info.func,
                                "Memory overflow detected (size %lld).\n",
-                               (llong)size);
+                               (llong)info.size);
                     fatal(EXIT_FAILURE);
                 }
             }
 
             if (MEMORY_CHECK_USE_AFTER_FREE
-                    && (bucket->value.reallocated == -1)) {
-                for (int64 j = 0; j < size; j += 1) {
+                    && (info.reallocated == -1)) {
+                for (int64 j = 0; j < info.size; j += 1) {
                     if (p[j] != 0xCD) {
-                        error_impl(bucket->value.file, bucket->value.line, bucket->value.func,
+                        error_impl(info.file, info.line, info.func,
                                    "Use after free detected (size %lld).\n",
-                                   (llong)size);
+                                   (llong)info.size);
                         fatal(EXIT_FAILURE);
                     }
                 }
