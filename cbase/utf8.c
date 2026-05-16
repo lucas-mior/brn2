@@ -268,7 +268,7 @@ main(void) {
         srand((uint)time(NULL));
 
         for (int32 i = 0; i < 50; i += 1) {
-            int32 gen_len = random_utf8_string(test_buf, 256, 10);
+            int32 gen_len = random_utf8_string(test_buf, SIZEOF(test_buf), 10);
             int32 consumed = 0;
 
             ASSERT(gen_len >= 10);
