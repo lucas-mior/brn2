@@ -550,7 +550,7 @@ free_debug(char *file, int32 line, char *func,
         if (MEMORY_CHECK_USE_AFTER_FREE) {
             memset64(pointer, 0xCD, size);
         } else {
-            free(pointer);
+            free(pointer - 8);
         }
     } else {
         error_impl(file, line, func,
