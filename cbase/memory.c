@@ -351,10 +351,33 @@ realloc_debug(char *file, int32 line, char *func,
 
             info.reallocated = old_info.reallocated + 1;
             hash_remove_alloc_map(allocations, &old_key);
+
+            if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
+                base_p = xmalloc(new_size + 16, false);
+                int64 copy_size = old_size;
+                if (new_size < old_size) {
+                    copy_size = new_size;
+                }
+                if (copy_size > 0) {
+                    memcpy64((uchar *)base_p + 8, old, copy_size);
+                }
+                old_info.file = file;
+                old_info.line = line;
+                old_info.func = func;
+                old_info.reallocated = -1;
+                hash_insert_alloc_map(allocations, &old_key, old_info);
+                if (MEMORY_CHECK_USE_AFTER_FREE) {
+                    memset64(old, 0xCD, old_info.size);
+                }
+            } else {
+                old_base = ((uchar *)old - 8);
+                base_p = xrealloc(old_base, new_size + 16);
+            }
+        } else {
+            old_base = NULL;
+            base_p = xrealloc(old_base, new_size + 16);
         }
 
-        old_base = old ? ((uchar *)old - 8) : NULL;
-        base_p = xrealloc(old_base, new_size + 16);
         ptr = (uchar *)base_p;
 
         for (int32 j = 0; j < 8; j += 1) {
@@ -460,10 +483,33 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
             info.reallocated = old_info.reallocated + 1;
             hash_remove_alloc_map(allocations, &old_key);
+
+            if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
+                base_p = xmalloc(total_size + 16, false);
+                int64 copy_size = old_size;
+                if (total_size < old_size) {
+                    copy_size = total_size;
+                }
+                if (copy_size > 0) {
+                    memcpy64((uchar *)base_p + 8, old, copy_size);
+                }
+                old_info.file = file;
+                old_info.line = line;
+                old_info.func = func;
+                old_info.reallocated = -1;
+                hash_insert_alloc_map(allocations, &old_key, old_info);
+                if (MEMORY_CHECK_USE_AFTER_FREE) {
+                    memset64(old, 0xCD, old_info.size);
+                }
+            } else {
+                old_base = ((uchar *)old - 8);
+                base_p = xrealloc(old_base, total_size + 16);
+            }
+        } else {
+            old_base = NULL;
+            base_p = xrealloc(old_base, total_size + 16);
         }
 
-        old_base = old ? ((uchar *)old - 8) : NULL;
-        base_p = xrealloc(old_base, total_size + 16);
         ptr = (uchar *)base_p;
 
         for (int32 j = 0; j < 8; j += 1) {
