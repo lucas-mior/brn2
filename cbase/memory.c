@@ -970,7 +970,37 @@ int main(void) {
         free2(mem_dup, len);
     }
 
+    {
+        int32 iterations = 2500;
+        void **ptrs = malloc2(iterations * SIZEOF(void *));
+
+        printf("\n--- Starting High-Volume Stress Tests ---\n");
+
+        for (int32 i = 0; i < iterations; i += 1) {
+            ptrs[i] = malloc2(8);
+            ((int64 *)ptrs[i])[0] = (int64)i;
+        }
+        memory_check();
+
+        for (int32 i = 0; i < iterations; i += 1) {
+            ptrs[i] = realloc2(ptrs[i], 1, 2, SIZEOF(int64));
+            ASSERT(((int64 *)ptrs[i])[0] == (int64)i);
+            ((int64 *)ptrs[i])[1] = (int64)(i * 2);
+        }
+        memory_check();
+
+        for (int32 i = 0; i < iterations; i += 1) {
+            ASSERT(((int64 *)ptrs[i])[0] == (int64)i);
+            ASSERT(((int64 *)ptrs[i])[1] == (int64)(i * 2));
+            free2(ptrs[i], 2 * SIZEOF(int64));
+        }
+        free2(ptrs, iterations * SIZEOF(void *));
+        printf("High-volume tracking and validation successful.\n");
+    }
+
 #if OS_LINUX
+    // this block has to execute last,
+    // because it leaves garbage still to be detected
     printf("\n--- Starting Failure Case Tests ---\n");
 
     {
