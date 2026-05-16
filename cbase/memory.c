@@ -353,14 +353,16 @@ realloc_debug(char *file, int32 line, char *func,
             hash_remove_alloc_map(allocations, &old_key);
 
             if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
-                base_p = xmalloc(new_size + 16, false);
                 int64 copy_size = old_size;
+                base_p = xmalloc(new_size + 16, false);
+
                 if (new_size < old_size) {
                     copy_size = new_size;
                 }
                 if (copy_size > 0) {
                     memcpy64((uchar *)base_p + 8, old, copy_size);
                 }
+
                 old_info.file = file;
                 old_info.line = line;
                 old_info.func = func;
