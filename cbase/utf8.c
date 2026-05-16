@@ -94,28 +94,32 @@ utf8_encode(uint32 u, char *c) {
 
 static int32
 random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
+    int32 max_len = capacity - 1;
+    int32 target_len = min_len;
+    int32 range;
+    int32 current_byte_len;
+
     if (capacity <= 0) {
         return 0;
     }
-
-    int32 max_len = capacity - 1;
-    int32 target_len = min_len;
 
     if (target_len > max_len) {
         target_len = max_len;
     }
 
-    int32 range = max_len - target_len + 1;
+    range = max_len - target_len + 1;
 
     if (range > 1) {
         target_len = target_len + (rand() % range);
     }
 
-    int32 current_byte_len = 0;
+    current_byte_len = 0;
 
     while (current_byte_len < target_len) {
+        char temp_buf[4];
         int32 choice = rand() % 4;
         uint32 u = 0;
+        int32 encoded_len;
 
         if (choice == 0) {
             u = (uint32)(1 + (rand() % 0x7F));
@@ -130,8 +134,7 @@ random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
             u = (uint32)(0x10000 + (rand() % (0x10FFFF - 0x10000 + 1)));
         }
 
-        char temp_buf[4];
-        int64 encoded_len = utf8_encode(u, temp_buf);
+        encoded_len = utf8_encode(u, temp_buf);
 
         if (encoded_len > 0) {
             if (current_byte_len + encoded_len <= max_len) {
