@@ -136,7 +136,7 @@ random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
             u = (uint32)(0x10000 + (rand() % (0x10FFFF - 0x10000 + 1)));
         }
 
-        encoded_len = (int32)utf8_encode(u, temp_buf);
+        encoded_len = utf8_encode(u, temp_buf);
 
         if (encoded_len > 0) {
             if (current_byte_len + encoded_len <= max_len) {
