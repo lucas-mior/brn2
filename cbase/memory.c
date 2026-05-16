@@ -545,9 +545,9 @@ free_debug(char *file, int32 line, char *func,
         info.func = func;
         info.reallocated = -1;
         hash_remove_alloc_map(allocations, &pointer_key);
-        hash_insert_alloc_map(allocations, &pointer_key, info);
         
         if (MEMORY_CHECK_USE_AFTER_FREE) {
+            hash_insert_alloc_map(allocations, &pointer_key, info);
             memset64(pointer, 0xCD, size);
         } else {
             free(ptr - 8);
