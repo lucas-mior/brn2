@@ -26,10 +26,6 @@ static int64 memory_page_size = 0;
 #define MEMORY_CHECK_USE_AFTER_FREE 1
 #endif
 
-#if !defined(MEMORY_LEAK_EVERYTHING_TO_AVOID_UB)
-#define MEMORY_LEAK_EVERYTHING_TO_AVOID_UB 1
-#endif
-
 #if !defined(MEMORY_CHECK_USE_AFTER_FREE)
 #define MEMORY_CHECK_USE_AFTER_FREE 0
 #endif
@@ -50,7 +46,7 @@ typedef struct DebugAllocInfo {
                         * and so on */
 } DebugAllocInfo;
 
-#define HASH_KEY_TYPE void *
+#define HASH_KEY_TYPE intptr_t
 #define HASH_KEY_FIXED_LEN 1
 #define HASH_VALUE_TYPE DebugAllocInfo
 #define HASH_TYPE alloc_map
@@ -208,6 +204,8 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
 
     {
         DebugAllocInfo info;
+        intptr_t key = (intptr_t)p;
+
         info.size = size;
         info.file = file;
         info.line = line;
@@ -218,7 +216,7 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
         if (allocations == NULL) {
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
         }
-        hash_insert_alloc_map(allocations, &p, info);
+        hash_insert_alloc_map(allocations, &key, info);
         pthread_mutex_unlock(&allocations_mutex);
     }
 
@@ -283,6 +281,8 @@ realloc_debug(char *file, int32 line, char *func,
 
     {
         DebugAllocInfo info;
+        intptr_t p_key;
+
         info.size = new_size;
         info.file = file;
         info.line = line;
@@ -300,7 +300,9 @@ realloc_debug(char *file, int32 line, char *func,
         }
         if (old != NULL) {
             DebugAllocInfo old_info;
-            if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
+            intptr_t old_key = (intptr_t)old;
+
+            if (!hash_lookup_alloc_map(allocations, &old_key, &old_info)) {
                 error_impl(file, line, func,
                            "Tried to reallocate invalid pointer: %p.\n", old);
                 fatal(EXIT_FAILURE);
@@ -341,7 +343,7 @@ realloc_debug(char *file, int32 line, char *func,
             }
 
             info.reallocated = old_info.reallocated + 1;
-            hash_remove_alloc_map(allocations, &old);
+            hash_remove_alloc_map(allocations, &old_key);
         }
 
         old_base = old ? ((uchar *)old - 8) : NULL;
@@ -356,7 +358,8 @@ realloc_debug(char *file, int32 line, char *func,
         }
 
         p = ptr + 8;
-        hash_insert_alloc_map(allocations, &p, info);
+        p_key = (intptr_t)p;
+        hash_insert_alloc_map(allocations, &p_key, info);
 
         pthread_mutex_unlock(&allocations_mutex);
     }
@@ -387,6 +390,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
     {
         DebugAllocInfo info;
+        intptr_t p_key;
 
         info.size = total_size;
         info.file = file;
@@ -405,7 +409,9 @@ realloc_flex_debug(char *file, int32 line, char *func,
         }
         if (old != NULL) {
             DebugAllocInfo old_info;
-            if (!hash_lookup_alloc_map(allocations, &old, &old_info)) {
+            intptr_t old_key = (intptr_t)old;
+
+            if (!hash_lookup_alloc_map(allocations, &old_key, &old_info)) {
                 error_impl(file, line, func,
                            "Tried to reallocate invalid pointer: %p.\n", old);
                 fatal(EXIT_FAILURE);
@@ -446,7 +452,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
             }
 
             info.reallocated = old_info.reallocated + 1;
-            hash_remove_alloc_map(allocations, &old);
+            hash_remove_alloc_map(allocations, &old_key);
         }
 
         old_base = old ? ((uchar *)old - 8) : NULL;
@@ -461,7 +467,8 @@ realloc_flex_debug(char *file, int32 line, char *func,
         }
 
         p = ptr + 8;
-        hash_insert_alloc_map(allocations, &p, info);
+        p_key = (intptr_t)p;
+        hash_insert_alloc_map(allocations, &p_key, info);
 
         pthread_mutex_unlock(&allocations_mutex);
     }
@@ -473,6 +480,7 @@ static void
 free_debug(char *file, int32 line, char *func,
            void *pointer, int64 size) {
     DebugAllocInfo info;
+    intptr_t pointer_key = (intptr_t)pointer;
 
     if (RUNNING_ON_VALGRIND) {
         free(pointer);
@@ -497,7 +505,7 @@ free_debug(char *file, int32 line, char *func,
                    "Called free without having called malloc or realloc.\n");
         fatal(EXIT_FAILURE);
     }
-    if (hash_lookup_alloc_map(allocations, &pointer, &info)) {
+    if (hash_lookup_alloc_map(allocations, &pointer_key, &info)) {
         uchar *ptr;
 
         if (info.reallocated == -1) {
@@ -536,22 +544,13 @@ free_debug(char *file, int32 line, char *func,
         info.line = line;
         info.func = func;
         info.reallocated = -1;
-        hash_remove_alloc_map(allocations, &pointer);
-        hash_insert_alloc_map(allocations, &pointer, info);
+        hash_remove_alloc_map(allocations, &pointer_key);
+        hash_insert_alloc_map(allocations, &pointer_key, info);
         
         if (MEMORY_CHECK_USE_AFTER_FREE) {
             memset64(pointer, 0xCD, size);
         } else {
-            // Note: it is undefined behaviour to use a pointer value whose
-            // object it points to has been freed.
-            // How to avoid memory leaks in this case?
-            // I guess the answer is praying that the compiler
-            // does not explore this UB when optimizations are disabled.
-            // The same is true of realloc, but currently the old pointers are
-            // not kept in the allocations hash table so its not a problem.
-            if (!MEMORY_LEAK_EVERYTHING_TO_AVOID_UB) {
-                free(pointer);
-            }
+            free(pointer);
         }
     } else {
         error_impl(file, line, func,
@@ -747,12 +746,14 @@ typedef struct TestFlex {
     caught_expected_fail = false; \
     if (sigsetjmp(test_jump_env, 1) == 0) { \
         BLOCK; \
-        fprintf(stderr, "Error: Code block at %s:%d did not fail as expected.\n", \
+        fprintf(stderr, \
+                "Error: Code block at %s:%d did not fail as expected.\n", \
                 __FILE__, __LINE__); \
         exit(EXIT_FAILURE); \
     } \
     ASSERT(caught_expected_fail); \
-    printf("Successfully caught expected failure at %s:%d\n", __FILE__, __LINE__); \
+    printf("Successfully caught expected failure at %s:%d\n", \
+           __FILE__, __LINE__); \
 } while (0)
 
 int main(void) {
