@@ -207,7 +207,7 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
         fatal(EXIT_FAILURE);
     }
 
-    base_p = xmalloc(size + 2*MEMORY_PADDING, false);
+    base_p = xmalloc(size + 2 * MEMORY_PADDING, false);
     ptr = (uchar *)base_p;
 
     for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
@@ -852,12 +852,18 @@ typedef struct TestFlex {
     int64 items[];
 } TestFlex;
 
+typedef struct TestString {
+    char *s;
+    int32 len;
+} TestString;
+
 #define ASSERT_EXPECTED_FATAL(BLOCK) do { \
     caught_expected_fail = false; \
     if (sigsetjmp(test_jump_env, 1) == 0) { \
         BLOCK; \
         fprintf(stderr, \
-                "Error: Code block at %s:%d did not fail as expected.\n", \
+                "Error: Code block at %s:%d " \
+                "did not fail as expected.\n", \
                 __FILE__, __LINE__); \
         exit(EXIT_FAILURE); \
     } \
@@ -1002,6 +1008,52 @@ int main(void) {
         }
         free2(ptrs, iterations * SIZEOF(void *));
         printf("High-volume tracking and validation successful.\n");
+    }
+
+    {
+        char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
+        int32 num_strings = 2000;
+        TestString *v_strings;
+
+        printf("Starting High-Volume Variable String Stress Tests.\n");
+        v_strings = malloc2(num_strings*SIZEOF(*v_strings));
+
+        srand(1337);
+        for (int32 i = 0; i < num_strings; i += 1) {
+            int32 v_len = (int32)(8 + (uint32)rand() % 64u);
+
+            v_strings[i].len = v_len;
+            v_strings[i].s = malloc2(v_len + 1);
+
+            for (int32 j = 0; j < v_len; j += 1) {
+                size_t mod_val = SIZEOF(characters) - 1;
+                int32 c_idx = (int32)((uint)rand() % mod_val);
+
+                v_strings[i].s[j] = characters[c_idx];
+            }
+            v_strings[i].s[v_len] = '\0';
+        }
+        memory_check();
+
+        for (int32 i = 0; i < num_strings; i += 1) {
+            int32 old_len = v_strings[i].len;
+            int32 new_len = old_len + 16;
+
+            v_strings[i].s = realloc2(v_strings[i].s, old_len + 1,
+                                      new_len + 1, SIZEOF(char));
+            for (int32 j = old_len; j < new_len; j += 1) {
+                v_strings[i].s[j] = 'A';
+            }
+            v_strings[i].s[new_len] = '\0';
+            v_strings[i].len = new_len;
+        }
+        memory_check();
+
+        for (int32 i = 0; i < num_strings; i += 1) {
+            free2(v_strings[i].s, v_strings[i].len + 1);
+        }
+        free2(v_strings, num_strings * SIZEOF(*v_strings));
+        printf("High-volume variable string tests successful.\n");
     }
 
 #if OS_LINUX
