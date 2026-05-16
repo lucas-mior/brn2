@@ -122,9 +122,11 @@ random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
         int32 encoded_len;
 
         if (choice == 0) {
-            u = (uint32)(1 + (rand() % 0x7F));
+            /* Printable ASCII only: space (0x20) to tilde (0x7E) */
+            u = (uint32)(0x20 + (rand() % (0x7E - 0x20 + 1)));
         } else if (choice == 1) {
-            u = (uint32)(0x80 + (rand() % (0x7FF - 0x80 + 1)));
+            /* Printable 2-byte: Exclude C1 control codes (0x80-0x9F) */
+            u = (uint32)(0xA0 + (rand() % (0x7FF - 0xA0 + 1)));
         } else if (choice == 2) {
             u = (uint32)(0x800 + (rand() % (0xFFFF - 0x800 + 1)));
             if (u >= 0xD800 && u <= 0xDFFF) {
