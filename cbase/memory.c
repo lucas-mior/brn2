@@ -186,12 +186,12 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
 
     if (size <= 0) {
         error_impl(file, line, func,
-                   "Error: invalid size = %lld.\n", (llong)size);
+                   "Invalid allocation size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
     if ((ullong)size >= (ullong)SIZE_MAX) {
         error_impl(file, line, func,
-                   "Error: Number (%lld) is bigger than SIZEMAX\n",
+                   "Allocation size (%lld) is bigger than SIZEMAX\n",
                    (llong)size);
         fatal(EXIT_FAILURE);
     }
@@ -258,7 +258,8 @@ realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
 
 static void *
 realloc_debug(char *file, int32 line, char *func,
-              void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
+              void *old, int64 old_capacity, int64 new_capacity,
+              int64 obj_size) {
     int64 old_size;
     int64 new_size;
     void *p;
@@ -273,12 +274,12 @@ realloc_debug(char *file, int32 line, char *func,
 
     if (obj_size <= 0) {
         error_impl(file, line, func,
-                   "Error: invalid object size = %lld.\n", (llong)obj_size);
+                   "realloc: invalid object size = %lld.\n", (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
     if ((ullong)SIZE_MAX / (ullong)obj_size < (ullong)new_capacity) {
         error_impl(file, line, func,
-                   "Error: Number (%lld) is bigger than SIZEMAX\n",
+                   "realloc: allocation size (%lld) is bigger than SIZEMAX\n",
                    (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
@@ -316,7 +317,7 @@ realloc_debug(char *file, int32 line, char *func,
             }
             if (old_info.reallocated == -1) {
                 error_impl(file, line, func,
-                           "Tried to reallocate freed pointer: %p.\n", old);
+                           "Tried to reallocate freed pointer.\n");
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
@@ -331,7 +332,7 @@ realloc_debug(char *file, int32 line, char *func,
             for (int32 j = 0; j < 8; j += 1) {
                 if (((uchar *)old)[-8 + j] != 0xDC) {
                     error_impl(file, line, func,
-                               "Memory underflow detected before realloc in %p.\n", old);
+                               "Memory underflow detected before realloc.\n");
                     error_impl(old_info.file, old_info.line, old_info.func,
                                "Allocated here (old size = %lld bytes).\n",
                                (llong)old_size);
@@ -341,7 +342,7 @@ realloc_debug(char *file, int32 line, char *func,
             for (int32 j = 0; j < 8; j += 1) {
                 if (((uchar *)old)[old_size + j] != 0xDC) {
                     error_impl(file, line, func,
-                               "Memory overflow detected before realloc in %p.\n", old);
+                               "Memory overflow detected before realloc.\n");
                     error_impl(old_info.file, old_info.line, old_info.func,
                                "Allocated here (old size = %lld bytes).\n",
                                (llong)old_size);
@@ -416,7 +417,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
     if (new_capacity <= 0) {
         error_impl(file, line, func,
-                   "Error: invalid new capacity = %lld.\n", (llong)new_capacity);
+                   "Invalid new capacity = %lld.\n", (llong)new_capacity);
         fatal(EXIT_FAILURE);
     }
 
@@ -450,7 +451,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
             }
             if (old_info.reallocated == -1) {
                 error_impl(file, line, func,
-                           "Tried to reallocate freed pointer: %p.\n", old);
+                           "Tried to reallocate freed pointer.\n");
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
@@ -465,7 +466,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
             for (int32 j = 0; j < 8; j += 1) {
                 if (((uchar *)old)[-8 + j] != 0xDC) {
                     error_impl(file, line, func,
-                               "Memory underflow detected before realloc in %p.\n", old);
+                               "Memory underflow detected before realloc\n");
                     error_impl(old_info.file, old_info.line, old_info.func,
                                "Allocated here (old size = %lld bytes).\n",
                                (llong)old_size);
@@ -475,7 +476,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
             for (int32 j = 0; j < 8; j += 1) {
                 if (((uchar *)old)[old_size + j] != 0xDC) {
                     error_impl(file, line, func,
-                               "Memory overflow detected before realloc in %p.\n", old);
+                               "Memory overflow detected before realloc.\n");
                     error_impl(old_info.file, old_info.line, old_info.func,
                                "Allocated here (old size = %lld bytes).\n",
                                (llong)old_size);
@@ -566,14 +567,13 @@ free_debug(char *file, int32 line, char *func,
         uchar *ptr;
 
         if (info.reallocated == -1) {
-            error_impl(file, line, func,
-                       "Error: double free of pointer %p.\n", pointer);
+            error_impl(file, line, func, "Double free.\n");
             fatal(EXIT_FAILURE);
         }
         if (info.size != size) {
             error_impl(file, line, func,
-                       "Error: size mismatch freeing %p. Expected %lld, got %lld.\n",
-                       pointer, (llong)info.size, (llong)size);
+                       "Allocation size mismatch: Expected %lld, got %lld.\n",
+                       (llong)info.size, (llong)size);
             error_impl(info.file, info.line, info.func,
                        "Memory was allocated here. (reallocated = %d)\n",
                        info.reallocated);
@@ -585,14 +585,14 @@ free_debug(char *file, int32 line, char *func,
         for (int32 j = 0; j < 8; j += 1) {
             if (ptr[-8 + j] != 0xDC) {
                 error_impl(info.file, info.line, info.func,
-                           "Memory underflow detected during free of %p.\n", pointer);
+                           "Memory underflow detected during free.\n");
                 fatal(EXIT_FAILURE);
             }
         }
         for (int32 j = 0; j < 8; j += 1) {
             if (ptr[size + j] != 0xDC) {
                 error_impl(info.file, info.line, info.func,
-                           "Memory overflow detected during free of %p.\n", pointer);
+                           "Memory overflow detected during free.\n");
                 fatal(EXIT_FAILURE);
             }
         }
