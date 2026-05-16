@@ -12,6 +12,7 @@
 #include "base_macros.h"
 #include "primitives.h"
 #include "rapidhash.h"
+#include "util.h"
 
 static int64 memory_page_size = 0;
 
@@ -1011,27 +1012,21 @@ int main(void) {
     }
 
     {
-        char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         int32 num_strings = 2000;
         TestString *v_strings;
 
         printf("Starting High-Volume Variable String Stress Tests.\n");
-        v_strings = malloc2(num_strings*SIZEOF(*v_strings));
+        v_strings = malloc2(num_strings * SIZEOF(*v_strings));
 
         srand(1337);
         for (int32 i = 0; i < num_strings; i += 1) {
-            int32 v_len = (int32)(8 + (uint32)rand() % 64u);
+            char stack_buf[128];
+            int32 v_len = random_ascii_string(stack_buf,
+                                              SIZEOF(stack_buf), 8);
 
             v_strings[i].len = v_len;
             v_strings[i].s = malloc2(v_len + 1);
-
-            for (int32 j = 0; j < v_len; j += 1) {
-                size_t mod_val = SIZEOF(characters) - 1;
-                int32 c_idx = (int32)((uint)rand() % mod_val);
-
-                v_strings[i].s[j] = characters[c_idx];
-            }
-            v_strings[i].s[v_len] = '\0';
+            memcpy64(v_strings[i].s, stack_buf, v_len + 1);
         }
         memory_check();
 
