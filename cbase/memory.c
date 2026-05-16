@@ -15,6 +15,12 @@
 
 static int64 memory_page_size = 0;
 
+#if !defined(ALIGNMENT)
+#define ALIGNMENT 16
+#endif
+
+#define MEMORY_PADDING ((int32)ALIGNMENT)
+
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_memory 1
 #elif !defined(TESTING_memory)
@@ -144,8 +150,8 @@ memory_check(void) {
             info = bucket->value;
             p = (uchar *)bucket->key;
 
-            for (int32 j = 0; j < 8; j += 1) {
-                if (p[-8 + j] != 0xDC) {
+            for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+                if (p[-MEMORY_PADDING + j] != 0xDC) {
                     error_impl(info.file, info.line, info.func,
                                "Memory underflow detected (size %lld).\n",
                                (llong)info.size);
@@ -153,7 +159,7 @@ memory_check(void) {
                 }
             }
 
-            for (int32 j = 0; j < 8; j += 1) {
+            for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
                 if (p[info.size + j] != 0xDC) {
                     error_impl(info.file, info.line, info.func,
                                "Memory overflow detected (size %lld).\n",
@@ -201,17 +207,17 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
         fatal(EXIT_FAILURE);
     }
 
-    base_p = xmalloc(size + 16, false);
+    base_p = xmalloc(size + 2*MEMORY_PADDING, false);
     ptr = (uchar *)base_p;
 
-    for (int32 j = 0; j < 8; j += 1) {
+    for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
         ptr[j] = 0xDC;
     }
-    for (int32 j = 0; j < 8; j += 1) {
-        ptr[8 + size + j] = 0xDC;
+    for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+        ptr[MEMORY_PADDING + size + j] = 0xDC;
     }
 
-    p = ptr + 8;
+    p = ptr + MEMORY_PADDING;
     memset64(p, 0xCD, size);
 
     {
@@ -342,8 +348,8 @@ realloc_debug(char *file, int32 line, char *func,
                 fatal(EXIT_FAILURE);
             }
 
-            for (int32 j = 0; j < 8; j += 1) {
-                if (((uchar *)old)[-8 + j] != 0xDC) {
+            for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+                if (((uchar *)old)[-MEMORY_PADDING + j] != 0xDC) {
                     error_impl(file, line, func,
                                "Memory underflow detected before realloc.\n");
                     error_impl(old_info.file, old_info.line, old_info.func,
@@ -352,7 +358,7 @@ realloc_debug(char *file, int32 line, char *func,
                     fatal(EXIT_FAILURE);
                 }
             }
-            for (int32 j = 0; j < 8; j += 1) {
+            for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
                 if (((uchar *)old)[old_size + j] != 0xDC) {
                     error_impl(file, line, func,
                                "Memory overflow detected before realloc.\n");
@@ -368,13 +374,13 @@ realloc_debug(char *file, int32 line, char *func,
 
             if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
                 int64 copy_size = old_size;
-                base_p = xmalloc(new_size + 16, false);
+                base_p = xmalloc(new_size + 2 * MEMORY_PADDING, false);
 
                 if (new_size < old_size) {
                     copy_size = new_size;
                 }
                 if (copy_size > 0) {
-                    memcpy64((uchar *)base_p + 8, old, copy_size);
+                    memcpy64((uchar *)base_p + MEMORY_PADDING, old, copy_size);
                 }
 
                 old_info.file = file;
@@ -386,24 +392,24 @@ realloc_debug(char *file, int32 line, char *func,
                     memset64(old, 0xCD, old_info.size);
                 }
             } else {
-                old_base = ((uchar *)old - 8);
-                base_p = xrealloc(old_base, new_size + 16);
+                old_base = ((uchar *)old - MEMORY_PADDING);
+                base_p = xrealloc(old_base, new_size + 2 * MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
-            base_p = xrealloc(old_base, new_size + 16);
+            base_p = xrealloc(old_base, new_size + 2 * MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
 
-        for (int32 j = 0; j < 8; j += 1) {
+        for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
             ptr[j] = 0xDC;
         }
-        for (int32 j = 0; j < 8; j += 1) {
-            ptr[8 + new_size + j] = 0xDC;
+        for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+            ptr[MEMORY_PADDING + new_size + j] = 0xDC;
         }
 
-        p = ptr + 8;
+        p = ptr + MEMORY_PADDING;
         p_key = (intptr_t)p;
         hash_insert_alloc_map(allocations, &p_key, info);
 
@@ -504,8 +510,8 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 fatal(EXIT_FAILURE);
             }
 
-            for (int32 j = 0; j < 8; j += 1) {
-                if (((uchar *)old)[-8 + j] != 0xDC) {
+            for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+                if (((uchar *)old)[-MEMORY_PADDING + j] != 0xDC) {
                     error_impl(file, line, func,
                                "Memory underflow detected before realloc\n");
                     error_impl(old_info.file, old_info.line, old_info.func,
@@ -514,7 +520,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
                     fatal(EXIT_FAILURE);
                 }
             }
-            for (int32 j = 0; j < 8; j += 1) {
+            for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
                 if (((uchar *)old)[old_size + j] != 0xDC) {
                     error_impl(file, line, func,
                                "Memory overflow detected before realloc.\n");
@@ -530,13 +536,13 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
             if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
                 int64 copy_size = old_size;
-                base_p = xmalloc(total_size + 16, false);
+                base_p = xmalloc(total_size + 2 * MEMORY_PADDING, false);
 
                 if (total_size < old_size) {
                     copy_size = total_size;
                 }
                 if (copy_size > 0) {
-                    memcpy64((uchar *)base_p + 8, old, copy_size);
+                    memcpy64((uchar *)base_p + MEMORY_PADDING, old, copy_size);
                 }
 
                 old_info.file = file;
@@ -548,24 +554,24 @@ realloc_flex_debug(char *file, int32 line, char *func,
                     memset64(old, 0xCD, old_info.size);
                 }
             } else {
-                old_base = ((uchar *)old - 8);
-                base_p = xrealloc(old_base, total_size + 16);
+                old_base = ((uchar *)old - MEMORY_PADDING);
+                base_p = xrealloc(old_base, total_size + 2 * MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
-            base_p = xrealloc(old_base, total_size + 16);
+            base_p = xrealloc(old_base, total_size + 2 * MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
 
-        for (int32 j = 0; j < 8; j += 1) {
+        for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
             ptr[j] = 0xDC;
         }
-        for (int32 j = 0; j < 8; j += 1) {
-            ptr[8 + total_size + j] = 0xDC;
+        for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+            ptr[MEMORY_PADDING + total_size + j] = 0xDC;
         }
 
-        p = ptr + 8;
+        p = ptr + MEMORY_PADDING;
         p_key = (intptr_t)p;
         hash_insert_alloc_map(allocations, &p_key, info);
 
@@ -626,14 +632,14 @@ free_debug(char *file, int32 line, char *func,
 
         ptr = (uchar *)pointer;
 
-        for (int32 j = 0; j < 8; j += 1) {
-            if (ptr[-8 + j] != 0xDC) {
+        for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
+            if (ptr[-MEMORY_PADDING + j] != 0xDC) {
                 error_impl(info.file, info.line, info.func,
                            "Memory underflow detected during free.\n");
                 fatal(EXIT_FAILURE);
             }
         }
-        for (int32 j = 0; j < 8; j += 1) {
+        for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
             if (ptr[size + j] != 0xDC) {
                 error_impl(info.file, info.line, info.func,
                            "Memory overflow detected during free.\n");
@@ -653,7 +659,7 @@ free_debug(char *file, int32 line, char *func,
                  memset64(pointer, 0xCD, size);
             }
         } else {
-            free(ptr - 8);
+            free(ptr - MEMORY_PADDING);
         }
     } else {
         error_impl(file, line, func,
@@ -977,7 +983,7 @@ int main(void) {
         printf("\n--- Starting High-Volume Stress Tests ---\n");
 
         for (int32 i = 0; i < iterations; i += 1) {
-            ptrs[i] = malloc2(8);
+            ptrs[i] = malloc2(1 * SIZEOF(int64));
             ((int64 *)ptrs[i])[0] = (int64)i;
         }
         memory_check();
@@ -1018,7 +1024,7 @@ int main(void) {
             free2(p, size + 1); // Incorrect size
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8); 
+        free(p - MEMORY_PADDING); 
     }
 
     {
@@ -1029,7 +1035,7 @@ int main(void) {
             free2(p, size); // Double free
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8);
+        free(p - MEMORY_PADDING);
     }
 
     {
@@ -1072,11 +1078,11 @@ int main(void) {
         int64 size = 64;
         uchar *p = malloc2(size);
         ASSERT_EXPECTED_FATAL({
-            p[-8] = 0x00; // Corrupt underflow canary
+            p[-MEMORY_PADDING] = 0x00; // Corrupt underflow canary
             memory_check();
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8); 
+        free(p - MEMORY_PADDING); 
     }
 
     {
@@ -1087,7 +1093,7 @@ int main(void) {
             memory_check();
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8); 
+        free(p - MEMORY_PADDING); 
     }
 
     {
@@ -1098,7 +1104,7 @@ int main(void) {
             free2(p, size);
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8);
+        free(p - MEMORY_PADDING);
     }
 
     {
@@ -1109,7 +1115,7 @@ int main(void) {
             free2(p, size);
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8);
+        free(p - MEMORY_PADDING);
     }
 
     {
@@ -1121,7 +1127,7 @@ int main(void) {
             memory_check();
         });
         pthread_mutex_unlock(&allocations_mutex);
-        free(p - 8);
+        free(p - MEMORY_PADDING);
     }
 #endif
 
