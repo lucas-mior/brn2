@@ -27,6 +27,11 @@ static int64 memory_page_size = 0;
 #define MEMORY_CHECK_DOUBLE_FREE 1
 #endif
 
+#if MEMORY_CHECK_USE_AFTER_FREE
+// we are already leaking, might as well check double free
+#define MEMORY_CHECK_DOUBLE_FREE 1
+#endif
+
 #if !defined(MEMORY_CHECK_USE_AFTER_FREE)
 // this option makes every pointer leak and makes things extremely slow
 #define MEMORY_CHECK_USE_AFTER_FREE 0
@@ -316,8 +321,11 @@ realloc_debug(char *file, int32 line, char *func,
                 fatal(EXIT_FAILURE);
             }
             if (old_info.reallocated == -1) {
+                ASSERT(MEMORY_CHECK_DOUBLE_FREE);
                 error_impl(file, line, func,
                            "Tried to reallocate freed pointer.\n");
+                error_impl(old_info.file, old_info.line, old_info.func,
+                           "Freed here.\n");
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
@@ -450,8 +458,11 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 fatal(EXIT_FAILURE);
             }
             if (old_info.reallocated == -1) {
+                ASSERT(MEMORY_CHECK_DOUBLE_FREE);
                 error_impl(file, line, func,
                            "Tried to reallocate freed pointer.\n");
+                error_impl(old_info.file, old_info.line, old_info.func,
+                           "Freed here.\n");
                 fatal(EXIT_FAILURE);
             }
             if (old_info.size != old_size) {
@@ -568,6 +579,8 @@ free_debug(char *file, int32 line, char *func,
 
         if (info.reallocated == -1) {
             error_impl(file, line, func, "Double free.\n");
+            error_impl(info.file, info.line, info.func,
+                       "Freed here.\n");
             fatal(EXIT_FAILURE);
         }
         if (info.size != size) {
