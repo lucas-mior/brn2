@@ -263,7 +263,7 @@ main(void) {
     /* Test random_utf8_string generation and decoding validation */
     {
         char test_buf[256];
-        srand(time(NULL));
+        srand((uint)time(NULL));
 
         for (int32 i = 0; i < 50; i += 1) {
             int32 gen_len = random_utf8_string(test_buf, 256, 10);
@@ -272,7 +272,6 @@ main(void) {
             ASSERT(gen_len >= 10);
             ASSERT(gen_len < 256);
             ASSERT(test_buf[gen_len] == '\0');
-
 
             while (consumed < gen_len) {
                 uint32 u;
