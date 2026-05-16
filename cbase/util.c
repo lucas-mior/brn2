@@ -1541,6 +1541,14 @@ print_timings(char *file, int32 line, char *func,
     return;
 }
 
+static double
+timediff(struct timespec t0, struct timespec t1) {
+    double t0_f = (double)t0.tv_sec + (double)t0.tv_nsec*1e-9;
+    double t1_f = (double)t1.tv_sec + (double)t1.tv_nsec*1e-9;
+    double t = t1_f - t0_f;
+    return t;
+}
+
 static void
 catfile(int where, char *file) {
     int fd;
