@@ -282,10 +282,15 @@ realloc_debug(char *file, int32 line, char *func,
                    "realloc: invalid object size = %lld.\n", (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
+    if (new_capacity < 0) {
+        error_impl(file, line, func,
+                   "realloc: invalid capacity = %lld.\n", (llong)new_capacity);
+        fatal(EXIT_FAILURE);
+    }
     if (((ullong)SIZE_MAX / (ullong)obj_size) < (ullong)new_capacity) {
         error_impl(file, line, func,
-                   "realloc: allocation size (%lld) is bigger than SIZEMAX\n",
-                   (llong)obj_size);
+                   "realloc: allocation size (%lld) is bigger than "
+                   "SIZEMAX\n", (llong)new_capacity);
         fatal(EXIT_FAILURE);
     }
 
@@ -416,18 +421,43 @@ realloc_flex_debug(char *file, int32 line, char *func,
     void *old_base;
     void *base_p;
     uchar *ptr;
-    int64 total_size = struct_size + new_capacity*obj_size;
-    int64 old_size = struct_size + old_capacity*obj_size;
+    int64 total_size;
+    int64 old_size;
+    (void)old_capacity;
 
     if (RUNNING_ON_VALGRIND) {
-        return realloc(old, (size_t)total_size);
+        return realloc(old, (size_t)(struct_size + new_capacity*obj_size));
     }
 
+    if (obj_size <= 0) {
+        error_impl(file, line, func,
+                   "Invalid object size = %lld.\n", (llong)obj_size);
+        fatal(EXIT_FAILURE);
+    }
+    if (struct_size < 0) {
+        error_impl(file, line, func,
+                   "Invalid struct size = %lld.\n", (llong)struct_size);
+        fatal(EXIT_FAILURE);
+    }
     if (new_capacity <= 0) {
         error_impl(file, line, func,
                    "Invalid new capacity = %lld.\n", (llong)new_capacity);
         fatal(EXIT_FAILURE);
     }
+    if (((ullong)SIZE_MAX / (ullong)obj_size) < (ullong)new_capacity) {
+        error_impl(file, line, func,
+                   "Flex allocation capacity overflows SIZEMAX.\n");
+        fatal(EXIT_FAILURE);
+    }
+    if (((ullong)SIZE_MAX - (ullong)struct_size) <
+        (ullong)(new_capacity * obj_size)) {
+        error_impl(file, line, func,
+                   "Total flex allocation size overflows SIZEMAX.\n");
+        fatal(EXIT_FAILURE);
+    }
+
+    total_size = struct_size + new_capacity*obj_size;
+    old_size = struct_size + old_capacity*obj_size;
 
     {
         DebugAllocInfo info;
@@ -657,7 +687,8 @@ free2_(void *pointer, int64 size) {
                   old, old_capacity, new_capacity, obj_size)
 #define realloc_flex(old, old_capacity, new_capacity, obj_size) \
     realloc_flex_debug(__FILE__, __LINE__, (char *)__func__, \
-                       old, SIZEOF(*old), old_capacity, new_capacity, obj_size)
+                       old, SIZEOF(*old), old_capacity, \
+                       new_capacity, obj_size)
 #define free2(pointer, size) \
     free_debug(__FILE__, __LINE__, (char *)__func__, \
                pointer, size)
