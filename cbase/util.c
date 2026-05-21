@@ -1572,10 +1572,10 @@ print_timings(char *file, int32 line, char *func,
 
 static double
 timediff(struct timespec t0, struct timespec t1) {
-    double t0_f = (double)t0.tv_sec + (double)t0.tv_nsec*1e-9;
-    double t1_f = (double)t1.tv_sec + (double)t1.tv_nsec*1e-9;
-    double t = t1_f - t0_f;
-    return t;
+    llong sec = t1.tv_sec - t0.tv_sec;
+    llong nsec = t1.tv_nsec - t0.tv_nsec;
+    double diff = (double)sec + (double)nsec*1e-9;
+    return diff;
 }
 
 static void
@@ -1704,6 +1704,29 @@ timezone_init(void) {
         VAR = copy; \
     } \
 } while (0)
+
+static bool
+parse_option(char **parsed, char *arg, char *option_name) {
+    char name_equal[256];
+    char *tmp;
+    int32 length = SNPRINTF(name_equal, "%s=", option_name);
+    int32 arg_len;
+    if (arg == NULL) {
+        return false;
+    }
+    arg_len = strlen32(arg);
+
+    if ((tmp = BEGINS_WITH(arg, arg_len, name_equal, length))) {
+        *parsed = tmp;
+        return true;
+    }
+    return false;
+}
+
+#define PARSE_OPTION(arg, name) \
+    if (parse_option(&name, arg, #name)) { \
+        continue; \
+    }
 
 #if 0 == TESTING_util
 static inline void
