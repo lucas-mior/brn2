@@ -378,7 +378,7 @@ rapidhash_withSeed(const void *key, size_t len, uint64 seed) {
     return rapidhash_internal(key, len, seed, rapid_secret);
 }
 
-uint64
+static uint64
 rapidhash(const void *key, size_t len) {
     return rapidhash_withSeed(key, len, rapid_seed);
 }
