@@ -1,7 +1,10 @@
 #if !defined(UTF8_C)
 #define UTF8_C
 
-#include "util.c"
+#include <stdlib.h>
+#include "util.h"
+#include "base_macros.h"
+
 #define UTF_INVALID 0xFFFD
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)

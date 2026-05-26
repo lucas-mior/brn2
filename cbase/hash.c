@@ -174,6 +174,7 @@ CAT(hash_print_, HASH_TYPE)(struct Map *map, bool verbose) {
     for (uint32 i = 0; i < map->capacity; i += 1) {
         Bucket *iterator = &map->array[i];
         int8 slot_state = map->slot_states[i];
+        (void)iterator;
 
         if (!verbose) {
             if (slot_state == HASH_SLOT_FREE) {
