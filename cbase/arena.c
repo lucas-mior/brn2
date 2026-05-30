@@ -226,7 +226,7 @@ arena_free(Arena *arena) {
     }
     return true;
 }
-#else
+#elif OS_WINDOWS
 void *
 arena_allocate(int64 *size) {
     void *p;
@@ -257,6 +257,20 @@ arena_free(Arena *arena) {
         error2("Error in VirtualFree(%p): %lu.\n", arena, GetLastError());
         return false;
     }
+    return true;
+}
+#else
+void *
+arena_allocate(int64 *size) {
+    void *p;
+    *size = ALIGN_POWER_OF_2(*size, 4096);
+    p = malloc(*size);
+    assert(p);
+    return p;
+}
+bool
+arena_free(Arena *arena) {
+    free(arena);
     return true;
 }
 #endif

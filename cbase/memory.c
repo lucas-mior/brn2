@@ -196,7 +196,7 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
         return malloc((size_t)size);
     }
 
-    if (size <= 0) {
+    if (size < 0) {
         error_impl(file, line, func,
                    "Invalid allocation size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
@@ -764,7 +764,7 @@ xmunmap(void *p, int64 size) {
     }
     return;
 }
-#else
+#elif OS_WINDOWS
 static void *
 xmmap_commit(int64 *size) {
     void *p;
@@ -803,6 +803,20 @@ xmunmap(void *p, int64 size) {
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
         fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
     }
+    return;
+}
+#else
+static void *
+xmmap_commit(int64 *size) {
+    void *p;
+
+    p = malloc2(*size);
+    memset64(p, 0, *size);
+    return p;
+}
+static void
+xmunmap(void *p, int64 size) {
+    free2(p, (int64)size);
     return;
 }
 #endif
