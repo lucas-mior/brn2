@@ -28,6 +28,7 @@
 #define GREEN(S)  "\x1b[32m"   S RESET
 #define YELLOW(S) "\x1b[33m"   S RESET
 #define BLUE(S)   "\x1b[1;34m" S RESET
+#define CYAN(S)   "\x1b[01;35m" S RESET
 
 #define SIZEKB(X) ((int64)(X)*1024ll)
 #define SIZEMB(X) ((int64)(X)*1024ll*1024ll)
@@ -103,6 +104,12 @@ _Generic((SIZE), \
 
 #if !defined(MAP_POPULATE)
 #define MAP_POPULATE 0
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
 #endif
 
 #endif /* BASE_MACROS_H */

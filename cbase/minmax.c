@@ -270,6 +270,8 @@ minmax_functions_sink(void) {
 
 #if TESTING_minmax
 
+#include "util.c"
+
 int
 main(void) {
     {

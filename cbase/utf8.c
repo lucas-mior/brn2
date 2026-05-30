@@ -171,6 +171,7 @@ random_utf8_string(char *buffer, int32 capacity, int32 min_len) {
 #include <string.h>
 
 #include "assert.c"
+#include "util.c"
 
 int
 main(void) {

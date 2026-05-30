@@ -54,7 +54,7 @@ static char *program;
 #else
 static char *program = __FILE__;
 #endif
-static int32 program_len __attribute__((unused));
+static int32 program_len UNUSED;
 
 static bool timezone_initialized = false;
 static time_t timezone_offset = 0;
@@ -804,7 +804,7 @@ util_command(int argc, char **argv) {
 
     return (int)exit_code;
 }
-#else
+#elif OS_UNIX
 static int
 util_command(int argc, char **argv) {
     pid_t child;
@@ -1737,7 +1737,6 @@ util_functions_sink(void) {
     (void)util_segv_handler;
     (void)util_nthreads;
     (void)util_filename_from;
-    (void)util_command;
     (void)util_string_int32;
     (void)util_die_notify;
 #if OS_UNIX
@@ -2141,6 +2140,7 @@ main(int argc, char **argv) {
 
     (void)fwrite64;
     (void)fread64;
+    (void)program_len;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     PRINT_TIMINGS(1, t0, t1);
