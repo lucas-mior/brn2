@@ -379,8 +379,8 @@ rapidhash_withSeed(const void *key, size_t len, uint64 seed) {
 }
 
 static uint64
-rapidhash(const void *key, size_t len) {
-    return rapidhash_withSeed(key, len, rapid_seed);
+rapidhash(const void *key, int64 len) {
+    return rapidhash_withSeed(key, (size_t)len, rapid_seed);
 }
 
 typedef struct {

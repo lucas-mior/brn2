@@ -98,6 +98,38 @@ assert_file_contains(char *file, int32 line, char *func,
     return;
 }
 
+#define ASSERT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
+    assert_contains(__FILE__, __LINE__, (char *)__func__, \
+                    HAYSTACK, HAYSTACK_LEN, NEEDLE)
+
+#define ASSERT_NOT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
+    assert_not_contains(__FILE__, __LINE__, (char *)__func__, \
+                        HAYSTACK, HAYSTACK_LEN, NEEDLE)
+
+static void
+assert_contains(char *file, int32 line, char *func,
+                char *haystack, int32 haystack_len, char *needle) {
+    int32 needle_len = strlen32(needle);
+    if (memmem64(haystack, haystack_len, needle, needle_len) == NULL) {
+        error_impl(file, line, func,
+                   "expected to find substring:\n%s\n--- in ---\n%s",
+                   needle, haystack);
+        fatal(EXIT_FAILURE);
+    }
+}
+
+static void
+assert_not_contains(char *file, int32 line, char *func,
+                    char *haystack, int32 haystack_len, char *needle) {
+    int32 needle_len = strlen32(needle);
+    if (memmem64(haystack, haystack_len, needle, needle_len)) {
+        error_impl(file, line, func,
+                   "did not expect to find substring:\n%s\n--- in ---\n%s",
+                   needle, haystack);
+        fatal(EXIT_FAILURE);
+    }
+}
+
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                            \
 static void                                                              \
 a_strings_##MODE(char *file, uint line, char *func,                      \
@@ -871,13 +903,13 @@ main(void) {
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
-    }{
+    } {
         int a = 1;
         uint b = 1;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
-    }{
+    } {
         int a = 1;
         uint b = 2;
         ASSERT_NOT_EQUAL(a, b);
@@ -885,7 +917,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         long a = -1;
         ulong b = 0;
         ASSERT_NOT_EQUAL(a, b);
@@ -893,7 +925,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         long a = MINOF(a);
         ulong b = MAXOF(b);
         ASSERT_NOT_EQUAL(a, b);
@@ -901,7 +933,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         ulong a = MINOF(a);
         long b = MAXOF(b);
         ASSERT_NOT_EQUAL(a, b);
@@ -909,13 +941,13 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         char *a = "aaa";
         char *b = "aaa";
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         char *a = "aaa";
         char *b = "bbb";
         ASSERT_NOT_EQUAL(a, b);
@@ -923,48 +955,48 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         long a = -1;
         ASSERT_NOT_EQUAL(a, 0);
         ASSERT_LESS(a, 0);
         ASSERT_LESS_EQUAL(a, 0);
         ASSERT_MORE(0, a);
         ASSERT_MORE_EQUAL(0, a);
-    }{
+    } {
         double a = 0.123;
         ASSERT_NOT_EQUAL(a, 0.123000001);
         ASSERT_LESS(a, 0.123000001);
         ASSERT_LESS_EQUAL(a, 0.123000001);
         ASSERT_MORE(0.123000001, a);
         ASSERT_MORE_EQUAL(0.123000001, a);
-    }{
+    } {
         double a = 0.1 + 0.2;
         double b = 0.3;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_NOT_EQUAL(a, b + 1.0e-9);
-    }{
+    } {
         float a = 0.1f + 0.2f;
         double b = 0.3;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
-    }{
+    } {
         long a = -1;
         double b = -1;
         ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
-    }{
+    } {
         double a = -1;
         long b = -1;
         ASSERT_EQUAL(a, b);
         ASSERT_EQUAL(b, b);
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
-    }{
+    } {
         double a = -1;
         double b = 0;
         ASSERT_NOT_EQUAL(a, b);
@@ -972,7 +1004,7 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         float a = -1;
         double b = 1;
         ASSERT_NOT_EQUAL(a, b);
@@ -980,17 +1012,17 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         llong a = 1;
         ldouble b = 1;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         void *a = NULL;
         void *b = &a;
         ASSERT_NOT_EQUAL(a, b);
-    }{
+    } {
         int array[100];
         void *a = &array[0];
         void *b = &array[1];
@@ -999,13 +1031,13 @@ main(void) {
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE(b, a);
         ASSERT_MORE_EQUAL(b, a);
-    }{
+    } {
         bool a = true;
         bool b = true;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(a, b);
-    }{
+    } {
         bool a = true;
         bool b = false;
         ASSERT_NOT_EQUAL(a, b);
@@ -1013,7 +1045,7 @@ main(void) {
         ASSERT_MORE_EQUAL(a, b);
         ASSERT_LESS(b, a);
         ASSERT_LESS_EQUAL(b, a);
-    }{
+    } {
         // uncomment to trigger linking error
         /* double x = 0.1; */
         /* void *a = NULL; */
@@ -1021,7 +1053,7 @@ main(void) {
         /* ASSERT_MORE_EQUAL(a, x); */
         /* bool b = true; */
         /* ASSERT_EQUAL(b, 1); */
-    }{
+    } {
         int a = 0;
         double b = 1;
         float array[10] = {0};
