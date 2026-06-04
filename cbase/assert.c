@@ -18,16 +18,16 @@
 #if !defined(ASSERT_C)
 #define ASSERT_C
 
+#include <assert.h>
+#include <errno.h>
+#include <float.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <limits.h>
-#include <float.h>
-#include <assert.h>
-#include <signal.h>
 
 #if !defined(error2)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
@@ -154,11 +154,11 @@ a_strings_##MODE(char *file, uint line, char *func,                      \
     return;                                                              \
 }
 
-GENERATE_ASSERT_STRINGS(less,        <)
+GENERATE_ASSERT_STRINGS(less, <)
 GENERATE_ASSERT_STRINGS(less_equal, <=)
-GENERATE_ASSERT_STRINGS(equal,      ==)
-GENERATE_ASSERT_STRINGS(not_equal,  !=)
-GENERATE_ASSERT_STRINGS(more,        >)
+GENERATE_ASSERT_STRINGS(equal, ==)
+GENERATE_ASSERT_STRINGS(not_equal, !=)
+GENERATE_ASSERT_STRINGS(more, >)
 GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
@@ -177,11 +177,11 @@ a_pointers_##MODE(char *file, uint line, char *func,                     \
     return;                                                              \
 }
 
-GENERATE_ASSERT_POINTERS(less,        <)
+GENERATE_ASSERT_POINTERS(less, <)
 GENERATE_ASSERT_POINTERS(less_equal, <=)
-GENERATE_ASSERT_POINTERS(equal,      ==)
-GENERATE_ASSERT_POINTERS(not_equal,  !=)
-GENERATE_ASSERT_POINTERS(more,        >)
+GENERATE_ASSERT_POINTERS(equal, ==)
+GENERATE_ASSERT_POINTERS(not_equal, !=)
+GENERATE_ASSERT_POINTERS(more, >)
 GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
@@ -202,17 +202,17 @@ a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
     return;                                                                 \
 }
 
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", ==, equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", ==, equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", ==, equal)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", !=, not_equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", !=, not_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", !=, not_equal)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", <,  less)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", <,  less)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", <=, less_equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", <, less)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", <, less)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", <=, less_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", <=, less_equal)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", >,  more)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", >,  more)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", >=, more_equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", >, more)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", >, more)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", >=, more_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", >=, more_equal)
 
 #undef GENERATE_ASSERT_INTEGERS_SAME_SIGN
@@ -249,11 +249,11 @@ a_signed_unsigned##MODE(char *file, uint line, char *func,              \
     return;                                                             \
 }
 
-GENERATE_ASSERT_SIGNED_UNSIGNED(equal,      ==)
-GENERATE_ASSERT_SIGNED_UNSIGNED(not_equal,  !=)
-GENERATE_ASSERT_SIGNED_UNSIGNED(less,        <)
+GENERATE_ASSERT_SIGNED_UNSIGNED(equal, ==)
+GENERATE_ASSERT_SIGNED_UNSIGNED(not_equal, !=)
+GENERATE_ASSERT_SIGNED_UNSIGNED(less, <)
 GENERATE_ASSERT_SIGNED_UNSIGNED(less_equal, <=)
-GENERATE_ASSERT_SIGNED_UNSIGNED(more,        >)
+GENERATE_ASSERT_SIGNED_UNSIGNED(more, >)
 GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_SIGNED_UNSIGNED
@@ -274,11 +274,11 @@ a_unsigned_signed_##MODE(char *file, uint line, char *func,             \
     return;                                                             \
 }
 
-GENERATE_ASSERT_UNSIGNED_SIGNED(equal,      ==)
-GENERATE_ASSERT_UNSIGNED_SIGNED(not_equal,  !=)
-GENERATE_ASSERT_UNSIGNED_SIGNED(less,        <)
+GENERATE_ASSERT_UNSIGNED_SIGNED(equal, ==)
+GENERATE_ASSERT_UNSIGNED_SIGNED(not_equal, !=)
+GENERATE_ASSERT_UNSIGNED_SIGNED(less, <)
 GENERATE_ASSERT_UNSIGNED_SIGNED(less_equal, <=)
-GENERATE_ASSERT_UNSIGNED_SIGNED(more,        >)
+GENERATE_ASSERT_UNSIGNED_SIGNED(more, >)
 GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_UNSIGNED_SIGNED
@@ -399,7 +399,8 @@ assert_ldouble_almost_equal(ldouble var1, ldouble var2,
         *rel_tol_out = rel_tol;
     }
 
-    /* Exact equality catches identical finite values and matching infinities. */
+    /* Exact equality catches identical finite values and matching infinities.
+     */
     if (var1 == var2) {
         return true;
     }
@@ -442,14 +443,16 @@ assert_ldouble_almost_equal(ldouble var1, ldouble var2,
 
 static bool
 assert_ldouble_less(ldouble var1, ldouble var2, int kind1, int kind2) {
-    return (var1 < var2) && !assert_ldouble_almost_equal(var1, var2, kind1, kind2,
-                                                         NULL, NULL, NULL);
+    return (var1 < var2)
+           && !assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+                                           NULL, NULL, NULL);
 }
 
 static bool
 assert_ldouble_more(ldouble var1, ldouble var2, int kind1, int kind2) {
-    return (var1 > var2) && !assert_ldouble_almost_equal(var1, var2, kind1, kind2,
-                                                         NULL, NULL, NULL);
+    return (var1 > var2)
+           && !assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+                                           NULL, NULL, NULL);
 }
 
 static void __attribute((noreturn))
@@ -460,10 +463,10 @@ assert_ldouble_failure(char *file, uint line, char *func,
                        ldouble var1, ldouble var2, char *symbol,
                        ldouble diff, ldouble abs_tol, ldouble rel_tol) {
     error2("\n%s: Assertion failed at %s:%u\n", func, file, line);
-    error2("[%s%lld]%s = "LDOUBLE_FORMAT" %s "LDOUBLE_FORMAT" = %s[%s%lld]\n",
+    error2("[%s%lld]%s = "LDOUBLE_FORMAT " %s "LDOUBLE_FORMAT " = %s[%s%lld]\n",
            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    error2("floating diff = "LDOUBLE_FORMAT", abs_tol = "LDOUBLE_FORMAT", "
-           "rel_tol = "LDOUBLE_FORMAT"\n", diff, abs_tol, rel_tol);
+    error2("floating diff = "LDOUBLE_FORMAT ", abs_tol = "LDOUBLE_FORMAT ", "
+           "rel_tol = "LDOUBLE_FORMAT "\n", diff, abs_tol, rel_tol);
     TRAP();
     exit(EXIT_FAILURE);
 }
@@ -537,7 +540,8 @@ a_ldouble_less_equal(char *file, uint line, char *func,
     ldouble abs_tol;
     ldouble rel_tol;
     if (!((var1 < var2) || assert_ldouble_almost_equal(var1, var2, kind1, kind2,
-                                                       &diff, &abs_tol, &rel_tol))) {
+                                                       &diff, &abs_tol,
+                                                       &rel_tol))) {
         (void)assert_ldouble_almost_equal(var1, var2, kind1, kind2,
                                           &diff, &abs_tol, &rel_tol);
         assert_ldouble_failure(file, line, func, name1, name2,
@@ -578,7 +582,8 @@ a_ldouble_more_equal(char *file, uint line, char *func,
     ldouble abs_tol;
     ldouble rel_tol;
     if (!((var1 > var2) || assert_ldouble_almost_equal(var1, var2, kind1, kind2,
-                                                       &diff, &abs_tol, &rel_tol))) {
+                                                       &diff, &abs_tol,
+                                                       &rel_tol))) {
         (void)assert_ldouble_almost_equal(var1, var2, kind1, kind2,
                                           &diff, &abs_tol, &rel_tol);
         assert_ldouble_failure(file, line, func, name1, name2,
@@ -612,11 +617,11 @@ a_bool_##MODE(char *file, uint line, char *func,                       \
     return;                                                            \
 }
 
-GENERATE_ASSERT_BOOLS(equal,      ==)
-GENERATE_ASSERT_BOOLS(not_equal,  !=)
-GENERATE_ASSERT_BOOLS(less,        <)
+GENERATE_ASSERT_BOOLS(equal, ==)
+GENERATE_ASSERT_BOOLS(not_equal, !=)
+GENERATE_ASSERT_BOOLS(less, <)
 GENERATE_ASSERT_BOOLS(less_equal, <=)
-GENERATE_ASSERT_BOOLS(more,        >)
+GENERATE_ASSERT_BOOLS(more, >)
 GENERATE_ASSERT_BOOLS(more_equal, >=)
 
 #undef GENERATE_ASSERT_BOOLS
@@ -874,9 +879,9 @@ assert_functions_sink(void) {
 #endif
 
 #if TESTING_assert
-
-#include <signal.h>
 #include <setjmp.h>
+#include <signal.h>
+
 #include "util.c"
 
 static sig_atomic_t assertion_failed = false;

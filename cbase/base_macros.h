@@ -26,11 +26,18 @@
 #endif
 
 #define RESET     "\x1b[0m"
-#define RED(S)    "\x1b[31m"   S RESET
-#define GREEN(S)  "\x1b[32m"   S RESET
-#define YELLOW(S) "\x1b[33m"   S RESET
-#define BLUE(S)   "\x1b[1;34m" S RESET
-#define CYAN(S)   "\x1b[01;35m" S RESET
+
+#define RED(S)    "\x1b[0;31m"  S RESET
+#define GREEN(S)  "\x1b[0;32m"  S RESET
+#define YELLOW(S) "\x1b[0;33m"  S RESET
+#define BLUE(S)   "\x1b[0;34m"  S RESET
+#define CYAN(S)   "\x1b[0;35m"  S RESET
+
+#define BRED(S)    "\x1b[1;31m" S RESET
+#define BGREEN(S)  "\x1b[1;32m" S RESET
+#define BYELLOW(S) "\x1b[1;33m" S RESET
+#define BBLUE(S)   "\x1b[1;34m" S RESET
+#define BCYAN(S)   "\x1b[1;35m" S RESET
 
 #define SIZEKB(X) ((int64)(X)*1024ll)
 #define SIZEMB(X) ((int64)(X)*1024ll*1024ll)

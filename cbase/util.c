@@ -1709,7 +1709,7 @@ timezone_init(void) {
 } while (0)
 
 static char *
-read_entire_file(char *path) {
+read_entire_file(char *path, int32 *file_len) {
     FILE *fp;
     int64 len;
     char *data;
@@ -1736,15 +1736,25 @@ read_entire_file(char *path) {
     }
 
     data = xmalloc(len + 1, 0);
-    r = fread64(data, 1, len, fp);
-    if (r != len) {
-        error("Error reading %s: %s.\n", path, strerror(errno));
-        fatal(EXIT_FAILURE);
+    if (len > 0) {
+        r = fread64(data, 1, len, fp);
+        if (r != len) {
+            error("Error reading %s: %s.\n", path, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+    } else {
+        r = 0;
     }
     data[r] = '\0';
     if (fclose(fp)) {
         error("Error closing %s: %s.\n", path, strerror(errno));
     }
+
+    if (r >= MAXOF(*file_len)) {
+        error("Only files up to 2GB are supported.\n");
+        fatal(EXIT_FAILURE);
+    }
+    *file_len = (int32)r;
     return data;
 }
 

@@ -30,9 +30,9 @@
 #endif
 
 #if OS_UNIX
+#include <pthread.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <pthread.h>
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
@@ -41,14 +41,14 @@
 #define TESTING_arena 0
 #endif
 
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
 #include <assert.h>
-#include <time.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 typedef struct Arena {
     char *name;
@@ -223,9 +223,8 @@ arena_allocate(int64 *size) {
         }
     }
 
-    if ((p
-             = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))
-        == NULL) {
+    if ((p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
+                          PAGE_READWRITE)) == NULL) {
         error2("Error in VirtualAlloc(%lld): %lu.\n", (llong)*size,
                GetLastError());
         return NULL;
@@ -337,7 +336,8 @@ xarena_push(Arena *arena, int64 size) {
     }
 
     if ((p = arena_push(arena, size)) == NULL) {
-        error2("Error allocating %lld bytes: %s.\n", (llong)size, arena_strerror(errno));
+        error2("Error allocating %lld bytes: %s.\n",
+               (llong)size, arena_strerror(errno));
         exit(EXIT_FAILURE);
     }
     return p;
@@ -492,8 +492,8 @@ arena_functions_sink(void) {
 #if TESTING_arena
 // flags: -lm
 #include "assert.c"
-#include <stdio.h>
 #include "util.c"
+#include <stdio.h>
 
 #if !defined(UTIL_C)
 static void
