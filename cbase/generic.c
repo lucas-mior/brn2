@@ -162,7 +162,7 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
 
 #define fprint(FP, ...) fprint_0((FP), __VA_ARGS__, (char *)0)
 #define snprint(BUF, BSZ, ...) snprint_0((BUF), (BSZ), __VA_ARGS__, (char *)0)
-#define print(...) fprint_0(stdout, __VA_ARGS__, (char *)0)
+#define print0(...) fprint_0(stdout, __VA_ARGS__, (char *)0)
 
 #define S(X) toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X), \
     void *: "%p", \
@@ -805,11 +805,11 @@ main(void) {
         assert(!strcmp(buf, "file 1 0001\n"));
         fclose(fp);
 
-        n = print("print ", V(a), " ", W(b), "\n");
+        n = print0("print ", V(a), " ", W(b), "\n");
         assert(n == strlen2("print i able\n"));
         {
             char buffer[16];
-            assert((print(V(c), "\n")
+            assert((print0(V(c), "\n")
                     == snprintf(buffer, sizeof(buffer), "%d\n", c)));
         }
     }
