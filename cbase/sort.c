@@ -28,20 +28,12 @@
 #define TESTING_sort 0
 #endif
 
-#if !defined(SORT_MERGE_SUBSORTED_COMPARE)
-#define SORT_MERGE_SUBSORTED_COMPARE(A, B) compare_func(A, B)
+#if !defined(SORT_COMPARE)
+#define SORT_COMPARE(A, B) compare_func(A, B)
 #endif
 
 #ifndef MAX_NTHREADS
 #define MAX_NTHREADS 64
-#endif
-
-#if !defined(LENGTH)
-#define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
-#endif
-
-#if !defined(SIZEOF)
-#define SIZEOF(X) (int64)sizeof(X)
 #endif
 
 typedef struct HeapNode {
@@ -52,7 +44,7 @@ typedef struct HeapNode {
 
 static void
 sort_shuffle(void *array, int64 n, int64 size) {
-    char *tmp = xmalloc(size, false);
+    char *tmp = malloc2(size);
     char *arr = array;
 
     if (n > 1) {
@@ -66,7 +58,7 @@ sort_shuffle(void *array, int64 n, int64 size) {
         }
     }
 
-    free(tmp);
+    free2(tmp, size);
     return;
 }
 
@@ -83,11 +75,11 @@ sort_heapify(HeapNode *heap, int32 p, int32 i,
             break;
         }
 
-        if (SORT_MERGE_SUBSORTED_COMPARE(heap[left].value, heap[smallest].value) < 0) {
+        if (SORT_COMPARE(heap[left].value, heap[smallest].value) < 0) {
             smallest = left;
         }
         if ((right < p)
-            && SORT_MERGE_SUBSORTED_COMPARE(heap[right].value, heap[smallest].value) < 0) {
+            && SORT_COMPARE(heap[right].value, heap[smallest].value) < 0) {
             smallest = right;
         }
 
@@ -114,8 +106,11 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     int32 indices[MAX_NTHREADS] = {0};
     int32 offsets[MAX_NTHREADS];
     int64 memory_size = obj_size*n;
-    char *output = xmalloc(memory_size, false);
+    char *output = malloc2(memory_size);
     char *array2 = array;
+    if (p == 1) {
+        return;
+    }
 
     for (int32 k = 0; k < (p - 1); k += 1) {
         n_sub[k] = n / p;
@@ -131,7 +126,7 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     }
 
     for (int32 k = 0; k < p; k += 1) {
-        heap[k].value = xmalloc(obj_size, false);
+        heap[k].value = malloc2(obj_size);
         memcpy64(heap[k].value, &array2[offsets[k]*obj_size], obj_size);
         heap[k].p_index = k;
     }
@@ -155,9 +150,9 @@ sort_merge_subsorted(void *array, int32 n, int32 p, int64 obj_size,
     }
 
     memcpy64(array2, output, n*obj_size);
-    free(output);
+    free2(output, memory_size);
     for (int32 i = 0; i < p; i += 1) {
-        free(heap[i].value);
+        free2(heap[i].value, obj_size);
     }
     return;
 }
@@ -184,12 +179,12 @@ compare_int(void *a, void *b) {
     const int32 *bb = b;
     return *aa - *bb;
 }
-static int32 dummy = INT32_MAX;
 
 static void
 test_sorting(int32 n, int32 p) {
-    int32 *array = xmalloc(n*SIZEOF(*array), false);
-    int32 *n_sub = xmalloc(p*SIZEOF(*n_sub), false);
+    int32 *array = malloc2(n*SIZEOF(*array));
+    int32 *n_sub = malloc2(p*SIZEOF(*n_sub));
+    int32 dummy = INT32_MAX;
 
     if (n < p*2) {
         fprintf(stderr, "n=%d must be larger than p*2=%d*2\n", n, p);
@@ -229,8 +224,8 @@ test_sorting(int32 n, int32 p) {
         }
     }
 
-    free(array);
-    free(n_sub);
+    free2(array, n*SIZEOF(*array));
+    free2(n_sub, p*SIZEOF(*n_sub));
     return;
 }
 
@@ -244,6 +239,6 @@ main(void) {
     exit(EXIT_SUCCESS);
 }
 
-#endif
+#endif /* TESTING_sort */
 
-#endif
+#endif /* SORT_C */

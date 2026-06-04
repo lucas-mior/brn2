@@ -24,8 +24,8 @@
 #include "arena.c"
 
 #define MAX_THREADS BRN2_MAX_THREADS
-#define SORT_MERGE_SUBSORTED_COMPARE brn2_compare
-#include "sort_merge_subsorted.c"
+#define SORT_COMPARE brn2_compare
+#include "sort.c"
 
 bool brn2_options_fatal = DEBUGGING;
 bool brn2_options_implicit = false;

@@ -30,8 +30,8 @@
 
 #include "util.c"
 #include "arena.c"
-#define SORT_MERGE_SUBSORTED_COMPARE brn2_compare
-#include "sort_merge_subsorted.c"
+#define SORT_COMPARE brn2_compare
+#include "sort.c"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_brn2 1
