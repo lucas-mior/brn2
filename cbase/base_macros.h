@@ -145,4 +145,6 @@ _Generic((SIZE), \
 #define UNUSED
 #endif
 
+#define π 3.14159265358979323846264338327950288
+
 #endif /* BASE_MACROS_H */
