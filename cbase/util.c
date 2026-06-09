@@ -2042,6 +2042,7 @@ command_str(Command *command, int32 *len) {
     return xmemdup(buffer, *len + 1);
 }
 
+#if OS_UNIX
 static bool
 command_run_sync(Command *command, int *exit_status) {
     pid_t child;
@@ -2175,6 +2176,7 @@ command_run_capture(Command *command, char *cwd) {
         .status = status,
     };
 }
+#endif
 
 static void
 command_result_free(CommandResult *result) {
@@ -2271,7 +2273,6 @@ util_functions_sink(void) {
     (void)read_entire_file;
     (void)write_entire_file;
     (void)sb_printf;
-    (void)command_run_capture;
     (void)command_result_free;
     (void)command_argv0_set;
     (void)command_free;
@@ -2296,6 +2297,8 @@ util_functions_sink(void) {
     (void)send_signal;
     (void)atoi2;
 #if OS_UNIX
+    (void)command_run_capture;
+    (void)command_run_sync;
     (void)timezone_init;
 #endif
     (void)dirname2;
@@ -2335,7 +2338,6 @@ util_functions_sink(void) {
     (void)catfile;
     (void)parse_option;
     (void)command_print;
-    (void)command_run_sync;
     return;
 }
 #endif

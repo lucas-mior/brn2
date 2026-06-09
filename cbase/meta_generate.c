@@ -225,7 +225,7 @@ test_emit_string_and_lens_initializers(void) {
                  "        \"quo\\\"te\",\n"
                  "    },\n");
 
-    sb_free(out);
+    sb_free(&out);
     emit_lens_initializer(&out, "name_lens", values, lens, 3, "v");
     ASSERT_EQUAL(out.data, "    .name_lens = { 5, 2, 6 },\n");
     free2(out.data, out.cap);
@@ -241,7 +241,7 @@ test_emit_number_initializers(void) {
     emit_int_array_initializer(&out, "ints", ints, 3);
     ASSERT_EQUAL(out.data, "    .ints = { -1, 0, 42 },\n");
 
-    sb_free(out);
+    sb_free(&out);
     emit_u64_array_initializer(&out, "bits", u64s, 2);
     ASSERT_EQUAL(out.data,
                  "    .bits = { UINT64_C(0x1234), UINT64_C(0x0) },\n");

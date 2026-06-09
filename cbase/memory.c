@@ -795,7 +795,7 @@ xmmap_commit(int64 *size) {
             *size = 1;
         }
         p = malloc((size_t)*size);
-        memset64(p, 0, size);
+        memset64(p, 0, *size);
         return p;
     }
     if (memory_page_size == 0) {
