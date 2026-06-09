@@ -2330,7 +2330,9 @@ util_functions_sink(void) {
     (void)random_ascii_string;
     (void)strncpy32;
     (void)ends_with;
+#if OS_WINDOWS || OS_UNIX
     (void)util_command;
+#endif
     (void)rad2deg;
     (void)deg2rad;
     (void)path_basename;
@@ -2348,13 +2350,13 @@ util_functions_sink(void) {
 #define ENUM_BITFLAGS 0
 #define ENUM_PREFIX_ WEEK_DAY_
 #define ENUM_FIELDS \
-    X(SUNDAY, 0)                   \
-    X(MONDAY)                      \
-    X(TUESDAY, 10)                 \
-    X(WEDNESDAY)                   \
-    X(THURSDAY)                    \
-    X(FRIDAY, 5)                   \
-    X(SATURDAY, 20)
+    X(WEEK_DAY_SUNDAY, 0)          \
+    X(WEEK_DAY_MONDAY)             \
+    X(WEEK_DAY_TUESDAY, 10)        \
+    X(WEEK_DAY_WEDNESDAY)          \
+    X(WEEK_DAY_THURSDAY)           \
+    X(WEEK_DAY_FRIDAY, 5)          \
+    X(WEEK_DAY_SATURDAY, 20)
 #include "xenums.c"
 
 
@@ -2362,12 +2364,12 @@ util_functions_sink(void) {
 #define ENUM_BITFLAGS 1
 #define ENUM_PREFIX_ POWER_OF2_
 #define ENUM_FIELDS \
-    X(ONE)          \
-    X(TWO)          \
-    X(FOUR)         \
-    X(EIGHT)        \
-    X(SIXTEEN)      \
-    X(THIRTY2)
+    X(POWER_OF2_ONE)     \
+    X(POWER_OF2_TWO)     \
+    X(POWER_OF2_FOUR)    \
+    X(POWER_OF2_EIGHT)   \
+    X(POWER_OF2_SIXTEEN) \
+    X(POWER_OF2_THIRTY2)
 #include "xenums.c"
 
 

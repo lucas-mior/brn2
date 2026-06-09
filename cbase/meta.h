@@ -11,15 +11,15 @@
 #define ENUM_NAME TokenKind
 #define ENUM_BITFLAGS 0
 #define ENUM_FIELDS \
-    X(UNKNOWN) \
-    X(SPACE) \
-    X(NEWLINE) \
-    X(IDENT) \
-    X(LITERAL) \
-    X(COMMENT) \
-    X(OPERATOR) \
-    X(PUNCT) \
-    X(PREPROC)
+    X(TOKEN_UNKNOWN) \
+    X(TOKEN_SPACE) \
+    X(TOKEN_NEWLINE) \
+    X(TOKEN_IDENT) \
+    X(TOKEN_LITERAL) \
+    X(TOKEN_COMMENT) \
+    X(TOKEN_OPERATOR) \
+    X(TOKEN_PUNCT) \
+    X(TOKEN_PREPROC)
 #include "xenums.c"
 
 enum TokenizeFlags {
