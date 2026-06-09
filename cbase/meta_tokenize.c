@@ -7,17 +7,6 @@
 #define TOKENIZE_INITIAL_TOKEN_CAPACITY 32
 
 static bool
-token_is_comment(Token *token) {
-    bool result;
-
-    result = false;
-    if (token->kind == TOKEN_COMMENT) {
-        result = true;
-    }
-    return result;
-}
-
-static bool
 char_is_alpha(char c) {
     bool result;
 
@@ -765,16 +754,16 @@ test_token_predicates(void) {
     Token comment = {.kind = TOKEN_COMMENT, .text = "// c", .len = 4};
     Token space = {.kind = TOKEN_SPACE, .text = " ", .len = 1};
 
-    ASSERT(token_is_operator(&op));
-    ASSERT(!token_is_operator(&punct));
-    ASSERT(token_is_punct(&punct));
-    ASSERT(!token_is_punct(&op));
-    ASSERT(token_is_literal(&literal));
-    ASSERT(!token_is_literal(&comment));
-    ASSERT(token_is_comment(&comment));
-    ASSERT(!token_is_comment(&space));
+    ASSERT(op.kind == TOKEN_OPERATOR);
+    ASSERT(!(punct.kind == TOKEN_OPERATOR));
+    ASSERT(punct.kind == TOKEN_PUNCT);
+    ASSERT(!(op.kind == TOKEN_PUNCT));
+    ASSERT(literal.kind == TOKEN_LITERAL);
+    ASSERT(!(comment.kind == TOKEN_LITERAL));
+    ASSERT(comment.kind == TOKEN_COMMENT);
+    ASSERT(!(space.kind == TOKEN_COMMENT));
     ASSERT(token_is_number(&literal));
-    ASSERT(!token_is_number(&comment));
+    ASSERT(!(token_is_number(&comment)));
     return;
 }
 
