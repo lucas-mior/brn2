@@ -910,6 +910,7 @@ typedef struct TestFlex {
 typedef struct TestString {
     char *s;
     int32 len;
+    int32 padding;
 } TestString;
 
 #define ASSERT_EXPECTED_FATAL(BLOCK) do { \

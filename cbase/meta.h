@@ -29,8 +29,8 @@ enum TokenizeFlags {
 };
 
 typedef struct Token {
-    enum TokenKind kind;
     char *text;
+    enum TokenKind kind;
     int32 len;
     int32 column;
     int32 offset;

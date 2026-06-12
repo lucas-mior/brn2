@@ -79,6 +79,8 @@ emit_string_array_initializer(StrBuilder *out, char *field, char **values,
         int32 fb_len = SNPRINTF(fb, "%s%d", fallback_prefix, i);
         char *value;
         int32 value_len;
+        StrBuilder cs;
+
         if (values[i]) {
             value = values[i];
             value_len = value_lens[i];
@@ -86,7 +88,8 @@ emit_string_array_initializer(StrBuilder *out, char *field, char **values,
             value = fb;
             value_len = fb_len;
         }
-        StrBuilder cs = c_string_literal(value, value_len);
+
+        cs = c_string_literal(value, value_len);
         sb_printf(out, "        %s,\n", cs.data);
         free2(cs.data, cs.cap);
     }
