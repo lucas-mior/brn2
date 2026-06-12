@@ -3,10 +3,10 @@
 
 #include "platform_detection.h"
 
-#define QUOTE_(x) #x
-#define QUOTE(x) QUOTE_(x)
+#define S(...) #__VA_ARGS__
+#define QUOTE(x) S(x)
 
-#define STRLIT_LEN(s) ((int32)(sizeof(s) - 1))
+#define STRLIT_LEN(s) ((int32)(sizeof("" s) - 1))
 #define STRLIT_ARGS(s) s, STRLIT_LEN(s)
 
 #define CAT_(a, b) a ## b

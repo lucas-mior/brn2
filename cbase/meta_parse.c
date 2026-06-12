@@ -73,10 +73,6 @@ parse_text_with_flags(char *text, int32 text_len, int32 tokenize_flags) {
     int32 line_start;
 
     doc = malloc2(SIZEOF(*doc));
-    if (!doc) {
-        error("Memory allocation failed.\n");
-        fatal(EXIT_FAILURE);
-    }
 
     doc->capacity = PARSE_INITIAL_LINE_CAPACITY;
     doc->line_count = 0;

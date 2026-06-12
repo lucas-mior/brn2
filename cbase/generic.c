@@ -164,7 +164,7 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
 #define snprint(BUF, BSZ, ...) snprint_0((BUF), (BSZ), __VA_ARGS__, (char *)0)
 #define print0(...) fprint_0(stdout, __VA_ARGS__, (char *)0)
 
-#define S(X) toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X), \
+#define S_(X) toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X), \
     void *: "%p", \
     char *: "%s", \
     bool: "%i", \
@@ -187,7 +187,7 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
     ) \
 ), (X))
 
-#define V(X) "", S(X), ""
+#define V(X) "", S_(X), ""
 #define W(X) "", (X), ""
 #define SF(F, X) toString((char[S_BSZ]){ "" }, S_BSZ, (F), (X))
 #define VF(F, X) "", SF((F), (X)), ""
