@@ -32,11 +32,12 @@
 
 #define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, _9, n, ...) n
 #define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, x)
+
 #define SELECT_ON_NUM_ARGS(macro, ...) \
   CAT_SELECT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
-
 #define CAT_SELECT_ON_NUM_ARGS(macro, ...) \
   CAT_SELECT(macro, NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+
 #define CAT(...) CAT_SELECT_ON_NUM_ARGS(CAT, __VA_ARGS__)
 
 #include <stddef.h>
@@ -46,14 +47,14 @@
 #define OFFSET_OF(STRUCT, FIELD) offsetof(STRUCT, FIELD)
 #endif
 
-#define RESET     "\x1b[0m"
+#define RESET      "\x1b[0m"
 
-#define RED(S)    "\x1b[0;31m"  S RESET
-#define GREEN(S)  "\x1b[0;32m"  S RESET
-#define YELLOW(S) "\x1b[0;33m"  S RESET
-#define BLUE(S)   "\x1b[0;34m"  S RESET
-#define CYAN(S)   "\x1b[0;35m"  S RESET
-#define PURPLE(S) "\x1b[0;36m"  S RESET
+#define RED(S)     "\x1b[0;31m" S RESET
+#define GREEN(S)   "\x1b[0;32m" S RESET
+#define YELLOW(S)  "\x1b[0;33m" S RESET
+#define BLUE(S)    "\x1b[0;34m" S RESET
+#define CYAN(S)    "\x1b[0;35m" S RESET
+#define PURPLE(S)  "\x1b[0;36m" S RESET
 
 #define BRED(S)    "\x1b[1;31m" S RESET
 #define BGREEN(S)  "\x1b[1;32m" S RESET
