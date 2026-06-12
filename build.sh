@@ -58,7 +58,6 @@ CFLAGS="$CFLAGS -Wno-float-equal"
 CFLAGS="$CFLAGS -Wno-undefined-internal"
 CFLAGS="$CFLAGS -Wno-cast-qual"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
-CFLAGS="$CFLAGS -Wno-c23-compat"
 
 OS=$(uname -a)
 
@@ -79,7 +78,6 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-ignored-attributes"
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
-    CFLAGS="$CFLAGS -Wno-c23-extensions"
     CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
     CFLAGS="$CFLAGS -Wno-assign-enum"
     CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
