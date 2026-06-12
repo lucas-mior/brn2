@@ -993,17 +993,10 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     n = vsnprintf(buffer, (size_t)m, format, args);
 
     if (n >= m) {
-        if (1) {
-            m = n + 1;
-            big_buffer = xmalloc(m, false);
-            n = vsnprintf(big_buffer, (size_t)m, format, args);
-            pbuffer = big_buffer;
-        } else {
-            fprintf(stderr,
-                    "%s:%d %s(): Error in vsnprintf(\"%s\") (n = %lld).\n",
-                    file, line, func, format, (llong)n);
-            fatal(EXIT_FAILURE);
-        }
+        m = n + 1;
+        big_buffer = xmalloc(m, false);
+        n = vsnprintf(big_buffer, (size_t)m, format, args);
+        pbuffer = big_buffer;
     }
 
     va_end(args);
