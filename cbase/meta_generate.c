@@ -107,17 +107,20 @@ emit_lens_initializer(StrBuilder *out, char *field, char **values,
 
     sb_printf(out, "    .%s = { ", field);
     for (int32 i = 0; i < count; i += 1) {
-        if (i) {
-            SB_APPEND(out, ", ");
-        }
         char fb[32];
         int32 fb_len = SNPRINTF(fb, "%s%d", fallback_prefix, i);
         int32 value_len;
+
+        if (i > 0) {
+            SB_APPEND(out, ", ");
+        }
+
         if (values[i]) {
             value_len = value_lens[i];
         } else {
             value_len = fb_len;
         }
+
         sb_printf(out, "%d", value_len);
     }
     SB_APPEND(out, " },\n");
