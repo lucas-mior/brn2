@@ -830,6 +830,7 @@ static bool hash_remove_map_by_value(struct Hash_map_by_value *, int64 *);
 #define HASH_VALUE_TYPE int32
 #define HASH_VALUE_FORMATTER "%d"
 #define HASH_TYPE map_by_value
+#define HASH_PADDING_TYPE uint32
 #define HASH_DUPLICATE_KEYS 0
 #include "hash.c"
 
