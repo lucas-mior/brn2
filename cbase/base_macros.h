@@ -12,23 +12,23 @@
 #define CAT_(a, b) a ## b
 #define CAT_SELECT(a, b) CAT_(a, b)
 
-#define CAT1_(a) a
-#define CAT2_(a, b) a ## b
-#define CAT3_(a, b, c) a ## b ## c
-#define CAT4_(a, b, c, d) a ## b ## c ## d
-#define CAT5_(a, b, c, d, e) a ## b ## c ## d ## e
-#define CAT6_(a, b, c, d, e, f) a ## b ## c ## d ## e ## f
-#define CAT7_(a, b, c, d, e, f, g) a ## b ## c ## d ## e ## f ## g
+#define CAT1_(a)                      a
+#define CAT2_(a, b)                   a ## b
+#define CAT3_(a, b, c)                a ## b ## c
+#define CAT4_(a, b, c, d)             a ## b ## c ## d
+#define CAT5_(a, b, c, d, e)          a ## b ## c ## d ## e
+#define CAT6_(a, b, c, d, e, f)       a ## b ## c ## d ## e ## f
+#define CAT7_(a, b, c, d, e, f, g)    a ## b ## c ## d ## e ## f ## g
 #define CAT8_(a, b, c, d, e, f, g, h) a ## b ## c ## d ## e ## f ## g ## h
 
-#define CAT1(a) CAT1_(a)
-#define CAT2(a, b) CAT2_(a, b)
-#define CAT3(a, b, c) CAT3_(a, b, c)
-#define CAT4(a, b, c, d) CAT4_(a, b, c, d)
-#define CAT5(a, b, c, d, e) CAT5_(a, b, c, d, e)
-#define CAT6(a, b, c, d, e, f) CAT6_(a, b, c, d, e, f)
-#define CAT7(a, b, c, d, e, f, g) CAT7_(a, b, c, d, e, f, g)
-#define CAT8(a, b, c, d, e, f, g, h) CAT8_(a, b, c, d, e, f, g, h)
+#define CAT1(a)                       CAT1_(a)
+#define CAT2(a, b)                    CAT2_(a, b)
+#define CAT3(a, b, c)                 CAT3_(a, b, c)
+#define CAT4(a, b, c, d)              CAT4_(a, b, c, d)
+#define CAT5(a, b, c, d, e)           CAT5_(a, b, c, d, e)
+#define CAT6(a, b, c, d, e, f)        CAT6_(a, b, c, d, e, f)
+#define CAT7(a, b, c, d, e, f, g)     CAT7_(a, b, c, d, e, f, g)
+#define CAT8(a, b, c, d, e, f, g, h)  CAT8_(a, b, c, d, e, f, g, h)
 
 #define NUM_ARGS_(_1, _2, _3, _4, _5, _6, _7, _8, _9, n, ...) n
 #define NUM_ARGS(...) NUM_ARGS_(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, x)
