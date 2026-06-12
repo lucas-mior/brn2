@@ -68,6 +68,24 @@ else
     CC="${CC:-cc}"
 fi
 
+if [ "$CC" = "clang" ]; then
+    CFLAGS="$CFLAGS -Weverything"
+    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
+    CFLAGS="$CFLAGS -Wno-format-nonliteral"
+    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
+    CFLAGS="$CFLAGS -Wno-c++-keyword"
+    CFLAGS="$CFLAGS -Wno-pre-c11-compat"
+    CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
+    CFLAGS="$CFLAGS -Wno-ignored-attributes"
+    CFLAGS="$CFLAGS -Wno-covered-switch-default"
+    CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
+    CFLAGS="$CFLAGS -Wno-c23-extensions"
+    CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
+    CFLAGS="$CFLAGS -Wno-assign-enum"
+    CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
+    CFLAGS="$CFLAGS -Wno-bad-function-cast"
+fi
+
 noop () {
     return
 }
@@ -188,24 +206,6 @@ if [ "$target" = "cross" ]; then
     esac
 else
     LDFLAGS="$LDFLAGS -lpthread"
-fi
-
-if [ "$CC" = "clang" ]; then
-    CFLAGS="$CFLAGS -Weverything"
-    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
-    CFLAGS="$CFLAGS -Wno-format-nonliteral"
-    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
-    CFLAGS="$CFLAGS -Wno-c++-keyword"
-    CFLAGS="$CFLAGS -Wno-pre-c11-compat"
-    CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
-    CFLAGS="$CFLAGS -Wno-ignored-attributes"
-    CFLAGS="$CFLAGS -Wno-covered-switch-default"
-    CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
-    CFLAGS="$CFLAGS -Wno-c23-extensions"
-    CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
-    CFLAGS="$CFLAGS -Wno-assign-enum"
-    CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
-    CFLAGS="$CFLAGS -Wno-bad-function-cast"
 fi
 
 case "$target" in
