@@ -656,7 +656,7 @@ tokenization_find_matching(Tokenization *tokenization, int32 open_index) {
     } else if (TOKEN_IS(&tokenization->tokens[open_index], "{")) {
         close = "}";
     }
-    if (!close) {
+    if (close == NULL) {
         return -1;
     }
 

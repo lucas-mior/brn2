@@ -25,6 +25,11 @@
 
 #include "base_macros.h"
 
+#if CC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc23-extensions"
+#endif
+
 #if !defined(ENUM_UNDERLYING_TYPE)
   #if __clang__
     #define ENUM_UNDERLYING_TYPE : uint32
@@ -139,7 +144,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #define XENUM(e) \
         if (val & e) { \
             char *name = #e; \
-            int32 len = (int32)strlen32(name); \
+            int32 len = strlen32(name); \
             if (is_first == 0) { \
                 if (buffer_ptr < (buffer_end - 1)) { \
                     *buffer_ptr = '|'; \
@@ -380,3 +385,7 @@ main(void) {
 }
 
 #endif /* TESTING_xenums && !defined(TESTING_xenums_started) */
+
+#if CC_CLANG
+#pragma clang diagnostic pop
+#endif

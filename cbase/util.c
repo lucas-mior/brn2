@@ -33,6 +33,7 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <float.h>
+#include <dirent.h>
 
 #include "platform_detection.h"
 
@@ -191,7 +192,7 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
         memmem64(LONG, LONG_LEN, SHORT, LEN)
 #define MEMMEM(...) SELECT_ON_NUM_ARGS(MEMMEM_, __VA_ARGS__)
 
-static bool
+INLINE bool
 strequal(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
@@ -302,10 +303,10 @@ begins_with(char *string, int32 string_len, char *literal, int32 length) {
     }
 }
 
-#define BEGINS_WITH_3(LONG, LONG_LEN, SHORT) \
-        begins_with(LONG, LONG_LEN, SHORT, strlen32(SHORT))
-#define BEGINS_WITH_4(LONG, LONG_LEN, SHORT, LEN) \
-        begins_with(LONG, LONG_LEN, SHORT, LEN)
+#define BEGINS_WITH_3(STRING, STRING_LEN, PREFIX) \
+        begins_with(STRING, STRING_LEN, PREFIX, strlen32(PREFIX))
+#define BEGINS_WITH_4(STRING, STRING_LEN, PREFIX, PREFIX_LEN) \
+        begins_with(STRING, STRING_LEN, PREFIX, PREFIX_LEN)
 #define BEGINS_WITH(...) SELECT_ON_NUM_ARGS(BEGINS_WITH_, __VA_ARGS__)
 
 INLINE char *
@@ -321,10 +322,10 @@ ends_with(char *string, int32 string_len, char *literal, int32 length) {
     }
 }
 
-#define ENDS_WITH_3(LONG, LONG_LEN, SHORT) \
-        ends_with(LONG, LONG_LEN, SHORT, strlen32(SHORT))
-#define ENDS_WITH_4(LONG, LONG_LEN, SHORT, LEN) \
-        ends_with(LONG, LONG_LEN, SHORT, LEN)
+#define ENDS_WITH_3(STRING, STRING_LEN, SUFFIX) \
+        ends_with(STRING, STRING_LEN, SUFFIX, strlen32(SUFFIX))
+#define ENDS_WITH_4(STRING, STRING_LEN, SUFFIX, SUFFIX_LEN) \
+        ends_with(STRING, STRING_LEN, SUFFIX, SUFFIX_LEN)
 #define ENDS_WITH(...) SELECT_ON_NUM_ARGS(ENDS_WITH_, __VA_ARGS__)
 
 INLINE int
@@ -782,11 +783,30 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
 static int
 xunlink(char *filename) {
     if (unlink(filename) < 0) {
-        error("Error in unlink(%s): %s.\n", filename, strerror(errno));
+        error2("Error in unlink(%s): %s.\n", filename, strerror(errno));
         return -1;
     }
     return 0;
 }
+
+static int
+xfclose(FILE *file, char *filename) {
+    if (fclose(file)) {
+        error2("Error closing %s: %s.\n", filename, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+static int
+xclosedir(DIR *dir, char *dirname) {
+    if (closedir(dir)) {
+        error2("Error closing directory %s: %s.\n", dirname, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
 
 #if OS_WINDOWS
 static int
@@ -811,7 +831,7 @@ util_command(int argc, char **argv) {
 
     {
         char *exe = ".exe";
-        int64 exe_len = (int64)(strlen32(exe));
+        int64 exe_len = strlen32(exe);
         if (memmem64(argv[0], len0 + 1, exe, exe_len + 1) == NULL) {
             memcpy64(argv0_windows, argv[0], len0);
             memcpy64(argv0_windows + len0, exe, exe_len + 1);
@@ -1059,7 +1079,7 @@ util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
     (void)unused;
 
-    write64(STDERR_FILENO, message, (uint32)strlen32(message));
+    write64(STDERR_FILENO, message, strlen32(message));
     for (uint32 i = 0; i < LENGTH(notifiers); i += 1) {
         execlp(notifiers[i],
                notifiers[i], "-u", "critical", program, message, NULL);
@@ -1614,12 +1634,15 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
 static char *
 path_basename(char *path, int32 path_len) {
     int32 slash = -1;
+    int32 start;
+
     for (int32 i = 0; i < path_len; i += 1) {
         if (path[i] == '/') {
             slash = i;
         }
     }
-    int32 start = slash + 1;
+
+    start = slash + 1;
     return xstrndup(path + start, path_len - start);
 }
 
