@@ -759,14 +759,14 @@ main(void) {
         FILE *fp;
         int n;
 
-        assert(!strcmp(S(a), "i"));
-        assert(!strcmp(S(b), "able"));
-        assert(!strcmp(S(c), "1"));
-        assert(!strcmp(S((uint)42), "42"));
-        assert(!strcmp(S((long)-42), "-42"));
-        assert(!strcmp(S((ullong)42), "42"));
-        assert(!strcmp(S(true), "1"));
-        assert(!strcmp(S(false), "0"));
+        assert(!strcmp(S_(a), "i"));
+        assert(!strcmp(S_(b), "able"));
+        assert(!strcmp(S_(c), "1"));
+        assert(!strcmp(S_((uint)42), "42"));
+        assert(!strcmp(S_((long)-42), "-42"));
+        assert(!strcmp(S_((ullong)42), "42"));
+        assert(!strcmp(S_(true), "1"));
+        assert(!strcmp(S_(false), "0"));
         assert(!strcmp(SF("0x%02x", 10), "0x0a"));
 
         n = snprint(buf, sizeof(buf),
