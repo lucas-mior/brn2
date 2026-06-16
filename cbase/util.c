@@ -793,14 +793,53 @@ xunlink(char *filename) {
     return 0;
 }
 
+static FILE *
+xfopen(char *file, int32 line, char *func, char *filename, char *mode) {
+    FILE *f;
+    char *mode_long = "what";
+
+    if (strequal(mode, "w")) {
+        mode_long = "writing";
+    }
+    if (strequal(mode, "r")) {
+        mode_long = "reading";
+    }
+    if (strequal(mode, "r+")) {
+        mode_long = "reading and writing";
+    }
+    if (strequal(mode, "w+")) {
+        mode_long = "reading and writing";
+    }
+    if (strequal(mode, "a")) {
+        mode_long = "appending";
+    }
+    if (strequal(mode, "a+")) {
+        mode_long = "reading and appending";
+    }
+
+    if ((f = fopen(filename, mode)) == NULL) {
+        error_impl(file, line, func, "Error opening %s for %s: %s.\n",
+                   filename, mode_long, strerror(errno));
+        return NULL;
+    }
+    return f;
+}
+
+#define XFOPEN(FILENAME, MODE) \
+    xfopen(__FILE__, __LINE__, (char *)__func__, FILENAME, MODE)
+
 static int
-xfclose(FILE *file, char *filename) {
-    if (fclose(file)) {
-        error2("Error closing %s: %s.\n", filename, strerror(errno));
+xfclose(char *file, int32 line, char *func, FILE *f, char *filename) {
+    if (fclose(f)) {
+        error_impl(file, line, func,
+                   "Error closing %s: %s.\n", filename, strerror(errno));
         return -1;
     }
     return 0;
 }
+
+#define XFCLOSE(F, FILENAME) \
+    xfclose(__FILE__, __LINE__, (char *)__func__, F, FILENAME)
 
 static int
 xclosedir(DIR *dir, char *dirname) {
@@ -1881,9 +1920,7 @@ read_entire_file(char *path, int32 *file_len) {
         r = 0;
     }
     data[r] = '\0';
-    if (fclose(fp)) {
-        error("Error closing %s: %s.\n", path, strerror(errno));
-    }
+    XFCLOSE(fp, path);
 
     if (r >= MAXOF(*file_len)) {
         error("Only files up to 2GB are supported.\n");
@@ -1895,22 +1932,21 @@ read_entire_file(char *path, int32 *file_len) {
 
 static void
 write_entire_file(char *path, char *text, int64 text_len) {
-    FILE *f;
+    FILE *file;
 
-    if ((f = fopen(path, "wb")) == NULL) {
+    if ((file = fopen(path, "wb")) == NULL) {
         error("Error opening %s for writing: %s", path, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
-    if (fwrite64(text, 1, text_len, f) != text_len) {
+    if (fwrite64(text, 1, text_len, file) != text_len) {
         error("Error writing %lld bytes to %s: %s.",
               (llong)text_len, path, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    if (fclose(f)) {
-        error("Error closing %s: %s.", path, strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
+
+    XFCLOSE(file, path);
+    return;
 }
 
 void
