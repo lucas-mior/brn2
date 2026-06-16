@@ -50,6 +50,10 @@
 #define TESTING_util 0
 #endif
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten/emscripten.h>
+#endif
+
 #if !TESTING_util
 static char *program;
 #else
@@ -1058,6 +1062,16 @@ error_async_safe(char *message) {
 
 void __attribute((noreturn))
 fatal(int status) {
+#if defined(__EMSCRIPTEN__)
+    char stack[8192];
+    int32 flags = EM_LOG_C_STACK
+                  |EM_LOG_JS_STACK
+                  |EM_LOG_DEMANGLE
+                  |EM_LOG_NO_PATHS;
+
+    emscripten_get_callstack(flags, stack, SIZEOF(stack));
+    error2("fatal(%d) call stack:\n%s\n", status, stack);
+#endif
     if (DEBUGGING) {
         (void)status;
         raise(SIGILL);
@@ -2298,6 +2312,9 @@ util_functions_sink(void) {
     (void)util_filename_from;
     (void)util_string_int32;
     (void)util_die_notify;
+    (void)remove_escape_sequences;
+    (void)xfclose;
+    (void)xclosedir;
 #if OS_UNIX
     (void)util_copy_file_sync;
     (void)util_copy_file_async;
@@ -2325,6 +2342,7 @@ util_functions_sink(void) {
     (void)bytes_pretty;
     (void)qsort64;
     (void)print_timings;
+    (void)strncmp32;
 
     (void)xmmap_commit;
     (void)xstrdup;
