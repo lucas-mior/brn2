@@ -674,8 +674,8 @@ CAT(hash_remove_pre_calc_, HASH_TYPE)(struct Map *map,
     if (CAT(hash_probe_, HASH_TYPE)(map, key, key_length, hash, base_index, &target_idx))
 #endif
     {
-        target = &map->array[target_idx];
 #if !HASH_KEY_FIXED_LEN
+        target = &map->array[target_idx];
   #if HASH_DUPLICATE_KEYS
         arena_decr(map->arena_keys, target->key);
   #endif

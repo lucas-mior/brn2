@@ -81,10 +81,10 @@ _Generic((ARRAY), \
 #include "sfa.h"
 
 #define CLAMP(VAR, VMIN, VMAX) \
-_Generic((VAR), \
-    float: clamp_double, \
-    double: clamp_double, \
-    default: clamp_int64 \
+_Generic((VAR),                \
+    float: clamp_double,       \
+    double: clamp_double,      \
+    default: clamp_int64       \
 )(VAR, VMIN, VMAX)
 
 #define CLAMP_TYPE double
@@ -417,45 +417,13 @@ random_ascii_string(char *buffer, int32 capacity, int32 min_len) {
     return len;
 }
 
-#define X64(FUNC, TYPE) \
-INLINE int64 \
-CAT(FUNC, 64)(int fd, void *buffer, int64 size) { \
-    TYPE instance = 0; \
-    ssize_t w; \
-    (void)instance; \
-    if (size == 0) \
-        return 0; \
-    if (size < 0) {\
-        error("Error: Invalid size = %lld\n", (llong)size); \
-        fatal(EXIT_FAILURE); \
-    } \
-    if ((ullong)size >= (ullong)MAXOF(instance)) { \
-        error("Error: Size (%lld) is too big for %s\n", (llong)size, #FUNC); \
-        fatal(EXIT_FAILURE); \
-    } \
-    w = FUNC(fd, buffer, (TYPE)size); \
-    return (int64)w; \
-}
-
-#if OS_WINDOWS
-X64(write, uint)
-X64(read, uint)
-#define RW_CAST uint
-#else
-X64(write, size_t)
-X64(read, size_t)
-#define RW_CAST size_t
-#endif
-
-#undef X64
-
 static void
 write_all(int fd, char *buffer, int64 left) {
     int64 written = 0;
     int64 w;
 
     while (left > 0) {
-        if ((w = write(fd, buffer + written, (RW_CAST)left)) <= 0) {
+        if ((w = write(fd, buffer + written, (RW_TYPE)left)) <= 0) {
             fprintf(stderr, "Error writing: %s.\n", strerror(errno));
             fatal(EXIT_FAILURE);
         }
@@ -465,34 +433,11 @@ write_all(int fd, char *buffer, int64 left) {
     return;
 }
 
-#define X64(FUNC) \
-INLINE int64 \
-CAT(FUNC, 64)(void *buffer, int64 size, int64 n, FILE *file) { \
-    size_t rw; \
-    if ((size_t)size >= (SIZE_MAX/(size_t)n)) { \
-        error("Error: Overflow (%lld*%lld)\n", (llong)size, (llong)n); \
-        fatal(EXIT_FAILURE); \
-    } \
-    if ((size <= 0) || (n <= 0)) { \
-        error("Error: Invalid size(%lld) or n(%lld)\n", (llong)size, (llong)n); \
-        fatal(EXIT_FAILURE); \
-    } \
-    if ((ullong)size >= (ullong)SIZE_MAX) { \
-        error("Error: Size (%lld) is bigger than SIZEMAX\n", (llong)size); \
-        fatal(EXIT_FAILURE); \
-    } \
-    if ((ullong)n >= (ullong)SIZE_MAX) { \
-        error("Error: Number (%lld) is bigger than SIZEMAX\n", (llong)size); \
-        fatal(EXIT_FAILURE); \
-    } \
-    rw = FUNC(buffer, (size_t)size, (size_t)n, file); \
-    return (int64)rw; \
-}
+#define RW_FUNCTION write
+#include "rw_function.h"
 
-X64(fwrite)
-X64(fread)
-
-#undef X64
+#define RW_FUNCTION read
+#include "rw_function.h"
 
 static void
 qsort64(void *base, int64 n, int64 size,
@@ -500,12 +445,13 @@ qsort64(void *base, int64 n, int64 size,
     int (*compar_consted)(const void *, const void *);
     compar_consted = (int (*)(const void *, const void *)) compar;
     if (DEBUGGING) {
-        if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
-            error("Error: Overflow (%lld*%lld)\n", (llong)size, (llong)n);
+        if ((size <= 0) || (n <= 0)) {
+            error("Error: Invalid size(%lld) or n(%lld)\n",
+                  (llong)size, (llong)n);
             fatal(EXIT_FAILURE);
         }
-        if ((size <= 0) || (n <= 0)) {
-            error("Error: Invalid size(%lld) or n(%lld)\n", (llong)size, (llong)n);
+        if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
+            error("Error: Overflow (%lld*%lld)\n", (llong)size, (llong)n);
             fatal(EXIT_FAILURE);
         }
         if ((ullong)size >= (ullong)SIZE_MAX) {
@@ -1934,12 +1880,18 @@ static void
 write_entire_file(char *path, char *text, int64 text_len) {
     FILE *file;
 
+    if (text_len < 0) {
+        error("Error writing negative length %lld to %s.",
+              (llong)text_len, path);
+        fatal(EXIT_FAILURE);
+    }
+
     if ((file = fopen(path, "wb")) == NULL) {
         error("Error opening %s for writing: %s", path, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
-    if (fwrite64(text, 1, text_len, file) != text_len) {
+    if ((text_len > 0) && (fwrite64(text, 1, text_len, file) != text_len)) {
         error("Error writing %lld bytes to %s: %s.",
               (llong)text_len, path, strerror(errno));
         fatal(EXIT_FAILURE);
@@ -1955,7 +1907,7 @@ sb_reserve(StrBuilder *str_builder, int32 extra) {
     int32 old_cap = str_builder->cap;
     int32 cap;
 
-    if (need <= str_builder->cap) {
+    if (str_builder->data && need <= str_builder->cap) {
         return;
     }
     if (need >= MAXOF(str_builder->cap)) {
@@ -1963,7 +1915,11 @@ sb_reserve(StrBuilder *str_builder, int32 extra) {
         fatal(EXIT_FAILURE);
     }
 
-    if (str_builder->cap <= 0) {
+    if (!str_builder->data) {
+        old_cap = 0;
+    }
+
+    if (!str_builder->data || str_builder->cap <= 0) {
         cap = 256;
     } else {
         cap = str_builder->cap;
