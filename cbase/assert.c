@@ -622,9 +622,9 @@ a_bool_##MODE(char *file, uint line, char *func,                       \
     if (!(var1 SYMBOL var2)) {                                         \
         char *s1 = "false";                                            \
         char *s2 = "false";                                            \
-        if (!DEBUGGING) {                              \
-            __builtin_unreachable(); \
-        } \
+        if (!DEBUGGING) {                                              \
+            __builtin_unreachable();                                   \
+        }                                                              \
         if (var1) {                                                    \
             s1 = "true";                                               \
         }                                                              \
