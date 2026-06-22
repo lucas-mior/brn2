@@ -89,4 +89,10 @@
 #undef MAX
 #endif
 
+#if OS_WINDOWS
+#define RW_TYPE uint
+#else
+#define RW_TYPE size_t
+#endif
+
 #endif /* PLATFORM_DETECTION_H */

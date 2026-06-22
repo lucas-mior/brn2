@@ -704,9 +704,16 @@ tokenize(char *text, int32 text_len) {
 
 static void
 free_tokenization(Tokenization *tokenization) {
-    for (int32 i = 0; i < tokenization->token_count; i += 1) {
-        Token *token = &tokenization->tokens[i];
-        free2(token->text, token->len + 1);
+    if (tokenization == NULL) {
+        return;
+    }
+
+    if (tokenization->tokens) {
+        for (int32 i = 0; i < tokenization->token_count; i += 1) {
+            Token *token = &tokenization->tokens[i];
+
+            free2(token->text, token->len + 1);
+        }
     }
 
     free2(tokenization->tokens,
