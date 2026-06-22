@@ -1817,7 +1817,8 @@ timezone_init(void) {
 #define GETENV(VAR) do { \
     if ((VAR = getenv(#VAR)) == NULL) { \
         if (DEBUGGING) { \
-            error(RED("%s") " is not defined.", #VAR); \
+            error_impl(__FILE__, __LINE__, (char *)__func__, \
+                       RED("%s") " is not defined.", #VAR); \
         } \
     } else { \
         int32 len = strlen32(VAR); \
@@ -2133,7 +2134,7 @@ command_run_capture(Command *command, char *cwd) {
         XCLOSE(&pipefd[1]);
 
         execvp(command->argv[0], command->argv);
-        perror("execvp");
+        error("Error executing %s: %s.\n", command->argv[0], strerror(errno));
         _exit(127);
     default:
         XCLOSE(&pipefd[1]);
