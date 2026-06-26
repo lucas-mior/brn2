@@ -146,4 +146,16 @@ _Generic((SIZE), \
 
 #define π 3.14159265358979323846264338327950288
 
+#if !defined(__has_builtin)
+  #define __has_builtin(x) 0  // Compatibility with older/alternative compilers
+#endif
+
+#if __has_builtin(__builtin_unreachable)
+  #define UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+  #define UNREACHABLE() __assume(0)
+#else
+  #define UNREACHABLE() do { } while(0)
+#endif
+
 #endif /* BASE_MACROS_H */
