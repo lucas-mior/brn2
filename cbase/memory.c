@@ -732,10 +732,11 @@ static void *
 xmmap_commit(int64 *size) {
     void *p;
 
+    if (*size == 0) {
+        *size = 1;
+    }
+
     if (RUNNING_ON_VALGRIND) {
-        if (*size == 0) {
-            *size = 1;
-        }
         p = malloc((size_t)*size);
         memset64(p, 0, *size);
         return p;

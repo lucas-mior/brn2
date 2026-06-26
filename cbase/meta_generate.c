@@ -30,7 +30,7 @@ c_string_literal(char *value, int32 value_len) {
 
     if (out.cap != out.len + 1) {
         out.data
-        = realloc2(out.data, out.cap, out.len + 1, SIZEOF(out.data[0]));
+            = realloc2(out.data, out.cap, out.len + 1, SIZEOF(out.data[0]));
         out.cap = out.len + 1;
     }
 
@@ -173,7 +173,7 @@ emit_u64_array_initializer(StrBuilder *out, char *field, uint64 *values,
 
 static void
 c_emit_wrapped_expr(StrBuilder *out, char *indent, char *prefix, char *expr,
-                     char *suffix) {
+                    char *suffix) {
     int32 prefix_len = strlen32(prefix);
 
     SB_APPEND(out, indent);
@@ -191,7 +191,6 @@ c_emit_wrapped_expr(StrBuilder *out, char *indent, char *prefix, char *expr,
     SB_APPEND(out, suffix);
     SB_APPEND(out, "\n");
 }
-
 
 #if TESTING_meta_generate
 
@@ -230,12 +229,11 @@ test_emit_string_and_lens_initializers(void) {
     int32 lens[3] = {5, 0, 6};
 
     emit_string_array_initializer(&out, "names", values, lens, 3, "v");
-    ASSERT_EQUAL(out.data,
-                 "    .names = {\n"
-                 "        \"alpha\",\n"
-                 "        \"v1\",\n"
-                 "        \"quo\\\"te\",\n"
-                 "    },\n");
+    ASSERT_EQUAL(out.data, "    .names = {\n"
+                           "        \"alpha\",\n"
+                           "        \"v1\",\n"
+                           "        \"quo\\\"te\",\n"
+                           "    },\n");
 
     sb_free(&out);
     emit_lens_initializer(&out, "name_lens", values, lens, 3, "v");
@@ -266,10 +264,9 @@ test_emit_wrapped_expr(void) {
     StrBuilder out = {0};
 
     c_emit_wrapped_expr(&out, "  ", "return ", "f(a,b)", ";");
-    ASSERT_EQUAL(out.data,
-                 "  return f(\n"
-                 "         a,\n"
-                 "         b);\n");
+    ASSERT_EQUAL(out.data, "  return f(\n"
+                           "         a,\n"
+                           "         b);\n");
     free2(out.data, out.cap);
     return;
 }

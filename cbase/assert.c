@@ -58,7 +58,7 @@
 #define ASSERT(C) do {                                     \
     if (!(C)) {                                            \
         if (!DEBUGGING) {                                  \
-            __builtin_unreachable();                       \
+            UNREACHABLE();                       \
         } else {                                           \
             error2("%s: Assertion '%s' failed at %s:%d\n", \
                    __func__, #C, __FILE__, __LINE__);      \
@@ -174,7 +174,7 @@ a_pointers_##MODE(char *file, uint line, char *func,                     \
                   void *var1, void *var2) {                              \
     if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) {                     \
         if (!DEBUGGING) {                              \
-            __builtin_unreachable(); \
+            UNREACHABLE(); \
         } \
         error2("\n%s: Assertion failed at %s:%u\n", func, file, line);   \
         error2("%s = %p " #SYMBOL " %p = %s\n",                          \
@@ -202,7 +202,7 @@ a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
                        TYPE long long var1, TYPE long long var2) {          \
     if (!(var1 SYMBOL var2)) {                                              \
         if (!DEBUGGING) {                              \
-            __builtin_unreachable(); \
+            UNREACHABLE(); \
         } \
         error2("\n%s: Assertion failed at %s:%u\n", func, file, line);      \
         error2("[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
@@ -252,7 +252,7 @@ a_signed_unsigned##MODE(char *file, uint line, char *func,              \
                         llong var1, ullong var2) {                      \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) {             \
         if (!DEBUGGING) {                              \
-            __builtin_unreachable(); \
+            UNREACHABLE(); \
         } \
         error2("\n%s: Assertion failed at %s:%u\n", func, file, line);  \
         error2("[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",     \
@@ -280,7 +280,7 @@ a_unsigned_signed_##MODE(char *file, uint line, char *func,             \
                          ullong var1, llong var2) {                     \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) {          \
         if (!DEBUGGING) {                              \
-            __builtin_unreachable(); \
+            UNREACHABLE(); \
         } \
         error2("\n%s: Assertion failed at %s:%u\n", func, file, line);  \
         error2("[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",     \
@@ -479,7 +479,7 @@ assert_ldouble_failure(char *file, uint line, char *func,
                        ldouble var1, ldouble var2, char *symbol,
                        ldouble diff, ldouble abs_tol, ldouble rel_tol) {
     if (!DEBUGGING) {
-        __builtin_unreachable();
+        UNREACHABLE();
     }
     error2("\n%s: Assertion failed at %s:%u\n", func, file, line);
     error2("[%s%lld]%s = "LDOUBLE_FORMAT " %s "LDOUBLE_FORMAT " = %s[%s%lld]\n",
@@ -623,7 +623,7 @@ a_bool_##MODE(char *file, uint line, char *func,                       \
         char *s1 = "false";                                            \
         char *s2 = "false";                                            \
         if (!DEBUGGING) {                                              \
-            __builtin_unreachable();                                   \
+            UNREACHABLE();                                   \
         }                                                              \
         if (var1) {                                                    \
             s1 = "true";                                               \
