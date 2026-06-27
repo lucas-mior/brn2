@@ -31,7 +31,7 @@
 #endif
 
 #if !defined(ENUM_UNDERLYING_TYPE)
-  #if __clang__
+  #if CC_CLANG
     #define ENUM_UNDERLYING_TYPE : uint32
   #else
     #define ENUM_UNDERLYING_TYPE
@@ -195,35 +195,28 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 }
 
 
-static int32
+static bool
 CAT(ENUM_PREFIX_, token_equals)(char *token, int32 token_len, char *name) {
     int32 name_len = strlen32(name);
     if (token_len != name_len) {
-        return 0;
+        return false;
     }
-    return strncmp(token, name, (size_t)token_len) == 0;
+    return !strncmp32(token, name, token_len);
 }
 
-static int32
+static bool
 CAT(ENUM_PREFIX_, token_equals_enum_name)(char *token, int32 token_len,
                                           char *name) {
     char *prefix = QUOTE(ENUM_PREFIX_);
     int32 prefix_len = strlen32(prefix);
 
     if (CAT(ENUM_PREFIX_, token_equals)(token, token_len, name)) {
-        return 1;
+        return true;
     }
-    if (strncmp(name, prefix, (size_t)prefix_len) != 0) {
-        return 0;
+    if (strncmp32(name, prefix, prefix_len)) {
+        return false;
     }
-    return CAT(ENUM_PREFIX_, token_equals)(token, token_len,
-                                           name + prefix_len);
-}
-
-static int32
-CAT(ENUM_PREFIX_, is_ident_char)(char c) {
-    return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
-            || (c >= '0' && c <= '9') || c == '_');
+    return CAT(ENUM_PREFIX_, token_equals)(token, token_len, name + prefix_len);
 }
 
 static enum ENUM_NAME
@@ -257,7 +250,7 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
         }
 
         token = p;
-        while (CAT(ENUM_PREFIX_, is_ident_char)(*p)) {
+        while (is_ident_char(*p)) {
             p += 1;
         }
         token_len = (int32)(p - token);
