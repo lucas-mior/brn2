@@ -34,6 +34,7 @@
 #include <sys/stat.h>
 #include <float.h>
 #include <dirent.h>
+#include <ctype.h>
 
 #include "platform_detection.h"
 
@@ -86,6 +87,13 @@ _Generic((VAR),                \
     double: clamp_double,      \
     default: clamp_int64       \
 )(VAR, VMIN, VMAX)
+
+#define SQUARE(VAR)           \
+_Generic((VAR),               \
+    float: square_double,     \
+    double: square_double,    \
+    default: square_int64     \
+)(VAR)
 
 #define CLAMP_TYPE double
 #include "clamp.h"
@@ -2020,6 +2028,16 @@ parse_option(char **parsed, char *arg, char *option_name) {
         return true;
     }
     return false;
+}
+
+static bool
+is_ident_start_char(char c) {
+    return isalpha((uint8)c) || c == '_';
+}
+
+static bool
+is_ident_char(char c) {
+    return isalnum((uint8)c) || c == '_';
 }
 
 static void
