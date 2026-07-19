@@ -477,7 +477,6 @@ realloc_flex_debug(char *file, int32 line, char *func,
         return realloc(old, (size_t)(struct_size + new_capacity*obj_size));
     }
 
-
     total_size = struct_size + new_capacity*obj_size;
     old_size = struct_size + old_capacity*obj_size;
 

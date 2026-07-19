@@ -138,6 +138,15 @@ _Generic((SIZE), \
 #define MAP_POPULATE 0
 #endif
 
+#if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
+#define MAP_ANON MAP_ANONYMOUS
+#elif !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
+#define MAP_ANONYMOUS MAP_ANON
+#elif !defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
+#define MAP_ANON 0
+#define MAP_ANONYMOUS 0
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
 #define UNUSED __attribute__((unused))
 #else
@@ -156,6 +165,12 @@ _Generic((SIZE), \
   #define UNREACHABLE() __assume(0)
 #else
   #define UNREACHABLE() do { } while(0)
+#endif
+
+#if CC_CLANG
+#define ENUM_UNDERLYING_TYPE_ : uint32
+#else
+#define ENUM_UNDERLYING_TYPE_
 #endif
 
 #endif /* BASE_MACROS_H */
