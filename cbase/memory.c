@@ -326,14 +326,14 @@ realloc_debug(char *file, int32 line, char *func,
 
         pthread_mutex_lock(&allocations_mutex);
 
-        if ((old != NULL) && (allocations == NULL)) {
+        if (old && (allocations == NULL)) {
             error_impl(file, line, func,
                        "Tried to reallocate invalid pointer: %p.", old);
             fatal(EXIT_FAILURE);
         } else if (allocations == NULL) {
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
         }
-        if (old != NULL) {
+        if (old) {
             DebugAllocInfo old_info;
             intptr old_key = (intptr)old;
 
@@ -491,14 +491,14 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
         pthread_mutex_lock(&allocations_mutex);
 
-        if ((old != NULL) && (allocations == NULL)) {
+        if (old && (allocations == NULL)) {
             error_impl(file, line, func,
                        "Tried to reallocate invalid pointer: %p.\n", old);
             fatal(EXIT_FAILURE);
         } else if (allocations == NULL) {
             allocations = hash_create_alloc_map(1024, "DebugAllocations");
         }
-        if (old != NULL) {
+        if (old) {
             DebugAllocInfo old_info;
             intptr old_key = (intptr)old;
 
