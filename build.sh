@@ -43,7 +43,7 @@ main="main.c"
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
-CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700"
+CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
@@ -192,8 +192,12 @@ if [ "$target" = "cross" ]; then
 
     case $cross in
     "x86_64-macos"|"aarch64-macos")
-        CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
+        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
         CFLAGS="$CFLAGS -fno-lto"
+        LDFLAGS="$LDFLAGS -lpthread"
+        ;;
+    *linux*)
+        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
     *windows*)
@@ -204,6 +208,14 @@ if [ "$target" = "cross" ]; then
         ;;
     esac
 else
+    case "$OS" in
+    *Linux*)
+        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
+        ;;
+    *Darwin*)
+        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
+        ;;
+    esac
     LDFLAGS="$LDFLAGS -lpthread"
 fi
 

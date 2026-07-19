@@ -139,7 +139,7 @@ INLINE void *memchr64(void *pointer, int32 value, int64 size);
 INLINE int memcmp64(void *left, void *right, int64 size);
 static char *basename2(char *path, int32 *full_length, int32 *base_len);
 
-#if OS_WINDOWS || OS_BSD
+#if OS_WINDOWS
 static void *
 memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     uchar *h = haystack;
