@@ -170,8 +170,7 @@ memory_check(void) {
                 }
             }
 
-            if (MEMORY_CHECK_USE_AFTER_FREE
-                    && (info.reallocated == -1)) {
+            if (MEMORY_CHECK_USE_AFTER_FREE && (info.reallocated == -1)) {
                 for (int64 j = 0; j < info.size; j += 1) {
                     if (p[j] != 0xCD) {
                         error_impl(info.file, info.line, info.func,
