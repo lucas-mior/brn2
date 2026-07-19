@@ -18,6 +18,12 @@
 #if !defined(UTIL_C)
 #define UTIL_C
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -133,7 +139,7 @@ INLINE void *memchr64(void *pointer, int32 value, int64 size);
 INLINE int memcmp64(void *left, void *right, int64 size);
 static char *basename2(char *path, int32 *full_length, int32 *base_len);
 
-#if OS_WINDOWS
+#if OS_WINDOWS || OS_BSD
 static void *
 memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     uchar *h = haystack;
@@ -168,15 +174,26 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 }
 #endif
 
-extern void *memrchr(const void *pointer, int32 character_to_find, size_t size);
-void *
-memrchr(const void *pointer, int32 character_to_find, size_t size) {
-    uchar *buffer = (uchar *)pointer;
-    uchar target_byte = (uchar)character_to_find;
+INLINE void *
+memrchr64(void *pointer, int32 value, int64 size) {
+    uchar *buffer;
+    uchar target;
 
-    for (long i = (long)(size - 1); i >= 0; i -= 1) {
-        if (buffer[i] == target_byte) {
-            return (void *)(buffer + i);
+    if (DEBUGGING) {
+        if (size < 0) {
+            error("Error: Invalid size = %lld\n", (llong)size);
+            fatal(EXIT_FAILURE);
+        }
+    }
+    if (size == 0) {
+        return NULL;
+    }
+
+    buffer = pointer;
+    target = (uchar)value;
+    for (int64 i = size - 1; i >= 0; i -= 1) {
+        if (buffer[i] == target) {
+            return buffer + i;
         }
     }
 
@@ -241,26 +258,21 @@ memchr64(void *pointer, int32 value, int64 size) {
     return memchr(pointer, value, (size_t)size);
 }
 
-INLINE void *
-memrchr64(void *pointer, int32 value, int64 size) {
-    if (DEBUGGING) {
-        if (size < 0) {
-            error("Error: Invalid size = %lld\n", (llong)size);
-            fatal(EXIT_FAILURE);
-        }
-    }
-    if (size == 0) {
+static int32
+optional_strlen32(char *string) {
+    if (string == NULL) {
         return 0;
     }
-    return memrchr(pointer, value, (size_t)size);
+    return strlen32(string);
 }
 
-INLINE int32
+static int32
 strlen32(char *string) {
     int32 length;
     size_t len = strlen(string);
 
     if (DEBUGGING) {
+        ASSERT(string);
         if (len >= MAXOF(length)) {
             error("Error: string (%.*s ...) is too long.\n", 50, string);
             fatal(EXIT_FAILURE);
@@ -804,7 +816,6 @@ xclosedir(DIR *dir, char *dirname) {
     return 0;
 }
 
-
 #if OS_WINDOWS
 static int
 util_command(int argc, char **argv) {
@@ -1176,7 +1187,6 @@ util_copy_file_sync(char *destination, char *source) {
     XCLOSE(&destination_fd, destination);
     return 0;
 }
-
 
 #if !defined(MAX_FILES_COPY)
 #define MAX_FILES_COPY 256
@@ -1910,7 +1920,7 @@ write_entire_file(char *path, char *text, int64 text_len) {
     return;
 }
 
-void
+static void
 sb_reserve(StrBuilder *str_builder, int32 extra) {
     int64 need = str_builder->len + extra + 1;
     int32 old_cap = str_builder->cap;
@@ -1943,7 +1953,7 @@ sb_reserve(StrBuilder *str_builder, int32 extra) {
     return;
 }
 
-void
+static void
 sb_append(StrBuilder *str_builder, char *s, int32 n) {
     sb_reserve(str_builder, n);
     memcpy64(str_builder->data + str_builder->len, s, n);
@@ -1964,7 +1974,7 @@ sb_free(StrBuilder *str_builder) {
         sb_append(BUILER, STRING, (int32)LEN)
 #define SB_APPEND(...) SELECT_ON_NUM_ARGS(SB_APPEND_, __VA_ARGS__)
 
-void
+static void
 sb_printf(StrBuilder *str_builder, char *fmt, ...) {
     va_list ap;
     va_list ap2;
@@ -1988,7 +1998,7 @@ sb_printf(StrBuilder *str_builder, char *fmt, ...) {
     return;
 }
 
-char *
+static char *
 sb_steal(StrBuilder *str_builder, int32 *len) {
     char *out;
     (void)len;
@@ -2232,7 +2242,6 @@ command_result_free(CommandResult *result) {
     return;
 }
 
-
 static void
 command_push(Command *command, char *argument) {
 
@@ -2404,7 +2413,6 @@ util_functions_sink(void) {
     X(WEEK_DAY_SATURDAY, 20)
 #include "xenums.c"
 
-
 #define ENUM_NAME PowerOfTwo
 #define ENUM_BITFLAGS 1
 #define ENUM_PREFIX_ POWER_OF2_
@@ -2416,7 +2424,6 @@ util_functions_sink(void) {
     X(POWER_OF2_SIXTEEN) \
     X(POWER_OF2_THIRTY2)
 #include "xenums.c"
-
 
 static void
 write_file(char *path, void *data, int64 len) {
@@ -2798,6 +2805,10 @@ main(int argc, char **argv) {
     exit(EXIT_SUCCESS);
 }
 
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
 
 #endif /* UTIL_C */

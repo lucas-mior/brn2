@@ -192,7 +192,6 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
 #define SF(F, X) toString((char[S_BSZ]){ "" }, S_BSZ, (F), (X))
 #define VF(F, X) "", SF((F), (X)), ""
 
-
 #define TYPENAME(VAR)        \
 _Generic((VAR),              \
     void*:   "void*",        \
@@ -774,7 +773,6 @@ main(void) {
                     V(c) " divided by " V(d) " equals " V(c/d) "\n");
         assert(n == strlen2("Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));
-
 
         assert(!strcmp(buf, "Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));

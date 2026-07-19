@@ -186,7 +186,7 @@ main(void) {
         assert(stat.st_size == 34523);
         assert(stat.st_mtime == 1735689600);
         assert(stat.st_ctime == 1735689600);
-        error("stat.atime: %lu\n", stat.st_atime);
+        error("stat.atime: %lld\n", stat.st_atime);
     }
 
     {

@@ -194,7 +194,6 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #endif
 }
 
-
 static bool
 CAT(ENUM_PREFIX_, token_equals)(char *token, int32 token_len, char *name) {
     int32 name_len = strlen32(name);
