@@ -592,6 +592,7 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
 
 int32
 itoa2(char *str, int32 size, llong num) {
+    ullong magnitude;
     int i = 0;
     bool negative = false;
 
@@ -601,17 +602,17 @@ itoa2(char *str, int32 size, llong num) {
     }
 
     if (num < 0) {
-        // TODO: Convert through an unsigned magnitude. Negating LLONG_MIN is
-        // signed overflow and therefore undefined behavior.
         negative = true;
-        num = -num;
+        magnitude = (ullong)(-(num + 1)) + 1;
+    } else {
+        magnitude = (ullong)num;
     }
 
     do {
-        str[i] = num % 10 + '0';
+        str[i] = (char)(magnitude % 10 + '0');
         i += 1;
-        num /= 10;
-    } while (num > 0);
+        magnitude /= 10;
+    } while (magnitude > 0);
 
     if (negative) {
         str[i] = '-';
