@@ -22,12 +22,6 @@ static int64
 CAT(f, RW_FUNCTION, 64)(void *buffer, int64 size, int64 n, FILE *file) {
     size_t rw;
 
-    // TODO: Validate n before dividing by it. n == 0 reaches undefined
-    // division before the later invalid-argument check.
-    if (size >= (MAXOF(size)/n)) {
-        error("Error: Overflow (%lld*%lld)\n", (llong)size, (llong)n);
-        fatal(EXIT_FAILURE);
-    }
     if (size <= 0) {
         error("Error: Invalid size = %lld\n", (llong)size);
         fatal(EXIT_FAILURE);
@@ -36,13 +30,16 @@ CAT(f, RW_FUNCTION, 64)(void *buffer, int64 size, int64 n, FILE *file) {
         error("Error: Invalid n = %lld\n", (llong)n);
         fatal(EXIT_FAILURE);
     }
+    if (size >= (MAXOF(size)/n)) {
+        error("Error: Overflow (%lld*%lld)\n", (llong)size, (llong)n);
+        fatal(EXIT_FAILURE);
+    }
     if ((size_t)size >= MAXOF(rw)) {
         error("Error: size (%lld) is bigger than SIZEMAX\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
     if ((size_t)n >= MAXOF(rw)) {
-        // TODO: Print n, not size, in this diagnostic.
-        error("Error: n (%lld) is bigger than SIZEMAX\n", (llong)size);
+        error("Error: n (%lld) is bigger than SIZEMAX\n", (llong)n);
         fatal(EXIT_FAILURE);
     }
 
