@@ -250,7 +250,7 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
             char *end = NULL;
             // TODO: Check errno, end == p, and UINT32_MAX before converting.
             // Overflowing numeric tokens are silently truncated into result.
-            unsigned long value = strtoul(p, &end, 0);
+            ulong value = strtoul(p, &end, 0);
             result |= (uint32)value;
             p = end;
             continue;
