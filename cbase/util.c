@@ -1622,7 +1622,7 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
     normalize(path, full_length);
 
     left = *full_length;
-    // TODO: Handle an empty path before forming path - 1, which is undefined.
+    ASSERT_MORE(*full_length, 0);
     end = path + left - 1;
 
     if (left == 1) {
