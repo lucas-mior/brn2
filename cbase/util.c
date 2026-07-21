@@ -480,8 +480,7 @@ qsort64(void *base, int64 n, int64 size,
             fatal(EXIT_FAILURE);
         }
         if ((ullong)n >= (ullong)SIZE_MAX) {
-            // TODO: Print n, not size, in this diagnostic.
-            error("Error: Number (%lld) is bigger than SIZEMAX\n", (llong)size);
+            error("Error: Number (%lld) is bigger than SIZEMAX\n", (llong)n);
             fatal(EXIT_FAILURE);
         }
     }
@@ -574,7 +573,7 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     int n;
     va_list args;
 
-    // TODO: Reject negative size before converting it to size_t.
+    ASSERT_MORE_EQUAL(size, 0);
     va_start(args, format);
     n = vsnprintf(buffer, (size_t)size, format, args);
     va_end(args);
