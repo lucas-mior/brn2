@@ -446,7 +446,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
     void *old_base;
     void *base_p;
     uchar *ptr;
-    int64 total_size;
+    int64 new_size;
     int64 old_size;
     (void)old_capacity;
 
@@ -486,7 +486,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
         return realloc(old, (size_t)(struct_size + new_capacity*obj_size));
     }
 
-    total_size = struct_size + new_capacity*obj_size;
+    new_size = struct_size + new_capacity*obj_size;
     // TODO: Validate old_capacity and check the old-size arithmetic for
     // overflow before using it for bounds checks and debug bookkeeping.
     old_size = struct_size + old_capacity*obj_size;
@@ -495,7 +495,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
         DebugAllocInfo info;
         intptr p_key;
 
-        info.size = total_size;
+        info.size = new_size;
         info.file = file;
         info.line = line;
         info.func = func;
@@ -564,10 +564,10 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 int64 copy_size = old_size;
                 // TODO: Check guard-size addition for overflow before
                 // allocating the flex debug block.
-                base_p = xmalloc(total_size + 2*MEMORY_PADDING, false);
+                base_p = xmalloc(new_size + 2*MEMORY_PADDING, false);
 
-                if (total_size < old_size) {
-                    copy_size = total_size;
+                if (new_size < old_size) {
+                    copy_size = new_size;
                 }
                 if (copy_size > 0) {
                     memcpy64((uchar *)base_p + MEMORY_PADDING, old, copy_size);
@@ -585,13 +585,13 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 old_base = ((uchar *)old - MEMORY_PADDING);
                 // TODO: Check guard-size addition for overflow before
                 // reallocating the flex debug block.
-                base_p = xrealloc(old_base, total_size + 2*MEMORY_PADDING);
+                base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
             // TODO: Check guard-size addition for overflow before allocating
             // the flex debug block.
-            base_p = xrealloc(old_base, total_size + 2*MEMORY_PADDING);
+            base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
@@ -600,7 +600,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
             ptr[j] = 0xDC;
         }
         for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
-            ptr[MEMORY_PADDING + total_size + j] = 0xDC;
+            ptr[MEMORY_PADDING + new_size + j] = 0xDC;
         }
 
         p = ptr + MEMORY_PADDING;
