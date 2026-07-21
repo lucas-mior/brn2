@@ -2519,11 +2519,12 @@ command_run_capture(Command *command, char *cwd) {
     }
     XCLOSE(&pipefd[0]);
 
-    // TODO: Retry waitpid after EINTR to avoid treating an interrupted wait as
-    // a fatal child-process failure.
-    if (waitpid(pid, &status, 0) < 0) {
+    while (waitpid(pid, &status, 0) < 0) {
         free2(output, len + 1);
-        error("waitpid failed: %s", strerror(errno));
+        error("Error waiting for child: %s", strerror(errno));
+        if (errno == EINTR) {
+            continue;
+        }
         fatal(EXIT_FAILURE);
     }
 
