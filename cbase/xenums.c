@@ -131,7 +131,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
         case CAT(ENUM_PREFIX_, LAST):
             return QUOTE(ENUM_PREFIX_) "LAST";
         default:
-            return "Unknown value";
+            return "Invalid enum value.";
     }
 #else
     char buffer[CAT(ENUM_PREFIX_, BIT_COUNT)*256 + 1];
@@ -173,10 +173,10 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM_FL_2
     #undef XENUM
 
-    if (buffer_ptr == buffer) {
-        // TODO: Preserve unknown set bits instead of reporting NONE. A nonzero
-        // value containing only unrecognized bits is currently misrepresented.
+    if (val == 0) {
         return xstrdup("NONE");
+    } else if (buffer_ptr == buffer) {
+        return xstrdup("Invalid bit flags enum value.\n");
     }
 
     *buffer_ptr = '\0';
