@@ -105,6 +105,14 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE {
     CAT(ENUM_PREFIX_, LAST)
 };
 
+static void
+CAT(ENUM_PREFIX_, str_free)(char *str) {
+#if ENUM_BITFLAGS
+    free2(str, strlen32(str) + 1);
+#endif
+    return;
+}
+
 static char *
 CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
@@ -168,14 +176,12 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     if (buffer_ptr == buffer) {
         // TODO: Preserve unknown set bits instead of reporting NONE. A nonzero
         // value containing only unrecognized bits is currently misrepresented.
-        return "NONE";
+        return xstrdup("NONE");
     }
 
     *buffer_ptr = '\0';
 
     {
-        // TODO: Define one ownership rule for all return paths. Zero returns a
-        // static literal while nonzero values return heap memory.
         int64 final_len = (int64)(buffer_ptr - buffer) + 1;
         char *copy;
 
