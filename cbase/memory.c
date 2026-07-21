@@ -578,6 +578,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 old_info.func = func;
                 old_info.reallocated = -1;
                 hash_insert_alloc_map(allocations, &old_key, old_info);
+
                 if (MEMORY_CHECK_USE_AFTER_FREE) {
                     memset64(old, 0xCD, old_info.size);
                 }
