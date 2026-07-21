@@ -7,7 +7,7 @@
 #include "util.c"
 
 typedef struct GenericArrayHeader {
-    max_align_t alignment;
+    ldouble alignment;
     int32 count;
     int32 cap;
 } GenericArrayHeader;
@@ -80,6 +80,13 @@ generic_array_grow(void *array, int64 item_size) {
     header->cap = new_cap;
 
     return header + 1;
+}
+
+static inline void
+array_sink(void) {
+    (void)generic_array_init;
+    (void)generic_array_grow;
+    return;
 }
 
 #endif /* ARRAY_H */

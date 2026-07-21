@@ -70,7 +70,7 @@
 #undef SIZEOF
 #endif
 #define SIZEOF(X) ((int64)sizeof(X))
-#define LENGTH(x) (int64)((sizeof(x) / sizeof(*x)))
+#define LENGTH(x) (int32)((sizeof(x) / sizeof(*x)))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
 #define ALIGN_POWER_OF_2_(SIZE, A) (int64)(((SIZE) + ((A) - 1)) & ~((A) - 1))
