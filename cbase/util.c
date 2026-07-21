@@ -269,10 +269,12 @@ optional_strlen32(char *string) {
 static int32
 strlen32(char *string) {
     int32 length;
-    size_t len = strlen(string);
+    size_t len;
+
+    ASSERT(string);
+    len = strlen(string);
 
     if (DEBUGGING) {
-        ASSERT(string);
         if (len >= MAXOF(length)) {
             error("Error: string (%.*s ...) is too long.\n", 50, string);
             fatal(EXIT_FAILURE);
@@ -832,7 +834,7 @@ util_command(int argc, char **argv) {
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
-    // TODO: Validate argc, argv, and argv[0] before dereferencing argv[0].
+
     int64 len0 = strlen32(argv[0]);
     char argv0_windows[BUFSIZ];
     char *argv0 = argv[0];
