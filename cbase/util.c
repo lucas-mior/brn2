@@ -1182,8 +1182,6 @@ util_copy_file_sync(char *destination, char *source) {
 
     errno = 0;
     while ((r = read64(source_fd, buffer, BUFSIZ)) > 0) {
-        // TODO: Loop until all r bytes are written and retry EINTR. A legal
-        // partial write is currently treated as a copy failure.
         w = write64(destination_fd, buffer, r);
         if (w != r) {
             fprintf(stderr, "Error writing data to %s", destination);
