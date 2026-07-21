@@ -707,12 +707,13 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #if OS_WINDOWS
 static int
 strerror_r(int errnum, char *buffer, size_t size) {
-    // TODO: Handle size == 0 and terminate at buffer[size - 1]. The current
-    // code underflows the copy bound and writes one byte past the buffer.
     char *error_message = strerror(errnum);
     int32 len = strlen32(error_message);
+
+    ASSERT_MORE(size, 0);
     memcpy64(buffer, error_message, (llong)MIN(len + 1, size - 1));
-    buffer[size] = '\0';
+    buffer[size - 1] = '\0';
+
     return 0;
 }
 #endif
