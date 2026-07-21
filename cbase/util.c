@@ -867,8 +867,6 @@ util_command(int argc, char **argv) {
 
     {
         int64 j = 0;
-        // TODO: Include every argument and handle an empty argument list.
-        // The last argument is omitted, and argc == 1 writes cmdline[-1].
         for (int i = 0; i < argc - 1; i += 1) {
             int64 len2 = strlen32(argv[i]);
             if ((j + len2) >= SIZEOF(cmdline)) {
@@ -1908,8 +1906,6 @@ read_entire_file(char *path, int32 *file_len) {
     if (len > 0) {
         r = fread64(data, 1, len, fp);
         if (r != len) {
-            // TODO: Use ferror/feof and report the stream error. errno can be
-            // unchanged here, producing a misleading "Success" message.
             error("Error reading "RED("%s")": %s.\n", path, strerror(errno));
             fatal(EXIT_FAILURE);
         }
