@@ -1273,10 +1273,7 @@ util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
 
         n = poll(pipes, (nfds_t)copy_files->nfds, 1000);
         if (n == 0) {
-            // TODO: Continue waiting or close every remaining descriptor before
-            // returning. A timeout currently leaks descriptors and truncates
-            // files.
-            break;
+            continue;
         }
         if (n < 0) {
             error("Error in poll(nfds=%lld): %s.\n",
