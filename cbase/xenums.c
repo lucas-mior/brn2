@@ -105,12 +105,6 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE {
     CAT(ENUM_PREFIX_, LAST)
 };
 
-// TODO: When ENUM_BITFLAGS == 1, passing bitwise OR'd integers into a strict
-// `enum ENUM_NAME` type could trigger compiler warnings or undefined behavior
-// in pedantic modes since the result isn't explicitly defined in the enum.
-// Consider changing the parameter type to an integer (e.g., uint32) for
-// bitflags.
-
 static char *
 CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
