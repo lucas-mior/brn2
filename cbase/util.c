@@ -976,6 +976,9 @@ util_command_launch(int argc, char **argv) {
     (void)argc;
 
     switch (fork()) {
+    case -1:
+        error("Error forking: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
     case 0:
         if (setsid() < 0) {
             error("Error in setsid: %s.\n", strerror(errno));
@@ -983,12 +986,7 @@ util_command_launch(int argc, char **argv) {
         execvp(argv[0], argv);
         STRING_FROM_ARRAY(cmd, " ", argv, argc);
         error("\nError executing\n%s\n%s.", cmd, strerror(errno));
-        // TODO: Call _exit here. Returning lets the forked child continue the
-        // caller's application code after execvp fails.
-        return -1;
-    case -1:
-        error("Error forking: %s.\n", strerror(errno));
-        fatal(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     default:
         return 0;
     }
