@@ -950,17 +950,16 @@ util_command(int argc, char **argv) {
             error(" %s", argv[j]);
         }
         error("': %s.\n", strerror(errno));
-        // TODO: Use _exit after fork. exit can flush inherited stdio buffers a
-        // second time and run parent atexit handlers in the child.
-        exit(2);
+        _exit(2);
     case -1:
         error("Error forking: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     default:
-        // TODO: Retry waitpid after EINTR so a signal does not leave the child
-        // unreaped and turn a successful command into a fatal error.
-        if (waitpid(child, &status, 0) < 0) {
+        while (waitpid(child, &status, 0) < 0) {
             error("Error waiting for the forked child: %s.\n", strerror(errno));
+            if (errno == EINTR) {
+                continue;
+            }
             fatal(EXIT_FAILURE);
         }
         if (!WIFEXITED(status)) {
