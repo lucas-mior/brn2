@@ -89,9 +89,7 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE {
     #define XENUM_DEF_1(e)    e,
     #define XENUM_DEF_2(e, v) e = v,
 #else
-    // TODO: Use an unsigned value of the underlying type. Shifting signed 1
-    // into bit 31 is undefined even though 32 flags are supported.
-    #define XENUM_DEF_1(e)    e = 1 << CAT(e, _BIT_IDX),
+    #define XENUM_DEF_1(e)    e = 1u << CAT(e, _BIT_IDX),
     #define XENUM_DEF_2(e, v) e = v,
 #endif
     #define X(...)            SELECT_ON_NUM_ARGS(XENUM_DEF_, __VA_ARGS__)
