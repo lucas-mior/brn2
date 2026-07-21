@@ -224,7 +224,7 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
 
     // TODO: Check that adding both guard regions fits in int64 and size_t.
     // A near-limit size can overflow before xmalloc sees it.
-    base_p = xmalloc(size + 2 * MEMORY_PADDING, false);
+    base_p = xmalloc(size + 2*MEMORY_PADDING, false);
     ptr = (uchar *)base_p;
 
     for (int32 j = 0; j < MEMORY_PADDING; j += 1) {
@@ -401,7 +401,7 @@ realloc_debug(char *file, int32 line, char *func,
                 int64 copy_size = old_size;
                 // TODO: Check guard-size addition for overflow before
                 // allocating the debug block.
-                base_p = xmalloc(new_size + 2 * MEMORY_PADDING, false);
+                base_p = xmalloc(new_size + 2*MEMORY_PADDING, false);
 
                 if (new_size < old_size) {
                     copy_size = new_size;
@@ -422,13 +422,13 @@ realloc_debug(char *file, int32 line, char *func,
                 old_base = ((uchar *)old - MEMORY_PADDING);
                 // TODO: Check guard-size addition for overflow before
                 // reallocating the debug block.
-                base_p = xrealloc(old_base, new_size + 2 * MEMORY_PADDING);
+                base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
             // TODO: Check guard-size addition for overflow before
             // allocating the debug block.
-            base_p = xrealloc(old_base, new_size + 2 * MEMORY_PADDING);
+            base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
@@ -485,7 +485,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
     // TODO: Compute the product in unsigned checked arithmetic. The signed
     // multiplication below can overflow before the cast validates it.
     if (((ullong)SIZE_MAX - (ullong)struct_size) <
-        (ullong)(new_capacity * obj_size)) {
+        (ullong)(new_capacity*obj_size)) {
         error_impl(file, line, func,
                    "Total flex allocation size overflows SIZEMAX.\n");
         fatal(EXIT_FAILURE);
@@ -577,7 +577,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 int64 copy_size = old_size;
                 // TODO: Check guard-size addition for overflow before
                 // allocating the flex debug block.
-                base_p = xmalloc(total_size + 2 * MEMORY_PADDING, false);
+                base_p = xmalloc(total_size + 2*MEMORY_PADDING, false);
 
                 if (total_size < old_size) {
                     copy_size = total_size;
@@ -598,13 +598,13 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 old_base = ((uchar *)old - MEMORY_PADDING);
                 // TODO: Check guard-size addition for overflow before
                 // reallocating the flex debug block.
-                base_p = xrealloc(old_base, total_size + 2 * MEMORY_PADDING);
+                base_p = xrealloc(old_base, total_size + 2*MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
             // TODO: Check guard-size addition for overflow before allocating
             // the flex debug block.
-            base_p = xrealloc(old_base, total_size + 2 * MEMORY_PADDING);
+            base_p = xrealloc(old_base, total_size + 2*MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
@@ -1030,19 +1030,19 @@ int main(void) {
         int64 initial_size;
         TestFlex *flex;
 
-        initial_size = SIZEOF(TestFlex) + (count * SIZEOF(int64));
+        initial_size = SIZEOF(TestFlex) + (count*SIZEOF(int64));
         flex = malloc2(initial_size);
         flex->count = (int32)count;
 
         for (int32 i = 0; i < count; i += 1) {
-            flex->items[i] = (int64)(i * 10);
+            flex->items[i] = (int64)(i*10);
         }
 
         memory_check();
         flex = realloc_flex(flex, count, grow, SIZEOF(int64));
         flex->count = (int32)grow;
         for (int32 i = 0; i < count; i += 1) {
-            ASSERT(flex->items[i] == (int64)(i * 10));
+            ASSERT(flex->items[i] == (int64)(i*10));
         }
         printf("realloc_flex (grow) preserved data.\n");
 
@@ -1050,7 +1050,7 @@ int main(void) {
         flex = realloc_flex(flex, grow, shrink, SIZEOF(int64));
         flex->count = (int32)shrink;
         for (int32 i = 0; i < shrink; i += 1) {
-            ASSERT(flex->items[i] == (int64)(i * 10));
+            ASSERT(flex->items[i] == (int64)(i*10));
         }
         printf("realloc_flex (shrink) successful.\n");
 
@@ -1078,12 +1078,12 @@ int main(void) {
 
     {
         int32 iterations = 2500;
-        void **ptrs = malloc2(iterations * SIZEOF(void *));
+        void **ptrs = malloc2(iterations*SIZEOF(void *));
 
         printf("\n--- Starting High-Volume Stress Tests ---\n");
 
         for (int32 i = 0; i < iterations; i += 1) {
-            ptrs[i] = malloc2(1 * SIZEOF(int64));
+            ptrs[i] = malloc2(1*SIZEOF(int64));
             ((int64 *)ptrs[i])[0] = (int64)i;
         }
         memory_check();
@@ -1091,16 +1091,16 @@ int main(void) {
         for (int32 i = 0; i < iterations; i += 1) {
             ptrs[i] = realloc2(ptrs[i], 1, 2, SIZEOF(int64));
             ASSERT(((int64 *)ptrs[i])[0] == (int64)i);
-            ((int64 *)ptrs[i])[1] = (int64)(i * 2);
+            ((int64 *)ptrs[i])[1] = (int64)(i*2);
         }
         memory_check();
 
         for (int32 i = 0; i < iterations; i += 1) {
             ASSERT(((int64 *)ptrs[i])[0] == (int64)i);
-            ASSERT(((int64 *)ptrs[i])[1] == (int64)(i * 2));
-            free2(ptrs[i], 2 * SIZEOF(int64));
+            ASSERT(((int64 *)ptrs[i])[1] == (int64)(i*2));
+            free2(ptrs[i], 2*SIZEOF(int64));
         }
-        free2(ptrs, iterations * SIZEOF(void *));
+        free2(ptrs, iterations*SIZEOF(void *));
         printf("High-volume tracking and validation successful.\n");
     }
 
@@ -1109,7 +1109,7 @@ int main(void) {
         TestString *v_strings;
 
         printf("Starting High-Volume Variable String Stress Tests.\n");
-        v_strings = malloc2(num_strings * SIZEOF(*v_strings));
+        v_strings = malloc2(num_strings*SIZEOF(*v_strings));
 
         srand(1337);
         for (int32 i = 0; i < num_strings; i += 1) {
@@ -1140,7 +1140,7 @@ int main(void) {
         for (int32 i = 0; i < num_strings; i += 1) {
             free2(v_strings[i].s, v_strings[i].len + 1);
         }
-        free2(v_strings, num_strings * SIZEOF(*v_strings));
+        free2(v_strings, num_strings*SIZEOF(*v_strings));
         printf("High-volume variable string tests successful.\n");
     }
 
@@ -1194,7 +1194,7 @@ int main(void) {
         int64 initial_size;
         TestFlex *flex;
 
-        initial_size = SIZEOF(TestFlex) + (count * SIZEOF(int64));
+        initial_size = SIZEOF(TestFlex) + (count*SIZEOF(int64));
         flex = malloc2(initial_size);
 
         ASSERT_EXPECTED_FATAL({
