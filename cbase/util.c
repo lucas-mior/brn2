@@ -1727,7 +1727,6 @@ print_timings(char *file, int32 line, char *func,
     llong seconds = t1.tv_sec - t0.tv_sec;
     llong nanos = t1.tv_nsec - t0.tv_nsec;
 
-    // TODO: Reject nitems == 0 before calculating a per-item duration.
     double total_seconds = (double)seconds + (double)nanos / 1.0e9;
     double micros_per = 1e6*(total_seconds / (double)nitems);
 
