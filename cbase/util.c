@@ -1255,9 +1255,7 @@ util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
     int *dests = copy_files->dests;
     int32 left = copy_files->nfds;
 
-    // TODO: Allow exactly LENGTH(pipes) descriptors. The backing arrays can
-    // hold that many, so this comparison rejects one valid slot.
-    if (copy_files->nfds >= LENGTH(copy_files->pipes)) {
+    if (copy_files->nfds > LENGTH(copy_files->pipes)) {
         error("Error too many files for UtilCopyFilesAsync definition.\n");
         fatal(EXIT_FAILURE);
     }
