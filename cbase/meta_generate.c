@@ -18,6 +18,8 @@ c_string_literal(char *value, int32 value_len) {
     StrBuilder out = {0};
 
     SB_APPEND(&out, "\"");
+    // TODO: Escape control characters, especially newlines and NUL bytes.
+    // Emitting them verbatim can create invalid or truncated C source.
     for (int32 i = 0; i < value_len; i += 1) {
         if ((value[i] == '\\') || (value[i] == '"')) {
             SB_APPEND(&out, "\\");
@@ -51,6 +53,9 @@ c_identifier(char *value, int32 value_len) {
         SB_APPEND(&out, &c, 1);
     }
 
+    // TODO: Reject or rewrite C keywords and reserved identifiers. Inputs
+    // such as "int" or names beginning with reserved underscores remain
+    // invalid.
     if (!out.len || isdigit((uint8)out.data[0])) {
         StrBuilder pref = {0};
         SB_APPEND(&pref, "_");
@@ -82,6 +87,9 @@ emit_string_array_initializer(StrBuilder *out, char *field, char **values,
 
     for (int32 i = 0; i < count; i += 1) {
         char fb[32];
+        // TODO: Build this fallback dynamically. A long prefix aborts
+        // generation
+        // even though the output builder itself supports longer strings.
         int32 fb_len = SNPRINTF(fb, "%s%d", fallback_prefix, i);
         char *value;
         int32 value_len;
@@ -114,6 +122,9 @@ emit_lens_initializer(StrBuilder *out, char *field, char **values,
     sb_printf(out, "    .%s = { ", field);
     for (int32 i = 0; i < count; i += 1) {
         char fb[32];
+        // TODO: Build this fallback dynamically. A long prefix aborts
+        // generation
+        // even though the output builder itself supports longer strings.
         int32 fb_len = SNPRINTF(fb, "%s%d", fallback_prefix, i);
         int32 value_len;
 

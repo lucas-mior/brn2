@@ -37,6 +37,8 @@ CAT(string_from_, SFA_NAME)(char *buffer, int32 size,
         n += m;
     }
     {
+        // TODO: Handle array_length == 0 before subtracting one. The current
+        // code reads array[-1] for an empty array.
         int32 i = array_length - 1;
         int32 space = size - n;
         n += snprintf2(buffer + n, space, SFA_FORMAT, array[i]);

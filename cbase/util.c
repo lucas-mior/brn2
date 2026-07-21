@@ -443,6 +443,7 @@ write_all(int fd, char *buffer, int64 left) {
     int64 w;
 
     while (left > 0) {
+        // TODO: Retry write when it fails with EINTR instead of terminating.
         if ((w = write(fd, buffer + written, (RW_TYPE)left)) <= 0) {
             fprintf(stderr, "Error writing: %s.\n", strerror(errno));
             fatal(EXIT_FAILURE);
@@ -479,6 +480,7 @@ qsort64(void *base, int64 n, int64 size,
             fatal(EXIT_FAILURE);
         }
         if ((ullong)n >= (ullong)SIZE_MAX) {
+            // TODO: Print n, not size, in this diagnostic.
             error("Error: Number (%lld) is bigger than SIZEMAX\n", (llong)size);
             fatal(EXIT_FAILURE);
         }
@@ -572,6 +574,7 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     int n;
     va_list args;
 
+    // TODO: Reject negative size before converting it to size_t.
     va_start(args, format);
     n = vsnprintf(buffer, (size_t)size, format, args);
     va_end(args);
@@ -595,6 +598,8 @@ itoa2(char *str, int32 size, llong num) {
     }
 
     if (num < 0) {
+        // TODO: Convert through an unsigned magnitude. Negating LLONG_MIN is
+        // signed overflow and therefore undefined behavior.
         negative = true;
         num = -num;
     }
@@ -663,6 +668,8 @@ util_filename_from(char *buffer, int64 size, int fd) {
         return -1;
     }
     len = MIN(strlen32(buffer2), size - 1);
+    // TODO: Copy len bytes and write buffer[len] = '\0'. When truncated, the
+    // source byte at len is not a terminator.
     memcpy64(buffer, buffer2, len + 1);
     return 0;
 #elif OS_WINDOWS
@@ -697,6 +704,8 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #if OS_WINDOWS
 static int
 strerror_r(int errnum, char *buffer, size_t size) {
+    // TODO: Handle size == 0 and terminate at buffer[size - 1]. The current
+    // code underflows the copy bound and writes one byte past the buffer.
     char *error_message = strerror(errnum);
     int32 len = strlen32(error_message);
     memcpy64(buffer, error_message, (llong)MIN(len + 1, size - 1));
@@ -823,6 +832,7 @@ util_command(int argc, char **argv) {
     FILE *tty;
     PROCESS_INFORMATION proc_info = {0};
     DWORD exit_code = 0;
+    // TODO: Validate argc, argv, and argv[0] before dereferencing argv[0].
     int64 len0 = strlen32(argv[0]);
     char argv0_windows[BUFSIZ];
     char *argv0 = argv[0];
@@ -849,6 +859,8 @@ util_command(int argc, char **argv) {
 
     {
         int64 j = 0;
+        // TODO: Include every argument and handle an empty argument list.
+        // The last argument is omitted, and argc == 1 writes cmdline[-1].
         for (int i = 0; i < argc - 1; i += 1) {
             int64 len2 = strlen32(argv[i]);
             if ((j + len2) >= SIZEOF(cmdline)) {
@@ -935,11 +947,15 @@ util_command(int argc, char **argv) {
             error(" %s", argv[j]);
         }
         error("': %s.\n", strerror(errno));
+        // TODO: Use _exit after fork. exit can flush inherited stdio buffers a
+        // second time and run parent atexit handlers in the child.
         exit(2);
     case -1:
         error("Error forking: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     default:
+        // TODO: Retry waitpid after EINTR so a signal does not leave the child
+        // unreaped and turn a successful command into a fatal error.
         if (waitpid(child, &status, 0) < 0) {
             error("Error waiting for the forked child: %s.\n", strerror(errno));
             fatal(EXIT_FAILURE);
@@ -965,6 +981,8 @@ util_command_launch(int argc, char **argv) {
         execvp(argv[0], argv);
         STRING_FROM_ARRAY(cmd, " ", argv, argc);
         error("\nError executing\n%s\n%s.", cmd, strerror(errno));
+        // TODO: Call _exit here. Returning lets the forked child continue the
+        // caller's application code after execvp fails.
         return -1;
     case -1:
         error("Error forking: %s.\n", strerror(errno));
@@ -1001,6 +1019,8 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     n = vsnprintf(buffer, (size_t)m, format, args);
 
     if (n >= m) {
+        // TODO: Restart or va_copy args before the second vsnprintf. Reusing a
+        // consumed va_list is undefined behavior.
         m = n + 1;
         big_buffer = xmalloc(m, false);
         n = vsnprintf(big_buffer, (size_t)m, format, args);
@@ -1162,6 +1182,8 @@ util_copy_file_sync(char *destination, char *source) {
 
     errno = 0;
     while ((r = read64(source_fd, buffer, BUFSIZ)) > 0) {
+        // TODO: Loop until all r bytes are written and retry EINTR. A legal
+        // partial write is currently treated as a copy failure.
         w = write64(destination_fd, buffer, r);
         if (w != r) {
             fprintf(stderr, "Error writing data to %s", destination);
@@ -1235,6 +1257,8 @@ util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
     int *dests = copy_files->dests;
     int32 left = copy_files->nfds;
 
+    // TODO: Allow exactly LENGTH(pipes) descriptors. The backing arrays can
+    // hold that many, so this comparison rejects one valid slot.
     if (copy_files->nfds >= LENGTH(copy_files->pipes)) {
         error("Error too many files for UtilCopyFilesAsync definition.\n");
         fatal(EXIT_FAILURE);
@@ -1248,6 +1272,9 @@ util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
 
         n = poll(pipes, (nfds_t)copy_files->nfds, 1000);
         if (n == 0) {
+            // TODO: Continue waiting or close every remaining descriptor before
+            // returning. A timeout currently leaks descriptors and truncates
+            // files.
             break;
         }
         if (n < 0) {
@@ -1265,6 +1292,8 @@ util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
             }
             n -= 1;
             while ((r = read64(pipes[i].fd, buffer, sizeof(buffer))) > 0) {
+                // TODO: Finish partial writes and report failure to the caller.
+                // This path closes the file and silently leaves it truncated.
                 if ((w = write64(dests[i], buffer, r)) != r) {
                     if (w < 0) {
                         error("Error writing: %s.\n", strerror(errno));
@@ -1338,6 +1367,9 @@ send_signal(char *executable, int32 signal_number) {
         }
         XCLOSE(&cmdline, buffer);
 
+        // TODO: Compare the executable pathname or basename exactly. Substring
+        // matching can signal unrelated processes whose argv[0] merely
+        // contains it.
         if (memmem64(command, r, executable, len)) {
             if ((last = memchr64(command, '\0', r))) {
                 r = last - command;
@@ -1488,6 +1520,8 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
 out:
+    // TODO: Skip XCLOSE for negative descriptors. An open failure is followed
+    // by a second, misleading "Error closing" diagnostic for fd == -1.
     XCLOSE(&fd_a, filename_a);
     XCLOSE(&fd_b, filename_b);
     return equal;
@@ -1597,6 +1631,7 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
     normalize(path, full_length);
 
     left = *full_length;
+    // TODO: Handle an empty path before forming path - 1, which is undefined.
     end = path + left - 1;
 
     if (left == 1) {
@@ -1626,6 +1661,8 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
             }
             return p;
         }
+        // TODO: Compare only non-NULL separators. Relational comparison
+        // between an array pointer and NULL is undefined behavior.
         if (fslash > bslash) {
             length = fslash - p + 1;
             p = fslash + 1;
@@ -1701,6 +1738,7 @@ print_timings(char *file, int32 line, char *func,
     llong seconds = t1.tv_sec - t0.tv_sec;
     llong nanos = t1.tv_nsec - t0.tv_nsec;
 
+    // TODO: Reject nitems == 0 before calculating a per-item duration.
     double total_seconds = (double)seconds + (double)nanos / 1.0e9;
     double micros_per = 1e6*(total_seconds / (double)nitems);
 
@@ -1736,6 +1774,8 @@ catfile(int where, char *file) {
         error("Error reading %s: %s.\n", file, strerror(errno));
         fatal(EXIT_FAILURE);
     }
+    // TODO: Close fd on both success and failure paths. Every call currently
+    // leaks the descriptor opened for file.
     return;
 }
 
@@ -1880,6 +1920,8 @@ read_entire_file(char *path, int32 *file_len) {
     if (len > 0) {
         r = fread64(data, 1, len, fp);
         if (r != len) {
+            // TODO: Use ferror/feof and report the stream error. errno can be
+            // unchanged here, producing a misleading "Success" message.
             error("Error reading "RED("%s")": %s.\n", path, strerror(errno));
             fatal(EXIT_FAILURE);
         }
@@ -2061,6 +2103,8 @@ sb_append(StrBuilder *str_builder, char *data, int32 data_len) {
         return;
     }
 
+    // TODO: Preserve data's offset before sb_reserve when it aliases this
+    // builder. A realloc makes the source pointer dangling before memcpy.
     sb_reserve(str_builder, data_len);
     memcpy64(str_builder->data + str_builder->len, data, data_len);
     str_builder->len += data_len;
@@ -2256,6 +2300,9 @@ str_builder_array_reserve(StrBuilderArray *array, int32 extra) {
         new_cap = 8;
     }
     while (new_cap < needed) {
+        // TODO: Stop before int32 doubling overflows. A large valid needed
+        // value
+        // can wrap new_cap and make this loop nonterminating.
         new_cap *= 2;
     }
 
@@ -2479,6 +2526,8 @@ command_run_capture(Command *command, char *cwd) {
     }
     XCLOSE(&pipefd[0]);
 
+    // TODO: Retry waitpid after EINTR to avoid treating an interrupted wait as
+    // a fatal child-process failure.
     if (waitpid(pid, &status, 0) < 0) {
         free2(output, len + 1);
         error("waitpid failed: %s", strerror(errno));

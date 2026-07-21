@@ -89,6 +89,8 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE {
     #define XENUM_DEF_1(e)    e,
     #define XENUM_DEF_2(e, v) e = v,
 #else
+    // TODO: Use an unsigned value of the underlying type. Shifting signed 1
+    // into bit 31 is undefined even though 32 flags are supported.
     #define XENUM_DEF_1(e)    e = 1 << CAT(e, _BIT_IDX),
     #define XENUM_DEF_2(e, v) e = v,
 #endif
@@ -176,12 +178,16 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM
 
     if (buffer_ptr == buffer) {
+        // TODO: Preserve unknown set bits instead of reporting NONE. A nonzero
+        // value containing only unrecognized bits is currently misrepresented.
         return "NONE";
     }
 
     *buffer_ptr = '\0';
 
     {
+        // TODO: Define one ownership rule for all return paths. Zero returns a
+        // static literal while nonzero values return heap memory.
         int64 final_len = (int64)(buffer_ptr - buffer) + 1;
         char *copy;
 
@@ -242,6 +248,8 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
 
         if (*p >= '0' && *p <= '9') {
             char *end = NULL;
+            // TODO: Check errno, end == p, and UINT32_MAX before converting.
+            // Overflowing numeric tokens are silently truncated into result.
             unsigned long value = strtoul(p, &end, 0);
             result |= (uint32)value;
             p = end;

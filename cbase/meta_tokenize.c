@@ -127,6 +127,7 @@ line_reserve_tokens(Line *line, int32 extra) {
     int32 new_capacity;
     Token *new_tokens;
 
+    // TODO: Validate extra and check addition and later doubling for overflow.
     need = line->token_count + extra;
     if (need <= line->token_capacity) {
         return;
@@ -228,6 +229,8 @@ scan_literal_token(char *text, int32 text_len, int32 start) {
     i = quote_index + 1;
     while (i < text_len) {
         if (text[i] == '\\') {
+            // TODO: Clamp a trailing escape to text_len. Advancing by two at
+            // the final byte returns a token length that reads past the source.
             i += 2;
             continue;
         }
@@ -441,6 +444,8 @@ static void
 tokenize_line_with_flags(Line *line, bool *in_block_comment, int32 flags) {
     int32 i;
 
+    // TODO: Do not classify a line as preprocessor text while continuing a
+    // block comment. This early return also leaves in_block_comment stuck true.
     if ((flags & TOKENIZE_PREPROCESSOR_LINES)
         && line_starts_preprocessor(line->text, line->len)) {
         line_add_token(line, TOKEN_PREPROC, line->text, line->len, 0);
@@ -590,6 +595,8 @@ tokenization_significant_at_or_after(Tokenization *tokenization,
     int32 result;
 
     result = token_index;
+    // TODO: Reject or clamp negative token_index before indexing
+    // tokens[result].
     while ((result < tokenization->token_count)
            && token_is_trivia(&tokenization->tokens[result])) {
         result += 1;

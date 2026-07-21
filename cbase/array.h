@@ -42,6 +42,8 @@ generic_array_init(int32 cap, int64 item_size) {
         cap = 0;
     }
 
+    // TODO: Validate item_size and check the multiplication and addition for
+    // overflow before allocating the array storage.
     size = SIZEOF(*header) + cap*item_size;
     header = malloc2(size);
     header->count = 0;
@@ -64,6 +66,8 @@ generic_array_grow(void *array, int64 item_size) {
             return array;
         }
         old_cap = header->cap;
+        // TODO: Grow a zero-capacity initialized array to a positive capacity
+        // and check doubling for overflow. Zero currently remains zero.
         new_cap = old_cap*2;
     } else {
         header = NULL;
@@ -71,6 +75,8 @@ generic_array_grow(void *array, int64 item_size) {
         new_cap = 8;
     }
 
+    // TODO: Check both size calculations for signed overflow. Wrapped sizes
+    // can underallocate before ARRAY_PUSH writes the new element.
     old_size = SIZEOF(*header) + old_cap*item_size;
     new_size = SIZEOF(*header) + new_cap*item_size;
     header = realloc2(header, old_size, new_size, 1);

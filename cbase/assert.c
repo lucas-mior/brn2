@@ -84,6 +84,8 @@ assert_file_contains(char *file, int32 line, char *func,
                    path, strerror(errno));
         fatal(EXIT_FAILURE);
     }
+    // TODO: Search across read-buffer boundaries. A needle split between two
+    // fgets calls is present in the file but is reported as missing.
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
         if (strstr(buffer, needle)) {
             found = true;
@@ -115,6 +117,8 @@ assert_contains(char *file, int32 line, char *func,
                 char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = strlen32(needle);
     if (memmem64(haystack, haystack_len, needle, needle_len) == NULL) {
+        // TODO: Print haystack with its explicit length. Using %s can read past
+        // a valid non-NUL-terminated bounded buffer.
         error_impl(file, line, func,
                    "expected to find substring:\n%s\n--- in ---\n%s",
                    needle, haystack);
@@ -127,6 +131,8 @@ assert_not_contains(char *file, int32 line, char *func,
                     char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = strlen32(needle);
     if (memmem64(haystack, haystack_len, needle, needle_len)) {
+        // TODO: Print haystack with its explicit length. Using %s can read past
+        // a valid non-NUL-terminated bounded buffer.
         error_impl(file, line, func,
                    "did not expect to find substring:\n%s\n--- in ---\n%s",
                    needle, haystack);
@@ -134,6 +140,8 @@ assert_not_contains(char *file, int32 line, char *func,
     }
 }
 
+// TODO: Fix the second operand order in the generated diagnostic. It prints
+// the second value where its name belongs and its name where its value belongs.
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                            \
 static void                                                              \
 a_strings_##MODE(char *file, uint line, char *func,                      \
@@ -167,6 +175,8 @@ GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
 
+// TODO: Fix the second operand order in the generated diagnostic. It prints
+// the second pointer where its name belongs and vice versa.
 #define GENERATE_ASSERT_POINTERS(MODE, SYMBOL)                           \
 static void                                                              \
 a_pointers_##MODE(char *file, uint line, char *func,                     \
@@ -193,6 +203,8 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
+// TODO: Fix the second operand order in the generated diagnostic. The value
+// and name are passed in the opposite order required by the format string.
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE)      \
 static void                                                                 \
 a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
@@ -243,6 +255,8 @@ compare_sign_with_unsign(llong s, ullong u) {
     }
 }
 
+// TODO: Fix the second operand order in the generated diagnostic. The value
+// and name are passed in the opposite order required by the format string.
 #define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL)                   \
 static void                                                             \
 a_signed_unsigned##MODE(char *file, uint line, char *func,              \
@@ -271,6 +285,8 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_SIGNED_UNSIGNED
 
+// TODO: Fix the second operand order in the generated diagnostic. The value
+// and name are passed in the opposite order required by the format string.
 #define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL)                   \
 static void                                                             \
 a_unsigned_signed_##MODE(char *file, uint line, char *func,             \
@@ -461,6 +477,8 @@ assert_double_more(double var1, double var2, int kind1, int kind2) {
                                            NULL, NULL, NULL);
 }
 
+// TODO: Fix the second operand order in the floating-point diagnostic. The
+// second value is printed where its variable name belongs and vice versa.
 static void __attribute((noreturn))
 assert_double_failure(char *file, uint line, char *func,
                        char *name1, char *name2,
@@ -602,6 +620,8 @@ a_double_more_equal(char *file, uint line, char *func,
     return;
 }
 
+// TODO: Fix the second operand order in the generated diagnostic. It prints
+// the second boolean value before the second variable name.
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL)                            \
 static void                                                            \
 a_bool_##MODE(char *file, uint line, char *func,                       \
