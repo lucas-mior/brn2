@@ -643,7 +643,7 @@ strftime2(char *buffer, int64 size, char *format, struct tm *time_info) {
 
     n = (int64)strftime(buffer, (size_t)size, format, time_info);
     if ((n <= 0) || (n >= size)) {
-        error("Error in strftime(%s) (n = %lld).\n", format, (llong)n);
+        error("Error in strftime(\"%s\") (n = %lld).\n", format, (llong)n);
         fatal(EXIT_FAILURE);
     }
     return n;
