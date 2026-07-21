@@ -669,9 +669,8 @@ util_filename_from(char *buffer, int64 size, int fd) {
         return -1;
     }
     len = MIN(strlen32(buffer2), size - 1);
-    // TODO: Copy len bytes and write buffer[len] = '\0'. When truncated, the
-    // source byte at len is not a terminator.
     memcpy64(buffer, buffer2, len + 1);
+    buffer[len] = '\0';
     return 0;
 #elif OS_WINDOWS
     HANDLE h;
