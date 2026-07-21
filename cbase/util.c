@@ -443,9 +443,11 @@ write_all(int fd, char *buffer, int64 left) {
     int64 w;
 
     while (left > 0) {
-        // TODO: Retry write when it fails with EINTR instead of terminating.
         if ((w = write(fd, buffer + written, (RW_TYPE)left)) <= 0) {
             fprintf(stderr, "Error writing: %s.\n", strerror(errno));
+            if (errno == EINTR) {
+                continue;
+            }
             fatal(EXIT_FAILURE);
         }
         left -= w;
