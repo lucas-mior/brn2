@@ -126,10 +126,6 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
         #undef X
         #undef XENUM_ST_1
         #undef XENUM_ST_2
-#if ENUM_BITFLAGS
-        case CAT(ENUM_PREFIX_, NONE):
-            return QUOTE(ENUM_PREFIX_) "NONE";
-#endif
         case CAT(ENUM_PREFIX_, LAST):
             return QUOTE(ENUM_PREFIX_) "LAST";
         default:
