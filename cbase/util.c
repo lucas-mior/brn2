@@ -1762,8 +1762,8 @@ catfile(int where, char *file) {
         error("Error reading %s: %s.\n", file, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    // TODO: Close fd on both success and failure paths. Every call currently
-    // leaks the descriptor opened for file.
+
+    XCLOSE(&fd, file);
     return;
 }
 
@@ -2287,11 +2287,13 @@ str_builder_array_reserve(StrBuilderArray *array, int32 extra) {
     if (new_cap <= 0) {
         new_cap = 8;
     }
-    while (new_cap < needed) {
-        // TODO: Stop before int32 doubling overflows. A large valid needed
-        // value
-        // can wrap new_cap and make this loop nonterminating.
-        new_cap *= 2;
+
+    if (needed >= (MAXOF(new_cap)/2)) {
+        new_cap = needed;
+    } else {
+        while (new_cap < needed) {
+            new_cap *= 2;
+        }
     }
 
     array->items = realloc2(array->items, old_cap, new_cap,
