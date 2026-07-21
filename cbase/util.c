@@ -1652,9 +1652,7 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
             }
             return p;
         }
-        // TODO: Compare only non-NULL separators. Relational comparison
-        // between an array pointer and NULL is undefined behavior.
-        if (fslash > bslash) {
+        if ((uintptr_t)fslash > (uintptr_t)bslash) {
             length = fslash - p + 1;
             p = fslash + 1;
         } else {
