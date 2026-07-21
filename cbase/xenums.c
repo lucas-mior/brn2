@@ -240,16 +240,6 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
             break;
         }
 
-        if (*p >= '0' && *p <= '9') {
-            char *end = NULL;
-            // TODO: Check errno, end == p, and UINT32_MAX before converting.
-            // Overflowing numeric tokens are silently truncated into result.
-            ulong value = strtoul(p, &end, 0);
-            result |= (uint32)value;
-            p = end;
-            continue;
-        }
-
         token = p;
         while (is_ident_char(*p)) {
             p += 1;
