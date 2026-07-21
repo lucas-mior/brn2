@@ -309,10 +309,10 @@ realloc_debug(char *file, int32 line, char *func,
                    "realloc: invalid capacity = %lld.\n", (llong)new_capacity);
         fatal(EXIT_FAILURE);
     }
-    if (((ullong)SIZE_MAX / (ullong)obj_size) < (ullong)new_capacity) {
+    if ((MAXOF(new_size) / obj_size) < new_capacity) {
         error_impl(file, line, func,
-                   "realloc: allocation size (%lld) is bigger than SIZEMAX\n",
-                   (llong)new_capacity);
+                   "realloc: %lld objects of size %lld is too much.\n",
+                   (llong)new_capacity, (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
 
@@ -325,7 +325,6 @@ realloc_debug(char *file, int32 line, char *func,
         return realloc(old, (size_t)(new_capacity*obj_size));
     }
 
-    // TODO: Validate old_capacity and check its multiplication for overflow.
     old_size = old_capacity*obj_size;
     new_size = new_capacity*obj_size;
 
