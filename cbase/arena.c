@@ -139,6 +139,9 @@ arena_create(int64 size, char *name) {
     }
 
     arena = p;
+    // TODO: Initialize name to NULL. The malloc fallback leaves it
+    // indeterminate
+    // when the caller does not supply a name.
     if (name) {
         int64 len = strlen32(name);
         arena->name = xmalloc(len + 1, false);
@@ -159,6 +162,8 @@ arena_destroy(Arena *arena) {
 
     do {
         next = arena->next;
+        // TODO: Free arena->name before releasing the mapping. Named arenas
+        // currently leak their separately allocated name.
         arena_free(arena);
     } while ((arena = next));
 
@@ -179,6 +184,8 @@ arena_allocate(int64 *size) {
         arena_page_size = (int64)aux;
     }
 
+    // TODO: Round *size before mmap. The current code maps the unrounded
+    // length, then advertises and unmaps a larger rounded length.
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
             p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
@@ -294,6 +301,8 @@ arena_with_space(Arena *arena, int64 size) {
 static void *
 arena_push(Arena *arena, int64 size) {
     void *before;
+    // TODO: Reject nonpositive sizes and detect alignment overflow before
+    // ALIGN. Negative or overflowing inputs can become zero or wrap.
     size = ALIGN(size);
 
     if ((arena = arena_with_space(arena, size)) == NULL) {
@@ -365,6 +374,8 @@ arena_push_index32(Arena *arena, uint32 size) {
     }
 
     if (arena != arena_save) {
+        // TODO: Set errno and return UINT32_MAX. Returning EARENA_LINKED makes
+        // an error indistinguishable from a valid arena index.
         return EARENA_LINKED;
     }
 
@@ -415,6 +426,8 @@ arena_decr(Arena *arena, void *p) {
         return false;
     }
 
+    // TODO: Track allocation starts or reject interior/repeated pointers.
+    // Any address inside the arena currently decrements the live count.
     arena->npushed -= 1;
     if (arena->npushed < 0) {
         error2("Warning: inconsistent arena state (npushed = %lld)\n",

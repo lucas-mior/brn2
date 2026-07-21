@@ -252,6 +252,8 @@ CAT(hash_init_, HASH_TYPE)(struct Map *map, uint32 length, char *name) {
     map->slot_states = xmmap_commit(&slot_states_size);
     memset64(map->slot_states, 0, capacity*sizeof(*map->slot_states));
     map->capacity = capacity;
+    // TODO: Use an unsigned shift and reject unsupported powers. Shifting
+    // signed 1 into bit 31 is undefined behavior.
     map->bitmask = (1 << power) - 1;
     map->size = array_size;
     map->slot_states_size = slot_states_size;
@@ -310,6 +312,8 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
 
 static void
 CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
+    // TODO: Reject the maximum capacity before doubling. A 2^31-entry table
+    // wraps new_capacity to zero and corrupts all following size calculations.
     uint32 new_capacity = map->capacity*2;
     uint32 new_bitmask = (new_capacity - 1);
     int64 new_size = new_capacity*sizeof(Bucket);
@@ -479,6 +483,8 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
     memcpy64(&target->key, key, sizeof(HASH_KEY_TYPE));
 #else
   #if HASH_DUPLICATE_KEYS
+    // TODO: Copy only key_length bytes, or explicitly require a terminator.
+    // The current length-based API reads one byte past an exact-size key.
     target->key = xarena_push(map->arena_keys, key_length + 1);
     memcpy64(target->key, key, key_length + 1);
   #else
@@ -560,6 +566,8 @@ CAT(hash_overwrite_pre_calc_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
     memcpy64(&target->key, key, sizeof(HASH_KEY_TYPE));
 #else
   #if HASH_DUPLICATE_KEYS
+    // TODO: Copy only key_length bytes, or explicitly require a terminator.
+    // The current length-based API reads one byte past an exact-size key.
     target->key = xarena_push(map->arena_keys, key_length + 1);
     memcpy64(target->key, key, key_length + 1);
   #else
@@ -760,6 +768,8 @@ CAT(hash_functions_sink_, HASH_TYPE)(void) {
 INLINE uint64
 hash_function(void *key, int32 key_length) {
     uint64 hash;
+    // TODO: Validate key and key_length in release builds. A negative length is
+    // converted to a huge size_t by rapidhash and causes out-of-bounds reads.
     if (DEBUGGING) {
         ASSERT_MORE(key_length, 0);
     }

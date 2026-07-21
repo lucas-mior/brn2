@@ -74,6 +74,8 @@ typedef struct DebugAllocInfo {
 static struct Hash_alloc_map *allocations = NULL;
 static pthread_mutex_t allocations_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+// TODO: Validate n in every build, not only DEBUGGING. Negative lengths are
+// converted to huge size_t values before calling the C library function.
 #define X64(FUNC) \
 INLINE void \
 CAT(FUNC, 64)(void *dest, void *source, int64 n) { \
@@ -97,6 +99,8 @@ X64(memcpy)
 X64(memmove)
 #undef X64
 
+// TODO: Validate size in every build. Negative lengths are converted to a
+// huge size_t before calling memset when DEBUGGING is disabled.
 INLINE void
 memset64(void *buffer, int value, int64 size) {
     if (size == 0) {
@@ -119,6 +123,7 @@ memset64(void *buffer, int value, int64 size) {
 INLINE void *
 xmalloc(int64 size, bool zero) {
     void *p;
+    // TODO: Reject negative sizes before converting them to size_t.
     if (size == 0) {
         size = 1;
     }
@@ -192,6 +197,8 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
     uchar *ptr;
     void *base_p;
 
+    // TODO: Perform the normal size validation and handle malloc failure in
+    // this branch. It can return NULL despite this being a fatal wrapper.
     if (RUNNING_ON_VALGRIND) {
         if (size == 0) {
             size = 1;
@@ -215,6 +222,8 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
         fatal(EXIT_FAILURE);
     }
 
+    // TODO: Check that adding both guard regions fits in int64 and size_t.
+    // A near-limit size can overflow before xmalloc sees it.
     base_p = xmalloc(size + 2 * MEMORY_PADDING, false);
     ptr = (uchar *)base_p;
 
@@ -253,6 +262,7 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
     return p;
 }
 
+// TODO: Reject negative new_size before converting it to size_t.
 INLINE void *
 xrealloc(void *old, int64 new_size) {
     void *p;
@@ -269,6 +279,8 @@ xrealloc(void *old, int64 new_size) {
 
 INLINE void *
 realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
+    // TODO: Validate both operands and check multiplication for overflow.
+    // Release builds can pass a wrapped allocation size to realloc.
     int64 new_size = new_capacity*obj_size;
     (void)old_capacity;
 
@@ -304,6 +316,8 @@ realloc_debug(char *file, int32 line, char *func,
         fatal(EXIT_FAILURE);
     }
 
+    // TODO: Handle realloc failure in this branch instead of returning NULL
+    // from a wrapper whose other paths fail fatally.
     if (RUNNING_ON_VALGRIND) {
         if (new_capacity == 0) {
             new_capacity = 1;
@@ -311,6 +325,7 @@ realloc_debug(char *file, int32 line, char *func,
         return realloc(old, (size_t)(new_capacity*obj_size));
     }
 
+    // TODO: Validate old_capacity and check its multiplication for overflow.
     old_size = old_capacity*obj_size;
     new_size = new_capacity*obj_size;
 
@@ -385,6 +400,8 @@ realloc_debug(char *file, int32 line, char *func,
 
             if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
                 int64 copy_size = old_size;
+                // TODO: Check guard-size addition for overflow before
+                // allocating the debug block.
                 base_p = xmalloc(new_size + 2 * MEMORY_PADDING, false);
 
                 if (new_size < old_size) {
@@ -404,10 +421,14 @@ realloc_debug(char *file, int32 line, char *func,
                 }
             } else {
                 old_base = ((uchar *)old - MEMORY_PADDING);
+                // TODO: Check guard-size addition for overflow before
+                // reallocating the debug block.
                 base_p = xrealloc(old_base, new_size + 2 * MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
+            // TODO: Check guard-size addition for overflow before
+            // allocating the debug block.
             base_p = xrealloc(old_base, new_size + 2 * MEMORY_PADDING);
         }
 
@@ -462,6 +483,8 @@ realloc_flex_debug(char *file, int32 line, char *func,
                    "Flex allocation capacity overflows SIZEMAX.\n");
         fatal(EXIT_FAILURE);
     }
+    // TODO: Compute the product in unsigned checked arithmetic. The signed
+    // multiplication below can overflow before the cast validates it.
     if (((ullong)SIZE_MAX - (ullong)struct_size) <
         (ullong)(new_capacity * obj_size)) {
         error_impl(file, line, func,
@@ -473,10 +496,13 @@ realloc_flex_debug(char *file, int32 line, char *func,
         if (new_capacity == 0) {
             new_capacity = 1;
         }
+        // TODO: Check realloc failure in this fatal allocation wrapper.
         return realloc(old, (size_t)(struct_size + new_capacity*obj_size));
     }
 
     total_size = struct_size + new_capacity*obj_size;
+    // TODO: Validate old_capacity and check the old-size arithmetic for
+    // overflow before using it for bounds checks and debug bookkeeping.
     old_size = struct_size + old_capacity*obj_size;
 
     {
@@ -550,6 +576,8 @@ realloc_flex_debug(char *file, int32 line, char *func,
 
             if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
                 int64 copy_size = old_size;
+                // TODO: Check guard-size addition for overflow before
+                // allocating the flex debug block.
                 base_p = xmalloc(total_size + 2 * MEMORY_PADDING, false);
 
                 if (total_size < old_size) {
@@ -569,10 +597,14 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 }
             } else {
                 old_base = ((uchar *)old - MEMORY_PADDING);
+                // TODO: Check guard-size addition for overflow before
+                // reallocating the flex debug block.
                 base_p = xrealloc(old_base, total_size + 2 * MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
+            // TODO: Check guard-size addition for overflow before allocating
+            // the flex debug block.
             base_p = xrealloc(old_base, total_size + 2 * MEMORY_PADDING);
         }
 
@@ -719,6 +751,8 @@ free2_(void *pointer, int64 size) {
     xmalloc(size, false)
 #define realloc2(old, old_capacity, new_capacity, obj_size) \
     realloc4(old, old_capacity, new_capacity, obj_size)
+// TODO: Replace this unchecked signed multiplication and addition with the
+// same overflow validation used by the debug implementation.
 #define realloc_flex(old, old_capacity, new_capacity, obj_size) \
     xrealloc(old, SIZEOF(*old) + obj_size*new_capacity)
 #define free2(pointer, size) \
@@ -730,11 +764,13 @@ static void *
 xmmap_commit(int64 *size) {
     void *p;
 
+    // TODO: Reject negative sizes before converting them to size_t.
     if (*size == 0) {
         *size = 1;
     }
 
     if (RUNNING_ON_VALGRIND) {
+        // TODO: Handle malloc failure before zeroing the returned pointer.
         p = malloc((size_t)*size);
         memset64(p, 0, *size);
         return p;
@@ -748,6 +784,8 @@ xmmap_commit(int64 *size) {
         memory_page_size = aux;
     }
 
+    // TODO: Round *size before mmap. The current code maps the unrounded
+    // length, then exposes and unmaps the larger rounded length.
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
             p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
@@ -791,6 +829,7 @@ xmmap_commit(int64 *size) {
         if (*size == 0) {
             *size = 1;
         }
+        // TODO: Reject negative sizes and handle malloc failure before memset.
         p = malloc((size_t)*size);
         memset64(p, 0, *size);
         return p;
@@ -821,6 +860,8 @@ xmunmap(void *p, int64 size) {
         free(p);
         return;
     }
+    // TODO: Propagate or fail on VirtualFree errors. Merely logging makes the
+    // caller believe the mapping was released when it was not.
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
         fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
     }
