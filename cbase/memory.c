@@ -320,6 +320,7 @@ realloc_debug(char *file, int32 line, char *func,
 
     old_size = old_capacity*obj_size;
     new_size = new_capacity*obj_size;
+    ASSERT(new_size <= (MAXOF(new_size) - 2*MEMORY_PADDING));
 
     {
         DebugAllocInfo info;
@@ -392,8 +393,6 @@ realloc_debug(char *file, int32 line, char *func,
 
             if (MEMORY_CHECK_DOUBLE_FREE || MEMORY_CHECK_USE_AFTER_FREE) {
                 int64 copy_size = old_size;
-                // TODO: Check guard-size addition for overflow before
-                // allocating the debug block.
                 base_p = xmalloc(new_size + 2*MEMORY_PADDING, false);
 
                 if (new_size < old_size) {
@@ -413,14 +412,10 @@ realloc_debug(char *file, int32 line, char *func,
                 }
             } else {
                 old_base = ((uchar *)old - MEMORY_PADDING);
-                // TODO: Check guard-size addition for overflow before
-                // reallocating the debug block.
                 base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
-            // TODO: Check guard-size addition for overflow before
-            // allocating the debug block.
             base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
         }
 
@@ -470,17 +465,16 @@ realloc_flex_debug(char *file, int32 line, char *func,
                    "Invalid new capacity = %lld.\n", (llong)new_capacity);
         fatal(EXIT_FAILURE);
     }
-    if (((ullong)SIZE_MAX / (ullong)obj_size) < (ullong)new_capacity) {
+    if ((INT64_MAX / obj_size) < new_capacity) {
         error_impl(file, line, func,
-                   "Flex allocation capacity overflows SIZEMAX.\n");
+                   "Allocating %lld objects of size %lld is too much.\n",
+                   (llong)new_capacity, (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
-    // TODO: Compute the product in unsigned checked arithmetic. The signed
-    // multiplication below can overflow before the cast validates it.
-    if (((ullong)SIZE_MAX - (ullong)struct_size) <
-        (ullong)(new_capacity*obj_size)) {
+    if ((INT64_MAX - struct_size) < (new_capacity*obj_size)) {
         error_impl(file, line, func,
-                   "Total flex allocation size overflows SIZEMAX.\n");
+                   "Allocating %lld objects of size %lld is too much.\n",
+                   (llong)new_capacity, (llong)obj_size);
         fatal(EXIT_FAILURE);
     }
 
