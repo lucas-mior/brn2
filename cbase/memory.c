@@ -74,8 +74,6 @@ typedef struct DebugAllocInfo {
 static struct Hash_alloc_map *allocations = NULL;
 static pthread_mutex_t allocations_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-// TODO: Validate n in every build, not only DEBUGGING. Negative lengths are
-// converted to huge size_t values before calling the C library function.
 #define X64(FUNC) \
 INLINE void \
 CAT(FUNC, 64)(void *dest, void *source, int64 n) { \
@@ -99,8 +97,6 @@ X64(memcpy)
 X64(memmove)
 #undef X64
 
-// TODO: Validate size in every build. Negative lengths are converted to a
-// huge size_t before calling memset when DEBUGGING is disabled.
 INLINE void
 memset64(void *buffer, int value, int64 size) {
     if (size == 0) {
@@ -215,15 +211,12 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
                    "Invalid allocation size = %lld.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
-    if ((ullong)size >= (ullong)SIZE_MAX) {
+    if (size >= (MAXOF(size) - 2*MEMORY_PADDING)) {
         error_impl(file, line, func,
-                   "Allocation size (%lld) is bigger than SIZEMAX\n",
-                   (llong)size);
+                   "Allocation size (%lld) is too big.\n", (llong)size);
         fatal(EXIT_FAILURE);
     }
 
-    // TODO: Check that adding both guard regions fits in int64 and size_t.
-    // A near-limit size can overflow before xmalloc sees it.
     base_p = xmalloc(size + 2*MEMORY_PADDING, false);
     ptr = (uchar *)base_p;
 
