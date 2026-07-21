@@ -734,17 +734,6 @@ static void
 brn2_sort(FileList *old) {
     int32 partitions;
 
-    char *last = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-                 "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
-    int32 last_length = strlen32(last);
-    FileName *dummy_last;
-    int64 dummy_size = STRUCT_ARRAY_SIZE(dummy_last, char, last_length + 1);
-
-    dummy_last = malloc2(dummy_size);
-    memset64(dummy_last, 0, sizeof(*dummy_last));
-    memcpy64(dummy_last, last, last_length + 1);
-
 #if SORT_BENCHMARK
     struct timespec t0;
     struct timespec t1;
@@ -760,16 +749,15 @@ brn2_sort(FileList *old) {
 
     partitions = brn2_threads(brn2_threads_work_sort,
                               old->length, old, NULL, NULL, 0, NULL);
+    ASSERT(partitions >= 1);
     if (partitions == 1) {
-        free2(dummy_last, dummy_size);
         return;
     }
 
     /* qsort(old->files, old->length, sizeof(*(old->files)), * brn2_compare); */
     /* stc_sort_list_sort(old->files, old->length); */
     sort_merge_subsorted(old->files, old->length, partitions,
-                         sizeof(*(old->files)),
-                         &dummy_last, brn2_compare);
+                         SIZEOF(*(old->files)), brn2_compare);
 
 #if SORT_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
@@ -794,7 +782,6 @@ brn2_sort(FileList *old) {
     exit(EXIT_SUCCESS);
 #endif
 
-    free2(dummy_last, dummy_size);
     return;
 }
 
