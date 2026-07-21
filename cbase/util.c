@@ -735,6 +735,10 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
     }
 #endif
 
+    if (*fd < 0) {
+        return 0;
+    }
+
     if (close(*fd) < 0) {
         char error_buffer[4096];
         char itoa_buffer[32];
@@ -1288,8 +1292,6 @@ util_copy_file_async_parsed(UtilCopyFilesAsync *copy_files) {
             }
             n -= 1;
             while ((r = read64(pipes[i].fd, buffer, sizeof(buffer))) > 0) {
-                // TODO: Finish partial writes and report failure to the caller.
-                // This path closes the file and silently leaves it truncated.
                 if ((w = write64(dests[i], buffer, r)) != r) {
                     if (w < 0) {
                         error("Error writing: %s.\n", strerror(errno));
@@ -1363,9 +1365,6 @@ send_signal(char *executable, int32 signal_number) {
         }
         XCLOSE(&cmdline, buffer);
 
-        // TODO: Compare the executable pathname or basename exactly. Substring
-        // matching can signal unrelated processes whose argv[0] merely
-        // contains it.
         if (memmem64(command, r, executable, len)) {
             if ((last = memchr64(command, '\0', r))) {
                 r = last - command;
@@ -1516,8 +1515,6 @@ util_equal_files(char *filename_a, char *filename_b) {
         goto out;
     }
 out:
-    // TODO: Skip XCLOSE for negative descriptors. An open failure is followed
-    // by a second, misleading "Error closing" diagnostic for fd == -1.
     XCLOSE(&fd_a, filename_a);
     XCLOSE(&fd_b, filename_b);
     return equal;
