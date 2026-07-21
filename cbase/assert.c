@@ -302,49 +302,39 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 #define ASSERT_FP_KIND_NONE    0
 #define ASSERT_FP_KIND_FLOAT   1
 #define ASSERT_FP_KIND_DOUBLE  2
-#define ASSERT_FP_KIND_LDOUBLE 3
 
 #define ASSERT_FP_KIND_EXPR(VAR) \
 _Generic((VAR), \
-    float:  ASSERT_FP_KIND_FLOAT, \
+    float:  ASSERT_FP_KIND_FLOAT,  \
     double: ASSERT_FP_KIND_DOUBLE, \
-    default: _Generic((VAR), \
-        ldouble: ASSERT_FP_KIND_LDOUBLE, \
-        default: ASSERT_FP_KIND_NONE \
-    ) \
+    default: ASSERT_FP_KIND_NONE   \
 )
 
 #if !defined(ASSERT_FLOAT_REL_TOL)
-#define ASSERT_FLOAT_REL_TOL   (16.0L*(ldouble)FLT_EPSILON)
+#define ASSERT_FLOAT_REL_TOL   (16.0*(double)FLT_EPSILON)
 #endif
 #if !defined(ASSERT_DOUBLE_REL_TOL)
-#define ASSERT_DOUBLE_REL_TOL  (16.0L*(ldouble)DBL_EPSILON)
-#endif
-#if !defined(ASSERT_LDOUBLE_REL_TOL)
-#define ASSERT_LDOUBLE_REL_TOL (16.0L*(ldouble)LDBL_EPSILON)
+#define ASSERT_DOUBLE_REL_TOL  (16.0*(double)DBL_EPSILON)
 #endif
 
 #if !defined(ASSERT_FLOAT_ABS_TOL)
-#define ASSERT_FLOAT_ABS_TOL   (16.0L*(ldouble)FLT_EPSILON)
+#define ASSERT_FLOAT_ABS_TOL   (16.0*(double)FLT_EPSILON)
 #endif
 #if !defined(ASSERT_DOUBLE_ABS_TOL)
-#define ASSERT_DOUBLE_ABS_TOL  (16.0L*(ldouble)DBL_EPSILON)
-#endif
-#if !defined(ASSERT_LDOUBLE_ABS_TOL)
-#define ASSERT_LDOUBLE_ABS_TOL (16.0L*(ldouble)LDBL_EPSILON)
+#define ASSERT_DOUBLE_ABS_TOL  (16.0*(double)DBL_EPSILON)
 #endif
 
-static ldouble
-assert_ldouble_abs(ldouble x) {
-    if (x < (ldouble)0) {
+static double
+assert_double_abs(double x) {
+    if (x < (double)0) {
         return -x;
     }
     return x;
 }
 
 static bool
-assert_ldouble_is_infinite(ldouble x) {
-    return (x > (ldouble)LDBL_MAX) || (x < -(ldouble)LDBL_MAX);
+assert_double_is_infinite(double x) {
+    return (x > (double)DBL_MAX) || (x < -(double)DBL_MAX);
 }
 
 static int
@@ -355,10 +345,10 @@ assert_fp_common_kind(int kind1, int kind2) {
     if ((kind1 == ASSERT_FP_KIND_DOUBLE) || (kind2 == ASSERT_FP_KIND_DOUBLE)) {
         return ASSERT_FP_KIND_DOUBLE;
     }
-    return ASSERT_FP_KIND_LDOUBLE;
+    return ASSERT_FP_KIND_DOUBLE;
 }
 
-static ldouble
+static double
 assert_fp_rel_tol(int common_kind) {
     if (common_kind == ASSERT_FP_KIND_FLOAT) {
         return ASSERT_FLOAT_REL_TOL;
@@ -366,10 +356,10 @@ assert_fp_rel_tol(int common_kind) {
     if (common_kind == ASSERT_FP_KIND_DOUBLE) {
         return ASSERT_DOUBLE_REL_TOL;
     }
-    return ASSERT_LDOUBLE_REL_TOL;
+    return ASSERT_DOUBLE_REL_TOL;
 }
 
-static ldouble
+static double
 assert_fp_abs_tol(int common_kind) {
     if (common_kind == ASSERT_FP_KIND_FLOAT) {
         return ASSERT_FLOAT_ABS_TOL;
@@ -377,36 +367,36 @@ assert_fp_abs_tol(int common_kind) {
     if (common_kind == ASSERT_FP_KIND_DOUBLE) {
         return ASSERT_DOUBLE_ABS_TOL;
     }
-    return ASSERT_LDOUBLE_ABS_TOL;
+    return ASSERT_DOUBLE_ABS_TOL;
 }
 
 static bool
-assert_ldouble_almost_equal(ldouble var1, ldouble var2,
-                            int kind1, int kind2,
-                            ldouble *diff_out,
-                            ldouble *abs_tol_out,
-                            ldouble *rel_tol_out) {
+assert_double_almost_equal(double var1, double var2,
+                           int kind1, int kind2,
+                           double *diff_out,
+                           double *abs_tol_out,
+                           double *rel_tol_out) {
     int common_kind;
-    ldouble diff;
-    ldouble abs1;
-    ldouble abs2;
-    ldouble scale;
-    ldouble abs_tol;
-    ldouble rel_tol;
+    double diff;
+    double abs1;
+    double abs2;
+    double scale;
+    double abs_tol;
+    double rel_tol;
 
     common_kind = assert_fp_common_kind(kind1, kind2);
     abs_tol = assert_fp_abs_tol(common_kind);
     rel_tol = assert_fp_rel_tol(common_kind);
 
-    if (abs_tol < (ldouble)0) {
+    if (abs_tol < (double)0) {
         abs_tol = -abs_tol;
     }
-    if (rel_tol < (ldouble)0) {
+    if (rel_tol < (double)0) {
         rel_tol = -rel_tol;
     }
 
     if (diff_out != NULL) {
-        *diff_out = (ldouble)0;
+        *diff_out = (double)0;
     }
     if (abs_tol_out != NULL) {
         *abs_tol_out = abs_tol;
@@ -430,14 +420,14 @@ assert_ldouble_almost_equal(ldouble var1, ldouble var2,
     }
 
     /* Mismatched infinities are ordered but never approximately equal. */
-    if (assert_ldouble_is_infinite(var1) || assert_ldouble_is_infinite(var2)) {
+    if (assert_double_is_infinite(var1) || assert_double_is_infinite(var2)) {
         if (diff_out != NULL) {
-            *diff_out = assert_ldouble_abs(var1 - var2);
+            *diff_out = assert_double_abs(var1 - var2);
         }
         return false;
     }
 
-    diff = assert_ldouble_abs(var1 - var2);
+    diff = assert_double_abs(var1 - var2);
     if (diff_out != NULL) {
         *diff_out = diff;
     }
@@ -446,8 +436,8 @@ assert_ldouble_almost_equal(ldouble var1, ldouble var2,
         return true;
     }
 
-    abs1 = assert_ldouble_abs(var1);
-    abs2 = assert_ldouble_abs(var2);
+    abs1 = assert_double_abs(var1);
+    abs2 = assert_double_abs(var2);
     if (abs1 > abs2) {
         scale = abs1;
     } else {
@@ -458,51 +448,51 @@ assert_ldouble_almost_equal(ldouble var1, ldouble var2,
 }
 
 static bool
-assert_ldouble_less(ldouble var1, ldouble var2, int kind1, int kind2) {
+assert_double_less(double var1, double var2, int kind1, int kind2) {
     return (var1 < var2)
-           && !assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+           && !assert_double_almost_equal(var1, var2, kind1, kind2,
                                            NULL, NULL, NULL);
 }
 
 static bool
-assert_ldouble_more(ldouble var1, ldouble var2, int kind1, int kind2) {
+assert_double_more(double var1, double var2, int kind1, int kind2) {
     return (var1 > var2)
-           && !assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+           && !assert_double_almost_equal(var1, var2, kind1, kind2,
                                            NULL, NULL, NULL);
 }
 
 static void __attribute((noreturn))
-assert_ldouble_failure(char *file, uint line, char *func,
+assert_double_failure(char *file, uint line, char *func,
                        char *name1, char *name2,
                        char *type1, char *type2,
                        llong bits1, llong bits2,
-                       ldouble var1, ldouble var2, char *symbol,
-                       ldouble diff, ldouble abs_tol, ldouble rel_tol) {
+                       double var1, double var2, char *symbol,
+                       double diff, double abs_tol, double rel_tol) {
     if (!DEBUGGING) {
         UNREACHABLE();
     }
     error2("\n%s: Assertion failed at %s:%u\n", func, file, line);
-    error2("[%s%lld]%s = "LDOUBLE_FORMAT " %s "LDOUBLE_FORMAT " = %s[%s%lld]\n",
+    error2("[%s%lld]%s = "DOUBLE_FORMAT " %s "DOUBLE_FORMAT " = %s[%s%lld]\n",
            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    error2("floating diff = "LDOUBLE_FORMAT ", abs_tol = "LDOUBLE_FORMAT ", "
-           "rel_tol = "LDOUBLE_FORMAT "\n", diff, abs_tol, rel_tol);
+    error2("floating diff = "DOUBLE_FORMAT ", abs_tol = "DOUBLE_FORMAT ", "
+           "rel_tol = "DOUBLE_FORMAT "\n", diff, abs_tol, rel_tol);
     TRAP();
     exit(EXIT_FAILURE);
 }
 
 static void
-a_ldouble_equal(char *file, uint line, char *func,
+a_double_equal(char *file, uint line, char *func,
                 char *name1, char *name2,
                 char *type1, char *type2,
                 llong bits1, llong bits2,
                 int kind1, int kind2,
-                ldouble var1, ldouble var2) {
-    ldouble diff;
-    ldouble abs_tol;
-    ldouble rel_tol;
-    if (!assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+                double var1, double var2) {
+    double diff;
+    double abs_tol;
+    double rel_tol;
+    if (!assert_double_almost_equal(var1, var2, kind1, kind2,
                                      &diff, &abs_tol, &rel_tol)) {
-        assert_ldouble_failure(file, line, func, name1, name2,
+        assert_double_failure(file, line, func, name1, name2,
                                type1, type2, bits1, bits2,
                                var1, var2, "~=", diff, abs_tol, rel_tol);
     }
@@ -510,18 +500,18 @@ a_ldouble_equal(char *file, uint line, char *func,
 }
 
 static void
-a_ldouble_not_equal(char *file, uint line, char *func,
+a_double_not_equal(char *file, uint line, char *func,
                     char *name1, char *name2,
                     char *type1, char *type2,
                     llong bits1, llong bits2,
                     int kind1, int kind2,
-                    ldouble var1, ldouble var2) {
-    ldouble diff;
-    ldouble abs_tol;
-    ldouble rel_tol;
-    if (assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+                    double var1, double var2) {
+    double diff;
+    double abs_tol;
+    double rel_tol;
+    if (assert_double_almost_equal(var1, var2, kind1, kind2,
                                     &diff, &abs_tol, &rel_tol)) {
-        assert_ldouble_failure(file, line, func, name1, name2,
+        assert_double_failure(file, line, func, name1, name2,
                                type1, type2, bits1, bits2,
                                var1, var2, "!~=", diff, abs_tol, rel_tol);
     }
@@ -529,19 +519,19 @@ a_ldouble_not_equal(char *file, uint line, char *func,
 }
 
 static void
-a_ldouble_less(char *file, uint line, char *func,
+a_double_less(char *file, uint line, char *func,
                char *name1, char *name2,
                char *type1, char *type2,
                llong bits1, llong bits2,
                int kind1, int kind2,
-               ldouble var1, ldouble var2) {
-    ldouble diff;
-    ldouble abs_tol;
-    ldouble rel_tol;
-    (void)assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+               double var1, double var2) {
+    double diff;
+    double abs_tol;
+    double rel_tol;
+    (void)assert_double_almost_equal(var1, var2, kind1, kind2,
                                       &diff, &abs_tol, &rel_tol);
-    if (!assert_ldouble_less(var1, var2, kind1, kind2)) {
-        assert_ldouble_failure(file, line, func, name1, name2,
+    if (!assert_double_less(var1, var2, kind1, kind2)) {
+        assert_double_failure(file, line, func, name1, name2,
                                type1, type2, bits1, bits2,
                                var1, var2, "<", diff, abs_tol, rel_tol);
     }
@@ -549,21 +539,21 @@ a_ldouble_less(char *file, uint line, char *func,
 }
 
 static void
-a_ldouble_less_equal(char *file, uint line, char *func,
+a_double_less_equal(char *file, uint line, char *func,
                      char *name1, char *name2,
                      char *type1, char *type2,
                      llong bits1, llong bits2,
                      int kind1, int kind2,
-                     ldouble var1, ldouble var2) {
-    ldouble diff;
-    ldouble abs_tol;
-    ldouble rel_tol;
-    if (!((var1 < var2) || assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+                     double var1, double var2) {
+    double diff;
+    double abs_tol;
+    double rel_tol;
+    if (!((var1 < var2) || assert_double_almost_equal(var1, var2, kind1, kind2,
                                                        &diff, &abs_tol,
                                                        &rel_tol))) {
-        (void)assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+        (void)assert_double_almost_equal(var1, var2, kind1, kind2,
                                           &diff, &abs_tol, &rel_tol);
-        assert_ldouble_failure(file, line, func, name1, name2,
+        assert_double_failure(file, line, func, name1, name2,
                                type1, type2, bits1, bits2,
                                var1, var2, "<=", diff, abs_tol, rel_tol);
     }
@@ -571,19 +561,19 @@ a_ldouble_less_equal(char *file, uint line, char *func,
 }
 
 static void
-a_ldouble_more(char *file, uint line, char *func,
+a_double_more(char *file, uint line, char *func,
                char *name1, char *name2,
                char *type1, char *type2,
                llong bits1, llong bits2,
                int kind1, int kind2,
-               ldouble var1, ldouble var2) {
-    ldouble diff;
-    ldouble abs_tol;
-    ldouble rel_tol;
-    (void)assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+               double var1, double var2) {
+    double diff;
+    double abs_tol;
+    double rel_tol;
+    (void)assert_double_almost_equal(var1, var2, kind1, kind2,
                                       &diff, &abs_tol, &rel_tol);
-    if (!assert_ldouble_more(var1, var2, kind1, kind2)) {
-        assert_ldouble_failure(file, line, func, name1, name2,
+    if (!assert_double_more(var1, var2, kind1, kind2)) {
+        assert_double_failure(file, line, func, name1, name2,
                                type1, type2, bits1, bits2,
                                var1, var2, ">", diff, abs_tol, rel_tol);
     }
@@ -591,21 +581,21 @@ a_ldouble_more(char *file, uint line, char *func,
 }
 
 static void
-a_ldouble_more_equal(char *file, uint line, char *func,
+a_double_more_equal(char *file, uint line, char *func,
                      char *name1, char *name2,
                      char *type1, char *type2,
                      llong bits1, llong bits2,
                      int kind1, int kind2,
-                     ldouble var1, ldouble var2) {
-    ldouble diff;
-    ldouble abs_tol;
-    ldouble rel_tol;
-    if (!((var1 > var2) || assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+                     double var1, double var2) {
+    double diff;
+    double abs_tol;
+    double rel_tol;
+    if (!((var1 > var2) || assert_double_almost_equal(var1, var2, kind1, kind2,
                                                        &diff, &abs_tol,
                                                        &rel_tol))) {
-        (void)assert_ldouble_almost_equal(var1, var2, kind1, kind2,
+        (void)assert_double_almost_equal(var1, var2, kind1, kind2,
                                           &diff, &abs_tol, &rel_tol);
-        assert_ldouble_failure(file, line, func, name1, name2,
+        assert_double_failure(file, line, func, name1, name2,
                                type1, type2, bits1, bits2,
                                var1, var2, ">=", diff, abs_tol, rel_tol);
     }
@@ -695,12 +685,9 @@ _Generic((VAR2), \
     uint:    A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
     ulong:   A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
     ullong:  A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: _Generic((VAR2), \
-      ldouble: A_BOTH_LDOUBLE(MODE,  VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-      default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED() \
-    ) \
+    float:   A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
+    double:  A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED()            \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 
@@ -731,44 +718,38 @@ _Generic((VAR2), \
     uint:    A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_UINT   ), \
     ulong:   A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
     ullong:  A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   A_BOTH_LDOUBLE(MODE,      VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  A_BOTH_LDOUBLE(MODE,      VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: _Generic((VAR2), \
-      ldouble: A_BOTH_LDOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-      default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED() \
-    ) \
+    float:   A_BOTH_DOUBLE(MODE,      VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
+    double:  A_BOTH_DOUBLE(MODE,      VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED()              \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 
-#define A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_ldouble_##MODE(__FILE__, __LINE__, (char *)__func__,       \
+#define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
+    a_double_##MODE(__FILE__, __LINE__, (char *)__func__,       \
                      #VAR1, #VAR2,                     \
                      typename(TYPE1), typename(TYPE2), \
                      typebits(TYPE1), typebits(TYPE2), \
                      ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2), \
-                     LDOUBLE_GET2(VAR1, TYPE1), LDOUBLE_GET2(VAR2, TYPE2))
+                     DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
 
-#define A_FIRST_LDOUBLE(MODE, VAR1, VAR2, TYPE1) \
+#define A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
-    char:    A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR   ),     \
-    schar:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ),     \
-    short:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ),     \
-    int:     A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ),     \
-    long:    A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ),     \
-    llong:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ),     \
-    uchar:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ),     \
-    ushort:  A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ),     \
-    uint:    A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ),     \
-    ulong:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ),     \
-    ullong:  A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),     \
-    float:   A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ),     \
-    double:  A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),     \
-    default: _Generic((VAR2),                                           \
-        ldouble: A_BOTH_LDOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LDOUBLE), \
-        default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE()         \
-    ) \
+    char:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR   ),     \
+    schar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ),     \
+    short:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ),     \
+    int:     A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ),     \
+    long:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ),     \
+    llong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ),     \
+    uchar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ),     \
+    ushort:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ),     \
+    uint:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ),     \
+    ulong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ),     \
+    ullong:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),     \
+    float:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ),     \
+    double:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),     \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()            \
 )
-void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_LDOUBLE(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE(void);
 
 #define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                  \
 _Generic((VAR2),                                               \
@@ -816,13 +797,10 @@ _Generic((VAR1),                                                        \
     uint:    A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ),          \
     ulong:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ),          \
     ullong:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ),          \
-    float:   A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ),          \
-    double:  A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ),          \
+    float:   A_FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ),          \
+    double:  A_FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ),          \
     bool:    A_FIRST_BOOL(MODE,     VAR1, VAR2, TYPE_BOOL),             \
-    default: _Generic((VAR1),                                           \
-      ldouble: A_FIRST_LDOUBLE(MODE,  VAR1, VAR2, TYPE_LDOUBLE),        \
-      default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()            \
-    )                                                                   \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()            \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal,      VAR1, VAR2)
@@ -887,12 +865,12 @@ assert_functions_sink(void) {
     (void)a_unsigned_signed_more;
     (void)a_unsigned_signed_more_equal;
 
-    (void)a_ldouble_less;
-    (void)a_ldouble_less_equal;
-    (void)a_ldouble_equal;
-    (void)a_ldouble_not_equal;
-    (void)a_ldouble_more;
-    (void)a_ldouble_more_equal;
+    (void)a_double_less;
+    (void)a_double_less_equal;
+    (void)a_double_equal;
+    (void)a_double_not_equal;
+    (void)a_double_more;
+    (void)a_double_more_equal;
     (void)assert_file_contains;
     (void)assert_contains;
     (void)assert_not_contains;
@@ -1048,7 +1026,7 @@ main(void) {
         ASSERT_MORE_EQUAL(b, a);
     } {
         llong a = 1;
-        ldouble b = 1;
+        double b = 1;
         ASSERT_EQUAL(a, b);
         ASSERT_LESS_EQUAL(a, b);
         ASSERT_MORE_EQUAL(b, a);
