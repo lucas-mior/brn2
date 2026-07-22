@@ -977,8 +977,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
         return;
     }
 #endif
-    renamed = rename(oldname, newname);
-    if (renamed < 0) {
+    if ((renamed = rename(oldname, newname)) < 0) {
         error("Error renaming "RED("'%s'")" to "RED("'%s'")": %s.\n",
               oldname, newname, strerror(errno));
         if (brn2_options_fatal) {
