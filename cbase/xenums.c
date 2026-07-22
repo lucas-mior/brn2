@@ -326,6 +326,7 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
 static inline void
 CAT(ENUM_PREFIX_, functions_sink)(void) {
     (void)CAT(ENUM_PREFIX_, str);
+    (void)CAT(ENUM_PREFIX_, str_free);
     (void)CAT(ENUM_PREFIX_, parse);
     return;
 }
