@@ -13,7 +13,7 @@ run_brn2_debug () {
 }
 
 if [ ! -d /tmp/brn2 ]; then
-    mkdir -f /tmp/brn2
+    mkdir /tmp/brn2
 fi
 cd /tmp/brn2
 
