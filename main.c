@@ -34,7 +34,7 @@ bool brn2_options_sort = true;
 bool brn2_options_autosolve = false;
 bool brn2_options_vim_split = false;
 int32 nthreads;
-int (*print)(const char *, ...);
+int (*print)(const char *, ...) = noop;
 
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
@@ -560,8 +560,7 @@ main(int argc, char **argv) {
 
 #if BRN2_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    // TODO: Define or replace brn2_timings; both benchmark calls fail to link.
-    brn2_timings("before renames", t0, t1, old->length);
+    PRINT_TIMINGS("before renames", t0, t1, old->length);
 #endif
 
     {
@@ -593,9 +592,8 @@ main(int argc, char **argv) {
             error("Check your files.\n");
             fatal(EXIT_FAILURE);
         } else {
-            // TODO: Honor --quiet for the final summary too.
-            printf("%d file%.*s renamed.\n", number_renames,
-                   number_renames != 1, "s");
+            print("%d file%.*s renamed.\n",
+                  number_renames, number_renames != 1, "s");
         }
     }
 
