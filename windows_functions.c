@@ -136,7 +136,6 @@ lstat(const char *path, struct stat *statbuf) {
     ull_size.HighPart = fd.nFileSizeHigh;
     if (ull_size.QuadPart > LONG_MAX) {
         fprintf(stderr, "Warning: file is too large, size will be wrong.\n");
-        ull_size.QuadPart = -1;
     }
     statbuf->st_size = (long)ull_size.QuadPart;
 
