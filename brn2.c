@@ -211,10 +211,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         int64 size;
 
         if (brn2_is_invalid_name(name)) {
-            // TODO: Always free skipped scandir entries; release builds leak.
-            if (DEBUGGING) {
-                free(directory_list[i]);
-            }
+            free(directory_list[i]);
             continue;
         }
         if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
