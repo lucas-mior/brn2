@@ -24,7 +24,7 @@ cleanup () {
 trap cleanup EXIT
 
 set -x
-bin/brn2 -f "/tmp/rename" -t "/tmp/rename2"
+bin/brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
 
 check () {
     if ! grep -q "$1" "$2"; then
@@ -52,7 +52,7 @@ for f in c bxx d a; do
 done
 
 set -x
-bin/brn2 -f "/tmp/rename" -t "/tmp/rename2"
+bin/brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
 set +x
 
 check a c
@@ -81,7 +81,7 @@ for f in b c d a; do
 done
 
 set -x
-bin/brn2 -q -f "/tmp/rename" -t "/tmp/rename2" 2>/dev/null
+bin/brn2_debug -q -f "/tmp/rename" -t "/tmp/rename2" 2>/dev/null
 set +x
 
 check a b
