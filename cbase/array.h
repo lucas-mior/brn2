@@ -42,8 +42,6 @@ generic_array_init(int32 cap, int64 item_size) {
         cap = 0;
     }
 
-    // TODO: Validate item_size and check the multiplication and addition for
-    // overflow before allocating the array storage.
     size = SIZEOF(*header) + cap*item_size;
     header = malloc2(size);
     header->count = 0;
