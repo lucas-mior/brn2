@@ -169,7 +169,8 @@ case "$target" in
     CC=gcc
     # TODO: Put -lm in link flags after the source; check currently fails
     # with unresolved pow and round references.
-    CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer -lm"
+    CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer"
+    LDFLAGS="$LDFLAGS -lm"
     ;;
 "build")
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
