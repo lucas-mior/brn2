@@ -7,9 +7,13 @@ set -e
 brn2="$PWD/bin/brn2_debug"
 
 run_brn2_debug () {
-    gdb -q -nx -batch --return-child-result \
-        -ex run \
-        --args "$brn2" "$@"
+    if command gdb; then
+        gdb -q -nx -batch --return-child-result \
+            -ex run \
+            --args "$brn2" "$@"
+    else
+        "$brn2" "$@"
+    fi
 }
 
 if [ ! -d /tmp/brn2 ]; then
