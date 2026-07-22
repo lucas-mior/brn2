@@ -407,6 +407,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     char buffer[BRN2_PATH_MAX];
     int32 capacity = 128;
     FILE *lines;
+    int32 line = 0;
 
     if (!strcmp(filename, "-")) {
         lines = stdin;
@@ -421,15 +422,20 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     list->capacity = capacity;
 
     errno = 0;
-    // TODO: Detect records that fill the buffer without a newline. Otherwise
-    // one overlong pathname is split into several independent pathnames.
     while (fgets(buffer, sizeof(buffer), lines)) {
         FileName **file_pointer;
         FileName *file;
         int32 name_length;
         int64 size;
 
+        line += 1;
         name_length = (int32)strcspn(buffer, "\n");
+
+        if (buffer[name_length] != '\n') {
+            error("Too long file name at line %d.\n", line);
+            fatal(EXIT_FAILURE);
+        }
+
         buffer[name_length] = '\0';
         if (is_old && brn2_is_invalid_name(buffer)) {
             continue;
