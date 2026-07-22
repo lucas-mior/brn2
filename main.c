@@ -115,6 +115,7 @@ main(int argc, char **argv) {
     FileList *new;
     struct Hash_map *oldlist_map = NULL;
     struct Hash_set *newlist_set = NULL;
+    uint32 capacity_map;
     int32 available_threads;
 #if OS_UNIX
     int32 thread_ids[BRN2_MAX_THREADS];
@@ -299,7 +300,6 @@ main(int argc, char **argv) {
     {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
-        uint32 capacity_map;
         int32 j = 0;
         int64 buffered;
 #if OS_UNIX
@@ -329,8 +329,6 @@ main(int argc, char **argv) {
             }
         }
 
-        // TODO: Filter and compact old before building this map. Removed
-        // entries leave stale values and may change precomputed-index capacity.
         oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
         capacity_map = hash_capacity(oldlist_map);
 
@@ -460,7 +458,7 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            newlist_set = hash_create_set((uint32)new->length, "newlist_set");
+            newlist_set = hash_create_set(capacity_map, "newlist_set");
 
             main_capacity = hash_capacity(newlist_set);
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
