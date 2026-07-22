@@ -1415,19 +1415,40 @@ send_signal(char *executable, int32 signal_number) {
 #if !OS_WINDOWS
 static bool
 util_file_exists(char *filename) {
-    int32 fd;
-
-    if ((fd = open(filename, O_PATH | O_NOFOLLOW)) < 0) {
-        return false;
-    } else {
-        XCLOSE(&fd, filename);
-        return true;
+#if defined(O_PATH) && defined(O_NOFOLLOW)
+    // this should be faster than lstat()
+    {
+        int32 fd;
+        if (((fd = open(filename, O_PATH | O_NOFOLLOW)) < 0)
+                && (errno == ENOENT)) {
+            return false;
+        } else {
+            XCLOSE(&fd, filename);
+            return true;
+        }
     }
+#else
+    {
+        struct stat statbuf;
+        if ((lstat(filename, &statbuf) < 0) && (errno == ENOENT)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+#endif
 }
 #else
 static bool
 util_file_exists(char *filename) {
-    return !access(filename, F_OK);
+    DWORD attributes;
+
+    attributes = GetFileAttributesA(filename);
+    if (attributes == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    }
+
+    return true;
 }
 #endif
 
