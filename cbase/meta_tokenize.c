@@ -592,11 +592,8 @@ token_is_trivia(Token *token) {
 static int32
 tokenization_significant_at_or_after(Tokenization *tokenization,
                                      int32 token_index) {
-    int32 result;
-
-    result = token_index;
-    // TODO: Reject or clamp negative token_index before indexing
-    // tokens[result].
+    int32 result = token_index;
+    assert(token_index >= 0);
     while ((result < tokenization->token_count)
            && token_is_trivia(&tokenization->tokens[result])) {
         result += 1;
