@@ -31,8 +31,8 @@ c_string_literal(char *value, int32 value_len) {
     SB_APPEND(&out, "\"");
 
     if (out.cap != out.len + 1) {
-        out.data
-            = realloc2(out.data, out.cap, out.len + 1, SIZEOF(out.data[0]));
+        out.data = realloc2(out.data,
+                            out.cap, out.len + 1, SIZEOF(out.data[0]));
         out.cap = out.len + 1;
     }
 
