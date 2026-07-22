@@ -2094,6 +2094,7 @@ sb_append(StrBuilder *str_builder, char *data, int32 data_len) {
     memcpy64(str_builder->data + str_builder->len, data, data_len);
     str_builder->len += data_len;
     str_builder->data[str_builder->len] = '\0';
+
     return;
 }
 
