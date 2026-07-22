@@ -375,15 +375,14 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
 
     if (length == 0) {
-        // TODO: Unmap, close, restore size, free storage, and reset
-        // every list field.
-        return;
+        goto cleanup;
     }
     list->files = realloc2(list->files,
                            capacity, length, SIZEOF(*(list->files)));
     list->length = length;
     list->capacity = length;
 
+cleanup:
     munmap(map, (size_t)map_size);
     if (ftruncate(fd, map_size - padding) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n",
