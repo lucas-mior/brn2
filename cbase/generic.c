@@ -108,8 +108,7 @@ snprint_0(char *restrict buf, int64 bufSize, ... /* strings, NULL */) {
     char *dst = buf;
     char *s;
 
-    // TODO: Reject negative bufSize. It is treated as writable space and is
-    // later converted to a huge size_t for memcpy.
+    assert(bufSize >= 0);
     if (bufSize) {
         remainingLen = bufSize - 1;
     } else {
