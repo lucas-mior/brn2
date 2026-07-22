@@ -4,34 +4,31 @@ set -e
 
 ./build.sh debug
 
+brn2="$PWD/bin/brn2_debug"
+
 run_brn2_debug () {
     gdb -q -nx -batch --return-child-result \
         -ex run \
-        --args bin/brn2_debug "$@"
+        --args "$brn2" "$@"
 }
 
-rm -rf "/tmp/rename" "/tmp/rename2"
+mkdir /tmp/brn2
+cd /tmp/brn2
+
+rm -rf "rename" "rename2"
 
 for f in a b c d; do
     echo "$f" >  "$f"
-    echo "$f" >> "/tmp/rename"
+    echo "$f" >> "rename"
 done
-echo "a" >> "/tmp/rename"
+echo "a" >> "rename"
 
 for f in b c d a; do
-    echo "$f" >> "/tmp/rename2"
+    echo "$f" >> "rename2"
 done
 
-cleanup () {
-    rm -f a b c d bxx
-    rm -f "/tmp/rename" "/tmp/rename2"
-    return
-}
-
-trap cleanup EXIT
-
 set -x
-run_brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
+run_brn2_debug -f "rename" -t "rename2"
 
 check () {
     if ! grep -q "^${1}$" "$2"; then
@@ -46,20 +43,20 @@ check b c
 check c d
 check d a
 
-rm -rf "/tmp/rename" "/tmp/rename2"
+rm -rf "rename" "rename2"
 
 for f in a b c d; do
     echo "$f" >  "$f"
-    echo "$f" >> "/tmp/rename"
+    echo "$f" >> "rename"
 done
-echo "a" >> "/tmp/rename"
+echo "a" >> "rename"
 
 for f in c bxx d a; do
-    echo "$f" >> "/tmp/rename2"
+    echo "$f" >> "rename2"
 done
 
 set -x
-run_brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
+run_brn2_debug -f "rename" -t "rename2"
 set +x
 
 check a c
@@ -68,7 +65,7 @@ check c d
 check d a
 
 rm -f a b c d bxx
-rm -rf "/tmp/rename" "/tmp/rename2"
+rm -rf "rename" "rename2"
 
 for f in a b c d; do
     echo "$f" > "$f"
@@ -81,17 +78,20 @@ awk 'BEGIN {
         printf "a\nb\nc\nd\n"
     }
     print "a"
-}' > "/tmp/rename"
+}' > "rename"
 
 for f in b c d a; do
-    echo "$f" >> "/tmp/rename2"
+    echo "$f" >> "rename2"
 done
 
 set -x
-run_brn2_debug -q -f "/tmp/rename" -t "/tmp/rename2" 2>/dev/null
+run_brn2_debug -q -f "rename" -t "rename2" 2>/dev/null
 set +x
 
 check a b
 check b c
 check c d
 check d a
+
+rm -f a b c d bxx
+rm -f "rename" "rename2"
