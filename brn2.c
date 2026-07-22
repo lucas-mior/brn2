@@ -475,7 +475,9 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("Error closing file %s: %s.\n", filename, strerror(errno));
     }
     if (length == 0) {
-        // TODO: Free the allocation and reset every list field before return.
+        free2(list->files, list->capacity*SIZEOF(*list->files));
+        list->length = 0;
+        list->capacity = 0;
         return;
     }
     list->files = realloc2(list->files,
