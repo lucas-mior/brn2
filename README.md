@@ -71,6 +71,11 @@ will take place when you save and exit.
 - If you want to filter/organize the files to rename, use command line utilities
   like `find` and output it to a file. Edit this file as you like and then
   launch brn2 with the `-f` option. See examples below.
+- Renames are not atomic (except swapping with renameat2).
+  If another process renames a file to the new name you have set for another
+  file in the short interval between we check for the new name existence, you
+  will loose the file created by the other process. This should only be a
+  problem under adversarial circumstances.
 
 #### Be careful when renaming in depth
 If you supply the files:
