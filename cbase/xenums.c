@@ -85,10 +85,12 @@ enum CAT(ENUM_NAME, _BitIndices) ENUM_UNDERLYING_TYPE_SPEC {
     CAT(ENUM_PREFIX_, BIT_COUNT)
 };
 _Static_assert(CAT(ENUM_PREFIX_, BIT_COUNT)
-               <= (sizeof(ENUM_UNDERLYING_TYPE)*CHAR_BIT));
+               <= (sizeof(ENUM_UNDERLYING_TYPE)*CHAR_BIT),
+               "bit flag enum does not fit in the underlying integer");
 #endif
 
-_Static_assert((ENUM_UNDERLYING_TYPE)-1 > 0);
+_Static_assert((ENUM_UNDERLYING_TYPE)-1 > 0,
+               "enum underlying type must be unsigned");
 
 // Note: passing numbers to the X macro second parameter is not allowed for the
 // BITFLAGS case. It will break the API. You can only passing composition of

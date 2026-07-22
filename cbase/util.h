@@ -100,6 +100,7 @@ static void sb_append_byte(StrBuilder *str_builder, char byte);
 static void sb_printf(StrBuilder *str_builder, char *fmt, ...)
     __attribute__((format(printf, 2, 3)));
 static char *sb_steal(StrBuilder *str_builder, int32 *len, int32 *cap);
+static char *sb_steal_exact(StrBuilder *str_builder, int32 *len);
 
 static void str_builder_array_init(StrBuilderArray *array);
 static void str_builder_array_clear(StrBuilderArray *array);

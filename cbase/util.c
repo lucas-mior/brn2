@@ -2178,6 +2178,24 @@ sb_steal(StrBuilder *str_builder, int32 *len, int32 *cap) {
     return data;
 }
 
+static char *
+sb_steal_exact(StrBuilder *str_builder, int32 *len) {
+    char *data;
+    int32 data_len;
+    int32 cap;
+
+    data = sb_steal(str_builder, &data_len, &cap);
+    if (cap != data_len + 1) {
+        data = realloc2(data, cap, data_len + 1, SIZEOF(*data));
+    }
+    data[data_len] = '\0';
+
+    if (len) {
+        *len = data_len;
+    }
+    return data;
+}
+
 static void
 str_builder_array_init(StrBuilderArray *array) {
     array->items = NULL;
