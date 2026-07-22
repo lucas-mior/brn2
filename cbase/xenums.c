@@ -115,7 +115,7 @@ static void
 CAT(ENUM_PREFIX_, str_free)(char *str) {
     (void)str;
 #if ENUM_BITFLAGS
-    free2(str, strlen32(str) + 1);
+    free2(str, optional_strlen32(str) + 1);
 #endif
     return;
 }
