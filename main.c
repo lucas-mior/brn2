@@ -343,10 +343,9 @@ main(int argc, char **argv) {
             bool contains_newline;
 
             if ((contains_newline = memchr64(file->name, '\n', file->length))
-                // TODO: Store compacted index j, not original index i.
                 || !hash_insert_pre_calc_map(oldlist_map,
                                              file->name, file->length,
-                                             file->hash, index, i)) {
+                                             file->hash, index, j)) {
                 if (contains_newline) {
                     error(RED("'%s'")" contains new line.", file->name);
                 } else {
@@ -357,7 +356,7 @@ main(int argc, char **argv) {
                     fatal(EXIT_FAILURE);
                 }
 
-                error(" Removing from list...\n");
+                error2(" Removing from list...\n");
                 continue;
             }
 
