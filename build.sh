@@ -167,6 +167,8 @@ case "$target" in
     ;;
 "check")
     CC=gcc
+    # TODO: Put -lm in link flags after the source; check currently fails
+    # with unresolved pow and round references.
     CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer -lm"
     ;;
 "build")
@@ -327,6 +329,7 @@ case "$target" in
     elif [ "$CC" = "cproc" ]; then
         with_other cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     else
+        # TODO: Place linker-only libraries after "$main".
         $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     fi
     trace_off

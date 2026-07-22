@@ -54,7 +54,10 @@ scandir(const char *dir, struct dirent ***namelist,
 
     SNPRINTF(buffer, "%s/*", dir);
 
+    // TODO: Use wide enumeration throughout. ANSI names are later decoded as
+    // UTF-8 by lstat, so ordinary non-ASCII filenames can be corrupted.
     if ((find_handle = FindFirstFileA(buffer, &find_data)) == INVALID_HANDLE_VALUE) {
+        // TODO: Translate GetLastError to errno or report it directly.
         return -1;
     }
 
@@ -80,6 +83,8 @@ scandir(const char *dir, struct dirent ***namelist,
         list[count] = dir_entry;
         count += 1;
     } while (FindNextFileA(find_handle, &find_data));
+    // TODO: Check GetLastError. Enumeration errors currently look like EOF
+    // and return a silently truncated directory list.
     FindClose(find_handle);
 
     *namelist = list;
@@ -106,6 +111,7 @@ lstat(const char *path, struct stat *statbuf) {
         return -1;
     }
 
+    // TODO: Set errno from GetLastError on conversion or attribute errors.
     if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wide_path, MAX_PATH) == 0) {
         return -1;
     }
@@ -118,6 +124,7 @@ lstat(const char *path, struct stat *statbuf) {
 
     // File type
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        // TODO: Distinguish directory junctions from file symlinks.
         statbuf->st_mode = S_IFLNK;
     } else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         statbuf->st_mode = S_IFDIR;
@@ -128,6 +135,8 @@ lstat(const char *path, struct stat *statbuf) {
     ull_size.LowPart = fd.nFileSizeLow;
     ull_size.HighPart = fd.nFileSizeHigh;
     if (ull_size.QuadPart > LONG_MAX) {
+        // TODO: Renaming must not reject files merely because they exceed
+        // 2 GiB.
         fprintf(stderr, "Error: file is too large to be represented in long\n");
         return -1;
     }

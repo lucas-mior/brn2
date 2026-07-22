@@ -211,6 +211,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         int64 size;
 
         if (brn2_is_invalid_name(name)) {
+            // TODO: Always free skipped scandir entries; release builds leak.
             if (DEBUGGING) {
                 free(directory_list[i]);
             }
@@ -218,6 +219,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
         if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
             error("File name too long. Skipping...\n");
+            // TODO: Free directory_list[i] before skipping this entry.
             continue;
         }
 
@@ -266,6 +268,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         brn2_list_from_lines(list, filename, is_old);
         return;
     }
+    // TODO: Open read-only and never resize the input file. The current
+    // code requires write access and can leave NUL padding after an error.
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening '%s' for reading: %s.\n",
               filename, strerror(errno));
@@ -305,6 +309,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
     map = mmap(NULL, (size_t)map_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (map == MAP_FAILED) {
+        // TODO: Name the actual input file; this is not a history file.
         error("Error mapping history file to memory: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
@@ -324,6 +329,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         char *pointer = map;
         int64 left = map_size - padding;
 
+        // TODO: Process a final line without '\n' and reject embedded
+        // NUL bytes, which disagree with pathname and strcmp semantics.
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
@@ -371,6 +378,8 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
 
     if (length == 0) {
+        // TODO: Unmap, close, restore size, free storage, and reset
+        // every list field.
         return;
     }
     list->files = realloc2(list->files,
@@ -416,6 +425,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     list->capacity = capacity;
 
     errno = 0;
+    // TODO: Detect records that fill the buffer without a newline. Otherwise
+    // one overlong pathname is split into several independent pathnames.
     while (fgets(buffer, sizeof(buffer), lines)) {
         FileName **file_pointer;
         FileName *file;
@@ -453,14 +464,17 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
         errno = 0;
     }
+    // TODO: Check ferror(lines); stdio errors need not leave errno set.
     if (errno) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
         fatal(EXIT_FAILURE);
     }
+    // TODO: Do not close stdin; main reuses it for the editor prompt.
     if (fclose(lines) != 0) {
         error("Error closing file %s: %s.\n", filename, strerror(errno));
     }
     if (length == 0) {
+        // TODO: Free the allocation and reset every list field before return.
         return;
     }
     list->files = realloc2(list->files,
@@ -492,6 +506,8 @@ brn2_free_list(FileList *list) {
     }
     free2(list->files, list->capacity*SIZEOF(*(list->files)));
     arenas_reset(list->arenas, nthreads);
+    // TODO: Clear files, length, and capacity; failed editor retries
+    // reuse this list.
     return;
 }
 
@@ -514,6 +530,8 @@ brn2_threads_work_normalization(Work *arg) {
         char *p;
         int64 off = 0;
 
+        // TODO: Preserve a leading "//". It is a UNC prefix on Windows
+        // and may have implementation-defined meaning on POSIX.
         while ((p = memmem64(file->name + off, file->length - off, "//", 2))) {
             off = p - file->name;
 
@@ -538,6 +556,7 @@ brn2_threads_work_normalization(Work *arg) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
                 if (errno != ENOENT) {
+                    // TODO: Report lstat, which is the operation that failed.
                     error("Error in stat('%s'): %s.\n",
                           file->name, strerror(errno));
                 }
@@ -561,6 +580,7 @@ brn2_threads_work_normalization(Work *arg) {
 
 void
 brn2_slash_add(FileName *file) {
+    // TODO: Reject an empty normalized name before reading name[-1].
     if (file->name[file->length - 1] != '/') {
         file->name[file->length] = '/';
         file->name[file->length + 1] = '\0';
@@ -794,6 +814,7 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
         FileName *newfile = new->files[i];
 
         if (newfile->length >= BRN2_PATH_MAX) {
+            // TODO: Add a newline and say "is %d bytes or longer".
             error("Error: filename on line %d is longer than %d bytes",
                   i + 1, BRN2_PATH_MAX);
             failed = true;
@@ -814,6 +835,9 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
                       " have exactly the same content.\n",
                       oldfile->name, newfile->name);
                 if (brn2_options_autosolve) {
+                    // TODO: Do not unlink during validation. A repeated target
+                    // equal to its own old name can delete the wrong source,
+                    // and a later validation failure leaves that deletion done.
                     error("--autosolve is enabled: Deleting old file...\n");
                     if (unlink(newfile->name) < 0) {
                         error("Error deleting %s: %s.\n",
@@ -869,6 +893,8 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 
     found = hash_lookup_pre_calc_map(oldlist_map, newname, newlen, newhash,
                                      newindex, &next_on_oldlist);
+    // TODO: access() follows dangling symlinks and races with rename(). Use an
+    // entry-aware check plus an atomic no-replace rename where available.
     newname_exists = !access(newname, F_OK);
 
 #if defined(_GNU_SOURCE)
@@ -892,6 +918,8 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                                          oldname, oldlen, oldhash, oldindex)) {
                 *number_renames += 1;
             }
+            // TODO: When !found, counting the external path as another
+            // rename makes one requested implicit exchange fail final totals.
             if (hash_insert_pre_calc_set(names_renamed,
                                          newname, newlen, newhash, newindex)) {
                 *number_renames += 1;
@@ -925,6 +953,8 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
             }
             return;
         } else if (errno != ENOENT) {
+            // TODO: Return after exchange failure. Falling through to rename()
+            // can overwrite the destination and destroy one side of the swap.
             error("Error swapping " RED("'%s'") " and " RED("'%s'")": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
