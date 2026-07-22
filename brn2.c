@@ -534,8 +534,8 @@ brn2_threads_work_normalization(Work *arg) {
         char *p;
         int64 off = 0;
 
-        // TODO: Preserve a leading "//". It is a UNC prefix on Windows
-        // and may have implementation-defined meaning on POSIX.
+        // Note: leading // is not preserved, even though is can be used for
+        // special purposes in some operating systems.
         while ((p = memmem64(file->name + off, file->length - off, "//", 2))) {
             off = p - file->name;
 
