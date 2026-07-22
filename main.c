@@ -40,6 +40,7 @@ int (*print)(const char *, ...) = noop;
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
     {"file",      required_argument, NULL, 'f'},
+    {"file-test", required_argument, NULL, 't'},
     {"explicit",  no_argument,       NULL, 'e'},
     {"fatal",     no_argument,       NULL, 'F'},
     {"help",      no_argument,       NULL, 'h'},
@@ -127,6 +128,7 @@ main(int argc, char **argv) {
 
     char *directory = ".";
     char *lines = NULL;
+    char *lines_test = NULL;
     int mode = FILES_FROM_DIR;
 
 #if BRN2_BENCHMARK
@@ -138,7 +140,7 @@ main(int argc, char **argv) {
     program_len = strlen32(argv[0]);
     program = basename2(argv[0], &program_len, NULL);
 
-    while ((opt = getopt_long(argc, argv, "d:f:eFhiqsvaV", options, NULL))
+    while ((opt = getopt_long(argc, argv, "d:f:t:eFhiqsvaV", options, NULL))
            != -1) {
         switch (opt) {
         case 'd':
@@ -154,6 +156,12 @@ main(int argc, char **argv) {
                 brn2_usage(stderr);
             }
             lines = optarg;
+            break;
+        case 't':
+            if (optarg == NULL) {
+                brn2_usage(stderr);
+            }
+            lines_test = optarg;
             break;
         case '?':
             brn2_usage(stderr);
@@ -472,37 +480,41 @@ main(int argc, char **argv) {
         while (true) {
             int32 status;
 
-            if (!isatty(fileno(stdin))) {
-                char *tty_path;
-                if (OS_WINDOWS) {
-                    tty_path = "CONIN$";
-                } else {
-                    tty_path = "/dev/tty";
-                }
+            if (lines_test == NULL) {
+                if (!isatty(fileno(stdin))) {
+                    char *tty_path;
+                    if (OS_WINDOWS) {
+                        tty_path = "CONIN$";
+                    } else {
+                        tty_path = "/dev/tty";
+                    }
 
-                if (!freopen(tty_path, "r", stdin)) {
-                    error("Error reopening stdin: %s.\n", strerror(errno));
-                    fatal(EXIT_FAILURE);
-                }
-            }
-
-            if (brn2_options_vim_split) {
-                status = util_command(LENGTH(args_vim_split), args_vim_split);
-            } else {
-                status = util_command(LENGTH(args_edit), args_edit);
-            }
-
-            if (status != 0) {
-                if (OS_WINDOWS) {
-                    args_edit[0] = "Notepad.exe";
-                    if (util_command(LENGTH(args_edit), args_edit) < 0) {
+                    if (!freopen(tty_path, "r", stdin)) {
+                        error("Error reopening stdin: %s.\n", strerror(errno));
                         fatal(EXIT_FAILURE);
                     }
-                } else {
-                    fatal(EXIT_FAILURE);
                 }
+
+                if (brn2_options_vim_split) {
+                    status = util_command(LENGTH(args_vim_split), args_vim_split);
+                } else {
+                    status = util_command(LENGTH(args_edit), args_edit);
+                }
+
+                if (status != 0) {
+                    if (OS_WINDOWS) {
+                        args_edit[0] = "Notepad.exe";
+                        if (util_command(LENGTH(args_edit), args_edit) < 0) {
+                            fatal(EXIT_FAILURE);
+                        }
+                    } else {
+                        fatal(EXIT_FAILURE);
+                    }
+                }
+                brn2_list_from_file(new, brn2_buffer.name, false);
+            } else {
+                brn2_list_from_file(new, lines_test, false);
             }
-            brn2_list_from_file(new, brn2_buffer.name, false);
 
             if (new->length <= 0) {
                 error("New list is empty. Exiting...\n");
