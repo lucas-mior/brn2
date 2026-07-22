@@ -493,9 +493,7 @@ main(int argc, char **argv) {
                 status = util_command(LENGTH(args_edit), args_edit);
             }
 
-            // TODO: Treat every nonzero editor status as failure. execvp
-            // failures return a positive exit status and look successful here.
-            if (status < 0) {
+            if (status != 0) {
                 if (OS_WINDOWS) {
                     args_edit[0] = "Notepad.exe";
                     if (util_command(LENGTH(args_edit), args_edit) < 0) {
