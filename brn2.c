@@ -955,14 +955,13 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                                          newname, newlen, newhash, newindex, i);
             }
             return;
-        } else if (errno != ENOENT) {
-            // TODO: Return after exchange failure. Falling through to rename()
-            // can overwrite the destination and destroy one side of the swap.
+        } else {
             error("Error swapping " RED("'%s'") " and " RED("'%s'")": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
             }
+            return;
         }
     }
 #else
