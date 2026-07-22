@@ -160,7 +160,6 @@ arena_destroy(Arena *arena) {
 
     do {
         next = arena->next;
-        free(arena->name);
         arena_free(arena);
     } while ((arena = next));
 
@@ -204,6 +203,7 @@ arena_allocate(int64 *size) {
 }
 bool
 arena_free(Arena *arena) {
+    free(arena->name);
     if (munmap(arena, (size_t)arena->size) < 0) {
         error2("Error in munmap(%p, %lld): %s.\n", (void *)arena,
                (llong)arena->size, strerror(errno));
