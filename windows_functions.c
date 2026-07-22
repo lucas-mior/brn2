@@ -39,53 +39,196 @@
 #define TESTING_windows_functions 0
 #endif
 
+static void
+windows_set_errno(DWORD error_code) {
+    switch (error_code) {
+    case ERROR_FILE_NOT_FOUND:
+    case ERROR_PATH_NOT_FOUND:
+    case ERROR_INVALID_DRIVE:
+    case ERROR_BAD_NETPATH:
+    case ERROR_BAD_NET_NAME:
+        errno = ENOENT;
+        break;
+    case ERROR_ACCESS_DENIED:
+    case ERROR_NETWORK_ACCESS_DENIED:
+    case ERROR_WRITE_PROTECT:
+    case ERROR_SHARING_VIOLATION:
+    case ERROR_LOCK_VIOLATION:
+        errno = EACCES;
+        break;
+    case ERROR_FILE_EXISTS:
+    case ERROR_ALREADY_EXISTS:
+        errno = EEXIST;
+        break;
+    case ERROR_INVALID_PARAMETER:
+    case ERROR_INVALID_NAME:
+    case ERROR_BAD_PATHNAME:
+        errno = EINVAL;
+        break;
+    case ERROR_NO_UNICODE_TRANSLATION:
+        errno = EILSEQ;
+        break;
+    case ERROR_FILENAME_EXCED_RANGE:
+        errno = ENAMETOOLONG;
+        break;
+    case ERROR_NOT_ENOUGH_MEMORY:
+    case ERROR_OUTOFMEMORY:
+        errno = ENOMEM;
+        break;
+    case ERROR_TOO_MANY_OPEN_FILES:
+        errno = EMFILE;
+        break;
+    case ERROR_DISK_FULL:
+    case ERROR_HANDLE_DISK_FULL:
+        errno = ENOSPC;
+        break;
+    case ERROR_DIRECTORY:
+        errno = ENOTDIR;
+        break;
+    case ERROR_DIR_NOT_EMPTY:
+        errno = ENOTEMPTY;
+        break;
+    case ERROR_OPERATION_ABORTED:
+        errno = EINTR;
+        break;
+    case ERROR_BROKEN_PIPE:
+    case ERROR_NO_DATA:
+        errno = EPIPE;
+        break;
+    default:
+        errno = EIO;
+        break;
+    }
+    return;
+}
+
+static void
+scandir_list_free(struct dirent **list, int64 count, int64 capacity) {
+    for (int64 i = 0; i < count; i += 1) {
+        free2(list[i], SIZEOF(*list[i]));
+    }
+    free2(list, capacity*SIZEOF(*list));
+    return;
+}
+
 static int
 scandir(const char *dir, struct dirent ***namelist,
         int (*filter)(const struct dirent *),
         int (*compar)(const struct dirent **, const struct dirent **)) {
-    WIN32_FIND_DATAA find_data;
+    WIN32_FIND_DATAW find_data;
     HANDLE find_handle;
-    char buffer[MAX_PATH];
+    wchar_t *wide_pattern;
     struct dirent **list;
-    int64 count = 0;
+    DWORD error_code;
+    int64 pattern_capacity;
+    int64 pattern_length;
+    int64 count;
     int64 capacity = 16;
+    int32 wide_dir_length;
     (void)filter;
     (void)compar;
 
-    SNPRINTF(buffer, "%s/*", dir);
-
-    // TODO: Use wide enumeration throughout. ANSI names are later decoded as
-    // UTF-8 by lstat, so ordinary non-ASCII filenames can be corrupted.
-    if ((find_handle = FindFirstFileA(buffer, &find_data)) == INVALID_HANDLE_VALUE) {
-        // TODO: Translate GetLastError to errno or report it directly.
+    if ((dir == NULL) || (namelist == NULL)) {
+        errno = EINVAL;
         return -1;
     }
 
-    list = malloc2(capacity*SIZEOF(*list));
-    do {
-        struct dirent *dir_entry = malloc2(sizeof(*dir_entry));
-        int64 length = strlen32(find_data.cFileName);
+    wide_dir_length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                          dir, -1, NULL, 0);
+    if (wide_dir_length <= 0) {
+        windows_set_errno(GetLastError());
+        return -1;
+    }
 
-        if (length > (SIZEOF(dir_entry->d_name) - 1)) {
-            error("Error scanning file %s. File name is too long.\n",
-                  find_data.cFileName);
-            fatal(EXIT_FAILURE);
+    pattern_capacity = (int64)wide_dir_length + 2;
+    wide_pattern = malloc2(pattern_capacity*SIZEOF(*wide_pattern));
+    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, dir, -1,
+                            wide_pattern, wide_dir_length)
+        != wide_dir_length) {
+        error_code = GetLastError();
+        free2(wide_pattern, pattern_capacity*SIZEOF(*wide_pattern));
+        windows_set_errno(error_code);
+        return -1;
+    }
+
+    pattern_length = (int64)wide_dir_length - 1;
+    if ((pattern_length > 0)
+        && (wide_pattern[pattern_length - 1] != L'/')
+        && (wide_pattern[pattern_length - 1] != L'\\')) {
+        wide_pattern[pattern_length++] = L'\\';
+    }
+    wide_pattern[pattern_length++] = L'*';
+    wide_pattern[pattern_length] = L'\0';
+
+    find_handle = FindFirstFileW(wide_pattern, &find_data);
+    if (find_handle == INVALID_HANDLE_VALUE) {
+        error_code = GetLastError();
+        free2(wide_pattern, pattern_capacity*SIZEOF(*wide_pattern));
+        windows_set_errno(error_code);
+        return -1;
+    }
+    free2(wide_pattern, pattern_capacity*SIZEOF(*wide_pattern));
+
+    count = 0;
+    list = malloc2(capacity*SIZEOF(*list));
+    while (true) {
+        struct dirent *dir_entry;
+        int32 utf8_length;
+
+        utf8_length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
+                                          find_data.cFileName, -1,
+                                          NULL, 0, NULL, NULL);
+        if (utf8_length <= 0) {
+            error_code = GetLastError();
+            FindClose(find_handle);
+            scandir_list_free(list, count, capacity);
+            windows_set_errno(error_code);
+            return -1;
         }
 
-        memcpy64(dir_entry->d_name, find_data.cFileName, length + 1);
+        dir_entry = malloc2(SIZEOF(*dir_entry));
+        if (utf8_length > SIZEOF(dir_entry->d_name)) {
+            free2(dir_entry, SIZEOF(*dir_entry));
+            FindClose(find_handle);
+            scandir_list_free(list, count, capacity);
+            errno = ENAMETOOLONG;
+            return -1;
+        }
+
+        if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
+                                find_data.cFileName, -1, dir_entry->d_name,
+                                utf8_length, NULL, NULL)
+            != utf8_length) {
+            error_code = GetLastError();
+            free2(dir_entry, SIZEOF(*dir_entry));
+            FindClose(find_handle);
+            scandir_list_free(list, count, capacity);
+            windows_set_errno(error_code);
+            return -1;
+        }
 
         if (count >= capacity) {
-            int64 old_capacity = capacity; 
+            int64 old_capacity = capacity;
+
             capacity *= 2;
-            list = realloc2(list,
-                            old_capacity, capacity, SIZEOF(*list));
+            list = realloc2(list, old_capacity, capacity, SIZEOF(*list));
         }
-        list[count] = dir_entry;
-        count += 1;
-    } while (FindNextFileA(find_handle, &find_data));
-    // TODO: Check GetLastError. Enumeration errors currently look like EOF
-    // and return a silently truncated directory list.
-    FindClose(find_handle);
+        list[count++] = dir_entry;
+
+        if (!FindNextFileW(find_handle, &find_data)) {
+            error_code = GetLastError();
+            break;
+        }
+    }
+
+    if (!FindClose(find_handle) && (error_code == ERROR_NO_MORE_FILES)) {
+        error_code = GetLastError();
+    }
+    if (error_code != ERROR_NO_MORE_FILES) {
+        scandir_list_free(list, count, capacity);
+        windows_set_errno(error_code);
+        return -1;
+    }
 
     *namelist = list;
     return (int)count;
@@ -97,26 +240,46 @@ filetime_to_time_t(const FILETIME *filetime) {
     u_large_integer.LowPart = filetime->dwLowDateTime;
     u_large_integer.HighPart = filetime->dwHighDateTime;
     // Convert from Windows epoch (1601) to Unix epoch (1970)
-    return (time_t)((u_large_integer.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    return (time_t)(
+        (u_large_integer.QuadPart - 116444736000000000ULL) / 10000000ULL);
 }
 
 static int
 lstat(const char *path, struct stat *statbuf) {
-    wchar_t wide_path[MAX_PATH];
+    wchar_t *wide_path;
     WIN32_FILE_ATTRIBUTE_DATA fd;
     ULARGE_INTEGER ull_size;
+    DWORD error_code;
+    int64 wide_path_size;
+    int32 wide_path_length;
 
-    if (path == NULL || statbuf == NULL) {
-        fprintf(stderr, "lstat: Invalid argument.\n");
+    if ((path == NULL) || (statbuf == NULL)) {
+        errno = EINVAL;
         return -1;
     }
 
-    // TODO: Set errno from GetLastError on conversion or attribute errors.
-    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wide_path, MAX_PATH) == 0) {
+    wide_path_length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                           path, -1, NULL, 0);
+    if (wide_path_length <= 0) {
+        windows_set_errno(GetLastError());
+        return -1;
+    }
+
+    wide_path_size = (int64)wide_path_length*SIZEOF(*wide_path);
+    wide_path = malloc2(wide_path_size);
+    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1,
+                            wide_path, wide_path_length)
+        != wide_path_length) {
+        error_code = GetLastError();
+        free2(wide_path, wide_path_size);
+        windows_set_errno(error_code);
         return -1;
     }
 
     if (!GetFileAttributesExW(wide_path, GetFileExInfoStandard, &fd)) {
+        error_code = GetLastError();
+        free2(wide_path, wide_path_size);
+        windows_set_errno(error_code);
         return -1;
     }
 
@@ -124,13 +287,56 @@ lstat(const char *path, struct stat *statbuf) {
 
     // File type
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-        // TODO: Distinguish directory junctions from file symlinks.
-        statbuf->st_mode = S_IFLNK;
+        FILE_ATTRIBUTE_TAG_INFO tag_info;
+        HANDLE file_handle;
+
+        file_handle = CreateFileW(
+            wide_path,
+            0,
+            FILE_SHARE_READ |FILE_SHARE_WRITE |FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_FLAG_BACKUP_SEMANTICS |FILE_FLAG_OPEN_REPARSE_POINT,
+            NULL);
+        if (file_handle == INVALID_HANDLE_VALUE) {
+            error_code = GetLastError();
+            free2(wide_path, wide_path_size);
+            windows_set_errno(error_code);
+            return -1;
+        }
+
+        if (!GetFileInformationByHandleEx(file_handle,
+                                          FileAttributeTagInfo,
+                                          &tag_info,
+                                          (DWORD)SIZEOF(tag_info))) {
+            error_code = GetLastError();
+            CloseHandle(file_handle);
+            free2(wide_path, wide_path_size);
+            windows_set_errno(error_code);
+            return -1;
+        }
+
+        if (!CloseHandle(file_handle)) {
+            error_code = GetLastError();
+            free2(wide_path, wide_path_size);
+            windows_set_errno(error_code);
+            return -1;
+        }
+
+        if (tag_info.ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+            statbuf->st_mode = S_IFLNK;
+        } else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            statbuf->st_mode = S_IFDIR;
+        } else {
+            statbuf->st_mode = S_IFREG;
+        }
     } else if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         statbuf->st_mode = S_IFDIR;
     } else {
         statbuf->st_mode = S_IFREG;
     }
+
+    free2(wide_path, wide_path_size);
 
     ull_size.LowPart = fd.nFileSizeLow;
     ull_size.HighPart = fd.nFileSizeHigh;
