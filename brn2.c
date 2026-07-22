@@ -324,8 +324,6 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         char *pointer = map;
         int64 left = map_size - padding;
 
-        // TODO: Process a final line without '\n' and reject embedded
-        // NUL bytes, which disagree with pathname and strcmp semantics.
         while ((left > 0) && (pointer = memchr64(pointer, '\n', left))) {
             FileName **file_pointer = &(list->files[length]);
             FileName *file;
