@@ -482,10 +482,9 @@ CAT(hash_insert_pre_calc_, HASH_TYPE)(struct Map *map,
     memcpy64(&target->key, key, sizeof(HASH_KEY_TYPE));
 #else
   #if HASH_DUPLICATE_KEYS
-    // TODO: Copy only key_length bytes, or explicitly require a terminator.
-    // The current length-based API reads one byte past an exact-size key.
     target->key = xarena_push(map->arena_keys, key_length + 1);
-    memcpy64(target->key, key, key_length + 1);
+    memcpy64(target->key, key, key_length);
+    ((char *)target->key)[key_length] = '\0';
   #else
     target->key = key;
   #endif
@@ -565,10 +564,9 @@ CAT(hash_overwrite_pre_calc_, HASH_TYPE)(struct Map *map, HASH_KEY_TYPE *key
     memcpy64(&target->key, key, sizeof(HASH_KEY_TYPE));
 #else
   #if HASH_DUPLICATE_KEYS
-    // TODO: Copy only key_length bytes, or explicitly require a terminator.
-    // The current length-based API reads one byte past an exact-size key.
     target->key = xarena_push(map->arena_keys, key_length + 1);
-    memcpy64(target->key, key, key_length + 1);
+    memcpy64(target->key, key, key_length);
+    ((char *)target->key)[key_length] = '\0';
   #else
     target->key = key;
   #endif
