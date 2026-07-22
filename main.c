@@ -34,6 +34,7 @@ bool brn2_options_sort = true;
 bool brn2_options_autosolve = false;
 bool brn2_options_vim_split = false;
 int32 nthreads;
+static int32 narenas;
 int (*print)(const char *, ...) = noop;
 
 static struct option options[] = {
@@ -202,16 +203,15 @@ main(int argc, char **argv) {
     old = &old_stack;
     new = &new_stack;
 
-    // TODO: Finalize nthreads before creating arenas. Reducing it later
-    // leaves old-list allocations in arenas omitted from reset and cleanup.
-    for (int32 i = 0; i < nthreads; i += 1) {
+    narenas = nthreads;
+    for (int32 i = 0; i < narenas; i += 1) {
         char buffer_old[256];
         char buffer_new[256];
 
         SNPRINTF(buffer_old, "arena_old[%d]", i);
         SNPRINTF(buffer_new, "arena_new[%d]", i);
-        old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
-        new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
+        old->arenas[i] = arena_create(BRN2_ARENA_SIZE / narenas, buffer_old);
+        new->arenas[i] = arena_create(BRN2_ARENA_SIZE / narenas, buffer_new);
     }
 
     switch (mode) {
@@ -604,8 +604,8 @@ main(int argc, char **argv) {
         xmunmap(new->indexes, new->indexes_size);
         hash_destroy_map(oldlist_map);
         hash_destroy_set(newlist_set);
-        arenas_destroy(old->arenas, nthreads);
-        arenas_destroy(new->arenas, nthreads);
+        arenas_destroy(old->arenas, narenas);
+        arenas_destroy(new->arenas, narenas);
     }
 #if OS_WINDOWS
     printf("Press enter to continue.\n");
