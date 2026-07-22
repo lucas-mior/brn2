@@ -506,10 +506,13 @@ brn2_free_list(FileList *list) {
             ASSERT(arenas_pop(list->arenas, nthreads, file));
         }
     }
-    free2(list->files, list->capacity*SIZEOF(*(list->files)));
     arenas_reset(list->arenas, nthreads);
-    // TODO: Clear files, length, and capacity; failed editor retries
-    // reuse this list.
+
+    free2(list->files, list->capacity*SIZEOF(*(list->files)));
+    list->files = NULL;
+    list->length = 0;
+    list->capacity = 0;
+
     return;
 }
 
