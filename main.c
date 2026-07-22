@@ -485,7 +485,9 @@ main(int argc, char **argv) {
             int32 status;
 
             if (lines_test == NULL) {
-                if (!isatty(fileno(stdin))) {
+                if (isatty(fileno(stdin))) {
+                    clearerr(stdin);
+                } else {
                     char *tty_path;
                     if (OS_WINDOWS) {
                         tty_path = "CONIN$";

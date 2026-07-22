@@ -470,9 +470,10 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    // TODO: Do not close stdin; main reuses it for the editor prompt.
-    if (fclose(lines) != 0) {
-        error("Error closing file %s: %s.\n", filename, strerror(errno));
+    if (lines != stdin) {
+        if (fclose(lines) != 0) {
+            error("Error closing file %s: %s.\n", filename, strerror(errno));
+        }
     }
     if (length == 0) {
         free2(list->files, list->capacity*SIZEOF(*list->files));
