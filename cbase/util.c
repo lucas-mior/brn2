@@ -2285,7 +2285,7 @@ str_builder_array_reserve(StrBuilderArray *array, int32 extra) {
     }
 
     if (needed >= (MAXOF(new_cap)/2)) {
-        new_cap = needed;
+        new_cap = (int32)needed;
     } else {
         while (new_cap < needed) {
             new_cap *= 2;
