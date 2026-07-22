@@ -244,7 +244,7 @@ CAT(ENUM_PREFIX_, token_equals_enum_name)(char *token, int32 token_len,
 
 static enum ENUM_NAME
 CAT(ENUM_PREFIX_, parse)(char *string) {
-    uint32 result = 0;
+    ENUM_UNDERLYING_TYPE result = 0;
     char *p = string;
 
     if (p == NULL) {
@@ -286,7 +286,7 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
         if (CAT(ENUM_PREFIX_, token_equals)(token, token_len,
                                             QUOTE(ENUM_PREFIX_) "LAST")
             || CAT(ENUM_PREFIX_, token_equals)(token, token_len, "LAST")) {
-            result |= (uint32)CAT(ENUM_PREFIX_, LAST);
+            result |= (ENUM_UNDERLYING_TYPE)CAT(ENUM_PREFIX_, LAST);
             matched = 1;
         }
 
@@ -294,7 +294,7 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
             if (!matched \
                 && CAT(ENUM_PREFIX_, token_equals_enum_name)(token, token_len, \
                                                             #e)) { \
-                result |= (uint32)e; \
+                result |= (ENUM_UNDERLYING_TYPE)e; \
                 matched = 1; \
             }
         #define XENUM_PARSE_1(e)    XENUM_PARSE_ONE(e)
