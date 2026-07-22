@@ -116,8 +116,8 @@ main(int argc, char **argv) {
     FileList *new;
     struct Hash_map *oldlist_map = NULL;
     struct Hash_set *newlist_set = NULL;
-    uint32 capacity_map;
     int32 available_threads;
+    int32 unfiltered_old_length;
 #if OS_UNIX
     int32 thread_ids[BRN2_MAX_THREADS];
 #endif
@@ -308,6 +308,7 @@ main(int argc, char **argv) {
     {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
+        uint32 capacity_map;
         int32 j = 0;
         int64 buffered;
 #if OS_UNIX
@@ -337,6 +338,7 @@ main(int argc, char **argv) {
             }
         }
 
+        unfiltered_old_length = old->length;
         oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
         capacity_map = hash_capacity(oldlist_map);
 
@@ -466,11 +468,13 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            newlist_set = hash_create_set(capacity_map, "newlist_set");
+            newlist_set = hash_create_set(unfiltered_old_length, "newlist_set");
 
             main_capacity = hash_capacity(newlist_set);
+
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
+
             brn2_create_hashes(new, main_capacity);
             brn2_verify(new, old, newlist_set, new->indexes);
 
@@ -536,7 +540,8 @@ main(int argc, char **argv) {
             brn2_normalize_names(old, new);
 
             if (newlist_set == NULL) {
-                newlist_set = hash_create_set((uint32)new->length, "newlist_set");
+                newlist_set = hash_create_set((uint32)unfiltered_old_length,
+                                              "newlist_set");
             } else {
                 hash_zero_set(newlist_set);
             }
