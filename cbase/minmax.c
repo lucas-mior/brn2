@@ -85,14 +85,16 @@ GENERATE_COMPARE_INTEGERS_SAME_SIGN(unsigned, >,  max)
 
 #undef GENERATE_COMPARE_INTEGERS_SAME_SIGN
 
-// TODO: Preserve unsigned results above LLONG_MAX. Converting the selected
-// ullong to llong is implementation-defined and can return a negative value.
 #define GENERATE_COMPARE_SIGNED_UNSIGNED(MODE, SYMBOL) \
 static llong \
 get_signed_unsigned_##MODE(llong var1, ullong var2) { \
     if ((compare_sign_with_unsign(var1, var2) SYMBOL 0)) { \
         return var1; \
     } else { \
+        if (var2 > LLONG_MAX) { \
+            error2("You are working with a too large number.\n"); \
+            TRAP(); \
+        } \
         return (llong)var2; \
     } \
 }
@@ -299,7 +301,7 @@ main(void) {
         ASSERT_EQUAL(max, b);
     } {
         long a = MINOF(a);
-        ulong b = MAXOF(b);
+        ulong b = MAXOF(a);
         double min = (double)MIN(a, b);
         ullong max = (ullong)MAX(a, b);
         ASSERT_EQUAL((long)min, a);
