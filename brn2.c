@@ -561,8 +561,7 @@ brn2_threads_work_normalization(Work *arg) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
                 if (errno != ENOENT) {
-                    // TODO: Report lstat, which is the operation that failed.
-                    error("Error in stat('%s'): %s.\n",
+                    error("Error in lstat('%s'): %s.\n",
                           file->name, strerror(errno));
                 }
                 work->old_list->files[i]->type = TYPE_ERR;
