@@ -115,7 +115,7 @@ main(int argc, char **argv) {
     FileList *old;
     FileList *new;
     struct Hash_map *oldlist_map = NULL;
-    struct Hash_set *newlist_set = NULL;
+    struct Hash_map *newlist_map = NULL;
     int32 available_threads;
     int32 unfiltered_old_length;
 #if OS_UNIX
@@ -468,17 +468,17 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            newlist_set = hash_create_set(unfiltered_old_length, "newlist_set");
+            newlist_map = hash_create_map(unfiltered_old_length, "newlist_map");
 
-            main_capacity = hash_capacity(newlist_set);
+            main_capacity = hash_capacity(newlist_map);
 
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             brn2_create_hashes(new, main_capacity);
 
-            brn2_verify(new, old, newlist_set, new->indexes);
+            brn2_verify(new, old, newlist_map, new->indexes);
 
-            hash_print_summary_set(newlist_set);
+            hash_print_summary_map(newlist_map);
         }
 #else
         while (true) {
@@ -541,21 +541,21 @@ main(int argc, char **argv) {
 
             brn2_normalize_names(old, new);
 
-            if (newlist_set == NULL) {
-                newlist_set = hash_create_set((uint32)unfiltered_old_length,
-                                              "newlist_set");
+            if (newlist_map == NULL) {
+                newlist_map = hash_create_map((uint32)unfiltered_old_length,
+                                              "newlist_map");
             } else {
-                hash_zero_set(newlist_set);
+                hash_zero_map(newlist_map);
             }
             if (new->indexes == NULL) {
                 new->indexes_size = new->length*SIZEOF(*(new->indexes));
                 new->indexes = xmmap_commit(&(new->indexes_size));
             }
 
-            main_capacity = hash_capacity(newlist_set);
+            main_capacity = hash_capacity(newlist_map);
             brn2_create_hashes(new, main_capacity);
 
-            if (!brn2_verify(new, old, newlist_set, new->indexes)) {
+            if (!brn2_verify(new, old, newlist_map, new->indexes)) {
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
@@ -622,7 +622,7 @@ main(int argc, char **argv) {
         xmunmap(old->indexes, old->indexes_size);
         xmunmap(new->indexes, new->indexes_size);
         hash_destroy_map(oldlist_map);
-        hash_destroy_set(newlist_set);
+        hash_destroy_map(newlist_map);
         arenas_destroy(old->arenas, narenas);
         arenas_destroy(new->arenas, narenas);
     }
