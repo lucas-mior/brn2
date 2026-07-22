@@ -5,7 +5,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the*License,
+ * by the Free Software Foundation, either version 3 of the License,
  * or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -35,7 +35,7 @@ bool brn2_options_autosolve = false;
 bool brn2_options_vim_split = false;
 int32 nthreads;
 static int32 narenas;
-int (*print)(const char *, ...) = noop;
+int32 (*print)(const char *, ...) = noop;
 
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
@@ -50,10 +50,10 @@ static struct option options[] = {
     {"verbose",   no_argument,       NULL, 'v'},
     {"autosolve", no_argument,       NULL, 'a'},
     {"vim-split", no_argument,       NULL, 'V'},
-    {NULL,        0,                 NULL, 0}
+    {NULL,        0,                 NULL, 0},
 };
 
-enum {
+enum Brn2InputMode {
     FILES_FROM_FILE,
     FILES_FROM_ARGS,
     FILES_FROM_DIR,
@@ -63,7 +63,7 @@ static File brn2_buffer;
 static File brn2_buffer_old;
 
 static void
-write_fatal(int fd, char *buffer, int64 size, int32 line) {
+write_fatal(int32 fd, char *buffer, int64 size, int32 line) {
     int64 w;
 
     if ((w = write64(fd, buffer, size)) != size) {
@@ -100,6 +100,7 @@ handler_segv(int unused) {
 static Arena *
 xarena_create(int64 size, char *name) {
     Arena *arena;
+
     if ((arena = arena_create(size, name)) == NULL) {
         error("Error creating arena of size %lld: %s.\n",
               (llong)size, arena_strerror(errno));
@@ -121,15 +122,13 @@ main(int argc, char **argv) {
 #if OS_UNIX
     int32 thread_ids[BRN2_MAX_THREADS];
 #endif
-
     uint32 main_capacity;
-    char *EDITOR;
-    int opt;
-
+    char *editor;
     char *directory = ".";
     char *lines = NULL;
     char *lines_test = NULL;
-    int mode = FILES_FROM_DIR;
+    enum Brn2InputMode mode = FILES_FROM_DIR;
+    int32 opt;
 
 #if BRN2_BENCHMARK
     struct timespec t0;
@@ -195,7 +194,7 @@ main(int argc, char **argv) {
             brn2_usage(stderr);
         }
     }
-    if (optind < argc && !strcmp(argv[optind], "--")) {
+    if ((optind < argc) && strequal(argv[optind], "--")) {
         optind += 1;
     }
     if ((argc - optind) >= 1) {
@@ -219,13 +218,15 @@ main(int argc, char **argv) {
 
         SNPRINTF(buffer_old, "arena_old[%d]", i);
         SNPRINTF(buffer_new, "arena_new[%d]", i);
-        old->arenas[i] = arena_create(BRN2_ARENA_SIZE / narenas, buffer_old);
-        new->arenas[i] = arena_create(BRN2_ARENA_SIZE / narenas, buffer_new);
+        old->arenas[i] = xarena_create(BRN2_ARENA_SIZE / narenas,
+                                       buffer_old);
+        new->arenas[i] = xarena_create(BRN2_ARENA_SIZE / narenas,
+                                       buffer_new);
     }
 
     switch (mode) {
     case FILES_FROM_FILE:
-        if (!lines) {
+        if (lines == NULL) {
             brn2_usage(stderr);
         }
         brn2_list_from_file(old, lines, true);
@@ -299,10 +300,11 @@ main(int argc, char **argv) {
         brn2_sort(old);
     }
 
-    GETENV(EDITOR);
-    if (EDITOR == NULL) {
-        EDITOR = "vim";
-        error("EDITOR variable is not set. Using %s by default.\n", EDITOR);
+    if ((editor = getenv("EDITOR")) == NULL) {
+        editor = "vim";
+        error("EDITOR variable is not set. Using %s by default.\n", editor);
+    } else {
+        editor = xstrdup(editor);
     }
 
     {
@@ -357,9 +359,9 @@ main(int argc, char **argv) {
                                              file->name, file->length,
                                              file->hash, index, j)) {
                 if (contains_newline) {
-                    error(RED("'%s'")" contains new line.", file->name);
+                    error(RED("'%s'") " contains new line.", file->name);
                 } else {
-                    error(RED("'%s'")" repeated in the buffer.", file->name);
+                    error(RED("'%s'") " repeated in the buffer.", file->name);
                 }
                 if (brn2_options_fatal) {
                     error("\n");
@@ -415,9 +417,9 @@ main(int argc, char **argv) {
 
     {
         char *args_edit[] = {
-            EDITOR,
+            editor,
             brn2_buffer.name,
-            NULL
+            NULL,
         };
         char *args_vim_split[] = {
             "vim",
@@ -430,14 +432,14 @@ main(int argc, char **argv) {
             "wincmd l | set scrollbind cursorbind",
             "-c",
             " | au QuitPre */brn2.* quitall",
-            NULL
+            NULL,
         };
         char *args_shuf[] = {
             "shuf",
             brn2_buffer.name,
             "-o",
             brn2_buffer.name,
-            NULL
+            NULL,
         };
 
         (void)args_edit;
@@ -495,14 +497,15 @@ main(int argc, char **argv) {
                         tty_path = "/dev/tty";
                     }
 
-                    if (!freopen(tty_path, "r", stdin)) {
+                    if (freopen(tty_path, "r", stdin) == NULL) {
                         error("Error reopening stdin: %s.\n", strerror(errno));
                         fatal(EXIT_FAILURE);
                     }
                 }
 
                 if (brn2_options_vim_split) {
-                    status = util_command(LENGTH(args_vim_split), args_vim_split);
+                    status = util_command(LENGTH(args_vim_split),
+                                          args_vim_split);
                 } else {
                     status = util_command(LENGTH(args_edit), args_edit);
                 }
@@ -578,7 +581,7 @@ main(int argc, char **argv) {
         int32 number_changes = brn2_get_number_changes(old, new);
         int32 number_renames = 0;
 
-        if (number_changes) {
+        if (number_changes > 0) {
             struct Hash_set *names_renamed
                 = hash_create_set((uint32)unfiltered_old_length,
                                   "names_renamed");
@@ -603,7 +606,7 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         } else {
             print("%d file%.*s renamed.\n",
-                  number_renames, number_renames != 1, "s");
+                       number_renames, number_renames != 1, "s");
         }
     }
 
