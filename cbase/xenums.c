@@ -380,12 +380,15 @@ main(void) {
 
     s = TEST_NORMAL_str(TEST_NORMAL_APPLE);
     ASSERT_EQUAL(s, "TEST_NORMAL_APPLE");
+    TEST_NORMAL_str_free(s);
 
     s = TEST_NORMAL_str(TEST_NORMAL_BANANA);
     ASSERT_EQUAL(s, "TEST_NORMAL_BANANA");
+    TEST_NORMAL_str_free(s);
 
     s = TEST_NORMAL_str(TEST_NORMAL_CHERRY);
     ASSERT_EQUAL(s, "TEST_NORMAL_CHERRY");
+    TEST_NORMAL_str_free(s);
 
     ASSERT_EQUAL((uint32)TEST_NORMAL_parse("TEST_NORMAL_APPLE"), TEST_NORMAL_APPLE);
     ASSERT_EQUAL((uint32)TEST_NORMAL_parse("BANANA"), TEST_NORMAL_BANANA);
@@ -393,6 +396,7 @@ main(void) {
 
     s = TEST_NORMAL_str(999);
     ASSERT_EQUAL(s, "Invalid enum value");
+    TEST_NORMAL_str_free(s);
 
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
