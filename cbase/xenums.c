@@ -140,6 +140,10 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     char *buffer_end = buffer + sizeof(buffer);
     int32 is_first = 1;
 
+    if (val == 0) {
+        return xstrdup("NONE");
+    }
+
     #define XENUM(e) \
         if (val & e) { \
             char *name = #e; \
@@ -161,6 +165,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
                 TRAP(); \
             } \
             is_first = 0; \
+            val &= ~e; \
         }
 
     #define XENUM_FL_1(e)    XENUM(e)
@@ -174,10 +179,9 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM_FL_2
     #undef XENUM
 
-    if (val == 0) {
-        return xstrdup("NONE");
-    } else if (buffer_ptr == buffer) {
-        return xstrdup("Invalid bit flags enum value");
+    if (val) {
+        error2("Warning: bit flags enum contains invalid bit set.\n");
+        TRAP();
     }
 
     *buffer_ptr = '\0';
