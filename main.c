@@ -136,7 +136,7 @@ main(int argc, char **argv) {
     program_len = strlen32(argv[0]);
     program = basename2(argv[0], &program_len, NULL);
 
-    while ((opt = getopt_long(argc, argv, "d:f:ceFhiqsvaV", options, NULL))
+    while ((opt = getopt_long(argc, argv, "d:f:eFhiqsvaV", options, NULL))
            != -1) {
         switch (opt) {
         case 'd':
@@ -155,9 +155,6 @@ main(int argc, char **argv) {
             break;
         case '?':
             brn2_usage(stderr);
-        case 'c':
-            // TODO: Remove or document -c; it is accepted but does nothing.
-            break;
         case 'e':
             brn2_options_implicit = false;
             break;
