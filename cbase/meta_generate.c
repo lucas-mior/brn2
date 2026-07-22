@@ -87,10 +87,6 @@ emit_string_array_initializer(StrBuilder *out, char *field, char **values,
 
     for (int32 i = 0; i < count; i += 1) {
         char fb[32];
-        // TODO: Build this fallback dynamically. A long prefix aborts
-        // generation
-        // even though the output builder itself supports longer strings.
-        int32 fb_len = SNPRINTF(fb, "%s%d", fallback_prefix, i);
         char *value;
         int32 value_len;
         StrBuilder cs;
@@ -99,6 +95,7 @@ emit_string_array_initializer(StrBuilder *out, char *field, char **values,
             value = values[i];
             value_len = value_lens[i];
         } else {
+            int32 fb_len = SNPRINTF(fb, "%s%d", fallback_prefix, i);
             value = fb;
             value_len = fb_len;
         }
