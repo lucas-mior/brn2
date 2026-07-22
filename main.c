@@ -600,7 +600,7 @@ main(int argc, char **argv) {
             error("%d name%.*s changed but %d file%.*s renamed. ",
                   number_changes, number_changes != 1, "s", number_renames,
                   number_renames != 1, "s");
-            error("Check your files.\n");
+            error2("Check your files.\n");
             fatal(EXIT_FAILURE);
         } else {
             print("%d file%.*s renamed.\n",
