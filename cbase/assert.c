@@ -498,11 +498,11 @@ assert_double_failure(char *file, uint line, char *func,
 
 static void
 a_double_equal(char *file, uint line, char *func,
-                char *name1, char *name2,
-                char *type1, char *type2,
-                llong bits1, llong bits2,
-                int kind1, int kind2,
-                double var1, double var2) {
+               char *name1, char *name2,
+               char *type1, char *type2,
+               llong bits1, llong bits2,
+               int kind1, int kind2,
+               double var1, double var2) {
     double diff;
     double abs_tol;
     double rel_tol;
