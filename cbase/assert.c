@@ -141,12 +141,12 @@ a_strings_##MODE(char *file, uint line, char *func,                      \
                  char *var1, char *var2) {                               \
     if (var1 == NULL) {                                                  \
         error2("\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        error2("%s is NULL\n", name1);                                   \
+        error2("%s is NULL.\n", name1);                                   \
         TRAP();                                                          \
     }                                                                    \
     if (var2 == NULL) {                                                  \
         error2("\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        error2("%s is NULL\n", name2);                                   \
+        error2("%s is NULL.\n", name2);                                   \
         TRAP();                                                          \
     }                                                                    \
     if (!(strcmp(var1, var2) SYMBOL 0)) {                                \
