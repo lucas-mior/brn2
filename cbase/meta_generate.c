@@ -53,7 +53,7 @@ c_identifier(char *value, int32 value_len) {
         SB_APPEND(&out, &c, 1);
     }
 
-    // TODO: Reject or rewrite C keywords and reserved identifiers. Inputs
+    // TODO: Reject C keywords and reserved identifiers. Inputs
     // such as "int" or names beginning with reserved underscores remain
     // invalid.
     if (!out.len || isdigit((uint8)out.data[0])) {
