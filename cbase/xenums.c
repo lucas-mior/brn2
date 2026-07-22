@@ -285,12 +285,14 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
         }
 #endif
 
+#if ENUM_BITFLAGS == 0
         if (CAT(ENUM_PREFIX_, token_equals)(token, token_len,
                                             QUOTE(ENUM_PREFIX_) "LAST")
             || CAT(ENUM_PREFIX_, token_equals)(token, token_len, "LAST")) {
             result |= (ENUM_UNDERLYING_TYPE)CAT(ENUM_PREFIX_, LAST);
             matched = 1;
         }
+#endif
 
         #define XENUM_PARSE_ONE(e) \
             if (!matched \
