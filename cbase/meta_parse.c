@@ -37,7 +37,6 @@ document_reserve_lines(Document *doc, int32 extra) {
     int32 need;
     int32 new_capacity;
 
-    // TODO: Validate extra and check this addition for overflow.
     need = doc->line_count + extra;
     if (need <= doc->capacity) {
         return;
