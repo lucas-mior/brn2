@@ -1,10 +1,17 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 ./build.sh
 
-touch a b c d
+rm -rf "/tmp/rename" "/tmp/rename2"
+
+for f in a b c d; do
+    echo "$f" >  "$f"
+    echo "$f" >> "/tmp/rename"
+    echo "$f" >> "/tmp/rename2"
+done
+echo "a" >> "/tmp/rename"
 
 cleanup () {
     rm a b c d
@@ -12,7 +19,5 @@ cleanup () {
 
 trap cleanup EXIT
 
-printf "a\nb\nc\nd\na\n" > "/tmp/rename"
-printf "b\nc\nd\na\n"    > "/tmp/rename2"
-
+set -x
 bin/brn2 -f "/tmp/rename" -t "/tmp/rename2"
