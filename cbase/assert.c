@@ -723,8 +723,8 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
                              typebits(TYPE1), typebits(TYPE2),      \
                              (ullong)(VAR1), (llong)(VAR2))
 
-#define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
-_Generic((VAR2), \
+#define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1)                        \
+_Generic((VAR2),                                                         \
     char:    A_CHAR_FOR_UNSIGNED(MODE, VAR1, VAR2, TYPE1),               \
     schar:   A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
     short:   A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
@@ -736,17 +736,17 @@ _Generic((VAR2), \
     uint:    A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_UINT   ), \
     ulong:   A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
     ullong:  A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   A_BOTH_DOUBLE(MODE,      VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  A_BOTH_DOUBLE(MODE,      VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED()              \
+    float:   A_BOTH_DOUBLE(MODE,       VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
+    double:  A_BOTH_DOUBLE(MODE,       VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED()             \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 
-#define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    a_double_##MODE(__FILE__, __LINE__, (char *)__func__,       \
-                     #VAR1, #VAR2,                     \
-                     typename(TYPE1), typename(TYPE2), \
-                     typebits(TYPE1), typebits(TYPE2), \
+#define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                      \
+    a_double_##MODE(__FILE__, __LINE__, (char *)__func__,                  \
+                     #VAR1, #VAR2,                                         \
+                     typename(TYPE1), typename(TYPE2),                     \
+                     typebits(TYPE1), typebits(TYPE2),                     \
                      ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2), \
                      DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
 
@@ -765,7 +765,7 @@ _Generic((VAR2), \
     ullong:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),     \
     float:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ),     \
     double:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),     \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()            \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()             \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE(void);
 
@@ -815,10 +815,10 @@ _Generic((VAR1),                                                        \
     uint:    A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ),          \
     ulong:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ),          \
     ullong:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ),          \
-    float:   A_FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ),          \
-    double:  A_FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ),          \
+    float:   A_FIRST_DOUBLE(MODE,   VAR1, VAR2, TYPE_FLOAT  ),          \
+    double:  A_FIRST_DOUBLE(MODE,   VAR1, VAR2, TYPE_DOUBLE ),          \
     bool:    A_FIRST_BOOL(MODE,     VAR1, VAR2, TYPE_BOOL),             \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()            \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()              \
 )
 
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal,      VAR1, VAR2)
