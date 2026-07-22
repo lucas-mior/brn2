@@ -339,6 +339,10 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
                 continue;
             }
 
+            if (memchr64(begin, '\0', name_length)) {
+                error("File contains NUL byte.\n");
+                fatal(EXIT_FAILURE);
+            }
             if (begin == pointer) {
                 error("Empty line in file. Exiting.\n");
                 fatal(EXIT_FAILURE);
