@@ -90,6 +90,9 @@ _Static_assert(CAT(ENUM_PREFIX_, BIT_COUNT)
 
 _Static_assert((ENUM_UNDERLYING_TYPE)-1 > 0);
 
+// Note: passing numbers to the X macro second parameter is not allowed for the
+// BITFLAGS case. It will break the API. You can only passing composition of
+// previous enum values.
 enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
 #if ENUM_BITFLAGS == 0
     #define XENUM_DEF_1(e)    e,
