@@ -34,7 +34,7 @@ set -x
 run_brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
 
 check () {
-    if ! grep -q "$1" "$2"; then
+    if ! grep -q "^${1}$" "$2"; then
         echo "file $2 should be $1"
         exit 1
     fi
