@@ -308,8 +308,6 @@ CAT(hash_destroy_, HASH_TYPE)(struct Map *map) {
 
 static void
 CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
-    // TODO: Reject the maximum capacity before doubling. A 2^31-entry table
-    // wraps new_capacity to zero and corrupts all following size calculations.
     uint32 new_capacity = map->capacity*2;
     uint32 new_bitmask = (new_capacity - 1);
     int64 new_size = new_capacity*sizeof(Bucket);
@@ -320,6 +318,11 @@ CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
     int8 *old_slot_states = map->slot_states;
     int64 old_slot_states_size = map->slot_states_size;
     uint32 old_capacity = map->capacity;
+
+    if (new_capacity < map->capacity) {
+        error("Hash table %s is too big.\n", map->name);
+        fatal(EXIT_FAILURE);
+    }
 
     memset64(new_slot_states, 0, new_capacity*sizeof(*new_slot_states));
 
