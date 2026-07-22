@@ -334,11 +334,9 @@ CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
     for (uint32 j = 0; j < old_capacity; j += 1) {
         Bucket *iterator = &old_array[j];
         int8 slot_state = old_slot_states[j];
-        // TODO: Initialize `rehash_base` and `rehash_probe` at declaration
-        // below to reduce uninitialized state branching.
         uint32 rehash_base;
         uint32 rehash_probe;
-        uint32 rehash_step = 0;
+        uint32 rehash_step;
 
         if (slot_state == HASH_SLOT_FREE) {
             continue;
@@ -349,6 +347,7 @@ CAT(hash_resize_, HASH_TYPE)(struct Map *map) {
 
         rehash_base = iterator->hash & new_bitmask;
         rehash_probe = rehash_base;
+        rehash_step = 0;
 
         while (rehash_step < new_capacity) {
             if (new_slot_states[rehash_probe] == HASH_SLOT_FREE) {
