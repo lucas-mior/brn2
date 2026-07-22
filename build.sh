@@ -167,8 +167,6 @@ case "$target" in
     ;;
 "check")
     CC=gcc
-    # TODO: Put -lm in link flags after the source; check currently fails
-    # with unresolved pow and round references.
     CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer"
     LDFLAGS="$LDFLAGS -lm"
     ;;
