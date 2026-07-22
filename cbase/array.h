@@ -78,8 +78,12 @@ generic_array_grow(void *array, int64 item_size) {
         new_cap = 8;
     }
 
-    // TODO: Check both size calculations for signed overflow. Wrapped sizes
-    // can underallocate before ARRAY_PUSH writes the new element.
+    if ((MAXOF(new_size)/item_size) < new_cap) {
+        error("Array with %lld items of size %lld is too much.\n",
+              (llong)new_cap, (llong)item_size);
+        fatal(EXIT_FAILURE);
+    }
+
     old_size = SIZEOF(*header) + old_cap*item_size;
     new_size = SIZEOF(*header) + new_cap*item_size;
     header = realloc2(header, old_size, new_size, 1);
