@@ -13,6 +13,6 @@ cleanup () {
 trap cleanup EXIT
 
 printf "a\nb\nc\nd\na\n" > "/tmp/rename"
-printf "b\nc\nd\na\n" > "/tmp/rename2"
+printf "b\nc\nd\na\n"    > "/tmp/rename2"
 
 bin/brn2 -f "/tmp/rename" -t "/tmp/rename2"
