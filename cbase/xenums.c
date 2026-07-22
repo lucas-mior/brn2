@@ -146,8 +146,23 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
         return xstrdup("NONE");
     }
 
+    #define XENUM_EXACT(e) \
+        if (val == e) { \
+            return xstrdup(#e); \
+        }
+    #define XENUM_EXACT_1(e)    XENUM_EXACT(e)
+    #define XENUM_EXACT_2(e, v) XENUM_EXACT(e)
+    #define X(...)              SELECT_ON_NUM_ARGS(XENUM_EXACT_, __VA_ARGS__)
+
+    ENUM_FIELDS
+
+    #undef X
+    #undef XENUM_EXACT_1
+    #undef XENUM_EXACT_2
+    #undef XENUM_EXACT
+
     #define XENUM(e) \
-        if (val & e) { \
+        if ((val & e) == e) { \
             char *name = #e; \
             int32 len = strlen32(name); \
             if (is_first == 0) { \
