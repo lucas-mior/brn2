@@ -265,8 +265,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         brn2_list_from_lines(list, filename, is_old);
         return;
     }
-    // TODO: Open read-only and never resize the input file. The current
-    // code requires write access and can leave NUL padding after an error.
+
     if ((fd = open(filename, O_RDWR)) < 0) {
         error("Error opening '%s' for reading: %s.\n",
               filename, strerror(errno));
@@ -306,8 +305,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
     map = mmap(NULL, (size_t)map_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (map == MAP_FAILED) {
-        // TODO: Name the actual input file; this is not a history file.
-        error("Error mapping history file to memory: %s.\n", strerror(errno));
+        error("Error mapping input file to memory: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
