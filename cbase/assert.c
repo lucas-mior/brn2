@@ -115,11 +115,9 @@ assert_contains(char *file, int32 line, char *func,
                 char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = strlen32(needle);
     if (memmem64(haystack, haystack_len, needle, needle_len) == NULL) {
-        // TODO: Print haystack with its explicit length. Using %s can read past
-        // a valid non-NUL-terminated bounded buffer.
         error_impl(file, line, func,
-                   "expected to find substring:\n%s\n--- in ---\n%s",
-                   needle, haystack);
+                   "expected to find substring:\n%.*s\n--- in ---\n%.*s",
+                   needle_len, needle, haystack_len, haystack);
         fatal(EXIT_FAILURE);
     }
 }
