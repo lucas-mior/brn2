@@ -127,7 +127,6 @@ line_reserve_tokens(Line *line, int32 extra) {
     int32 new_capacity;
     Token *new_tokens;
 
-    // TODO: Validate extra and check addition and later doubling for overflow.
     need = line->token_count + extra;
     if (need <= line->token_capacity) {
         return;
