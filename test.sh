@@ -2,7 +2,7 @@
 
 set -e
 
-./build.sh
+./build.sh debug
 
 run_brn2_debug () {
     gdb -q -nx -batch --return-child-result \
@@ -25,6 +25,7 @@ done
 cleanup () {
     rm -f a b c d bxx
     rm -f "/tmp/rename" "/tmp/rename2"
+    return
 }
 
 trap cleanup EXIT

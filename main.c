@@ -27,7 +27,7 @@
 #define SORT_COMPARE brn2_compare
 #include "sort.c"
 
-bool brn2_options_fatal = DEBUGGING;
+bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_sort = true;
