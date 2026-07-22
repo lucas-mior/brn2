@@ -583,7 +583,7 @@ brn2_threads_work_normalization(Work *arg) {
 
 void
 brn2_slash_add(FileName *file) {
-    // TODO: Reject an empty normalized name before reading name[-1].
+    ASSERT(file->length > 0);
     if (file->name[file->length - 1] != '/') {
         file->name[file->length] = '/';
         file->name[file->length + 1] = '\0';
