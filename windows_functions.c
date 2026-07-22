@@ -135,10 +135,8 @@ lstat(const char *path, struct stat *statbuf) {
     ull_size.LowPart = fd.nFileSizeLow;
     ull_size.HighPart = fd.nFileSizeHigh;
     if (ull_size.QuadPart > LONG_MAX) {
-        // TODO: Renaming must not reject files merely because they exceed
-        // 2 GiB.
-        fprintf(stderr, "Error: file is too large to be represented in long\n");
-        return -1;
+        fprintf(stderr, "Warning: file is too large, size will be wrong.\n");
+        ull_size.QuadPart = -1;
     }
     statbuf->st_size = (long)ull_size.QuadPart;
 
