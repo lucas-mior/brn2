@@ -283,7 +283,7 @@ main(int argc, char **argv) {
         old->files
             = realloc2(old->files,
                        length_before, old->length, SIZEOF(*(old->files)));
-        // TODO: Update old->capacity after shrinking this allocation.
+        old->capacity = old->length;
     }
 
     if (brn2_options_sort) {
@@ -318,7 +318,7 @@ main(int argc, char **argv) {
                   brn2_buffer.name, strerror(errno));
             fatal(EXIT_FAILURE);
         }
-        // TODO: Register cleanup now; failures below leave this temp file.
+        atexit(delete_brn2_buffer);
 
         if (brn2_options_vim_split) {
             SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2.old.XXXXXX");
@@ -397,8 +397,6 @@ main(int argc, char **argv) {
                 fatal(EXIT_FAILURE);
             }
         }
-
-        atexit(delete_brn2_buffer);
     }
 
     if (old->length <= 0) {
