@@ -7,13 +7,9 @@ set -e
 brn2="$PWD/bin/brn2_debug"
 
 run_brn2_debug () {
-    if command gdb; then
-        gdb -q -nx -batch --return-child-result \
-            -ex run \
-            --args "$brn2" "$@"
-    else
-        "$brn2" "$@"
-    fi
+    gdb -q -nx -batch --return-child-result \
+        -ex run \
+        --args "$brn2" "$@"
 }
 
 if [ ! -d /tmp/brn2 ]; then
@@ -142,3 +138,28 @@ fi
 
 cd ..
 rm -rf "autosolve-validation"
+
+rm -rf "autosolve-execution"
+mkdir -p "autosolve-execution"
+cd "autosolve-execution"
+
+printf "same contents\n" > "a"
+printf "same contents\n" > "b"
+printf "a\nb\n" > "rename"
+printf "b\nb\n" > "rename2"
+
+set -x
+run_brn2_debug --fatal --autosolve -f "rename" -t "rename2"
+set +x
+
+if [ -e "a" ]; then
+    echo "--autosolve did not remove the equal moving source"
+    exit 1
+fi
+if ! printf "same contents\n" | cmp -s - "b"; then
+    echo "--autosolve changed the replacement target contents"
+    exit 1
+fi
+
+cd ..
+rm -rf "autosolve-execution"

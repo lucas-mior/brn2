@@ -933,6 +933,118 @@ noop(const char *unused, ...) {
     return 0;
 }
 
+static bool
+brn2_regular_file_stat(char *filename, struct stat *file_stat) {
+    if (lstat(filename, file_stat) < 0) {
+        error("Error checking " RED("'%s'") ": %s.\n",
+              filename, strerror(errno));
+        return false;
+    }
+    if (!S_ISREG(file_stat->st_mode)) {
+        error("Error checking " RED("'%s'") ": Not a regular file.\n",
+              filename);
+        return false;
+    }
+    return true;
+}
+
+static void
+brn2_execute_replace_equal_target(
+        FileList *old, FileList *new, struct Hash_map *oldlist_map,
+        struct Hash_set *names_renamed, int32 i, int32 *number_renames) {
+    Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
+    FileName *oldfile = old->files[i];
+    FileName *newfile = new->files[i];
+    FileName *owner_oldfile;
+    FileName *owner_newfile;
+    struct stat old_stat;
+    struct stat new_stat;
+    int32 owner_index = rename_plan->conflicting_owner_index;
+    int32 mapped_index;
+    int renamed;
+
+    if ((owner_index < 0) || (owner_index >= old->length)
+            || (owner_index == i)) {
+        error("Error replacing equal file " RED("'%s'") ":"
+              " Invalid conflict plan.\n", oldfile->name);
+        fatal(EXIT_FAILURE);
+    }
+
+    owner_oldfile = old->files[owner_index];
+    owner_newfile = new->files[owner_index];
+    if (strcmp(newfile->name, owner_oldfile->name)
+            || strcmp(owner_oldfile->name, owner_newfile->name)) {
+        error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
+              " Conflict plan no longer matches the rename lists.\n",
+              owner_oldfile->name, oldfile->name);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (!hash_lookup_pre_calc_map(oldlist_map,
+                                  oldfile->name, oldfile->length,
+                                  oldfile->hash, old->indexes[i],
+                                  &mapped_index)
+            || (mapped_index != i)
+            || !hash_lookup_map(oldlist_map,
+                                newfile->name, newfile->length,
+                                &mapped_index)
+            || (mapped_index != owner_index)) {
+        error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
+              " Rename state changed before execution.\n",
+              newfile->name, oldfile->name);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (!brn2_regular_file_stat(oldfile->name, &old_stat)
+            || !brn2_regular_file_stat(newfile->name, &new_stat)) {
+        fatal(EXIT_FAILURE);
+    }
+    if (!util_equal_files(oldfile->name, newfile->name)) {
+        error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
+              " Files are no longer equal.\n",
+              newfile->name, oldfile->name);
+        fatal(EXIT_FAILURE);
+    }
+
+#if OS_UNIX
+    if ((old_stat.st_dev == new_stat.st_dev)
+            && (old_stat.st_ino == new_stat.st_ino)) {
+        renamed = unlink(oldfile->name);
+    } else
+#endif
+    {
+#if OS_WINDOWS
+        if (MoveFileExA(oldfile->name, newfile->name,
+                        MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+            renamed = 0;
+        } else {
+            windows_set_errno(GetLastError());
+            renamed = -1;
+        }
+#else
+        renamed = rename(oldfile->name, newfile->name);
+#endif
+    }
+
+    if (renamed < 0) {
+        error("Error replacing " RED("'%s'") " with " RED("'%s'") ": %s.\n",
+              newfile->name, oldfile->name, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    ASSERT(hash_remove_pre_calc_map(oldlist_map,
+                                    oldfile->name, oldfile->length,
+                                    oldfile->hash, old->indexes[i]));
+    if (hash_insert_pre_calc_set(names_renamed,
+                                 oldfile->name, oldfile->length,
+                                 oldfile->hash, old->indexes[i])) {
+        *number_renames += 1;
+    }
+    print("%s -> " GREEN("%s") " (replaced equal file)\n",
+          oldfile->name, newfile->name);
+    return;
+}
+
 void
 brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
               struct Hash_set *names_renamed, int32 i, int32 *number_renames) {
@@ -953,6 +1065,14 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 
     uint64 oldhash = old->files[i]->hash;
     uint32 oldindex = old->indexes[i];
+
+    ASSERT(new->rename_plans != NULL);
+    if (new->rename_plans[i].execution_mode
+            == BRN2_RENAME_REPLACE_EQUAL_TARGET) {
+        brn2_execute_replace_equal_target(old, new, oldlist_map,
+                                          names_renamed, i, number_renames);
+        return;
+    }
 
     if (newhash == oldhash) {
         if (!strcmp(oldname, newname)) {
