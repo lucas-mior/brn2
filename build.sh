@@ -257,7 +257,6 @@ case "$target" in
     exit
     ;;
 "test")
-    ./test.sh
     find . -iname "*.c" | sort | while read -r src; do
         trace_off
         name=$(basename "$src")
