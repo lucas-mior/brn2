@@ -132,7 +132,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
         case CAT(ENUM_PREFIX_, LAST):
             return QUOTE(ENUM_PREFIX_) "LAST";
         default:
-            return "Invalid enum value.";
+            return "Invalid enum value";
     }
 #else
     char buffer[CAT(ENUM_PREFIX_, BIT_COUNT)*256 + 1];
@@ -177,7 +177,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     if (val == 0) {
         return xstrdup("NONE");
     } else if (buffer_ptr == buffer) {
-        return xstrdup("Invalid bit flags enum value.\n");
+        return xstrdup("Invalid bit flags enum value");
     }
 
     *buffer_ptr = '\0';
@@ -363,7 +363,7 @@ main(void) {
     ASSERT_EQUAL((uint32)TEST_NORMAL_parse("TEST_NORMAL_CHERRY"), TEST_NORMAL_CHERRY);
 
     s = TEST_NORMAL_str(999);
-    ASSERT_EQUAL(s, "Unknown value");
+    ASSERT_EQUAL(s, "Invalid enum value");
 
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
