@@ -490,10 +490,10 @@ assert_double_failure(char *file, uint line, char *func,
         UNREACHABLE();
     }
     error2("\n%s: Assertion failed at %s:%u\n", func, file, line);
-    error2("[%s%lld]%s = "DOUBLE_FORMAT " %s "DOUBLE_FORMAT " = %s[%s%lld]\n",
+    error2("[%s%lld]%s = %f %s %f = %s[%s%lld]\n",
            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    error2("floating diff = "DOUBLE_FORMAT ", abs_tol = "DOUBLE_FORMAT ", "
-           "rel_tol = "DOUBLE_FORMAT "\n", diff, abs_tol, rel_tol);
+    error2("floating diff = %f, abs_tol = %f, "
+           "rel_tol = %f\n", diff, abs_tol, rel_tol);
     TRAP();
     exit(EXIT_FAILURE);
 }
