@@ -216,7 +216,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         }
         if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
             error("File name too long. Skipping...\n");
-            // TODO: Free directory_list[i] before skipping this entry.
+            free(directory_list[i]);
             continue;
         }
 
