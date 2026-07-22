@@ -328,8 +328,7 @@ case "$target" in
     elif [ "$CC" = "cproc" ]; then
         with_other cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     else
-        # TODO: Place linker-only libraries after "$main".
-        $CC $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+        $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
     fi
     trace_off
     ;;
