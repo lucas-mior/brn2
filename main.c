@@ -459,15 +459,15 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
-            // TODO: Pass the required table name; benchmark does not build.
-            newlist_set = hash_create_set((uint32)new->length);
+            newlist_set = hash_create_set((uint32)new->length, "newlist_set");
+
             main_capacity = hash_capacity(newlist_set);
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             brn2_create_hashes(new, main_capacity);
             brn2_verify(new, old, newlist_set, new->indexes);
-            // TODO: Remove the extra argument; this function takes one.
-            hash_print_summary_set(newlist_set, "newlist_set");
+
+            hash_print_summary_set(newlist_set);
         }
 #else
         while (true) {
