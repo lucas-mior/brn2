@@ -815,8 +815,8 @@ brn2_sort(FileList *old) {
 }
 
 bool
-brn2_verify(FileList *new, FileList *old, struct Hash_map *claimants_map,
-            uint32 *hashes_new) {
+brn2_verify(FileList *new, FileList *old, struct Hash_map *oldlist_map,
+            struct Hash_map *claimants_map, uint32 *hashes_new) {
     bool failed = false;
 
     free2(new->rename_plans, new->rename_plans_size);
@@ -846,7 +846,6 @@ brn2_verify(FileList *new, FileList *old, struct Hash_map *claimants_map,
         if (!hash_insert_pre_calc_map(claimants_map,
                                       newfile->name, newfile->length,
                                       newfile->hash, hashes_new[i], i)) {
-            FileName *oldfile = old->files[i];
             int32 first_claimant;
 
             ASSERT(hash_lookup_pre_calc_map(claimants_map,
@@ -854,33 +853,74 @@ brn2_verify(FileList *new, FileList *old, struct Hash_map *claimants_map,
                                              newfile->hash, hashes_new[i],
                                              &first_claimant));
             new->rename_plans[first_claimant].claimant_count += 1;
-            error("Error: " RED("'%s'") " repeats on line %d. ",
-                  newfile->name, i + 1);
-
-            if (util_equal_files(newfile->name, oldfile->name)) {
-                error("Old (%s) and new name (%s)"
-                      " have exactly the same content.\n",
-                      oldfile->name, newfile->name);
-                if (brn2_options_autosolve) {
-                    // TODO: Do not unlink during validation. A repeated target
-                    // equal to its own old name can delete the wrong source,
-                    // and a later validation failure leaves that deletion done.
-                    error("--autosolve is enabled: Deleting old file...\n");
-                    if (unlink(newfile->name) < 0) {
-                        error("Error deleting %s: %s.\n",
-                              newfile->name, strerror(errno));
-                        fatal(EXIT_FAILURE);
-                    }
-                    continue;
-                }
-            }
-
-            failed = true;
-            if (brn2_options_fatal) {
-                fatal(EXIT_FAILURE);
-            }
         } else {
             new->rename_plans[i].claimant_count = 1;
+        }
+    }
+
+    for (int32 i = 0; i < new->length; i += 1) {
+        FileName *newfile = new->files[i];
+        Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
+        int32 first_claimant;
+        int32 claimant_count;
+
+        ASSERT(hash_lookup_pre_calc_map(claimants_map,
+                                         newfile->name, newfile->length,
+                                         newfile->hash, hashes_new[i],
+                                         &first_claimant));
+        claimant_count = new->rename_plans[first_claimant].claimant_count;
+        rename_plan->claimant_count = claimant_count;
+
+        if ((claimant_count == 1) || (i == first_claimant)) {
+            continue;
+        }
+
+        error("Error: " RED("'%s'") " repeats on line %d. ",
+              newfile->name, i + 1);
+
+        if (claimant_count == 2) {
+            int32 owner_index;
+
+            if (hash_lookup_map(oldlist_map,
+                                newfile->name, newfile->length,
+                                &owner_index)
+                && ((owner_index == first_claimant) || (owner_index == i))) {
+                int32 mover_index;
+                FileName *owner_oldfile = old->files[owner_index];
+                FileName *owner_newfile = new->files[owner_index];
+
+                if (!strcmp(owner_oldfile->name, owner_newfile->name)) {
+                    if (owner_index == first_claimant) {
+                        mover_index = i;
+                    } else {
+                        mover_index = first_claimant;
+                    }
+
+                    if (util_equal_files(old->files[mover_index]->name,
+                                         owner_oldfile->name)) {
+                        error("Old files (%s) and (%s)"
+                              " have exactly the same content.\n",
+                              old->files[mover_index]->name,
+                              owner_oldfile->name);
+                        if (brn2_options_autosolve) {
+                            Brn2RenamePlan *mover_plan
+                                = &(new->rename_plans[mover_index]);
+
+                            mover_plan->execution_mode
+                                = BRN2_RENAME_REPLACE_EQUAL_TARGET;
+                            mover_plan->conflicting_owner_index = owner_index;
+                            error("--autosolve is enabled:"
+                                  " Planning equal-file replacement.\n");
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        failed = true;
+        if (brn2_options_fatal) {
+            fatal(EXIT_FAILURE);
         }
     }
 
@@ -1491,7 +1531,8 @@ main(void) {
 
             brn2_create_hashes(new, main_capacity);
 
-            ASSERT(brn2_verify(new, old, newlist_map, new->indexes));
+            ASSERT(brn2_verify(new, old, oldlist_map,
+                               newlist_map, new->indexes));
             hash_destroy_map(newlist_map);
         }
 
