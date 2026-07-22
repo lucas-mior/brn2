@@ -152,9 +152,7 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
     va_list ap;
 
     assert(buf);
-    // TODO: Require bufSize > 0 independently of assertions. Negative values
-    // pass this assertion and become huge size_t values in vsnprintf.
-    assert(bufSize);
+    assert(bufSize > 0);
     assert(fmt);
 
     va_start(ap, fmt);
