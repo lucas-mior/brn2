@@ -444,9 +444,9 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         if (length >= capacity) {
             int64 old_capacity = capacity;
             capacity *= 2;
-            list->files
-                = realloc2(list->files,
-                           old_capacity, capacity, SIZEOF(*(list->files)));
+            list->files = realloc2(list->files,
+                                   old_capacity, capacity,
+                                   SIZEOF(*(list->files)));
         }
 
         size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
