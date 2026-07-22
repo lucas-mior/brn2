@@ -1002,6 +1002,7 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     char *big_buffer = NULL;
     char *pbuffer = buffer;
     va_list args;
+    va_list args_copy;
     int32 n;
     int32 m = SIZEOF(buffer);
     int32 p;
@@ -1019,11 +1020,11 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     file = basename2(file2, &file_len, &base_len);
 
     va_start(args, format);
-    n = vsnprintf(buffer, (size_t)m, format, args);
+    va_copy(args_copy, args);
+    n = vsnprintf(buffer, (size_t)m, format, args_copy);
+    va_end(args_copy);
 
     if (n >= m) {
-        // TODO: Restart or va_copy args before the second vsnprintf. Reusing a
-        // consumed va_list is undefined behavior.
         m = n + 1;
         big_buffer = xmalloc(m, false);
         n = vsnprintf(big_buffer, (size_t)m, format, args);
