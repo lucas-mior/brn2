@@ -895,9 +895,7 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
 
     found = hash_lookup_pre_calc_map(oldlist_map, newname, newlen, newhash,
                                      newindex, &next_on_oldlist);
-    // TODO: access() follows dangling symlinks and races with rename(). Use an
-    // entry-aware check plus an atomic no-replace rename where available.
-    newname_exists = util_file_exists(newname);  // replaced access().
+    newname_exists = util_file_exists(newname);
 
 #if defined(_GNU_SOURCE)
     if (newname_exists && !found && !brn2_options_implicit) {
