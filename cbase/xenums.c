@@ -171,7 +171,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM_EXACT
 
     #define XENUM(e) \
-        if ((val & e) == e) { \
+        if (val && ((val & e) == e)) { \
             char *name = #e; \
             int32 len = strlen32(name); \
             if (is_first == 0) { \
