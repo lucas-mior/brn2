@@ -2,14 +2,31 @@
 
 set -e
 
-./build.sh debug
+test_target=${BRN2_TEST_TARGET:-debug}
 
-brn2="$PWD/bin/brn2_debug"
+./build.sh "$test_target"
 
-run_brn2_debug () {
-    gdb -q -nx -batch --return-child-result \
-        -ex run \
-        --args "$brn2" "$@"
+case "$test_target" in
+"debug")
+    brn2="$PWD/bin/brn2_debug"
+    ;;
+"build"|"release")
+    brn2="$PWD/bin/brn2"
+    ;;
+*)
+    echo "Unsupported BRN2_TEST_TARGET: $test_target"
+    exit 1
+    ;;
+esac
+
+run_brn2 () {
+    if command -v gdb >/dev/null 2>&1; then
+        gdb -q -nx -batch --return-child-result \
+            -ex run \
+            --args "$brn2" "$@"
+    else
+        "$brn2" "$@"
+    fi
 }
 
 if [ ! -d /tmp/brn2 ]; then
@@ -30,7 +47,7 @@ for f in b c d a; do
 done
 
 set -x
-run_brn2_debug -f "rename" -t "rename2"
+run_brn2 -f "rename" -t "rename2"
 
 check () {
     if ! grep -q "^${1}$" "$2"; then
@@ -58,7 +75,7 @@ for f in c bxx d a; do
 done
 
 set -x
-run_brn2_debug -f "rename" -t "rename2"
+run_brn2 -f "rename" -t "rename2"
 set +x
 
 check a c
@@ -87,7 +104,7 @@ for f in b c d a; do
 done
 
 set -x
-run_brn2_debug -q -f "rename" -t "rename2" 2>/dev/null
+run_brn2 -q -f "rename" -t "rename2" 2>/dev/null
 set +x
 
 check a b
@@ -98,9 +115,41 @@ check d a
 rm -f a b c d bxx
 rm -f "rename" "rename2"
 
-rm -rf "autosolve-validation"
-mkdir -p "autosolve-validation/expected"
-cd "autosolve-validation"
+check_unchanged () {
+    expected=$1
+    shift
+
+    for file in "$@"; do
+        if ! cmp -s "$expected/$file" "$file"; then
+            echo "file $file changed after rejected rename list"
+            exit 1
+        fi
+    done
+}
+
+expect_failure () {
+    message=$1
+    shift
+
+    set +e
+    set -x
+    run_brn2 "$@"
+    status=$?
+    set +x
+    set -e
+
+    if [ "$status" -eq 0 ]; then
+        echo "$message"
+        exit 1
+    fi
+}
+
+rm -rf "autosolve-tests"
+mkdir -p "autosolve-tests"
+cd "autosolve-tests"
+
+mkdir -p "unequal/expected"
+cd "unequal"
 
 printf "source a\n" > "expected/a"
 printf "source b\n" > "expected/b"
@@ -109,48 +158,23 @@ cp "expected/b" "b"
 printf "a\nb\n" > "rename"
 printf "b\nb\n" > "rename2"
 
-# The second target repeats the first target, but it is also the second
-# source's unchanged name. Since a and b differ, --autosolve must reject the
-# rename list without modifying either source.
-set +e
-set -x
-run_brn2_debug --fatal --autosolve -f "rename" -t "rename2"
-status=$?
-set +x
-set -e
-
-failed=0
-if [ "$status" -eq 0 ]; then
-    echo "--autosolve accepted unequal files with the same target"
-    failed=1
-fi
-if ! cmp -s "expected/a" "a"; then
-    echo "--autosolve modified source a during validation"
-    failed=1
-fi
-if ! cmp -s "expected/b" "b"; then
-    echo "--autosolve modified source b during validation"
-    failed=1
-fi
-if [ "$failed" -ne 0 ]; then
-    exit 1
-fi
+# A moving claimant may replace an unchanged owner only when the two source
+# files are equal. Unequal files must be rejected without changing either one.
+expect_failure \
+    "--autosolve accepted unequal files with the same target" \
+    --fatal --autosolve -f "rename" -t "rename2"
+check_unchanged "expected" a b
 
 cd ..
-rm -rf "autosolve-validation"
-
-rm -rf "autosolve-execution"
-mkdir -p "autosolve-execution"
-cd "autosolve-execution"
+mkdir -p "equal-forward"
+cd "equal-forward"
 
 printf "same contents\n" > "a"
 printf "same contents\n" > "b"
 printf "a\nb\n" > "rename"
 printf "b\nb\n" > "rename2"
 
-set -x
-run_brn2_debug --fatal --autosolve -f "rename" -t "rename2"
-set +x
+run_brn2 --fatal --autosolve -f "rename" -t "rename2"
 
 if [ -e "a" ]; then
     echo "--autosolve did not remove the equal moving source"
@@ -162,4 +186,78 @@ if ! printf "same contents\n" | cmp -s - "b"; then
 fi
 
 cd ..
-rm -rf "autosolve-execution"
+mkdir -p "equal-disabled/expected"
+cd "equal-disabled"
+
+printf "same contents\n" > "expected/a"
+printf "same contents\n" > "expected/b"
+cp "expected/a" "a"
+cp "expected/b" "b"
+printf "a\nb\n" > "rename"
+printf "b\nb\n" > "rename2"
+
+expect_failure \
+    "duplicate targets succeeded without --autosolve" \
+    --fatal -f "rename" -t "rename2"
+check_unchanged "expected" a b
+
+cd ..
+mkdir -p "valid-before-invalid/expected"
+cd "valid-before-invalid"
+
+printf "same valid contents\n" > "expected/a"
+printf "same valid contents\n" > "expected/b"
+printf "unequal source c\n" > "expected/c"
+printf "unequal source d\n" > "expected/d"
+cp "expected/a" "a"
+cp "expected/b" "b"
+cp "expected/c" "c"
+cp "expected/d" "d"
+printf "a\nb\nc\nd\n" > "rename"
+printf "b\nb\nd\nd\n" > "rename2"
+
+# Verification must finish before execution. The valid a -> b replacement
+# precedes the invalid c -> d conflict and therefore must not be performed.
+expect_failure \
+    "--autosolve executed a valid conflict before rejecting a later one" \
+    --fatal --autosolve -f "rename" -t "rename2"
+check_unchanged "expected" a b c d
+
+cd ..
+mkdir -p "equal-reversed"
+cd "equal-reversed"
+
+printf "same contents\n" > "a"
+printf "same contents\n" > "b"
+printf "b\na\n" > "rename"
+printf "b\nb\n" > "rename2"
+
+run_brn2 --fatal --autosolve -f "rename" -t "rename2"
+
+if [ -e "a" ]; then
+    echo "reversed --autosolve order did not remove the moving source"
+    exit 1
+fi
+if ! printf "same contents\n" | cmp -s - "b"; then
+    echo "reversed --autosolve order changed the target contents"
+    exit 1
+fi
+
+cd ..
+mkdir -p "three-claimants/expected"
+cd "three-claimants"
+
+for file in a b c; do
+    printf "same contents\n" > "expected/$file"
+    cp "expected/$file" "$file"
+done
+printf "a\nb\nc\n" > "rename"
+printf "b\nb\nb\n" > "rename2"
+
+expect_failure \
+    "--autosolve accepted three claimants for one target" \
+    --fatal --autosolve -f "rename" -t "rename2"
+check_unchanged "expected" a b c
+
+cd ../..
+rm -rf "autosolve-tests"
