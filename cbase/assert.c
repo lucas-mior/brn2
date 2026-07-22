@@ -479,11 +479,11 @@ assert_double_more(double var1, double var2, int kind1, int kind2) {
 
 static void __attribute((noreturn))
 assert_double_failure(char *file, uint line, char *func,
-                       char *name1, char *name2,
-                       char *type1, char *type2,
-                       llong bits1, llong bits2,
-                       double var1, double var2, char *symbol,
-                       double diff, double abs_tol, double rel_tol) {
+                      char *name1, char *name2,
+                      char *type1, char *type2,
+                      llong bits1, llong bits2,
+                      double var1, double var2, char *symbol,
+                      double diff, double abs_tol, double rel_tol) {
     if (!DEBUGGING) {
         UNREACHABLE();
     }
