@@ -576,8 +576,8 @@ main(int argc, char **argv) {
         int32 number_renames = 0;
 
         if (number_changes) {
-            struct Hash_set *names_renamed = hash_create_set((uint32)old->length,
-                                                             "names_renamed");
+            struct Hash_set *names_renamed
+                = hash_create_set(unfiltered_old_length, "names_renamed");
 
             if (brn2_options_quiet) {
                 print = noop;
