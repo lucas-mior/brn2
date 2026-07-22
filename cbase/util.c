@@ -1423,7 +1423,7 @@ util_file_exists(char *filename) {
                 && (errno == ENOENT)) {
             return false;
         } else {
-            XCLOSE(&fd, filename);
+            close(fd);
             return true;
         }
     }
