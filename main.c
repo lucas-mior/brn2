@@ -333,8 +333,10 @@ main(int argc, char **argv) {
         // entries leave stale values and may change precomputed-index capacity.
         oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
         capacity_map = hash_capacity(oldlist_map);
+
         old->indexes_size = old->length*SIZEOF(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
+
         brn2_create_hashes(old, capacity_map);
 
         for (int32 i = 0; i < old->length; i += 1) {
