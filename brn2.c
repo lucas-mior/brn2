@@ -905,10 +905,15 @@ brn2_verify(FileList *new, FileList *old, struct Hash_map *oldlist_map,
                         if (brn2_options_autosolve) {
                             Brn2RenamePlan *mover_plan
                                 = &(new->rename_plans[mover_index]);
+                            Brn2RenamePlan *owner_plan
+                                = &(new->rename_plans[owner_index]);
 
                             mover_plan->execution_mode
                                 = BRN2_RENAME_REPLACE_EQUAL_TARGET;
                             mover_plan->conflicting_owner_index = owner_index;
+                            owner_plan->execution_mode
+                                = BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER;
+                            owner_plan->conflicting_owner_index = mover_index;
                             error("--autosolve is enabled:"
                                   " Planning equal-file replacement.\n");
                             continue;
@@ -948,36 +953,40 @@ brn2_regular_file_stat(char *filename, struct stat *file_stat) {
     return true;
 }
 
-static void
-brn2_execute_replace_equal_target(
+static bool
+brn2_validate_replace_equal_target(
         FileList *old, FileList *new, struct Hash_map *oldlist_map,
-        struct Hash_set *names_renamed, int32 i, int32 *number_renames) {
+        int32 i, struct stat *old_stat, struct stat *new_stat) {
     Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
     FileName *oldfile = old->files[i];
     FileName *newfile = new->files[i];
     FileName *owner_oldfile;
     FileName *owner_newfile;
-    struct stat old_stat;
-    struct stat new_stat;
     int32 owner_index = rename_plan->conflicting_owner_index;
     int32 mapped_index;
-    int renamed;
 
     if ((owner_index < 0) || (owner_index >= old->length)
             || (owner_index == i)) {
         error("Error replacing equal file " RED("'%s'") ":"
               " Invalid conflict plan.\n", oldfile->name);
-        fatal(EXIT_FAILURE);
+        return false;
     }
 
     owner_oldfile = old->files[owner_index];
     owner_newfile = new->files[owner_index];
+    if ((new->rename_plans[owner_index].execution_mode
+                != BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER)
+            || (new->rename_plans[owner_index].conflicting_owner_index != i)) {
+        error("Error replacing equal file " RED("'%s'") ":"
+              " Invalid owner conflict plan.\n", oldfile->name);
+        return false;
+    }
     if (strcmp(newfile->name, owner_oldfile->name)
             || strcmp(owner_oldfile->name, owner_newfile->name)) {
         error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
               " Conflict plan no longer matches the rename lists.\n",
               owner_oldfile->name, oldfile->name);
-        fatal(EXIT_FAILURE);
+        return false;
     }
 
     if (!hash_lookup_pre_calc_map(oldlist_map,
@@ -992,17 +1001,97 @@ brn2_execute_replace_equal_target(
         error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
               " Rename state changed before execution.\n",
               newfile->name, oldfile->name);
-        fatal(EXIT_FAILURE);
+        return false;
     }
 
-    if (!brn2_regular_file_stat(oldfile->name, &old_stat)
-            || !brn2_regular_file_stat(newfile->name, &new_stat)) {
-        fatal(EXIT_FAILURE);
+    if (!brn2_regular_file_stat(oldfile->name, old_stat)
+            || !brn2_regular_file_stat(newfile->name, new_stat)) {
+        return false;
     }
     if (!util_equal_files(oldfile->name, newfile->name)) {
         error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
               " Files are no longer equal.\n",
               newfile->name, oldfile->name);
+        return false;
+    }
+
+    return true;
+}
+
+static bool
+brn2_validate_equal_target_owner(FileList *old, FileList *new, int32 i) {
+    Brn2RenamePlan *owner_plan = &(new->rename_plans[i]);
+    int32 mover_index = owner_plan->conflicting_owner_index;
+
+    if ((mover_index < 0) || (mover_index >= old->length)
+            || (mover_index == i)) {
+        error("Error skipping equal-file owner " RED("'%s'") ":"
+              " Invalid conflict plan.\n", old->files[i]->name);
+        return false;
+    }
+    if ((new->rename_plans[mover_index].execution_mode
+                != BRN2_RENAME_REPLACE_EQUAL_TARGET)
+            || (new->rename_plans[mover_index].conflicting_owner_index != i)
+            || strcmp(old->files[i]->name, new->files[i]->name)
+            || strcmp(new->files[mover_index]->name,
+                      new->files[i]->name)) {
+        error("Error skipping equal-file owner " RED("'%s'") ":"
+              " Conflict plan no longer matches the rename lists.\n",
+              old->files[i]->name);
+        return false;
+    }
+
+    return true;
+}
+
+static bool
+brn2_validate_execution_plan(FileList *old, FileList *new,
+                             struct Hash_map *oldlist_map) {
+    ASSERT(new->rename_plans != NULL);
+
+    for (int32 i = 0; i < new->length; i += 1) {
+        Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
+
+        switch (rename_plan->execution_mode) {
+        case BRN2_RENAME_NORMAL:
+            break;
+        case BRN2_RENAME_REPLACE_EQUAL_TARGET: {
+            struct stat old_stat;
+            struct stat new_stat;
+
+            if (!brn2_validate_replace_equal_target(old, new, oldlist_map,
+                                                     i, &old_stat, &new_stat)) {
+                return false;
+            }
+            break;
+        }
+        case BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER:
+            if (!brn2_validate_equal_target_owner(old, new, i)) {
+                return false;
+            }
+            break;
+        default:
+            error("Error: Invalid rename execution mode on line %d.\n",
+                  i + 1);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static void
+brn2_execute_replace_equal_target(
+        FileList *old, FileList *new, struct Hash_map *oldlist_map,
+        struct Hash_set *names_renamed, int32 i, int32 *number_renames) {
+    FileName *oldfile = old->files[i];
+    FileName *newfile = new->files[i];
+    struct stat old_stat;
+    struct stat new_stat;
+    int renamed;
+
+    if (!brn2_validate_replace_equal_target(old, new, oldlist_map, i,
+                                             &old_stat, &new_stat)) {
         fatal(EXIT_FAILURE);
     }
 
@@ -1067,11 +1156,18 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
     uint32 oldindex = old->indexes[i];
 
     ASSERT(new->rename_plans != NULL);
-    if (new->rename_plans[i].execution_mode
-            == BRN2_RENAME_REPLACE_EQUAL_TARGET) {
+    switch (new->rename_plans[i].execution_mode) {
+    case BRN2_RENAME_REPLACE_EQUAL_TARGET:
         brn2_execute_replace_equal_target(old, new, oldlist_map,
                                           names_renamed, i, number_renames);
         return;
+    case BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER:
+        return;
+    case BRN2_RENAME_NORMAL:
+        break;
+    default:
+        error("Error: Invalid rename execution mode on line %d.\n", i + 1);
+        fatal(EXIT_FAILURE);
     }
 
     if (newhash == oldhash) {
@@ -1176,6 +1272,30 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
         }
         print("%s -> "GREEN("%s")"\n", oldname, newname);
     }
+    return;
+}
+
+void
+brn2_execute(FileList *old, FileList *new, struct Hash_map *oldlist_map,
+             struct Hash_set *names_renamed, int32 *number_renames) {
+    if (!brn2_validate_execution_plan(old, new, oldlist_map)) {
+        fatal(EXIT_FAILURE);
+    }
+
+    for (int32 i = 0; i < old->length; i += 1) {
+        if (new->rename_plans[i].execution_mode
+                == BRN2_RENAME_REPLACE_EQUAL_TARGET) {
+            brn2_execute2(old, new, oldlist_map, names_renamed, i,
+                          number_renames);
+        }
+    }
+    for (int32 i = 0; i < old->length; i += 1) {
+        if (new->rename_plans[i].execution_mode == BRN2_RENAME_NORMAL) {
+            brn2_execute2(old, new, oldlist_map, names_renamed, i,
+                          number_renames);
+        }
+    }
+
     return;
 }
 
@@ -1661,10 +1781,8 @@ main(void) {
 
         names_renamed = hash_create_set((uint32)old->length, "names_renamed");
 
-        for (int32 i = 0; i < old->length; i += 1) {
-            brn2_execute2(old, new, oldlist_map, names_renamed, i,
-                          &number_renames);
-        }
+        brn2_execute(old, new, oldlist_map, names_renamed,
+                     &number_renames);
 
         ASSERT_EQUAL(number_renames, number_changes);
         for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
