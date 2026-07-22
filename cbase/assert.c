@@ -690,9 +690,9 @@ GENERATE_ASSERT_BOOLS(more_equal, >=)
     A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_CHAR)
 #endif
 
-#define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
-_Generic((VAR2), \
-    char:    A_CHAR_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1),        \
+#define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1)                        \
+_Generic((VAR2),                                                       \
+    char:    A_CHAR_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1),               \
     schar:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
     short:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
     int:     A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_INT    ), \
@@ -703,9 +703,9 @@ _Generic((VAR2), \
     uint:    A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
     ulong:   A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
     ullong:  A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED()            \
+    float:   A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ),  \
+    double:  A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ),  \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED()             \
 )
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 
