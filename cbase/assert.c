@@ -167,18 +167,16 @@ GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
 
-// TODO: Fix the second operand order in the generated diagnostic. It prints
-// the second pointer where its name belongs and vice versa.
 #define GENERATE_ASSERT_POINTERS(MODE, SYMBOL)                           \
 static void                                                              \
 a_pointers_##MODE(char *file, uint line, char *func,                     \
                   char *name1, char *name2,                              \
                   void *var1, void *var2) {                              \
     if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) {                     \
-        if (!DEBUGGING) {                              \
-            UNREACHABLE(); \
-        } \
-        error2("\n%s: Assertion failed at %s:%u\n", func, file, line);   \
+        if (!DEBUGGING) {                                                \
+            UNREACHABLE();                                               \
+        }                                                                \
+        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);    \
         error2("%s = %p " #SYMBOL " %p = %s\n",                          \
                name1, var1, var2, name2);                                \
         TRAP();                                                          \
@@ -195,8 +193,6 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
-// TODO: Fix the second operand order in the generated diagnostic. The value
-// and name are passed in the opposite order required by the format string.
 #define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE)      \
 static void                                                                 \
 a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
@@ -247,8 +243,6 @@ compare_sign_with_unsign(llong s, ullong u) {
     }
 }
 
-// TODO: Fix the second operand order in the generated diagnostic. The value
-// and name are passed in the opposite order required by the format string.
 #define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL)                   \
 static void                                                             \
 a_signed_unsigned##MODE(char *file, uint line, char *func,              \
@@ -277,8 +271,6 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_SIGNED_UNSIGNED
 
-// TODO: Fix the second operand order in the generated diagnostic. The value
-// and name are passed in the opposite order required by the format string.
 #define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL)                   \
 static void                                                             \
 a_unsigned_signed_##MODE(char *file, uint line, char *func,             \
