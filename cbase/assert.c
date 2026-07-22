@@ -831,8 +831,8 @@ _Generic((VAR1),                                                        \
 #define ASSERT_NULL(VAR1) do {                                          \
     void *p = VAR1;                                                     \
     if (p != NULL) {                                                    \
-        error2("\n%s: Assertion failed at %s:%d\n",                     \
-               __func__, __FILE__, __LINE__);                           \
+        error2("\nAssertion failed at %s:%d:%s\n",                      \
+               __FILE__, __LINE__, __func__);                           \
         error2("%s = %p == NULL\n", #VAR1, p);                          \
         TRAP();                                                         \
     }                                                                   \
