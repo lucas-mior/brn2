@@ -289,9 +289,9 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         }
 
-        old->files
-            = realloc2(old->files,
-                       length_before, old->length, SIZEOF(*(old->files)));
+        old->files = realloc2(old->files,
+                              length_before, old->length,
+                              SIZEOF(*(old->files)));
         old->capacity = old->length;
     }
 
