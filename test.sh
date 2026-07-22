@@ -12,7 +12,9 @@ run_brn2_debug () {
         --args "$brn2" "$@"
 }
 
-mkdir /tmp/brn2
+if [ ! -d /tmp/brn2 ]; then
+    mkdir -f /tmp/brn2
+fi
 cd /tmp/brn2
 
 rm -rf "rename" "rename2"
