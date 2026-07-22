@@ -299,7 +299,7 @@ main(int argc, char **argv) {
     {
         char write_buffer[BRN2_PATH_MAX*2];
         char *pointer = write_buffer;
-        uint32 capacity_set;
+        uint32 capacity_map;
         int32 j = 0;
         int64 buffered;
 #if OS_UNIX
@@ -332,10 +332,10 @@ main(int argc, char **argv) {
         // TODO: Filter and compact old before building this map. Removed
         // entries leave stale values and may change precomputed-index capacity.
         oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
-        capacity_set = hash_capacity(oldlist_map);
+        capacity_map = hash_capacity(oldlist_map);
         old->indexes_size = old->length*SIZEOF(*(old->indexes));
         old->indexes = xmmap_commit(&(old->indexes_size));
-        brn2_create_hashes(old, capacity_set);
+        brn2_create_hashes(old, capacity_map);
 
         for (int32 i = 0; i < old->length; i += 1) {
             FileName *file = old->files[i];
