@@ -31,11 +31,13 @@
 #endif
 
 #if !defined(ENUM_UNDERLYING_TYPE)
-  #if CC_CLANG
-    #define ENUM_UNDERLYING_TYPE : uint32
-  #else
-    #define ENUM_UNDERLYING_TYPE
-  #endif
+  #define ENUM_UNDERLYING_TYPE uint32
+#endif
+
+#if CC_CLANG
+  #define ENUM_UNDERLYING_TYPE_SPEC : ENUM_UNDERLYING_TYPE
+#else
+  #define ENUM_UNDERLYING_TYPE_SPEC
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
@@ -70,7 +72,7 @@
 #endif
 
 #if ENUM_BITFLAGS
-enum CAT(ENUM_NAME, _BitIndices) ENUM_UNDERLYING_TYPE {
+enum CAT(ENUM_NAME, _BitIndices) ENUM_UNDERLYING_TYPE_SPEC {
     #define X_IDX_1(e)    CAT(e, _BIT_IDX),
     #define X_IDX_2(e, v) CAT(e, _BIT_IDX),
     #define X(...)        SELECT_ON_NUM_ARGS(X_IDX_, __VA_ARGS__)
@@ -86,12 +88,12 @@ _Static_assert(CAT(ENUM_PREFIX_, BIT_COUNT)
                <= (sizeof(enum CAT(ENUM_NAME, _BitIndices))*CHAR_BIT));
 #endif
 
-enum ENUM_NAME ENUM_UNDERLYING_TYPE {
+enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
 #if ENUM_BITFLAGS == 0
     #define XENUM_DEF_1(e)    e,
     #define XENUM_DEF_2(e, v) e = v,
 #else
-    #define XENUM_DEF_1(e)    e = 1u << CAT(e, _BIT_IDX),
+    #define XENUM_DEF_1(e)    e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_IDX),
     #define XENUM_DEF_2(e, v) e = v,
 #endif
     #define X(...)            SELECT_ON_NUM_ARGS(XENUM_DEF_, __VA_ARGS__)
