@@ -477,8 +477,6 @@ assert_double_more(double var1, double var2, int kind1, int kind2) {
                                            NULL, NULL, NULL);
 }
 
-// TODO: Fix the second operand order in the floating-point diagnostic. The
-// second value is printed where its variable name belongs and vice versa.
 static void __attribute((noreturn))
 assert_double_failure(char *file, uint line, char *func,
                        char *name1, char *name2,
@@ -489,11 +487,11 @@ assert_double_failure(char *file, uint line, char *func,
     if (!DEBUGGING) {
         UNREACHABLE();
     }
-    error2("\n%s: Assertion failed at %s:%u\n", func, file, line);
+    error2("\nAssertion failed at %s:%u:%s\n", file, line, func);
     error2("[%s%lld]%s = %f %s %f = %s[%s%lld]\n",
            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    error2("floating diff = %f, abs_tol = %f, "
-           "rel_tol = %f\n", diff, abs_tol, rel_tol);
+    error2("floating diff = %f, abs_tol = %f, rel_tol = %f\n",
+           diff, abs_tol, rel_tol);
     TRAP();
     exit(EXIT_FAILURE);
 }
