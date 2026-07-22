@@ -4,6 +4,12 @@ set -e
 
 ./build.sh
 
+run_brn2_debug () {
+    gdb -q -nx -batch --return-child-result \
+        -ex run \
+        --args bin/brn2_debug "$@"
+}
+
 rm -rf "/tmp/rename" "/tmp/rename2"
 
 for f in a b c d; do
@@ -24,7 +30,7 @@ cleanup () {
 trap cleanup EXIT
 
 set -x
-bin/brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
+run_brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
 
 check () {
     if ! grep -q "$1" "$2"; then
@@ -52,7 +58,7 @@ for f in c bxx d a; do
 done
 
 set -x
-bin/brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
+run_brn2_debug -f "/tmp/rename" -t "/tmp/rename2"
 set +x
 
 check a c
@@ -81,7 +87,7 @@ for f in b c d a; do
 done
 
 set -x
-bin/brn2_debug -q -f "/tmp/rename" -t "/tmp/rename2" 2>/dev/null
+run_brn2_debug -q -f "/tmp/rename" -t "/tmp/rename2" 2>/dev/null
 set +x
 
 check a b
