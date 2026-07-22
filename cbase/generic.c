@@ -496,10 +496,8 @@ _Generic((x), \
   fprintf(stderr, "["GREEN("%s%lld")"]%s = %llu ", \
                   typename(TYPE), typebits(TYPE), #VAR, (ullong)(VAR))
 
-#define DOUBLE_FORMAT "%f"
-
 #define PRINT_DOUBLE(VAR, TYPE) \
-  fprintf(stderr, "["GREEN("%s%lld")"]%s = "DOUBLE_FORMAT" ", \
+  fprintf(stderr, "["GREEN("%s%lld")"]%s = %f ", \
                   typename(TYPE), typebits(TYPE), #VAR, DOUBLE_GET2(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
