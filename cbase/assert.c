@@ -639,7 +639,7 @@ a_bool_##MODE(char *file, uint line, char *func,                       \
         if (var2) {                                                    \
             s2 = "true";                                               \
         }                                                              \
-        error2("\n%s: Assertion failed at %s:%u\n", func, file, line); \
+        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);  \
         error2("[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",        \
                type1, bits1, name1, s1, s2, name2, type2, bits2);      \
         TRAP();                                                        \
