@@ -816,8 +816,7 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
         FileName *newfile = new->files[i];
 
         if (newfile->length >= BRN2_PATH_MAX) {
-            // TODO: Add a newline and say "is %d bytes or longer".
-            error("Error: filename on line %d is longer than %d bytes",
+            error("Error: filename on line %d is %d bytes or longer.",
                   i + 1, BRN2_PATH_MAX);
             failed = true;
             if (brn2_options_fatal) {
