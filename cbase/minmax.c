@@ -104,8 +104,6 @@ GENERATE_COMPARE_SIGNED_UNSIGNED(max, >)
 
 #undef GENERATE_COMPARE_SIGNED_UNSIGNED
 
-// TODO: Preserve unsigned results above LLONG_MAX. Converting the selected
-// ullong to llong is implementation-defined and can return a negative value.
 #define GENERATE_COMPARE_UNSIGNED_SIGNED(MODE, SYMBOL) \
 static llong \
 get_unsigned_signed_##MODE(ullong var1, llong var2) { \
