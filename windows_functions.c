@@ -3,7 +3,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the*License,
+ * by the Free Software Foundation, either version 3 of the License,
  * or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <wchar.h>
 
-#ifndef S_IFLNK
+#if !defined(S_IFLNK)
 #define S_IFLNK 0120000
 #endif
 
@@ -112,9 +112,12 @@ scandir_list_free(struct dirent **list, int64 count, int64 capacity) {
 }
 
 static int
-scandir(const char *dir, struct dirent ***namelist,
-        int (*filter)(const struct dirent *),
-        int (*compar)(const struct dirent **, const struct dirent **)) {
+scandir(
+    const char *dir,
+    struct dirent ***namelist,
+    int (*filter)(const struct dirent *),
+    int (*compar)(const struct dirent **, const struct dirent **)
+) {
     WIN32_FIND_DATAW find_data;
     HANDLE find_handle;
     wchar_t *wide_pattern;
@@ -124,6 +127,7 @@ scandir(const char *dir, struct dirent ***namelist,
     int64 pattern_length;
     int64 count;
     int64 capacity = 16;
+    int32 result;
     int32 wide_dir_length;
     (void)filter;
     (void)compar;
@@ -230,12 +234,19 @@ scandir(const char *dir, struct dirent ***namelist,
         return -1;
     }
 
+    if (count >= MAXOF(result)) {
+        scandir_list_free(list, count, capacity);
+        errno = EOVERFLOW;
+        return -1;
+    }
+
+    result = (int32)count;
     *namelist = list;
-    return (int)count;
+    return result;
 }
 
 static time_t
-filetime_to_time_t(const FILETIME *filetime) {
+filetime_to_time_t(FILETIME *filetime) {
     ULARGE_INTEGER u_large_integer;
     u_large_integer.LowPart = filetime->dwLowDateTime;
     u_large_integer.HighPart = filetime->dwHighDateTime;
@@ -283,7 +294,7 @@ lstat(const char *path, struct stat *statbuf) {
         return -1;
     }
 
-    memset64(statbuf, 0, sizeof(*statbuf));
+    memset64(statbuf, 0, SIZEOF(*statbuf));
 
     // File type
     if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
@@ -341,7 +352,7 @@ lstat(const char *path, struct stat *statbuf) {
     ull_size.LowPart = fd.nFileSizeLow;
     ull_size.HighPart = fd.nFileSizeHigh;
     if (ull_size.QuadPart > LONG_MAX) {
-        fprintf(stderr, "Warning: file is too large, size will be wrong.\n");
+        error("Warning: file is too large, size will be wrong.\n");
     }
     statbuf->st_size = (long)ull_size.QuadPart;
 
@@ -354,12 +365,15 @@ lstat(const char *path, struct stat *statbuf) {
 }
 
 #if TESTING_windows_functions
-#include <assert.h>
-
 static bool
-contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
-    for (int32 i = 0; i < *nfiles; i += 1) {
-        char *from_scan = dirent[i]->d_name;
+contains(
+    char *buffer,
+    int64 length,
+    struct dirent **directory_entries,
+    int32 *number_files
+) {
+    for (int32 i = 0; i < *number_files; i += 1) {
+        char *from_scan = directory_entries[i]->d_name;
 
         if (strlen32(from_scan) != length) {
             continue;
@@ -367,11 +381,11 @@ contains(char *buffer, int64 length, struct dirent **dirent, int32 *nfiles) {
 
         if (!memcmp64(buffer, from_scan, length)) {
             printf("%s == %s\n", buffer, from_scan);
-            if (i < (*nfiles - 1)) {
-                *nfiles -= 1;
-                free2(dirent[i], sizeof(**dirent));
-                memmove(&dirent[i], &dirent[i + 1],
-                        (size_t)(*nfiles - i)*sizeof(*dirent));
+            if (i < (*number_files - 1)) {
+                *number_files -= 1;
+                free2(directory_entries[i], SIZEOF(**directory_entries));
+                memmove64(&directory_entries[i], &directory_entries[i + 1],
+                          (*number_files - i)*SIZEOF(*directory_entries));
             }
             return true;
         }
@@ -385,19 +399,19 @@ main(void) {
         char *string = "aaa/bbb/ccc";
         int64 length = strlen32(string);
 
-        assert(memmem64(string, length, "aaa", 3) == string);
-        assert(memmem64(string, length, "bbb", 3) == string + 4);
-        assert(memmem64(string, length, "aaaa", 4) == NULL);
-        assert(memmem64(string, length, "bbbb", 4) == NULL);
-        assert(memmem64(string, length, "/", 1) == string + 3);
+        ASSERT(memmem64(string, length, "aaa", 3) == string);
+        ASSERT(memmem64(string, length, "bbb", 3) == string + 4);
+        ASSERT(memmem64(string, length, "aaaa", 4) == NULL);
+        ASSERT(memmem64(string, length, "bbbb", 4) == NULL);
+        ASSERT(memmem64(string, length, "/", 1) == string + 3);
     }
 
     {
         struct stat stat;
-        assert(lstat("LICENSE", &stat) == 0);
-        assert(stat.st_size == 34523);
-        assert(stat.st_mtime == 1735689600);
-        assert(stat.st_ctime == 1735689600);
+        ASSERT(lstat("LICENSE", &stat) == 0);
+        ASSERT(stat.st_size == 34523);
+        ASSERT(stat.st_mtime == 1735689600);
+        ASSERT(stat.st_ctime == 1735689600);
         error("stat.atime: %lld\n", stat.st_atime);
     }
 
@@ -409,21 +423,21 @@ main(void) {
 
         if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
             error("Error in scandir for windows.\n");
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
 
         if ((ls_pipe = popen("dir /b", "r")) == NULL) {
             error("Error in popen: %s.\n", strerror(errno));
-            exit(EXIT_FAILURE);
+            fatal(EXIT_FAILURE);
         }
-        while (fgets(buffer, sizeof(buffer), ls_pipe)) {
+        while (fgets(buffer, SIZEOF(buffer), ls_pipe)) {
             int64 length = (int64)strcspn(buffer, "\n");
             buffer[length] = '\0';
-            assert(contains(buffer, length, dirent, &nfiles));
+            ASSERT(contains(buffer, length, dirent, &nfiles));
         }
 
         for (int32 i = 0; i < nfiles; i += 1) {
-            free2(dirent[i], sizeof(**dirent));
+            free2(dirent[i], SIZEOF(**dirent));
         }
     }
 

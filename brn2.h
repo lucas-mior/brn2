@@ -5,7 +5,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the*License,
+ * by the Free Software Foundation, either version 3 of the License,
  * or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -21,13 +21,13 @@
 #define BRN2_H
 
 #if defined(__WIN32__)
-  #define BRN2_MAX_THREADS 1
-  #include <windows.h>
+#define BRN2_MAX_THREADS 1
+#include <windows.h>
 #else
-  #define BRN2_MAX_THREADS 64
-  #include <pthread.h>
-  #include <sys/mman.h>
-  #include <sys/wait.h>
+#define BRN2_MAX_THREADS 64
+#include <pthread.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
 #endif
 
 #include <assert.h>
@@ -68,11 +68,11 @@
 
 typedef struct File {
     char name[124];
-    int fd;
+    int32 fd;
     FILE *stream;
 } File;
 
-enum {
+enum Brn2FileType {
     TYPE_DIR = 0,
     TYPE_FILE = 1,
     TYPE_ERR = 2,
@@ -81,7 +81,7 @@ enum {
 typedef struct FileName {
     uint64 hash;
     int32 length;
-    uint32 type;
+    enum Brn2FileType type;
     char name[];
 } FileName;
 
@@ -125,10 +125,10 @@ extern pthread_cond_t brn2_new_work;
 
 extern int (*print)(const char *, ...);
 
-INLINE int brn2_compare(void *, void *);
+INLINE int32 brn2_compare(void *, void *);
 void brn2_list_from_dir(FileList *, char *);
 void brn2_list_from_file(FileList *, char *, bool);
-void brn2_list_from_args(FileList *, int, char **);
+void brn2_list_from_args(FileList *, int32, char **);
 void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);
 bool brn2_verify(FileList *, FileList *, struct Hash_map *,
@@ -136,11 +136,10 @@ bool brn2_verify(FileList *, FileList *, struct Hash_map *,
 int32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
 void brn2_print_list(FileList *);
-void brn2_execute(FileList *, FileList *,
-                  struct Hash_map *, struct Hash_set *, int32 *);
-void brn2_execute2(FileList *, FileList *,
-                   struct Hash_map *, struct Hash_set *,
-                   int32, int32 *);
+void brn2_execute(FileList *, FileList *, struct Hash_map *,
+                  struct Hash_set *, int32 *);
+void brn2_execute2(FileList *, FileList *, struct Hash_map *,
+                   struct Hash_set *, int32, int32 *);
 
 void brn2_usage(FILE *) __attribute__((noreturn));
 
