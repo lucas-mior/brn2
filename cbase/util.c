@@ -1412,6 +1412,25 @@ send_signal(char *executable, int32 signal_number) {
 }
 #endif
 
+#if !OS_WINDOWS
+static bool
+util_file_exists(char *filename) {
+    int32 fd;
+
+    if ((fd = open(filename, O_PATH | O_NOFOLLOW)) < 0) {
+        return false;
+    } else {
+        XCLOSE(&fd, filename);
+        return true;
+    }
+}
+#else
+static bool
+util_file_exists(char *filename) {
+    return !access(filename, F_OK);
+}
+#endif
+
 static bool
 util_equal_files(char *filename_a, char *filename_b) {
     int fd_a;
