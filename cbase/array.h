@@ -66,9 +66,12 @@ generic_array_grow(void *array, int64 item_size) {
             return array;
         }
         old_cap = header->cap;
-        // TODO: Grow a zero-capacity initialized array to a positive capacity
-        // and check doubling for overflow. Zero currently remains zero.
-        new_cap = old_cap*2;
+        if (old_cap <= (MAXOF(old_cap)/2)) {
+            new_cap = old_cap*2;
+        } else {
+            error("Array is too large.\n");
+            fatal(EXIT_FAILURE);
+        }
     } else {
         header = NULL;
         old_cap = 0;
