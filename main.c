@@ -474,8 +474,8 @@ main(int argc, char **argv) {
 
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
-
             brn2_create_hashes(new, main_capacity);
+
             brn2_verify(new, old, newlist_set, new->indexes);
 
             hash_print_summary_set(newlist_set);
