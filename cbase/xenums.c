@@ -158,7 +158,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
                     TRAP(); \
                 } \
             } \
-            if (buffer_ptr < (buffer_end - len - 1)) { \
+            if (len < (buffer_end - buffer_ptr)) { \
                 memcpy64(buffer_ptr, name, len); \
                 buffer_ptr += len; \
             } else { \
