@@ -201,7 +201,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM
 
     if (val) {
-        error2("Warning: bit flags enum contains invalid bit set.\n");
+        error2("Error: bit flags enum contains invalid bit set.\n");
         TRAP();
     }
 
