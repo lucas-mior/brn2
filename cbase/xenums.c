@@ -85,7 +85,7 @@ enum CAT(ENUM_NAME, _BitIndices) ENUM_UNDERLYING_TYPE_SPEC {
     CAT(ENUM_PREFIX_, BIT_COUNT)
 };
 _Static_assert(CAT(ENUM_PREFIX_, BIT_COUNT)
-               <= (sizeof(enum CAT(ENUM_NAME, _BitIndices))*CHAR_BIT));
+               <= (sizeof(ENUM_UNDERLYING_TYPE)*CHAR_BIT);
 #endif
 
 enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
