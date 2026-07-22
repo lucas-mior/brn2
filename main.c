@@ -482,9 +482,8 @@ main(int argc, char **argv) {
                 }
 
                 if (!freopen(tty_path, "r", stdin)) {
-                    // TODO: Abort here. Later prompts can otherwise loop
-                    // on EOF.
                     error("Error reopening stdin: %s.\n", strerror(errno));
+                    fatal(EXIT_FAILURE);
                 }
             }
 
