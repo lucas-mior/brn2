@@ -44,8 +44,6 @@ document_reserve_lines(Document *doc, int32 extra) {
     }
 
     new_capacity = doc->capacity;
-    // TODO: Handle zero capacity and check doubling for overflow. Starting at
-    // zero loops forever; overflowing can also make the loop nonterminating.
     while (new_capacity < need) {
         new_capacity *= 2;
     }
