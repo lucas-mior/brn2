@@ -331,6 +331,8 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #undef ENUM_PREFIX_
 #undef ENUM_FIELDS
 #undef ENUM_BITFLAGS
+#undef ENUM_UNDERLYING_TYPE
+#undef ENUM_UNDERLYING_TYPE_SPEC
 
 #if TESTING_xenums && !defined(TESTING_xenums_started)
 #define TESTING_xenums_started
