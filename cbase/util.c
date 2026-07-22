@@ -2084,14 +2084,36 @@ sb_reserve(StrBuilder *str_builder, int32 extra) {
 
 static void
 sb_append(StrBuilder *str_builder, char *data, int32 data_len) {
+    bool aliases = false;
+    int32 data_offset = 0;
+
     if (data_len <= 0) {
         return;
     }
 
-    // TODO: Preserve data's offset before sb_reserve when it aliases this
-    // builder. A realloc makes the source pointer dangling before memcpy.
+    if (data == str_builder->data) {
+        aliases = true;
+    } else if (str_builder->data) {
+        uintptr_t data_address = (uintptr_t)data;
+        uintptr_t start = (uintptr_t)str_builder->data;
+
+        if (data_address >= start) {
+            uintptr_t offset = data_address - start;
+
+            if (offset < (uint32)str_builder->cap) {
+                aliases = true;
+                data_offset = (int32)offset;
+            }
+        }
+    }
+
     sb_reserve(str_builder, data_len);
-    memcpy64(str_builder->data + str_builder->len, data, data_len);
+    if (aliases) {
+        data = str_builder->data + data_offset;
+        memmove64(str_builder->data + str_builder->len, data, data_len);
+    } else {
+        memcpy64(str_builder->data + str_builder->len, data, data_len);
+    }
     str_builder->len += data_len;
     str_builder->data[str_builder->len] = '\0';
 
@@ -2797,6 +2819,19 @@ main(int argc, char **argv) {
     ASSERT(ENDS_WITH(s1, strlen32(s1), "aaaabbbb"));
     ASSERT(!ENDS_WITH(s1, strlen32(s1), "aaaa"));
     ASSERT(!ENDS_WITH(s1, strlen32(s1), "aaaaabbbbb"));
+
+    {
+        StrBuilder builder = {0};
+        int32 old_cap;
+
+        SB_APPEND(&builder, "0123456789abcde");
+        old_cap = builder.cap;
+        sb_append(&builder, builder.data + 1, builder.len - 1);
+        ASSERT_MORE(builder.cap, old_cap);
+        ASSERT_EQUAL(builder.data,
+                     "0123456789abcde123456789abcde");
+        sb_free(&builder);
+    }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #if OS_UNIX
