@@ -85,10 +85,23 @@ typedef struct FileName {
     char name[];
 } FileName;
 
+enum Brn2RenameExecutionMode {
+    BRN2_RENAME_NORMAL,
+    BRN2_RENAME_REPLACE_EQUAL_TARGET,
+};
+
+typedef struct Brn2RenamePlan {
+    enum Brn2RenameExecutionMode execution_mode;
+    int32 conflicting_owner_index;
+    int32 claimant_count;
+} Brn2RenamePlan;
+
 typedef struct FileList {
     Arena *arenas[BRN2_MAX_THREADS];
     uint32 *indexes;
     int64 indexes_size;
+    Brn2RenamePlan *rename_plans;
+    int64 rename_plans_size;
     int32 length;
     int32 capacity;
     FileName **files;
@@ -117,7 +130,7 @@ void brn2_list_from_file(FileList *, char *, bool);
 void brn2_list_from_args(FileList *, int, char **);
 void brn2_normalize_names(FileList *, FileList *);
 void brn2_create_hashes(FileList *, uint32);
-bool brn2_verify(FileList *, FileList *, struct Hash_set *, uint32 *);
+bool brn2_verify(FileList *, FileList *, struct Hash_map *, uint32 *);
 int32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
 void brn2_print_list(FileList *);

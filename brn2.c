@@ -511,7 +511,10 @@ brn2_free_list(FileList *list) {
     arenas_reset(list->arenas, nthreads);
 
     free2(list->files, list->capacity*SIZEOF(*(list->files)));
+    free2(list->rename_plans, list->rename_plans_size);
     list->files = NULL;
+    list->rename_plans = NULL;
+    list->rename_plans_size = 0;
     list->length = 0;
     list->capacity = 0;
 
@@ -812,9 +815,21 @@ brn2_sort(FileList *old) {
 }
 
 bool
-brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
+brn2_verify(FileList *new, FileList *old, struct Hash_map *claimants_map,
             uint32 *hashes_new) {
     bool failed = false;
+
+    free2(new->rename_plans, new->rename_plans_size);
+    new->rename_plans_size
+        = (int64)new->length*SIZEOF(*(new->rename_plans));
+    new->rename_plans = malloc2(new->rename_plans_size);
+
+    for (int32 i = 0; i < new->length; i += 1) {
+        Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
+        rename_plan->execution_mode = BRN2_RENAME_NORMAL;
+        rename_plan->conflicting_owner_index = -1;
+        rename_plan->claimant_count = 0;
+    }
 
     for (int32 i = 0; i < new->length; i += 1) {
         FileName *newfile = new->files[i];
@@ -828,10 +843,17 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
             }
         }
 
-        if (!hash_insert_pre_calc_set(repeated_set,
+        if (!hash_insert_pre_calc_map(claimants_map,
                                       newfile->name, newfile->length,
-                                      newfile->hash, hashes_new[i])) {
+                                      newfile->hash, hashes_new[i], i)) {
             FileName *oldfile = old->files[i];
+            int32 first_claimant;
+
+            ASSERT(hash_lookup_pre_calc_map(claimants_map,
+                                             newfile->name, newfile->length,
+                                             newfile->hash, hashes_new[i],
+                                             &first_claimant));
+            new->rename_plans[first_claimant].claimant_count += 1;
             error("Error: " RED("'%s'") " repeats on line %d. ",
                   newfile->name, i + 1);
 
@@ -857,6 +879,8 @@ brn2_verify(FileList *new, FileList *old, struct Hash_set *repeated_set,
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
             }
+        } else {
+            new->rename_plans[i].claimant_count = 1;
         }
     }
 
@@ -1458,17 +1482,17 @@ main(void) {
 
         {
             uint32 main_capacity;
-            struct Hash_set *newlist_set;
+            struct Hash_map *newlist_map;
 
-            newlist_set = hash_create_set((uint32)new->length, "newlist_set");
+            newlist_map = hash_create_map((uint32)new->length, "newlist_map");
             new->indexes_size = (int64)new->length * SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
-            main_capacity = hash_capacity(newlist_set);
+            main_capacity = hash_capacity(newlist_map);
 
             brn2_create_hashes(new, main_capacity);
 
-            ASSERT(brn2_verify(new, old, newlist_set, new->indexes));
-            hash_destroy_set(newlist_set);
+            ASSERT(brn2_verify(new, old, newlist_map, new->indexes));
+            hash_destroy_map(newlist_map);
         }
 
         number_changes = brn2_get_number_changes(old, new);
