@@ -513,9 +513,7 @@ main(int argc, char **argv) {
             }
             brn2_list_from_file(new, brn2_buffer.name, false);
 
-            // TODO: Check new->length; old is already known to be nonempty.
-            if (old->length <= 0) {
-                // to please clang static analyzer
+            if (new->length <= 0) {
                 error("New list is empty. Exiting...\n");
                 fatal(EXIT_FAILURE);
             }
