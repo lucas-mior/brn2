@@ -97,3 +97,44 @@ check d a
 
 rm -f a b c d bxx
 rm -f "rename" "rename2"
+
+rm -rf "autosolve-validation"
+mkdir -p "autosolve-validation/expected"
+cd "autosolve-validation"
+
+printf "source a\n" > "expected/a"
+printf "source b\n" > "expected/b"
+cp "expected/a" "a"
+cp "expected/b" "b"
+printf "a\nb\n" > "rename"
+printf "b\nb\n" > "rename2"
+
+# The second target repeats the first target, but it is also the second
+# source's unchanged name. Since a and b differ, --autosolve must reject the
+# rename list without modifying either source.
+set +e
+set -x
+run_brn2_debug --fatal --autosolve -f "rename" -t "rename2"
+status=$?
+set +x
+set -e
+
+failed=0
+if [ "$status" -eq 0 ]; then
+    echo "--autosolve accepted unequal files with the same target"
+    failed=1
+fi
+if ! cmp -s "expected/a" "a"; then
+    echo "--autosolve modified source a during validation"
+    failed=1
+fi
+if ! cmp -s "expected/b" "b"; then
+    echo "--autosolve modified source b during validation"
+    failed=1
+fi
+if [ "$failed" -ne 0 ]; then
+    exit 1
+fi
+
+cd ..
+rm -rf "autosolve-validation"
