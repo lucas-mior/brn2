@@ -84,8 +84,6 @@ assert_file_contains(char *file, int32 line, char *func,
                    path, strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    // TODO: Search across read-buffer boundaries. A needle split between two
-    // fgets calls is present in the file but is reported as missing.
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
         if (strstr(buffer, needle)) {
             found = true;
@@ -618,8 +616,6 @@ a_double_more_equal(char *file, uint line, char *func,
     return;
 }
 
-// TODO: Fix the second operand order in the generated diagnostic. It prints
-// the second boolean value before the second variable name.
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL)                            \
 static void                                                            \
 a_bool_##MODE(char *file, uint line, char *func,                       \
