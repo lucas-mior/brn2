@@ -466,8 +466,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         }
         errno = 0;
     }
-    // TODO: Check ferror(lines); stdio errors need not leave errno set.
-    if (errno) {
+    if (errno || ferror(lines)) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
         fatal(EXIT_FAILURE);
     }
