@@ -171,6 +171,7 @@ arena_destroy(Arena *arena) {
 void *
 arena_allocate(int64 *size) {
     void *p;
+    int64 size_original = *size;
 
     if (arena_page_size == 0) {
         long aux;
@@ -181,20 +182,18 @@ arena_allocate(int64 *size) {
         arena_page_size = (int64)aux;
     }
 
-    // TODO: Round *size before mmap. The current code maps the unrounded
-    // length, then advertises and unmaps a larger rounded length.
     do {
         if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
+            *size = ALIGN_POWER_OF_2(*size, SIZEMB(2));
             p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
                      MAP_ANON | MAP_PRIVATE | FLAGS_HUGE_PAGES, -1, 0);
             if (p != MAP_FAILED) {
-                *size = ALIGN_POWER_OF_2(*size, SIZEMB(2));
                 break;
             }
         }
+        *size = ALIGN_POWER_OF_2(size_original, arena_page_size);
         p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
                  MAP_ANON | MAP_PRIVATE, -1, 0);
-        *size = ALIGN_POWER_OF_2(*size, arena_page_size);
     } while (0);
 
     if (p == MAP_FAILED) {
