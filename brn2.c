@@ -920,10 +920,10 @@ brn2_execute2(FileList *old, FileList *new, struct Hash_map *oldlist_map,
                                          oldname, oldlen, oldhash, oldindex)) {
                 *number_renames += 1;
             }
-            // TODO: When !found, counting the external path as another
-            // rename makes one requested implicit exchange fail final totals.
             if (hash_insert_pre_calc_set(names_renamed,
                                          newname, newlen, newhash, newindex)) {
+                // Note: this counts one extra rename if the new name was not
+                // supplied and --implicit option is on
                 *number_renames += 1;
             }
             print(GREEN("%s")" <-> "GREEN("%s")"\n", oldname, newname);
