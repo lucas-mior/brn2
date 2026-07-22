@@ -88,6 +88,7 @@ typedef struct FileName {
 enum Brn2RenameExecutionMode {
     BRN2_RENAME_NORMAL,
     BRN2_RENAME_REPLACE_EQUAL_TARGET,
+    BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER,
 };
 
 typedef struct Brn2RenamePlan {
@@ -135,6 +136,8 @@ bool brn2_verify(FileList *, FileList *, struct Hash_map *,
 int32 brn2_get_number_changes(FileList *, FileList *);
 void brn2_free_list(FileList *);
 void brn2_print_list(FileList *);
+void brn2_execute(FileList *, FileList *,
+                  struct Hash_map *, struct Hash_set *, int32 *);
 void brn2_execute2(FileList *, FileList *,
                    struct Hash_map *, struct Hash_set *,
                    int32, int32 *);
