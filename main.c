@@ -156,6 +156,7 @@ main(int argc, char **argv) {
         case '?':
             brn2_usage(stderr);
         case 'c':
+            // TODO: Remove or document -c; it is accepted but does nothing.
             break;
         case 'e':
             brn2_options_implicit = false;
@@ -204,6 +205,8 @@ main(int argc, char **argv) {
     old = &old_stack;
     new = &new_stack;
 
+    // TODO: Finalize nthreads before creating arenas. Reducing it later
+    // leaves old-list allocations in arenas omitted from reset and cleanup.
     for (int32 i = 0; i < nthreads; i += 1) {
         char buffer_old[256];
         char buffer_new[256];
@@ -283,6 +286,7 @@ main(int argc, char **argv) {
         old->files
             = realloc2(old->files,
                        length_before, old->length, SIZEOF(*(old->files)));
+        // TODO: Update old->capacity after shrinking this allocation.
     }
 
     if (brn2_options_sort) {
@@ -317,6 +321,7 @@ main(int argc, char **argv) {
                   brn2_buffer.name, strerror(errno));
             fatal(EXIT_FAILURE);
         }
+        // TODO: Register cleanup now; failures below leave this temp file.
 
         if (brn2_options_vim_split) {
             SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2.old.XXXXXX");
@@ -327,6 +332,8 @@ main(int argc, char **argv) {
             }
         }
 
+        // TODO: Filter and compact old before building this map. Removed
+        // entries leave stale values and may change precomputed-index capacity.
         oldlist_map = hash_create_map((uint32)old->length, "oldlist_map");
         capacity_set = hash_capacity(oldlist_map);
         old->indexes_size = old->length*SIZEOF(*(old->indexes));
@@ -339,6 +346,7 @@ main(int argc, char **argv) {
             bool contains_newline;
 
             if ((contains_newline = memchr64(file->name, '\n', file->length))
+                // TODO: Store compacted index j, not original index i.
                 || !hash_insert_pre_calc_map(oldlist_map,
                                              file->name, file->length,
                                              file->hash, index, i)) {
@@ -456,12 +464,14 @@ main(int argc, char **argv) {
             }
             brn2_normalize_names(old, new);
 
+            // TODO: Pass the required table name; benchmark does not build.
             newlist_set = hash_create_set((uint32)new->length);
             main_capacity = hash_capacity(newlist_set);
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
             brn2_create_hashes(new, main_capacity);
             brn2_verify(new, old, newlist_set, new->indexes);
+            // TODO: Remove the extra argument; this function takes one.
             hash_print_summary_set(newlist_set, "newlist_set");
         }
 #else
@@ -477,6 +487,8 @@ main(int argc, char **argv) {
                 }
 
                 if (!freopen(tty_path, "r", stdin)) {
+                    // TODO: Abort here. Later prompts can otherwise loop
+                    // on EOF.
                     error("Error reopening stdin: %s.\n", strerror(errno));
                 }
             }
@@ -487,6 +499,8 @@ main(int argc, char **argv) {
                 status = util_command(LENGTH(args_edit), args_edit);
             }
 
+            // TODO: Treat every nonzero editor status as failure. execvp
+            // failures return a positive exit status and look successful here.
             if (status < 0) {
                 if (OS_WINDOWS) {
                     args_edit[0] = "Notepad.exe";
@@ -499,6 +513,7 @@ main(int argc, char **argv) {
             }
             brn2_list_from_file(new, brn2_buffer.name, false);
 
+            // TODO: Check new->length; old is already known to be nonempty.
             if (old->length <= 0) {
                 // to please clang static analyzer
                 error("New list is empty. Exiting...\n");
@@ -547,6 +562,7 @@ main(int argc, char **argv) {
 
 #if BRN2_BENCHMARK
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    // TODO: Define or replace brn2_timings; both benchmark calls fail to link.
     brn2_timings("before renames", t0, t1, old->length);
 #endif
 
@@ -579,6 +595,7 @@ main(int argc, char **argv) {
             error("Check your files.\n");
             fatal(EXIT_FAILURE);
         } else {
+            // TODO: Honor --quiet for the final summary too.
             printf("%d file%.*s renamed.\n", number_renames,
                    number_renames != 1, "s");
         }
