@@ -116,8 +116,6 @@ typedef struct Bucket {
 #endif
 } Bucket;
 
-// TODO: Struct `Map` is not typedef'd. Per your codebase rules ("do typedef
-// structs"), define it as `typedef struct Map { ... } Map;`.
 struct Map {
     char *name;
     int64 size;
@@ -252,9 +250,7 @@ CAT(hash_init_, HASH_TYPE)(struct Map *map, uint32 length, char *name) {
     map->slot_states = xmmap_commit(&slot_states_size);
     memset64(map->slot_states, 0, capacity*sizeof(*map->slot_states));
     map->capacity = capacity;
-    // TODO: Use an unsigned shift and reject unsupported powers. Shifting
-    // signed 1 into bit 31 is undefined behavior.
-    map->bitmask = (1 << power) - 1;
+    map->bitmask = (1u << power) - 1;
     map->size = array_size;
     map->slot_states_size = slot_states_size;
     map->length = 0;
@@ -768,8 +764,6 @@ CAT(hash_functions_sink_, HASH_TYPE)(void) {
 INLINE uint64
 hash_function(void *key, int32 key_length) {
     uint64 hash;
-    // TODO: Validate key and key_length in release builds. A negative length is
-    // converted to a huge size_t by rapidhash and causes out-of-bounds reads.
     if (DEBUGGING) {
         ASSERT_MORE(key_length, 0);
     }
