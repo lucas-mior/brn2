@@ -12,7 +12,7 @@
 #include "base_macros.h"
 #include "primitives.h"
 #include "rapidhash.h"
-#include "util.h"
+#include "cbase.h"
 
 static int64 memory_page_size = 0;
 

@@ -28,7 +28,7 @@
 #include <time.h>
 
 #include "rapidhash.h"
-#include "util.h"
+#include "cbase.h"
 #include "assert.c"
 #include "arena.c"
 

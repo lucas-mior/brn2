@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include "generic.c"
-#include "util.h"
+#include "cbase.h"
 #include "arena.c"
 
 #include "base_macros.h"
