@@ -68,7 +68,7 @@
 } while (0)
 
 #define ASSERT_FILE_CONTAINS(PATH, NEEDLE) \
-    assert_file_contains(__FILE__, __LINE__, (char *)__func__, \
+    assert_file_contains(__FILE__, __LINE__, FUNC__, \
                          PATH, NEEDLE)
 
 static void
@@ -103,11 +103,11 @@ assert_file_contains(char *file, int32 line, char *func,
 }
 
 #define ASSERT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
-    assert_contains(__FILE__, __LINE__, (char *)__func__, \
+    assert_contains(__FILE__, __LINE__, FUNC__, \
                     HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
 #define ASSERT_NOT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
-    assert_not_contains(__FILE__, __LINE__, (char *)__func__, \
+    assert_not_contains(__FILE__, __LINE__, FUNC__, \
                         HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
 static void
@@ -639,14 +639,14 @@ GENERATE_ASSERT_BOOLS(more_equal, >=)
 #undef GENERATE_ASSERT_BOOLS
 
 #define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
-    a_both_signed_##MODE(__FILE__, __LINE__, (char *)__func__,    \
+    a_both_signed_##MODE(__FILE__, __LINE__, FUNC__,    \
                          #VAR1, #VAR2,                            \
                          typename(TYPE1), typename(TYPE2),        \
                          typebits(TYPE1), typebits(TYPE2),        \
                          (llong)(VAR1), (llong)(VAR2))
 
 #define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)         \
-    a_signed_unsigned##MODE(__FILE__, __LINE__, (char *)__func__, \
+    a_signed_unsigned##MODE(__FILE__, __LINE__, FUNC__, \
                             #VAR1, #VAR2,                         \
                             typename(TYPE1), typename(TYPE2),     \
                             typebits(TYPE1), typebits(TYPE2),     \
@@ -692,14 +692,14 @@ _Generic((VAR2),                                                       \
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
-    a_both_unsigned_##MODE(__FILE__, __LINE__, (char *)__func__,    \
+    a_both_unsigned_##MODE(__FILE__, __LINE__, FUNC__,    \
                            #VAR1, #VAR2,                            \
                            typename(TYPE1), typename(TYPE2),        \
                            typebits(TYPE1), typebits(TYPE2),        \
                            (ullong)(VAR1), (ullong)(VAR2))
 
 #define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)           \
-    a_unsigned_signed_##MODE(__FILE__, __LINE__, (char *)__func__,  \
+    a_unsigned_signed_##MODE(__FILE__, __LINE__, FUNC__,  \
                              #VAR1, #VAR2,                          \
                              typename(TYPE1), typename(TYPE2),      \
                              typebits(TYPE1), typebits(TYPE2),      \
@@ -725,7 +725,7 @@ _Generic((VAR2),                                                         \
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
 
 #define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                      \
-    a_double_##MODE(__FILE__, __LINE__, (char *)__func__,                  \
+    a_double_##MODE(__FILE__, __LINE__, FUNC__,                  \
                      #VAR1, #VAR2,                                         \
                      typename(TYPE1), typename(TYPE2),                     \
                      typebits(TYPE1), typebits(TYPE2),                     \
@@ -753,7 +753,7 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE(void);
 
 #define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                  \
 _Generic((VAR2),                                               \
-    bool: a_bool_##MODE(__FILE__, __LINE__, (char *)__func__,  \
+    bool: a_bool_##MODE(__FILE__, __LINE__, FUNC__,  \
                         #VAR1, #VAR2,                          \
                         typename(TYPE1), typename(TYPE_BOOL),  \
                         typebits(TYPE1), typebits(TYPE_BOOL),  \
@@ -763,7 +763,7 @@ _Generic((VAR2),                                               \
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL(void);
 
 #define A_POINTERS(MODE, VAR1, VAR2)                           \
-    a_pointers_##MODE(__FILE__, __LINE__, (char *)__func__,    \
+    a_pointers_##MODE(__FILE__, __LINE__, FUNC__,    \
                       #VAR1, #VAR2,                            \
                       (void *)(uintptr_t)(VAR1),               \
                       (void *)(uintptr_t)(VAR2))
@@ -779,7 +779,7 @@ _Generic((VAR1),                                                        \
         default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP()    \
     ),                                                                  \
     char *: _Generic((VAR2),                                            \
-        char *: a_strings_##MODE(__FILE__, __LINE__, (char *)__func__,  \
+        char *: a_strings_##MODE(__FILE__, __LINE__, FUNC__,  \
                                  #VAR1, #VAR2,                          \
                                  (char *)(uintptr_t)(VAR1),             \
                                  (char *)(uintptr_t)(VAR2)),            \

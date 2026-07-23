@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include "generic.c"
-#include "util.c"
+#include "util.h"
 #include "arena.c"
 
 #include "base_macros.h"
@@ -335,6 +335,8 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 
 #if TESTING_xenums && !defined(TESTING_xenums_started)
 #define TESTING_xenums_started
+
+#include "util.c"
 
 #include "assert.c"
 
