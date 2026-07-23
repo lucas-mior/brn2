@@ -290,6 +290,12 @@ case "$target" in
 
     rm -f "${DESTDIR}${PREFIX}/bin/${program}"
     uninstall_opt "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
+    uninstall_opt "completions/${program}.bash" \
+        "${DESTDIR}${PREFIX}/share/bash-completion/completions/${program}"
+    uninstall_opt "completions/_${program}" \
+        "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${program}"
+    uninstall_opt "completions/${program}.fish" \
+        "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${program}.fish"
     uninstall_opt "etc" "${DESTDIR}/etc/${program}"
     uninstall_opt \
         "${program}.desktop" "${DESTDIR}/usr/share/applications/${program}.desktop"
@@ -306,6 +312,12 @@ case "$target" in
 
     install -Dm755 "$exe" "${DESTDIR}${PREFIX}/bin/${program}"
     install_opt -Dm644 "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
+    install_opt -Dm644 "completions/${program}.bash" \
+        "${DESTDIR}${PREFIX}/share/bash-completion/completions/${program}"
+    install_opt -Dm644 "completions/_${program}" \
+        "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${program}"
+    install_opt -Dm644 "completions/${program}.fish" \
+        "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${program}.fish"
     install_opt -dm755 "etc" "${DESTDIR}/etc/${program}"
     install_opt -Dm755 \
         "${program}.desktop" \

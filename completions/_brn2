@@ -1,0 +1,17 @@
+#compdef brn2
+
+_arguments -s -S \
+    '(-h --help)'{-h,--help}'[Display help and exit]' \
+    '(-v --verbose -q --quiet)'{-v,--verbose}'[Output messages]' \
+    '(-q --quiet -v --verbose)'{-q,--quiet}'[Suppress output messages]' \
+    '(-i --implicit -e --explicit)'{-i,--implicit}'[Allow renaming files not given in the file list]' \
+    '(-e --explicit -i --implicit)'{-e,--explicit}'[Only rename files given in the file list]' \
+    '(-F --fatal)'{-F,--fatal}'[Exit on first renaming error]' \
+    '(-a --autosolve)'{-a,--autosolve}'[Auto solve name conflicts for equal files]' \
+    '(-s --sort)'{-s,--sort}'[Disable sorting of the original list]' \
+    '(-V --vim-split)'{-V,--vim-split}'[Use vim in vertical split mode]' \
+    '(-d --dir)'{-d,--dir}'[Rename files in directory]:directory:_files -/' \
+    '(-f --file)'{-f,--file}'[Read filenames from file]:file:_files' \
+    '(-t --file-test)'{-t,--file-test}'[Read replacement filenames from file for tests]:file:_files' \
+    '--[End option parsing]' \
+    '*:file:_files'
