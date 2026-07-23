@@ -156,7 +156,7 @@ _Generic((SIZE), \
 #define π 3.14159265358979323846264338327950288
 
 #if !defined(__has_builtin)
-  #define __has_builtin(x) 0  // Compatibility with older/alternative compilers
+  #define __has_builtin(x) 0
 #endif
 
 #if __has_builtin(__builtin_unreachable)
@@ -167,10 +167,6 @@ _Generic((SIZE), \
   #define UNREACHABLE() do { } while(0)
 #endif
 
-#if CC_CLANG
-#define ENUM_UNDERLYING_TYPE_ : uint32
-#else
-#define ENUM_UNDERLYING_TYPE_
-#endif
+#define FUNC__ (char *)__func__
 
 #endif /* BASE_MACROS_H */

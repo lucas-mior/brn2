@@ -16,42 +16,7 @@
 
 static int64 memory_page_size = 0;
 
-#if !defined(ALIGNMENT)
-#define ALIGNMENT 16
-#endif
-
-#define MEMORY_PADDING ((int32)ALIGNMENT)
-
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_memory 1
-#elif !defined(TESTING_memory)
-#define TESTING_memory 0
-#endif
-
-#if TESTING_memory
-#define DEBUGGING_MEMORY 1
-#define MEMORY_CHECK_USE_AFTER_FREE 1
-#define MEMORY_CHECK_DOUBLE_FREE 1
-#endif
-
-#if !defined(MEMORY_CHECK_USE_AFTER_FREE)
-// this option makes every pointer leak and makes things extremely slow
-#define MEMORY_CHECK_USE_AFTER_FREE 0
-#endif
-
-#if MEMORY_CHECK_USE_AFTER_FREE
-// we are already leaking, might as well check double free
-#define MEMORY_CHECK_DOUBLE_FREE 1
-#endif
-
-#if !defined(MEMORY_CHECK_DOUBLE_FREE)
-// this option makes every pointer leak
-#define MEMORY_CHECK_DOUBLE_FREE 1
-#endif
-
-#if !defined(DEBUGGING_MEMORY)
-#define DEBUGGING_MEMORY DEBUGGING
-#endif
+#include "memory.h"
 
 typedef struct DebugAllocInfo {
     int64 size;
@@ -699,36 +664,6 @@ free2_(void *pointer, int64 size) {
     }
     return;
 }
-
-#if DEBUGGING_MEMORY
-#define malloc2_zero(size) \
-    malloc_debug(__FILE__, __LINE__, (char *)__func__, \
-                 size, true)
-#define malloc2(size) \
-    malloc_debug(__FILE__, __LINE__, (char *)__func__, \
-                 size, false)
-#define realloc2(old, old_capacity, new_capacity, obj_size) \
-    realloc_debug(__FILE__, __LINE__, (char *)__func__, \
-                  old, old_capacity, new_capacity, obj_size)
-#define realloc_flex(old, old_capacity, new_capacity, obj_size) \
-    realloc_flex_debug(__FILE__, __LINE__, (char *)__func__, \
-                       old, SIZEOF(*old), old_capacity, \
-                       new_capacity, obj_size)
-#define free2(pointer, size) \
-    free_debug(__FILE__, __LINE__, (char *)__func__, \
-               pointer, size)
-#else
-#define malloc2_zero(size) \
-    xmalloc(size, true)
-#define malloc2(size) \
-    xmalloc(size, false)
-#define realloc2(old, old_capacity, new_capacity, obj_size) \
-    realloc4(old, old_capacity, new_capacity, obj_size)
-#define realloc_flex(old, old_capacity, new_capacity, obj_size) \
-    xrealloc(old, SIZEOF(*old) + obj_size*new_capacity)
-#define free2(pointer, size) \
-    free2_(pointer, size)
-#endif
 
 #if OS_UNIX
 static void *
