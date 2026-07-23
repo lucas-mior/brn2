@@ -20,7 +20,7 @@
 
 #include "base_macros.h"
 #include "platform_detection.h"
-#include "util.h"
+#include "cbase.h"
 
 #define BYTE_POPED 0xDC
 #define BYTE_PUSHED_UNINITIALIZED 0xCD

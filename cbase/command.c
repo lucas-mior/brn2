@@ -24,7 +24,7 @@
 #define TESTING_command 0
 #endif
 
-#include "util.h"
+#include "cbase.h"
 #include "assert.c"
 
 #define ENUM_NAME CommandFlag
