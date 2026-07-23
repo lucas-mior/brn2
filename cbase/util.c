@@ -1612,7 +1612,7 @@ bytes_pretty(char *buffer, int64 raw) {
 }
 
 static void
-normalize(char *path, int32 *length) {
+normalize(char *restrict path, int32 *restrict length) {
     char *p;
     int64 off = 0;
 
@@ -2572,6 +2572,7 @@ command_run_capture(Command *command, char *cwd) {
             output = realloc2(output, old_cap, cap, SIZEOF(*output));
         }
 
+        errno = 0;
         if ((nread = read64(pipefd[0], output + len, cap - len - 1)) > 0) {
             len += nread;
             continue;
