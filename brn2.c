@@ -1105,8 +1105,7 @@ brn2_validate_execution_plan(
             }
             break;
         default:
-            error("Error: Invalid rename execution mode on line %d.\n",
-                  i + 1);
+            error("Error: Invalid rename execution mode on line %d.\n", i + 1);
             return false;
         }
     }
