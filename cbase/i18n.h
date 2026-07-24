@@ -4,6 +4,8 @@
 #if !defined(I18N_H)
 #define I18N_H
 
+#include "platform_detection.h"
+
 #if OS_LINUX
   #include <libintl.h>
   #include <locale.h>

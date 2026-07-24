@@ -4,8 +4,6 @@
 #if !defined(MEMORY_H)
 #define MEMORY_H
 
-#include <stdbool.h>
-
 #include "primitives.h"
 #include "base_macros.h"
 
@@ -14,6 +12,10 @@
 #endif
 
 #define MEMORY_PADDING ((int32)ALIGNMENT)
+
+#if !defined(TESTING_memory)
+#define TESTING_memory 0
+#endif
 
 #if TESTING_memory
 #define DEBUGGING_MEMORY 1

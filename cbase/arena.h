@@ -4,6 +4,8 @@
 #if !defined(ARENA_H)
 #define ARENA_H
 
+#include "primitives.h"
+
 typedef struct Arena {
     char *name;
     char *begin;
