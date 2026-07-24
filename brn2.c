@@ -34,6 +34,7 @@
 #define TESTING_brn2 0
 #endif
 
+#include "cbase.h"
 #include "brn2.h"
 
 #if OS_WINDOWS
