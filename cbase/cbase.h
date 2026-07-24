@@ -21,7 +21,6 @@
 #include <fcntl.h>
 #include <float.h>
 #include <limits.h>
-#include <poll.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdbool.h>
