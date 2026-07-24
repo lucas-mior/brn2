@@ -415,6 +415,8 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     char buffer[BRN2_PATH_MAX];
     int32 capacity = 128;
     FILE *lines;
+    bool close_lines = false;
+    bool read_failed = false;
     int32 line = 0;
 
     if (strequal(filename, "-")) {
@@ -424,6 +426,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
             error("Error opening '%s': %s.\n", filename, strerror(errno));
             fatal(EXIT_FAILURE);
         }
+        close_lines = true;
     }
 
     list->files = malloc2(capacity*SIZEOF(*(list->files)));
@@ -476,12 +479,15 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     }
     if (errno || ferror(lines)) {
         error("Error reading from %s: %s.\n", filename, strerror(errno));
-        fatal(EXIT_FAILURE);
+        read_failed = true;
     }
-    if (lines != stdin) {
+    if (close_lines) {
         if (fclose(lines) != 0) {
             error("Error closing file %s: %s.\n", filename, strerror(errno));
         }
+    }
+    if (read_failed) {
+        fatal(EXIT_FAILURE);
     }
     if (length == 0) {
         free2(list->files, list->capacity*SIZEOF(*list->files));
@@ -848,13 +854,10 @@ brn2_verify(
     free2(new->rename_plans, new->rename_plans_size);
     new->rename_plans_size
         = (int64)new->length*SIZEOF(*(new->rename_plans));
-    new->rename_plans = malloc2(new->rename_plans_size);
+    new->rename_plans = malloc2_zero(new->rename_plans_size);
 
     for (int32 i = 0; i < new->length; i += 1) {
-        Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
-        rename_plan->execution_mode = BRN2_RENAME_NORMAL;
-        rename_plan->conflicting_owner_index = -1;
-        rename_plan->claimant_count = 0;
+        new->rename_plans[i].conflicting_owner_index = -1;
     }
 
     for (int32 i = 0; i < new->length; i += 1) {
