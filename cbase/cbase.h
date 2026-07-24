@@ -174,13 +174,6 @@ void UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC(void);
 #define S_BSZ GENERIC_S_BSZ
 #endif
 
-#if !defined(MACRO_NAME)
-#define MACRO_NAME(X) #X
-#endif
-#if !defined(MACRO_VALUE)
-#define MACRO_VALUE(X) MACRO_NAME(X)
-#endif
-
 #define fprint(FP, ...) fprint_0((FP), __VA_ARGS__, (char *)0)
 #define snprint(BUF, BSZ, ...) snprint_0((BUF), (BSZ), __VA_ARGS__, (char *)0)
 #define print0(...) fprint_0(stdout, __VA_ARGS__, (char *)0)
@@ -200,8 +193,8 @@ void UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC(void);
     uint: "%u", \
     ulong: "%lu", \
     ullong: "%llu", \
-    float: "%." MACRO_VALUE(FLT_DIG) "g", \
-    double: "%." MACRO_VALUE(DBL_DIG) "g", \
+    float: "%." QUOTE(FLT_DIG) "g", \
+    double: "%." QUOTE(DBL_DIG) "g", \
     default: "%p" \
 ), (X))
 
