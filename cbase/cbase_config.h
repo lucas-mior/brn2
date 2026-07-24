@@ -58,8 +58,4 @@
 #define TESTING_xenums 0
 #endif
 
-#if TESTING
-#define CBASE_IMPLEMENT
-#endif
-
 #endif /* CBASE_CONFIG_H */
