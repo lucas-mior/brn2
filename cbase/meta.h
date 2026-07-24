@@ -4,6 +4,8 @@
 #if !defined(META_H)
 #define META_H
 
+#include "primitives.h"
+
 enum TokenKind {
     TOKEN_UNKNOWN,
     TOKEN_SPACE,
