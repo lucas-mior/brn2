@@ -170,14 +170,16 @@ _Generic((SIZE), \
 #define FUNC__ (char *)__func__
 #define FUNC FUNC__
 
-#if !defined(TRAP)
-#if defined(__GNUC__) || defined(__clang__)
-#define TRAP(...) __builtin_trap()
-#elif defined(_MSC_VER)
-#define TRAP(...) __debugbreak()
+#if TESTING
+  #define TRAP(...) raise(SIGILL)
 #else
-#define TRAP(...) *(int *)0 = 0
-#endif
+  #if defined(__GNUC__) || defined(__clang__)
+    #define TRAP(...) __builtin_trap()
+  #elif defined(_MSC_VER)
+    #define TRAP(...) __debugbreak()
+  #else
+    #define TRAP(...) *(int *)0 = 0
+  #endif
 #endif
 
 #endif /* BASE_MACROS_H */
