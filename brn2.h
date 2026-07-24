@@ -20,14 +20,12 @@
 #if !defined(BRN2_H)
 #define BRN2_H
 
+#include "cbase.h"
+
 #if defined(__WIN32__)
 #define BRN2_MAX_THREADS 1
-#include <windows.h>
 #else
 #define BRN2_MAX_THREADS 64
-#include <pthread.h>
-#include <sys/mman.h>
-#include <sys/wait.h>
 #endif
 
 #include <assert.h>
@@ -39,8 +37,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
-
-#include "cbase.h"
 
 #define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
