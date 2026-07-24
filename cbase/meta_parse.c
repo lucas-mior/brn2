@@ -1,15 +1,16 @@
 #if !defined(META_PARSE_C)
 #define META_PARSE_C
 
-#include "meta_tokenize.c"
-
 #define PARSE_INITIAL_LINE_CAPACITY 128
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_meta_parse 1
+#define CBASE_IMPLEMENT
 #elif !defined(TESTING_meta_parse)
 #define TESTING_meta_parse 0
 #endif
+
+#include "cbase.h"
 
 static void
 free_line(Line *line) {

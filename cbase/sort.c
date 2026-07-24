@@ -20,27 +20,14 @@
 
 #include <stdlib.h>
 
-#include "util.c"
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_sort 1
+#define CBASE_IMPLEMENT
 #elif !defined(TESTING_sort)
 #define TESTING_sort 0
 #endif
 
-#if !defined(SORT_COMPARE)
-#define SORT_COMPARE(A, B) compare_func(A, B)
-#endif
-
-#ifndef MAX_NTHREADS
-#define MAX_NTHREADS 64
-#endif
-
-typedef struct HeapNode {
-    void *value;
-    int32 p_index;
-    int32 unused;
-} HeapNode;
+#include "cbase.h"
 
 static void
 sort_shuffle(void *array, int64 n, int64 size) {

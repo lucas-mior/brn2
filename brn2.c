@@ -20,8 +20,6 @@
 #if !defined(BRN2_C)
 #define BRN2_C
 
-#include "brn2.h"
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -29,16 +27,14 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "util.c"
-#include "arena.c"
-#define SORT_COMPARE brn2_compare
-#include "sort.c"
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_brn2 1
+#define CBASE_IMPLEMENT
 #elif !defined(TESTING_brn2)
 #define TESTING_brn2 0
 #endif
+
+#include "brn2.h"
 
 #if OS_WINDOWS
 #include "windows_functions.c"
@@ -1387,7 +1383,6 @@ brn2_usage(FILE *stream) {
 
 #if TESTING_brn2
 #include <assert.h>
-#include "assert.c"
 #include "files.h"
 
 bool brn2_options_fatal = false;

@@ -17,15 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define CBASE_IMPLEMENT
 #include "brn2.h"
 
 #include "brn2.c"
-#include "util.c"
-#include "arena.c"
-
-#define MAX_THREADS BRN2_MAX_THREADS
-#define SORT_COMPARE brn2_compare
-#include "sort.c"
 
 bool brn2_options_fatal = false;
 bool brn2_options_implicit = false;

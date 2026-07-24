@@ -20,72 +20,150 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_command 1
+#define CBASE_IMPLEMENT
 #elif !defined(TESTING_command)
 #define TESTING_command 0
 #endif
 
 #include "cbase.h"
-#include "assert.c"
 
-#define ENUM_NAME CommandFlag
-#define ENUM_BITFLAGS 1
-#define ENUM_PREFIX_ COMMAND_FLAG_
-#define ENUM_FIELDS \
-    X(COMMAND_FLAG_CAPTURE_STDOUT)      \
-    X(COMMAND_FLAG_CAPTURE_STDERR)      \
-    X(COMMAND_FLAG_MERGE_STDERR)        \
-    X(COMMAND_FLAG_ASYNC)               \
-    X(COMMAND_FLAG_DETACHED)            \
-    X(COMMAND_FLAG_NEW_SESSION)         \
-    X(COMMAND_FLAG_NEW_PROCESS_GROUP)   \
-    X(COMMAND_FLAG_STDIN_TTY)           \
-    X(COMMAND_FLAG_CLOSE_STDIN)
-#include "xenums.c"
+static bool
+command_flag_token_equal(char *token, int32 token_len, char *name) {
+    int32 name_len = strlen32(name);
+    char *prefix = "COMMAND_FLAG_";
+    int32 prefix_len = strlen32(prefix);
 
-typedef struct CommandResult {
-    char *output;
-    char *stdout_output;
-    char *stderr_output;
+    if (STREQUAL(token, token_len, name, name_len)) {
+        return true;
+    }
+    if (!BEGINS_WITH(name, name_len, prefix, prefix_len)) {
+        return false;
+    }
+    return STREQUAL(token, token_len,
+                    name + prefix_len, name_len - prefix_len);
+}
 
-    int64 pid;
+static void
+COMMAND_FLAG_str_free(char *string) {
+    free2(string, strlen32(string) + 1);
+    return;
+}
 
-    int32 output_len;
-    int32 stdout_len;
-    int32 stderr_len;
-    int32 status;
-    int32 error_status;
-    int32 exit_status;
-    int32 term_signal;
-    int32 stdout_fd;
-    int32 stderr_fd;
+static char *
+COMMAND_FLAG_str(enum CommandFlag flags) {
+    StrBuilder result = {0};
+    enum CommandFlag values[] = {
+        COMMAND_FLAG_CAPTURE_STDOUT,
+        COMMAND_FLAG_CAPTURE_STDERR,
+        COMMAND_FLAG_MERGE_STDERR,
+        COMMAND_FLAG_ASYNC,
+        COMMAND_FLAG_DETACHED,
+        COMMAND_FLAG_NEW_SESSION,
+        COMMAND_FLAG_NEW_PROCESS_GROUP,
+        COMMAND_FLAG_STDIN_TTY,
+        COMMAND_FLAG_CLOSE_STDIN,
+    };
+    char *names[] = {
+        "COMMAND_FLAG_CAPTURE_STDOUT",
+        "COMMAND_FLAG_CAPTURE_STDERR",
+        "COMMAND_FLAG_MERGE_STDERR",
+        "COMMAND_FLAG_ASYNC",
+        "COMMAND_FLAG_DETACHED",
+        "COMMAND_FLAG_NEW_SESSION",
+        "COMMAND_FLAG_NEW_PROCESS_GROUP",
+        "COMMAND_FLAG_STDIN_TTY",
+        "COMMAND_FLAG_CLOSE_STDIN",
+    };
+    uint32 remaining = (uint32)flags;
 
-    bool exited;
-    bool signaled;
-    bool stdout_fd_open;
-    bool stderr_fd_open;
-} CommandResult;
+    if (flags == COMMAND_FLAG_NONE) {
+        return xstrdup("NONE");
+    }
 
-typedef struct Command {
-    char **argv;
-    char **env;
-    char *cwd;
+    for (int32 i = 0; i < LENGTH(values); i += 1) {
+        if ((remaining & (uint32)values[i]) == (uint32)values[i]) {
+            if (result.len > 0) {
+                SB_APPEND(&result, "|");
+            }
+            SB_APPEND(&result, names[i]);
+            remaining &= ~(uint32)values[i];
+        }
+    }
+    if (remaining != 0) {
+        error2("Error: command flags contain an invalid bit.\n");
+        TRAP();
+    }
+    return sb_steal_exact(&result, NULL);
+}
 
-    int32 *argvs_lens;
-    int32 *env_lens;
-    int32 cwd_len;
-    int32 argc;
-    int32 env_len;
-    int32 cap;
-    int32 env_cap;
-    int32 error_status;
+static enum CommandFlag
+COMMAND_FLAG_parse(char *string) {
+    enum CommandFlag result = COMMAND_FLAG_NONE;
+    enum CommandFlag values[] = {
+        COMMAND_FLAG_CAPTURE_STDOUT,
+        COMMAND_FLAG_CAPTURE_STDERR,
+        COMMAND_FLAG_MERGE_STDERR,
+        COMMAND_FLAG_ASYNC,
+        COMMAND_FLAG_DETACHED,
+        COMMAND_FLAG_NEW_SESSION,
+        COMMAND_FLAG_NEW_PROCESS_GROUP,
+        COMMAND_FLAG_STDIN_TTY,
+        COMMAND_FLAG_CLOSE_STDIN,
+    };
+    char *names[] = {
+        "COMMAND_FLAG_CAPTURE_STDOUT",
+        "COMMAND_FLAG_CAPTURE_STDERR",
+        "COMMAND_FLAG_MERGE_STDERR",
+        "COMMAND_FLAG_ASYNC",
+        "COMMAND_FLAG_DETACHED",
+        "COMMAND_FLAG_NEW_SESSION",
+        "COMMAND_FLAG_NEW_PROCESS_GROUP",
+        "COMMAND_FLAG_STDIN_TTY",
+        "COMMAND_FLAG_CLOSE_STDIN",
+    };
+    char *p = string;
 
-    CommandResult result;
-} Command;
+    if (p == NULL) {
+        return result;
+    }
+    while (*p != '\0') {
+        char *token;
+        int32 token_len;
+        bool matched = false;
 
-static void command_result_free(CommandResult *result);
-static char *command_str(Command *command, int32 *len);
-static void command_error_set(Command *command, int32 error_status);
-static bool command_wait(Command *command);
+        while ((*p == ' ') || (*p == '\t') || (*p == '\n')
+               || (*p == '\r') || (*p == '|') || (*p == '(')
+               || (*p == ')')) {
+            p += 1;
+        }
+        if (*p == '\0') {
+            break;
+        }
+        token = p;
+        while (is_ident_char(*p)) {
+            p += 1;
+        }
+        token_len = (int32)(p - token);
+        if (token_len <= 0) {
+            error2("Error: invalid command flag parse character '%c'.\n", *p);
+            TRAP();
+        }
+        if (command_flag_token_equal(token, token_len, "COMMAND_FLAG_NONE")) {
+            matched = true;
+        }
+        for (int32 i = 0; (i < LENGTH(values)) && !matched; i += 1) {
+            if (command_flag_token_equal(token, token_len, names[i])) {
+                result |= values[i];
+                matched = true;
+            }
+        }
+        if (!matched) {
+            error2("Error: invalid command flag '%.*s'.\n", token_len, token);
+            TRAP();
+        }
+    }
+    return result;
+}
 
 static void
 command_result_init(CommandResult *result) {
@@ -705,12 +783,6 @@ command_push(Command *command, char *argument) {
     return;
 }
 
-#define COMMAND_PUSH_2(A, B) \
-        command_push(A, B)
-#define COMMAND_PUSH_3(A, B, B_LEN) \
-        command_push_length(A, B, B_LEN)
-#define COMMAND_PUSH(...) SELECT_ON_NUM_ARGS(COMMAND_PUSH_, __VA_ARGS__)
-
 static void
 command_env_push_length(
     Command *command,
@@ -731,12 +803,6 @@ command_env_push(Command *command, char *assignment) {
     command_env_push_length(command, assignment, strlen32(assignment));
     return;
 }
-
-#define COMMAND_ENV_PUSH_2(A, B) \
-        command_env_push(A, B)
-#define COMMAND_ENV_PUSH_3(A, B, B_LEN) \
-        command_env_push_length(A, B, B_LEN)
-#define COMMAND_ENV_PUSH(...) SELECT_ON_NUM_ARGS(COMMAND_ENV_PUSH_, __VA_ARGS__)
 
 static void
 command_push_split(Command *command, char *arguments, char *delimiters) {
@@ -910,10 +976,7 @@ command_env_printf(Command *command, char *fmt, ...) {
     return;
 }
 
-
 #if TESTING_command
-#include "util.c"
-#include "assert.c"
 
 int
 main(int argc, char **argv) {

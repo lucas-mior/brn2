@@ -19,9 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "generic.c"
-#include "cbase.h"
-#include "arena.c"
 
 #include "base_macros.h"
 
@@ -41,10 +38,13 @@
 #endif
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-  #define TESTING_xenums 1
+#define TESTING_xenums 1
+#define CBASE_IMPLEMENT
 #elif !defined(TESTING_xenums)
-  #define TESTING_xenums 0
+#define TESTING_xenums 0
 #endif
+
+#include "cbase.h"
 
 #if TESTING_xenums && !defined(ENUM_NAME)
 #define ENUM_NAME TestFlags
@@ -56,7 +56,8 @@
     X(TEST_FLAGS_EXEC)
 #endif
 
-#if !defined(__INCLUDE_LEVEL__) || (__INCLUDE_LEVEL__ >= 1) || (TESTING_xenums == 0)
+#if !defined(__INCLUDE_LEVEL__) || (__INCLUDE_LEVEL__ >= 1) \
+    || (TESTING_xenums == 0)
   #if !defined(ENUM_NAME)
     #error "ENUM_NAME is not defined"
   #endif
@@ -108,7 +109,7 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
     #define X(...)            SELECT_ON_NUM_ARGS(XENUM_DEF_, __VA_ARGS__)
 
 #if ENUM_BITFLAGS
-	CAT(ENUM_PREFIX_, NONE) = 0,
+    CAT(ENUM_PREFIX_, NONE) = 0,
 #endif
     ENUM_FIELDS
 
@@ -297,7 +298,8 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
             }
         #define XENUM_PARSE_1(e)    XENUM_PARSE_ONE(e)
         #define XENUM_PARSE_2(e, v) XENUM_PARSE_ONE(e)
-        #define X(...)              SELECT_ON_NUM_ARGS(XENUM_PARSE_, __VA_ARGS__)
+        #define X(...) \
+            SELECT_ON_NUM_ARGS(XENUM_PARSE_, __VA_ARGS__)
 
         ENUM_FIELDS
 
@@ -336,9 +338,7 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #if TESTING_xenums && !defined(TESTING_xenums_started)
 #define TESTING_xenums_started
 
-#include "util.c"
 
-#include "assert.c"
 
 #define ENUM_NAME TestNormal
 #define ENUM_PREFIX_ TEST_NORMAL_
@@ -392,9 +392,11 @@ main(void) {
     ASSERT_EQUAL(s, "TEST_NORMAL_CHERRY");
     TEST_NORMAL_str_free(s);
 
-    ASSERT_EQUAL((uint32)TEST_NORMAL_parse("TEST_NORMAL_APPLE"), TEST_NORMAL_APPLE);
+    ASSERT_EQUAL((uint32)TEST_NORMAL_parse("TEST_NORMAL_APPLE"),
+                 TEST_NORMAL_APPLE);
     ASSERT_EQUAL((uint32)TEST_NORMAL_parse("BANANA"), TEST_NORMAL_BANANA);
-    ASSERT_EQUAL((uint32)TEST_NORMAL_parse("TEST_NORMAL_CHERRY"), TEST_NORMAL_CHERRY);
+    ASSERT_EQUAL((uint32)TEST_NORMAL_parse("TEST_NORMAL_CHERRY"),
+                 TEST_NORMAL_CHERRY);
 
     s = TEST_NORMAL_str(999);
     ASSERT_EQUAL(s, "Invalid enum value");
