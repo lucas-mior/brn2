@@ -77,21 +77,6 @@
 #include <windows.h>
 #endif
 
-#if OS_WINDOWS || OS_MAC
-
-#if CC_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreserved-macro-identifier"
-#endif
-
-#undef _GNU_SOURCE
-
-#if CC_CLANG
-#pragma clang diagnostic pop
-#endif
-
-#endif
-
 #if OS_UNIX
 #include <sys/mman.h>
 #include <sys/wait.h>
