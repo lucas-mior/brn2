@@ -371,9 +371,7 @@ command_start(Command *command, enum CommandFlag flags) {
         fatal(EXIT_FAILURE);
     case 0:
         if (flags & COMMAND_FLAG_DETACHED) {
-            pid_t detached_pid;
-
-            switch (detached_pid = fork()) {
+            switch (fork()) {
             case -1:
                 error("Error forking detached child: %s.\n", strerror(errno));
                 _exit(127);
