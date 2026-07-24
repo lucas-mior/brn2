@@ -78,18 +78,15 @@ handler_segv(int unused) {
 }
 
 static int32
-main_command_run(int32 argc, char **argv) {
-    Command command = {0};
+main_command_run(Command *command) {
     int32 status = -1;
 
-    command_push_array(&command, argc, argv);
-    if (command_run(&command, COMMAND_FLAG_STDIN_TTY)) {
-        status = command.result.status;
-        if (!command.result.exited) {
+    if (command_run(command, COMMAND_FLAG_STDIN_TTY)) {
+        status = command->result.status;
+        if (!command->result.exited) {
             status = -1;
         }
     }
-    command_free(&command);
     return status;
 }
 
@@ -412,43 +409,20 @@ main(int argc, char **argv) {
     }
 
     {
-        char *args_edit[] = {
-            editor,
-            brn2_buffer.name,
-            NULL,
-        };
-        char *args_vim_split[] = {
-            "vim",
-            "-O",
-            brn2_buffer_old.name,
-            brn2_buffer.name,
-            "-c",
-            "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
-            "-c",
-            "wincmd l | set scrollbind cursorbind",
-            "-c",
-            " | au QuitPre */brn2.* quitall",
-            NULL,
-        };
-        char *args_shuf[] = {
-            "shuf",
-            brn2_buffer.name,
-            "-o",
-            brn2_buffer.name,
-            NULL,
-        };
-
-        (void)args_edit;
-        (void)args_vim_split;
-        (void)args_shuf;
-
 #if BRN2_BENCHMARK
         {
             char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
-            main_command_run(LENGTH(args_shuf), args_shuf);
+            Command command = {0};
+
+            command_push(&command, "shuf");
+            command_push(&command, brn2_buffer.name);
+            command_push(&command, "-o");
+            command_push(&command, brn2_buffer.name);
+            main_command_run(&command);
+            command_free(&command);
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             srand(42);
@@ -499,20 +473,44 @@ main(int argc, char **argv) {
                     }
                 }
 
-                if (brn2_options_vim_split) {
-                    status = main_command_run(LENGTH(args_vim_split),
-                                             args_vim_split);
-                } else {
-                    status = main_command_run(LENGTH(args_edit), args_edit);
+                {
+                    Command command = {0};
+
+                    if (brn2_options_vim_split) {
+                        command_push(&command, "vim");
+                        command_push(&command, "-O");
+                        command_push(&command, brn2_buffer_old.name);
+                        command_push(&command, brn2_buffer.name);
+                        command_push(&command, "-c");
+                        command_push(&command,
+                                     "wincmd h | set nomodifiable "
+                                     "scrollbind cursorbind cursorline");
+                        command_push(&command, "-c");
+                        command_push(&command,
+                                     "wincmd l | set scrollbind cursorbind");
+                        command_push(&command, "-c");
+                        command_push(&command,
+                                     " | au QuitPre */brn2.* quitall");
+                    } else {
+                        command_push(&command, editor);
+                        command_push(&command, brn2_buffer.name);
+                    }
+
+                    status = main_command_run(&command);
+                    command_free(&command);
                 }
 
                 if (status != 0) {
                     if (OS_WINDOWS) {
-                        args_edit[0] = "Notepad.exe";
-                        if (main_command_run(LENGTH(args_edit),
-                                             args_edit) < 0) {
+                        Command command = {0};
+
+                        command_push(&command, "Notepad.exe");
+                        command_push(&command, brn2_buffer.name);
+                        if (main_command_run(&command) < 0) {
+                            command_free(&command);
                             fatal(EXIT_FAILURE);
                         }
+                        command_free(&command);
                     } else {
                         fatal(EXIT_FAILURE);
                     }
