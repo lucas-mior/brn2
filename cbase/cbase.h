@@ -98,8 +98,6 @@
 #include "base_macros.h"
 #include "i18n.h"
 #include "memory.h"
-#include <stdbool.h>
-#include <stdio.h>
 
 #include "primitives.h"
 
