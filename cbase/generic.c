@@ -27,7 +27,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_generic 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_generic)
 #define TESTING_generic 0
 #endif

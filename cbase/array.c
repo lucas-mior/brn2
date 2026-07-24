@@ -3,7 +3,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_array 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_array)
 #define TESTING_array 0
 #endif

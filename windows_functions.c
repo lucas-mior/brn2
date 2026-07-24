@@ -20,7 +20,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_windows_functions 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_windows_functions)
 #define TESTING_windows_functions 0
 #endif

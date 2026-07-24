@@ -6,7 +6,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_meta_generate 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_meta_generate)
 #define TESTING_meta_generate 0
 #endif

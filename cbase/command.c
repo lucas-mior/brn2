@@ -20,7 +20,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_command 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_command)
 #define TESTING_command 0
 #endif
