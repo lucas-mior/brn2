@@ -77,6 +77,22 @@ handler_segv(int unused) {
     fatal(EXIT_FAILURE);
 }
 
+static int32
+main_command_run(int32 argc, char **argv) {
+    Command command = {0};
+    int32 status = -1;
+
+    command_push_array(&command, argc, argv);
+    if (command_run(&command, COMMAND_FLAG_STDIN_TTY)) {
+        status = command.result.status;
+        if (!command.result.exited) {
+            status = -1;
+        }
+    }
+    command_free(&command);
+    return status;
+}
+
 static Arena *
 xarena_create(int64 size, char *name) {
     Arena *arena;
@@ -432,7 +448,7 @@ main(int argc, char **argv) {
                              "abcdefghijklmnopqrstuvwxyz"
                              "!@#$%&*()[]-=_+<>,"
                              "0123456789";
-            util_command(LENGTH(args_shuf), args_shuf);
+            main_command_run(LENGTH(args_shuf), args_shuf);
             brn2_list_from_file(new, brn2_buffer.name, false);
 
             srand(42);
@@ -484,16 +500,17 @@ main(int argc, char **argv) {
                 }
 
                 if (brn2_options_vim_split) {
-                    status = util_command(LENGTH(args_vim_split),
-                                          args_vim_split);
+                    status = main_command_run(LENGTH(args_vim_split),
+                                             args_vim_split);
                 } else {
-                    status = util_command(LENGTH(args_edit), args_edit);
+                    status = main_command_run(LENGTH(args_edit), args_edit);
                 }
 
                 if (status != 0) {
                     if (OS_WINDOWS) {
                         args_edit[0] = "Notepad.exe";
-                        if (util_command(LENGTH(args_edit), args_edit) < 0) {
+                        if (main_command_run(LENGTH(args_edit),
+                                             args_edit) < 0) {
                             fatal(EXIT_FAILURE);
                         }
                     } else {
