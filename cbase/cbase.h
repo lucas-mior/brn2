@@ -83,11 +83,11 @@
 #include <limits.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
@@ -1355,11 +1355,6 @@ static int32 utf8_next_position(char *, int32, int32);
 static int32 utf8_suffix_width_position(char *, int32, int32);
 static int32 utf8_validate(uint32 *, int32);
 static int32 utf8_width(char *, int32);
-
-#include <dirent.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <time.h>
 
 #if !defined(MAX_FILES_COPY)
 #define MAX_FILES_COPY 256
