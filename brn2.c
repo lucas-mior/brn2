@@ -1178,7 +1178,6 @@ brn2_execute2(
     struct Hash_map *oldlist_map, struct Hash_set *names_renamed,
     int32 i, int32 *number_renames
 ) {
-    int32 renamed;
     int32 next_on_oldlist;
     bool found;
     bool newname_exists;
@@ -1235,8 +1234,7 @@ brn2_execute2(
         return;
     }
     if (newname_exists) {
-        renamed = brn2_rename_exchange(oldname, newname);
-        if (renamed >= 0) {
+        if (brn2_rename_exchange(oldname, newname) >= 0) {
             if (hash_insert_pre_calc_set(names_renamed,
                                          oldname, oldlen, oldhash, oldindex)) {
                 *number_renames += 1;
@@ -1853,8 +1851,7 @@ main(void) {
                 fatal(EXIT_FAILURE);
             }
 
-            if (fgets(renamed_buffer, SIZEOF(renamed_buffer), file)
-                == NULL) {
+            if (fgets(renamed_buffer, SIZEOF(renamed_buffer), file) == NULL) {
                 error("Error in fgets from %s: %s.\n", path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
