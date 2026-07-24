@@ -87,12 +87,8 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-unreachable-code-break"
 fi
 
-noop () {
-    return
-}
-
 if ! command xsel; then
-    xsel=noop
+    xsel=cat
 else
     xsel=xsel
 fi
