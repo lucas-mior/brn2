@@ -1279,8 +1279,7 @@ brn2_execute2(
             }
             return;
         } else {
-            error("Error swapping " RED("'%s'") " and " RED("'%s'")
-                  ": %s.\n",
+            error("Error swapping " RED("'%s'") " and " RED("'%s'") ": %s.\n",
                   oldname, newname, strerror(errno));
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
