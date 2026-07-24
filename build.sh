@@ -82,6 +82,9 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-assign-enum"
     CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
     CFLAGS="$CFLAGS -Wno-bad-function-cast"
+    CFLAGS="$CFLAGS -Wno-unreachable-code"
+    CFLAGS="$CFLAGS -Wno-unreachable-code-return"
+    CFLAGS="$CFLAGS -Wno-unreachable-code-break"
 fi
 
 noop () {

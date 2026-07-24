@@ -2,7 +2,6 @@
 #define UTIL_H
 
 #include <dirent.h>
-#include <poll.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <time.h>
@@ -23,12 +22,18 @@ typedef struct StrBuilderArray {
     int32 cap;
 } StrBuilderArray;
 
+#if OS_UNIX
 typedef struct UtilCopyFilesAsync {
     struct pollfd pipes[MAX_FILES_COPY];
     int dests[MAX_FILES_COPY];
     int32 nfds;
     int32 unused;
 } UtilCopyFilesAsync;
+
+static int32 util_copy_file_async(char *, char *, int *);
+static void util_copy_file_async_parsed(UtilCopyFilesAsync *);
+static void *util_copy_file_async_thread(void *);
+#endif
 
 static void error_impl(char *, int32, char *, char *, ...)
     __attribute__((format(printf, 4, 5)));
@@ -106,9 +111,6 @@ static double timediff(struct timespec, struct timespec);
 static void timezone_init(void);
 static int util_command(int, char **);
 static int util_command_launch(int, char **);
-static int32 util_copy_file_async(char *, char *, int *);
-static void util_copy_file_async_parsed(UtilCopyFilesAsync *);
-static void *util_copy_file_async_thread(void *);
 static int32 util_copy_file_sync(char *, char *);
 static void util_die_notify(char *, char *, ...);
 static bool util_equal_files(char *, char *);
@@ -187,9 +189,6 @@ _Generic((VAR), \
     ends_with(STRING, STRING_LEN, SUFFIX, SUFFIX_LEN)
 #define ENDS_WITH(...) SELECT_ON_NUM_ARGS(ENDS_WITH_, __VA_ARGS__)
 
-#if OS_WINDOWS || OS_MAC
-#define basename basename2
-#endif
 #define ITOA(BUFFER, NUM) itoa2(BUFFER, SIZEOF(BUFFER), NUM)
 
 #define SNPRINTF(BUFFER, FORMAT, ...) \
