@@ -170,6 +170,10 @@ _Generic((SIZE), \
 #define FUNC__ (char *)__func__
 #define FUNC FUNC__
 
+#if !defined(TESTING)
+#define TESTING 0
+#endif
+
 #if TESTING
   #define TRAP(...) raise(SIGILL)
 #else

@@ -639,6 +639,8 @@ assert_functions_sink(void) {
 #endif
 
 #if TESTING_assert
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 #include <setjmp.h>
 #include <signal.h>
 

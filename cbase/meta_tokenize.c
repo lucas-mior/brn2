@@ -786,6 +786,8 @@ meta_tokenize_sink(void) {
 #endif
 
 #if TESTING_meta_tokenize
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 static void
 test_assert_token(Token *token, enum TokenKind kind, char *text, int32 column) {

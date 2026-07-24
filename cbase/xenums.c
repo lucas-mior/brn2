@@ -337,8 +337,6 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #if TESTING_xenums && !defined(TESTING_xenums_started)
 #define TESTING_xenums_started
 
-
-
 #define ENUM_NAME TestNormal
 #define ENUM_PREFIX_ TEST_NORMAL_
 #define ENUM_BITFLAGS 0
@@ -404,6 +402,9 @@ main(void) {
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
 }
+
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 #endif /* TESTING_xenums && !defined(TESTING_xenums_started) */
 

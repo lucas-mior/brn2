@@ -365,6 +365,9 @@ lstat(const char *path, struct stat *statbuf) {
 }
 
 #if TESTING_windows_functions
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
 static bool
 contains(
     char *buffer,

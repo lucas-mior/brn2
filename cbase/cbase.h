@@ -15,6 +15,7 @@
 #define ERROR_NOTIFY 0
 #endif
 
+#include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>

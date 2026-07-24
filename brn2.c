@@ -1382,6 +1382,8 @@ brn2_usage(FILE *stream) {
 // flags: -lm
 
 #if TESTING_brn2
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 #include <assert.h>
 #include "files.h"
 

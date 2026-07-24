@@ -141,6 +141,8 @@ minmax_functions_sink(void) {
 #endif
 
 #if TESTING_minmax
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 int
 main(void) {
