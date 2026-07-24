@@ -29,7 +29,6 @@
 #include <ctype.h>
 
 #include "platform_detection.h"
-
 #include "base_macros.h"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
