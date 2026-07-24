@@ -9,6 +9,7 @@
 #include <float.h>
 #include <limits.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -21,9 +22,83 @@
 #define TESTING_assert 0
 #endif
 
-#include "cbase.h"
-
+#include "platform_detection.h"
 #include "primitives.h"
+#include "base_macros.h"
+#include "generic.c"
+
+#define ASSERT_FP_KIND_NONE    0
+#define ASSERT_FP_KIND_FLOAT   1
+#define ASSERT_FP_KIND_DOUBLE  2
+
+#define ASSERT_FP_KIND_EXPR(VAR) \
+_Generic((VAR), \
+    float:  ASSERT_FP_KIND_FLOAT,  \
+    double: ASSERT_FP_KIND_DOUBLE, \
+    default: ASSERT_FP_KIND_NONE   \
+)
+
+#if !defined(ASSERT_FLOAT_REL_TOL)
+#define ASSERT_FLOAT_REL_TOL   (16.0*(double)FLT_EPSILON)
+#endif
+#if !defined(ASSERT_DOUBLE_REL_TOL)
+#define ASSERT_DOUBLE_REL_TOL  (16.0*(double)DBL_EPSILON)
+#endif
+
+#if !defined(ASSERT_FLOAT_ABS_TOL)
+#define ASSERT_FLOAT_ABS_TOL   (16.0*(double)FLT_EPSILON)
+#endif
+#if !defined(ASSERT_DOUBLE_ABS_TOL)
+#define ASSERT_DOUBLE_ABS_TOL  (16.0*(double)DBL_EPSILON)
+#endif
+
+static void __attribute__((format(printf, 4, 5)))
+assert_error(char *file, int32 line, char *func, char *format, ...) {
+    va_list ap;
+
+    fprintf(stderr, "%s:%d:%s: ", file, line, func);
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    va_end(ap);
+    return;
+}
+
+static void __attribute__((noreturn))
+assert_fatal(void) {
+    if (DEBUGGING) {
+        TRAP();
+    }
+    exit(EXIT_FAILURE);
+}
+
+static int32
+assert_strlen32(char *string) {
+    size_t length = strlen(string);
+
+    if (length > INT32_MAX) {
+        fprintf(stderr, "Assertion string is too long.\n");
+        assert_fatal();
+    }
+    return (int32)length;
+}
+
+static void *
+assert_memmem(char *haystack, int32 haystack_len,
+              char *needle, int32 needle_len) {
+    int32 i;
+
+    if ((haystack_len <= 0) || (needle_len <= 0)
+        || (needle_len > haystack_len)) {
+        return NULL;
+    }
+
+    for (i = 0; i <= haystack_len - needle_len; i += 1) {
+        if (!memcmp(haystack + i, needle, (size_t)needle_len)) {
+            return haystack + i;
+        }
+    }
+    return NULL;
+}
 
 static void
 assert_file_contains(char *file, int32 line, char *func,
@@ -33,10 +108,10 @@ assert_file_contains(char *file, int32 line, char *func,
     bool found = false;
 
     if ((file_handle = fopen(path, "r")) == NULL) {
-        error_impl(file, line, func,
-                   "Error opening %s for reading: %s.\n",
-                   path, strerror(errno));
-        fatal(EXIT_FAILURE);
+        assert_error(file, line, func,
+                     "Error opening %s for reading: %s.\n",
+                     path, strerror(errno));
+        assert_fatal();
     }
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
         if (strstr(buffer, needle)) {
@@ -45,13 +120,13 @@ assert_file_contains(char *file, int32 line, char *func,
         }
     }
     if (fclose(file_handle)) {
-        error_impl(file, line, func,
-                   "Error closing %s: %s.\n", path, strerror(errno));
+        assert_error(file, line, func,
+                     "Error closing %s: %s.\n", path, strerror(errno));
     }
     if (!found) {
-        error_impl(file, line, func,
-                   "Needle '%s' not found in '%s'.\n", needle, path);
-        fatal(EXIT_FAILURE);
+        assert_error(file, line, func,
+                     "Needle '%s' not found in '%s'.\n", needle, path);
+        assert_fatal();
     }
     return;
 }
@@ -59,24 +134,24 @@ assert_file_contains(char *file, int32 line, char *func,
 static void
 assert_contains(char *file, int32 line, char *func,
                 char *haystack, int32 haystack_len, char *needle) {
-    int32 needle_len = strlen32(needle);
-    if (memmem64(haystack, haystack_len, needle, needle_len) == NULL) {
-        error_impl(file, line, func,
-                   "expected to find substring:\n%.*s\n--- in ---\n%.*s",
-                   needle_len, needle, haystack_len, haystack);
-        fatal(EXIT_FAILURE);
+    int32 needle_len = assert_strlen32(needle);
+    if (assert_memmem(haystack, haystack_len, needle, needle_len) == NULL) {
+        assert_error(file, line, func,
+                     "expected to find substring:\n%.*s\n--- in ---\n%.*s",
+                     needle_len, needle, haystack_len, haystack);
+        assert_fatal();
     }
 }
 
 static void
 assert_not_contains(char *file, int32 line, char *func,
                     char *haystack, int32 haystack_len, char *needle) {
-    int32 needle_len = strlen32(needle);
-    if (memmem64(haystack, haystack_len, needle, needle_len)) {
-        error_impl(file, line, func,
-                   "did not expect to find substring:\n%.*s\n--- in ---\n%.*s",
-                   needle_len, needle, haystack_len, haystack);
-        fatal(EXIT_FAILURE);
+    int32 needle_len = assert_strlen32(needle);
+    if (assert_memmem(haystack, haystack_len, needle, needle_len)) {
+        assert_error(file, line, func,
+                     "did not expect to find substring:\n%.*s\n--- in ---\n%.*s",
+                     needle_len, needle, haystack_len, haystack);
+        assert_fatal();
     }
 }
 
@@ -86,18 +161,18 @@ a_strings_##MODE(char *file, uint line, char *func,                      \
                  char *name1, char *name2,                               \
                  char *var1, char *var2) {                               \
     if (var1 == NULL) {                                                  \
-        error2("\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        error2("%s is NULL.\n", name1);                                   \
+        fprintf(stderr, "\nError in assertion at %s:%u:%s\n", file, line, func);  \
+        fprintf(stderr, "%s is NULL.\n", name1);                                   \
         TRAP();                                                          \
     }                                                                    \
     if (var2 == NULL) {                                                  \
-        error2("\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        error2("%s is NULL.\n", name2);                                   \
+        fprintf(stderr, "\nError in assertion at %s:%u:%s\n", file, line, func);  \
+        fprintf(stderr, "%s is NULL.\n", name2);                                   \
         TRAP();                                                          \
     }                                                                    \
     if (!(strcmp(var1, var2) SYMBOL 0)) {                                \
-        error2("\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        error2("%s = %s " #SYMBOL " %s = %s\n",                          \
+        fprintf(stderr, "\nError in assertion at %s:%u:%s\n", file, line, func);  \
+        fprintf(stderr, "%s = %s " #SYMBOL " %s = %s\n",                          \
                name1, var1, var2, name2);                                \
         TRAP();                                                          \
     }                                                                    \
@@ -122,8 +197,8 @@ a_pointers_##MODE(char *file, uint line, char *func,                     \
         if (!DEBUGGING) {                                                \
             UNREACHABLE();                                               \
         }                                                                \
-        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);    \
-        error2("%s = %p " #SYMBOL " %p = %s\n",                          \
+        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);    \
+        fprintf(stderr, "%s = %p " #SYMBOL " %p = %s\n",                          \
                name1, var1, var2, name2);                                \
         TRAP();                                                          \
     }                                                                    \
@@ -150,8 +225,8 @@ a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
         if (!DEBUGGING) {                              \
             UNREACHABLE(); \
         } \
-        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);       \
-        error2("[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
+        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);       \
+        fprintf(stderr, "[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
                type1, bits1, name1, var1, var2, name2, type2, bits2);       \
         TRAP();                                                             \
     }                                                                       \
@@ -200,8 +275,8 @@ a_signed_unsigned##MODE(char *file, uint line, char *func,              \
         if (!DEBUGGING) {                              \
             UNREACHABLE(); \
         } \
-        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);   \
-        error2("[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",     \
+        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);   \
+        fprintf(stderr, "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",     \
                type1, bits1, name1, var1, var2, name2, type2, bits2);   \
         TRAP();                                                         \
     }                                                                   \
@@ -228,8 +303,8 @@ a_unsigned_signed_##MODE(char *file, uint line, char *func,             \
         if (!DEBUGGING) {                              \
             UNREACHABLE(); \
         } \
-        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);   \
-        error2("[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",     \
+        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);   \
+        fprintf(stderr, "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",     \
                type1, bits1, name1, var1, var2, name2, type2, bits2);   \
         TRAP();                                                         \
     }                                                                   \
@@ -392,10 +467,10 @@ assert_double_failure(char *file, uint line, char *func,
     if (!DEBUGGING) {
         UNREACHABLE();
     }
-    error2("\nAssertion failed at %s:%u:%s\n", file, line, func);
-    error2("[%s%lld]%s = %f %s %f = %s[%s%lld]\n",
+    fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);
+    fprintf(stderr, "[%s%lld]%s = %f %s %f = %s[%s%lld]\n",
            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    error2("floating diff = %f, abs_tol = %f, rel_tol = %f\n",
+    fprintf(stderr, "floating diff = %f, abs_tol = %f, rel_tol = %f\n",
            diff, abs_tol, rel_tol);
     TRAP();
     exit(EXIT_FAILURE);
@@ -542,8 +617,8 @@ a_bool_##MODE(char *file, uint line, char *func,                       \
         if (var2) {                                                    \
             s2 = "true";                                               \
         }                                                              \
-        error2("\nAssertion failed at %s:%u:%s\n", file, line, func);  \
-        error2("[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",        \
+        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);  \
+        fprintf(stderr, "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",        \
                type1, bits1, name1, s1, s2, name2, type2, bits2);      \
         TRAP();                                                        \
     }                                                                  \
@@ -624,9 +699,210 @@ assert_functions_sink(void) {
 }
 #endif
 
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE(void);
+
+#define ASSERT(C) do {                                     \
+    if (!(C)) {                                            \
+        if (!DEBUGGING) {                                  \
+            UNREACHABLE();                       \
+        } else {                                           \
+            fprintf(stderr, "%s: Assertion '%s' failed at %s:%d\n", \
+                   __func__, #C, __FILE__, __LINE__);      \
+            TRAP();                                        \
+        }                                                  \
+    }                                                      \
+} while (0)
+
+#define ASSERT_FILE_CONTAINS(PATH, NEEDLE) \
+    assert_file_contains(__FILE__, __LINE__, FUNC__, \
+                         PATH, NEEDLE)
+
+#define ASSERT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
+    assert_contains(__FILE__, __LINE__, FUNC__, \
+                    HAYSTACK, HAYSTACK_LEN, NEEDLE)
+
+#define ASSERT_NOT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
+    assert_not_contains(__FILE__, __LINE__, FUNC__, \
+                        HAYSTACK, HAYSTACK_LEN, NEEDLE)
+
+#define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
+    a_both_signed_##MODE(__FILE__, __LINE__, FUNC__,    \
+                         #VAR1, #VAR2,                            \
+                         typename(TYPE1), typename(TYPE2),        \
+                         typebits(TYPE1), typebits(TYPE2),        \
+                         (llong)(VAR1), (llong)(VAR2))
+
+#define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)         \
+    a_signed_unsigned##MODE(__FILE__, __LINE__, FUNC__, \
+                            #VAR1, #VAR2,                         \
+                            typename(TYPE1), typename(TYPE2),     \
+                            typebits(TYPE1), typebits(TYPE2),     \
+                            (llong)(VAR1), (ullong)(VAR2))
+
+#if CHAR_MIN < 0
+#define A_CHAR_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1) \
+    A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR)
+
+#define A_CHAR_FOR_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
+    A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR)
+
+#define A_FIRST_CHAR(MODE, VAR1, VAR2) \
+    A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_CHAR)
+#else
+#define A_CHAR_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1) \
+    A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR)
+
+#define A_CHAR_FOR_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
+    A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR)
+
+#define A_FIRST_CHAR(MODE, VAR1, VAR2) \
+    A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_CHAR)
+#endif
+
+#define A_FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1)                        \
+_Generic((VAR2),                                                       \
+    char:    A_CHAR_FOR_SIGNED(MODE, VAR1, VAR2, TYPE1),               \
+    schar:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
+    short:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
+    int:     A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_INT    ), \
+    long:    A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_LONG   ), \
+    llong:   A_BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_LLONG  ), \
+    uchar:   A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
+    ushort:  A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ), \
+    uint:    A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
+    ulong:   A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
+    ullong:  A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
+    float:   A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ),  \
+    double:  A_BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ),  \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED()             \
+)
+#define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
+    a_both_unsigned_##MODE(__FILE__, __LINE__, FUNC__,    \
+                           #VAR1, #VAR2,                            \
+                           typename(TYPE1), typename(TYPE2),        \
+                           typebits(TYPE1), typebits(TYPE2),        \
+                           (ullong)(VAR1), (ullong)(VAR2))
+
+#define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)           \
+    a_unsigned_signed_##MODE(__FILE__, __LINE__, FUNC__,  \
+                             #VAR1, #VAR2,                          \
+                             typename(TYPE1), typename(TYPE2),      \
+                             typebits(TYPE1), typebits(TYPE2),      \
+                             (ullong)(VAR1), (llong)(VAR2))
+
+#define A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1)                        \
+_Generic((VAR2),                                                         \
+    char:    A_CHAR_FOR_UNSIGNED(MODE, VAR1, VAR2, TYPE1),               \
+    schar:   A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
+    short:   A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
+    int:     A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_INT    ), \
+    long:    A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_LONG   ), \
+    llong:   A_UNSIGNED_SIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_LLONG  ), \
+    uchar:   A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
+    ushort:  A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_USHORT ), \
+    uint:    A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_UINT   ), \
+    ulong:   A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
+    ullong:  A_BOTH_UNSIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
+    float:   A_BOTH_DOUBLE(MODE,       VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
+    double:  A_BOTH_DOUBLE(MODE,       VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED()             \
+)
+#define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                      \
+    a_double_##MODE(__FILE__, __LINE__, FUNC__,                  \
+                     #VAR1, #VAR2,                                         \
+                     typename(TYPE1), typename(TYPE2),                     \
+                     typebits(TYPE1), typebits(TYPE2),                     \
+                     ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2), \
+                     DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
+
+#define A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE1) \
+_Generic((VAR2), \
+    char:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR   ),     \
+    schar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ),     \
+    short:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ),     \
+    int:     A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ),     \
+    long:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ),     \
+    llong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ),     \
+    uchar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ),     \
+    ushort:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ),     \
+    uint:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ),     \
+    ulong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ),     \
+    ullong:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),     \
+    float:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ),     \
+    double:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),     \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()             \
+)
+#define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                  \
+_Generic((VAR2),                                               \
+    bool: a_bool_##MODE(__FILE__, __LINE__, FUNC__,  \
+                        #VAR1, #VAR2,                          \
+                        typename(TYPE1), typename(TYPE_BOOL),  \
+                        typebits(TYPE1), typebits(TYPE_BOOL),  \
+                        (VAR1), (VAR2)),                       \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL()       \
+)
+#define A_POINTERS(MODE, VAR1, VAR2)                           \
+    a_pointers_##MODE(__FILE__, __LINE__, FUNC__,    \
+                      #VAR1, #VAR2,                            \
+                      (void *)(uintptr_t)(VAR1),               \
+                      (void *)(uintptr_t)(VAR2))
+
+#define ASSERT_COMPARE(MODE, VAR1, VAR2)                                \
+_Generic((VAR1),                                                        \
+    void *: _Generic((VAR2),                                            \
+        char *: A_POINTERS(MODE, VAR1, VAR2),                           \
+        void *: A_POINTERS(MODE, VAR1, VAR2),                           \
+        default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP()    \
+    ),                                                                  \
+    char *: _Generic((VAR2),                                            \
+        char *: a_strings_##MODE(__FILE__, __LINE__, FUNC__,  \
+                                 #VAR1, #VAR2,                          \
+                                 (char *)(uintptr_t)(VAR1),             \
+                                 (char *)(uintptr_t)(VAR2)),            \
+        void *: A_POINTERS(MODE, VAR1, VAR2),                           \
+        default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP()    \
+    ),                                                                  \
+    char:    A_FIRST_CHAR(MODE,     VAR1, VAR2),                        \
+    schar:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ),          \
+    short:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ),          \
+    int:     A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_INT    ),          \
+    long:    A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LONG   ),          \
+    llong:   A_FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LLONG  ),          \
+    uchar:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR  ),          \
+    ushort:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_USHORT ),          \
+    uint:    A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ),          \
+    ulong:   A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ),          \
+    ullong:  A_FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ),          \
+    float:   A_FIRST_DOUBLE(MODE,   VAR1, VAR2, TYPE_FLOAT  ),          \
+    double:  A_FIRST_DOUBLE(MODE,   VAR1, VAR2, TYPE_DOUBLE ),          \
+    bool:    A_FIRST_BOOL(MODE,     VAR1, VAR2, TYPE_BOOL),             \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()              \
+)
+
+#define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal,      VAR1, VAR2)
+#define ASSERT_NOT_EQUAL(VAR1, VAR2)  ASSERT_COMPARE(not_equal,  VAR1, VAR2)
+#define ASSERT_LESS(VAR1, VAR2)       ASSERT_COMPARE(less,       VAR1, VAR2)
+#define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
+#define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more,       VAR1, VAR2)
+#define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
+
+#define ASSERT_NULL(VAR1) do {                                          \
+    void *p = VAR1;                                                     \
+    if (p != NULL) {                                                    \
+        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n",                      \
+               __FILE__, __LINE__, __func__);                           \
+        fprintf(stderr, "%s = %p == NULL\n", #VAR1, p);                          \
+        TRAP();                                                         \
+    }                                                                   \
+} while (0)
+
 #if TESTING_assert
-#define CBASE_IMPLEMENT
-#include "cbase.h"
 #include <setjmp.h>
 #include <signal.h>
 
@@ -817,12 +1093,12 @@ main(void) {
         signal_action.sa_flags = SA_RESTART;
 
         if (sigaction(SIGILL, &signal_action, NULL) != 0) {
-            error2("Error in sigaction: %s.\n", strerror(errno));
+            fprintf(stderr, "Error in sigaction: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
-        error2("\nThe following assertions are supposed to fail");
-        error2("\nand then check the 'assertion_failed' variable\n");
+        fprintf(stderr, "\nThe following assertions are supposed to fail");
+        fprintf(stderr, "\nand then check the 'assertion_failed' variable\n");
 
         if (sigsetjmp(assert_env, 1) == 0) {
             ASSERT_EQUAL(a, b);
