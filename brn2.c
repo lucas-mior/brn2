@@ -1248,8 +1248,7 @@ brn2_execute2(
                 // supplied and --implicit option is on
                 *number_renames += 1;
             }
-            print(GREEN("%s") " <-> " GREEN("%s") "\n",
-                       oldname, newname);
+            print(GREEN("%s") " <-> " GREEN("%s") "\n", oldname, newname);
 
             if (found) {
                 int32 next = next_on_oldlist;
