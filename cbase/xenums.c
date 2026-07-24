@@ -10,6 +10,22 @@
 #if CC_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc23-extensions"
+#pragma clang diagnostic ignored "-Wfixed-enum-extension"
+#endif
+
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#define TESTING_xenums 1
+#elif !defined(TESTING_xenums)
+#define TESTING_xenums 0
+#endif
+
+#if !defined(CBASE_H)
+  #if defined(ENUM_NAME) || defined(ENUM_PREFIX_) \
+      || defined(ENUM_FIELDS) || defined(ENUM_BITFLAGS) \
+      || defined(ENUM_UNDERLYING_TYPE)
+    #error "include cbase.h before configuring xenums.c"
+  #endif
+#include "cbase.h"
 #endif
 
 #if !defined(ENUM_UNDERLYING_TYPE)
@@ -21,14 +37,6 @@
 #else
   #define ENUM_UNDERLYING_TYPE_SPEC
 #endif
-
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_xenums 1
-#elif !defined(TESTING_xenums)
-#define TESTING_xenums 0
-#endif
-
-#include "cbase.h"
 
 #if TESTING_xenums && !defined(ENUM_NAME)
 #define ENUM_NAME TestFlags
@@ -319,7 +327,8 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #undef ENUM_UNDERLYING_TYPE
 #undef ENUM_UNDERLYING_TYPE_SPEC
 
-#if TESTING_xenums && !defined(TESTING_xenums_started)
+#if TESTING_xenums && !defined(TESTING_xenums_started) \
+    && !defined(XENUMS_NO_TESTS)
 #define TESTING_xenums_started
 
 #define ENUM_NAME TestNormal
@@ -391,7 +400,8 @@ main(void) {
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
-#endif /* TESTING_xenums && !defined(TESTING_xenums_started) */
+#endif /* TESTING_xenums && !defined(TESTING_xenums_started)
+          && !defined(XENUMS_NO_TESTS) */
 
 #if CC_CLANG
 #pragma clang diagnostic pop
