@@ -1023,15 +1023,12 @@ main(int argc, char **argv) {
         command_reset(&cmd);
         ASSERT_EQUAL(cmd.argc, 0);
 
-        {
-            char *argv_array[] = {"first", "second", NULL};
-
-            command_push_array(&cmd, LENGTH(argv_array), argv_array);
-            ASSERT_EQUAL(cmd.argc, 2);
-            ASSERT_EQUAL(cmd.argv[0], "first");
-            ASSERT_EQUAL(cmd.argv[1], "second");
-            ASSERT_EQUAL(cmd.argv[cmd.argc], NULL);
-        }
+        command_push(&cmd, "first");
+        command_push(&cmd, "second");
+        ASSERT_EQUAL(cmd.argc, 2);
+        ASSERT_EQUAL(cmd.argv[0], "first");
+        ASSERT_EQUAL(cmd.argv[1], "second");
+        ASSERT_EQUAL(cmd.argv[cmd.argc], NULL);
 
         command_reset(&cmd);
         ASSERT_EQUAL(cmd.argc, 0);
