@@ -4,14 +4,6 @@
 #if !defined(CBASE_H)
 #define CBASE_H
 
-#if !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-
-#if !defined(_DEFAULT_SOURCE)
-#define _DEFAULT_SOURCE
-#endif
-
 #if !defined(TESTING_array)
 #define TESTING_array 0
 #endif
