@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "generic.c"
+#include "cbase.h"
 
 #define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
@@ -63,8 +63,6 @@
 #if !defined(BRN2_BENCHMARK)
 #define BRN2_BENCHMARK 0
 #endif
-
-#include "arena.c"
 
 typedef struct File {
     char name[124];

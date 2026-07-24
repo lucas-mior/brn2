@@ -26,30 +26,14 @@
 #include <assert.h>
 #include <signal.h>
 
-#if !defined(error2)
-#define error2(...) fprintf(stderr, __VA_ARGS__)
-#endif
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_minmax 1
+#define CBASE_IMPLEMENT
 #elif !defined(TESTING_minmax)
 #define TESTING_minmax 0
 #endif
 
-#if 1 == TESTING_minmax
-#define TRAP(...) raise(SIGILL)
-#elif !defined(TRAP)
-#if defined(__GNUC__) || defined(__clang__)
-#define TRAP(...) __builtin_trap()
-#elif defined(_MSC_VER)
-#define TRAP(...) __debugbreak()
-#else
-#define TRAP(...) *(int *)0 = 0
-#endif
-#endif
-
-#include "generic.c"
-#include "assert.c"
+#include "cbase.h"
 
 #include "primitives.h"
 
@@ -138,113 +122,6 @@ GENERATE_COMPARE_DOUBLE(max, >)
 
 #undef GENERATE_COMPARE_DOUBLE
 
-#define BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    get_both_signed_##MODE((llong)(VAR1), (llong)(VAR2))
-
-#define SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    get_signed_unsigned_##MODE((llong)(VAR1), (ullong)(VAR2))
-
-#define FIRST_SIGNED(MODE, VAR1, VAR2, TYPE1) \
-_Generic((VAR2), \
-    schar:   BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
-    short:   BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
-    int:     BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_INT    ), \
-    long:    BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_LONG   ), \
-    llong:   BOTH_SIGNED(MODE,     VAR1, VAR2, TYPE1, TYPE_LLONG  ), \
-    uchar:   SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
-    ushort:  SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ), \
-    uint:    SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
-    ulong:   SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
-    ullong:  SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_SIGNED() \
-)
-void UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_SIGNED(void);
-
-#define BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    get_both_unsigned_##MODE((ullong)(VAR1), (ullong)(VAR2))
-
-#define UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    get_unsigned_signed_##MODE((ullong)(VAR1), (llong)(VAR2))
-
-#define FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE1) \
-_Generic((VAR2), \
-    schar:   UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
-    short:   UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
-    int:     UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ), \
-    long:    UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ), \
-    llong:   UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ), \
-    uchar:   BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
-    ushort:  BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_USHORT ), \
-    uint:    BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_UINT   ), \
-    ulong:   BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
-    ullong:  BOTH_UNSIGNED(MODE,   VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  BOTH_DOUBLE(MODE,    VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_UNSIGNED() \
-)
-void UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_UNSIGNED(void);
-
-#define BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2) \
-    get_double_##MODE(DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
-
-#define FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE1) \
-_Generic((VAR2), \
-    schar:   BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ), \
-    short:   BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ), \
-    int:     BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ), \
-    long:    BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ), \
-    llong:   BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ), \
-    uchar:   BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ), \
-    ushort:  BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ), \
-    uint:    BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ), \
-    ulong:   BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ), \
-    ullong:  BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ), \
-    float:   BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ), \
-    double:  BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_DOUBLE()        \
-)
-void UNSUPPORTED_TYPE_FOR_GENERIC_FIRST_DOUBLE(void);
-
-#define POINTERS(MODE, VAR1, VAR2) \
-    get_pointer_##MODE((void *)(uintptr_t)(VAR1), (void *)(uintptr_t)(VAR2))
-
-void UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE_VOIDP(void);
-void UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE(void);
-
-#define MINMAX_COMPARE(MODE, VAR1, VAR2) \
-_Generic((VAR1), \
-    void *: _Generic((VAR2), \
-        char *: POINTERS(MODE, VAR1, VAR2), \
-        void *: POINTERS(MODE, VAR1, VAR2), \
-        default: UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE_VOIDP() \
-    ), \
-    schar:   FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ), \
-    short:   FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ), \
-    int:     FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_INT    ), \
-    long:    FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LONG   ), \
-    llong:   FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LLONG  ), \
-    uchar:   FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR  ), \
-    ushort:  FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_USHORT ), \
-    uint:    FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ), \
-    ulong:   FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ), \
-    ullong:  FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ), \
-    float:   FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ), \
-    double:  FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ), \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE() \
-)
-
-#if defined(MIN)
-#undef MIN
-#endif
-#if defined(MAX)
-#undef MAX
-#endif
-
-#define MIN(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
-#define MAX(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
-
 #if 0 == TESTING_minmax
 static inline void
 minmax_functions_sink(void) {
@@ -265,8 +142,6 @@ minmax_functions_sink(void) {
 #endif
 
 #if TESTING_minmax
-
-#include "util.c"
 
 int
 main(void) {

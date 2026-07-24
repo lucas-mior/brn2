@@ -1,6 +1,15 @@
 #if !defined(MEMORY_C)
 #define MEMORY_C
 
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#define TESTING_memory 1
+#define CBASE_IMPLEMENT
+#elif !defined(TESTING_memory)
+#define TESTING_memory 0
+#endif
+
+#include "cbase.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -12,7 +21,6 @@
 #include "base_macros.h"
 #include "primitives.h"
 #include "rapidhash.h"
-#include "cbase.h"
 
 static int64 memory_page_size = 0;
 
@@ -832,7 +840,6 @@ memory_functions_sink(void) {
 // flags: -lm
 #include <signal.h>
 #include <setjmp.h>
-#include "util.c"
 
 static sigjmp_buf test_jump_env;
 static bool caught_expected_fail = false;

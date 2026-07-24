@@ -18,7 +18,14 @@
 #if !defined(WINDOWS_FUNCTIONS_C)
 #define WINDOWS_FUNCTIONS_C
 
-#include "util.c"
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#define TESTING_windows_functions 1
+#define CBASE_IMPLEMENT
+#elif !defined(TESTING_windows_functions)
+#define TESTING_windows_functions 0
+#endif
+
+#include "cbase.h"
 
 #if !OS_WINDOWS
 #error "ONLY INCLUDE THIS FILE IF COMPILING FOR WINDOWS"
@@ -31,12 +38,6 @@
 
 #if !defined(S_IFLNK)
 #define S_IFLNK 0120000
-#endif
-
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_windows_functions 1
-#elif !defined(TESTING_windows_functions)
-#define TESTING_windows_functions 0
 #endif
 
 static void
