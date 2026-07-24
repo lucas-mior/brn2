@@ -2467,6 +2467,8 @@ util_functions_sink(void) {
 #endif
 
 #if TESTING_util
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 #define ENUM_NAME WeekDay
 #define ENUM_BITFLAGS 0

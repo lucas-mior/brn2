@@ -77,6 +77,9 @@ array_sink(void) {
 }
 
 #if TESTING_array
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
 int
 main(void) {
     array_sink();

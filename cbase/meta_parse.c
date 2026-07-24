@@ -123,6 +123,8 @@ parse_text(char *text, int32 text_len) {
 }
 
 #if TESTING_meta_parse
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 static void
 test_parse_c_text_splits_lines_and_tokens(void) {

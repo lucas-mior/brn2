@@ -295,6 +295,8 @@ c_emit_wrapped_expr(StrBuilder *out, char *indent, char *prefix, char *expr,
 }
 
 #if TESTING_meta_generate
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 static void
 test_c_string_literal(void) {

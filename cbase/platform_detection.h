@@ -72,6 +72,7 @@
 
 #if OS_WINDOWS
 #include <windows.h>
+#undef _GNU_SOURCE
 #endif
 
 #if OS_UNIX

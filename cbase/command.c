@@ -976,6 +976,8 @@ command_env_printf(Command *command, char *fmt, ...) {
 }
 
 #if TESTING_command
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 int
 main(int argc, char **argv) {

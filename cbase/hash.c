@@ -62,8 +62,7 @@ typedef struct CommonMap {
 
 #include "cbase.h"
 
-#if TESTING_hash && defined(__INCLUDE_LEVEL__) \
-    && (__INCLUDE_LEVEL__ == 0)
+#if 1 == TESTING_hash && !defined(TESTING_hash_started)
 #define HASH_KEY_TYPE char
 #define HASH_KEY_FORMATTER "%s"
 #define HASH_VALUE_TYPE int32
@@ -807,8 +806,7 @@ hash_expected_collisions(void *map) {
 
 #endif /* HASH_H2 */
 
-#if TESTING_hash && !defined(TESTING_hash_started) \
-    && defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#if TESTING_hash && !defined(TESTING_hash_started)
 #define TESTING_hash_started
 
 #if !OS_UNIX
@@ -1002,5 +1000,8 @@ main(void) {
 
     exit(EXIT_SUCCESS);
 }
+
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 #endif /* standalone hash tests */

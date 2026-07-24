@@ -176,6 +176,8 @@ sort_functions_sink(void) {
 #endif
 
 #if TESTING_sort
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 #define MAXI 10000
 static int32 possibleN[] = {31, 32, 33, 50};
