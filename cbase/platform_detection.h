@@ -72,6 +72,9 @@
 
 #if OS_WINDOWS
 #include <windows.h>
+#endif
+
+#if OS_WINDOWS || OS_MAC
 
 #if CC_CLANG
 #pragma clang diagnostic push
