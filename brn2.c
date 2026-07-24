@@ -1303,7 +1303,7 @@ brn2_execute2(
         return;
     }
 #endif
-    if ((renamed = rename(oldname, newname)) < 0) {
+    if (rename(oldname, newname) < 0) {
         error("Error renaming " RED("'%s'") " to " RED("'%s'")
               ": %s.\n",
               oldname, newname, strerror(errno));
