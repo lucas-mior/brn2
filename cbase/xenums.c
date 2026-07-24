@@ -39,7 +39,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_xenums 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_xenums)
 #define TESTING_xenums 0
 #endif

@@ -17,7 +17,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_hash 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_hash)
 #define TESTING_hash 0
 #endif

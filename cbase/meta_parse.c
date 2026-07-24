@@ -5,7 +5,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_meta_parse 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_meta_parse)
 #define TESTING_meta_parse 0
 #endif

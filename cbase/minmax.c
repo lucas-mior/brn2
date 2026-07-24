@@ -28,7 +28,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_minmax 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_minmax)
 #define TESTING_minmax 0
 #endif

@@ -3,7 +3,6 @@
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_meta_common 1
-#define CBASE_IMPLEMENT
 #elif !defined(TESTING_meta_common)
 #define TESTING_meta_common 0
 #endif
