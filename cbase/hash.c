@@ -49,9 +49,6 @@ INLINE uint32 hash_length(void *map);
 uint32 hash_expected_collisions(void *map);
 #endif
 
-#define HASH_PRINT_SUMMARY_map(MAP) hash_print_summary_map(MAP, QUOTE(MAP))
-#define HASH_PRINT_SUMMARY_set(MAP) hash_print_summary_set(MAP, QUOTE(MAP))
-
 struct CommonBucket;
 
 typedef struct CommonMap {
