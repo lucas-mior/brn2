@@ -376,19 +376,22 @@ _Generic((VAR), \
         continue; \
     }
 
-enum CommandFlag {
-    COMMAND_FLAG_NONE = 0,
-    COMMAND_FLAG_CAPTURE_STDOUT = 1 << 0,
-    COMMAND_FLAG_CAPTURE_STDERR = 1 << 1,
-    COMMAND_FLAG_MERGE_STDERR = 1 << 2,
-    COMMAND_FLAG_ASYNC = 1 << 3,
-    COMMAND_FLAG_DETACHED = 1 << 4,
-    COMMAND_FLAG_NEW_SESSION = 1 << 5,
-    COMMAND_FLAG_NEW_PROCESS_GROUP = 1 << 6,
-    COMMAND_FLAG_STDIN_TTY = 1 << 7,
-    COMMAND_FLAG_CLOSE_STDIN = 1 << 8,
-    COMMAND_FLAG_LAST,
-};
+#define ENUM_NAME CommandFlag
+#define ENUM_BITFLAGS 1
+#define ENUM_PREFIX_ COMMAND_FLAG_
+#define ENUM_FIELDS \
+    X(COMMAND_FLAG_CAPTURE_STDOUT)      \
+    X(COMMAND_FLAG_CAPTURE_STDERR)      \
+    X(COMMAND_FLAG_MERGE_STDERR)        \
+    X(COMMAND_FLAG_ASYNC)               \
+    X(COMMAND_FLAG_DETACHED)            \
+    X(COMMAND_FLAG_NEW_SESSION)         \
+    X(COMMAND_FLAG_NEW_PROCESS_GROUP)   \
+    X(COMMAND_FLAG_STDIN_TTY)           \
+    X(COMMAND_FLAG_CLOSE_STDIN)
+#define XENUMS_NO_TESTS 1
+#include "xenums.c"
+#undef XENUMS_NO_TESTS
 
 typedef struct CommandResult {
     char *output;
@@ -430,10 +433,6 @@ typedef struct Command {
     CommandResult result;
 } Command;
 
-static char *COMMAND_FLAG_str(enum CommandFlag);
-static void COMMAND_FLAG_str_free(char *);
-static enum CommandFlag COMMAND_FLAG_parse(char *);
-static bool command_flag_token_equal(char *, int32, char *);
 static void command_argv0_set(Command *, char *);
 static void command_child_env_apply(Command *);
 static void command_child_exec(
