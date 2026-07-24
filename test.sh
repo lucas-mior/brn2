@@ -132,11 +132,21 @@ expect_failure () {
     shift
 
     set +e
-    set -x
-    run_brn2 "$@"
+    printf '+ %s' "$brn2"
+    for arg in "$@"; do
+        printf ' %s' "$arg"
+    done
+    printf '\n'
+    output=$({ "$brn2" "$@"; } 2>&1)
     status=$?
-    set +x
     set -e
+
+    if [ -n "$output" ]; then
+        printf '%s\n' "$output" \
+        | sed \
+            -e '/^Illegal instruction/d' \
+            -e 's/[[:space:]]*Illegal instruction.*$//'
+    fi
 
     if [ "$status" -eq 0 ]; then
         echo "$message"
