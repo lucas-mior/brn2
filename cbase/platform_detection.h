@@ -72,7 +72,18 @@
 
 #if OS_WINDOWS
 #include <windows.h>
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-macro-identifier"
+#endif
+
 #undef _GNU_SOURCE
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
 #endif
 
 #if OS_UNIX
