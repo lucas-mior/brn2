@@ -973,11 +973,23 @@ main(int argc, char **argv) {
         command_reset(&cmd);
         ASSERT_EQUAL(cmd.argc, 0);
 
-        command_cwd_set(&cmd, "/tmp");
-        COMMAND_PUSH(&cmd, "pwd");
-        ASSERT(command_run_capture(&cmd, COMMAND_FLAG_CAPTURE_STDOUT));
-        ASSERT_EQUAL(cmd.result.stdout_output, "/tmp\n");
-        command_cwd_clear(&cmd);
+        {
+            char expected_cwd[PATH_MAX];
+            int32 expected_cwd_len;
+
+            ASSERT(realpath("/tmp", expected_cwd) != NULL);
+            expected_cwd_len = strlen32(expected_cwd);
+            ASSERT_LESS(expected_cwd_len + 1, SIZEOF(expected_cwd));
+            expected_cwd[expected_cwd_len] = '\n';
+            expected_cwd[expected_cwd_len + 1] = '\0';
+
+            command_cwd_set(&cmd, "/tmp");
+            COMMAND_PUSH(&cmd, "pwd");
+            COMMAND_PUSH(&cmd, "-P");
+            ASSERT(command_run_capture(&cmd, COMMAND_FLAG_CAPTURE_STDOUT));
+            ASSERT_EQUAL(cmd.result.stdout_output, expected_cwd);
+            command_cwd_clear(&cmd);
+        }
 
         command_reset(&cmd);
         ASSERT_EQUAL(cmd.argc, 0);
