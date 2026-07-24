@@ -36,6 +36,10 @@
 #include "cbase.h"
 #include "brn2.h"
 
+#if OS_LINUX
+#include <sys/syscall.h>
+#endif
+
 #if OS_WINDOWS
 #include "windows_functions.c"
 #endif
@@ -68,6 +72,22 @@ static void *brn2_threads_work_changes(Work *);
 static inline bool brn2_is_invalid_name(char *);
 static void brn2_slash_add(FileName *);
 static void brn2_list_from_lines(FileList *, char *, bool);
+
+#if OS_LINUX
+#if !defined(RENAME_EXCHANGE)
+#define RENAME_EXCHANGE (1 << 1)
+#endif
+
+static int32
+brn2_rename_exchange(const char *oldname, const char *newname) {
+    return (int32)syscall(SYS_renameat2,
+                          AT_FDCWD, oldname,
+                          AT_FDCWD, newname,
+                          RENAME_EXCHANGE);
+}
+
+#undef RENAME_EXCHANGE
+#endif
 
 #if OS_UNIX
 static pthread_mutex_t brn2_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -1217,7 +1237,7 @@ brn2_execute2(
                                      newindex, &next_on_oldlist);
     newname_exists = util_file_exists(newname);
 
-#if defined(_GNU_SOURCE)
+#if OS_LINUX
     if (newname_exists && !found && !brn2_options_implicit) {
         error("Error renaming " RED("'%s'") " to " RED("'%s'") ":\n",
               oldname, newname);
@@ -1231,8 +1251,7 @@ brn2_execute2(
         return;
     }
     if (newname_exists) {
-        renamed = renameat2(AT_FDCWD, oldname,
-                            AT_FDCWD, newname, RENAME_EXCHANGE);
+        renamed = brn2_rename_exchange(oldname, newname);
         if (renamed >= 0) {
             if (hash_insert_pre_calc_set(names_renamed,
                                          oldname, oldlen, oldhash, oldindex)) {

@@ -18,7 +18,7 @@
 #if !defined(I18N_H)
 #define I18N_H
 
-#if !OS_WINDOWS
+#if !OS_WINDOWS && !OS_MAC
   #include <libintl.h>
   #include <locale.h>
   
