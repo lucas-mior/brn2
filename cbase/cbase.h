@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL
+// Copyright (c) 2026 Lucas Mior
+
 #if !defined(CBASE_H)
 #define CBASE_H
 

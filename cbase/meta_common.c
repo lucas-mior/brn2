@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL
+// Copyright (c) 2026 Lucas Mior
+
 #if !defined(META_COMMON_C)
 #define META_COMMON_C
 
