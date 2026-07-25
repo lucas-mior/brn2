@@ -19,15 +19,9 @@ cross aarch64-linux-musl
 cross riscv64-linux-musl
 cross riscv64-linux-gnu
 cross x86_64-linux-musl
-cross x86_64-linux-muslx32
 cross aarch64-freebsd-none
 cross aarch64-netbsd-none
-cross arm-freebsd-eabihf
-cross arm-netbsd-eabi
-cross mips-netbsd-eabi
 cross powerpc64-freebsd-none
-# cross powerpc-freebsd-eabihf
-cross powerpc-netbsd-eabi
 cross riscv64-freebsd-none
 cross x86_64-freebsd-none
 cross x86_64-netbsd-none
