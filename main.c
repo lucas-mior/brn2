@@ -48,7 +48,7 @@ write_fatal(int32 fd, char *buffer, int64 size, int32 line) {
 
     if ((w = write64(fd, buffer, size)) != size) {
         error("Error writing %lld bytes to buffer (line %d)",
-              (llong)size, line);
+              size, line);
         if (w < 0) {
             error(": %s", strerror(errno));
         }
@@ -96,7 +96,7 @@ xarena_create(int64 size, char *name) {
 
     if ((arena = arena_create(size, name)) == NULL) {
         error("Error creating arena of size %lld: %s.\n",
-              (llong)size, arena_strerror(errno));
+              size, arena_strerror(errno));
         fatal(EXIT_FAILURE);
     }
     return arena;

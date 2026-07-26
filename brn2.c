@@ -307,7 +307,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     map_size += padding;
     if (ftruncate(fd, map_size) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n",
-              filename, (llong)map_size, strerror(errno));
+              filename, map_size, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
@@ -394,7 +394,7 @@ cleanup:
     munmap(map, (size_t)map_size);
     if (ftruncate(fd, map_size - padding) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n",
-              filename, (llong)map_size - padding, strerror(errno));
+              filename, map_size - padding, strerror(errno));
         fatal(EXIT_FAILURE);
     }
     XCLOSE(&fd);
@@ -1400,7 +1400,7 @@ brn2_print_list(FileList *list) {
     error("FileList = {\n");
     error(" arenas,\n");
     error(" indexes = %p\n", (void *)list->indexes);
-    error(" indexes_size = %lld\n", (llong)list->indexes_size);
+    error(" indexes_size = %lld\n", list->indexes_size);
     error(" length = %d\n", list->length);
 
     for (int32 i = 0; i < list->length; i += 1) {
