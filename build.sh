@@ -228,6 +228,7 @@ case "$target" in
     trace_on
     $CC $CPPFLAGS $CFLAGS main.c -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
     trace_off
+    exit
     ;;
 "uninstall")
     trace_on
