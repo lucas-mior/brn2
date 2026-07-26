@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "cbase.h"
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
