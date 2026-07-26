@@ -425,21 +425,23 @@ _Generic((VAR), \
 #undef XENUMS_NO_TESTS
 
 typedef struct CommandResult {
+    int64 pid;
+
     char *output;
     char *stdout_output;
     char *stderr_output;
 
-    int64 pid;
-
     int32 output_len;
     int32 stdout_len;
     int32 stderr_len;
+
+    int32 stdout_fd;
+    int32 stderr_fd;
+
     int32 status;
     int32 error_status;
     int32 exit_status;
     int32 term_signal;
-    int32 stdout_fd;
-    int32 stderr_fd;
 
     bool exited;
     bool signaled;
