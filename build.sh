@@ -231,7 +231,7 @@ install_opt () {
         install "$mode" "$file" "$dest"
     fi
     if [ -d "$file" ]; then
-        cp -rp "$file"/* "$DESTDIR/etc/$program/"
+        cp -rp "$file"/* "${DESTDIR}/${file}/${program}/"
     fi
 }
 
