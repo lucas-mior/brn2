@@ -12,18 +12,6 @@
 
 #include "cbase.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <errno.h>
-#include <pthread.h>
-
-#include "platform_detection.h"
-#include "base_macros.h"
-#include "primitives.h"
-#include "rapidhash.h"
-
 static int64 memory_page_size = 0;
 
 #include "memory.h"
