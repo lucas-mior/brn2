@@ -10,7 +10,7 @@
 #define TESTING_minmax 0
 #endif
 
-#include "cbase.h"
+#include "primitives.h"
 
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL) \
 static void * \
