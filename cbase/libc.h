@@ -46,9 +46,6 @@
 #undef MAX
 #endif
 
-#include "primitives.h"
-#include "base_macros.h"
-
 #if !defined(FLAGS_HUGE_PAGES)
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
 #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
