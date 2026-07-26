@@ -18,10 +18,6 @@
 
 #include "cbase.h"
 
-#if defined(__EMSCRIPTEN__)
-#include <emscripten/emscripten.h>
-#endif
-
 #if !TESTING_util
 static char *program;
 #else
