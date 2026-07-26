@@ -11,6 +11,7 @@
 #endif
 
 #include "primitives.h"
+#include "libc.h"
 
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL) \
 static void * \
