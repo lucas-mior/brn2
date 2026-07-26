@@ -222,6 +222,19 @@ else
     LDFLAGS="$LDFLAGS -lpthread"
 fi
 
+install_opt () {
+    mode="$1"
+    file="$2"
+    dest="$3"
+
+    if [ -e "$file" ]; then
+        install "$mode" "$file" "$dest"
+    fi
+    if [ -d "$file" ]; then
+        cp -rp "$file"/* "$DESTDIR/etc/$program/"
+    fi
+}
+
 case "$target" in
 "fast_feedback")
     trace_on
@@ -237,20 +250,17 @@ case "$target" in
     ;;
 "install")
     trace_on
+
     if [ ! -f "$program" ]; then
         $0 build
     fi
+
     install -Dm755 bin/${program}   ${DESTDIR}${PREFIX}/bin/${program}
-    install -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
-    if [ -d "etc" ]; then
-        install -dm755 "$DESTDIR/etc/$program"
-        cp -rp etc/* "$DESTDIR/etc/$program/"
-    fi
-    if [ -f "$program.desktop" ]; then
-        install -Dm755 \
-            "$program.desktop" \
-            "$DESTDIR/usr/share/applications/$program.desktop"
-    fi
+    install_opt -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
+    install_opt -dm755 "etc/" "$DESTDIR/etc/$program"
+    install_opt -Dm755
+        "$program.desktop" "$DESTDIR/usr/share/applications/$program.desktop"
+
     trace_off
     exit
     ;;
