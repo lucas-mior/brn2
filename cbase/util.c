@@ -10,9 +10,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-#include "platform_detection.h"
-#include "base_macros.h"
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_util 1
 #elif !defined(TESTING_util)

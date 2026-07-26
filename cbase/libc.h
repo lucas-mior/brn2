@@ -9,6 +9,7 @@
 #include <inttypes.h>
 #include <libgen.h>
 #include <limits.h>
+#include <math.h>
 #include <pthread.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -30,8 +31,6 @@
 #if OS_UNIX
 #include <sys/mman.h>
 #include <sys/wait.h>
-#include <fcntl.h>
-#include <pthread.h>
 #include <poll.h>
 #endif
 
@@ -41,8 +40,6 @@
 
 #if OS_MAC
 #include <sys/param.h>
-#undef MIN
-#undef MAX
 #endif
 
 #if !defined(FLAGS_HUGE_PAGES)
