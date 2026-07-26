@@ -30,7 +30,6 @@
 #if OS_UNIX
 #include <sys/mman.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <poll.h>
