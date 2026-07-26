@@ -229,9 +229,9 @@ install_opt () {
 
     if [ -e "$file" ]; then
         install "$mode" "$file" "$dest"
-    fi
-    if [ -d "$file" ]; then
-        cp -rp "$file"/* "${DESTDIR}/${file}/${program}/"
+        if [ -d "$file" ]; then
+            cp -rp "$file"/* "${DESTDIR}/${file}/${program}/"
+        fi
     fi
 }
 
@@ -258,7 +258,7 @@ case "$target" in
     install -Dm755 bin/${program}   ${DESTDIR}${PREFIX}/bin/${program}
     install_opt -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
     install_opt -dm755 "etc/" "$DESTDIR/etc/$program"
-    install_opt -Dm755
+    install_opt -Dm755 \
         "$program.desktop" "$DESTDIR/usr/share/applications/$program.desktop"
 
     trace_off
