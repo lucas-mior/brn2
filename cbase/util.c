@@ -4,12 +4,6 @@
 #if !defined(UTIL_C)
 #define UTIL_C
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_util 1
 #elif !defined(TESTING_util)
@@ -69,15 +63,6 @@ static time_t timezone_offset = 0;
 
 #define CLAMP_TYPE int64
 #include "clamp.h"
-
-#if DEBUGGING || TESTING_util
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wc11-extensions"
-#pragma clang diagnostic ignored "-Wformat"
-#pragma clang diagnostic ignored "-Wdouble-promotion"
-#endif
-
-#endif
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
@@ -2657,10 +2642,6 @@ main(int argc, char **argv) {
     exit(EXIT_SUCCESS);
 }
 
-#endif
-
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
 #endif
 
 #endif /* UTIL_C */
