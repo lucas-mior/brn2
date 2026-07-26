@@ -135,7 +135,7 @@ with_other () {
 
 case "$target" in
 "debug")
-    CFLAGS="$CFLAGS -g3 -fsanitize=undefined"
+    CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
@@ -159,7 +159,7 @@ case "$target" in
     CPPFLAGS="$CPPFLAGS $GNUSOURCE"
     ;;
 "test")
-    CFLAGS="$CFLAGS -g3 $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined -Wno-address"
+    CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined -Wno-address"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 "check")
@@ -269,10 +269,24 @@ case "$target" in
         fi
         name=$(echo "$name" | sed 's/\.c//')
         test_exe="/tmp/${name}_test"
+        cbase_obj="/tmp/${name}_cbase.o"
+
+        case "$src" in
+        "./cbase/cbase_main_separate_object.c")
+            separate_cbase=1
+            ;;
+        "./cbase/"*)
+            separate_cbase=0
+            ;;
+        *)
+            separate_cbase=1
+            ;;
+        esac
 
         printf "\nTesting ${RED}${src}${RES} ...\n"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
+        cbase_cmdline=
         if [ "$name" = "windows_functions" ]; then
             if ! zig version; then
                 continue
@@ -280,18 +294,43 @@ case "$target" in
             cmdline="zig cc $CPPFLAGS $CFLAGS"
             cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
             cmdline="$cmdline -target x86_64-windows-gnu"
-            cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
-            cmdline="$cmdline $flags -o $test_exe $src"
+            if [ "$separate_cbase" -eq 1 ]; then
+                cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
+                cbase_cmdline="$cbase_cmdline -x c -c cbase/cbase.h -o $cbase_obj"
+                cmdline="$cmdline -Wno-unused-variable"
+                cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
+                cmdline="$cmdline $flags -o $test_exe $src $cbase_obj"
+            else
+                cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
+                cmdline="$cmdline $flags -o $test_exe $src"
+            fi
             CC="zig cc"
         else
             cmdline="$CC $CPPFLAGS $CFLAGS"
-            cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
-            cmdline="$cmdline $flags -o $test_exe $src"
+            if [ "$separate_cbase" -eq 1 ]; then
+                cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
+                cbase_cmdline="$cbase_cmdline -x c -c cbase/cbase.h -o $cbase_obj"
+                cmdline="$cmdline -Wno-unused-variable"
+                cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
+                cmdline="$cmdline -o $test_exe $src $cbase_obj $LDFLAGS $flags"
+            else
+                cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
+                cmdline="$cmdline $flags -o $test_exe $src"
+            fi
+        fi
+
+        if [ "$name" = "cbase_main_separate_object" ]; then
+            cmdline=$(option_remove "$cmdline" "-DDEBUGGING=1")
+            cbase_cmdline=$(option_remove "$cbase_cmdline" "-DDEBUGGING=1")
         fi
 
         if [ "$CC" = "chibicc" ] || [ "$CC"  = "cproc" ]; then
-            cmdline_no_cc=$(option_remove "$cmdline" "$CC")
             trace_on
+            if [ "$separate_cbase" -eq 1 ]; then
+                cbase_cmdline_no_cc=$(option_remove "$cbase_cmdline" "$CC")
+                with_other "$CC" "$cbase_cmdline_no_cc" || exit 1
+            fi
+            cmdline_no_cc=$(option_remove "$cmdline" "$CC")
             if with_other "$CC" "$cmdline_no_cc"; then
                 /tmp/${name}_test
             else
@@ -299,6 +338,9 @@ case "$target" in
             fi
         else
             trace_on
+            if [ "$separate_cbase" -eq 1 ] && ! $cbase_cmdline; then
+                exit 1
+            fi
             if $cmdline; then
                 if ! $test_exe; then
                     gdb --quiet \
