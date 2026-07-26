@@ -10,10 +10,7 @@
 #if !defined(HASH_H)
 #define HASH_H
 
-#include <math.h>
-#include <sys/types.h>
-#include <time.h>
-
+#include "libc.h"
 #include "base_macros.h"
 #include "primitives.h"
 #include "rapidhash.h"

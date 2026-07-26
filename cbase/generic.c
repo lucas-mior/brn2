@@ -511,10 +511,8 @@ _Generic((VAR), \
 } while (0)
 
 #if TESTING_generic
-
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 int
 main(void) {
