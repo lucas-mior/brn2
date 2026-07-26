@@ -38,7 +38,7 @@ static struct Hash_alloc_map *allocations = NULL;
 static pthread_mutex_t allocations_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define X64(FUNC) \
-INLINE void \
+CBASE_API_DEF void \
 CAT(FUNC, 64)(void *dest, void *source, int64 n) { \
     if (n == 0) \
         return; \
@@ -60,7 +60,7 @@ X64(memcpy)
 X64(memmove)
 #undef X64
 
-INLINE void
+CBASE_API_DEF void
 memset64(void *buffer, int value, int64 size) {
     if (size == 0) {
         return;
@@ -79,7 +79,7 @@ memset64(void *buffer, int value, int64 size) {
     return;
 }
 
-INLINE void *
+CBASE_API_DEF void *
 xmalloc(int64 size, bool zero) {
     void *p;
 
@@ -97,7 +97,7 @@ xmalloc(int64 size, bool zero) {
     return p;
 }
 
-static void
+CBASE_API_DEF void
 memory_check(void) {
     if (RUNNING_ON_VALGRIND) {
         return;
@@ -151,7 +151,7 @@ memory_check(void) {
     return;
 }
 
-static void *
+CBASE_API_DEF void *
 malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
     void *p;
     uchar *ptr;
@@ -214,7 +214,7 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
     return p;
 }
 
-INLINE void *
+CBASE_API_DEF void *
 xrealloc(void *old, int64 new_size) {
     void *p;
     uint64 old_save = (uint64)old;
@@ -228,7 +228,7 @@ xrealloc(void *old, int64 new_size) {
     return p;
 }
 
-INLINE void *
+CBASE_API_DEF void *
 realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size = new_capacity*obj_size;
     (void)old_capacity;
@@ -236,7 +236,7 @@ realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     return xrealloc(old, new_size);
 }
 
-static void *
+CBASE_API_DEF void *
 realloc_debug(char *file, int32 line, char *func,
               void *old, int64 old_capacity, int64 new_capacity,
               int64 obj_size) {
@@ -392,7 +392,7 @@ realloc_debug(char *file, int32 line, char *func,
     return p;
 }
 
-static void *
+CBASE_API_DEF void *
 realloc_flex_debug(char *file, int32 line, char *func,
                    void *old, int64 struct_size,
                    int64 old_capacity, int64 new_capacity, int64 obj_size) {
@@ -560,7 +560,7 @@ realloc_flex_debug(char *file, int32 line, char *func,
     return p;
 }
 
-static void
+CBASE_API_DEF void
 free_debug(char *file, int32 line, char *func,
            void *pointer, int64 size) {
     DebugAllocInfo info;
@@ -651,7 +651,7 @@ free_debug(char *file, int32 line, char *func,
     return;
 }
 
-INLINE void
+CBASE_API_DEF void
 free2_(void *pointer, int64 size) {
     (void)size;
     if (pointer) {
@@ -697,7 +697,7 @@ memory_mapping_size(int64 size) {
 }
 
 #if OS_UNIX
-static void *
+CBASE_API_DEF void *
 xmmap_commit(int64 *size) {
     void *p;
     int64 size_original = *size;
@@ -724,7 +724,7 @@ xmmap_commit(int64 *size) {
     }
     return p;
 }
-static void
+CBASE_API_DEF void
 xmunmap(void *p, int64 size) {
     if (munmap(p, (size_t)size) < 0) {
         error("Error in munmap(%p, %lld): %s.\n",
@@ -734,7 +734,7 @@ xmunmap(void *p, int64 size) {
     return;
 }
 #elif OS_WINDOWS
-static void *
+CBASE_API_DEF void *
 xmmap_commit(int64 *size) {
     void *p;
 
@@ -752,7 +752,7 @@ xmmap_commit(int64 *size) {
     }
     return p;
 }
-static void
+CBASE_API_DEF void
 xmunmap(void *p, int64 size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
@@ -765,7 +765,7 @@ xmunmap(void *p, int64 size) {
     return;
 }
 #else
-static void *
+CBASE_API_DEF void *
 xmmap_commit(int64 *size) {
     void *p;
 
@@ -774,21 +774,21 @@ xmmap_commit(int64 *size) {
     memset64(p, 0, *size);
     return p;
 }
-static void
+CBASE_API_DEF void
 xmunmap(void *p, int64 size) {
     free2(p, (int64)size);
     return;
 }
 #endif
 
-static void *
+CBASE_API_DEF void *
 xmemdup(void *source, int64 size) {
     void *p = malloc2(size);
     memcpy64(p, source, size);
     return p;
 }
 
-static char *
+CBASE_API_DEF char *
 xstrdup(char *string) {
     char *p;
     int64 length = strlen32(string) + 1;
@@ -803,7 +803,7 @@ xstrdup(char *string) {
     return p;
 }
 
-static char *
+CBASE_API_DEF char *
 xstrndup(char *s, int64 n) {
     char *out = malloc2(n + 1);
     memcpy64(out, s, n);
@@ -812,7 +812,7 @@ xstrndup(char *s, int64 n) {
 }
 
 #if 0 == TESTING_memory
-static inline void
+CBASE_API_DEF void
 memory_functions_sink(void) {
     (void)memory_check;
     (void)realloc4;

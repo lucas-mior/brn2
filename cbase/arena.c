@@ -17,7 +17,7 @@
 
 static Arena *global_arena = NULL;
 
-static void
+CBASE_API_DEF void
 arena_print(Arena *arena) {
     while (arena) {
         error2("Arena %p {\n", (void *)arena);
@@ -38,7 +38,7 @@ arena_print(Arena *arena) {
     return;
 }
 
-static char *
+CBASE_API_DEF char *
 arena_strerror(int arena_errno) {
     switch (arena_errno) {
     case EARENA_INVALID:
@@ -58,7 +58,7 @@ arena_strerror(int arena_errno) {
     }
 }
 
-static Arena *
+CBASE_API_DEF Arena *
 arena_create(int64 size, char *name) {
     Arena *arena;
 
@@ -83,7 +83,7 @@ arena_create(int64 size, char *name) {
     return arena;
 }
 
-static void
+CBASE_API_DEF void
 arena_destroy(Arena *arena) {
     Arena *next;
 
@@ -96,13 +96,13 @@ arena_destroy(Arena *arena) {
     return;
 }
 
-static int64
+CBASE_API_DEF int64
 arena_data_size(Arena *arena) {
     int64 size = arena->size - (arena->begin - (char *)arena);
     return size;
 }
 
-static Arena *
+CBASE_API_DEF Arena *
 arena_with_space(Arena *arena, int64 size) {
     if (arena == NULL) {
         errno = EARENA_INVALID;
@@ -131,7 +131,7 @@ arena_with_space(Arena *arena, int64 size) {
     return arena;
 }
 
-static void *
+CBASE_API_DEF void *
 arena_push(Arena *arena, int64 size) {
     void *before;
     size = ALIGN(size);
@@ -151,7 +151,7 @@ arena_push(Arena *arena, int64 size) {
     return before;
 }
 
-static void *
+CBASE_API_DEF void *
 arenas_push(Arena **arenas, int32 number, int64 size) {
     for (int32 i = 0; i < number; i += 1) {
         void *p;
@@ -162,7 +162,7 @@ arenas_push(Arena **arenas, int32 number, int64 size) {
     return NULL;
 }
 
-static void *
+CBASE_API_DEF void *
 xarena_push(Arena *arena, int64 size) {
     void *p;
 
@@ -184,7 +184,7 @@ xarena_push(Arena *arena, int64 size) {
     return p;
 }
 
-static void *
+CBASE_API_DEF void *
 xarenas_push(Arena **arenas, int32 narenas, int64 size) {
     void *p;
 
@@ -196,7 +196,7 @@ xarenas_push(Arena **arenas, int32 narenas, int64 size) {
     return p;
 }
 
-static uint32
+CBASE_API_DEF uint32
 arena_push_index32(Arena *arena, uint32 size) {
     void *before;
     Arena *arena_save = arena;
@@ -221,7 +221,7 @@ arena_push_index32(Arena *arena, uint32 size) {
     return (uint32)((char *)before - (char *)arena->begin);
 }
 
-static Arena *
+CBASE_API_DEF Arena *
 arena_of(Arena *arena, void *p) {
     uintptr pointer_num = (uintptr)p;
 
@@ -241,7 +241,7 @@ arena_of(Arena *arena, void *p) {
     return NULL;
 }
 
-static bool
+CBASE_API_DEF bool
 arenas_pop(Arena **arenas, int32 narenas, void *p) {
     for (int32 i = 0; i < narenas; i += 1) {
         if (arena_decr(arenas[i], p)) {
@@ -251,7 +251,7 @@ arenas_pop(Arena **arenas, int32 narenas, void *p) {
     return false;
 }
 
-static bool
+CBASE_API_DEF bool
 arena_decr(Arena *arena, void *p) {
     if ((arena = arena_of(arena, p)) == NULL) {
         return false;
@@ -271,7 +271,7 @@ arena_decr(Arena *arena, void *p) {
     return true;
 }
 
-static int32
+CBASE_API_DEF int32
 arena_nlinked(Arena *arena) {
     int32 n = 0;
     while (arena) {
@@ -281,7 +281,7 @@ arena_nlinked(Arena *arena) {
     return n;
 }
 
-static void *
+CBASE_API_DEF void *
 arena_reset(Arena *arena) {
     Arena *first = arena;
 
@@ -300,7 +300,7 @@ arena_reset(Arena *arena) {
     return first->begin;
 }
 
-static void *
+CBASE_API_DEF void *
 arenas_reset(Arena **arenas, int32 number) {
     for (int32 i = 0; i < number; i += 1) {
         arena_reset(arenas[i]);
@@ -308,7 +308,7 @@ arenas_reset(Arena **arenas, int32 number) {
     return NULL;
 }
 
-static void
+CBASE_API_DEF void
 arenas_destroy(Arena **arenas, int32 number) {
     for (int32 i = 0; i < number; i += 1) {
         arena_destroy(arenas[i]);
@@ -317,7 +317,7 @@ arenas_destroy(Arena **arenas, int32 number) {
 }
 
 #if 0 == TESTING_arena
-static inline void
+CBASE_API_DEF void
 arena_functions_sink(void) {
     (void)arena_print;
     (void)xarenas_push;
