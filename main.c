@@ -2,7 +2,13 @@
 // Copyright (c) 2022 Patel, Nimai <nimai.m.patel@gmail.com>
 // Copyright (c) 2026 Mior, Lucas
 
+#ifndef BRN2_FULL_UNITY_BUILD
+#define BRN2_FULL_UNITY_BUILD 1
+#endif
+
+#if BRN2_FULL_UNITY_BUILD
 #define CBASE_IMPLEMENT
+#endif
 #include "cbase.h"
 
 #include "brn2.h"
@@ -17,6 +23,14 @@ bool brn2_options_vim_split = false;
 int32 nthreads;
 static int32 narenas;
 int32 (*print)(const char *, ...) = noop;
+
+#if BRN2_FULL_UNITY_BUILD
+#define brn2_program program
+#define brn2_program_len program_len
+#else
+static char *brn2_program;
+static int32 brn2_program_len;
+#endif
 
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
@@ -74,7 +88,7 @@ delete_brn2_buffer(void) {
 static void __attribute__((noreturn))
 handler_segv(int unused) {
     (void)unused;
-    error("%s: Memory error. Please file a bug report.\n", program);
+    error("%s: Memory error. Please file a bug report.\n", brn2_program);
     fatal(EXIT_FAILURE);
 }
 
@@ -130,8 +144,8 @@ main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    program_len = strlen32(argv[0]);
-    program = basename2(argv[0], &program_len, NULL);
+    brn2_program_len = strlen32(argv[0]);
+    brn2_program = basename2(argv[0], &brn2_program_len, NULL);
 
     while ((opt = getopt_long(argc, argv, "d:f:t:eFhiqsvaV", options, NULL))
            != -1) {
