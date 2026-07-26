@@ -826,8 +826,6 @@ memory_functions_sink(void) {
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 // flags: -lm
-#include <signal.h>
-#include <setjmp.h>
 
 static sigjmp_buf test_jump_env;
 static bool caught_expected_fail = false;
