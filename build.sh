@@ -310,6 +310,9 @@ case "$target" in
         "./cbase/"*)
             separate_cbase=0
             ;;
+        *"windows_functions.c"*)
+            separate_cbase=0
+            ;;
         *)
             separate_cbase=1
             ;;
