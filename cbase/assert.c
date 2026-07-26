@@ -10,10 +10,6 @@
 #define TESTING_assert 0
 #endif
 
-#include "platform_detection.h"
-#include "primitives.h"
-#include "base_macros.h"
-#include "generic.c"
 #include "cbase.h"
 
 #define ASSERT_FP_KIND_NONE    0

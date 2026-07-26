@@ -4,24 +4,13 @@
 #if !defined(MINMAX_C)
 #define MINMAX_C
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <float.h>
-#include <assert.h>
-#include <signal.h>
-#include <stdio.h>
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_minmax 1
 #elif !defined(TESTING_minmax)
 #define TESTING_minmax 0
 #endif
 
-#include "platform_detection.h"
-#include "primitives.h"
-#include "base_macros.h"
-#include "generic.c"
+#include "cbase.h"
 
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL) \
 static void * \
