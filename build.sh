@@ -167,7 +167,8 @@ case "$target" in
     CPPFLAGS="$CPPFLAGS $GNUSOURCE"
     ;;
 "test")
-    CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1 -fsanitize=undefined -Wno-address"
+    CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1"
+    CFLAGS="$CFLAGS -fsanitize=undefined -Wno-address"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 "check")
