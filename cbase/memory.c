@@ -672,46 +672,63 @@ free2_(void *pointer, int64 size) {
     return;
 }
 
+static int64
+memory_mapping_size(int64 size) {
+    if (size < 0) {
+        error("Invalid size = %lld\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    if (size == 0) {
+        size = 1;
+    }
+
+    if (memory_page_size == 0) {
+#if OS_UNIX
+        long page_size;
+
+        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
+            error("Error getting page size: %s.\n", strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        memory_page_size = (int64)page_size;
+#elif OS_WINDOWS
+        SYSTEM_INFO system_info;
+
+        GetSystemInfo(&system_info);
+        memory_page_size = (int64)system_info.dwPageSize;
+        if (memory_page_size <= 0) {
+            fprintf(stderr, "Error getting page size.\n");
+            fatal(EXIT_FAILURE);
+        }
+#else
+        memory_page_size = 4096;
+#endif
+    }
+
+    return ALIGN_POWER_OF_2(size, memory_page_size);
+}
+
 #if OS_UNIX
 static void *
 xmmap_commit(int64 *size) {
     void *p;
     int64 size_original = *size;
 
-    if (*size < 0) {
-        error("Invalid size = %lld\n", *size);
-        fatal(EXIT_FAILURE);
-    }
-    if (*size == 0) {
-        *size = 1;
-    }
-
-    if (RUNNING_ON_VALGRIND) {
-        return xmalloc(*size, true);
-    }
-    if (memory_page_size == 0) {
-        long aux;
-        if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
-            error("Error getting page size: %s.\n", strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
-        memory_page_size = aux;
-    }
+    *size = memory_mapping_size(*size);
 
     do {
-        if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
-            *size = ALIGN_POWER_OF_2(*size, SIZEMB(2));
+        if ((size_original >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
+            *size = ALIGN_POWER_OF_2(size_original, SIZEMB(2));
             p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
-                     MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE
-                     | FLAGS_HUGE_PAGES,
+                     MAP_ANONYMOUS | MAP_PRIVATE | FLAGS_HUGE_PAGES,
                      -1, 0);
             if (p != MAP_FAILED) {
                 break;
             }
         }
-        *size = ALIGN_POWER_OF_2(size_original, memory_page_size);
+        *size = memory_mapping_size(size_original);
         p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
-                 MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
+                 MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     } while (0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%lld): %s.\n", *size, strerror(errno));
@@ -721,10 +738,6 @@ xmmap_commit(int64 *size) {
 }
 static void
 xmunmap(void *p, int64 size) {
-    if (RUNNING_ON_VALGRIND) {
-        free(p);
-        return;
-    }
     if (munmap(p, (size_t)size) < 0) {
         error("Error in munmap(%p, %lld): %s.\n",
               p, size, strerror(errno));
@@ -737,20 +750,9 @@ static void *
 xmmap_commit(int64 *size) {
     void *p;
 
+    *size = memory_mapping_size(*size);
     if (RUNNING_ON_VALGRIND) {
-        if (*size == 0) {
-            *size = 1;
-        }
         return xmalloc(*size, true);
-    }
-    if (memory_page_size == 0) {
-        SYSTEM_INFO system_info;
-        GetSystemInfo(&system_info);
-        memory_page_size = system_info.dwPageSize;
-        if (memory_page_size <= 0) {
-            fprintf(stderr, "Error getting page size.\n");
-            fatal(EXIT_FAILURE);
-        }
     }
 
     p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
@@ -779,6 +781,7 @@ static void *
 xmmap_commit(int64 *size) {
     void *p;
 
+    *size = memory_mapping_size(*size);
     p = malloc2(*size);
     memset64(p, 0, *size);
     return p;
@@ -886,6 +889,17 @@ int main(void) {
     }
 
     printf("--- Starting Comprehensive Memory Tests ---\n");
+
+    {
+        int64 size = 1;
+        char *mapping;
+
+        mapping = xmmap_commit(&size);
+        ASSERT_MORE(size, 1);
+        ASSERT_EQUAL(size % memory_page_size, 0);
+        ASSERT_EQUAL(mapping[0], 0);
+        xmunmap(mapping, size);
+    }
 
     {
         int64 size = 256;

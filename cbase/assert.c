@@ -902,8 +902,8 @@ _Generic((VAR1),                                                        \
 } while (0)
 
 #if TESTING_assert
-#include <setjmp.h>
-#include <signal.h>
+#define CBASE_IMPLEMENT
+#include "cbase.h"
 
 static sig_atomic_t assertion_failed = false;
 static sigjmp_buf assert_env;
