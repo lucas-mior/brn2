@@ -85,13 +85,6 @@ delete_brn2_buffer(void) {
     return;
 }
 
-static void __attribute__((noreturn))
-handler_segv(int unused) {
-    (void)unused;
-    error("%s: Memory error. Please file a bug report.\n", brn2_program);
-    fatal(EXIT_FAILURE);
-}
-
 static int32
 main_command_run(Command *command) {
     int32 status = -1;
