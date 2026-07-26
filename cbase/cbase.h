@@ -151,9 +151,9 @@ static void *memrchr64(void *, int32, int64);
 
 #include "i18n.h"
 #include "memory.h"
+#include "arena.h"
 
 #include "assert.c"
-#include "arena.h"
 #include "generic.c"
 #include "minmax.c"
 
