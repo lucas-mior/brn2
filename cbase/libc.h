@@ -26,6 +26,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <wchar.h>
+#include <wctype.h>
 
 #if OS_WINDOWS
 #include <windows.h>

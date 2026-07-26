@@ -440,10 +440,6 @@ utf8_functions_sink(void) {
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
-#include <wchar.h>
-#include <wctype.h>
-#include <string.h>
-
 int
 main(void) {
     {
