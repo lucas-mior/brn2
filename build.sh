@@ -302,7 +302,7 @@ case "$target" in
             cmdline="$cmdline -target x86_64-windows-gnu"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="cbase_cmdline $xc -c cbase/cbase.h -o $cbase_obj"
+                cbase_cmdline="$cbase_cmdline $xc -c cbase/cbase.h -o $cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
@@ -316,7 +316,7 @@ case "$target" in
             cmdline="$CC $CPPFLAGS $CFLAGS"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="cbase_cmdline $xc  -c cbase/cbase.h -o $cbase_obj"
+                cbase_cmdline="$cbase_cmdline $xc  -c cbase/cbase.h -o $cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
@@ -329,14 +329,14 @@ case "$target" in
 
         if [ "$name" = "cbase_main_separate_object" ]; then
             cmdline=$(option_remove "$cmdline" "-DDEBUGGING=1")
-            cbase_cmdline=$(option_remove "cbase_cmdline" "-DDEBUGGING=1")
+            cbase_cmdline=$(option_remove "$cbase_cmdline" "-DDEBUGGING=1")
         fi
 
         if [ "$CC" = "chibicc" ] || [ "$CC"  = "cproc" ]; then
             trace_on
             if [ "$separate_cbase" -eq 1 ] && cbase_object_stale "$cbase_obj"; then
-                cbase_cmdline_no_cc=$(option_remove "cbase_cmdline" "$CC")
-                with_other "$CC" "cbase_cmdline_no_cc" || exit 1
+                cbase_cmdline_no_cc=$(option_remove "$cbase_cmdline" "$CC")
+                with_other "$CC" "$cbase_cmdline_no_cc" || exit 1
             fi
             cmdline_no_cc=$(option_remove "$cmdline" "$CC")
             if with_other "$CC" "$cmdline_no_cc"; then
@@ -348,7 +348,7 @@ case "$target" in
             trace_on
             if [ "$separate_cbase" -eq 1 ] \
                && cbase_object_stale "$cbase_obj" \
-               && ! cbase_cmdline; then
+               && ! $cbase_cmdline; then
                 exit 1
             fi
             if $cmdline; then
