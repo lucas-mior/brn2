@@ -369,9 +369,11 @@ case "$target" in
     ;;
 *)
     trace_on
+
     find . -iname "*.[ch]" -print0 \
         | xargs --verbose -0 ctags --kinds-C=+l+d || true
     vtags.sed tags | sort | uniq > .tags.vim      || true
+
     if [ "$target" = "debug" ]; then
         cbase_obj="bin/${program}_debug_cbase.o"
         if [ "$CC" = "chibicc" ]; then
@@ -407,6 +409,7 @@ case "$target" in
     else
         $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
     fi
+
     trace_off
     ;;
 esac
