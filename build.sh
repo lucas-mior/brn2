@@ -102,7 +102,7 @@ option_remove() {
     echo "$1" | sed -E "s| *$2 +| |g"
 }
 
-with_other () {
+with_toy_cc () {
     compiler="$1"
     compiler_macro=$(echo "$compiler" | tr '[:lower:]' '[:upper:]')
     compiler_macro="__${compiler_macro}__"
@@ -336,10 +336,10 @@ case "$target" in
             trace_on
             if [ "$separate_cbase" -eq 1 ] && cbase_object_stale "$cbase_obj"; then
                 cbase_cmdline_no_cc=$(option_remove "$cbase_cmdline" "$CC")
-                with_other "$CC" "$cbase_cmdline_no_cc" || exit 1
+                with_toy_cc "$CC" "$cbase_cmdline_no_cc" || exit 1
             fi
             cmdline_no_cc=$(option_remove "$cmdline" "$CC")
-            if with_other "$CC" "$cmdline_no_cc"; then
+            if with_toy_cc "$CC" "$cmdline_no_cc"; then
                 /tmp/${name}_test
             else
                 exit 1
@@ -376,20 +376,20 @@ case "$target" in
         cbase_obj="bin/${program}_debug_cbase.o"
         if [ "$CC" = "chibicc" ]; then
             if cbase_object_stale "$cbase_obj"; then
-                with_other chibicc \
+                with_toy_cc chibicc \
                     $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
                     $xc -c cbase/cbase.h -o "$cbase_obj"
             fi
-            with_other chibicc \
+            with_toy_cc chibicc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
                 $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
         elif [ "$CC" = "cproc" ]; then
             if cbase_object_stale "$cbase_obj"; then
-                with_other cproc \
+                with_toy_cc cproc \
                     $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
                     $xc  -c cbase/cbase.h -o "$cbase_obj"
             fi
-            with_other cproc \
+            with_toy_cc cproc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
                 $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
         else
@@ -401,9 +401,9 @@ case "$target" in
                 $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
         fi
     elif [ "$CC" = "chibicc" ]; then
-        with_other chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+        with_toy_cc chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     elif [ "$CC" = "cproc" ]; then
-        with_other cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
+        with_toy_cc cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     else
         $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
     fi
