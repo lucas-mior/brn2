@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "base_macros.h"
 
 #if CC_CLANG
