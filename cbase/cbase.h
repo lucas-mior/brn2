@@ -65,7 +65,9 @@
 #define ERROR_NOTIFY 0
 #endif
 
-#include "libc.h"
+#include "platform_detection.h"
+#include "primitives.h"
+#include "base_macros.h"
 
 #define error(...) \
     error_impl(__FILE__, __LINE__, (char *)__func__, __VA_ARGS__)
@@ -79,6 +81,7 @@ static int memcmp64(void *, void *, int64);
 static void *memmem64(void *, int64, void *, int64);
 static void *memrchr64(void *, int32, int64);
 
+#include "libc.h"
 #include "i18n.h"
 #include "memory.h"
 #include "arena.h"
