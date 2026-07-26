@@ -14,6 +14,7 @@
 #include "primitives.h"
 #include "base_macros.h"
 #include "generic.c"
+#include "cbase.h"
 
 #define ASSERT_FP_KIND_NONE    0
 #define ASSERT_FP_KIND_FLOAT   1
