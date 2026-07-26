@@ -3,8 +3,9 @@
 // Copyright (c) 2026 Mior, Lucas
 
 #define CBASE_IMPLEMENT
-#include "brn2.h"
+#include "cbase.h"
 
+#include "brn2.h"
 #include "brn2.c"
 
 bool brn2_options_fatal = false;
