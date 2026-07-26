@@ -4,17 +4,6 @@
 #if !defined(ASSERT_C)
 #define ASSERT_C
 
-#include <assert.h>
-#include <errno.h>
-#include <float.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_assert 1
 #elif !defined(TESTING_assert)
