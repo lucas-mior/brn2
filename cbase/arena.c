@@ -335,7 +335,6 @@ arena_functions_sink(void) {
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 // flags: -lm
-#include <stdio.h>
 
 #if !defined(UTIL_C)
 static void
