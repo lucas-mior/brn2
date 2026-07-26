@@ -62,8 +62,10 @@ OS=$(uname -a)
 
 if [ "$target" = "test" ] && [ -z "$CC" ] && command tcc; then
     CC=tcc
+    xc=""
 else
     CC="${CC:-cc}"
+    xc="-x c"
 fi
 
 if [ "$CC" = "clang" ]; then
@@ -300,7 +302,7 @@ case "$target" in
             cmdline="$cmdline -target x86_64-windows-gnu"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="cbase_cmdline -x c -c cbase/cbase.h -o cbase_obj"
+                cbase_cmdline="cbase_cmdline $xc -c cbase/cbase.h -o cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
@@ -314,7 +316,7 @@ case "$target" in
             cmdline="$CC $CPPFLAGS $CFLAGS"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="cbase_cmdline -x c -c cbase/cbase.h -o cbase_obj"
+                cbase_cmdline="cbase_cmdline $xc  -c cbase/cbase.h -o cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
@@ -376,7 +378,7 @@ case "$target" in
             if cbase_object_stale "cbase_obj"; then
                 with_other chibicc \
                     $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    -x c -c cbase/cbase.h -o "cbase_obj"
+                    $xc -c cbase/cbase.h -o "cbase_obj"
             fi
             with_other chibicc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
@@ -385,7 +387,7 @@ case "$target" in
             if cbase_object_stale "cbase_obj"; then
                 with_other cproc \
                     $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    -x c -c cbase/cbase.h -o "cbase_obj"
+                    $xc  -c cbase/cbase.h -o "cbase_obj"
             fi
             with_other cproc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
@@ -393,7 +395,7 @@ case "$target" in
         else
             if cbase_object_stale "cbase_obj"; then
                 $CC $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    -x c -c cbase/cbase.h -o "cbase_obj"
+                    $xc -c cbase/cbase.h -o "cbase_obj"
             fi
             $CC $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
                 $CFLAGS -o ${exe} "$main" "cbase_obj" $LDFLAGS
