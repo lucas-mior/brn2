@@ -10,16 +10,6 @@
 #define BYTE_POPED 0xDC
 #define BYTE_PUSHED_UNINITIALIZED 0xCD
 
-#if OS_WINDOWS
-#include <windows.h>
-#endif
-
-#if OS_UNIX
-#include <pthread.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#endif
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_arena 1
 #elif !defined(TESTING_arena)
@@ -27,14 +17,6 @@
 #endif
 
 #include "cbase.h"
-
-#include <assert.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
 static Arena *global_arena = NULL;
 
