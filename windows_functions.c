@@ -16,11 +16,6 @@
 #error "ONLY INCLUDE THIS FILE IF COMPILING FOR WINDOWS"
 #endif
 
-#include <windows.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <wchar.h>
-
 #if !defined(S_IFLNK)
 #define S_IFLNK 0120000
 #endif
