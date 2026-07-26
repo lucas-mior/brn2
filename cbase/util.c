@@ -10,23 +10,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <time.h>
-#include <libgen.h>
-#include <pthread.h>
-#include <limits.h>
-#include <sys/stat.h>
-#include <float.h>
-#include <dirent.h>
-#include <ctype.h>
-
 #include "platform_detection.h"
 #include "base_macros.h"
 

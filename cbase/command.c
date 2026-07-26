@@ -73,16 +73,18 @@ command_status_from_wait(int status, CommandResult *result) {
 
 static void
 command_result_file_descriptors_close(CommandResult *result) {
-    if (result->stdout_fd_open) {
+    if (result->pid == 0) {
+        result->stdout_fd = -1;
+        result->stderr_fd = -1;
+        return;
+    }
+
+    if (result->stdout_fd >= 0) {
         XCLOSE(&result->stdout_fd);
-        result->stdout_fd_open = false;
     }
-    if (result->stderr_fd_open) {
+    if (result->stderr_fd >= 0) {
         XCLOSE(&result->stderr_fd);
-        result->stderr_fd_open = false;
     }
-    result->stdout_fd = -1;
-    result->stderr_fd = -1;
     return;
 }
 
@@ -282,14 +284,14 @@ command_result_read_captured(Command *command) {
     pipes[COMMAND_CAPTURE_STDOUT_INDEX].fd = -1;
     pipes[COMMAND_CAPTURE_STDERR_INDEX].fd = -1;
 
-    if (command->result.stdout_fd_open) {
+    if (command->result.stdout_fd >= 0) {
         pipes[COMMAND_CAPTURE_STDOUT_INDEX].fd = command->result.stdout_fd;
         pipes[COMMAND_CAPTURE_STDOUT_INDEX].events = POLLIN;
         pipes[COMMAND_CAPTURE_STDOUT_INDEX].revents = 0;
         nfds = COMMAND_CAPTURE_STDOUT_INDEX + 1;
         left += 1;
     }
-    if (command->result.stderr_fd_open) {
+    if (command->result.stderr_fd >= 0) {
         pipes[COMMAND_CAPTURE_STDERR_INDEX].fd = command->result.stderr_fd;
         pipes[COMMAND_CAPTURE_STDERR_INDEX].events = POLLIN;
         pipes[COMMAND_CAPTURE_STDERR_INDEX].revents = 0;
@@ -351,10 +353,8 @@ command_result_read_captured(Command *command) {
 
             if (is_stderr) {
                 XCLOSE(&command->result.stderr_fd);
-                command->result.stderr_fd_open = false;
             } else {
                 XCLOSE(&command->result.stdout_fd);
-                command->result.stdout_fd_open = false;
             }
             pipes[i].fd = -1;
             pipes[i].revents = 0;
@@ -519,13 +519,11 @@ command_start(Command *command, enum CommandFlag flags) {
     if (flags & COMMAND_CAPTURE_STDOUT) {
         XCLOSE(&stdout_pipe[1]);
         command->result.stdout_fd = stdout_pipe[0];
-        command->result.stdout_fd_open = true;
     }
     if ((flags & COMMAND_CAPTURE_STDERR)
         && !(flags & COMMAND_MERGE_STDERR)) {
         XCLOSE(&stderr_pipe[1]);
         command->result.stderr_fd = stderr_pipe[0];
-        command->result.stderr_fd_open = true;
     }
 
     return true;
