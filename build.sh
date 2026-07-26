@@ -228,11 +228,20 @@ install_opt () {
     file="$2"
     dest="$3"
 
-    if [ -e "$file" ]; then
+    if [ -f "$file" ]; then
         install "$mode" "$file" "$dest"
-        if [ -d "$file" ]; then
-            cp -rp "$file"/* "${DESTDIR}/${file}/${program}/"
-        fi
+    elif [ -d "$file" ]; then
+        install "$mode" "$dest"
+        cp -rp "$file/." "$dest/"
+    fi
+}
+
+uninstall_opt () {
+    file="$1"
+    dest="$2"
+
+    if [ -e "$file" ]; then
+        rm -rf "$dest"
     fi
 }
 
@@ -245,22 +254,29 @@ case "$target" in
     ;;
 "uninstall")
     trace_on
-    rm -f ${DESTDIR}${PREFIX}/bin/${program}
-    rm -f ${DESTDIR}${PREFIX}/man/man1/${program}.1
+
+    rm -f "${DESTDIR}${PREFIX}/bin/${program}"
+    uninstall_opt "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
+    uninstall_opt "etc" "${DESTDIR}/etc/${program}"
+    uninstall_opt \
+        "${program}.desktop" "${DESTDIR}/usr/share/applications/${program}.desktop"
+
+    trace_off
     exit
     ;;
 "install")
     trace_on
 
-    if [ ! -f "$program" ]; then
-        $0 build
+    if [ ! -f "$exe" ]; then
+        "$0" build
     fi
 
-    install -Dm755 bin/${program}   ${DESTDIR}${PREFIX}/bin/${program}
-    install_opt -Dm644 ${program}.1 ${DESTDIR}${PREFIX}/man/man1/${program}.1
-    install_opt -dm755 "etc/" "$DESTDIR/etc/$program"
+    install -Dm755 "$exe" "${DESTDIR}${PREFIX}/bin/${program}"
+    install_opt -Dm644 "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
+    install_opt -dm755 "etc" "${DESTDIR}/etc/${program}"
     install_opt -Dm755 \
-        "$program.desktop" "$DESTDIR/usr/share/applications/$program.desktop"
+        "${program}.desktop" \
+        "${DESTDIR}/usr/share/applications/${program}.desktop"
 
     trace_off
     exit
