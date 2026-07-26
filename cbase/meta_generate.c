@@ -4,9 +4,6 @@
 #if !defined(META_GENERATE_C)
 #define META_GENERATE_C
 
-#include <ctype.h>
-#include <inttypes.h>
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_meta_generate 1
 #elif !defined(TESTING_meta_generate)

@@ -6,9 +6,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <float.h>
+#include <inttypes.h>
 #include <libgen.h>
 #include <limits.h>
 #include <pthread.h>
+#include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -20,8 +22,6 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
-#include <setjmp.h>
-#include <signal.h>
 
 #if OS_WINDOWS
 #include <windows.h>
