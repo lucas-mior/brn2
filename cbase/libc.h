@@ -42,6 +42,10 @@
 #include <sys/param.h>
 #endif
 
+#if OS_LINUX
+#include <sys/syscall.h>
+#endif
+
 #if defined(__EMSCRIPTEN__)
 #include <emscripten/emscripten.h>
 #endif

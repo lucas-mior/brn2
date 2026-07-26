@@ -5,13 +5,6 @@
 #if !defined(BRN2_C)
 #define BRN2_C
 
-#include <errno.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_brn2 1
 #elif !defined(TESTING_brn2)
@@ -20,10 +13,6 @@
 
 #include "cbase.h"
 #include "brn2.h"
-
-#if OS_LINUX
-#include <sys/syscall.h>
-#endif
 
 #if OS_WINDOWS
 #include "windows_functions.c"
