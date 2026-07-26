@@ -10,7 +10,7 @@ case "$test_target" in
 "debug")
     brn2="$PWD/bin/brn2_debug"
     ;;
-"build"|"release")
+"build")
     brn2="$PWD/bin/brn2"
     ;;
 *)
