@@ -1033,7 +1033,6 @@ util_copy_file_async_thread(void *arg) {
 #endif
 
 #if OS_LINUX
-#include <dirent.h>
 static void
 send_signal(char *executable, int32 signal_number) {
     DIR *processes;
