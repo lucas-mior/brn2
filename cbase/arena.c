@@ -4,9 +4,6 @@
 #if !defined(ARENA_C)
 #define ARENA_C
 
-#include "base_macros.h"
-#include "platform_detection.h"
-
 #define BYTE_POPED 0xDC
 #define BYTE_PUSHED_UNINITIALIZED 0xCD
 
@@ -19,8 +16,6 @@
 #include "cbase.h"
 
 static Arena *global_arena = NULL;
-
-static int64 arena_page_size = 0;
 
 static void
 arena_print(Arena *arena) {
@@ -65,18 +60,14 @@ arena_strerror(int arena_errno) {
 
 static Arena *
 arena_create(int64 size, char *name) {
-    void *p;
     Arena *arena;
 
     if (size <= 0) {
         errno = EARENA_SIZE;
         return NULL;
     }
-    if ((p = arena_allocate(&size)) == NULL) {
-        return NULL;
-    }
 
-    arena = p;
+    arena = xmmap_commit(&size);
     arena->name = NULL;
     if (name) {
         int64 len = strlen32(name);
@@ -98,104 +89,12 @@ arena_destroy(Arena *arena) {
 
     do {
         next = arena->next;
-        arena_free(arena);
+        free(arena->name);
+        xmunmap(arena, arena->size);
     } while ((arena = next));
 
     return;
 }
-
-#if OS_UNIX
-void *
-arena_allocate(int64 *size) {
-    void *p;
-    int64 size_original = *size;
-
-    if (arena_page_size == 0) {
-        long aux;
-        if ((aux = sysconf(_SC_PAGESIZE)) <= 0) {
-            error2("Error getting page size: %s.\n", strerror(errno));
-            return NULL;
-        }
-        arena_page_size = (int64)aux;
-    }
-
-    do {
-        if ((*size >= SIZEMB(2)) && FLAGS_HUGE_PAGES) {
-            *size = ALIGN_POWER_OF_2(*size, SIZEMB(2));
-            p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
-                     MAP_ANON | MAP_PRIVATE | FLAGS_HUGE_PAGES, -1, 0);
-            if (p != MAP_FAILED) {
-                break;
-            }
-        }
-        *size = ALIGN_POWER_OF_2(size_original, arena_page_size);
-        p = mmap(NULL, (size_t)*size, PROT_READ | PROT_WRITE,
-                 MAP_ANON | MAP_PRIVATE, -1, 0);
-    } while (0);
-
-    if (p == MAP_FAILED) {
-        error2("Error in mmap(%lld): %s.\n", *size, strerror(errno));
-        return NULL;
-    }
-    return p;
-}
-bool
-arena_free(Arena *arena) {
-    free(arena->name);
-    if (munmap(arena, (size_t)arena->size) < 0) {
-        error2("Error in munmap(%p, %lld): %s.\n", (void *)arena,
-               arena->size, strerror(errno));
-        return false;
-    }
-    return true;
-}
-#elif OS_WINDOWS
-void *
-arena_allocate(int64 *size) {
-    void *p;
-
-    if (arena_page_size == 0) {
-        SYSTEM_INFO si;
-        GetSystemInfo(&si);
-        arena_page_size = si.dwPageSize;
-        if (arena_page_size <= 0) {
-            error2("Error getting page size.\n");
-            return NULL;
-        }
-    }
-
-    if ((p = VirtualAlloc(NULL, (size_t)*size, MEM_COMMIT | MEM_RESERVE,
-                          PAGE_READWRITE)) == NULL) {
-        error2("Error in VirtualAlloc(%lld): %lu.\n", *size,
-               GetLastError());
-        return NULL;
-    }
-    *size = ALIGN_POWER_OF_2(*size, arena_page_size);
-    return p;
-}
-bool
-arena_free(Arena *arena) {
-    if (!VirtualFree(arena, 0, MEM_RELEASE)) {
-        error2("Error in VirtualFree(%p): %lu.\n", arena, GetLastError());
-        return false;
-    }
-    return true;
-}
-#else
-void *
-arena_allocate(int64 *size) {
-    void *p;
-    *size = ALIGN_POWER_OF_2(*size, 4096);
-    p = malloc(*size);
-    assert(p);
-    return p;
-}
-bool
-arena_free(Arena *arena) {
-    free(arena);
-    return true;
-}
-#endif
 
 static int64
 arena_data_size(Arena *arena) {
@@ -456,6 +355,14 @@ main(void) {
     Arena *arena;
     char *objs[1000];
     uint32 arena_size;
+
+    {
+        Arena *small_arena;
+
+        ASSERT((small_arena = arena_create(1, "small_arena")));
+        ASSERT_MORE(small_arena->size, ALIGN(sizeof(*small_arena)));
+        arena_destroy(small_arena);
+    }
 
     ASSERT((arena = arena_create(SIZEMB(3), "arena")));
     ASSERT(arena->pos == arena->begin);

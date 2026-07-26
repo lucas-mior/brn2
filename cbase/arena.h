@@ -24,8 +24,6 @@ enum ArenaErrors {
     EARENA_SIZE,
 };
 
-static void *arena_allocate(int64 *);
-static bool arena_free(Arena *);
 static Arena *arena_create(int64, char *);
 static int64 arena_data_size(Arena *);
 static bool arena_decr(Arena *, void *);
