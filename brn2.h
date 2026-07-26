@@ -13,16 +13,6 @@
 #define BRN2_MAX_THREADS 64
 #endif
 
-#include <assert.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <unistd.h>
-
 #define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
 #define BRN2_MIN_PARALLEL 64
