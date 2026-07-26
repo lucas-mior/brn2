@@ -178,9 +178,6 @@ case "$target" in
 "build")
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
-"release")
-    CFLAGS="$CFLAGS $GNUSOURCE -DRELEASING=1 -O2 -flto -march=native -ftree-vectorize"
-    ;;
 "fast_feedback")
     CC=clang
     CFLAGS="$CFLAGS $GNUSOURCE -Werror"
