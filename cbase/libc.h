@@ -42,6 +42,10 @@
 #include <sys/param.h>
 #endif
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten/emscripten.h>
+#endif
+
 #if !defined(FLAGS_HUGE_PAGES)
 #if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
 #define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
