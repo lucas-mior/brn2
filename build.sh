@@ -364,7 +364,29 @@ case "$target" in
     trace_on
     find . -iname "*.[ch]" | xargs ctags --kinds-C=+l+d 2> /dev/null || true
     vtags.sed tags | sort | uniq > .tags.vim       2> /dev/null || true
-    if [ "$CC" = "chibicc" ]; then
+    if [ "$target" = "debug" ]; then
+        cbase_obj="bin/${program}_debug_cbase.o"
+        if [ "$CC" = "chibicc" ]; then
+            with_other chibicc \
+                $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
+                -x c -c cbase/cbase.h -o "$cbase_obj"
+            with_other chibicc \
+                $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
+                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
+        elif [ "$CC" = "cproc" ]; then
+            with_other cproc \
+                $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
+                -x c -c cbase/cbase.h -o "$cbase_obj"
+            with_other cproc \
+                $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
+                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
+        else
+            $CC $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
+                -x c -c cbase/cbase.h -o "$cbase_obj"
+            $CC $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
+                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
+        fi
+    elif [ "$CC" = "chibicc" ]; then
         with_other chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     elif [ "$CC" = "cproc" ]; then
         with_other cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
