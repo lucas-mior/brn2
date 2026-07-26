@@ -10,7 +10,7 @@
 #define TESTING_assert 0
 #endif
 
-#include "cbase.h"
+#include "primitives.h"
 
 #define ASSERT_FP_KIND_NONE    0
 #define ASSERT_FP_KIND_FLOAT   1
