@@ -137,14 +137,26 @@
 #define MAP_ANONYMOUS 0
 #endif
 
+#define error(...) \
+    error_impl(__FILE__, __LINE__, (char *)__func__, __VA_ARGS__)
+#define error2(...) fprintf(stderr, __VA_ARGS__)
+static int32 optional_strlen32(char *);
+static int32 strlen32(char *);
+static void fatal(int32) __attribute__((noreturn));
+static void error_impl(char *, int32, char *, char *, ...)
+    __attribute__((format(printf, 4, 5)));
+static int memcmp64(void *, void *, int64);
+static void *memmem64(void *, int64, void *, int64);
+static void *memrchr64(void *, int32, int64);
+
 #include "i18n.h"
 #include "memory.h"
 
 #include "generic.c"
 #include "minmax.c"
+#include "arena.h"
 #include "assert.c"
 
-#include "arena.h"
 #define UTF_INVALID 0xFFFD
 
 static int32 random_utf8_string(char *, int32, int32);
@@ -195,9 +207,6 @@ static void util_copy_file_async_parsed(UtilCopyFilesAsync *);
 static void *util_copy_file_async_thread(void *);
 #endif
 
-static void error_impl(char *, int32, char *, char *, ...)
-    __attribute__((format(printf, 4, 5)));
-static void fatal(int32) __attribute__((noreturn));
 static void util_segv_handler(int32) __attribute__((noreturn));
 static int32 itoa2(char *, int32, llong);
 static long atoi2(char *);
@@ -212,11 +221,7 @@ static void error_async_safe(char *);
 static bool is_ident_char(char);
 static bool is_ident_start_char(char);
 static void *memchr64(void *, int32, int64);
-static int memcmp64(void *, void *, int64);
-static void *memmem64(void *, int64, void *, int64);
-static void *memrchr64(void *, int32, int64);
 static void normalize(char *restrict, int32 *restrict);
-static int32 optional_strlen32(char *);
 static bool parse_option(char **, char *, char *);
 static char *path_basename(char *, int32);
 static void print_timings(
@@ -264,7 +269,6 @@ static int64 square_int64(int64);
 static bool strequal(char *, char *);
 static bool strequal2(char *, int32, char *, int32);
 static int64 strftime2(char *, int64, char *, struct tm *);
-static int32 strlen32(char *);
 static int strncmp32(char *, char *, int64);
 static char *strncpy32(char *, char *, int64);
 static double timediff(struct timespec, struct timespec);
@@ -304,10 +308,6 @@ static void xpthread_mutex_lock(pthread_mutex_t *);
 static void xpthread_mutex_unlock(pthread_mutex_t *);
 static int xunlink(char *);
 static void here_impl(char *, int32, char *);
-
-#define error(...) \
-    error_impl(__FILE__, __LINE__, (char *)__func__, __VA_ARGS__)
-#define error2(...) fprintf(stderr, __VA_ARGS__)
 
 #define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH) \
 _Generic((ARRAY), \
@@ -386,10 +386,6 @@ _Generic((VAR), \
     } \
     ncalls_ncalls += 1; \
 } while (0)
-
-#define MEM_FREED 0xDC
-#define MEM_MALLOCED_UNINITIALIZED 0xCD
-#define MEM_DONT_READ 0xBD
 
 #define PRINT_TIMINGS_3(N, T0, T1) \
     print_timings(__FILE__, __LINE__, (char *)__func__, N, T0, T1)
