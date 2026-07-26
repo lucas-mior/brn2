@@ -796,8 +796,6 @@ hash_expected_collisions(void *map) {
 #error "hash.c tests only work on unix systems"
 #endif
 
-#include <assert.h>
-
 // Have to add these declarations so that clangd does not complain
 struct Hash_map_by_value;
 static void hash_deinit_map_by_value(struct Hash_map_by_value *);
