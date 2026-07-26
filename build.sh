@@ -304,7 +304,6 @@ case "$target" in
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
                 cbase_cmdline="$cbase_cmdline $xc -c cbase/cbase.h -o $cbase_obj"
 
-                cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
                 cmdline="$cmdline $flags -o $test_exe $src $cbase_obj"
             else
@@ -370,8 +369,9 @@ case "$target" in
     ;;
 *)
     trace_on
-    find . -iname "*.[ch]" | xargs ctags --kinds-C=+l+d 2> /dev/null || true
-    vtags.sed tags | sort | uniq > .tags.vim       2> /dev/null || true
+    find . -iname "*.[ch]" -print0 \
+        | xargs --verbose -0 ctags --kinds-C=+l+d || true
+    vtags.sed tags | sort | uniq > .tags.vim      || true
     if [ "$target" = "debug" ]; then
         cbase_obj="bin/${program}_debug_cbase.o"
         if [ "$CC" = "chibicc" ]; then
