@@ -12,6 +12,8 @@
 
 #include "libc.h"
 #include "primitives.h"
+#include "base_macros.h"
+#include "platform_detection.h"
 
 #define ASSERT_FP_KIND_NONE    0
 #define ASSERT_FP_KIND_FLOAT   1
