@@ -65,77 +65,7 @@
 #define ERROR_NOTIFY 0
 #endif
 
-#include "platform_detection.h"
-
-#include <assert.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <float.h>
-#include <libgen.h>
-#include <limits.h>
-#include <pthread.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <time.h>
-#include <unistd.h>
-#include <setjmp.h>
-#include <signal.h>
-
-#if OS_WINDOWS
-#include <windows.h>
-#endif
-
-#if OS_UNIX
-#include <sys/mman.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <poll.h>
-#endif
-
-#if defined(__GLIBC__)
-#include <fts.h>
-#endif
-
-#if OS_MAC
-#include <sys/param.h>
-#undef MIN
-#undef MAX
-#endif
-
-#include "primitives.h"
-#include "base_macros.h"
-
-#if !defined(FLAGS_HUGE_PAGES)
-#if defined(MAP_HUGETLB) && defined(MAP_HUGE_2MB)
-#define FLAGS_HUGE_PAGES MAP_HUGETLB | MAP_HUGE_2MB
-#else
-#define FLAGS_HUGE_PAGES 0
-#endif
-#endif
-
-#if !defined(MAP_POPULATE)
-#define MAP_POPULATE 0
-#endif
-
-#if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
-#define MAP_ANON MAP_ANONYMOUS
-#elif !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
-#define MAP_ANONYMOUS MAP_ANON
-#elif !defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
-#define MAP_ANON 0
-#define MAP_ANONYMOUS 0
-#endif
+#include "libc.h"
 
 #define error(...) \
     error_impl(__FILE__, __LINE__, (char *)__func__, __VA_ARGS__)
