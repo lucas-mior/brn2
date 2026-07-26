@@ -19,8 +19,7 @@ alias trace_off='{ set +x; } 2>/dev/null'
 
 
 dir=$(dirname "$(readlink -f "$0")")
-cbase="cbase"
-CPPFLAGS="$CPPFLAGS -I$dir/$cbase"
+CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 cd "$dir" || exit
 program=$(basename "$(readlink -f "$(dirname "$0")")")
 script=$(basename "$0")
@@ -138,7 +137,7 @@ cbase_object_stale () {
     if [ ! -f "$obj" ]; then
         return 0
     fi
-    find "$cbase" -iname "*.[ch]" -newer "$obj" -print -quit | grep -q .
+    find "cbase" -iname "*.[ch]" -newer "$obj" -print -quit | grep -q .
 }
 
 case "$target" in
@@ -301,11 +300,11 @@ case "$target" in
             cmdline="$cmdline -target x86_64-windows-gnu"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="$cbase_cmdline -x c -c cbase/cbase.h -o $cbase_obj"
+                cbase_cmdline="cbase_cmdline -x c -c cbase/cbase.h -o cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
-                cmdline="$cmdline $flags -o $test_exe $src $cbase_obj"
+                cmdline="$cmdline $flags -o $test_exe $src cbase_obj"
             else
                 cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
                 cmdline="$cmdline $flags -o $test_exe $src"
@@ -315,11 +314,11 @@ case "$target" in
             cmdline="$CC $CPPFLAGS $CFLAGS"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="$cbase_cmdline -x c -c cbase/cbase.h -o $cbase_obj"
+                cbase_cmdline="cbase_cmdline -x c -c cbase/cbase.h -o cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
-                cmdline="$cmdline -o $test_exe $src $cbase_obj $LDFLAGS $flags"
+                cmdline="$cmdline -o $test_exe $src cbase_obj $LDFLAGS $flags"
             else
                 cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
                 cmdline="$cmdline $flags -o $test_exe $src"
@@ -328,14 +327,14 @@ case "$target" in
 
         if [ "$name" = "cbase_main_separate_object" ]; then
             cmdline=$(option_remove "$cmdline" "-DDEBUGGING=1")
-            cbase_cmdline=$(option_remove "$cbase_cmdline" "-DDEBUGGING=1")
+            cbase_cmdline=$(option_remove "cbase_cmdline" "-DDEBUGGING=1")
         fi
 
         if [ "$CC" = "chibicc" ] || [ "$CC"  = "cproc" ]; then
             trace_on
-            if [ "$separate_cbase" -eq 1 ] && cbase_object_stale "$cbase_obj"; then
-                cbase_cmdline_no_cc=$(option_remove "$cbase_cmdline" "$CC")
-                with_other "$CC" "$cbase_cmdline_no_cc" || exit 1
+            if [ "$separate_cbase" -eq 1 ] && cbase_object_stale "cbase_obj"; then
+                cbase_cmdline_no_cc=$(option_remove "cbase_cmdline" "$CC")
+                with_other "$CC" "cbase_cmdline_no_cc" || exit 1
             fi
             cmdline_no_cc=$(option_remove "$cmdline" "$CC")
             if with_other "$CC" "$cmdline_no_cc"; then
@@ -346,8 +345,8 @@ case "$target" in
         else
             trace_on
             if [ "$separate_cbase" -eq 1 ] \
-               && cbase_object_stale "$cbase_obj" \
-               && ! $cbase_cmdline; then
+               && cbase_object_stale "cbase_obj" \
+               && ! cbase_cmdline; then
                 exit 1
             fi
             if $cmdline; then
@@ -374,30 +373,30 @@ case "$target" in
     if [ "$target" = "debug" ]; then
         cbase_obj="bin/${program}_debug_cbase.o"
         if [ "$CC" = "chibicc" ]; then
-            if cbase_object_stale "$cbase_obj"; then
+            if cbase_object_stale "cbase_obj"; then
                 with_other chibicc \
                     $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    -x c -c cbase/cbase.h -o "$cbase_obj"
+                    -x c -c cbase/cbase.h -o "cbase_obj"
             fi
             with_other chibicc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
+                $CFLAGS -o ${exe} "$main" "cbase_obj" $LDFLAGS
         elif [ "$CC" = "cproc" ]; then
-            if cbase_object_stale "$cbase_obj"; then
+            if cbase_object_stale "cbase_obj"; then
                 with_other cproc \
                     $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    -x c -c cbase/cbase.h -o "$cbase_obj"
+                    -x c -c cbase/cbase.h -o "cbase_obj"
             fi
             with_other cproc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
+                $CFLAGS -o ${exe} "$main" "cbase_obj" $LDFLAGS
         else
-            if cbase_object_stale "$cbase_obj"; then
+            if cbase_object_stale "cbase_obj"; then
                 $CC $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    -x c -c cbase/cbase.h -o "$cbase_obj"
+                    -x c -c cbase/cbase.h -o "cbase_obj"
             fi
             $CC $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
+                $CFLAGS -o ${exe} "$main" "cbase_obj" $LDFLAGS
         fi
     elif [ "$CC" = "chibicc" ]; then
         with_other chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
