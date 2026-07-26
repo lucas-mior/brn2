@@ -297,6 +297,7 @@ case "$target" in
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
                 cbase_cmdline="$cbase_cmdline -x c -c cbase/cbase.h -o $cbase_obj"
+
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
                 cmdline="$cmdline $flags -o $test_exe $src $cbase_obj"
@@ -310,6 +311,7 @@ case "$target" in
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
                 cbase_cmdline="$cbase_cmdline -x c -c cbase/cbase.h -o $cbase_obj"
+
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
                 cmdline="$cmdline -o $test_exe $src $cbase_obj $LDFLAGS $flags"
