@@ -11,6 +11,10 @@
 #define ALIGNMENT 16
 #endif
 
+#define MEM_FREED 0xDC
+#define MEM_MALLOCED_UNINITIALIZED 0xCD
+#define MEM_DONT_READ 0xBD
+
 #define MEMORY_PADDING ((int32)ALIGNMENT)
 
 #if !defined(TESTING_memory)
