@@ -193,9 +193,4 @@ _Generic((SIZE), \
   #endif
 #endif
 
-#define PASS_MULTIPLE_ARGS(cmd, ...) \
-    pass_multiple_args(cmd, \
-                       sizeof((char *[]){__VA_ARGS__})/sizeof(char *), \
-                       (char*[]){__VA_ARGS__})
-
 #endif /* BASE_MACROS_H */
