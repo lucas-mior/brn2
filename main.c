@@ -425,10 +425,11 @@ main(int argc, char **argv) {
                              "0123456789";
             Command command = {0};
 
-            command_push(&command, "shuf");
-            command_push(&command, brn2_buffer.name);
-            command_push(&command, "-o");
-            command_push(&command, brn2_buffer.name);
+            COMMAND_PUSH(&command,
+                         "shuf",
+                         brn2_buffer.name,
+                         "-o",
+                         brn2_buffer.name);
             main_command_run(&command);
             command_free(&command);
             brn2_list_from_file(new, brn2_buffer.name, false);
@@ -485,23 +486,22 @@ main(int argc, char **argv) {
                     Command command = {0};
 
                     if (brn2_options_vim_split) {
-                        command_push(&command, "vim");
-                        command_push(&command, "-O");
-                        command_push(&command, brn2_buffer_old.name);
-                        command_push(&command, brn2_buffer.name);
-                        command_push(&command, "-c");
-                        command_push(&command,
-                                     "wincmd h | set nomodifiable "
-                                     "scrollbind cursorbind cursorline");
-                        command_push(&command, "-c");
-                        command_push(&command,
-                                     "wincmd l | set scrollbind cursorbind");
-                        command_push(&command, "-c");
-                        command_push(&command,
-                                     " | au QuitPre */brn2.* quitall");
+                        COMMAND_PUSH(
+                            &command,
+                            "vim",
+                            "-O",
+                            brn2_buffer_old.name,
+                            brn2_buffer.name,
+                            "-c",
+                            "wincmd h | set nomodifiable "
+                            "scrollbind cursorbind cursorline",
+                            "-c",
+                            "wincmd l | set scrollbind cursorbind",
+                            "-c",
+                            " | au QuitPre */brn2.* quitall"
+                        );
                     } else {
-                        command_push(&command, editor);
-                        command_push(&command, brn2_buffer.name);
+                        COMMAND_PUSH(&command, editor, brn2_buffer.name);
                     }
 
                     status = main_command_run(&command);
@@ -512,8 +512,9 @@ main(int argc, char **argv) {
                     if (OS_WINDOWS) {
                         Command command = {0};
 
-                        command_push(&command, "Notepad.exe");
-                        command_push(&command, brn2_buffer.name);
+                        COMMAND_PUSH(&command,
+                                     "Notepad.exe",
+                                     brn2_buffer.name);
                         if (main_command_run(&command) < 0) {
                             command_free(&command);
                             fatal(EXIT_FAILURE);
