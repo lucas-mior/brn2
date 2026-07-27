@@ -133,12 +133,43 @@ with_toy_cc () {
     return 0
 }
 
+compiler_object_suffix () {
+    compiler_suffix=$(printf "%s" "$1" \
+        | sed -E 's|.*/||; s|[^[:alnum:]_]+|_|g; s|^_+||; s|_+$||')
+
+    if [ -z "$compiler_suffix" ]; then
+        compiler_suffix=cc
+    fi
+
+    printf "%s" "$compiler_suffix"
+}
+
+cbase_object () {
+    printf "cbase/cbase_%s.o" "$(compiler_object_suffix "$1")"
+}
+
 cbase_object_stale () {
-    obj="$1"
-    if [ ! -f "$obj" ]; then
+    cbase_stale_obj="$1"
+    cbase_stale_cmdline="${2:-}"
+
+    if [ ! -f "$cbase_stale_obj" ]; then
         return 0
     fi
-    find "cbase" -iname "*.[ch]" -newer "$obj" -print -quit | grep -q .
+
+    if [ -n "$cbase_stale_cmdline" ] \
+       && ! printf "%s\n" "$cbase_stale_cmdline" \
+          | cmp -s "${cbase_stale_obj}.cmd" -; then
+        return 0
+    fi
+
+    find "cbase" -iname "*.[ch]" -newer "$cbase_stale_obj" -print -quit \
+        | grep -q .
+}
+
+cbase_object_store_cmdline () {
+    cbase_store_obj="$1"
+    cbase_store_cmdline="$2"
+    printf "%s\n" "$cbase_store_cmdline" > "${cbase_store_obj}.cmd"
 }
 
 case "$target" in
@@ -327,29 +358,31 @@ case "$target" in
             if ! zig version; then
                 continue
             fi
-            cmdline="zig cc $CPPFLAGS $CFLAGS"
+            CC="zig cc"
+            cbase_obj=$(cbase_object "$CC")
+            cmdline="$CC $CPPFLAGS $CFLAGS"
             cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
             cmdline="$cmdline -target x86_64-windows-gnu"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="$cbase_cmdline $xc -c cbase/cbase.h -o cbase/cbase.o"
+                cbase_cmdline="$cbase_cmdline $xc -c cbase/cbase.h -o $cbase_obj"
 
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
-                cmdline="$cmdline $flags -o $test_exe $src cbase/cbase.o"
+                cmdline="$cmdline $flags -o $test_exe $src $cbase_obj"
             else
                 cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
                 cmdline="$cmdline $flags -o $test_exe $src"
             fi
-            CC="zig cc"
         else
+            cbase_obj=$(cbase_object "$CC")
             cmdline="$CC $CPPFLAGS $CFLAGS"
             if [ "$separate_cbase" -eq 1 ]; then
                 cbase_cmdline="$cmdline -DTESTING=1 -DCBASE_IMPLEMENT"
-                cbase_cmdline="$cbase_cmdline $xc  -c cbase/cbase.h -o cbase/cbase.o"
+                cbase_cmdline="$cbase_cmdline $xc  -c cbase/cbase.h -o $cbase_obj"
 
                 cmdline="$cmdline -Wno-unused-variable"
                 cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1 -DCBASE_IMPLEMENTED=1"
-                cmdline="$cmdline -o $test_exe $src cbase/cbase.o $LDFLAGS $flags"
+                cmdline="$cmdline -o $test_exe $src $cbase_obj $LDFLAGS $flags"
             else
                 cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
                 cmdline="$cmdline $flags -o $test_exe $src"
@@ -363,9 +396,11 @@ case "$target" in
 
         if [ "$CC" = "chibicc" ] || [ "$CC"  = "cproc" ]; then
             trace_on
-            if [ "$separate_cbase" -eq 1 ] && cbase_object_stale "cbase/cbase.o"; then
+            if [ "$separate_cbase" -eq 1 ] \
+               && cbase_object_stale "$cbase_obj" "$cbase_cmdline"; then
                 cbase_cmdline_no_cc=$(option_remove "$cbase_cmdline" "$CC")
                 with_toy_cc "$CC" "$cbase_cmdline_no_cc" || exit 1
+                cbase_object_store_cmdline "$cbase_obj" "$cbase_cmdline"
             fi
             cmdline_no_cc=$(option_remove "$cmdline" "$CC")
             if with_toy_cc "$CC" "$cmdline_no_cc"; then
@@ -376,9 +411,11 @@ case "$target" in
         else
             trace_on
             if [ "$separate_cbase" -eq 1 ] \
-               && cbase_object_stale "cbase/cbase.o" \
-               && ! $cbase_cmdline; then
-                exit 1
+               && cbase_object_stale "$cbase_obj" "$cbase_cmdline"; then
+                if ! $cbase_cmdline; then
+                    exit 1
+                fi
+                cbase_object_store_cmdline "$cbase_obj" "$cbase_cmdline"
             fi
             if $cmdline; then
                 if ! $test_exe; then
@@ -405,32 +442,36 @@ case "$target" in
     vtags.sed tags | sort | uniq > .tags.vim      || true
 
     if [ "$target" = "debug" ]; then
-        cbase_obj="bin/${program}_debug_cbase.o"
+        cbase_obj=$(cbase_object "$CC")
         if [ "$CC" = "chibicc" ]; then
-            if cbase_object_stale "cbase/cbase.o"; then
-                with_toy_cc chibicc \
-                    $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    $xc -c cbase/cbase.h -o "cbase/cbase.o"
+            cbase_cmdline="$CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT"
+            cbase_cmdline="$cbase_cmdline $xc -c cbase/cbase.h -o $cbase_obj"
+            if cbase_object_stale "$cbase_obj" "$cbase_cmdline"; then
+                with_toy_cc chibicc $cbase_cmdline
+                cbase_object_store_cmdline "$cbase_obj" "$cbase_cmdline"
             fi
             with_toy_cc chibicc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "cbase/cbase.o" $LDFLAGS
+                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
         elif [ "$CC" = "cproc" ]; then
-            if cbase_object_stale "cbase/cbase.o"; then
-                with_toy_cc cproc \
-                    $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    $xc  -c cbase/cbase.h -o "cbase/cbase.o"
+            cbase_cmdline="$CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT"
+            cbase_cmdline="$cbase_cmdline $xc  -c cbase/cbase.h -o $cbase_obj"
+            if cbase_object_stale "$cbase_obj" "$cbase_cmdline"; then
+                with_toy_cc cproc $cbase_cmdline
+                cbase_object_store_cmdline "$cbase_obj" "$cbase_cmdline"
             fi
             with_toy_cc cproc \
                 $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "cbase/cbase.o" $LDFLAGS
+                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
         else
-            if cbase_object_stale "cbase/cbase.o"; then
-                $CC $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT \
-                    $xc -c cbase/cbase.h -o "cbase/cbase.o"
+            cbase_cmdline="$CC $CPPFLAGS $CFLAGS -DCBASE_IMPLEMENT"
+            cbase_cmdline="$cbase_cmdline $xc -c cbase/cbase.h -o $cbase_obj"
+            if cbase_object_stale "$cbase_obj" "$cbase_cmdline"; then
+                $cbase_cmdline
+                cbase_object_store_cmdline "$cbase_obj" "$cbase_cmdline"
             fi
             $CC $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "cbase/cbase.o" $LDFLAGS
+                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
         fi
     elif [ "$CC" = "chibicc" ]; then
         with_toy_cc chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
@@ -508,7 +549,6 @@ esac
 trace_off
 if [ "$target" = "test_all" ]; then
     while IFS= read -r target <&3; do
-        find . -iname "*.o" -delete
         echo "target=$target"
 
         echo "$target" | grep -Eq "^(# |$)" && continue
@@ -519,7 +559,6 @@ if [ "$target" = "test_all" ]; then
         fi
 
         for compiler in gcc tcc clang "zig cc"; do
-            find . -iname "*.o" -delete
             printf "\nCC=${RED}${compiler}${RES}\n"
             CC="$compiler" $0 "$target" || exit 3
         done
