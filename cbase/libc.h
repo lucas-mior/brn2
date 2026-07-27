@@ -36,9 +36,12 @@
 #endif
 
 #if OS_UNIX
-#include <sys/mman.h>
-#include <sys/wait.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <poll.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
 #endif
 
 #if defined(__GLIBC__)
