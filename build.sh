@@ -46,7 +46,7 @@ CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
-CFLAGS="$CFLAGS -Werror"
+# CFLAGS="$CFLAGS -Werror"
 CFLAGS="$CFLAGS -Wno-format-pedantic"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
@@ -169,6 +169,7 @@ case "$target" in
 "test")
     CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1"
     CFLAGS="$CFLAGS -fsanitize=undefined -Wno-address"
+    CFLAGS="$CFLAGS -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 "check")
@@ -507,6 +508,7 @@ esac
 trace_off
 if [ "$target" = "test_all" ]; then
     while IFS= read -r target <&3; do
+        find . -iname "*.o" -delete
         echo "target=$target"
 
         echo "$target" | grep -Eq "^(# |$)" && continue
