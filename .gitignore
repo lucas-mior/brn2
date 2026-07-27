@@ -25,3 +25,4 @@ bbb
 *.cmd
 *.qbe
 *.cmd
+*.o
