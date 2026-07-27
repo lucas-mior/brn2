@@ -154,6 +154,15 @@ strequal(char *s1, char *s2) {
 }
 
 CBASE_API_DEF bool
+optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
+    if ((a == NULL) || (b == NULL)) {
+        return false;
+    }
+
+    return strequal2(a, a_len, b, b_len);
+}
+
+CBASE_API_DEF bool
 strequal2(char *a, int32 a_len, char *b, int32 b_len) {
     if (a_len != b_len) {
         return false;

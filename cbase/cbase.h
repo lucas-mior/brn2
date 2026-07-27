@@ -197,6 +197,7 @@ CBASE_API_DECL int64 clamp_int64(int64, int64, int64);
 CBASE_API_DECL int64 square_int64(int64);
 CBASE_API_DECL bool strequal(char *, char *);
 CBASE_API_DECL bool strequal2(char *, int32, char *, int32);
+CBASE_API_DEF bool optional_strequal(char *a, int32 a_len, char *b, int32 b_len);
 CBASE_API_DECL int64 strftime2(char *, int64, char *, struct tm *);
 CBASE_API_DECL int strncmp32(char *, char *, int64);
 CBASE_API_DECL char *strncpy32(char *, char *, int64);
