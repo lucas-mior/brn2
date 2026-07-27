@@ -1158,10 +1158,12 @@ main(void) {
         ASSERT(assertion_failed);
         assertion_failed = false;
     }
+
     ASSERT(true);
     ASSERT(!false);
     ASSERT_EQUAL(true, true);
-    ASSERT_EQUAL(0 < 1, 1 < 2);
+    ASSERT_EQUAL(0 < 1, 1 < 3);
+
     exit(EXIT_SUCCESS);
 }
 #endif
