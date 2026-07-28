@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#include <string.h>
+#include "cbase.h"
 
 typedef struct FileRename {
     char *original;
