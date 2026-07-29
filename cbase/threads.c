@@ -474,8 +474,7 @@ main(void) {
 
     memset64(values, 0, length*SIZEOF(*values));
     work.values = values;
-    workers = parallel_for_min_items(length, 1, threads_test_fill_work,
-                                     &work);
+    workers = parallel_for_min_items(length, 1, threads_test_fill_work, &work);
 
     ASSERT_MORE_EQUAL(workers, 1);
     for (int64 i = 0; i < length; i += 1) {
