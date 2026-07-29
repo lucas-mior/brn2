@@ -18,7 +18,6 @@
 #include <libgen.h>
 #include <limits.h>
 #include <math.h>
-#include <pthread.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -39,6 +38,10 @@
 
 #if OS_WINDOWS
 #include <windows.h>
+#endif
+
+#if OS_UNIX
+#include <pthread.h>
 #endif
 
 #if OS_UNIX

@@ -260,6 +260,7 @@ CBASE_API_DECL int xfclose(char *, int32, char *, FILE *, char *);
 CBASE_API_DECL FILE *xfopen(char *, int32, char *, char *, char *);
 CBASE_API_DECL void xkill(pid_t, int);
 CBASE_API_DECL void xpipe(int [2]);
+#if OS_UNIX
 CBASE_API_DECL void xpthread_cond_destroy(pthread_cond_t *);
 CBASE_API_DECL void xpthread_create(
     pthread_t *,
@@ -271,6 +272,7 @@ CBASE_API_DECL void xpthread_join(pthread_t *, void **);
 CBASE_API_DECL void xpthread_mutex_destroy(pthread_mutex_t *);
 CBASE_API_DECL void xpthread_mutex_lock(pthread_mutex_t *);
 CBASE_API_DECL void xpthread_mutex_unlock(pthread_mutex_t *);
+#endif
 CBASE_API_DECL int xunlink(char *);
 CBASE_API_DECL void here_impl(char *, int32, char *);
 
