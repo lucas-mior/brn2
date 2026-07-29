@@ -425,6 +425,7 @@ util_nthreads(void) {
 }
 #endif
 
+#if OS_UNIX
 CBASE_API_DEF void
 xpthread_mutex_lock(pthread_mutex_t *mutex) {
     int err;
@@ -486,6 +487,7 @@ xpthread_join(pthread_t *thread, void **thread_return) {
     *thread = 0;
     return;
 }
+#endif
 
 CBASE_API_DEF int32 __attribute__((format(printf, 3, 4)))
 snprintf2(char *buffer, int64 size, char *format, ...) {
@@ -2274,12 +2276,14 @@ util_functions_sink(void) {
     (void)xmemdup;
     (void)xunlink;
 
+#if OS_UNIX
     (void)xpthread_mutex_lock;
     (void)xpthread_mutex_unlock;
     (void)xpthread_cond_destroy;
     (void)xpthread_mutex_destroy;
     (void)xpthread_create;
     (void)xpthread_join;
+#endif
 
     (void)random_ascii_string;
     (void)strncpy32;
@@ -2663,12 +2667,14 @@ main(int argc, char **argv) {
     (void)xpipe;
     (void)xunlink;
 
+#if OS_UNIX
     (void)xpthread_mutex_lock;
     (void)xpthread_mutex_unlock;
     (void)xpthread_cond_destroy;
     (void)xpthread_mutex_destroy;
     (void)xpthread_create;
     (void)xpthread_join;
+#endif
 
     (void)fwrite64;
     (void)fread64;
