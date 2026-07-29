@@ -207,6 +207,8 @@ CBASE_API_DECL int64 strftime2(char *, int64, char *, struct tm *);
 CBASE_API_DECL int strncmp32(char *, char *, int64);
 CBASE_API_DECL char *strncpy32(char *, char *, int64);
 CBASE_API_DECL double timediff(struct timespec, struct timespec);
+CBASE_API_DECL void time_monotonic_coarse(struct timespec *);
+CBASE_API_DECL void time_monotonic_precise(struct timespec *);
 CBASE_API_DECL void timezone_init(void);
 CBASE_API_DECL int32 util_copy_file_sync(char *, char *);
 CBASE_API_DECL void util_die_notify(char *, char *, ...);

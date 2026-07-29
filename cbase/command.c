@@ -962,7 +962,7 @@ main(int argc, char **argv) {
     (void)argc;
     (void)argv;
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    time_monotonic_precise(&t0);
     {
         Command cmd = {0};
         char *command_text;
@@ -1205,7 +1205,7 @@ main(int argc, char **argv) {
 
     NCALLS(1);
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    time_monotonic_precise(&t1);
     PRINT_TIMINGS(1, t0, t1);
     exit(EXIT_SUCCESS);
 }

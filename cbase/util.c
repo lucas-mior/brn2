@@ -72,13 +72,17 @@ static time_t timezone_offset = 0;
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-#if OS_WINDOWS
 static void *
-memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
+cbase_memmem_fallback(
+    void *haystack,
+    size_t hay_len,
+    void *needle,
+    size_t needle_len
+) {
     uchar *h = haystack;
     uchar *n = needle;
-    uchar *end = h + hay_len;
-    uchar *limit = end - needle_len + 1;
+    uchar *end;
+    uchar *limit;
 
     if (needle_len == 0) {
         return haystack;
@@ -89,6 +93,9 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
     if (hay_len < needle_len) {
         return NULL;
     }
+
+    end = h + hay_len;
+    limit = end - needle_len + 1;
 
     while (h < limit) {
         uchar *p;
@@ -105,7 +112,6 @@ memmem(void *haystack, size_t hay_len, void *needle, size_t needle_len) {
 
     return NULL;
 }
-#endif
 
 CBASE_API_DEF void *
 memrchr64(void *pointer, int32 value, int64 size) {
@@ -144,7 +150,12 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
         return NULL;
     }
 
+#if CBASE_HAS_SYSTEM_MEMMEM
     result = memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
+#else
+    result = cbase_memmem_fallback(haystack, (size_t)hay_len,
+                                   needle, (size_t)needle_len);
+#endif
     return result;
 }
 
@@ -578,7 +589,7 @@ util_filename_from(char *buffer, int64 size, int fd) {
     }
     buffer[len] = '\0';
     return 0;
-#elif OS_MAC
+#elif CBASE_HAS_F_GETPATH
     static char buffer2[MAXPATHLEN];
     int64 len;
 
@@ -1049,7 +1060,7 @@ util_copy_file_async_thread(void *arg) {
 
 #endif
 
-#if OS_LINUX
+#if CBASE_HAS_PROCFS
 CBASE_API_DEF void
 send_signal(char *executable, int32 signal_number) {
     DIR *processes;
@@ -1069,9 +1080,11 @@ send_signal(char *executable, int32 signal_number) {
         ssize_t r;
         char *last;
 
-        if (process->d_type != DT_DIR) {
+#if CBASE_DIRENT_HAS_D_TYPE
+        if ((process->d_type != DT_DIR) && (process->d_type != DT_UNKNOWN)) {
             continue;
         }
+#endif
         if ((pid = atoi(process->d_name)) <= 0) {
             continue;
         }
@@ -1508,6 +1521,60 @@ timediff(struct timespec t0, struct timespec t1) {
     llong nsec = t1.tv_nsec - t0.tv_nsec;
     double diff = (double)sec + (double)nsec*1e-9;
     return diff;
+}
+
+CBASE_API_DEF void
+time_monotonic_precise(struct timespec *time) {
+    int32 status;
+
+#if defined(CLOCK_MONOTONIC_RAW)
+    status = clock_gettime(CLOCK_MONOTONIC_RAW, time);
+#elif defined(CLOCK_MONOTONIC)
+    status = clock_gettime(CLOCK_MONOTONIC, time);
+#else
+    struct timeval timeval;
+
+    status = gettimeofday(&timeval, NULL);
+    if (status == 0) {
+        time->tv_sec = timeval.tv_sec;
+        time->tv_nsec = timeval.tv_usec*1000;
+    }
+#endif
+
+    if (status < 0) {
+        error("Error reading precise monotonic clock: %s.\n",
+              strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
+CBASE_API_DEF void
+time_monotonic_coarse(struct timespec *time) {
+    int32 status;
+
+#if defined(CLOCK_MONOTONIC_COARSE)
+    status = clock_gettime(CLOCK_MONOTONIC_COARSE, time);
+#elif defined(CLOCK_MONOTONIC)
+    status = clock_gettime(CLOCK_MONOTONIC, time);
+#elif defined(CLOCK_MONOTONIC_RAW)
+    status = clock_gettime(CLOCK_MONOTONIC_RAW, time);
+#else
+    struct timeval timeval;
+
+    status = gettimeofday(&timeval, NULL);
+    if (status == 0) {
+        time->tv_sec = timeval.tv_sec;
+        time->tv_nsec = timeval.tv_usec*1000;
+    }
+#endif
+
+    if (status < 0) {
+        error("Error reading coarse monotonic clock: %s.\n",
+              strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    return;
 }
 
 CBASE_API_DEF void
@@ -2292,6 +2359,8 @@ util_functions_sink(void) {
     (void)deg2rad;
     (void)path_basename;
     (void)timediff;
+    (void)time_monotonic_coarse;
+    (void)time_monotonic_precise;
     (void)catfile;
     (void)parse_option;
     (void)command_print;
@@ -2401,7 +2470,7 @@ main(int argc, char **argv) {
         sb_free(&builder);
     }
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    time_monotonic_precise(&t0);
 #if OS_UNIX
     timezone_init();
 #endif
@@ -2680,7 +2749,7 @@ main(int argc, char **argv) {
     (void)fread64;
     (void)program_len;
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    time_monotonic_precise(&t1);
     PRINT_TIMINGS(1, t0, t1);
     exit(EXIT_SUCCESS);
 }
