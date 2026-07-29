@@ -63,25 +63,6 @@ brn2_rename_exchange(const char *oldname, const char *newname) {
 #undef RENAME_EXCHANGE
 #endif
 
-#if OS_UNIX
-static pthread_mutex_t brn2_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t brn2_done_work = PTHREAD_COND_INITIALIZER;
-
-pthread_t thread_pool[BRN2_MAX_THREADS];
-static int32 work_pending = 0;
-pthread_cond_t brn2_new_work = PTHREAD_COND_INITIALIZER;
-#endif
-
-static struct WorkQueue {
-    Work *items[BRN2_MAX_THREADS];
-    int32 head;
-    int32 tail;
-    int32 count;
-    int32 padding;
-} work_queue = {0};
-
-bool stop_threads = false;
-
 INLINE int32
 brn2_compare(void *a, void *b) {
     FileName **file_a = a;
@@ -131,47 +112,6 @@ brn2_list_from_args(FileList *list, int32 argc, char **argv) {
 
     return;
 }
-
-#if OS_UNIX
-static void *__attribute__((noreturn))
-brn2_threads_function(void *arg) {
-    (void)arg;
-
-    while (true) {
-        Work *work;
-
-        xpthread_mutex_lock(&brn2_mutex);
-        while ((work_queue.count <= 0) && !stop_threads) {
-            pthread_cond_wait(&brn2_new_work, &brn2_mutex);
-        }
-
-        if (stop_threads) {
-            xpthread_mutex_unlock(&brn2_mutex);
-            pthread_exit(NULL);
-        }
-
-        if (work_queue.count <= 0) {
-            work = NULL;
-        } else {
-            work = work_queue.items[work_queue.head];
-            work_queue.head = (work_queue.head + 1) % LENGTH(work_queue.items);
-            work_queue.count -= 1;
-        }
-
-        xpthread_mutex_unlock(&brn2_mutex);
-
-        if (work) {
-            work->function(work);
-            xpthread_mutex_lock(&brn2_mutex);
-            work_pending -= 1;
-            if ((work_pending <= 0) && (work_queue.count <= 0)) {
-                pthread_cond_signal(&brn2_done_work);
-            }
-            xpthread_mutex_unlock(&brn2_mutex);
-        }
-    }
-}
-#endif
 
 void
 brn2_list_from_dir(FileList *list, char *directory) {
@@ -675,21 +615,25 @@ brn2_get_number_changes(FileList *old, FileList *new) {
     return total;
 }
 
-#if OS_UNIX && (BRN2_MAX_THREADS > 1)
 static void
-brn2_threads_join(void) {
-    xpthread_mutex_lock(&brn2_mutex);
-    stop_threads = true;
-    pthread_cond_broadcast(&brn2_new_work);
-    xpthread_mutex_unlock(&brn2_mutex);
+brn2_parallel_work(
+    int64 start,
+    int64 end,
+    int32 worker_id,
+    void *user_data
+) {
+    Work *template = user_data;
+    Work work = *template;
 
-    for (int32 i = 0; i < nthreads; i += 1) {
-        xpthread_join(&thread_pool[i], NULL);
+    if ((start > MAXOF(work.start)) || (end > MAXOF(work.end))) {
+        error("Error: Thread work range does not fit in int32.\n");
+        fatal(EXIT_FAILURE);
     }
 
-    xpthread_mutex_destroy(&brn2_mutex);
-    xpthread_cond_destroy(&brn2_new_work);
-    xpthread_cond_destroy(&brn2_done_work);
+    work.start = (int32)start;
+    work.end = (int32)end;
+    work.id = worker_id;
+    work.function(&work);
     return;
 }
 
@@ -703,75 +647,18 @@ brn2_threads(
     uint32 map_size,
     char *map
 ) {
-    static Work slices[BRN2_MAX_THREADS];
-    int32 range = length / nthreads;
+    Work work = {0};
 
-    for (int32 i = 0; i < nthreads; i += 1) {
-        slices[i].start = i*range;
-        if ((i + 1) < nthreads) {
-            slices[i].end = (i + 1)*range;
-        } else {
-            slices[i].end = length;
-        }
-        slices[i].old_list = old;
-        slices[i].new_list = new;
-        slices[i].numbers = numbers;
-        slices[i].map_capacity = map_size;
-        slices[i].function = function;
-        slices[i].map = map;
-        slices[i].id = i;
+    work.old_list = old;
+    work.new_list = new;
+    work.numbers = numbers;
+    work.map_capacity = map_size;
+    work.function = function;
+    work.map = map;
 
-        xpthread_mutex_lock(&brn2_mutex);
-
-        if (work_queue.count >= LENGTH(work_queue.items)) {
-            error("Error: work queue is full.\n");
-            fatal(EXIT_FAILURE);
-        }
-        work_queue.items[work_queue.tail] = &slices[i];
-        work_queue.tail = (work_queue.tail + 1) % LENGTH(work_queue.items);
-        work_queue.count += 1;
-        work_pending += 1;
-
-        pthread_cond_signal(&brn2_new_work);
-        xpthread_mutex_unlock(&brn2_mutex);
-    }
-
-    xpthread_mutex_lock(&brn2_mutex);
-    while ((work_pending > 0) || (work_queue.count > 0)) {
-        pthread_cond_wait(&brn2_done_work, &brn2_mutex);
-    }
-    pthread_cond_signal(&brn2_new_work);
-    xpthread_mutex_unlock(&brn2_mutex);
-
-    return nthreads;
+    return parallel_for_max_threads_min_items(length, nthreads, 1,
+                                             brn2_parallel_work, &work);
 }
-#else
-static int32
-brn2_threads(
-    void *(*function)(Work *),
-    int32 length,
-    FileList *old,
-    FileList *new,
-    int32 *numbers,
-    uint32 map_size,
-    char *map
-) {
-    Work slices[1];
-
-    slices[0].start = 0;
-    slices[0].end = length;
-    slices[0].old_list = old;
-    slices[0].new_list = new;
-    slices[0].numbers = numbers;
-    slices[0].map_capacity = map_size;
-    slices[0].function = function;
-    slices[0].map = map;
-    slices[0].id = 0;
-    function(&slices[0]);
-
-    return 1;
-}
-#endif
 
 #define SORT_BENCHMARK 0
 
@@ -1445,10 +1332,6 @@ main(void) {
     FileList *list1 = &list1_stack;
     FileList *list2 = &list2_stack;
 
-    for (int32 i = 0; i < nthreads; i += 1) {
-        xpthread_create(&thread_pool[i], NULL, brn2_threads_function, NULL);
-    }
-
     {
         char command[256];
         char *filelist = "/tmp/brn2test";
@@ -1918,7 +1801,6 @@ main(void) {
         arenas_destroy(old->arenas, nthreads);
     }
 
-    brn2_threads_join();
     exit(EXIT_SUCCESS);
 }
 #endif
