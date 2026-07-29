@@ -85,13 +85,6 @@ extern bool brn2_options_autosolve;
 extern bool brn2_options_vim_split;
 extern int32 nthreads;
 
-#if OS_UNIX
-extern pthread_t thread_pool[BRN2_MAX_THREADS];
-extern uint32 ids[BRN2_MAX_THREADS];
-extern bool stop_threads;
-extern pthread_cond_t brn2_new_work;
-#endif
-
 extern int (*print)(const char *, ...);
 
 INLINE int32 brn2_compare(void *, void *);

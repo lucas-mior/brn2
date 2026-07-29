@@ -46,6 +46,9 @@
 #if !defined(TESTING_utf8)
 #define TESTING_utf8 0
 #endif
+#if !defined(TESTING_threads)
+#define TESTING_threads 0
+#endif
 #if !defined(TESTING_util)
 #define TESTING_util 0
 #endif
@@ -218,6 +221,36 @@ CBASE_API_DECL int64 read64(int32, void *, int64);
 CBASE_API_DECL int64 write64(int32, void *, int64);
 CBASE_API_DECL int64 fread64(void *, int64, int64, FILE *);
 CBASE_API_DECL int64 fwrite64(void *, int64, int64, FILE *);
+
+#if !defined(PARALLEL_FOR_MAX_THREADS)
+#define PARALLEL_FOR_MAX_THREADS 64
+#endif
+
+#if !defined(MIN_PARALLEL_ITEMS)
+#define MIN_PARALLEL_ITEMS 64
+#endif
+
+typedef void ParallelForFunction(int64, int64, int32, void *);
+
+CBASE_API_DECL int32 parallel_for(
+    int64,
+    ParallelForFunction *,
+    void *
+);
+CBASE_API_DECL int32 parallel_for_min_items(
+    int64,
+    int64,
+    ParallelForFunction *,
+    void *
+);
+CBASE_API_DECL int32 parallel_for_max_threads_min_items(
+    int64,
+    int32,
+    int64,
+    ParallelForFunction *,
+    void *
+);
+CBASE_API_DECL void threads_functions_sink(void);
 CBASE_API_DECL void write_all(int, char *, int64);
 CBASE_API_DECL bool write_entire_file(char *, char *, int64);
 CBASE_API_DECL int xclose(char *, int, int *, char *, char *);
@@ -540,6 +573,7 @@ CBASE_API_DECL void array_sink(void);
 #include "array.c"
 #include "utf8.c"
 #include "util.c"
+#include "threads.c"
 
 #define ENUM_NAME CommandFlag
 #define ENUM_BITFLAGS 1

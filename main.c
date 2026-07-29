@@ -120,9 +120,6 @@ main(int argc, char **argv) {
     struct Hash_map *newlist_map = NULL;
     int32 available_threads;
     int32 unfiltered_old_length;
-#if OS_UNIX
-    int32 thread_ids[BRN2_MAX_THREADS];
-#endif
     uint32 main_capacity;
     char *editor;
     char *directory = ".";
@@ -253,12 +250,6 @@ main(int argc, char **argv) {
     }
     if (old->length <= BRN2_MIN_PARALLEL) {
         nthreads = 1;
-    }
-
-    for (int32 i = 0; i < nthreads; i += 1) {
-        thread_ids[i] = i;
-        xpthread_create(&thread_pool[i], NULL,
-                        brn2_threads_function, &thread_ids[i]);
     }
 #endif
 
@@ -620,9 +611,6 @@ main(int argc, char **argv) {
 #endif
 
     if (DEBUGGING) {
-#if BRN2_MAX_THREADS > 1
-        brn2_threads_join();
-#endif
         brn2_free_list(old);
         brn2_free_list(new);
         xmunmap(old->indexes, old->indexes_size);
