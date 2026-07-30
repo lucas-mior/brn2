@@ -422,7 +422,7 @@ case "$target" in
                 if ! $test_exe; then
                     gdb --quiet \
                         -ex run -ex backtrace -ex quit \
-                        $test_exe 2>&1 | $xsel -b
+                        $test_exe 2>&1 | $xsel -o -b
                     exit 1
                 fi
             else
