@@ -1,0 +1,7 @@
+git bisect bad                                     
+
+There are only 'skip'ped commits left to test.
+The first 'bad' commit could be any of:
+c2684c067d14f507bedf9c37e58ad72b64a9d956
+38b8245b58f0a83c60964076cf591d7e33588e10
+We cannot bisect more!
