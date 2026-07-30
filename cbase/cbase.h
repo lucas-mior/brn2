@@ -81,6 +81,10 @@ CBASE_API_DECL void *memmem64(void *, int64, void *, int64);
 CBASE_API_DECL void *memrchr64(void *, int32, int64);
 
 #include "libc.h"
+#if defined(ALIGN)
+#undef ALIGN
+#endif
+#define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
 #include "i18n.h"
 #include "memory.h"
 #include "arena.h"
@@ -276,6 +280,13 @@ CBASE_API_DECL void xpthread_mutex_lock(pthread_mutex_t *);
 CBASE_API_DECL void xpthread_mutex_unlock(pthread_mutex_t *);
 #endif
 CBASE_API_DECL int xunlink(char *);
+#if TESTING && OS_UNIX
+CBASE_API_DECL bool test_command_exists(char *);
+CBASE_API_DECL bool test_hardlink_supported(char *);
+CBASE_API_DECL bool test_symlink_supported(char *);
+CBASE_API_DECL void test_make_temp_dir(char *, int32, char *);
+CBASE_API_DECL void test_remove_tree(char *);
+#endif
 CBASE_API_DECL void here_impl(char *, int32, char *);
 
 #define STRING_FROM_ARRAY(BUFFER, SEP, ARRAY, LENGTH) \
