@@ -72,6 +72,7 @@ static time_t timezone_offset = 0;
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
+#if !CBASE_HAS_SYSTEM_MEMMEM
 static void *
 cbase_memmem_fallback(
     void *haystack,
@@ -112,6 +113,7 @@ cbase_memmem_fallback(
 
     return NULL;
 }
+#endif
 
 CBASE_API_DEF void *
 memrchr64(void *pointer, int32 value, int64 size) {
@@ -2368,6 +2370,192 @@ util_functions_sink(void) {
 }
 #endif
 
+#if TESTING && OS_UNIX
+CBASE_API_DEF bool
+test_command_exists(char *command) {
+    char *path;
+    int32 command_len;
+    int32 path_len;
+
+    if ((command == NULL) || (command[0] == '\0')) {
+        return false;
+    }
+
+    command_len = strlen32(command);
+    if (memchr64(command, '/', command_len) != NULL) {
+        return access(command, X_OK) == 0;
+    }
+
+    path = getenv("PATH");
+    if (path == NULL) {
+        return false;
+    }
+
+    path_len = strlen32(path);
+    for (int32 start = 0; start <= path_len; start += 1) {
+        char candidate[PATH_MAX];
+        int32 len;
+        int32 end;
+
+        end = start;
+        while ((end < path_len) && (path[end] != ':')) {
+            end += 1;
+        }
+
+        if (end == start) {
+            len = snprintf2(candidate, SIZEOF(candidate), "./%s", command);
+        } else {
+            len = snprintf2(candidate, SIZEOF(candidate), "%.*s/%s",
+                            end - start, path + start, command);
+        }
+        if ((len > 0) && (len < SIZEOF(candidate))
+            && (access(candidate, X_OK) == 0)) {
+            return true;
+        }
+
+        start = end;
+    }
+
+    return false;
+}
+
+CBASE_API_DEF void
+test_make_temp_dir(char *buffer, int32 capacity, char *name) {
+    char *tmpdir;
+    int32 len;
+
+    tmpdir = getenv("CECUP_TEST_TMPDIR");
+    if (tmpdir == NULL) {
+        tmpdir = getenv("TMPDIR");
+    }
+    if (tmpdir == NULL) {
+        tmpdir = "/tmp";
+    }
+
+    len = snprintf2(buffer, capacity, "%s/cecup_%s_XXXXXX", tmpdir, name);
+    if ((len <= 0) || (len >= capacity)) {
+        error("Temporary directory path too long.\n");
+        fatal(EXIT_FAILURE);
+    }
+    if (mkdtemp(buffer) == NULL) {
+        error("Error creating temporary directory %s: %s.\n",
+              buffer, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+
+    return;
+}
+
+static void
+test_remove_tree_children(char *path) {
+    DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir(path);
+    if (dir == NULL) {
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) {
+        char child[PATH_MAX];
+        int32 len;
+
+        if (strequal(entry->d_name, ".") || strequal(entry->d_name, "..")) {
+            continue;
+        }
+
+        len = snprintf2(child, SIZEOF(child), "%s/%s", path, entry->d_name);
+        if ((len <= 0) || (len >= SIZEOF(child))) {
+            error("Test path too long below %s.\n", path);
+            fatal(EXIT_FAILURE);
+        }
+        test_remove_tree(child);
+    }
+
+    xclosedir(dir, path);
+    return;
+}
+
+CBASE_API_DEF void
+test_remove_tree(char *path) {
+    struct stat statbuf;
+
+    if (lstat(path, &statbuf) < 0) {
+        if (errno == ENOENT) {
+            return;
+        }
+        error("Error checking test path %s: %s.\n", path, strerror(errno));
+        return;
+    }
+
+    if (S_ISDIR(statbuf.st_mode) && !S_ISLNK(statbuf.st_mode)) {
+        test_remove_tree_children(path);
+        if (rmdir(path) < 0) {
+            error("Error removing test directory %s: %s.\n",
+                  path, strerror(errno));
+        }
+    } else if (unlink(path) < 0) {
+        error("Error removing test path %s: %s.\n", path, strerror(errno));
+    }
+
+    return;
+}
+
+CBASE_API_DEF bool
+test_symlink_supported(char *dir) {
+    char link_path[PATH_MAX];
+    int32 len;
+    bool supported;
+
+    len = snprintf2(link_path, SIZEOF(link_path), "%s/symlink_probe", dir);
+    if ((len <= 0) || (len >= SIZEOF(link_path))) {
+        return false;
+    }
+
+    unlink(link_path);
+    supported = symlink("target", link_path) == 0;
+    if (supported) {
+        unlink(link_path);
+    }
+
+    return supported;
+}
+
+CBASE_API_DEF bool
+test_hardlink_supported(char *dir) {
+    char link_path[PATH_MAX];
+    char src_path[PATH_MAX];
+    int32 len;
+    bool supported;
+    int32 fd;
+
+    len = snprintf2(src_path, SIZEOF(src_path), "%s/hardlink_probe_src", dir);
+    if ((len <= 0) || (len >= SIZEOF(src_path))) {
+        return false;
+    }
+    len = snprintf2(link_path, SIZEOF(link_path),
+                    "%s/hardlink_probe_dst", dir);
+    if ((len <= 0) || (len >= SIZEOF(link_path))) {
+        return false;
+    }
+
+    unlink(src_path);
+    unlink(link_path);
+    fd = open(src_path, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    if (fd < 0) {
+        return false;
+    }
+    write64(fd, "x", 1);
+    XCLOSE(&fd, src_path);
+
+    supported = link(src_path, link_path) == 0;
+    unlink(link_path);
+    unlink(src_path);
+
+    return supported;
+}
+#endif
+
 #if TESTING_util
 #define CBASE_IMPLEMENT
 #include "cbase.h"
@@ -2442,10 +2630,13 @@ main(int argc, char **argv) {
     char *s1 = "aaaabbbb";
     struct timespec t0;
     struct timespec t1;
+    char temp_dir[PATH_MAX];
 
     (void)argc;
     (void)argv;
     (void)here_counter;
+
+    test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "util");
 
     ASSERT(BEGINS_WITH(s1, strlen32(s1), "aaaa"));
     ASSERT(BEGINS_WITH(s1, strlen32(s1), "aaaabbbb"));
@@ -2645,8 +2836,11 @@ main(int argc, char **argv) {
     }
 
     {
-        char *a = "/tmp/afile";
-        char *b = "/tmp/bfile";
+        char a[PATH_MAX];
+        char b[PATH_MAX];
+
+        SNPRINTF(a, "%s/afile", temp_dir);
+        SNPRINTF(b, "%s/bfile", temp_dir);
 
         WRITE_FILE(a, "hello world");
         WRITE_FILE(b, "hello world");
@@ -2670,8 +2864,11 @@ main(int argc, char **argv) {
         char buffer2[4096];
         char name2[256];
         char buffer3[4096];
-        char *name = "/tmp/test";
+        char buffer4[4096];
+        char name[PATH_MAX];
         int fd;
+
+        SNPRINTF(name, "%s/test", temp_dir);
 
         if ((fd = open(name,
                        O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) < 0) {
@@ -2691,16 +2888,18 @@ main(int argc, char **argv) {
         }
         name2[SIZEOF(name2) - 1] = '\0';
 
-        if ((fd = open(name2,
+        SNPRINTF(buffer2, "%s/%s", temp_dir, name2);
+
+        if ((fd = open(buffer2,
                        O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) < 0) {
-            error("Error opening %s: %s.\n", name2, strerror(errno));
+            error("Error opening %s: %s.\n", buffer2, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 
-        util_filename_from(buffer2, sizeof(buffer2), fd);
-        ASSERT_EQUAL(realpath(name2, buffer3), buffer2);
+        util_filename_from(buffer4, sizeof(buffer4), fd);
+        ASSERT_EQUAL(realpath(buffer2, buffer3), buffer4);
         XCLOSE(&fd);
-        xunlink(name2);
+        xunlink(buffer2);
     }
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
@@ -2748,6 +2947,8 @@ main(int argc, char **argv) {
     (void)fwrite64;
     (void)fread64;
     (void)program_len;
+
+    test_remove_tree(temp_dir);
 
     time_monotonic_precise(&t1);
     PRINT_TIMINGS(1, t0, t1);

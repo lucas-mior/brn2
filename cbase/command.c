@@ -1114,19 +1114,22 @@ main(int argc, char **argv) {
 
         {
             char expected_cwd[PATH_MAX];
+            char test_cwd[PATH_MAX];
             int32 expected_cwd_len;
 
-            ASSERT(realpath("/tmp", expected_cwd) != NULL);
+            test_make_temp_dir(test_cwd, SIZEOF(test_cwd), "command_cwd");
+            ASSERT(realpath(test_cwd, expected_cwd) != NULL);
             expected_cwd_len = strlen32(expected_cwd);
             ASSERT_LESS(expected_cwd_len + 1, SIZEOF(expected_cwd));
             expected_cwd[expected_cwd_len] = '\n';
             expected_cwd[expected_cwd_len + 1] = '\0';
 
-            command_cwd_set(&cmd, "/tmp");
+            command_cwd_set(&cmd, test_cwd);
             COMMAND_PUSH(&cmd, "pwd", "-P");
             ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
             ASSERT_EQUAL(cmd.result.stdout_output, expected_cwd);
             command_cwd_clear(&cmd);
+            test_remove_tree(test_cwd);
         }
 
         command_reset(&cmd);
