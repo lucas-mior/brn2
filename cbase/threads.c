@@ -331,7 +331,9 @@ thread_pool_ensure_started(int32 thread_count) {
     if (!thread_pool_is_initialized) {
         thread_pool_is_initialized = true;
         thread_pool_platform_init();
+#if !CC_TCC
         atexit(thread_pool_shutdown);
+#endif
     }
 
     for (int32 i = thread_pool_nthreads; i < thread_count; i += 1) {
