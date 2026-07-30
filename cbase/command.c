@@ -1159,10 +1159,8 @@ main(int argc, char **argv) {
                          "COMMAND_CAPTURE_STDOUT"
                          "|COMMAND_CAPTURE_STDERR");
             COMMAND_str_free(flags_str);
-            ASSERT_EQUAL((uint32)COMMAND_parse(
-                             "CAPTURE_STDOUT|CAPTURE_STDERR"),
-                         (uint32)(COMMAND_CAPTURE_STDOUT
-                                  |COMMAND_CAPTURE_STDERR));
+            ASSERT(COMMAND_parse("CAPTURE_STDOUT|CAPTURE_STDERR")
+                   == (COMMAND_CAPTURE_STDOUT |COMMAND_CAPTURE_STDERR));
         }
 
         COMMAND_PUSH(&cmd, "sh", "-c", "exit 9");
