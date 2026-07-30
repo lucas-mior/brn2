@@ -1,10 +1,15 @@
-git bisect bad                                     
+git bisect good                                    
+9ab6f49f0629668a561e189943ddffe6d35ee67c is the first 'bad' commit
+commit 9ab6f49f0629668a561e189943ddffe6d35ee67c
+Author: lucas-mior <lucas.mior@tutamail.com>
+Date:   Wed Jul 29 16:15:04 2026 -0300
 
-There are only 'skip'ped commits left to test.
-The first 'bad' commit could be any of:
+    wip threads
 
-c2684c067d14f507bedf9c37e58ad72b64a9d956
-
-38b8245b58f0a83c60964076cf591d7e33588e10
-
-We cannot bisect more!
+ brn2.c          | 166 ++++++++++++---------------------------------------------------------------------
+ brn2.h          |   7 ----
+ cbase/cbase.h   |  34 +++++++++++++++++
+ cbase/threads.c | 306 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ main.c          |  12 ------
+ 5 files changed, 364 insertions(+), 161 deletions(-)
+ create mode 100644 cbase/threads.c
