@@ -2681,14 +2681,14 @@ main(int argc, char **argv) {
     }
 
     for (enum WeekDay day = WEEK_DAY_MONDAY; day <= WEEK_DAY_LAST; day += 1) {
-        printf("enum[%d] = %s\n", day, WEEK_DAY_str(day));
+        printf("enum[%u] = %s\n", day, WEEK_DAY_str(day));
     }
 
     printf("\n");
 
     for (uint x = 0; x < POWER_OF2_LAST; x += 1) {
         char *value_name = POWER_OF2_str((enum PowerOfTwo)x);
-        printf("enum[%d] = %s\n", x, value_name);
+        printf("enum[%u] = %s\n", x, value_name);
         POWER_OF2_str_free(value_name);
     }
 
