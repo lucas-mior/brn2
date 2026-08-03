@@ -47,6 +47,7 @@
 #endif
 
 #if OS_UNIX
+#include <sys/ioctl.h>
 #include <sys/select.h>
 #include <netdb.h>
 #include <netinet/in.h>

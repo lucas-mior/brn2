@@ -140,6 +140,14 @@ typeof(var)  // good
 - Never typedef enums and unions.
 - Never typedef pointers.
 
+## Function declarations
+Most functions don't need to have an extra declaration, only the definition will
+suffice. Order the functions in a file properly so that extra declarations
+aren't needed. Functions that do need an extra pre declaration, put the
+declaration in a project-wide header file or in the header file associated with
+the C file itself. Avoid declaring functions defined in a C file, in another C
+file. 
+
 ## Struct declarations
 
 Try to organize big structs in logical groups or types with empty lines:
@@ -185,7 +193,7 @@ That means to also avoid calling `strlen32`:
     + Instead, to `my_function(STRLIT("literal"))`
 - `STRLIT("literal")` can be used to pass the string literal and its length
   in an "don't repeat yourself" way, that also does not depend on the compiler
-  to optimize the strlen32 away, since it uses `sizeof` to get the length of the
+  to optimize the `strlen32`, since it uses `sizeof` to get the length of the
   literal.
 
 Exceptions to this rule are:

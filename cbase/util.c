@@ -12,12 +12,6 @@
 
 #include "cbase.h"
 
-#if !TESTING_util
-static char *program;
-#else
-static char *program = __FILE__;
-#endif
-static int32 program_len UNUSED;
 static ullong here_counter;
 
 CBASE_API_DEF void
