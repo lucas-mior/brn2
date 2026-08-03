@@ -68,6 +68,9 @@
 #include "primitives.h"
 #include "base_macros.h"
 
+static char *program = __FILE__;
+static int32 program_len UNUSED;
+
 #define error(...) \
     error_impl(__FILE__, __LINE__, (char *)__func__, __VA_ARGS__)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
