@@ -744,7 +744,6 @@ xclosedir(DIR *dir, char *dirname) {
     return 0;
 }
 
-
 CBASE_API_DEF void __attribute__((format(printf, 4, 5)))
 error_impl(char *file, int32 line, char *func, char *format, ...) {
     char buffer[BUFSIZ];
@@ -2606,13 +2605,13 @@ test_hardlink_supported(char *dir) {
 #define ENUM_BITFLAGS 0
 #define ENUM_PREFIX_ WEEK_DAY_
 #define ENUM_FIELDS \
-    X(WEEK_DAY_SUNDAY, 0)          \
-    X(WEEK_DAY_MONDAY)             \
-    X(WEEK_DAY_TUESDAY, 10)        \
-    X(WEEK_DAY_WEDNESDAY)          \
-    X(WEEK_DAY_THURSDAY)           \
-    X(WEEK_DAY_FRIDAY, 5)          \
-    X(WEEK_DAY_SATURDAY, 20)
+    X(WEEK_DAY_SUNDAY, sunday)    \
+    X(WEEK_DAY_MONDAY, monday)    \
+    X(WEEK_DAY_TUESDAY, tuesday)  \
+    X(WEEK_DAY_WEDNESDAY)         \
+    X(WEEK_DAY_THURSDAY)          \
+    X(WEEK_DAY_FRIDAY, friday)    \
+    X(WEEK_DAY_SATURDAY, saturday)
 #include "xenums.c"
 
 #define ENUM_NAME PowerOfTwo
