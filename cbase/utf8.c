@@ -119,7 +119,6 @@ utf8_encode_raw(uint32 u, char *c) {
     return len;
 }
 
-
 CBASE_API_DEF bool
 utf8_valid(char *text, int32 text_len, int32 *bad_offset) {
     uint32 rune;

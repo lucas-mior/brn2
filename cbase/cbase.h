@@ -425,6 +425,7 @@ typedef struct CommandResult {
     int32 stdout_len;
     int32 stderr_len;
 
+    int32 stdin_fd;
     int32 stdout_fd;
     int32 stderr_fd;
 
@@ -442,6 +443,7 @@ typedef struct Command {
     char **argv;
     char **env;
     char *cwd;
+    char *stdin_buffer;
 
     int32 *argvs_lens;
     int32 *env_lens;
@@ -451,6 +453,8 @@ typedef struct Command {
     int32 cap;
     int32 env_cap;
     int32 error_status;
+    bool stdin_buffer_enabled;
+    int64 stdin_buffer_len;
 
     CommandResult result;
 } Command;
@@ -458,7 +462,7 @@ typedef struct Command {
 CBASE_API_DECL void command_argv0_set(Command *, char *);
 CBASE_API_DECL void command_child_env_apply(Command *);
 CBASE_API_DECL void command_child_exec(
-    Command *, enum CommandFlag, int [2], int [2]
+    Command *, enum CommandFlag, int [2], int [2], int [2]
 ) __attribute__((noreturn));
 #if OS_WINDOWS
 CBASE_API_DECL void command_windows_command_line(Command *, char *, int64);
@@ -488,6 +492,8 @@ CBASE_API_DECL void command_push_owned_length(
     int32
 );
 CBASE_API_DECL void command_push_split(Command *, char *, char *);
+CBASE_API_DECL bool command_stdin_buffer_set(Command *, char *, int64);
+CBASE_API_DECL void command_stdin_buffer_clear(Command *);
 CBASE_API_DECL void command_reset(Command *);
 CBASE_API_DECL void command_result_append(
     StrBuilder *,
@@ -501,6 +507,7 @@ CBASE_API_DECL void command_result_file_descriptors_close(CommandResult *);
 CBASE_API_DECL void command_result_free(CommandResult *);
 CBASE_API_DECL void command_result_init(CommandResult *);
 CBASE_API_DECL void command_result_read_captured(Command *);
+CBASE_API_DECL void command_result_process_io(Command *, enum CommandFlag);
 CBASE_API_DECL bool command_run(Command *, enum CommandFlag);
 CBASE_API_DECL bool command_run_async(Command *, enum CommandFlag);
 CBASE_API_DECL bool command_run_capture(Command *, enum CommandFlag);
@@ -556,10 +563,24 @@ typedef struct GenericArrayHeader {
 
 CBASE_API_DECL void *generic_array_init(int32, int64);
 CBASE_API_DECL void *generic_array_grow(void *, int64);
+CBASE_API_DECL bool generic_array_reserve(void **, int32, int64);
+CBASE_API_DECL int32 generic_array_capacity(void *);
+CBASE_API_DECL void generic_array_set_count(void *, int32);
 CBASE_API_DECL void array_sink(void);
 
 #define ARRAY_HEADER(ARRAY) ((GenericArrayHeader *)(ARRAY) - 1)
 #define ARRAY_LEN(ARRAY) ((ARRAY) ? ARRAY_HEADER(ARRAY)->count : 0)
+#define ARRAY_CAPACITY(ARRAY) generic_array_capacity(ARRAY)
+#define ARRAY_RESERVE(ARRAY, NEEDED_COUNT) \
+    generic_array_reserve((void **)&(ARRAY), \
+                          (NEEDED_COUNT), \
+                          SIZEOF(*(ARRAY)))
+#define ARRAY_SET_COUNT(ARRAY, COUNT) \
+    generic_array_set_count((ARRAY), (COUNT))
+#define ARRAY_INIT_COUNT(ARRAY, COUNT) do { \
+    ARRAY_INIT((ARRAY), (COUNT)); \
+    ARRAY_SET_COUNT((ARRAY), (COUNT)); \
+} while (0)
 #define ARRAY_CLEAR(ARRAY) do { \
     if (ARRAY) { \
         ARRAY_HEADER(ARRAY)->count = 0; \
