@@ -96,7 +96,7 @@ typeof(var)  // good
 ## Memory allocation
 
 - Avoid `malloc`, `calloc`, `realloc`, and `free`.
-  * Use wrappers that track allocations in debug builds:
+  * Use wrappers that track allocations in debug builds instead:
     + `malloc2(size)`
     + `free2(pointer, size)`
     + `realloc2(pointer, old_array_capacity, new_array_capacity, obj_size)`
@@ -104,6 +104,8 @@ typeof(var)  // good
     + `realloc2(size) + memset64(pointer, 0, size)` instead of `calloc`.
   * The wrappers above never fail: if out of memory, they exit the program. No
     need to check if they succeded or not.
+  * `free2` already checks if the passed pointer is NULL. Don't check if the
+    pointer is NULL before calling `free2`.
 - Choose what is best in each situation:
   * Use traditional `malloc2`, `realloc2`, and `free2`.
   * Use the `arena.c` bump allocator for groups of allocations with the same

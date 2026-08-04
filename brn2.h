@@ -105,4 +105,7 @@ void brn2_execute2(FileList *, FileList *, struct Hash_map *,
 
 void brn2_usage(FILE *) __attribute__((noreturn));
 
+#define SORT_COMPARE brn2_compare
+#include "sort.c"
+
 #endif

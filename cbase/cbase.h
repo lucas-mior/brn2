@@ -110,6 +110,8 @@ CBASE_API_DECL int32 utf8_decode_raw(char *, uint32 *, int32);
 CBASE_API_DECL int32 utf8_encode(uint32, char *, int32);
 CBASE_API_DECL char utf8_encode_byte(uint32, int32);
 CBASE_API_DECL int32 utf8_encode_raw(uint32, char *);
+CBASE_API_DECL bool utf8_has_bom(char *, int32);
+CBASE_API_DECL bool utf8_valid(char *, int32, int32 *);
 CBASE_API_DECL void utf8_functions_sink(void);
 CBASE_API_DECL int32 utf8_next_position(char *, int32, int32);
 CBASE_API_DECL int32 utf8_suffix_width_position(char *, int32, int32);
@@ -174,7 +176,8 @@ CBASE_API_DECL void print_timings(
 CBASE_API_DECL void qsort64(void *, int64, int64, int (*)(void *, void *));
 CBASE_API_DECL double rad2deg(double);
 CBASE_API_DECL int32 random_ascii_string(char *, int32, int32);
-CBASE_API_DECL char *read_entire_file(char *, int32 *);
+CBASE_API_DECL bool path_missing(char *);
+CBASE_API_DECL bool read_entire_file(char *, char **, int32 *);
 CBASE_API_DECL char *remove_escape_sequences(char *, int32 *);
 CBASE_API_DECL void sb_append(StrBuilder *, char *, int32);
 CBASE_API_DECL void sb_append_byte(StrBuilder *, char);
@@ -287,6 +290,7 @@ CBASE_API_DECL int xunlink(char *);
 CBASE_API_DECL bool test_command_exists(char *);
 CBASE_API_DECL bool test_hardlink_supported(char *);
 CBASE_API_DECL bool test_symlink_supported(char *);
+CBASE_API_DECL void test_join_path(char *, int64, char *, char *);
 CBASE_API_DECL void test_make_temp_dir(char *, int32, char *);
 CBASE_API_DECL void test_remove_tree(char *);
 #endif
@@ -522,10 +526,6 @@ CBASE_API_DECL bool command_wait(Command *);
 #define COMMAND_ENV_PUSH(...) \
     SELECT_ON_NUM_ARGS(COMMAND_ENV_PUSH_, __VA_ARGS__)
 
-#if !defined(SORT_COMPARE)
-#define SORT_COMPARE(A, B) compare_func(A, B)
-#endif
-
 #if !defined(MAX_NTHREADS)
 #define MAX_NTHREADS 64
 #endif
@@ -614,7 +614,6 @@ CBASE_API_DECL void array_sink(void);
 #undef XENUMS_LINKAGE
 
 #include "command.c"
-#include "sort.c"
 #include "cbase.h"
 #include "meta_common.c"
 #include "meta_tokenize.c"
