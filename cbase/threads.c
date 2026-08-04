@@ -267,6 +267,7 @@ thread_pool_worker_run(void) {
 
         if (thread_pool_queue.count > 0) {
             work = thread_pool_queue.items[thread_pool_queue.head];
+            thread_pool_queue.items[thread_pool_queue.head] = NULL;
             thread_pool_queue.head = (thread_pool_queue.head + 1)
                                      % LENGTH(thread_pool_queue.items);
             thread_pool_queue.count -= 1;
@@ -351,7 +352,7 @@ parallel_for_max_threads_min_items(
     ParallelForFunction *function,
     void *user_data
 ) {
-    static ThreadWork slices[PARALLEL_FOR_MAX_THREADS];
+    ThreadWork slices[PARALLEL_FOR_MAX_THREADS];
     int32 thread_count;
     int64 range;
 
@@ -398,6 +399,10 @@ parallel_for_max_threads_min_items(
     while ((thread_pool_work_pending > 0)
            || (thread_pool_queue.count > 0)) {
         thread_pool_wait_done_work();
+    }
+
+    for (int32 i = 0; i < LENGTH(thread_pool_queue.items); i += 1) {
+        thread_pool_queue.items[i] = NULL;
     }
     thread_pool_unlock();
 
