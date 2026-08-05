@@ -1213,6 +1213,26 @@ typedef struct TestString {
     int32 padding;
 } TestString;
 
+static void
+test_debug_free_raw(void *p, int64 size) {
+    intptr key;
+
+    if (p == NULL) {
+        return;
+    }
+
+    key = (intptr)p;
+    allocations_lock();
+    if (allocations != NULL) {
+        hash_remove_alloc_map(allocations, &key);
+    }
+    allocations_unlock();
+
+    memory_aligned_free((uchar *)p - MEMORY_PADDING,
+                        memory_allocation_size(size) + 2*MEMORY_PADDING);
+    return;
+}
+
 #define ASSERT_EXPECTED_FATAL(BLOCK) do { \
     caught_expected_fail = false; \
     if (sigsetjmp(test_jump_env, 1) == 0) { \
@@ -1468,8 +1488,7 @@ int main(void) {
             free2(p, size + 1); // Incorrect size
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 
     {
@@ -1480,8 +1499,7 @@ int main(void) {
             free2(p, size); // Double free
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 
     {
@@ -1528,8 +1546,7 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 
     {
@@ -1540,8 +1557,7 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 
     {
@@ -1552,8 +1568,7 @@ int main(void) {
             free2(p, size);
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 
     {
@@ -1564,8 +1579,7 @@ int main(void) {
             free2(p, size);
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 
     {
@@ -1577,8 +1591,7 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING,
-                            memory_allocation_size(size) + 2*MEMORY_PADDING);
+        test_debug_free_raw(p, size);
     }
 #endif
 
