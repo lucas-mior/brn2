@@ -96,7 +96,7 @@
 #define ARCH_AVX 0
 #endif
 
-#if defined(__SSE__)
+#if defined(__SSE__) || defined(__x86_64__)
 #define ARCH_SSE 1
 #else
 #define ARCH_SSE 0
