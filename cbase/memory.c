@@ -70,11 +70,13 @@ memory_mapping_size(int64 size) {
     return ALIGN_POWER_OF_2(size, memory_page_size);
 }
 
+#if !OS_WINDOWS
 static bool
 memory_uses_os_allocator(int64 size) {
     ASSERT(size > 0);
     return !RUNNING_ON_VALGRIND && (size >= MEMORY_OS_ALLOC_THRESHOLD);
 }
+#endif
 
 static void
 memory_check_size_t(int64 size) {
@@ -85,6 +87,7 @@ memory_check_size_t(int64 size) {
     return;
 }
 
+#if !OS_WINDOWS
 static void *
 memory_os_alloc(int64 size) {
     void *p;
@@ -99,14 +102,6 @@ memory_os_alloc(int64 size) {
              MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (p == MAP_FAILED) {
         error("Error in mmap(%lld): %s.\n", map_size, strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-#elif OS_WINDOWS
-    p = VirtualAlloc(NULL, (size_t)map_size, MEM_COMMIT | MEM_RESERVE,
-                     PAGE_READWRITE);
-    if (p == NULL) {
-        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n",
-                map_size, GetLastError());
         fatal(EXIT_FAILURE);
     }
 #else
@@ -135,12 +130,6 @@ memory_os_free(void *p, int64 size) {
     if (munmap(p, (size_t)map_size) < 0) {
         error("Error in munmap(%p, %lld): %s.\n",
               p, map_size, strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-#elif OS_WINDOWS
-    (void)map_size;
-    if (!VirtualFree(p, 0, MEM_RELEASE)) {
-        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
         fatal(EXIT_FAILURE);
     }
 #else
@@ -183,10 +172,6 @@ memory_os_realloc(void *old, int64 old_size, int64 new_size) {
     memory_assert_aligned_pointer(p);
     ASSUME_ALIGNED(p);
     return p;
-#elif OS_WINDOWS
-    if (new_map_size < old_map_size) {
-        return old;
-    }
 #endif
 
     p = memory_os_alloc(new_size);
@@ -194,6 +179,7 @@ memory_os_realloc(void *old, int64 old_size, int64 new_size) {
     memory_os_free(old, old_size);
     return p;
 }
+#endif
 
 static void *
 memory_aligned_alloc(int64 size) {
@@ -203,10 +189,12 @@ memory_aligned_alloc(int64 size) {
     ASSERT((size % ALIGNMENT) == 0);
     memory_check_size_t(size);
 
+#if !OS_WINDOWS
     if (memory_uses_os_allocator(size)) {
         p = memory_os_alloc(size);
         return p;
     }
+#endif
 
 #if OS_WINDOWS
     p = _aligned_malloc((size_t)size, (size_t)ALIGNMENT);
@@ -230,10 +218,12 @@ memory_aligned_free(void *p, int64 size) {
     }
 
     size = memory_allocation_size(size);
+#if !OS_WINDOWS
     if (memory_uses_os_allocator(size)) {
         memory_os_free(p, size);
         return;
     }
+#endif
 
 #if OS_WINDOWS
     _aligned_free(p);
@@ -485,9 +475,11 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
 CBASE_API_DEF void *
 aligned_realloc(void *old, int64 old_size, int64 new_size) {
     void *p;
+#if !OS_WINDOWS
     int64 copy_size;
     bool old_uses_os;
     bool new_uses_os;
+#endif
 
     if (old_size < 0) {
         error("Error: Invalid old size = %lld.\n", old_size);
@@ -499,6 +491,17 @@ aligned_realloc(void *old, int64 old_size, int64 new_size) {
     }
     old_size = memory_allocation_size(old_size);
     new_size = memory_allocation_size(new_size);
+
+#if OS_WINDOWS
+    p = _aligned_realloc(old, (size_t)new_size, (size_t)ALIGNMENT);
+    if (p == NULL) {
+        error("Failed to reallocate %lld bytes.\n", new_size);
+        fatal(EXIT_FAILURE);
+    }
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
+    return p;
+#else
     old_uses_os = memory_uses_os_allocator(old_size);
     new_uses_os = memory_uses_os_allocator(new_size);
 
@@ -522,6 +525,7 @@ aligned_realloc(void *old, int64 old_size, int64 new_size) {
     memory_aligned_free(old, old_size);
 
     return p;
+#endif
 }
 
 CBASE_API_DEF void *
