@@ -539,12 +539,15 @@ CBASE_API_DECL bool command_wait(Command *);
 #define MAX_NTHREADS 64
 #endif
 
-typedef struct GenericArrayHeader {
+// Note: it is ok to typedef union here
+typedef union GenericArrayHeader {
+    struct {
+        int32 count;
+        int32 cap;
+    };
     max_align_t alignment;
-    int32 count;
-    int32 cap;
-    int64 padding;
 } GenericArrayHeader;
+
 _Static_assert(_Alignof(GenericArrayHeader) <= ALIGNMENT,
                "GenericArrayHeader alignment exceeds allocator alignment");
 _Static_assert((sizeof(GenericArrayHeader)%ALIGNMENT) == 0,
@@ -567,19 +570,19 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 #define ARRAY_SET_COUNT(ARRAY, COUNT) \
     generic_array_set_count((ARRAY), (COUNT))
 #define ARRAY_INIT_COUNT(ARRAY, COUNT) do { \
-    ARRAY_INIT((ARRAY), (COUNT)); \
-    ARRAY_SET_COUNT((ARRAY), (COUNT)); \
+    ARRAY_INIT((ARRAY), (COUNT));           \
+    ARRAY_SET_COUNT((ARRAY), (COUNT));      \
 } while (0)
-#define ARRAY_CLEAR(ARRAY) do { \
-    if (ARRAY) { \
-        ARRAY_HEADER(ARRAY)->count = 0; \
-    } \
+#define ARRAY_CLEAR(ARRAY) do {            \
+    if (ARRAY) {                           \
+        ARRAY_HEADER(ARRAY)->count = 0;    \
+    }                                      \
 } while (0)
-#define ARRAY_FREE(ARRAY) do { \
-    if (ARRAY) { \
-        GenericArrayHeader *array_header_ = ARRAY_HEADER(ARRAY); \
-        free2(array_header_, SIZEOF(*array_header_) \
-              + array_header_->cap*SIZEOF(*(ARRAY))); \
+#define ARRAY_FREE(ARRAY) do {                                               \
+    if (ARRAY) {                                                             \
+        GenericArrayHeader *array_header_ = ARRAY_HEADER(ARRAY);             \
+        free2(array_header_,                                                 \
+              SIZEOF(*array_header_) + array_header_->cap*SIZEOF(*(ARRAY))); \
         (ARRAY) = NULL; \
     } \
 } while (0)
