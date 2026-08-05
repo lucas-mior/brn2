@@ -128,6 +128,10 @@ main(int argc, char **argv) {
     enum Brn2InputMode mode = FILES_FROM_DIR;
     int32 opt;
 
+    PRINTLN(ARCH_SSE);
+    PRINTLN(ARCH_AVX);
+    PRINTLN(ARCH_AVX512);
+
 #if BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
