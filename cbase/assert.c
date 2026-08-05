@@ -143,28 +143,31 @@ assert_not_contains(char *file, int32 line, char *func,
     }
 }
 
-#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                            \
-static void                                                              \
-a_strings_##MODE(char *file, uint line, char *func,                      \
-                 char *name1, char *name2,                               \
-                 char *var1, char *var2) {                               \
-    if (var1 == NULL) {                                                  \
-        fprintf(stderr, "\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        fprintf(stderr, "%s is NULL.\n", name1);                                   \
-        TRAP();                                                          \
-    }                                                                    \
-    if (var2 == NULL) {                                                  \
-        fprintf(stderr, "\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        fprintf(stderr, "%s is NULL.\n", name2);                                   \
-        TRAP();                                                          \
-    }                                                                    \
-    if (!(strcmp(var1, var2) SYMBOL 0)) {                                \
-        fprintf(stderr, "\nError in assertion at %s:%u:%s\n", file, line, func);  \
-        fprintf(stderr, "%s = %s " #SYMBOL " %s = %s\n",                          \
-               name1, var1, var2, name2);                                \
-        TRAP();                                                          \
-    }                                                                    \
-    return;                                                              \
+#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                               \
+static void                                                                 \
+a_strings_##MODE(char *file, int32 line, char *func,                        \
+                 char *name1, char *name2,                                  \
+                 char *var1, char *var2) {                                  \
+    if (var1 == NULL) {                                                     \
+        fprintf(stderr,                                                     \
+                "\nError in assertion at %s:%d:%s\n", file, line, func);    \
+        fprintf(stderr, "%s is NULL.\n", name1);                            \
+        TRAP();                                                             \
+    }                                                                       \
+    if (var2 == NULL) {                                                     \
+        fprintf(stderr,                                                     \
+                "\nError in assertion at %s:%d:%s\n", file, line, func);    \
+        fprintf(stderr, "%s is NULL.\n", name2);                            \
+        TRAP();                                                             \
+    }                                                                       \
+    if (!(strcmp(var1, var2) SYMBOL 0)) {                                   \
+        fprintf(stderr,                                                     \
+                "\nError in assertion at %s:%d:%s\n", file, line, func);    \
+        fprintf(stderr,                                                     \
+                "%s = %s " #SYMBOL " %s = %s\n", name1, var1, var2, name2); \
+        TRAP();                                                             \
+    }                                                                       \
+    return;                                                                 \
 }
 
 GENERATE_ASSERT_STRINGS(less, <)
@@ -176,21 +179,21 @@ GENERATE_ASSERT_STRINGS(more_equal, >=)
 
 #undef GENERATE_ASSERT_STRINGS
 
-#define GENERATE_ASSERT_POINTERS(MODE, SYMBOL)                           \
-static void                                                              \
-a_pointers_##MODE(char *file, uint line, char *func,                     \
-                  char *name1, char *name2,                              \
-                  void *var1, void *var2) {                              \
-    if (!((uintptr_t)var1 SYMBOL (uintptr_t)var2)) {                     \
-        if (!DEBUGGING) {                                                \
-            UNREACHABLE();                                               \
-        }                                                                \
-        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);    \
-        fprintf(stderr, "%s = %p " #SYMBOL " %p = %s\n",                          \
-               name1, var1, var2, name2);                                \
-        TRAP();                                                          \
-    }                                                                    \
-    return;                                                              \
+#define GENERATE_ASSERT_POINTERS(MODE, SYMBOL)                                 \
+static void                                                                    \
+a_pointers_##MODE(char *file, int32 line, char *func,                          \
+                  char *name1, char *name2,                                    \
+                  void *var1, void *var2) {                                    \
+    if (!((uintptr)var1 SYMBOL (uintptr)var2)) {                               \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
+        fprintf(stderr, "%s = %p " #SYMBOL " %p = %s\n",                       \
+               name1, var1, var2, name2);                                      \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
 }
 
 GENERATE_ASSERT_POINTERS(less, <)
@@ -202,23 +205,25 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
-#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE)      \
-static void                                                                 \
-a_both_##TYPE##_##MODE(char *file, uint line, char *func,                   \
-                       char *name1, char *name2,                            \
-                       char *type1, char *type2,                            \
-                       llong bits1, llong bits2,                            \
-                       TYPE long long var1, TYPE long long var2) {          \
-    if (!(var1 SYMBOL var2)) {                                              \
-        if (!DEBUGGING) {                              \
-            UNREACHABLE(); \
-        } \
-        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);       \
-        fprintf(stderr, "[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n", \
-               type1, bits1, name1, var1, var2, name2, type2, bits2);       \
-        TRAP();                                                             \
-    }                                                                       \
-    return;                                                                 \
+#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE)         \
+static void                                                                    \
+a_both_##TYPE##_##MODE(char *file, int32 line, char *func,                     \
+                       char *name1, char *name2,                               \
+                       char *type1, char *type2,                               \
+                       llong bits1, llong bits2,                               \
+                       TYPE long long var1, TYPE long long var2) {             \
+    if (!(var1 SYMBOL var2)) {                                                 \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        fprintf(stderr,                                                        \
+                "[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n",   \
+               type1, bits1, name1, var1, var2, name2, type2, bits2);          \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
 }
 
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", ==, equal)
@@ -252,23 +257,23 @@ compare_sign_with_unsign(llong s, ullong u) {
     }
 }
 
-#define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL)                   \
-static void                                                             \
-a_signed_unsigned##MODE(char *file, uint line, char *func,              \
-                        char *name1, char *name2,                       \
-                        char *type1, char *type2,                       \
-                        llong bits1, llong bits2,                       \
-                        llong var1, ullong var2) {                      \
-    if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) {             \
-        if (!DEBUGGING) {                              \
-            UNREACHABLE(); \
-        } \
-        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);   \
-        fprintf(stderr, "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",     \
-               type1, bits1, name1, var1, var2, name2, type2, bits2);   \
-        TRAP();                                                         \
-    }                                                                   \
-    return;                                                             \
+#define GENERATE_ASSERT_SIGNED_UNSIGNED(MODE, SYMBOL)                          \
+static void                                                                    \
+a_signed_unsigned##MODE(char *file, int32 line, char *func,                    \
+                        char *name1, char *name2,                              \
+                        char *type1, char *type2,                              \
+                        llong bits1, llong bits2,                              \
+                        llong var1, ullong var2) {                             \
+    if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) {                    \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
+        fprintf(stderr, "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",   \
+               type1, bits1, name1, var1, var2, name2, type2, bits2);          \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
 }
 
 GENERATE_ASSERT_SIGNED_UNSIGNED(equal, ==)
@@ -280,23 +285,23 @@ GENERATE_ASSERT_SIGNED_UNSIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_SIGNED_UNSIGNED
 
-#define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL)                   \
-static void                                                             \
-a_unsigned_signed_##MODE(char *file, uint line, char *func,             \
-                         char *name1, char *name2,                      \
-                         char *type1, char *type2,                      \
-                         llong bits1, llong bits2,                      \
-                         ullong var1, llong var2) {                     \
-    if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) {          \
-        if (!DEBUGGING) {                              \
-            UNREACHABLE(); \
-        } \
-        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);   \
-        fprintf(stderr, "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",     \
-               type1, bits1, name1, var1, var2, name2, type2, bits2);   \
-        TRAP();                                                         \
-    }                                                                   \
-    return;                                                             \
+#define GENERATE_ASSERT_UNSIGNED_SIGNED(MODE, SYMBOL)                          \
+static void                                                                    \
+a_unsigned_signed_##MODE(char *file, int32 line, char *func,                   \
+                         char *name1, char *name2,                             \
+                         char *type1, char *type2,                             \
+                         llong bits1, llong bits2,                             \
+                         ullong var1, llong var2) {                            \
+    if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) {                 \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
+        fprintf(stderr, "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",   \
+               type1, bits1, name1, var1, var2, name2, type2, bits2);          \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
 }
 
 GENERATE_ASSERT_UNSIGNED_SIGNED(equal, ==)
@@ -307,6 +312,34 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more, >)
 GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_UNSIGNED_SIGNED
+
+#define GENERATE_ASSERT_FP(SYMBOL, MODE)                                       \
+static void                                                                    \
+a_double_##MODE(char *file, int32 line, char *func,                            \
+                char *name1, char *name2,                                      \
+                char *type1, char *type2,                                      \
+                llong bits1, llong bits2,                                      \
+                double var1, double var2) {                                    \
+    if (!(var1 SYMBOL var2)) {                                                 \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
+        fprintf(stderr, "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",       \
+                        type1, bits1, name1, var1, var2, name2, type2, bits2); \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
+}
+
+GENERATE_ASSERT_FP(==, equal)
+GENERATE_ASSERT_FP(!=, not_equal)
+GENERATE_ASSERT_FP(<,  less)
+GENERATE_ASSERT_FP(>,  more)
+GENERATE_ASSERT_FP(<=, less_equal)
+GENERATE_ASSERT_FP(>=, more_equal)
+
+#undef GENERATE_ASSERT_FP
 
 static double
 assert_double_abs(double x) {
@@ -433,20 +466,22 @@ assert_double_almost_equal(double var1, double var2,
 
 static bool
 assert_double_less(double var1, double var2, int kind1, int kind2) {
-    return (var1 < var2)
-           && !assert_double_almost_equal(var1, var2, kind1, kind2,
-                                           NULL, NULL, NULL);
+    (void)kind1;
+    (void)kind2;
+
+    return var1 < var2;
 }
 
 static bool
 assert_double_more(double var1, double var2, int kind1, int kind2) {
-    return (var1 > var2)
-           && !assert_double_almost_equal(var1, var2, kind1, kind2,
-                                           NULL, NULL, NULL);
+    (void)kind1;
+    (void)kind2;
+
+    return var1 > var2;
 }
 
 static void __attribute((noreturn))
-assert_double_failure(char *file, uint line, char *func,
+assert_double_failure(char *file, int32 line, char *func,
                       char *name1, char *name2,
                       char *type1, char *type2,
                       llong bits1, llong bits2,
@@ -455,17 +490,16 @@ assert_double_failure(char *file, uint line, char *func,
     if (!DEBUGGING) {
         UNREACHABLE();
     }
-    fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);
+    fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func);
     fprintf(stderr, "[%s%lld]%s = %f %s %f = %s[%s%lld]\n",
            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
     fprintf(stderr, "floating diff = %f, abs_tol = %f, rel_tol = %f\n",
            diff, abs_tol, rel_tol);
     TRAP();
-    exit(EXIT_FAILURE);
 }
 
 static void
-a_double_equal(char *file, uint line, char *func,
+a_double_close(char *file, int32 line, char *func,
                char *name1, char *name2,
                char *type1, char *type2,
                llong bits1, llong bits2,
@@ -484,7 +518,7 @@ a_double_equal(char *file, uint line, char *func,
 }
 
 static void
-a_double_not_equal(char *file, uint line, char *func,
+a_double_not_close(char *file, int32 line, char *func,
                    char *name1, char *name2,
                    char *type1, char *type2,
                    llong bits1, llong bits2,
@@ -502,123 +536,56 @@ a_double_not_equal(char *file, uint line, char *func,
     return;
 }
 
-static void
-a_double_less(char *file, uint line, char *func,
-              char *name1, char *name2,
-              char *type1, char *type2,
-              llong bits1, llong bits2,
-              int kind1, int kind2,
-              double var1, double var2) {
-    double diff;
-    double abs_tol;
-    double rel_tol;
-    (void)assert_double_almost_equal(var1, var2, kind1, kind2,
-                                      &diff, &abs_tol, &rel_tol);
-    if (!assert_double_less(var1, var2, kind1, kind2)) {
-        assert_double_failure(file, line, func, name1, name2,
-                               type1, type2, bits1, bits2,
-                               var1, var2, "<", diff, abs_tol, rel_tol);
-    }
-    return;
+#define GENERATE_ASSERT_BOOLS(MODE, SYMBOL)                                    \
+static void                                                                    \
+a_bool_##MODE(char *file, int32 line, char *func,                              \
+              char *name1, char *name2,                                        \
+              char *type1, char *type2,                                        \
+              llong bits1, llong bits2,                                        \
+              bool var1, bool var2) {                                          \
+    if (!(var1 SYMBOL var2)) {                                                 \
+        char *s1 = "false";                                                    \
+        char *s2 = "false";                                                    \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        if (var1) {                                                            \
+            s1 = "true";                                                       \
+        }                                                                      \
+        if (var2) {                                                            \
+            s2 = "true";                                                       \
+        }                                                                      \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        fprintf(stderr, "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",       \
+                        type1, bits1, name1, s1, s2, name2, type2, bits2);     \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
 }
 
-static void
-a_double_less_equal(char *file, uint line, char *func,
-                    char *name1, char *name2,
-                    char *type1, char *type2,
-                    llong bits1, llong bits2,
-                    int kind1, int kind2,
-                    double var1, double var2) {
-    double diff;
-    double abs_tol;
-    double rel_tol;
-    if (!((var1 < var2) || assert_double_almost_equal(var1, var2, kind1, kind2,
-                                                       &diff, &abs_tol,
-                                                       &rel_tol))) {
-        (void)assert_double_almost_equal(var1, var2, kind1, kind2,
-                                          &diff, &abs_tol, &rel_tol);
-        assert_double_failure(file, line, func, name1, name2,
-                               type1, type2, bits1, bits2,
-                               var1, var2, "<=", diff, abs_tol, rel_tol);
-    }
-    return;
+static void __attribute((noreturn))
+a_bool_more(void *p, ...) {
+    (void)p;
+    TRAP();
 }
-
-static void
-a_double_more(char *file, uint line, char *func,
-              char *name1, char *name2,
-              char *type1, char *type2,
-              llong bits1, llong bits2,
-              int kind1, int kind2,
-              double var1, double var2) {
-    double diff;
-    double abs_tol;
-    double rel_tol;
-    (void)assert_double_almost_equal(var1, var2, kind1, kind2,
-                                      &diff, &abs_tol, &rel_tol);
-    if (!assert_double_more(var1, var2, kind1, kind2)) {
-        assert_double_failure(file, line, func, name1, name2,
-                               type1, type2, bits1, bits2,
-                               var1, var2, ">", diff, abs_tol, rel_tol);
-    }
-    return;
+static void __attribute((noreturn))
+a_bool_less(void *p, ...) {
+    (void)p;
+    TRAP();
 }
-
-static void
-a_double_more_equal(char *file, uint line, char *func,
-                    char *name1, char *name2,
-                    char *type1, char *type2,
-                    llong bits1, llong bits2,
-                    int kind1, int kind2,
-                    double var1, double var2) {
-    double diff;
-    double abs_tol;
-    double rel_tol;
-    if (!((var1 > var2) || assert_double_almost_equal(var1, var2, kind1, kind2,
-                                                       &diff, &abs_tol,
-                                                       &rel_tol))) {
-        (void)assert_double_almost_equal(var1, var2, kind1, kind2,
-                                          &diff, &abs_tol, &rel_tol);
-        assert_double_failure(file, line, func, name1, name2,
-                               type1, type2, bits1, bits2,
-                               var1, var2, ">=", diff, abs_tol, rel_tol);
-    }
-    return;
+static void __attribute((noreturn))
+a_bool_more_equal(void *p, ...) {
+    (void)p;
+    TRAP();
 }
-
-#define GENERATE_ASSERT_BOOLS(MODE, SYMBOL)                            \
-static void                                                            \
-a_bool_##MODE(char *file, uint line, char *func,                       \
-              char *name1, char *name2,                                \
-              char *type1, char *type2,                                \
-              llong bits1, llong bits2,                                \
-              bool var1, bool var2) {                                  \
-    if (!(var1 SYMBOL var2)) {                                         \
-        char *s1 = "false";                                            \
-        char *s2 = "false";                                            \
-        if (!DEBUGGING) {                                              \
-            UNREACHABLE();                                   \
-        }                                                              \
-        if (var1) {                                                    \
-            s1 = "true";                                               \
-        }                                                              \
-        if (var2) {                                                    \
-            s2 = "true";                                               \
-        }                                                              \
-        fprintf(stderr, "\nAssertion failed at %s:%u:%s\n", file, line, func);  \
-        fprintf(stderr, "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",        \
-               type1, bits1, name1, s1, s2, name2, type2, bits2);      \
-        TRAP();                                                        \
-    }                                                                  \
-    return;                                                            \
+static void __attribute((noreturn))
+a_bool_less_equal(void *p, ...) {
+    (void)p;
+    TRAP();
 }
-
 GENERATE_ASSERT_BOOLS(equal, ==)
 GENERATE_ASSERT_BOOLS(not_equal, !=)
-GENERATE_ASSERT_BOOLS(less, <)
-GENERATE_ASSERT_BOOLS(less_equal, <=)
-GENERATE_ASSERT_BOOLS(more, >)
-GENERATE_ASSERT_BOOLS(more_equal, >=)
 
 #undef GENERATE_ASSERT_BOOLS
 
@@ -676,10 +643,6 @@ assert_functions_sink(void) {
     (void)assert_file_contains;
     (void)assert_contains;
     (void)assert_not_contains;
-    (void)a_bool_less;
-    (void)a_bool_less_equal;
-    (void)a_bool_more;
-    (void)a_bool_more_equal;
 
     (void)a_bool_equal;
     (void)a_bool_not_equal;
@@ -694,17 +657,19 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 
-#define ASSERT(C) do {                                     \
-    if (!(C)) {                                            \
-        if (!DEBUGGING) {                                  \
-            UNREACHABLE();                       \
-        } else {                                           \
-            fprintf(stderr, "%s: Assertion '%s' failed at %s:%d\n", \
-                   __func__, #C, __FILE__, __LINE__);      \
-            TRAP();                                        \
-        }                                                  \
-    }                                                      \
+#define ASSERT(C) do {                                                         \
+    if (!(C)) {                                                                \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        } else {                                                               \
+            fprintf(stderr, "Assertion '%s' failed at %s:%d:%s\n",             \
+                            #C, __FILE__, __LINE__, FUNC__);                   \
+            TRAP();                                                            \
+        }                                                                      \
+    }                                                                          \
 } while (0)
 
 #define ASSERT_FILE_CONTAINS(PATH, NEEDLE) \
@@ -771,14 +736,14 @@ _Generic((VAR2),                                                       \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED()             \
 )
 #define A_BOTH_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
-    a_both_unsigned_##MODE(__FILE__, __LINE__, FUNC__,    \
+    a_both_unsigned_##MODE(__FILE__, __LINE__, FUNC__,              \
                            #VAR1, #VAR2,                            \
                            typename(TYPE1), typename(TYPE2),        \
                            typebits(TYPE1), typebits(TYPE2),        \
                            (ullong)(VAR1), (ullong)(VAR2))
 
 #define A_UNSIGNED_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)           \
-    a_unsigned_signed_##MODE(__FILE__, __LINE__, FUNC__,  \
+    a_unsigned_signed_##MODE(__FILE__, __LINE__, FUNC__,            \
                              #VAR1, #VAR2,                          \
                              typename(TYPE1), typename(TYPE2),      \
                              typebits(TYPE1), typebits(TYPE2),      \
@@ -802,12 +767,11 @@ _Generic((VAR2),                                                         \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED()             \
 )
 #define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                      \
-    a_double_##MODE(__FILE__, __LINE__, FUNC__,                  \
-                     #VAR1, #VAR2,                                         \
-                     typename(TYPE1), typename(TYPE2),                     \
-                     typebits(TYPE1), typebits(TYPE2),                     \
-                     ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2), \
-                     DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
+    a_double_##MODE(__FILE__, __LINE__, FUNC__,                            \
+                    #VAR1, #VAR2,                                          \
+                    typename(TYPE1), typename(TYPE2),                      \
+                    typebits(TYPE1), typebits(TYPE2),                      \
+                    DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
 
 #define A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
@@ -828,7 +792,7 @@ _Generic((VAR2), \
 )
 #define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                  \
 _Generic((VAR2),                                               \
-    bool: a_bool_##MODE(__FILE__, __LINE__, FUNC__,  \
+    bool: a_bool_##MODE(__FILE__, __LINE__, FUNC__,            \
                         #VAR1, #VAR2,                          \
                         typename(TYPE1), typename(TYPE_BOOL),  \
                         typebits(TYPE1), typebits(TYPE_BOOL),  \
@@ -836,10 +800,10 @@ _Generic((VAR2),                                               \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL()       \
 )
 #define A_POINTERS(MODE, VAR1, VAR2)                           \
-    a_pointers_##MODE(__FILE__, __LINE__, FUNC__,    \
+    a_pointers_##MODE(__FILE__, __LINE__, FUNC__,              \
                       #VAR1, #VAR2,                            \
-                      (void *)(uintptr_t)(VAR1),               \
-                      (void *)(uintptr_t)(VAR2))
+                      (void *)(uintptr)(VAR1),                 \
+                      (void *)(uintptr)(VAR2))
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2)                                \
 _Generic((VAR1),                                                        \
@@ -849,10 +813,10 @@ _Generic((VAR1),                                                        \
         default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP()    \
     ),                                                                  \
     char *: _Generic((VAR2),                                            \
-        char *: a_strings_##MODE(__FILE__, __LINE__, FUNC__,  \
+        char *: a_strings_##MODE(__FILE__, __LINE__, FUNC__,            \
                                  #VAR1, #VAR2,                          \
-                                 (char *)(uintptr_t)(VAR1),             \
-                                 (char *)(uintptr_t)(VAR2)),            \
+                                 (char *)(uintptr)(VAR1),               \
+                                 (char *)(uintptr)(VAR2)),              \
         void *: A_POINTERS(MODE, VAR1, VAR2),                           \
         default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP()    \
     ),                                                                  \
@@ -880,14 +844,37 @@ _Generic((VAR1),                                                        \
 #define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more,       VAR1, VAR2)
 #define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
 
-#define ASSERT_NULL(VAR1) do {                                          \
-    void *p = VAR1;                                                     \
-    if (p != NULL) {                                                    \
-        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n",                      \
-               __FILE__, __LINE__, __func__);                           \
-        fprintf(stderr, "%s = %p == NULL\n", #VAR1, p);                          \
-        TRAP();                                                         \
-    }                                                                   \
+#define A_BOTH_DOUBLE_CLOSE(VAR1, VAR2, TYPE1, TYPE2)                      \
+    a_double_close(__FILE__, __LINE__, FUNC__,                             \
+                   #VAR1, #VAR2,                                           \
+                   typename(TYPE1), typename(TYPE2),                       \
+                   typebits(TYPE1), typebits(TYPE2),                       \
+                   ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2),   \
+                   DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
+
+#define A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE1) \
+_Generic((VAR2), \
+    float:  A_BOTH_DOUBLE_CLOSE(VAR1, VAR2, TYPE1, TYPE_FLOAT),  \
+    double: A_BOTH_DOUBLE_CLOSE(VAR1, VAR2, TYPE1, TYPE_DOUBLE), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND()  \
+)
+
+#define ASSERT_CLOSE(VAR1, VAR2) \
+_Generic((VAR1), \
+    float:  A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE_FLOAT),                      \
+    double: A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE_DOUBLE),                     \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST()                 \
+)
+
+#define ASSERT_NULL(VAR1) do {                                                 \
+    void *p = VAR1;                                                            \
+    if (p != NULL) {                                                           \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n",                            \
+                __FILE__, __LINE__, FUNC__);                                   \
+        fprintf(stderr, "%s = %p == NULL\n", #VAR1, p);                        \
+        TRAP();                                                                \
+    }                                                                          \
 } while (0)
 
 #if TESTING_assert
@@ -987,16 +974,21 @@ main(void) {
     } {
         double a = 0.1 + 0.2;
         double b = 0.3;
-        ASSERT_EQUAL(a, b);
-        ASSERT_LESS_EQUAL(a, b);
-        ASSERT_MORE_EQUAL(a, b);
+        ASSERT_CLOSE(a, b);
+        ASSERT_CLOSE(b, a);
         ASSERT_NOT_EQUAL(a, b + 1.0e-9);
+        ASSERT_LESS(b, a);
+        ASSERT_MORE(a, b);
+    } {
+        float a = 0.3f;
+        double b = 0.3;
+        ASSERT_CLOSE(a, b);
+        ASSERT_MORE(a, b);
+        ASSERT_LESS(b, a);
     } {
         float a = 0.1f + 0.2f;
         double b = 0.3;
-        ASSERT_EQUAL(a, b);
-        ASSERT_LESS_EQUAL(a, b);
-        ASSERT_MORE_EQUAL(a, b);
+        ASSERT_CLOSE(a, b);
     } {
         long a = -1;
         double b = -1;
@@ -1050,16 +1042,10 @@ main(void) {
         bool a = true;
         bool b = true;
         ASSERT_EQUAL(a, b);
-        ASSERT_LESS_EQUAL(a, b);
-        ASSERT_MORE_EQUAL(a, b);
     } {
         bool a = true;
         bool b = false;
         ASSERT_NOT_EQUAL(a, b);
-        ASSERT_MORE(a, b);
-        ASSERT_MORE_EQUAL(a, b);
-        ASSERT_LESS(b, a);
-        ASSERT_LESS_EQUAL(b, a);
     } {
         char haystack[] = "alpha beta gamma";
         char binary_haystack[] = { 'a', 'b', '\0', 'c', 'd' };
