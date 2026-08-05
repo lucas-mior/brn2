@@ -26,19 +26,17 @@ _Generic((VAR), \
     default: ASSERT_FP_KIND_NONE   \
 )
 
-#if !defined(ASSERT_FLOAT_REL_TOL)
-#define ASSERT_FLOAT_REL_TOL   (16.0*(double)FLT_EPSILON)
+#if !defined(ASSERT_FLOAT_MAX_ULPS)
+#define ASSERT_FLOAT_MAX_ULPS  16ull
 #endif
-#if !defined(ASSERT_DOUBLE_REL_TOL)
-#define ASSERT_DOUBLE_REL_TOL  (16.0*(double)DBL_EPSILON)
+#if !defined(ASSERT_DOUBLE_MAX_ULPS)
+#define ASSERT_DOUBLE_MAX_ULPS 16ull
 #endif
 
-#if !defined(ASSERT_FLOAT_ABS_TOL)
-#define ASSERT_FLOAT_ABS_TOL   (16.0*(double)FLT_EPSILON)
-#endif
-#if !defined(ASSERT_DOUBLE_ABS_TOL)
-#define ASSERT_DOUBLE_ABS_TOL  (16.0*(double)DBL_EPSILON)
-#endif
+_Static_assert(sizeof(float)*CHAR_BIT == 32,
+               "assert.c ULP comparison requires 32-bit float");
+_Static_assert(sizeof(double)*CHAR_BIT == 64,
+               "assert.c ULP comparison requires 64-bit double");
 
 static void __attribute__((format(printf, 4, 5)))
 assert_error(char *file, int32 line, char *func, char *format, ...) {
@@ -143,31 +141,31 @@ assert_not_contains(char *file, int32 line, char *func,
     }
 }
 
-#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                               \
-static void                                                                 \
-a_strings_##MODE(char *file, int32 line, char *func,                        \
-                 char *name1, char *name2,                                  \
-                 char *var1, char *var2) {                                  \
-    if (var1 == NULL) {                                                     \
-        fprintf(stderr,                                                     \
-                "\nError in assertion at %s:%d:%s\n", file, line, func);    \
-        fprintf(stderr, "%s is NULL.\n", name1);                            \
-        TRAP();                                                             \
-    }                                                                       \
-    if (var2 == NULL) {                                                     \
-        fprintf(stderr,                                                     \
-                "\nError in assertion at %s:%d:%s\n", file, line, func);    \
-        fprintf(stderr, "%s is NULL.\n", name2);                            \
-        TRAP();                                                             \
-    }                                                                       \
-    if (!(strcmp(var1, var2) SYMBOL 0)) {                                   \
-        fprintf(stderr,                                                     \
-                "\nError in assertion at %s:%d:%s\n", file, line, func);    \
-        fprintf(stderr,                                                     \
-                "%s = %s " #SYMBOL " %s = %s\n", name1, var1, var2, name2); \
-        TRAP();                                                             \
-    }                                                                       \
-    return;                                                                 \
+#define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                                  \
+static void                                                                    \
+a_strings_##MODE(char *file, int32 line, char *func,                           \
+                 char *name1, char *name2,                                     \
+                 char *var1, char *var2) {                                     \
+    if (var1 == NULL) {                                                        \
+        fprintf(stderr,                                                        \
+                "\nError in assertion at %s:%d:%s\n", file, line, func);       \
+        fprintf(stderr, "%s is NULL.\n", name1);                               \
+        TRAP();                                                                \
+    }                                                                          \
+    if (var2 == NULL) {                                                        \
+        fprintf(stderr,                                                        \
+                "\nError in assertion at %s:%d:%s\n", file, line, func);       \
+        fprintf(stderr, "%s is NULL.\n", name2);                               \
+        TRAP();                                                                \
+    }                                                                          \
+    if (!(strcmp(var1, var2) SYMBOL 0)) {                                      \
+        fprintf(stderr,                                                        \
+                "\nError in assertion at %s:%d:%s\n", file, line, func);       \
+        fprintf(stderr,                                                        \
+                "%s = %s " #SYMBOL " %s = %s\n", name1, var1, var2, name2);    \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
 }
 
 GENERATE_ASSERT_STRINGS(less, <)
@@ -188,9 +186,10 @@ a_pointers_##MODE(char *file, int32 line, char *func,                          \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
-        fprintf(stderr, "%s = %p " #SYMBOL " %p = %s\n",                       \
-               name1, var1, var2, name2);                                      \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        fprintf(stderr,                                                        \
+                "%s = %p " #SYMBOL " %p = %s\n", name1, var1, var2, name2);    \
         TRAP();                                                                \
     }                                                                          \
     return;                                                                    \
@@ -268,9 +267,11 @@ a_signed_unsigned##MODE(char *file, int32 line, char *func,                    \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
-        fprintf(stderr, "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",   \
-               type1, bits1, name1, var1, var2, name2, type2, bits2);          \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        fprintf(stderr,                                                        \
+                "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",           \
+                type1, bits1, name1, var1, var2, name2, type2, bits2);         \
         TRAP();                                                                \
     }                                                                          \
     return;                                                                    \
@@ -296,9 +297,11 @@ a_unsigned_signed_##MODE(char *file, int32 line, char *func,                   \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
-        fprintf(stderr, "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",   \
-               type1, bits1, name1, var1, var2, name2, type2, bits2);          \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        fprintf(stderr,                                                        \
+                "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",           \
+                type1, bits1, name1, var1, var2, name2, type2, bits2);         \
         TRAP();                                                                \
     }                                                                          \
     return;                                                                    \
@@ -313,7 +316,7 @@ GENERATE_ASSERT_UNSIGNED_SIGNED(more_equal, >=)
 
 #undef GENERATE_ASSERT_UNSIGNED_SIGNED
 
-#define GENERATE_ASSERT_FP(SYMBOL, MODE)                                       \
+#define GENERATE_ASSERT_DOUBLE(SYMBOL, MODE)                                   \
 static void                                                                    \
 a_double_##MODE(char *file, int32 line, char *func,                            \
                 char *name1, char *name2,                                      \
@@ -324,22 +327,24 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func); \
-        fprintf(stderr, "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",       \
-                        type1, bits1, name1, var1, var2, name2, type2, bits2); \
+        fprintf(stderr,                                                        \
+                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        fprintf(stderr,                                                        \
+                "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",               \
+                type1, bits1, name1, var1, var2, name2, type2, bits2);         \
         TRAP();                                                                \
     }                                                                          \
     return;                                                                    \
 }
 
-GENERATE_ASSERT_FP(==, equal)
-GENERATE_ASSERT_FP(!=, not_equal)
-GENERATE_ASSERT_FP(<,  less)
-GENERATE_ASSERT_FP(>,  more)
-GENERATE_ASSERT_FP(<=, less_equal)
-GENERATE_ASSERT_FP(>=, more_equal)
+GENERATE_ASSERT_DOUBLE(==, equal)
+GENERATE_ASSERT_DOUBLE(!=, not_equal)
+GENERATE_ASSERT_DOUBLE(<,  less)
+GENERATE_ASSERT_DOUBLE(>,  more)
+GENERATE_ASSERT_DOUBLE(<=, less_equal)
+GENERATE_ASSERT_DOUBLE(>=, more_equal)
 
-#undef GENERATE_ASSERT_FP
+#undef GENERATE_ASSERT_DOUBLE
 
 static double
 assert_double_abs(double x) {
@@ -350,8 +355,23 @@ assert_double_abs(double x) {
 }
 
 static bool
+assert_double_is_nan(double x) {
+    return x != x;
+}
+
+static bool
 assert_double_is_infinite(double x) {
     return (x > (double)DBL_MAX) || (x < -(double)DBL_MAX);
+}
+
+static bool
+assert_double_is_negative(double x) {
+    return signbit(x) != 0;
+}
+
+static bool
+assert_double_is_zero(double x) {
+    return x == (double)0;
 }
 
 static int
@@ -365,82 +385,153 @@ assert_fp_common_kind(int kind1, int kind2) {
     return ASSERT_FP_KIND_DOUBLE;
 }
 
-static double
-assert_fp_rel_tol(int common_kind) {
+static ullong
+assert_fp_max_ulps(int common_kind) {
     if (common_kind == ASSERT_FP_KIND_FLOAT) {
-        return ASSERT_FLOAT_REL_TOL;
+        return (ullong)ASSERT_FLOAT_MAX_ULPS;
     }
     if (common_kind == ASSERT_FP_KIND_DOUBLE) {
-        return ASSERT_DOUBLE_REL_TOL;
+        return (ullong)ASSERT_DOUBLE_MAX_ULPS;
     }
-    return ASSERT_DOUBLE_REL_TOL;
+    return (ullong)ASSERT_DOUBLE_MAX_ULPS;
 }
 
-static double
-assert_fp_abs_tol(int common_kind) {
-    if (common_kind == ASSERT_FP_KIND_FLOAT) {
-        return ASSERT_FLOAT_ABS_TOL;
+static uint32
+assert_float_ordered_bits(float var) {
+    union {
+        float as_float;
+        uint32 as_uint;
+    } bits;
+    uint32 sign_mask = 0x80000000u;
+
+    bits.as_float = var;
+    if (bits.as_uint & sign_mask) {
+        return ~bits.as_uint;
     }
-    if (common_kind == ASSERT_FP_KIND_DOUBLE) {
-        return ASSERT_DOUBLE_ABS_TOL;
+    return bits.as_uint|sign_mask;
+}
+
+static uint64
+assert_double_ordered_bits(double var) {
+    union {
+        double as_double;
+        uint64 as_uint;
+    } bits;
+    uint64 sign_mask = 0x8000000000000000ull;
+
+    bits.as_double = var;
+    if (bits.as_uint & sign_mask) {
+        return ~bits.as_uint;
     }
-    return ASSERT_DOUBLE_ABS_TOL;
+    return bits.as_uint|sign_mask;
+}
+
+static ullong
+assert_uint32_distance(uint32 a, uint32 b) {
+    if (a > b) {
+        return (ullong)(a - b);
+    }
+    return (ullong)(b - a);
+}
+
+static ullong
+assert_uint64_distance(uint64 a, uint64 b) {
+    if (a > b) {
+        return (ullong)(a - b);
+    }
+    return (ullong)(b - a);
+}
+
+static ullong
+assert_float_ulp_distance(float var1, float var2) {
+    uint32 bits1 = assert_float_ordered_bits(var1);
+    uint32 bits2 = assert_float_ordered_bits(var2);
+
+    return assert_uint32_distance(bits1, bits2);
+}
+
+static ullong
+assert_double_ulp_distance(double var1, double var2) {
+    uint64 bits1 = assert_double_ordered_bits(var1);
+    uint64 bits2 = assert_double_ordered_bits(var2);
+
+    return assert_uint64_distance(bits1, bits2);
 }
 
 static bool
-assert_double_almost_equal(double var1, double var2,
-                           int kind1, int kind2,
-                           double *diff_out,
-                           double *abs_tol_out,
-                           double *rel_tol_out) {
-    int common_kind;
-    double diff;
-    double abs1;
-    double abs2;
-    double scale;
-    double abs_tol;
-    double rel_tol;
-
-    common_kind = assert_fp_common_kind(kind1, kind2);
-    abs_tol = assert_fp_abs_tol(common_kind);
-    rel_tol = assert_fp_rel_tol(common_kind);
-
-    if (abs_tol < (double)0) {
-        abs_tol = -abs_tol;
-    }
-    if (rel_tol < (double)0) {
-        rel_tol = -rel_tol;
-    }
+assert_double_special_close(double var1, double var2,
+                            double *diff_out, bool *handled_out) {
+    bool sign1;
+    bool sign2;
 
     if (diff_out != NULL) {
         *diff_out = (double)0;
     }
-    if (abs_tol_out != NULL) {
-        *abs_tol_out = abs_tol;
-    }
-    if (rel_tol_out != NULL) {
-        *rel_tol_out = rel_tol;
+    *handled_out = true;
+
+    if (assert_double_is_infinite(var1) || assert_double_is_infinite(var2)) {
+        if (var1 == var2) {
+            return true;
+        }
+        if (diff_out != NULL) {
+            *diff_out = assert_double_abs(var1 - var2);
+        }
+        return false;
     }
 
-    /* Exact equality catches identical finite values and matching infinities.
-     */
-    if (var1 == var2) {
-        return true;
-    }
-
-    /* NaNs are not approximately equal to anything, including themselves. */
-    if ((var1 != var1) || (var2 != var2)) {
+    if (assert_double_is_nan(var1) || assert_double_is_nan(var2)) {
         if (diff_out != NULL) {
             *diff_out = var1 - var2;
         }
         return false;
     }
 
-    /* Mismatched infinities are ordered but never approximately equal. */
-    if (assert_double_is_infinite(var1) || assert_double_is_infinite(var2)) {
+    sign1 = assert_double_is_negative(var1);
+    sign2 = assert_double_is_negative(var2);
+    if (sign1 != sign2) {
+        if (assert_double_is_zero(var1) && assert_double_is_zero(var2)) {
+            return true;
+        }
         if (diff_out != NULL) {
             *diff_out = assert_double_abs(var1 - var2);
         }
+        return false;
+    }
+
+    if (var1 == var2) {
+        return true;
+    }
+
+    *handled_out = false;
+    return false;
+}
+
+static bool
+assert_double_close_ulps(double var1, double var2,
+                         int kind1, int kind2,
+                         double *diff_out,
+                         ullong *ulps_out,
+                         ullong *max_ulps_out) {
+    int common_kind;
+    bool handled;
+    double diff;
+    ullong ulps;
+    ullong max_ulps;
+
+    common_kind = assert_fp_common_kind(kind1, kind2);
+    max_ulps = assert_fp_max_ulps(common_kind);
+
+    if (ulps_out != NULL) {
+        *ulps_out = 0;
+    }
+    if (max_ulps_out != NULL) {
+        *max_ulps_out = max_ulps;
+    }
+
+    if (assert_double_special_close(var1, var2, diff_out, &handled)) {
+        return true;
+    }
+    if (handled) {
         return false;
     }
 
@@ -449,19 +540,61 @@ assert_double_almost_equal(double var1, double var2,
         *diff_out = diff;
     }
 
-    if (diff <= abs_tol) {
+    if (common_kind == ASSERT_FP_KIND_FLOAT) {
+        float float1;
+        float float2;
+
+        if ((assert_double_abs(var1) > (double)FLT_MAX)
+            || (assert_double_abs(var2) > (double)FLT_MAX)) {
+            if (ulps_out != NULL) {
+                *ulps_out = ULLONG_MAX;
+            }
+            return false;
+        }
+
+        float1 = (float)var1;
+        float2 = (float)var2;
+        ulps = assert_float_ulp_distance(float1, float2);
+    } else {
+        ulps = assert_double_ulp_distance(var1, var2);
+    }
+
+    if (ulps_out != NULL) {
+        *ulps_out = ulps;
+    }
+
+    return ulps <= max_ulps;
+}
+
+static bool
+assert_double_close_tolerance(double var1, double var2,
+                              double tolerance,
+                              double *diff_out,
+                              double *tolerance_out) {
+    bool handled;
+    double diff;
+
+    if (tolerance < (double)0) {
+        tolerance = -tolerance;
+    }
+
+    if (tolerance_out != NULL) {
+        *tolerance_out = tolerance;
+    }
+
+    if (assert_double_special_close(var1, var2, diff_out, &handled)) {
         return true;
     }
-
-    abs1 = assert_double_abs(var1);
-    abs2 = assert_double_abs(var2);
-    if (abs1 > abs2) {
-        scale = abs1;
-    } else {
-        scale = abs2;
+    if (handled) {
+        return false;
     }
 
-    return diff <= rel_tol*scale;
+    diff = assert_double_abs(var1 - var2);
+    if (diff_out != NULL) {
+        *diff_out = diff;
+    }
+
+    return diff <= tolerance;
 }
 
 static bool
@@ -486,15 +619,26 @@ assert_double_failure(char *file, int32 line, char *func,
                       char *type1, char *type2,
                       llong bits1, llong bits2,
                       double var1, double var2, char *symbol,
-                      double diff, double abs_tol, double rel_tol) {
+                      double diff, double tolerance,
+                      ullong ulps, ullong max_ulps,
+                      bool use_tolerance) {
     if (!DEBUGGING) {
         UNREACHABLE();
     }
-    fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func);
-    fprintf(stderr, "[%s%lld]%s = %f %s %f = %s[%s%lld]\n",
-           type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    fprintf(stderr, "floating diff = %f, abs_tol = %f, rel_tol = %f\n",
-           diff, abs_tol, rel_tol);
+    fprintf(stderr,
+            "\nAssertion failed at %s:%d:%s\n", file, line, func);
+    fprintf(stderr,
+            "[%s%lld]%s = %.17g %s %.17g = %s[%s%lld]\n",
+            type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
+    if (use_tolerance) {
+        fprintf(stderr,
+                "floating diff = %.17g, tolerance = %.17g\n",
+                diff, tolerance);
+    } else {
+        fprintf(stderr,
+                "floating diff = %.17g, ulps = %llu, max_ulps = %llu\n",
+                diff, ulps, max_ulps);
+    }
     TRAP();
 }
 
@@ -506,13 +650,35 @@ a_double_close(char *file, int32 line, char *func,
                int kind1, int kind2,
                double var1, double var2) {
     double diff;
-    double abs_tol;
-    double rel_tol;
-    if (!assert_double_almost_equal(var1, var2, kind1, kind2,
-                                     &diff, &abs_tol, &rel_tol)) {
+    ullong ulps;
+    ullong max_ulps;
+
+    if (!assert_double_close_ulps(var1, var2, kind1, kind2,
+                                  &diff, &ulps, &max_ulps)) {
         assert_double_failure(file, line, func, name1, name2,
-                               type1, type2, bits1, bits2,
-                               var1, var2, "~=", diff, abs_tol, rel_tol);
+                              type1, type2, bits1, bits2,
+                              var1, var2, "~=", diff, (double)0,
+                              ulps, max_ulps, false);
+    }
+    return;
+}
+
+static void
+a_double_close_tolerance(char *file, int32 line, char *func,
+                         char *name1, char *name2,
+                         char *type1, char *type2,
+                         llong bits1, llong bits2,
+                         double var1, double var2,
+                         double tolerance) {
+    double diff;
+    double tolerance_abs;
+
+    if (!assert_double_close_tolerance(var1, var2, tolerance,
+                                       &diff, &tolerance_abs)) {
+        assert_double_failure(file, line, func, name1, name2,
+                              type1, type2, bits1, bits2,
+                              var1, var2, "~=", diff, tolerance_abs,
+                              0, 0, true);
     }
     return;
 }
@@ -525,13 +691,15 @@ a_double_not_close(char *file, int32 line, char *func,
                    int kind1, int kind2,
                    double var1, double var2) {
     double diff;
-    double abs_tol;
-    double rel_tol;
-    if (assert_double_almost_equal(var1, var2, kind1, kind2,
-                                    &diff, &abs_tol, &rel_tol)) {
+    ullong ulps;
+    ullong max_ulps;
+
+    if (assert_double_close_ulps(var1, var2, kind1, kind2,
+                                 &diff, &ulps, &max_ulps)) {
         assert_double_failure(file, line, func, name1, name2,
-                               type1, type2, bits1, bits2,
-                               var1, var2, "!~=", diff, abs_tol, rel_tol);
+                              type1, type2, bits1, bits2,
+                              var1, var2, "!~=", diff, (double)0,
+                              ulps, max_ulps, false);
     }
     return;
 }
@@ -564,6 +732,9 @@ a_bool_##MODE(char *file, int32 line, char *func,                              \
     return;                                                                    \
 }
 
+GENERATE_ASSERT_BOOLS(equal, ==)
+GENERATE_ASSERT_BOOLS(not_equal, !=)
+
 static void __attribute((noreturn))
 a_bool_more(void *p, ...) {
     (void)p;
@@ -584,8 +755,6 @@ a_bool_less_equal(void *p, ...) {
     (void)p;
     TRAP();
 }
-GENERATE_ASSERT_BOOLS(equal, ==)
-GENERATE_ASSERT_BOOLS(not_equal, !=)
 
 #undef GENERATE_ASSERT_BOOLS
 
@@ -640,6 +809,7 @@ assert_functions_sink(void) {
     (void)a_double_not_equal;
     (void)a_double_more;
     (void)a_double_more_equal;
+    (void)a_double_close_tolerance;
     (void)assert_file_contains;
     (void)assert_contains;
     (void)assert_not_contains;
@@ -852,6 +1022,15 @@ _Generic((VAR1),                                                        \
                    ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2),   \
                    DOUBLE_GET2(VAR1, TYPE1), DOUBLE_GET2(VAR2, TYPE2))
 
+#define A_BOTH_DOUBLE_CLOSE_TOL(VAR1, VAR2, TOL, TYPE1, TYPE2)              \
+    a_double_close_tolerance(__FILE__, __LINE__, FUNC__,                    \
+                             #VAR1, #VAR2,                                  \
+                             typename(TYPE1), typename(TYPE2),              \
+                             typebits(TYPE1), typebits(TYPE2),              \
+                             DOUBLE_GET2(VAR1, TYPE1),                     \
+                             DOUBLE_GET2(VAR2, TYPE2),                     \
+                             (double)(TOL))
+
 #define A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE1) \
 _Generic((VAR2), \
     float:  A_BOTH_DOUBLE_CLOSE(VAR1, VAR2, TYPE1, TYPE_FLOAT),  \
@@ -859,12 +1038,28 @@ _Generic((VAR2), \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND()  \
 )
 
-#define ASSERT_CLOSE(VAR1, VAR2) \
-_Generic((VAR1), \
-    float:  A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE_FLOAT),                      \
-    double: A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE_DOUBLE),                     \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST()                 \
+#define A_FIRST_DOUBLE_CLOSE_TOL(VAR1, VAR2, TOL, TYPE1) \
+_Generic((VAR2), \
+    float:  A_BOTH_DOUBLE_CLOSE_TOL(VAR1, VAR2, TOL, TYPE1, TYPE_FLOAT),  \
+    double: A_BOTH_DOUBLE_CLOSE_TOL(VAR1, VAR2, TOL, TYPE1, TYPE_DOUBLE), \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND()           \
 )
+
+#define ASSERT_CLOSE_2(VAR1, VAR2) \
+_Generic((VAR1), \
+    float:  A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE_FLOAT),                 \
+    double: A_FIRST_DOUBLE_CLOSE(VAR1, VAR2, TYPE_DOUBLE),                \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST()            \
+)
+
+#define ASSERT_CLOSE_3(VAR1, VAR2, TOL) \
+_Generic((VAR1), \
+    float:  A_FIRST_DOUBLE_CLOSE_TOL(VAR1, VAR2, TOL, TYPE_FLOAT),        \
+    double: A_FIRST_DOUBLE_CLOSE_TOL(VAR1, VAR2, TOL, TYPE_DOUBLE),       \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST()            \
+)
+
+#define ASSERT_CLOSE(...) SELECT_ON_NUM_ARGS(ASSERT_CLOSE_, __VA_ARGS__)
 
 #define ASSERT_NULL(VAR1) do {                                                 \
     void *p = VAR1;                                                            \
