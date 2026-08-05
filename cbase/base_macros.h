@@ -155,7 +155,7 @@ _Generic((SIZE), \
 #endif
 
 #if CC_GCC || CC_CLANG
-#define UNUSED __attribute__((unused))
+#define UNUSED __attribute((unused))
 #else
 #define UNUSED
 #endif
@@ -174,6 +174,8 @@ _Generic((SIZE), \
   #define UNREACHABLE() do { } while(0)
 #endif
 
+// __func__ returns const char *
+// which breaks the qualifiers when passing it around
 #define FUNC__ (char *)__func__
 #define FUNC FUNC__
 
