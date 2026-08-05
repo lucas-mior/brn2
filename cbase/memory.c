@@ -34,15 +34,178 @@ memory_assert_aligned_pointer(void *p) {
     return;
 }
 
+static int64
+memory_mapping_size(int64 size) {
+    if (size < 0) {
+        error("Invalid size = %lld\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    if (size == 0) {
+        size = 1;
+    }
+
+    if (memory_page_size == 0) {
+#if OS_UNIX
+        long page_size;
+
+        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
+            error("Error getting page size: %s.\n", strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        memory_page_size = (int64)page_size;
+#elif OS_WINDOWS
+        SYSTEM_INFO system_info;
+
+        GetSystemInfo(&system_info);
+        memory_page_size = (int64)system_info.dwPageSize;
+        if (memory_page_size <= 0) {
+            fprintf(stderr, "Error getting page size.\n");
+            fatal(EXIT_FAILURE);
+        }
+#else
+        memory_page_size = 4096;
+#endif
+    }
+
+    return ALIGN_POWER_OF_2(size, memory_page_size);
+}
+
+static bool
+memory_uses_os_allocator(int64 size) {
+    ASSERT(size > 0);
+    return !RUNNING_ON_VALGRIND && (size >= MEMORY_OS_ALLOC_THRESHOLD);
+}
+
+static void
+memory_check_size_t(int64 size) {
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error: Size (%lld) is bigger than SIZEMAX.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    return;
+}
+
+static void *
+memory_os_alloc(int64 size) {
+    void *p;
+    int64 map_size;
+
+    ASSERT(size > 0);
+    map_size = memory_mapping_size(size);
+    memory_check_size_t(map_size);
+
+#if OS_UNIX
+    p = mmap(NULL, (size_t)map_size, PROT_READ | PROT_WRITE,
+             MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (p == MAP_FAILED) {
+        error("Error in mmap(%lld): %s.\n", map_size, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+#elif OS_WINDOWS
+    p = VirtualAlloc(NULL, (size_t)map_size, MEM_COMMIT | MEM_RESERVE,
+                     PAGE_READWRITE);
+    if (p == NULL) {
+        fprintf(stderr, "Error in VirtualAlloc(%lld): %lu.\n",
+                map_size, GetLastError());
+        fatal(EXIT_FAILURE);
+    }
+#else
+    p = malloc((size_t)map_size);
+    if (p == NULL) {
+        error("Failed to allocate %lld bytes.\n", map_size);
+        fatal(EXIT_FAILURE);
+    }
+#endif
+
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
+    return p;
+}
+
+static void
+memory_os_free(void *p, int64 size) {
+    int64 map_size;
+
+    ASSERT(p != NULL);
+    ASSERT(size > 0);
+    map_size = memory_mapping_size(size);
+    memory_check_size_t(map_size);
+
+#if OS_UNIX
+    if (munmap(p, (size_t)map_size) < 0) {
+        error("Error in munmap(%p, %lld): %s.\n",
+              p, map_size, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+#elif OS_WINDOWS
+    (void)map_size;
+    if (!VirtualFree(p, 0, MEM_RELEASE)) {
+        fprintf(stderr, "Error in VirtualFree(%p): %lu.\n", p, GetLastError());
+        fatal(EXIT_FAILURE);
+    }
+#else
+    (void)map_size;
+    free(p);
+#endif
+    return;
+}
+
+static void *
+memory_os_realloc(void *old, int64 old_size, int64 new_size) {
+    void *p;
+    int64 old_map_size;
+    int64 new_map_size;
+
+    ASSERT(old != NULL);
+    ASSERT(memory_uses_os_allocator(old_size));
+    ASSERT(memory_uses_os_allocator(new_size));
+
+    old_map_size = memory_mapping_size(old_size);
+    new_map_size = memory_mapping_size(new_size);
+    memory_check_size_t(old_map_size);
+    memory_check_size_t(new_map_size);
+    if (old_map_size == new_map_size) {
+        return old;
+    }
+
+#if OS_LINUX && defined(SYS_mremap)
+#if !defined(MREMAP_MAYMOVE)
+#define MREMAP_MAYMOVE 1
+#endif
+    errno = 0;
+    p = (void *)syscall(SYS_mremap, old, (size_t)old_map_size,
+                        (size_t)new_map_size, MREMAP_MAYMOVE);
+    if (p == MAP_FAILED) {
+        error("Error in mremap(%p, %lld, %lld): %s.\n",
+              old, old_map_size, new_map_size, strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
+    return p;
+#elif OS_WINDOWS
+    if (new_map_size < old_map_size) {
+        return old;
+    }
+#endif
+
+    p = memory_os_alloc(new_size);
+    memcpy64(p, old, old_size < new_size ? old_size : new_size);
+    memory_os_free(old, old_size);
+    return p;
+}
+
 static void *
 memory_aligned_alloc(int64 size) {
     void *p;
 
     ASSERT(size > 0);
     ASSERT((size % ALIGNMENT) == 0);
-    if ((ullong)size >= (ullong)SIZE_MAX) {
-        error("Error: Size (%lld) is bigger than SIZEMAX.\n", size);
-        fatal(EXIT_FAILURE);
+    memory_check_size_t(size);
+
+    if (memory_uses_os_allocator(size)) {
+        p = memory_os_alloc(size);
+        return p;
     }
 
 #if OS_WINDOWS
@@ -61,7 +224,17 @@ memory_aligned_alloc(int64 size) {
 }
 
 static void
-memory_aligned_free(void *p) {
+memory_aligned_free(void *p, int64 size) {
+    if (p == NULL) {
+        return;
+    }
+
+    size = memory_allocation_size(size);
+    if (memory_uses_os_allocator(size)) {
+        memory_os_free(p, size);
+        return;
+    }
+
 #if OS_WINDOWS
     _aligned_free(p);
 #else
@@ -313,6 +486,8 @@ CBASE_API_DEF void *
 aligned_realloc(void *old, int64 old_size, int64 new_size) {
     void *p;
     int64 copy_size;
+    bool old_uses_os;
+    bool new_uses_os;
 
     if (old_size < 0) {
         error("Error: Invalid old size = %lld.\n", old_size);
@@ -324,12 +499,19 @@ aligned_realloc(void *old, int64 old_size, int64 new_size) {
     }
     old_size = memory_allocation_size(old_size);
     new_size = memory_allocation_size(new_size);
+    old_uses_os = memory_uses_os_allocator(old_size);
+    new_uses_os = memory_uses_os_allocator(new_size);
 
-    p = memory_aligned_alloc(new_size);
     if (old == NULL) {
+        p = memory_aligned_alloc(new_size);
+        return p;
+    }
+    if (old_uses_os && new_uses_os) {
+        p = memory_os_realloc(old, old_size, new_size);
         return p;
     }
 
+    p = memory_aligned_alloc(new_size);
     copy_size = old_size;
     if (new_size < copy_size) {
         copy_size = new_size;
@@ -337,7 +519,7 @@ aligned_realloc(void *old, int64 old_size, int64 new_size) {
     if (copy_size > 0) {
         memcpy64(p, old, copy_size);
     }
-    memory_aligned_free(old);
+    memory_aligned_free(old, old_size);
 
     return p;
 }
@@ -733,7 +915,7 @@ free_debug(char *file, int32 line, char *func,
     intptr pointer_key = (intptr)pointer;
 
     if (RUNNING_ON_VALGRIND) {
-        memory_aligned_free(pointer);
+        memory_aligned_free(pointer, size);
         return;
     }
 
@@ -811,7 +993,7 @@ free_debug(char *file, int32 line, char *func,
                 memset64(pointer, 0xCD, size);
             }
         } else {
-            memory_aligned_free(ptr - MEMORY_PADDING);
+            memory_aligned_free(ptr - MEMORY_PADDING, size + 2*MEMORY_PADDING);
         }
     } else {
         error_impl(file, line, func,
@@ -826,47 +1008,14 @@ free_debug(char *file, int32 line, char *func,
 
 CBASE_API_DEF void
 free2_(void *pointer, int64 size) {
-    (void)size;
-    if (pointer) {
-        memory_aligned_free(pointer);
-    }
-    return;
-}
-
-static int64
-memory_mapping_size(int64 size) {
     if (size < 0) {
-        error("Invalid size = %lld\n", size);
+        error("Error: freeing allocation of negative size = %lld.\n", size);
         fatal(EXIT_FAILURE);
     }
-    if (size == 0) {
-        size = 1;
+    if (pointer) {
+        memory_aligned_free(pointer, size);
     }
-
-    if (memory_page_size == 0) {
-#if OS_UNIX
-        long page_size;
-
-        if ((page_size = sysconf(_SC_PAGESIZE)) <= 0) {
-            error("Error getting page size: %s.\n", strerror(errno));
-            fatal(EXIT_FAILURE);
-        }
-        memory_page_size = (int64)page_size;
-#elif OS_WINDOWS
-        SYSTEM_INFO system_info;
-
-        GetSystemInfo(&system_info);
-        memory_page_size = (int64)system_info.dwPageSize;
-        if (memory_page_size <= 0) {
-            fprintf(stderr, "Error getting page size.\n");
-            fatal(EXIT_FAILURE);
-        }
-#else
-        memory_page_size = 4096;
-#endif
-    }
-
-    return ALIGN_POWER_OF_2(size, memory_page_size);
+    return;
 }
 
 #if OS_UNIX
@@ -929,7 +1078,7 @@ CBASE_API_DEF void
 xmunmap(void *p, int64 size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        memory_aligned_free(p);
+        memory_aligned_free(p, size);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -1107,6 +1256,38 @@ int main(void) {
     }
 
     {
+        int64 small_size = MEMORY_OS_ALLOC_THRESHOLD / 2;
+        int64 large_size = MEMORY_OS_ALLOC_THRESHOLD * 2;
+        int64 shrink_size = MEMORY_OS_ALLOC_THRESHOLD / 4;
+        uchar *p = xmalloc(small_size, false);
+
+        for (int64 i = 0; i < small_size; i += 1) {
+            p[i] = (uchar)(i & 0xFF);
+        }
+
+        p = aligned_realloc(p, small_size, large_size);
+        for (int64 i = 0; i < small_size; i += 1) {
+            ASSERT(p[i] == (uchar)(i & 0xFF));
+        }
+
+        for (int64 i = small_size; i < large_size; i += 1) {
+            p[i] = (uchar)(i & 0xFF);
+        }
+
+        p = aligned_realloc(p, large_size, large_size*2);
+        for (int64 i = 0; i < large_size; i += 1) {
+            ASSERT(p[i] == (uchar)(i & 0xFF));
+        }
+
+        p = aligned_realloc(p, large_size*2, shrink_size);
+        for (int64 i = 0; i < shrink_size; i += 1) {
+            ASSERT(p[i] == (uchar)(i & 0xFF));
+        }
+        free2_(p, shrink_size);
+        printf("large aligned_realloc transitions preserved data.\n");
+    }
+
+    {
         int64 count = 5;
         int64 grow = 10;
         int64 shrink = 3;
@@ -1247,7 +1428,8 @@ int main(void) {
             free2(p, size + 1); // Incorrect size
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 
     {
@@ -1258,7 +1440,8 @@ int main(void) {
             free2(p, size); // Double free
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 
     {
@@ -1305,7 +1488,8 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 
     {
@@ -1316,7 +1500,8 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 
     {
@@ -1327,7 +1512,8 @@ int main(void) {
             free2(p, size);
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 
     {
@@ -1338,7 +1524,8 @@ int main(void) {
             free2(p, size);
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 
     {
@@ -1350,7 +1537,8 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        memory_aligned_free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING,
+                            memory_allocation_size(size) + 2*MEMORY_PADDING);
     }
 #endif
 
