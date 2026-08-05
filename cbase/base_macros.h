@@ -96,7 +96,7 @@
 #if defined(SIZEOF)
 #undef SIZEOF
 #endif
-#define SIZEOF(X) ((int64)sizeof(X))
+#define SIZEOF(...) ((int64)sizeof(__VA_ARGS__))
 #define LENGTH(x) (int32)((sizeof(x) / sizeof(*x)))
 #define SWAP(x, y) do { __typeof__(x) SWAP = x; x = y; y = SWAP; } while (0)
 
