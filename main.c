@@ -321,7 +321,9 @@ main(int argc, char **argv) {
                   brn2_buffer.name, strerror(errno));
             fatal(EXIT_FAILURE);
         }
+#if CC_GCC || CC_CLANG
         atexit(delete_brn2_buffer);
+#endif
 
         if (brn2_options_vim_split) {
             SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2.old.XXXXXX");

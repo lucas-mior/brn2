@@ -540,7 +540,7 @@ CBASE_API_DECL bool command_wait(Command *);
 #endif
 
 typedef struct GenericArrayHeader {
-    ldouble alignment;
+    max_align_t alignment;
     int32 count;
     int32 cap;
     int64 padding;
