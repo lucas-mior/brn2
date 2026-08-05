@@ -1291,6 +1291,7 @@ int main(void) {
 
     fsync(STDOUT_FILENO);
     fsync(STDERR_FILENO);
+
     printf("\nAll memory tests passed.\n");
     return EXIT_SUCCESS;
 }
