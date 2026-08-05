@@ -34,6 +34,27 @@ memory_assert_aligned_pointer(void *p) {
     return;
 }
 
+static void *
+memory_aligned_alloc(int64 size) {
+    void *p;
+
+    ASSERT(size > 0);
+    ASSERT((size % ALIGNMENT) == 0);
+    if ((ullong)size >= (ullong)SIZE_MAX) {
+        error("Error: Size (%lld) is bigger than SIZEMAX.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+
+    if ((p = aligned_alloc((size_t)ALIGNMENT, (size_t)size)) == NULL) {
+        error("Failed to allocate %lld bytes.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
+
+    return p;
+}
+
 typedef struct DebugAllocInfo {
     int64 size;
     char *file;
@@ -140,12 +161,7 @@ xmalloc(int64 size, bool zero) {
     void *p;
 
     size = memory_allocation_size(size);
-    if ((p = malloc((size_t)size)) == NULL) {
-        error("Failed to allocate %lld bytes.\n", size);
-        fatal(EXIT_FAILURE);
-    }
-    memory_assert_aligned_pointer(p);
-    ASSUME_ALIGNED(p);
+    p = memory_aligned_alloc(size);
     if (zero) {
         memset64(p, 0, size);
     }
@@ -279,27 +295,49 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
 }
 
 CBASE_API_DEF void *
-xrealloc(void *old, int64 new_size) {
+aligned_realloc(void *old, int64 old_size, int64 new_size) {
+    void *p;
+    int64 copy_size;
+
+    if (old_size < 0) {
+        error("Error: Invalid old size = %lld.\n", old_size);
+        fatal(EXIT_FAILURE);
+    }
+    if (new_size < 0) {
+        error("Error: Invalid new size = %lld.\n", new_size);
+        fatal(EXIT_FAILURE);
+    }
+    old_size = memory_allocation_size(old_size);
+    new_size = memory_allocation_size(new_size);
+
+    p = memory_aligned_alloc(new_size);
+    if (old == NULL) {
+        return p;
+    }
+
+    copy_size = old_size;
+    if (new_size < copy_size) {
+        copy_size = new_size;
+    }
+    if (copy_size > 0) {
+        memcpy64(p, old, copy_size);
+    }
+    free(old);
+
+    return p;
+}
+
+CBASE_API_DEF void *
+xrealloc(void *old, int64 old_size, int64 new_size) {
     void *p;
     uint64 old_save = (uint64)old;
 
-    if (new_size < 0) {
-        error("Error: Invalid size = %lld.\n", new_size);
-        fatal(EXIT_FAILURE);
-    }
-    new_size = memory_allocation_size(new_size);
-    if ((ullong)new_size >= (ullong)SIZE_MAX) {
-        error("Error: Size (%lld) is bigger than SIZEMAX.\n", new_size);
-        fatal(EXIT_FAILURE);
-    }
-
-    if ((p = realloc(old, (size_t)new_size)) == NULL) {
+    p = aligned_realloc(old, old_size, new_size);
+    if (p == NULL) {
         error("Failed to reallocate %lld bytes from %llx.\n",
               new_size, (ullong)old_save);
         fatal(EXIT_FAILURE);
     }
-    memory_assert_aligned_pointer(p);
-    ASSUME_ALIGNED(p);
 
     return p;
 }
@@ -307,14 +345,22 @@ xrealloc(void *old, int64 new_size) {
 CBASE_API_DEF void *
 realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     int64 new_size;
-    (void)old_capacity;
 
     if (obj_size <= 0) {
         error("realloc: invalid object size = %lld.\n", obj_size);
         fatal(EXIT_FAILURE);
     }
+    if (old_capacity < 0) {
+        error("realloc: invalid old capacity = %lld.\n", old_capacity);
+        fatal(EXIT_FAILURE);
+    }
     if (new_capacity < 0) {
         error("realloc: invalid capacity = %lld.\n", new_capacity);
+        fatal(EXIT_FAILURE);
+    }
+    if ((MAXOF(new_size) / obj_size) < old_capacity) {
+        error("realloc: %lld objects of size %lld is too much.\n",
+              old_capacity, obj_size);
         fatal(EXIT_FAILURE);
     }
     if ((MAXOF(new_size) / obj_size) < new_capacity) {
@@ -324,7 +370,7 @@ realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
     }
     new_size = memory_allocation_size(new_capacity*obj_size);
 
-    return xrealloc(old, new_size);
+    return xrealloc(old, old_capacity*obj_size, new_size);
 }
 
 CBASE_API_DEF void *
@@ -363,7 +409,7 @@ realloc_debug(char *file, int32 line, char *func,
     }
 
     if (RUNNING_ON_VALGRIND) {
-        return xrealloc(old, new_capacity*obj_size);
+        return xrealloc(old, old_capacity*obj_size, new_capacity*obj_size);
     }
 
     old_size = memory_allocation_size(old_capacity*obj_size);
@@ -460,11 +506,12 @@ realloc_debug(char *file, int32 line, char *func,
                 }
             } else {
                 old_base = ((uchar *)old - MEMORY_PADDING);
-                base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
+                base_p = xrealloc(old_base, old_size + 2*MEMORY_PADDING,
+                                  new_size + 2*MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
-            base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
+            base_p = xrealloc(old_base, 0, new_size + 2*MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
@@ -536,7 +583,8 @@ realloc_flex_debug(char *file, int32 line, char *func,
     }
 
     if (RUNNING_ON_VALGRIND) {
-        return xrealloc(old, struct_size + new_capacity*obj_size);
+        return xrealloc(old, struct_size + old_capacity*obj_size,
+                        struct_size + new_capacity*obj_size);
     }
 
     old_size = memory_allocation_size(struct_size + old_capacity*obj_size);
@@ -634,11 +682,12 @@ realloc_flex_debug(char *file, int32 line, char *func,
                 }
             } else {
                 old_base = ((uchar *)old - MEMORY_PADDING);
-                base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
+                base_p = xrealloc(old_base, old_size + 2*MEMORY_PADDING,
+                                  new_size + 2*MEMORY_PADDING);
             }
         } else {
             old_base = NULL;
-            base_p = xrealloc(old_base, new_size + 2*MEMORY_PADDING);
+            base_p = xrealloc(old_base, 0, new_size + 2*MEMORY_PADDING);
         }
 
         ptr = (uchar *)base_p;
@@ -926,6 +975,7 @@ memory_functions_sink(void) {
     (void)memory_functions_sink;
     (void)memory_check;
     (void)realloc4;
+    (void)aligned_realloc;
     (void)free2_;
     (void)realloc_flex_debug;
     return;
