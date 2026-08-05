@@ -146,64 +146,96 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
     return buf;
 }
 
-static double
+static double UNUSED
 double_from_voidp(void* x) {
     (void)x;
     TRAP();
-    return (double)0.0;
+    return 0.0;  // NOLINT
 }
-static double
+static double UNUSED
 double_from_charp(char* x) {
     (void)x;
     TRAP();
-    return (double)0.0;
+    return 0.0;  // NOLINT
 }
-static double
+static double UNUSED
 double_from_bool(bool x) {
     (void)x;
     TRAP();
-    return (double)0.0;
+    return 0.0;  // NOLINT
 }
-static double
+static double UNUSED
 double_from_char(char x) {
     (void)x;
     TRAP();
-    return (double)0.0;
+    return 0.0;  // NOLINT
 }
-static double double_from_schar  (schar x)   {
+static void
+check_integer_fits_in_double(llong x) {
+    if (x > (1ll << DBL_MANT_DIG)) {
+        TRAP();
+    }
+    if (x < -(1ll << DBL_MANT_DIG)) {
+        TRAP();
+    }
+    return;
+}
+static double UNUSED
+double_from_schar(schar x) {
     return (double)x;
 }
-static double double_from_short  (short x)   {
+static double UNUSED
+double_from_short(short x) {
     return (double)x;
 }
-static double double_from_int    (int x)     {
+static double UNUSED
+double_from_int(int x) {
     return (double)x;
 }
-static double double_from_long   (long x)    {
+static double UNUSED
+double_from_long(long x) {
+    check_integer_fits_in_double((llong)x);
     return (double)x;
 }
-static double double_from_llong  (llong x)   {
+static double UNUSED
+double_from_llong(llong x) {
+    check_integer_fits_in_double(x);
     return (double)x;
 }
-static double double_from_uchar  (uchar x)   {
+static double UNUSED
+double_from_uchar(uchar x) {
     return (double)x;
 }
-static double double_from_ushort (ushort x)  {
+static double UNUSED
+double_from_ushort(ushort x) {
     return (double)x;
 }
-static double double_from_uint   (uint x)    {
+static double UNUSED
+double_from_uint(uint x) {
     return (double)x;
 }
-static double double_from_ulong  (ulong x)   {
+static double UNUSED
+double_from_ulong(ulong x) {
+    if (x >= (ullong)LLONG_MAX) {
+        TRAP();
+    }
+    check_integer_fits_in_double((llong)x);
     return (double)x;
 }
-static double double_from_ullong (ullong x)  {
+static double UNUSED
+double_from_ullong(ullong x) {
+    if (x >= (ullong)LLONG_MAX) {
+        TRAP();
+    }
+    check_integer_fits_in_double((llong)x);
     return (double)x;
 }
-static double double_from_float  (float x)   {
+static double UNUSED
+double_from_float(float x) {
     return (double)x;
 }
-static double double_from_double (double x)  {
+static double UNUSED
+double_from_double(double x)  {
     return (double)x;
 }
 
@@ -269,24 +301,56 @@ typename(enum Type type) {
 static double
 double_get(union Primitive var, enum Type type) {
     switch (type) {
-    case TYPE_VOIDP:   TRAP(); break;
-    case TYPE_CHARP:   TRAP(); break;
-    case TYPE_BOOL:    TRAP(); break;
-    case TYPE_CHAR:    TRAP(); break;
-    case TYPE_SCHAR:   return (double)var.aschar;
-    case TYPE_SHORT:   return (double)var.ashort;
-    case TYPE_INT:     return (double)var.aint;
-    case TYPE_LONG:    return (double)var.along;
-    case TYPE_LLONG:   return (double)var.allong;
-    case TYPE_UCHAR:   return (double)var.auchar;
-    case TYPE_USHORT:  return (double)var.aushort;
-    case TYPE_UINT:    return (double)var.auint;
-    case TYPE_ULONG:   return (double)var.aulong;
-    case TYPE_ULLONG:  return (double)var.aullong;
-    case TYPE_FLOAT:   return (double)var.afloat;
-    case TYPE_DOUBLE:  return (double)var.adouble;
+    case TYPE_VOIDP:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_CHARP:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_BOOL:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_CHAR:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_SCHAR:
+        return (double)var.aschar;
+    case TYPE_SHORT:
+        return (double)var.ashort;
+    case TYPE_INT:
+        return (double)var.aint;
+    case TYPE_LONG:
+        check_integer_fits_in_double(var.along);
+        return (double)var.along;
+    case TYPE_LLONG:
+        check_integer_fits_in_double(var.allong);
+        return (double)var.allong;
+    case TYPE_UCHAR:
+        return (double)var.auchar;
+    case TYPE_USHORT:
+        return (double)var.aushort;
+    case TYPE_UINT:
+        return (double)var.auint;
+    case TYPE_ULONG:
+        if (var.aulong >= (ullong)LLONG_MAX) {
+            TRAP();
+        }
+        check_integer_fits_in_double((llong)var.aulong);
+        return (double)var.aulong;
+    case TYPE_ULLONG:
+        if (var.aullong >= (ullong)LLONG_MAX) {
+            TRAP();
+        }
+        check_integer_fits_in_double((llong)var.aullong);
+        return (double)var.aullong;
+    case TYPE_FLOAT:
+        return (double)var.afloat;
+    case TYPE_DOUBLE:
+        return (double)var.adouble;
     case TYPE_OTHER:
-    default:           TRAP(); break;
+    default:
+        TRAP();
+        break;  // NOLINT
     }
     return (double)0.0;
 }
@@ -294,27 +358,10 @@ double_get(union Primitive var, enum Type type) {
 #if 0 == TESTING_generic
 static inline void
 generic_functions_sink(void) {
-    (void)double_from_voidp;
-    (void)double_from_charp;
-    (void)double_from_bool;
-    (void)double_from_char;
-    (void)double_from_schar;
-    (void)double_from_short;
-    (void)double_from_int;
-    (void)double_from_long;
-    (void)double_from_llong;
-    (void)double_from_uchar;
-    (void)double_from_ushort;
-    (void)double_from_uint;
-    (void)double_from_ulong;
-    (void)double_from_ullong;
-    (void)double_from_float;
-    (void)double_from_double;
-
+    (void)generic_functions_sink;
     (void)typebits;
     (void)typename;
     (void)double_get;
-    (void)generic_functions_sink;
     return;
 }
 #endif
@@ -461,7 +508,7 @@ _Generic((x), \
     default: UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC            \
 )(x)
 
-#if defined(__GNUC__) || defined(__clang__)
+#if CC_GCC || CC_CLANG
 #define DOUBLE_GET2(VAR, TYPE) double_get((union Primitive)(VAR), TYPE)
 #else
 #define DOUBLE_GET2(VAR, TYPE) DOUBLE_GET(VAR)
@@ -481,7 +528,7 @@ _Generic((x), \
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
   fprintf(stderr, "["GREEN("%s%lld")"]%s = "FORMAT" ", \
-                  typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr_t)(VAR))
+                  typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr)(VAR))
 
 #define PRINT(VAR) \
 _Generic((VAR), \
@@ -518,61 +565,61 @@ int
 main(void) {
     union Primitive primitive;
 
-    assert(MINOF(primitive.afloat)   == -FLT_MAX);
-    assert(MINOF(primitive.aint)     == INT_MIN);
-    assert(MINOF(primitive.allong)   == LLONG_MIN);
-    assert(MINOF(primitive.along)    == LONG_MIN);
-    assert(MINOF(primitive.aschar)   == SCHAR_MIN);
-    assert(MINOF(primitive.ashort)   == SHRT_MIN);
-    assert(MINOF(primitive.auchar)   == 0);
-    assert(MINOF(primitive.auint)    == 0u);
-    assert(MINOF(primitive.aullong)  == 0ull);
-    assert(MINOF(primitive.aulong)   == 0ul);
-    assert(MINOF(primitive.aushort)  == 0);
+    assert(MINOF(primitive.afloat)  == -FLT_MAX);
+    assert(MINOF(primitive.aint)    == INT_MIN);
+    assert(MINOF(primitive.allong)  == LLONG_MIN);
+    assert(MINOF(primitive.along)   == LONG_MIN);
+    assert(MINOF(primitive.aschar)  == SCHAR_MIN);
+    assert(MINOF(primitive.ashort)  == SHRT_MIN);
+    assert(MINOF(primitive.auchar)  == 0);
+    assert(MINOF(primitive.auint)   == 0u);
+    assert(MINOF(primitive.aullong) == 0ull);
+    assert(MINOF(primitive.aulong)  == 0ul);
+    assert(MINOF(primitive.aushort) == 0);
 
-    assert(MAXOF(primitive.afloat)   == FLT_MAX);
-    assert(MAXOF(primitive.aschar)   == SCHAR_MAX);
-    assert(MAXOF(primitive.ashort)   == SHRT_MAX);
-    assert(MAXOF(primitive.aint)     == INT_MAX);
-    assert(MAXOF(primitive.along)    == LONG_MAX);
-    assert(MAXOF(primitive.allong)   == LLONG_MAX);
-    assert(MAXOF(primitive.auchar)   == UCHAR_MAX);
-    assert(MAXOF(primitive.aushort)  == USHRT_MAX);
-    assert(MAXOF(primitive.auint)    == UINT_MAX);
-    assert(MAXOF(primitive.aulong)   == ULONG_MAX);
-    assert(MAXOF(primitive.aullong)  == ULLONG_MAX);
-    assert(MAXOF(primitive.abool)    == 1);
+    assert(MAXOF(primitive.afloat)  == FLT_MAX);
+    assert(MAXOF(primitive.aschar)  == SCHAR_MAX);
+    assert(MAXOF(primitive.ashort)  == SHRT_MAX);
+    assert(MAXOF(primitive.aint)    == INT_MAX);
+    assert(MAXOF(primitive.along)   == LONG_MAX);
+    assert(MAXOF(primitive.allong)  == LLONG_MAX);
+    assert(MAXOF(primitive.auchar)  == UCHAR_MAX);
+    assert(MAXOF(primitive.aushort) == USHRT_MAX);
+    assert(MAXOF(primitive.auint)   == UINT_MAX);
+    assert(MAXOF(primitive.aulong)  == ULONG_MAX);
+    assert(MAXOF(primitive.aullong) == ULLONG_MAX);
+    assert(MAXOF(primitive.abool)   == 1);
 
-    assert(!strcmp(TYPENAME(primitive.avoidp),
-                   typename(TYPEID(primitive.avoidp))));
-    assert(!strcmp(TYPENAME(primitive.acharp),
-                   typename(TYPEID(primitive.acharp))));
-    assert(!strcmp(TYPENAME(primitive.abool),
-                   typename(TYPEID(primitive.abool))));
-    assert(!strcmp(TYPENAME(primitive.aschar),
-                   typename(TYPEID(primitive.aschar))));
-    assert(!strcmp(TYPENAME(primitive.ashort),
-                   typename(TYPEID(primitive.ashort))));
-    assert(!strcmp(TYPENAME(primitive.aint),
-                   typename(TYPEID(primitive.aint))));
-    assert(!strcmp(TYPENAME(primitive.along),
-                   typename(TYPEID(primitive.along))));
-    assert(!strcmp(TYPENAME(primitive.allong),
-                   typename(TYPEID(primitive.allong))));
-    assert(!strcmp(TYPENAME(primitive.auchar),
-                   typename(TYPEID(primitive.auchar))));
-    assert(!strcmp(TYPENAME(primitive.aushort),
-                   typename(TYPEID(primitive.aushort))));
-    assert(!strcmp(TYPENAME(primitive.auint),
-                   typename(TYPEID(primitive.auint))));
-    assert(!strcmp(TYPENAME(primitive.aulong),
-                   typename(TYPEID(primitive.aulong))));
-    assert(!strcmp(TYPENAME(primitive.aullong),
-                   typename(TYPEID(primitive.aullong))));
-    assert(!strcmp(TYPENAME(primitive.afloat),
-                   typename(TYPEID(primitive.afloat))));
-    assert(!strcmp(TYPENAME(primitive.adouble),
-                   typename(TYPEID(primitive.adouble))));
+    assert(strequal(TYPENAME(primitive.avoidp),
+                    typename(TYPEID(primitive.avoidp))));
+    assert(strequal(TYPENAME(primitive.acharp),
+                    typename(TYPEID(primitive.acharp))));
+    assert(strequal(TYPENAME(primitive.abool),
+                    typename(TYPEID(primitive.abool))));
+    assert(strequal(TYPENAME(primitive.aschar),
+                    typename(TYPEID(primitive.aschar))));
+    assert(strequal(TYPENAME(primitive.ashort),
+                    typename(TYPEID(primitive.ashort))));
+    assert(strequal(TYPENAME(primitive.aint),
+                    typename(TYPEID(primitive.aint))));
+    assert(strequal(TYPENAME(primitive.along),
+                    typename(TYPEID(primitive.along))));
+    assert(strequal(TYPENAME(primitive.allong),
+                    typename(TYPEID(primitive.allong))));
+    assert(strequal(TYPENAME(primitive.auchar),
+                    typename(TYPEID(primitive.auchar))));
+    assert(strequal(TYPENAME(primitive.aushort),
+                    typename(TYPEID(primitive.aushort))));
+    assert(strequal(TYPENAME(primitive.auint),
+                    typename(TYPEID(primitive.auint))));
+    assert(strequal(TYPENAME(primitive.aulong),
+                    typename(TYPEID(primitive.aulong))));
+    assert(strequal(TYPENAME(primitive.aullong),
+                    typename(TYPEID(primitive.aullong))));
+    assert(strequal(TYPENAME(primitive.afloat),
+                    typename(TYPEID(primitive.afloat))));
+    assert(strequal(TYPENAME(primitive.adouble),
+                    typename(TYPEID(primitive.adouble))));
 
     {
         int32 var_int32;
@@ -656,15 +703,15 @@ main(void) {
         FILE *fp;
         int n;
 
-        assert(!strcmp(S_(a), "i"));
-        assert(!strcmp(S_(b), "able"));
-        assert(!strcmp(S_(c), "1"));
-        assert(!strcmp(S_((uint)42), "42"));
-        assert(!strcmp(S_((long)-42), "-42"));
-        assert(!strcmp(S_((ullong)42), "42"));
-        assert(!strcmp(S_(true), "1"));
-        assert(!strcmp(S_(false), "0"));
-        assert(!strcmp(SF("0x%02x", 10), "0x0a"));
+        assert(strequal(S_(a), "i"));
+        assert(strequal(S_(b), "able"));
+        assert(strequal(S_(c), "1"));
+        assert(strequal(S_((uint)42), "42"));
+        assert(strequal(S_((long)-42), "-42"));
+        assert(strequal(S_((ullong)42), "42"));
+        assert(strequal(S_(true), "1"));
+        assert(strequal(S_(false), "0"));
+        assert(strequal(SF("0x%02x", 10), "0x0a"));
 
         n = snprint(buf, sizeof(buf),
                     "Now you can insert var" V(a) V(b) "s in situ:\n"
@@ -672,7 +719,7 @@ main(void) {
         assert(n == strlen2("Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));
 
-        assert(!strcmp(buf, "Now you can insert variables in situ:\n"
+        assert(strequal(buf, "Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));
 
         n = snprint(buf, sizeof(buf),
@@ -681,16 +728,16 @@ main(void) {
                  "This is %s It's %lu characters long\n",
                  e, (ulong)strlen(e));
         assert(n == strlen2(expected));
-        assert(!strcmp(buf, expected));
+        assert(strequal(buf, expected));
 
         n = snprint(buf, sizeof(buf),
                     "custom " VF("%04i", c) " " VF("%c", a) "\n");
         assert(n == strlen2("custom 0001 i\n"));
-        assert(!strcmp(buf, "custom 0001 i\n"));
+        assert(strequal(buf, "custom 0001 i\n"));
 
         n = snprint(small, sizeof(small), "prefix-" W(e));
         assert(n == (int)(strlen("prefix-") + strlen(e)));
-        assert(!strcmp(small, "prefix-"));
+        assert(strequal(small, "prefix-"));
 
         fp = tmpfile();
         assert(fp);
@@ -698,7 +745,7 @@ main(void) {
         assert(n == strlen2("file 1 0001\n"));
         rewind(fp);
         assert(fgets(buf, sizeof(buf), fp));
-        assert(!strcmp(buf, "file 1 0001\n"));
+        assert(strequal(buf, "file 1 0001\n"));
         fclose(fp);
 
         n = print0("print ", V(a), " ", W(b), "\n");

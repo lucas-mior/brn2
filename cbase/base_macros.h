@@ -122,10 +122,12 @@ _Generic((SIZE), \
 #define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
 
 #if defined(__GNUC__)
+#define ASSUME_ALIGNED_EXPR(X) __builtin_assume_aligned((X), ALIGNMENT)
 #define ASSUME_ALIGNED(X) do { \
     X = __builtin_assume_aligned(X, ALIGNMENT); \
 } while (0)
 #else
+#define ASSUME_ALIGNED_EXPR(X) (X)
 #define ASSUME_ALIGNED(X) do {} while (0)
 #endif
 
@@ -160,7 +162,9 @@ _Generic((SIZE), \
 #define UNUSED
 #endif
 
-#define π 3.14159265358979323846264338327950288
+#define π  3.14159265358979323846264338327950288
+#define π2 2*π
+#define τ  2*π
 
 #if !defined(__has_builtin)
   #define __has_builtin(x) 0
