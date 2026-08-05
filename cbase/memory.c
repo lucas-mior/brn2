@@ -16,6 +16,24 @@ static int64 memory_page_size = 0;
 
 #include "memory.h"
 
+static int64
+memory_allocation_size(int64 size) {
+    if (size == 0) {
+        size = 1;
+    }
+    ASSERT(size > 0);
+    ASSERT(size <= (INT64_MAX - (ALIGNMENT - 1)));
+    return ALIGN(size);
+}
+
+static void
+memory_assert_aligned_pointer(void *p) {
+    if (((uintptr)p % ALIGNMENT) != 0) {
+        TRAP();
+    }
+    return;
+}
+
 typedef struct DebugAllocInfo {
     int64 size;
     char *file;
@@ -121,13 +139,13 @@ CBASE_API_DEF void *
 xmalloc(int64 size, bool zero) {
     void *p;
 
-    if (size == 0) {
-        size = 1;
-    }
+    size = memory_allocation_size(size);
     if ((p = malloc((size_t)size)) == NULL) {
         error("Failed to allocate %lld bytes.\n", size);
         fatal(EXIT_FAILURE);
     }
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
     if (zero) {
         memset64(p, 0, size);
     }
@@ -208,6 +226,12 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
                    "Invalid allocation size = %lld.\n", size);
         fatal(EXIT_FAILURE);
     }
+    if (size > (MAXOF(size) - (ALIGNMENT - 1))) {
+        error_impl(file, line, func,
+                   "Allocation size (%lld) is too big.\n", size);
+        fatal(EXIT_FAILURE);
+    }
+    size = memory_allocation_size(size);
     if (size >= (MAXOF(size) - 2*MEMORY_PADDING)) {
         error_impl(file, line, func,
                    "Allocation size (%lld) is too big.\n", size);
@@ -225,6 +249,8 @@ malloc_debug(char *file, int32 line, char *func, int64 size, bool zero) {
     }
 
     p = ptr + MEMORY_PADDING;
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
     memset64(p, 0xCD, size);
 
     {
@@ -261,9 +287,7 @@ xrealloc(void *old, int64 new_size) {
         error("Error: Invalid size = %lld.\n", new_size);
         fatal(EXIT_FAILURE);
     }
-    if (new_size == 0) {
-        new_size = 1;
-    }
+    new_size = memory_allocation_size(new_size);
     if ((ullong)new_size >= (ullong)SIZE_MAX) {
         error("Error: Size (%lld) is bigger than SIZEMAX.\n", new_size);
         fatal(EXIT_FAILURE);
@@ -274,14 +298,31 @@ xrealloc(void *old, int64 new_size) {
               new_size, (ullong)old_save);
         fatal(EXIT_FAILURE);
     }
+    memory_assert_aligned_pointer(p);
+    ASSUME_ALIGNED(p);
 
     return p;
 }
 
 CBASE_API_DEF void *
 realloc4(void *old, int64 old_capacity, int64 new_capacity, int64 obj_size) {
-    int64 new_size = new_capacity*obj_size;
+    int64 new_size;
     (void)old_capacity;
+
+    if (obj_size <= 0) {
+        error("realloc: invalid object size = %lld.\n", obj_size);
+        fatal(EXIT_FAILURE);
+    }
+    if (new_capacity < 0) {
+        error("realloc: invalid capacity = %lld.\n", new_capacity);
+        fatal(EXIT_FAILURE);
+    }
+    if ((MAXOF(new_size) / obj_size) < new_capacity) {
+        error("realloc: %lld objects of size %lld is too much.\n",
+              new_capacity, obj_size);
+        fatal(EXIT_FAILURE);
+    }
+    new_size = memory_allocation_size(new_capacity*obj_size);
 
     return xrealloc(old, new_size);
 }
@@ -314,16 +355,19 @@ realloc_debug(char *file, int32 line, char *func,
                    new_capacity, obj_size);
         fatal(EXIT_FAILURE);
     }
+    if ((new_capacity*obj_size) > (MAXOF(new_size) - (ALIGNMENT - 1))) {
+        error_impl(file, line, func,
+                   "realloc: %lld objects of size %lld is too much.\n",
+                   new_capacity, obj_size);
+        fatal(EXIT_FAILURE);
+    }
 
     if (RUNNING_ON_VALGRIND) {
-        if (new_capacity == 0) {
-            new_capacity = 1;
-        }
         return xrealloc(old, new_capacity*obj_size);
     }
 
-    old_size = old_capacity*obj_size;
-    new_size = new_capacity*obj_size;
+    old_size = memory_allocation_size(old_capacity*obj_size);
+    new_size = memory_allocation_size(new_capacity*obj_size);
     ASSERT(new_size <= (MAXOF(new_size) - 2*MEMORY_PADDING));
 
     {
@@ -433,6 +477,8 @@ realloc_debug(char *file, int32 line, char *func,
         }
 
         p = ptr + MEMORY_PADDING;
+        memory_assert_aligned_pointer(p);
+        ASSUME_ALIGNED(p);
         p_key = (intptr)p;
         hash_insert_alloc_map(allocations, &p_key, info);
 
@@ -481,16 +527,20 @@ realloc_flex_debug(char *file, int32 line, char *func,
                    new_capacity, obj_size);
         fatal(EXIT_FAILURE);
     }
-
-    if (RUNNING_ON_VALGRIND) {
-        if (new_capacity == 0) {
-            new_capacity = 1;
-        }
-        return realloc(old, (size_t)(struct_size + new_capacity*obj_size));
+    if ((struct_size + new_capacity*obj_size) >
+        (INT64_MAX - (ALIGNMENT - 1))) {
+        error_impl(file, line, func,
+                   "Allocating %lld objects of size %lld is too much.\n",
+                   new_capacity, obj_size);
+        fatal(EXIT_FAILURE);
     }
 
-    old_size = struct_size + old_capacity*obj_size;
-    new_size = struct_size + new_capacity*obj_size;
+    if (RUNNING_ON_VALGRIND) {
+        return xrealloc(old, struct_size + new_capacity*obj_size);
+    }
+
+    old_size = memory_allocation_size(struct_size + old_capacity*obj_size);
+    new_size = memory_allocation_size(struct_size + new_capacity*obj_size);
     ASSERT(new_size <= (MAXOF(new_size) - 2*MEMORY_PADDING));
 
     {
@@ -601,6 +651,8 @@ realloc_flex_debug(char *file, int32 line, char *func,
         }
 
         p = ptr + MEMORY_PADDING;
+        memory_assert_aligned_pointer(p);
+        ASSUME_ALIGNED(p);
         p_key = (intptr)p;
         hash_insert_alloc_map(allocations, &p_key, info);
 
@@ -627,6 +679,13 @@ free_debug(char *file, int32 line, char *func,
                    size);
         fatal(EXIT_FAILURE);
     }
+    if (size > (MAXOF(size) - (ALIGNMENT - 1))) {
+        error_impl(file, line, func,
+                   "Error: freeing allocation of too large size = %lld.\n",
+                   size);
+        fatal(EXIT_FAILURE);
+    }
+    size = memory_allocation_size(size);
 
     if (pointer == NULL) {
         return;

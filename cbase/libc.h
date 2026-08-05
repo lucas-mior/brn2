@@ -21,6 +21,7 @@
 #include <math.h>
 #include <setjmp.h>
 #include <signal.h>
+#include <stdalign.h>
 #include <stdarg.h>
 #include <stdatomic.h>
 #include <stdbool.h>
