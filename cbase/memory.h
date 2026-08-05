@@ -17,6 +17,10 @@
 
 #define MEMORY_PADDING ((int32)ALIGNMENT)
 
+#if !defined(MEMORY_OS_ALLOC_THRESHOLD)
+#define MEMORY_OS_ALLOC_THRESHOLD SIZEKB(128)
+#endif
+
 #if !defined(TESTING_memory)
 #define TESTING_memory 0
 #endif
