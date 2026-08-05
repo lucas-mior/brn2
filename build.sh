@@ -210,7 +210,7 @@ case "$target" in
     LDFLAGS="$LDFLAGS -lm"
     ;;
 "build")
-    CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS $GNUSOURCE -g3 -O2 -flto -march=native -ftree-vectorize"
     ;;
 "fast_feedback")
     CC=clang
