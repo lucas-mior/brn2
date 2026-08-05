@@ -115,11 +115,11 @@ _Generic((SIZE), \
     int:    ALIGN_POWER_OF_2_((uint)SIZE,   (uint)A)    \
 )
 
-#define ALIGNMENT 16ul
+#define ALIGNMENT 16ll
 #if defined(ALIGN)
 #undef ALIGN
 #endif
-#define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
+#define ALIGN(x) ALIGN_POWER_OF_2(x, (ullong)ALIGNMENT)
 
 #if defined(__GNUC__)
 #define ASSUME_ALIGNED_EXPR(X) __builtin_assume_aligned((X), ALIGNMENT)

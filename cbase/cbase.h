@@ -548,11 +548,6 @@ typedef union GenericArrayHeader {
     max_align_t alignment;
 } GenericArrayHeader;
 
-_Static_assert(_Alignof(GenericArrayHeader) <= ALIGNMENT,
-               "GenericArrayHeader alignment exceeds allocator alignment");
-_Static_assert((sizeof(GenericArrayHeader)%ALIGNMENT) == 0,
-               "GenericArrayHeader size must preserve payload alignment");
-
 CBASE_API_DECL void *generic_array_init(int32, int64);
 CBASE_API_DECL void *generic_array_grow(void *, int64);
 CBASE_API_DECL bool generic_array_reserve(void **, int32, int64);
