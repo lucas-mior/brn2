@@ -45,7 +45,12 @@ memory_aligned_alloc(int64 size) {
         fatal(EXIT_FAILURE);
     }
 
-    if ((p = aligned_alloc((size_t)ALIGNMENT, (size_t)size)) == NULL) {
+#if OS_WINDOWS
+    p = _aligned_malloc((size_t)size, (size_t)ALIGNMENT);
+#else
+    p = aligned_alloc((size_t)ALIGNMENT, (size_t)size);
+#endif
+    if (p == NULL) {
         error("Failed to allocate %lld bytes.\n", size);
         fatal(EXIT_FAILURE);
     }
@@ -53,6 +58,16 @@ memory_aligned_alloc(int64 size) {
     ASSUME_ALIGNED(p);
 
     return p;
+}
+
+static void
+memory_aligned_free(void *p) {
+#if OS_WINDOWS
+    _aligned_free(p);
+#else
+    free(p);
+#endif
+    return;
 }
 
 typedef struct DebugAllocInfo {
@@ -322,7 +337,7 @@ aligned_realloc(void *old, int64 old_size, int64 new_size) {
     if (copy_size > 0) {
         memcpy64(p, old, copy_size);
     }
-    free(old);
+    memory_aligned_free(old);
 
     return p;
 }
@@ -718,7 +733,7 @@ free_debug(char *file, int32 line, char *func,
     intptr pointer_key = (intptr)pointer;
 
     if (RUNNING_ON_VALGRIND) {
-        free(pointer);
+        memory_aligned_free(pointer);
         return;
     }
 
@@ -796,7 +811,7 @@ free_debug(char *file, int32 line, char *func,
                 memset64(pointer, 0xCD, size);
             }
         } else {
-            free(ptr - MEMORY_PADDING);
+            memory_aligned_free(ptr - MEMORY_PADDING);
         }
     } else {
         error_impl(file, line, func,
@@ -813,7 +828,7 @@ CBASE_API_DEF void
 free2_(void *pointer, int64 size) {
     (void)size;
     if (pointer) {
-        free(pointer);
+        memory_aligned_free(pointer);
     }
     return;
 }
@@ -914,7 +929,7 @@ CBASE_API_DEF void
 xmunmap(void *p, int64 size) {
     (void)size;
     if (RUNNING_ON_VALGRIND) {
-        free(p);
+        memory_aligned_free(p);
         return;
     }
     if (!VirtualFree(p, 0, MEM_RELEASE)) {
@@ -1232,7 +1247,7 @@ int main(void) {
             free2(p, size + 1); // Incorrect size
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 
     {
@@ -1243,7 +1258,7 @@ int main(void) {
             free2(p, size); // Double free
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 
     {
@@ -1290,7 +1305,7 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 
     {
@@ -1301,7 +1316,7 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 
     {
@@ -1312,7 +1327,7 @@ int main(void) {
             free2(p, size);
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 
     {
@@ -1323,7 +1338,7 @@ int main(void) {
             free2(p, size);
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 
     {
@@ -1335,7 +1350,7 @@ int main(void) {
             memory_check();
         });
         allocations_unlock();
-        free(p - MEMORY_PADDING);
+        memory_aligned_free(p - MEMORY_PADDING);
     }
 #endif
 

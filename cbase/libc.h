@@ -39,6 +39,7 @@
 #include <wctype.h>
 
 #if OS_WINDOWS
+#include <malloc.h>
 #include <windows.h>
 #endif
 
