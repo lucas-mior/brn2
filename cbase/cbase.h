@@ -523,10 +523,9 @@ CBASE_API_DECL char *command_str(Command *, int32 *);
 CBASE_API_DECL void command_vector_reserve(char ***, int32 **, int32 *, int32, int32);
 CBASE_API_DECL bool command_wait(Command *);
 
-#define COMMAND_PUSH(CMD, ...) \
-    command_push_array(CMD, \
-                       (int32)(sizeof((char *[]){__VA_ARGS__}) \
-                               /sizeof(char *)), \
+#define COMMAND_PUSH(CMD, ...)                                             \
+    command_push_array(CMD,                                                \
+                       (SIZEOF((char *[]){__VA_ARGS__}) / SIZEOF(char *)), \
                        (char *[]){__VA_ARGS__})
 
 #define COMMAND_ENV_PUSH_2(A, B) command_env_push(A, B)
@@ -556,23 +555,30 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 
 #define ARRAY_HEADER(ARRAY) \
     ((GenericArrayHeader *)ASSUME_ALIGNED_EXPR((void *)(ARRAY)) - 1)
+
 #define ARRAY_LEN(ARRAY) ((ARRAY) ? ARRAY_HEADER(ARRAY)->count : 0)
+
 #define ARRAY_CAPACITY(ARRAY) generic_array_capacity(ARRAY)
+
 #define ARRAY_RESERVE(ARRAY, NEEDED_COUNT) \
     generic_array_reserve((void **)&(ARRAY), \
                           (NEEDED_COUNT), \
                           SIZEOF(*(ARRAY)))
+
 #define ARRAY_SET_COUNT(ARRAY, COUNT) \
     generic_array_set_count((ARRAY), (COUNT))
+
 #define ARRAY_INIT_COUNT(ARRAY, COUNT) do { \
     ARRAY_INIT((ARRAY), (COUNT));           \
     ARRAY_SET_COUNT((ARRAY), (COUNT));      \
 } while (0)
+
 #define ARRAY_CLEAR(ARRAY) do {            \
     if (ARRAY) {                           \
         ARRAY_HEADER(ARRAY)->count = 0;    \
     }                                      \
 } while (0)
+
 #define ARRAY_FREE(ARRAY) do {                                               \
     if (ARRAY) {                                                             \
         GenericArrayHeader *array_header_ = ARRAY_HEADER(ARRAY);             \
@@ -581,9 +587,11 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
         (ARRAY) = NULL; \
     } \
 } while (0)
+
 #define ARRAY_PUSH(ARRAY, ...) \
     ((ARRAY) = generic_array_grow((ARRAY), SIZEOF(*(ARRAY))), \
      (ARRAY)[ARRAY_HEADER(ARRAY)->count++] = (__VA_ARGS__))
+
 #define ARRAY_INIT(ARRAY, CAPACITY) \
     ((ARRAY) = generic_array_init((CAPACITY), SIZEOF(*(ARRAY))))
 
