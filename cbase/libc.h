@@ -4,6 +4,9 @@
 // Note: all libc or main platform headers must be included here.
 // other files include them by `#include "cbase.h"` or `#include "libc.h"`
 
+#if !defined(CBASE_LIBC_H)
+#define CBASE_LIBC_H
+
 #include "platform_detection.h"
 
 #include <assert.h>
@@ -138,3 +141,5 @@
 #define MAP_ANON 0
 #define MAP_ANONYMOUS 0
 #endif
+
+#endif /* CBASE__LIBC_H */
