@@ -56,7 +56,7 @@ typedef intptr_t  intptr;
 #error "This compiler/machine does not use two's complement for integers. Throw it out."
 #endif
 
-#if LLONG_MIN != -9223372036854775808
+#if (LLONG_MIN + 1) != -9223372036854775807
 #error "This compiler/machine does not use two's complement for integers. Throw it out."
 #endif
 
