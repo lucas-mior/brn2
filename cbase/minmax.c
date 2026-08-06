@@ -263,9 +263,9 @@ _Generic((VAR1), \
 // use typeof for the appropriate type, since we are mainly interested in
 // mainstream compiler warnings anyway
 #if CC_CLANG || CC_GCC || CC_TCC
-  #define TYPEOF(X) __typeof__(X)
+  #define CAST(X) (__typeof__(X))
 #else
-  #define TYPEOF(...)
+  #define CAST(...)
 #endif
 
 // Can't cast to the type directly because _Generic has to have all expressions
@@ -273,19 +273,19 @@ _Generic((VAR1), \
 #define MIN(VAR1, VAR2)                                               \
   _Generic((VAR1),                                                    \
     schar: _Generic((VAR2),                                           \
-        schar: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                    \
+        schar: CAST(VAR1)MIN_IMPL(VAR1, VAR2),                        \
         default: MIN_IMPL(VAR1, VAR2)),                               \
     short: _Generic((VAR2),                                           \
-        short: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                    \
+        short: CAST(VAR1)MIN_IMPL(VAR1, VAR2),                        \
         default: MIN_IMPL(VAR1, VAR2)),                               \
     int: _Generic((VAR2),                                             \
-        int: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                      \
-        default: MIN_IMPL(VAR1, VAR2)),                               \
+        int: CAST(VAR1)MIN_IMPL(VAR1, VAR2),                          \
+        default:           MIN_IMPL(VAR1, VAR2)),                     \
     long: _Generic((VAR2),                                            \
-        llong:                MIN_IMPL(VAR1, VAR2),                   \
-        default: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2)),                 \
+        llong:                 MIN_IMPL(VAR1, VAR2),                  \
+        default: CAST(VAR1)MIN_IMPL(VAR1, VAR2)),                     \
     llong: _Generic((VAR2),                                           \
-        llong: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                    \
+        llong: CAST(VAR1)MIN_IMPL(VAR1, VAR2),                        \
         default:             MIN_IMPL(VAR1, VAR2)),                   \
     default:                 MIN_IMPL(VAR1, VAR2)                     \
   )
@@ -293,7 +293,7 @@ _Generic((VAR1), \
 #define MAX(VAR1, VAR2)                                               \
   _Generic((VAR1),                                                    \
     int: _Generic((VAR2),                                             \
-        int: (TYPEOF(VAR1))MAX_IMPL(VAR1, VAR2),                      \
+        int: CAST(VAR1)MAX_IMPL(VAR1, VAR2),                          \
         default: MAX_IMPL(VAR1, VAR2)),                               \
     default: MAX_IMPL(VAR1, VAR2)                                     \
   )
