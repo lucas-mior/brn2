@@ -268,6 +268,9 @@ _Generic((VAR1), \
   #define CAST(...)
 #endif
 
+#define MIN_SAME(VAR1, VAR2) ((VAR1) < (VAR2) ? VAR1 : VAR2)
+#define MAX_SAME(VAR1, VAR2) ((VAR1) > (VAR2) ? VAR1 : VAR2)
+
 // IDEA: Cast to the the type if both operands are of the same type
 // or the second one has smaller type.
 // This silence complete irrelevant warnings automatically,
@@ -275,38 +278,38 @@ _Generic((VAR1), \
 // Can't cast to the type directly
 // because _Generic has to have all expressions be compatible,
 // even if they aren't selected
-#define MIN(VAR1, VAR2)                                               \
-  _Generic((VAR1),                                                    \
-    schar: _Generic((VAR2),                                           \
-        schar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        default:             MIN_IMPL(VAR1, VAR2)),                   \
-    short: _Generic((VAR2),                                           \
-        schar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        short:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        default:             MIN_IMPL(VAR1, VAR2)),                   \
-    int: _Generic((VAR2),                                             \
-        schar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        short:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        int:       CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        default:             MIN_IMPL(VAR1, VAR2)),                   \
-    long: _Generic((VAR2),                                            \
-        llong:               MIN_IMPL(VAR1, VAR2),                    \
-        double:              MIN_IMPL(VAR1, VAR2),                    \
-        float:               MIN_IMPL(VAR1, VAR2),                    \
-        default:   CAST(VAR1)MIN_IMPL(VAR1, VAR2)),                   \
-    uchar: _Generic((VAR2),                                           \
-        uchar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        default:             MIN_IMPL(VAR1, VAR2)),                   \
-    ushort: _Generic((VAR2),                                          \
-        uchar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        ushort:    CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        default:             MIN_IMPL(VAR1, VAR2)),                   \
-    uint: _Generic((VAR2),                                            \
-        uchar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        ushort:    CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        uint:      CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
-        default:             MIN_IMPL(VAR1, VAR2)),                   \
-    default:                 MIN_IMPL(VAR1, VAR2)                     \
+#define MIN(VAR1, VAR2)                                   \
+  _Generic((VAR1),                                        \
+    schar: _Generic((VAR2),                               \
+        schar:     MIN_SAME(VAR1, VAR2),                  \
+        default:   MIN_IMPL(VAR1, VAR2)),                 \
+    short: _Generic((VAR2),                               \
+        schar:     MIN_SAME(VAR1, VAR2),                  \
+        short:     MIN_SAME(VAR1, VAR2),                  \
+        default:   MIN_IMPL(VAR1, VAR2)),                 \
+    int: _Generic((VAR2),                                 \
+        schar:     MIN_SAME(VAR1, VAR2),                  \
+        short:     MIN_SAME(VAR1, VAR2),                  \
+        int:       MIN_SAME(VAR1, VAR2),                  \
+        default:   MIN_IMPL(VAR1, VAR2)),                 \
+    long: _Generic((VAR2),                                \
+        llong:     MIN_IMPL(VAR1, VAR2),                  \
+        double:    MIN_IMPL(VAR1, VAR2),                  \
+        float:     MIN_IMPL(VAR1, VAR2),                  \
+        default:   MIN_SAME(VAR1, VAR2)),                 \
+    uchar: _Generic((VAR2),                               \
+        uchar:     MIN_SAME(VAR1, VAR2),                  \
+        default:   MIN_IMPL(VAR1, VAR2)),                 \
+    ushort: _Generic((VAR2),                              \
+        uchar:     MIN_SAME(VAR1, VAR2),                  \
+        ushort:    MIN_SAME(VAR1, VAR2),                  \
+        default:   MIN_IMPL(VAR1, VAR2)),                 \
+    uint: _Generic((VAR2),                                \
+        uchar:     MIN_SAME(VAR1, VAR2),                  \
+        ushort:    MIN_SAME(VAR1, VAR2),                  \
+        uint:      MIN_SAME(VAR1, VAR2),                  \
+        default:   MIN_IMPL(VAR1, VAR2)),                 \
+    default:       MIN_IMPL(VAR1, VAR2)                   \
   )
 
 #define MAX(VAR1, VAR2)                                               \
