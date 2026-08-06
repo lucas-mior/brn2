@@ -92,45 +92,6 @@ CBASE_API_DECL void *memrchr64(void *, int32, int64);
 #include "memory.h"
 #include "arena.h"
 
-enum Type {
-    TYPE_VOIDP = 1,
-    TYPE_CHARP,
-    TYPE_BOOL,
-    TYPE_CHAR,
-    TYPE_SCHAR,
-    TYPE_SHORT,
-    TYPE_INT,
-    TYPE_LONG,
-    TYPE_LLONG,
-    TYPE_UCHAR,
-    TYPE_USHORT,
-    TYPE_UINT,
-    TYPE_ULONG,
-    TYPE_ULLONG,
-    TYPE_FLOAT,
-    TYPE_DOUBLE,
-    TYPE_OTHER = 0,
-};
-
-union Primitive {
-    void *avoidp;
-    char *acharp;
-    bool abool;
-    char achar;
-    schar aschar;
-    short ashort;
-    int aint;
-    long along;
-    llong allong;
-    uchar auchar;
-    ushort aushort;
-    uint auint;
-    ulong aulong;
-    ullong aullong;
-    float afloat;
-    double adouble;
-};
-
 #include "assert.c"
 #include "generic.c"
 #include "minmax.c"
