@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-# shellcheck disable=SC2086
+# shellcheck disable=SC2086,SC2031 
 
 set -e
 
