@@ -361,8 +361,6 @@ _Generic((VAR1),                                                     \
         long:    BOTH_LONG(MODE, VAR1, VAR2),                        \
         default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LONG)           \
     ),                                                               \
-    llong:                                                           \
-        FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LLONG),                  \
     uchar: _Generic((VAR2),                                          \
         uchar:   BOTH_UCHAR(MODE, VAR1, VAR2),                       \
         default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR)        \
@@ -379,8 +377,8 @@ _Generic((VAR1),                                                     \
         ulong:   BOTH_ULONG(MODE, VAR1, VAR2),                       \
         default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG)        \
     ),                                                               \
-    ullong:                                                          \
-        FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG),               \
+    llong:   FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LLONG),             \
+    ullong:  FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG),          \
     float:   FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ),          \
     double:  FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ),          \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE()           \
