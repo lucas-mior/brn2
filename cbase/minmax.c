@@ -260,6 +260,14 @@ _Generic((VAR1), \
 #undef MAX
 #endif
 
+// use typeof for the appropriate type, since we are mainly interested in
+// mainstream compiler warnings anyway
+#if CC_CLANG || CC_GCC || CC_TCC
+  #define CAST(X) (__typeof__(X))
+#else
+  #define CAST(...)
+#endif
+
 #define MIN_SAME(VAR1, VAR2) ((VAR1) < (VAR2) ? VAR1 : VAR2)
 #define MAX_SAME(VAR1, VAR2) ((VAR1) > (VAR2) ? VAR1 : VAR2)
 
