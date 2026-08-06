@@ -223,6 +223,14 @@ esac
 
 if [ "$target" = "cross" ]; then
     cross="$2"
+    if [ "$cross" = "all" ]; then
+        grep "cross" ./targets | awk '{print $NF}' | while read f; do 
+            echo "running cross $f ..."
+            $0 cross "$f"
+            echo "runned cross $f ..."
+        done
+        exit
+    fi
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
     CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
