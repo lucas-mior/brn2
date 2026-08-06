@@ -270,20 +270,20 @@ _Generic((VAR1), \
 
 // Can't cast to the type directly because _Generic has to have all expressions
 // be compatible, even if they aren't selected
-#define MIN(VAR1, VAR2)                     \
-  _Generic((VAR1),                          \
-    int: _Generic((VAR2),                 \
-        int: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2), \
-        default: MIN_IMPL(VAR1, VAR2)),     \
-    default: MIN_IMPL(VAR1, VAR2)           \
+#define MIN(VAR1, VAR2)                                                        \
+  _Generic((VAR1),                                                             \
+    int: _Generic((VAR2),                                                      \
+        int: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                               \
+        default: MIN_IMPL(VAR1, VAR2)),                                        \
+    default: MIN_IMPL(VAR1, VAR2)                                              \
   )
 
-#define MAX(VAR1, VAR2)                     \
-  _Generic((VAR1),                          \
-    int: _Generic((VAR2),                 \
-        int: (TYPEOF(VAR1))MAX_IMPL(VAR1, VAR2), \
-        default: MAX_IMPL(VAR1, VAR2)),     \
-    default: MAX_IMPL(VAR1, VAR2)           \
+#define MAX(VAR1, VAR2)                                                        \
+  _Generic((VAR1),                                                             \
+    int: _Generic((VAR2),                                                      \
+        int: (TYPEOF(VAR1))MAX_IMPL(VAR1, VAR2),                               \
+        default: MAX_IMPL(VAR1, VAR2)),                                        \
+    default: MAX_IMPL(VAR1, VAR2)                                              \
   )
 
 // gives warnings because of returning always long
