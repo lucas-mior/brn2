@@ -44,4 +44,14 @@ typedef ullong uint64;
 typedef uintptr_t uintptr;
 typedef intptr_t  intptr;
 
+#define TWOS_TYPE SHRT
+#define TWOS_MIN (-32768ll)
+#include "twos_complement_check.h"
+#define TWOS_TYPE INT
+#define TWOS_MIN (-2147483648ll)
+#include "twos_complement_check.h"
+#define TWOS_TYPE LLONG
+#define TWOS_MIN (-9223372036854775808ll)
+#include "twos_complement_check.h"
+
 #endif /* PRIMITIVES_H */
