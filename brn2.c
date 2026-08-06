@@ -187,7 +187,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
     return;
 }
 
-#if defined(__linux__)
+#if OS_LINUX
 void
 brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     char *map;
