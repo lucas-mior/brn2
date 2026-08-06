@@ -268,6 +268,9 @@ _Generic((VAR1), \
   #define CAST(...)
 #endif
 
+// IDEA: Cast to the the type if both operands are of the same type
+// or the second one has smaller type.
+// This silence complete irrelevant warnings automatically.
 // Can't cast to the type directly
 // because _Generic has to have all expressions be compatible,
 // even if they aren't selected
