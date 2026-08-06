@@ -10,7 +10,7 @@
 #error "TWOS_TYPE is not defined."
 #endif
 
-#if CAT(TWOS_TYPE, _MIN) != TWOS_MIN
+#if (CAT(TWOS_TYPE, _MIN) + 1) != (TWOS_MIN + 1)
 #error "This compiler/machine does not use two's complement for integers. Throw it out."
 #endif
 
