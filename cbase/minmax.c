@@ -276,6 +276,7 @@ _Generic((VAR1), \
         schar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
         default:             MIN_IMPL(VAR1, VAR2)),                   \
     short: _Generic((VAR2),                                           \
+        schar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
         short:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
         default:             MIN_IMPL(VAR1, VAR2)),                   \
     int: _Generic((VAR2),                                             \
