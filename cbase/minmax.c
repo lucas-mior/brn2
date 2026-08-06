@@ -260,8 +260,35 @@ _Generic((VAR1), \
 #undef MAX
 #endif
 
-#define MIN(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
-#define MAX(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
+#if CC_CLANG || CC_GCC || CC_TCC
+  #define TYPEOF(X) __typeof__(X)
+#else
+  #define TYPEOF(...)
+#endif
+
+#define MIN(VAR1, VAR2)                     \
+  _Generic((VAR1),                          \
+    int: _Generic((VAR2),                 \
+        int: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2), \
+        default: MIN_IMPL(VAR1, VAR2)),     \
+    default: MIN_IMPL(VAR1, VAR2)           \
+  )
+
+#define MAX(VAR1, VAR2)                     \
+  _Generic((VAR1),                          \
+    int: _Generic((VAR2),                 \
+        int: (TYPEOF(VAR1))MAX_IMPL(VAR1, VAR2), \
+        default: MAX_IMPL(VAR1, VAR2)),     \
+    default: MAX_IMPL(VAR1, VAR2)           \
+  )
+
+// gives warnings because of returning always long
+// even when smaller integers are used
+/* #define MIN(A, B) MIN_IMPL(A, B) */
+/* #define MAX(A, B) MAX_IMPL(A, B) */
+
+#define MIN_IMPL(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
+#define MAX_IMPL(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
 
 #if TESTING_minmax
 #define CBASE_IMPLEMENT
@@ -282,8 +309,8 @@ main(void) {
     } {
         int a = 1;
         int b = 1;
-        long min = MIN(a, b);
-        long max = MAX(a, b);
+        int min = MIN(a, b);
+        int max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, a);
     } {
