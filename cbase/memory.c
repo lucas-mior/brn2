@@ -157,7 +157,7 @@ memory_os_realloc(void *old, int64 old_size, int64 new_size) {
         return old;
     }
 
-#if OS_LINUX || defined(__NetBSD__)
+#if defined(SYS_mremap)
   #if !defined(MREMAP_MAYMOVE)
     #define MREMAP_MAYMOVE 1
   #endif
