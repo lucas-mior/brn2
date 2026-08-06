@@ -280,6 +280,9 @@ _Generic((VAR1), \
         default:             MIN_IMPL(VAR1, VAR2)),                   \
     int: _Generic((VAR2),                                             \
         int:       CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
+        long:                MIN_IMPL(VAR1, VAR2),                    \
+        llong:               MIN_IMPL(VAR1, VAR2),                    \
+        double:              MIN_IMPL(VAR1, VAR2),                    \
         default:             MIN_IMPL(VAR1, VAR2)),                   \
     long: _Generic((VAR2),                                            \
         llong:               MIN_IMPL(VAR1, VAR2),                    \
