@@ -361,10 +361,8 @@ _Generic((VAR1),                                                     \
         long:    BOTH_LONG(MODE, VAR1, VAR2),                        \
         default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LONG)           \
     ),                                                               \
-    llong: _Generic((VAR2),                                          \
-        llong:   BOTH_LLONG(MODE, VAR1, VAR2),                       \
-        default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LLONG)          \
-    ),                                                               \
+    llong:                                                           \
+        FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LLONG),                  \
     uchar: _Generic((VAR2),                                          \
         uchar:   BOTH_UCHAR(MODE, VAR1, VAR2),                       \
         default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR)        \
