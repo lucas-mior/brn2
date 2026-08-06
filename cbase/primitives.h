@@ -44,14 +44,20 @@ typedef ullong uint64;
 typedef uintptr_t uintptr;
 typedef intptr_t  intptr;
 
-#define TWOS_TYPE SHRT
-#define TWOS_MIN (-32768ll)
-#include "twos_complement_check.h"
-#define TWOS_TYPE INT
-#define TWOS_MIN (-2147483648ll)
-#include "twos_complement_check.h"
-#define TWOS_TYPE LLONG
-#define TWOS_MIN (-9223372036854775808ll)
-#include "twos_complement_check.h"
+#if SCHAR_MIN != -128
+#error "This compiler/machine does not use two's complement for integers. Throw it out."
+#endif
+
+#if SHRT_MIN != -32768
+#error "This compiler/machine does not use two's complement for integers. Throw it out."
+#endif
+
+#if INT_MIN != -2147483648
+#error "This compiler/machine does not use two's complement for integers. Throw it out."
+#endif
+
+#if LLONG_MIN != -9223372036854775808ll
+#error "This compiler/machine does not use two's complement for integers. Throw it out."
+#endif
 
 #endif /* PRIMITIVES_H */
