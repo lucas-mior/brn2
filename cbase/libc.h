@@ -8,14 +8,9 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <dirent.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <float.h>
-#include <ftw.h>
-#include <getopt.h>
 #include <inttypes.h>
-#include <libgen.h>
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
@@ -29,14 +24,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <wchar.h>
+#include <wctype.h>
+
+#if OS_UNIX || OS_WINDOWS || OS_WASM
+#include <dirent.h>
+#include <fcntl.h>
+#include <ftw.h>
+#include <getopt.h>
+#include <libgen.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
-#include <wchar.h>
-#include <wctype.h>
+#endif
 
 #if OS_WINDOWS
 #include <malloc.h>

@@ -28,3 +28,45 @@ jobs:
 
       - name: Build and Test
         run: ./build.sh test
+
+  freebsd:
+    runs-on: ubuntu-latest
+    name: FreeBSD VM
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Test
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          run: |
+            cc --version
+            ./build.sh test
+
+  openbsd:
+    runs-on: ubuntu-latest
+    name: OpenBSD VM
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Test
+        uses: vmactions/openbsd-vm@v1
+        with:
+          usesh: true
+          run: |
+            cc --version
+            ./build.sh test
+
+  netbsd:
+    runs-on: ubuntu-latest
+    name: NetBSD VM
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Test
+        uses: vmactions/netbsd-vm@v1
+        with:
+          usesh: true
+          run: |
+            cc --version
+            ./build.sh test
