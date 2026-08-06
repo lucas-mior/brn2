@@ -268,6 +268,7 @@ _Generic((VAR1), \
   #define CAST(...)
 #endif
 
+// some cases break
 #define MIN_SAME(VAR1, VAR2) ((VAR1) < (VAR2) ? VAR1 : VAR2)
 #define MAX_SAME(VAR1, VAR2) ((VAR1) > (VAR2) ? VAR1 : VAR2)
 
