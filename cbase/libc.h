@@ -86,7 +86,7 @@
 #include <sys/param.h>
 #endif
 
-#if OS_UNIX
+#if OS_LINUX || OS_BSD
 #include <sys/syscall.h>
 #endif
 

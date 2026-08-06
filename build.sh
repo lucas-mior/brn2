@@ -224,12 +224,17 @@ esac
 if [ "$target" = "cross" ]; then
     cross="$2"
     if [ "$cross" = "all" ]; then
-        grep "cross" ./targets | awk '{print $NF}' | while read f; do 
+        status=0
+        for f in $(awk '/^cross / { print $NF }' ./targets); do
             echo "running cross $f ..."
-            $0 cross "$f"
-            echo "runned cross $f ..."
+            if "$0" cross "$f"; then
+                echo "ran cross $f ..."
+            else
+                status=1
+                echo "failed cross $f ..."
+            fi
         done
-        exit
+        exit "$status"
     fi
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
