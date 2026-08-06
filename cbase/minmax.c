@@ -278,28 +278,28 @@ _Generic((VAR1), \
 // Can't cast to the type directly
 // because _Generic has to have all expressions be compatible,
 // even if they aren't selected
-#define MIN(VAR1, VAR2)                                   \
-  _Generic((VAR1),                                        \
-    int: _Generic((VAR2),                                 \
-        schar:     MIN_SAME(VAR1, VAR2),                  \
-        short:     MIN_SAME(VAR1, VAR2),                  \
-        int:       MIN_SAME(VAR1, VAR2),                  \
-        default:   MIN_IMPL(VAR1, VAR2)),                 \
-    default:       MIN_IMPL(VAR1, VAR2)                   \
-  )
+/* #define MIN(VAR1, VAR2)                                   \ */
+/*   _Generic((VAR1),                                        \ */
+/*     int: _Generic((VAR2),                                 \ */
+/*         schar:     MIN_SAME(VAR1, VAR2),                  \ */
+/*         short:     MIN_SAME(VAR1, VAR2),                  \ */
+/*         int:       MIN_SAME(VAR1, VAR2),                  \ */
+/*         default:   MIN_IMPL(VAR1, VAR2)),                 \ */
+/*     default:       MIN_IMPL(VAR1, VAR2)                   \ */
+/*   ) */
 
-#define MAX(VAR1, VAR2)                                               \
-  _Generic((VAR1),                                                    \
-    int: _Generic((VAR2),                                             \
-        int: CAST(VAR1)MAX_IMPL(VAR1, VAR2),                          \
-        default: MAX_IMPL(VAR1, VAR2)),                               \
-    default: MAX_IMPL(VAR1, VAR2)                                     \
-  )
+/* #define MAX(VAR1, VAR2)                                               \ */
+/*   _Generic((VAR1),                                                    \ */
+/*     int: _Generic((VAR2),                                             \ */
+/*         int: CAST(VAR1)MAX_IMPL(VAR1, VAR2),                          \ */
+/*         default: MAX_IMPL(VAR1, VAR2)),                               \ */
+/*     default: MAX_IMPL(VAR1, VAR2)                                     \ */
+/*   ) */
 
 // gives warnings because of returning always long
 // even when smaller integers are used
-/* #define MIN(A, B) MIN_IMPL(A, B) */
-/* #define MAX(A, B) MAX_IMPL(A, B) */
+#define MIN(A, B) MIN_IMPL(A, B)
+#define MAX(A, B) MAX_IMPL(A, B)
 
 #define MIN_IMPL(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
 #define MAX_IMPL(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
