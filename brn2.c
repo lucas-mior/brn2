@@ -67,7 +67,17 @@ INLINE int32
 brn2_compare(void *a, void *b) {
     FileName **file_a = a;
     FileName **file_b = b;
-    return strcmp((*file_a)->name, (*file_b)->name);
+    FileName *restrict fa = *file_a;
+    FileName *restrict fb = *file_b;
+    int32 minlength = fa->length < fb->length ? fa->length : fb->length;
+    int32 r = memcmp64(fa->name, fb->name, minlength);
+
+    if (r != 0) {
+        return r;
+    }
+
+    return fa->length - fb->length;
+/*     return strcmp((*file_a)->name, (*file_b)->name); */
 }
 
 void
