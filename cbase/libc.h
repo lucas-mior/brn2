@@ -41,16 +41,6 @@
 #include <unistd.h>
 #endif
 
-#if OS_WINDOWS
-#include <malloc.h>
-#include <windows.h>
-#endif
-
-#if OS_UNIX
-#include <pthread.h>
-#include <utime.h>
-#endif
-
 #if OS_UNIX
 #include <sys/ioctl.h>
 #include <sys/select.h>
@@ -61,6 +51,13 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/un.h>
+#include <pthread.h>
+#include <utime.h>
+#endif
+
+#if OS_WINDOWS
+#include <malloc.h>
+#include <windows.h>
 #endif
 
 #if !defined(CBASE_HAS_FTS)
