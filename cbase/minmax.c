@@ -274,8 +274,8 @@ _Generic((VAR1), \
 
 // gives warnings because of returning always long
 // even when smaller integers are used
-#define MIN(A, B) MIN_IMPL(A, B)
-#define MAX(A, B) MAX_IMPL(A, B)
+#define MIN(A, B) MIN_SAME(A, B)
+#define MAX(A, B) MAX_SAME(A, B)
 
 #define MIN_IMPL(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
 #define MAX_IMPL(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
@@ -313,10 +313,10 @@ main(void) {
     } {
         long a = -1;
         ulong b = 0;
-        double min = (double)MIN(a, b);
-        double max = (double)MAX(a, b);
-        ASSERT_EQUAL(min, a);
+        long min = MIN(a, b);
+        long max = MAX(a, b);
         ASSERT_EQUAL(max, b);
+        ASSERT_EQUAL(min, a);
     } {
         long a = MINOF(a);
         ulong b = MAXOF(a);
