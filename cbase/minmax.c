@@ -272,20 +272,20 @@ _Generic((VAR1), \
 // be compatible, even if they aren't selected
 #define MIN(VAR1, VAR2)                                                        \
   _Generic((VAR1),                                                             \
-    schar: _Generic((VAR2),                                                      \
-        schar: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                               \
+    schar: _Generic((VAR2),                                                    \
+        schar: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                             \
         default: MIN_IMPL(VAR1, VAR2)),                                        \
-    short: _Generic((VAR2),                                                      \
-        short: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                               \
+    short: _Generic((VAR2),                                                    \
+        short: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                             \
         default: MIN_IMPL(VAR1, VAR2)),                                        \
     int: _Generic((VAR2),                                                      \
         int: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                               \
         default: MIN_IMPL(VAR1, VAR2)),                                        \
-    long: _Generic((VAR2),                                                      \
-        long: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                               \
+    long: _Generic((VAR2),                                                     \
+        long: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                              \
         default: MIN_IMPL(VAR1, VAR2)),                                        \
-    llong: _Generic((VAR2),                                                      \
-        llong: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                               \
+    llong: _Generic((VAR2),                                                    \
+        llong: (TYPEOF(VAR1))MIN_IMPL(VAR1, VAR2),                             \
         default: MIN_IMPL(VAR1, VAR2)),                                        \
     default: MIN_IMPL(VAR1, VAR2)                                              \
   )
