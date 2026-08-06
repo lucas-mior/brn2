@@ -268,8 +268,9 @@ _Generic((VAR1), \
   #define CAST(...)
 #endif
 
-// Can't cast to the type directly because _Generic has to have all expressions
-// be compatible, even if they aren't selected
+// Can't cast to the type directly
+// because _Generic has to have all expressions be compatible,
+// even if they aren't selected
 #define MIN(VAR1, VAR2)                                               \
   _Generic((VAR1),                                                    \
     schar: _Generic((VAR2),                                           \
