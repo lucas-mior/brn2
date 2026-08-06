@@ -320,7 +320,7 @@ main(void) {
     } {
         long a = MINOF(a);
         ulong b = MAXOF(a);
-        double min = (double)MIN(a, b);
+        long min = MIN(a, b);
         ullong max = (ullong)MAX(a, b);
         ASSERT_EQUAL((long)min, a);
         ASSERT_EQUAL(max, b);
