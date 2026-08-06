@@ -47,6 +47,41 @@ GENERATE_COMPARE_INTEGERS_SAME_SIGN(unsigned, >,  max)
 
 #undef GENERATE_COMPARE_INTEGERS_SAME_SIGN
 
+#define GENERATE_COMPARE_INTEGERS(TYPE, NAME, SYMBOL, MODE) \
+static TYPE \
+get_both_##NAME##_##MODE(TYPE var1, TYPE var2) { \
+    if (var1 SYMBOL var2) { \
+        return var1; \
+    } else { \
+        return var2; \
+    } \
+}
+
+GENERATE_COMPARE_INTEGERS(char,   char,   <, min)
+GENERATE_COMPARE_INTEGERS(schar,  schar,  <, min)
+GENERATE_COMPARE_INTEGERS(short,  short,  <, min)
+GENERATE_COMPARE_INTEGERS(int,    int,    <, min)
+GENERATE_COMPARE_INTEGERS(long,   long,   <, min)
+GENERATE_COMPARE_INTEGERS(llong,  llong,  <, min)
+GENERATE_COMPARE_INTEGERS(uchar,  uchar,  <, min)
+GENERATE_COMPARE_INTEGERS(ushort, ushort, <, min)
+GENERATE_COMPARE_INTEGERS(uint,   uint,   <, min)
+GENERATE_COMPARE_INTEGERS(ulong,  ulong,  <, min)
+GENERATE_COMPARE_INTEGERS(ullong, ullong, <, min)
+GENERATE_COMPARE_INTEGERS(char,   char,   >, max)
+GENERATE_COMPARE_INTEGERS(schar,  schar,  >, max)
+GENERATE_COMPARE_INTEGERS(short,  short,  >, max)
+GENERATE_COMPARE_INTEGERS(int,    int,    >, max)
+GENERATE_COMPARE_INTEGERS(long,   long,   >, max)
+GENERATE_COMPARE_INTEGERS(llong,  llong,  >, max)
+GENERATE_COMPARE_INTEGERS(uchar,  uchar,  >, max)
+GENERATE_COMPARE_INTEGERS(ushort, ushort, >, max)
+GENERATE_COMPARE_INTEGERS(uint,   uint,   >, max)
+GENERATE_COMPARE_INTEGERS(ulong,  ulong,  >, max)
+GENERATE_COMPARE_INTEGERS(ullong, ullong, >, max)
+
+#undef GENERATE_COMPARE_INTEGERS
+
 static int
 minmax_compare_sign_with_unsign(llong s, ullong u) {
     ullong saux;
@@ -125,6 +160,28 @@ minmax_functions_sink(void) {
     (void)get_both_signed_max;
     (void)get_both_unsigned_min;
     (void)get_both_unsigned_max;
+    (void)get_both_char_min;
+    (void)get_both_char_max;
+    (void)get_both_schar_min;
+    (void)get_both_schar_max;
+    (void)get_both_short_min;
+    (void)get_both_short_max;
+    (void)get_both_int_min;
+    (void)get_both_int_max;
+    (void)get_both_long_min;
+    (void)get_both_long_max;
+    (void)get_both_llong_min;
+    (void)get_both_llong_max;
+    (void)get_both_uchar_min;
+    (void)get_both_uchar_max;
+    (void)get_both_ushort_min;
+    (void)get_both_ushort_max;
+    (void)get_both_uint_min;
+    (void)get_both_uint_max;
+    (void)get_both_ulong_min;
+    (void)get_both_ulong_max;
+    (void)get_both_ullong_min;
+    (void)get_both_ullong_max;
     (void)get_signed_unsigned_min;
     (void)get_signed_unsigned_max;
     (void)get_unsigned_signed_min;
@@ -143,6 +200,53 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE(void);
 
 #define BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     get_both_signed_##MODE((llong)(VAR1), (llong)(VAR2))
+
+#define MINMAX_CHAR(VAR) _Generic((VAR), char: (VAR), default: (char)0)
+#define MINMAX_SCHAR(VAR) _Generic((VAR), schar: (VAR), default: (schar)0)
+#define MINMAX_SHORT(VAR) _Generic((VAR), short: (VAR), default: (short)0)
+#define MINMAX_INT(VAR) _Generic((VAR), int: (VAR), default: (int)0)
+#define MINMAX_LONG(VAR) _Generic((VAR), long: (VAR), default: (long)0)
+#define MINMAX_LLONG(VAR) _Generic((VAR), llong: (VAR), default: (llong)0)
+#define MINMAX_UCHAR(VAR) _Generic((VAR), uchar: (VAR), default: (uchar)0)
+#define MINMAX_USHORT(VAR) \
+    _Generic((VAR), ushort: (VAR), default: (ushort)0)
+#define MINMAX_UINT(VAR) _Generic((VAR), uint: (VAR), default: (uint)0)
+#define MINMAX_ULONG(VAR) _Generic((VAR), ulong: (VAR), default: (ulong)0)
+#define MINMAX_ULLONG(VAR) \
+    _Generic((VAR), ullong: (VAR), default: (ullong)0)
+
+#define BOTH_CHAR(MODE, VAR1, VAR2) \
+    get_both_char_##MODE(MINMAX_CHAR(VAR1), MINMAX_CHAR(VAR2))
+
+#define BOTH_SCHAR(MODE, VAR1, VAR2) \
+    get_both_schar_##MODE(MINMAX_SCHAR(VAR1), MINMAX_SCHAR(VAR2))
+
+#define BOTH_SHORT(MODE, VAR1, VAR2) \
+    get_both_short_##MODE(MINMAX_SHORT(VAR1), MINMAX_SHORT(VAR2))
+
+#define BOTH_INT(MODE, VAR1, VAR2) \
+    get_both_int_##MODE(MINMAX_INT(VAR1), MINMAX_INT(VAR2))
+
+#define BOTH_LONG(MODE, VAR1, VAR2) \
+    get_both_long_##MODE(MINMAX_LONG(VAR1), MINMAX_LONG(VAR2))
+
+#define BOTH_LLONG(MODE, VAR1, VAR2) \
+    get_both_llong_##MODE(MINMAX_LLONG(VAR1), MINMAX_LLONG(VAR2))
+
+#define BOTH_UCHAR(MODE, VAR1, VAR2) \
+    get_both_uchar_##MODE(MINMAX_UCHAR(VAR1), MINMAX_UCHAR(VAR2))
+
+#define BOTH_USHORT(MODE, VAR1, VAR2) \
+    get_both_ushort_##MODE(MINMAX_USHORT(VAR1), MINMAX_USHORT(VAR2))
+
+#define BOTH_UINT(MODE, VAR1, VAR2) \
+    get_both_uint_##MODE(MINMAX_UINT(VAR1), MINMAX_UINT(VAR2))
+
+#define BOTH_ULONG(MODE, VAR1, VAR2) \
+    get_both_ulong_##MODE(MINMAX_ULONG(VAR1), MINMAX_ULONG(VAR2))
+
+#define BOTH_ULLONG(MODE, VAR1, VAR2) \
+    get_both_ullong_##MODE(MINMAX_ULLONG(VAR1), MINMAX_ULLONG(VAR2))
 
 #define SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2) \
     get_signed_unsigned_##MODE((llong)(VAR1), (ullong)(VAR2))
@@ -237,17 +341,50 @@ _Generic((VAR1), \
         void *: POINTERS(MODE, VAR1, VAR2), \
         default: UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE_VOIDP() \
     ), \
-    char:    FIRST_CHAR(MODE,     VAR1, VAR2), \
-    schar:   FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SCHAR  ), \
-    short:   FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_SHORT  ), \
-    int:     FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_INT    ), \
-    long:    FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LONG   ), \
-    llong:   FIRST_SIGNED(MODE,   VAR1, VAR2, TYPE_LLONG  ), \
-    uchar:   FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR  ), \
-    ushort:  FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_USHORT ), \
-    uint:    FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT   ), \
-    ulong:   FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG  ), \
-    ullong:  FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG ), \
+    char: _Generic((VAR2), \
+        char:    BOTH_CHAR(MODE, VAR1, VAR2), \
+        default: FIRST_CHAR(MODE, VAR1, VAR2) \
+    ), \
+    schar: _Generic((VAR2), \
+        schar:   BOTH_SCHAR(MODE, VAR1, VAR2), \
+        default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_SCHAR) \
+    ), \
+    short: _Generic((VAR2), \
+        short:   BOTH_SHORT(MODE, VAR1, VAR2), \
+        default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_SHORT) \
+    ), \
+    int: _Generic((VAR2), \
+        int:     BOTH_INT(MODE, VAR1, VAR2), \
+        default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_INT) \
+    ), \
+    long: _Generic((VAR2), \
+        long:    BOTH_LONG(MODE, VAR1, VAR2), \
+        default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LONG) \
+    ), \
+    llong: _Generic((VAR2), \
+        llong:   BOTH_LLONG(MODE, VAR1, VAR2), \
+        default: FIRST_SIGNED(MODE, VAR1, VAR2, TYPE_LLONG) \
+    ), \
+    uchar: _Generic((VAR2), \
+        uchar:   BOTH_UCHAR(MODE, VAR1, VAR2), \
+        default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UCHAR) \
+    ), \
+    ushort: _Generic((VAR2), \
+        ushort:  BOTH_USHORT(MODE, VAR1, VAR2), \
+        default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_USHORT) \
+    ), \
+    uint: _Generic((VAR2), \
+        uint:    BOTH_UINT(MODE, VAR1, VAR2), \
+        default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_UINT) \
+    ), \
+    ulong: _Generic((VAR2), \
+        ulong:   BOTH_ULONG(MODE, VAR1, VAR2), \
+        default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULONG) \
+    ), \
+    ullong: _Generic((VAR2), \
+        ullong:  BOTH_ULLONG(MODE, VAR1, VAR2), \
+        default: FIRST_UNSIGNED(MODE, VAR1, VAR2, TYPE_ULLONG) \
+    ), \
     float:   FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_FLOAT  ), \
     double:  FIRST_DOUBLE(MODE,  VAR1, VAR2, TYPE_DOUBLE ), \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_MINMAX_COMPARE() \
@@ -260,20 +397,6 @@ _Generic((VAR1), \
 #undef MAX
 #endif
 
-// use typeof for the appropriate type, since we are mainly interested in
-// mainstream compiler warnings anyway
-#if CC_CLANG || CC_GCC || CC_TCC
-  #define CAST(X) (__typeof__(X))
-#else
-  #define CAST(...)
-#endif
-
-// some cases break
-#define MIN_SAME(VAR1, VAR2) ((VAR1) < (VAR2) ? VAR1 : VAR2)
-#define MAX_SAME(VAR1, VAR2) ((VAR1) > (VAR2) ? VAR1 : VAR2)
-
-// gives warnings because of returning always long
-// even when smaller integers are used
 #define MIN(A, B) MIN_IMPL(A, B)
 #define MAX(A, B) MAX_IMPL(A, B)
 
@@ -284,9 +407,26 @@ _Generic((VAR1), \
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
+#define ASSERT_TYPE(EXPR, TYPE) \
+    _Static_assert(_Generic((EXPR), TYPE: 1, default: 0), "unexpected type")
+
 int
 main(void) {
     {
+        ASSERT_TYPE(MIN((char){ 0 }, (char){ 1 }), char);
+        ASSERT_TYPE(MAX((schar){ 0 }, (schar){ 1 }), schar);
+        ASSERT_TYPE(MIN((short){ 0 }, (short){ 1 }), short);
+        ASSERT_TYPE(MAX((int){ 0 }, (int){ 1 }), int);
+        ASSERT_TYPE(MIN((long){ 0 }, (long){ 1 }), long);
+        ASSERT_TYPE(MAX((llong){ 0 }, (llong){ 1 }), llong);
+        ASSERT_TYPE(MIN((uchar){ 0 }, (uchar){ 1 }), uchar);
+        ASSERT_TYPE(MAX((ushort){ 0 }, (ushort){ 1 }), ushort);
+        ASSERT_TYPE(MIN((uint){ 0 }, (uint){ 1 }), uint);
+        ASSERT_TYPE(MAX((ulong){ 0 }, (ulong){ 1 }), ulong);
+        ASSERT_TYPE(MIN((ullong){ 0 }, (ullong){ 1 }), ullong);
+        ASSERT_TYPE(MIN((int){ 0 }, (uint){ 1 }), llong);
+        ASSERT_TYPE(MAX((void *)0, (void *)0), void *);
+    } {
         long min01 = MIN(0, 1);
         long min11 = MIN(1, 1);
         long max11 = MAX(1, 1);
