@@ -274,8 +274,8 @@ _Generic((VAR1), \
 
 // gives warnings because of returning always long
 // even when smaller integers are used
-#define MIN(A, B) MIN_SAME(A, B)
-#define MAX(A, B) MAX_SAME(A, B)
+#define MIN(A, B) MIN_IMPL(A, B)
+#define MAX(A, B) MAX_IMPL(A, B)
 
 #define MIN_IMPL(VAR1, VAR2) MINMAX_COMPARE(min, VAR1, VAR2)
 #define MAX_IMPL(VAR1, VAR2) MINMAX_COMPARE(max, VAR1, VAR2)
