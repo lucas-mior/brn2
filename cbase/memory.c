@@ -172,6 +172,34 @@ memory_os_realloc(void *old, int64 old_size, int64 new_size) {
     memory_assert_aligned_pointer(p);
     ASSUME_ALIGNED(p);
     return p;
+#elif OS_UNIX && !OS_LINUX
+    if (new_map_size < old_map_size) {
+        uchar *tail = (uchar *)old + new_map_size;
+        int64 tail_size = old_map_size - new_map_size;
+
+        if (munmap(tail, (size_t)tail_size) < 0) {
+            error("Error in munmap(%p, %lld): %s.\n",
+                  tail, tail_size, strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+        return old;
+    } else {
+        uchar *tail = (uchar *)old + old_map_size;
+        int64 tail_size = new_map_size - old_map_size;
+
+        p = mmap(tail, (size_t)tail_size, PROT_READ | PROT_WRITE,
+                 MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+        if (p == tail) {
+            return old;
+        }
+        if (p != MAP_FAILED) {
+            if (munmap(p, (size_t)tail_size) < 0) {
+                error("Error in munmap(%p, %lld): %s.\n",
+                      p, tail_size, strerror(errno));
+                fatal(EXIT_FAILURE);
+            }
+        }
+    }
 #endif
 
     p = memory_os_alloc(new_size);
