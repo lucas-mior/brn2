@@ -290,6 +290,23 @@ _Generic((VAR1), \
         double:              MIN_IMPL(VAR1, VAR2),                    \
         float:               MIN_IMPL(VAR1, VAR2),                    \
         default:   CAST(VAR1)MIN_IMPL(VAR1, VAR2)),                   \
+    uchar: _Generic((VAR2),                                           \
+        uchar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
+        default:             MIN_IMPL(VAR1, VAR2)),                   \
+    ushort: _Generic((VAR2),                                          \
+        uchar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
+        ushort:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                   \
+        default:             MIN_IMPL(VAR1, VAR2)),                   \
+    uint: _Generic((VAR2),                                            \
+        uchar:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                    \
+        ushort:     CAST(VAR1)MIN_IMPL(VAR1, VAR2),                   \
+        uint:       CAST(VAR1)MIN_IMPL(VAR1, VAR2),                   \
+        default:             MIN_IMPL(VAR1, VAR2)),                   \
+    ulong: _Generic((VAR2),                                           \
+        ullong:               MIN_IMPL(VAR1, VAR2),                   \
+        double:              MIN_IMPL(VAR1, VAR2),                    \
+        float:               MIN_IMPL(VAR1, VAR2),                    \
+        default:   CAST(VAR1)MIN_IMPL(VAR1, VAR2)),                   \
     default:                 MIN_IMPL(VAR1, VAR2)                     \
   )
 
