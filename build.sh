@@ -17,12 +17,6 @@ fi
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
-cbase_pre_compile () {
-    cbase_pre_compile_dir="${cbase:-cbase}"
-    "$cbase_pre_compile_dir/pre-compile.sh" "$CC" $CPPFLAGS $CFLAGS
-}
-
-
 dir=$(dirname "$(readlink -f "$0")")
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 cd "$dir" || exit
@@ -57,6 +51,7 @@ CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
 CFLAGS="$CFLAGS -Wno-unused-macros"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
+CFLAGS="$CFLAGS -Wno-tautological-constant-out-of-range-compare"
 CFLAGS="$CFLAGS -Wno-float-equal"
 CFLAGS="$CFLAGS -Wno-undefined-internal"
 CFLAGS="$CFLAGS -Wno-cast-qual"
@@ -143,7 +138,7 @@ with_toy_cc () {
 case "$target" in
 "debug")
     CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -DCBASE_IMPLEMENT=0 -Wno-unused-function"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
     ;;
@@ -159,7 +154,7 @@ case "$target" in
     ;;
 "valgrind")
     CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -DCBASE_IMPLEMENT=0"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
 "callgrind")
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
@@ -328,21 +323,6 @@ case "$target" in
         name=$(echo "$name" | sed 's/\.c//')
         test_exe="/tmp/${name}_test"
 
-        case "$src" in
-        "./cbase/cbase_main_separate_object.c")
-            separate_cbase=1
-            ;;
-        "./cbase/"*)
-            separate_cbase=0
-            ;;
-        *"windows_functions.c"*)
-            separate_cbase=0
-            ;;
-        *)
-            separate_cbase=1
-            ;;
-        esac
-
         printf "\nTesting ${RED}${src}${RES} ...\n"
 
         flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
@@ -354,27 +334,14 @@ case "$target" in
             cmdline="$CC $CPPFLAGS $CFLAGS"
             cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
             cmdline="$cmdline -target x86_64-windows-gnu"
-            if [ "$separate_cbase" -eq 1 ]; then
-                cbase_obj=$(cbase_pre_compile)
-                cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1"
-                cmdline="$cmdline -DCBASE_IMPLEMENT=0"
-                cmdline="$cmdline $flags -o $test_exe $src $cbase_obj"
-            else
-                cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1"
-                cmdline="$cmdline $flags -o $test_exe $src"
-            fi
+            cmdline="$cmdline -Wno-unused-variable"
+            cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1"
+            cmdline="$cmdline $flags -o $test_exe $src"
         else
             cmdline="$CC $CPPFLAGS $CFLAGS"
-            if [ "$separate_cbase" -eq 1 ]; then
-                cbase_obj=$(cbase_pre_compile)
-                cmdline="$cmdline -Wno-unused-variable"
-                cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1"
-                cmdline="$cmdline -DCBASE_IMPLEMENT=0"
-                cmdline="$cmdline -o $test_exe $src $cbase_obj $LDFLAGS $flags"
-            else
-                cmdline="$cmdline -Wno-unused-variable -DTESTING_$name=1 -DTESTING=1 $LDFLAGS"
-                cmdline="$cmdline $flags -o $test_exe $src"
-            fi
+            cmdline="$cmdline -Wno-unused-variable"
+            cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1"
+            cmdline="$cmdline -o $test_exe $src $LDFLAGS $flags"
         fi
 
         if [ "$name" = "cbase_main_separate_object" ]; then
@@ -415,21 +382,7 @@ case "$target" in
         | xargs --verbose -0 ctags --kinds-C=+l+d || true
     vtags.sed tags | sort | uniq > .tags.vim      || true
 
-    if [ "$target" = "debug" ]; then
-        cbase_obj=$(cbase_pre_compile)
-        if [ "$CC" = "chibicc" ]; then
-            with_toy_cc chibicc \
-                $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
-        elif [ "$CC" = "cproc" ]; then
-            with_toy_cc cproc \
-                $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
-        else
-            $CC $CPPFLAGS -DBRN2_FULL_UNITY_BUILD=0 \
-                $CFLAGS -o ${exe} "$main" "$cbase_obj" $LDFLAGS
-        fi
-    elif [ "$CC" = "chibicc" ]; then
+    if [ "$CC" = "chibicc" ]; then
         with_toy_cc chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
     elif [ "$CC" = "cproc" ]; then
         with_toy_cc cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
