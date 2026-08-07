@@ -72,6 +72,10 @@ fast_feedback)
     ;;
 esac
 
+if ! command -v "$CC" > /dev/null 2>&1; then
+    CC=cc
+fi
+
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
