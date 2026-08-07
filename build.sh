@@ -24,7 +24,7 @@ program=$(basename "$(readlink -f "$(dirname "$0")")")
 script=$(basename "$0")
 
 targets="$(sort ./targets)"
-target="${1:-build}"
+target="${1:-debug}"
 
 if ! grep -q "$target" ./targets; then
     echo "usage: $script <targets>"
