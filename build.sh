@@ -210,7 +210,7 @@ if [ "$target" = "cross" ]; then
     CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
 
     case $cross in
-    "x86_64-macos"|"aarch64-macos")
+    x86_64-macos|aarch64-macos)
         CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
         CFLAGS="$CFLAGS -fno-lto"
         LDFLAGS="$LDFLAGS -lpthread"
