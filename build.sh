@@ -98,38 +98,6 @@ option_remove() {
     echo "$1" | sed -E "s| *$2 +| |g"
 }
 
-with_toy_cc () {
-    compiler="$1"
-    compiler_macro=$(echo "$compiler" | tr '[:lower:]' '[:upper:]')
-    compiler_macro="__${compiler_macro}__"
-    shift
-    args="$*"
-    trace_on
-    while ! problem=$($compiler \
-                      "-D${compiler_macro}" -D__attribute=__attribute__ \
-                      $args 2>&1); do
-        trace_off
-        problem=$(echo "$problem" | head -n 1 | tr -d "'")
-
-        sleep 0.4
-        if echo "$problem" | grep -Eq "unknown (argument|option)"; then
-            arg=$(echo "$problem" | awk '{print $NF}')
-            printf "\nRemoving argument $arg...\n"
-            args=$(option_remove "$args" "$arg")
-        elif echo "$problem" | grep -q "unknown file extension:"; then
-            arg=$(echo "$problem" | awk '{print $NF}')
-            printf "\nRemoving argument $arg...\n"
-            args=$(option_remove "$args" "$arg")
-        else
-            printf "\n\nError compiling with $compiler:\n\n%s" "${problem}\n\n"
-            return 1
-        fi
-        printf "\n"
-        trace_on
-    done
-    return 0
-}
-
 case "$target" in
 debug)
     CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
@@ -342,26 +310,16 @@ test)
             cmdline=$(option_remove "$cmdline" "-DDEBUGGING=1")
         fi
 
-        if [ "$CC" = "chibicc" ] || [ "$CC"  = "cproc" ]; then
-            trace_on
-            cmdline_no_cc=$(option_remove "$cmdline" "$CC")
-            if with_toy_cc "$CC" "$cmdline_no_cc"; then
-                /tmp/${name}_test
-            else
+        trace_on
+        if $cmdline; then
+            if ! $test_exe; then
+                gdb --quiet \
+                    -ex run -ex backtrace -ex quit \
+                    $test_exe 2>&1 | $xsel -o -b
                 exit 1
             fi
         else
-            trace_on
-            if $cmdline; then
-                if ! $test_exe; then
-                    gdb --quiet \
-                        -ex run -ex backtrace -ex quit \
-                        $test_exe 2>&1 | $xsel -o -b
-                    exit 1
-                fi
-            else
-                exit 1
-            fi
+            exit 1
         fi
         trace_off
     done
@@ -376,13 +334,7 @@ test_all)
         | xargs --verbose -0 ctags --kinds-C=+l+d || true
     vtags.sed tags | sort | uniq > .tags.vim      || true
 
-    if [ "$CC" = "chibicc" ]; then
-        with_toy_cc chibicc $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
-    elif [ "$CC" = "cproc" ]; then
-        with_toy_cc cproc   $CPPFLAGS $CFLAGS $LDFLAGS -o ${exe} "$main"
-    else
-        $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
-    fi
+    $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
 
     trace_off
     ;;
