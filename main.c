@@ -24,14 +24,6 @@ int32 nthreads;
 static int32 narenas;
 int32 (*print)(const char *, ...) = noop;
 
-#if BRN2_FULL_UNITY_BUILD
-#define brn2_program program
-#define brn2_program_len program_len
-#else
-static char *brn2_program;
-static int32 brn2_program_len;
-#endif
-
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
     {"file",      required_argument, NULL, 'f'},
@@ -134,8 +126,8 @@ main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
 #endif
 
-    brn2_program_len = strlen32(argv[0]);
-    brn2_program = basename2(argv[0], &brn2_program_len, NULL);
+    program_len = strlen32(argv[0]);
+    program = basename2(argv[0], &program_len, NULL);
 
     while ((opt = getopt_long(argc, argv, "d:f:t:eFhiqsvaV", options, NULL))
            != -1) {
