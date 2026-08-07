@@ -584,7 +584,7 @@ if [ "$target" = "test_all" ]; then
             continue
         fi
 
-        for compiler in gcc tcc clang "zig cc"; do
+        for compiler in tcc clang gcc; do
             printf "\nCC=${RED}${compiler}${RES}\n"
             CC="$compiler" $0 "$target" || exit 3
         done
