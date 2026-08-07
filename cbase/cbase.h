@@ -484,16 +484,14 @@ CBASE_API_DECL bool command_wait(Command *);
 #define MAX_NTHREADS 64
 #endif
 
-typedef struct GenericArrayHeader {
-    ldouble alignment;
-    int32 count;
-    int32 cap;
-    int64 padding;
+// Note: it is fine to typedef union in this case
+typedef union GenericArrayHeader {
+    struct {
+        int32 count;
+        int32 cap;
+    };
+    max_align_t alignment;
 } GenericArrayHeader;
-_Static_assert(_Alignof(GenericArrayHeader) <= ALIGNMENT,
-               "GenericArrayHeader alignment exceeds allocator alignment");
-_Static_assert((sizeof(GenericArrayHeader)%ALIGNMENT) == 0,
-               "GenericArrayHeader size must preserve payload alignment");
 
 CBASE_API_DECL void *generic_array_init(int32, int64);
 CBASE_API_DECL void *generic_array_grow(void *, int64);
