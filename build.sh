@@ -125,7 +125,7 @@ callgrind)
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1"
-    CFLAGS="$CFLAGS -fsanitize=undefined -Wno-address"
+    CFLAGS="$CFLAGS -fsanitize=undefined"
     CFLAGS="$CFLAGS -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     ;;
