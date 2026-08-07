@@ -1340,6 +1340,7 @@ main(void) {
     FileList list2_stack = {0};
     FileList *list1 = &list1_stack;
     FileList *list2 = &list2_stack;
+    (void)noop;
 
     {
         char command[256];
