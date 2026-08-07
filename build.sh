@@ -40,7 +40,6 @@ CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-float-equal"
 CFLAGS="$CFLAGS -Wno-format-pedantic"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
-CFLAGS="$CFLAGS -Wno-undefined-internal"
 CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-unused-macros"
@@ -410,7 +409,7 @@ if [ "$target" = "test_all" ]; then
             continue
         fi
 
-        for compiler in gcc; do
+        for compiler in clang gcc "zig cc"; do
             printf "\nCC=${RED}${compiler}${RES}\n"
             CC="$compiler" $0 "$target" || exit 3
         done
