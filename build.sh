@@ -62,7 +62,7 @@ OS=$(uname -a)
 
 requested_cc=${CC:-}
 case "$target" in
-"debug"|"test"|"fast_feedback")
+debug|test|fast_feedback)
     CC="${requested_cc:-tcc}"
     ;;
 *)
@@ -138,45 +138,45 @@ with_toy_cc () {
 
 
 case "$target" in
-"debug")
+debug)
     CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
     ;;
-"benchmark")
+benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
     exe="bin/${program}_benchmark"
     ;;
-"perf")
+perf)
     CFLAGS="$CFLAGS -g3 -Og -flto"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
-"valgrind")
+valgrind)
     CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
     ;;
-"callgrind")
+callgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE"
     ;;
-"test")
+test)
     CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1"
     CFLAGS="$CFLAGS -fsanitize=undefined -Wno-address"
     CFLAGS="$CFLAGS -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     ;;
-"check")
+check)
     CC=gcc
     CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer"
     LDFLAGS="$LDFLAGS -lm"
     ;;
-"build")
-    CFLAGS="$CFLAGS $GNUSOURCE -g3 -O2 -flto -march=native -ftree-vectorize"
+build)
+    CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
-"fast_feedback")
+fast_feedback)
     CFLAGS="$CFLAGS $GNUSOURCE -Werror"
     ;;
 *)
@@ -255,13 +255,13 @@ uninstall_opt () {
 }
 
 case "$target" in
-"fast_feedback")
+fast_feedback)
     trace_on
     $CC $CPPFLAGS $CFLAGS main.c -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
     trace_off
     exit
     ;;
-"uninstall")
+uninstall)
     trace_on
 
     rm -f "${DESTDIR}${PREFIX}/bin/${program}"
@@ -279,7 +279,7 @@ case "$target" in
     trace_off
     exit
     ;;
-"install")
+install)
     trace_on
 
     if [ ! -f "$exe" ]; then
@@ -302,12 +302,12 @@ case "$target" in
     trace_off
     exit
     ;;
-"assembly")
+assembly)
     trace_on
     $CC $CPPFLAGS $CFLAGS -S $LDFLAGS -o ${program}_$CC.S "$main"
     exit
     ;;
-"test")
+test)
     find . -iname "*.c" | sort | while read -r src; do
         trace_off
         name=$(basename "$src")
@@ -374,7 +374,7 @@ case "$target" in
     done
     exit
     ;;
-"test_all")
+test_all)
     ;;
 *)
     trace_on
@@ -405,7 +405,7 @@ create_temp_files() {
 }
 
 case "$target" in
-"benchmark")
+benchmark)
     create_temp_files
     ls > "rename"
 
@@ -416,7 +416,7 @@ case "$target" in
     rm $dir/$exe
     exit
     ;;
-"valgrind")
+valgrind)
     create_temp_files
     ls > rename
 
@@ -432,7 +432,7 @@ case "$target" in
     trace_off
     exit
     ;;
-"perf")
+perf)
     create_temp_files
 
     cd /tmp/brn2 || exit
@@ -444,7 +444,7 @@ case "$target" in
     trace_off
     exit
     ;;
-"check")
+check)
     CC=gcc CFLAGS="-fanalyzer" ./build.sh
 
     CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
