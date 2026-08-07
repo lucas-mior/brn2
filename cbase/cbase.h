@@ -604,8 +604,8 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 #define CBASE_IMPLEMENT_IS_ZERO_0 _, 1
 #endif
 
-#if defined(CBASE_IMPLEMENT) \
-    && !CBASE_IMPLEMENT_IS_ZERO(CBASE_IMPLEMENT) \
+#if defined(CBASE_IMPLEMENT)
+#if !CBASE_IMPLEMENT_IS_ZERO(CBASE_IMPLEMENT) \
     && !defined(CBASE_IMPLEMENTED)
 #define CBASE_IMPLEMENTED 1
 
@@ -643,9 +643,8 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 #include "meta_parse.c"
 #include "meta_generate.c"
 
-#endif /* CBASE_IMPLEMENT && !CBASE_IMPLEMENTED */
+#endif /* !CBASE_IMPLEMENT_IS_ZERO(CBASE_IMPLEMENT) && !CBASE_IMPLEMENTED */
 
-#if defined(CBASE_IMPLEMENT)
 #undef CBASE_IMPLEMENT_IS_ZERO
 #undef CBASE_IMPLEMENT_IS_ZERO_
 #undef CBASE_IMPLEMENT_IS_ZERO__
