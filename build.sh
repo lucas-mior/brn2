@@ -69,11 +69,6 @@ case "$target" in
     CC="${requested_cc:-cc}"
     ;;
 esac
-if [ "$CC" = "tcc" ]; then
-    xc=""
-else
-    xc="-x c"
-fi
 
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
