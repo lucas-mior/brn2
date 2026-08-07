@@ -85,12 +85,12 @@ typedef struct UtilCopyFilesAsync {
     int32 unused;
 } UtilCopyFilesAsync;
 
-CBASE_API_DECL bool util_is_integer(char *string);
 CBASE_API_DECL int32 util_copy_file_async(char *, char *, int *);
 CBASE_API_DECL void util_copy_file_async_parsed(UtilCopyFilesAsync *);
 CBASE_API_DECL void *util_copy_file_async_thread(void *);
 #endif
 
+CBASE_API_DECL bool util_is_integer(char *string);
 CBASE_API_DECL void util_segv_handler(int32) __attribute__((noreturn));
 CBASE_API_DECL int32 itoa2(char *, int32, llong);
 CBASE_API_DECL long atoi2(char *);
@@ -538,19 +538,7 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 
 #endif /* CBASE_H */
 
-#if defined(CBASE_IMPLEMENT)
-#define CBASE_IMPLEMENT_IS_ZERO(VALUE) CBASE_IMPLEMENT_IS_ZERO_(VALUE)
-#define CBASE_IMPLEMENT_IS_ZERO_(VALUE) \
-    CBASE_IMPLEMENT_IS_ZERO__(CBASE_IMPLEMENT_IS_ZERO_##VALUE)
-#define CBASE_IMPLEMENT_IS_ZERO__(...) \
-    CBASE_IMPLEMENT_IS_ZERO___(__VA_ARGS__, 0)
-#define CBASE_IMPLEMENT_IS_ZERO___(_IGNORED, VALUE, ...) VALUE
-#define CBASE_IMPLEMENT_IS_ZERO_0 _, 1
-#endif
-
-#if defined(CBASE_IMPLEMENT)
-#if !CBASE_IMPLEMENT_IS_ZERO(CBASE_IMPLEMENT) \
-    && !defined(CBASE_IMPLEMENTED)
+#if defined(CBASE_IMPLEMENT) && !defined(CBASE_IMPLEMENTED)
 #define CBASE_IMPLEMENTED 1
 
 #include "arena.c"
@@ -587,11 +575,4 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 #include "meta_parse.c"
 #include "meta_generate.c"
 
-#endif /* !CBASE_IMPLEMENT_IS_ZERO(CBASE_IMPLEMENT) && !CBASE_IMPLEMENTED */
-
-#undef CBASE_IMPLEMENT_IS_ZERO
-#undef CBASE_IMPLEMENT_IS_ZERO_
-#undef CBASE_IMPLEMENT_IS_ZERO__
-#undef CBASE_IMPLEMENT_IS_ZERO___
-#undef CBASE_IMPLEMENT_IS_ZERO_0
 #endif
