@@ -27,24 +27,6 @@ main="main.c"
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
-CPPFLAGS="$CPPFLAGS -I$dir/cbase"
-CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
-
-CFLAGS="$CFLAGS -std=c11"
-CFLAGS="$CFLAGS -Wfatal-errors"
-CFLAGS="$CFLAGS -Wextra -Wall"
-CFLAGS="$CFLAGS -Werror=all -Werror=extra"
-CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
-CFLAGS="$CFLAGS -Wno-cast-qual"
-CFLAGS="$CFLAGS -Wno-char-subscripts"
-CFLAGS="$CFLAGS -Wno-constant-logical-operand"
-CFLAGS="$CFLAGS -Wno-float-equal"
-CFLAGS="$CFLAGS -Wno-format-pedantic"
-CFLAGS="$CFLAGS -Wno-gnu-union-cast"
-CFLAGS="$CFLAGS -Wno-unknown-pragmas"
-CFLAGS="$CFLAGS -Wno-unknown-warning-option"
-CFLAGS="$CFLAGS -Wno-unused-macros"
-
 OS=$(uname -a)
 
 case "$target" in
@@ -62,6 +44,24 @@ esac
 if ! command -v "$CC" > /dev/null 2>&1; then
     CC=cc
 fi
+
+CPPFLAGS="$CPPFLAGS -I$dir/cbase"
+CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
+
+CFLAGS="$CFLAGS -std=c11"
+CFLAGS="$CFLAGS -Wfatal-errors"
+CFLAGS="$CFLAGS -Wextra -Wall"
+CFLAGS="$CFLAGS -Werror=all -Werror=extra"
+CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
+CFLAGS="$CFLAGS -Wno-cast-qual"
+CFLAGS="$CFLAGS -Wno-char-subscripts"
+CFLAGS="$CFLAGS -Wno-constant-logical-operand"
+CFLAGS="$CFLAGS -Wno-float-equal"
+CFLAGS="$CFLAGS -Wno-format-pedantic"
+CFLAGS="$CFLAGS -Wno-gnu-union-cast"
+CFLAGS="$CFLAGS -Wno-unknown-pragmas"
+CFLAGS="$CFLAGS -Wno-unknown-warning-option"
+CFLAGS="$CFLAGS -Wno-unused-macros"
 
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
