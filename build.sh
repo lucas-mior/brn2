@@ -6,12 +6,10 @@ dir=$(dirname "$(readlink -f "$0")")
 # shellcheck source=/dev/null
 . "$dir/cbase/common.sh"
 
-CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 cd "$dir" || exit
 program=$(get_program "$0")
 script=$(basename "$0")
 
-targets="$(sort ./targets)"
 target="${1:-debug}"
 
 if ! grep -q "$target" ./targets; then
@@ -20,7 +18,7 @@ if ! grep -q "$target" ./targets; then
     exit 1
 fi
 
-printf "\n${script} ${RED}${1} ${2}$RES\n"
+printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -29,7 +27,9 @@ main="main.c"
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
+CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
+
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
@@ -77,7 +77,6 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-assign-enum"
     CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
     CFLAGS="$CFLAGS -Wno-bad-function-cast"
-    CFLAGS="$CFLAGS -Wno-char-subscripts"
 fi
 
 if ! command xsel; then
@@ -91,10 +90,6 @@ if echo "$OS" | grep -q "Linux"; then
         GNUSOURCE="-D_GNU_SOURCE"
     fi
 fi
-
-option_remove() {
-    echo "$1" | sed -E "s| *$2 +| |g"
-}
 
 case "$target" in
 debug)
@@ -135,7 +130,7 @@ build)
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
-    CFLAGS="$CFLAGS $GNUSOURCE -Werror"
+    CFLAGS="$CFLAGS $GNUSOURCE"
     ;;
 *)
     CFLAGS="$CFLAGS -O2"
@@ -188,28 +183,6 @@ else
     esac
     LDFLAGS="$LDFLAGS -lpthread"
 fi
-
-install_opt () {
-    mode="$1"
-    file="$2"
-    dest="$3"
-
-    if [ -f "$file" ]; then
-        install "$mode" "$file" "$dest"
-    elif [ -d "$file" ]; then
-        install "$mode" "$dest"
-        cp -rp "$file/." "$dest/"
-    fi
-}
-
-uninstall_opt () {
-    file="$1"
-    dest="$2"
-
-    if [ -e "$file" ]; then
-        rm -rf "$dest"
-    fi
-}
 
 case "$target" in
 fast_feedback)
@@ -326,9 +299,7 @@ test_all)
 *)
     trace_on
 
-    find . -iname "*.[ch]" -print0 \
-        | xargs --verbose -0 ctags --kinds-C=+l+d || true
-    vtags.sed tags | sort | uniq > .tags.vim      || true
+    build_tags
 
     $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
 
