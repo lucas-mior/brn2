@@ -64,6 +64,10 @@ static time_t timezone_offset = 0;
 #define CLAMP_TYPE int64
 #include "clamp.h"
 
+#define CLAMP_LINKAGE CBASE_API_DEF
+#define CLAMP_TYPE int32
+#include "clamp.h"
+
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
 #if !CBASE_HAS_SYSTEM_MEMMEM
