@@ -33,7 +33,8 @@ CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
-CFLAGS="$CFLAGS -Werror"
+CFLAGS="$CFLAGS -Werror=all -Werror=extra"
+# CFLAGS="$CFLAGS -Werror"  # Only activate it occasionally
 CFLAGS="$CFLAGS -Wno-cast-qual"
 CFLAGS="$CFLAGS -Wno-char-subscripts"
 CFLAGS="$CFLAGS -Wno-constant-logical-operand"
@@ -80,9 +81,9 @@ if [ "$CC" = "clang" ]; then
 fi
 
 if ! command xsel; then
-    xsel=cat
+    xsel="cat"
 else
-    xsel=xsel
+    xsel="xsel"
 fi
 
 if echo "$OS" | grep -q "Linux"; then
@@ -261,6 +262,7 @@ test)
             if ! zig version; then
                 continue
             fi
+            # shellcheck disable=SC2030
             CC="zig cc"
             cmdline="$CC $CPPFLAGS $CFLAGS"
             cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
