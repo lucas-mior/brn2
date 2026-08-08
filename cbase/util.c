@@ -251,7 +251,14 @@ memchr64(void *pointer, int32 value, int64 size) {
     if (size == 0) {
         return 0;
     }
+#if CC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
+#endif
     return memchr(pointer, value, (size_t)size);
+#if CC_CLANG
+#pragma clang diagnostic pop
+#endif
 }
 
 CBASE_API_DEF int32
