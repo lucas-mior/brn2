@@ -23,7 +23,6 @@ printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
-main="main.c"
 exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
@@ -167,7 +166,7 @@ fi
 case "$target" in
 fast_feedback)
     trace_on
-    $CC $CPPFLAGS $CFLAGS main.c -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
+    $CC $CPPFLAGS $CFLAGS "main.c" -o "$exe" $LDFLAGS && LC_ALL=C "$exe"
     trace_off
     exit
     ;;
@@ -214,7 +213,7 @@ install)
     ;;
 assembly)
     trace_on
-    $CC $CPPFLAGS $CFLAGS -S $LDFLAGS -o ${program}_$CC.S "$main"
+    $CC $CPPFLAGS $CFLAGS -S $LDFLAGS -o ${program}_$CC.S "main.c"
     exit
     ;;
 test)
@@ -225,7 +224,7 @@ test)
         if [ -n "$2" ] && [ "$name" != "$2" ]; then
             continue
         fi
-        if [ "$name" = "$main" ]; then
+        if [ "$name" = "main.c" ]; then
             continue
         fi
         if echo "$src" | grep -q "stc/"; then
@@ -282,7 +281,7 @@ test_all)
 
     build_tags
 
-    $CC $CPPFLAGS $CFLAGS -o ${exe} "$main" $LDFLAGS
+    $CC $CPPFLAGS $CFLAGS -o ${exe} "main.c" $LDFLAGS
 
     trace_off
     ;;
