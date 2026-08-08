@@ -88,69 +88,6 @@ assert_memmem(char *haystack, int32 haystack_len,
     return NULL;
 }
 
-#if !CBASE_HAS_SYSTEM_MEMMEM
-static void *
-cbase_memmem_fallback(
-    void *haystack,
-    size_t hay_len,
-    void *needle,
-    size_t needle_len
-) {
-    uchar *h = haystack;
-    uchar *n = needle;
-    uchar *end;
-    uchar *limit;
-
-    if (needle_len == 0) {
-        return haystack;
-    }
-    if ((haystack == NULL) || (needle == NULL)) {
-        return NULL;
-    }
-    if (hay_len < needle_len) {
-        return NULL;
-    }
-
-    end = h + hay_len;
-    limit = end - needle_len + 1;
-
-    while (h < limit) {
-        uchar *p;
-
-        if ((p = memchr64(h, n[0], limit - h)) == NULL) {
-            return NULL;
-        }
-
-        if (memcmp64(p, n, (int64)needle_len) == 0) {
-            return (void *)p;
-        }
-        h = p + 1;
-    }
-
-    return NULL;
-}
-#endif
-
-static void *
-assert_memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
-    void *result;
-
-    if (hay_len <= 0) {
-        return NULL;
-    }
-    if (needle_len <= 0) {
-        return NULL;
-    }
-
-#if CBASE_HAS_SYSTEM_MEMMEM
-    result = memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
-#else
-    result = cbase_memmem_fallback(haystack, (size_t)hay_len,
-                                   needle, (size_t)needle_len);
-#endif
-    return result;
-}
-
 static void
 assert_file_contains(char *file, int32 line, char *func,
                      char *path, char *needle) {
@@ -167,7 +104,7 @@ assert_file_contains(char *file, int32 line, char *func,
     }
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
         int32 n = assert_strlen32(buffer);
-        if (assert_memmem64(buffer, n, needle, needle_len)) {
+        if (assert_memmem(buffer, n, needle, needle_len)) {
             found = true;
             break;
         }
