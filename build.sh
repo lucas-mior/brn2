@@ -51,6 +51,17 @@ CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall -Wpedantic"
+
+if [ "$CC" = "gcc" ]; then
+    CFLAGS="$CFLAGS -Wshadow"
+    CFLAGS="$CFLAGS -Wsign-conversion"
+    CFLAGS="$CFLAGS -Wcast-align"
+    CFLAGS="$CFLAGS -Wundef"
+    CFLAGS="$CFLAGS -Wformat=2"
+    CFLAGS="$CFLAGS -Wvla"
+    CFLAGS="$CFLAGS -Wmissing-prototypes"
+fi
+
 CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 CFLAGS="$CFLAGS -Wno-cast-qual"
@@ -59,6 +70,7 @@ CFLAGS="$CFLAGS -Wno-constant-logical-operand"
 CFLAGS="$CFLAGS -Wno-gnu-union-cast"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-unused-macros"
+CFLAGS="$CFLAGS -Wno-format-nonliteral"
 
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
@@ -66,7 +78,6 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-c++-keyword"
     CFLAGS="$CFLAGS -Wno-covered-switch-default"
     CFLAGS="$CFLAGS -Wno-float-equal"
-    CFLAGS="$CFLAGS -Wno-format-nonliteral"
     CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
     CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
     CFLAGS="$CFLAGS -Wno-pre-c11-compat"
