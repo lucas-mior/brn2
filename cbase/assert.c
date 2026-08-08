@@ -993,21 +993,50 @@ _Generic((VAR1),                                                        \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()              \
 )
 
-#if CC_GCC
-#define ASSERT_EQUAL(VAR1, VAR2) do {                         \
+#if CC_GCC || CC_CLANG
+#define ASSERT_DIAGNOSTIC_PUSH() do {                         \
     _Pragma("GCC diagnostic push")                            \
     _Pragma("GCC diagnostic ignored \"-Waddress\"")           \
-    ASSERT_COMPARE(equal, VAR1, VAR2);                        \
+    _Pragma("GCC diagnostic ignored \"-Wpedantic\"")          \
+} while (0)
+#define ASSERT_DIAGNOSTIC_POP() do {                          \
     _Pragma("GCC diagnostic pop")                             \
 } while (0)
+#define ASSERT_COMPARE_DIAGNOSTIC(MODE, VAR1, VAR2) do {      \
+    ASSERT_DIAGNOSTIC_PUSH();                                 \
+    ASSERT_COMPARE(MODE, VAR1, VAR2);                         \
+    ASSERT_DIAGNOSTIC_POP();                                  \
+} while (0)
+#define ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(MODE, VAR1, VAR2) do { \
+    ASSERT_DIAGNOSTIC_PUSH();                                      \
+    ASSERT_DOUBLE_CLOSE_ULPS(MODE, VAR1, VAR2);                    \
+    ASSERT_DIAGNOSTIC_POP();                                       \
+} while (0)
+#define ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(MODE, VAR1, VAR2, TOL) do { \
+    ASSERT_DIAGNOSTIC_PUSH();                                          \
+    ASSERT_DOUBLE_CLOSE_TOL(MODE, VAR1, VAR2, TOL);                    \
+    ASSERT_DIAGNOSTIC_POP();                                           \
+} while (0)
+#define ASSERT_EQUAL(VAR1, VAR2) \
+    ASSERT_COMPARE_DIAGNOSTIC(equal, VAR1, VAR2)
+#define ASSERT_NOT_EQUAL(VAR1, VAR2) \
+    ASSERT_COMPARE_DIAGNOSTIC(not_equal, VAR1, VAR2)
+#define ASSERT_LESS(VAR1, VAR2) \
+    ASSERT_COMPARE_DIAGNOSTIC(less, VAR1, VAR2)
+#define ASSERT_LESS_EQUAL(VAR1, VAR2) \
+    ASSERT_COMPARE_DIAGNOSTIC(less_equal, VAR1, VAR2)
+#define ASSERT_MORE(VAR1, VAR2) \
+    ASSERT_COMPARE_DIAGNOSTIC(more, VAR1, VAR2)
+#define ASSERT_MORE_EQUAL(VAR1, VAR2) \
+    ASSERT_COMPARE_DIAGNOSTIC(more_equal, VAR1, VAR2)
 #else
 #define ASSERT_EQUAL(VAR1, VAR2)      ASSERT_COMPARE(equal,      VAR1, VAR2)
-#endif
 #define ASSERT_NOT_EQUAL(VAR1, VAR2)  ASSERT_COMPARE(not_equal,  VAR1, VAR2)
 #define ASSERT_LESS(VAR1, VAR2)       ASSERT_COMPARE(less,       VAR1, VAR2)
 #define ASSERT_LESS_EQUAL(VAR1, VAR2) ASSERT_COMPARE(less_equal, VAR1, VAR2)
 #define ASSERT_MORE(VAR1, VAR2)       ASSERT_COMPARE(more,       VAR1, VAR2)
 #define ASSERT_MORE_EQUAL(VAR1, VAR2) ASSERT_COMPARE(more_equal, VAR1, VAR2)
+#endif
 
 #define A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE2)                   \
     a_double_##MODE(__FILE__, __LINE__, FUNC__,                               \
@@ -1054,6 +1083,19 @@ _Generic((VAR1), \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST()            \
 )
 
+#if CC_GCC || CC_CLANG
+#define ASSERT_CLOSE_2(VAR1, VAR2) \
+    ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(close, VAR1, VAR2)
+
+#define ASSERT_CLOSE_3(VAR1, VAR2, TOL) \
+    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(close_tolerance, VAR1, VAR2, TOL)
+
+#define ASSERT_NOT_CLOSE_2(VAR1, VAR2) \
+    ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(not_close, VAR1, VAR2)
+
+#define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL) \
+    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(not_close_tolerance, VAR1, VAR2, TOL)
+#else
 #define ASSERT_CLOSE_2(VAR1, VAR2) \
     ASSERT_DOUBLE_CLOSE_ULPS(close, VAR1, VAR2)
 
@@ -1065,6 +1107,7 @@ _Generic((VAR1), \
 
 #define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL) \
     ASSERT_DOUBLE_CLOSE_TOL(not_close_tolerance, VAR1, VAR2, TOL)
+#endif
 
 #define ASSERT_CLOSE(...) SELECT_ON_NUM_ARGS(ASSERT_CLOSE_, __VA_ARGS__)
 #define ASSERT_NOT_CLOSE(...) SELECT_ON_NUM_ARGS(ASSERT_NOT_CLOSE_, __VA_ARGS__)
