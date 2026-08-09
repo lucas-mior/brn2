@@ -49,6 +49,28 @@ get_program() {
     basename "$(readlink -f "$(dirname "$1")")"
 }
 
+needs_rebuild () {
+    target_file=$1
+    shift
+
+    if [ ! -e "$target_file" ]; then
+        return 0
+    fi
+
+    for source_file do
+        if [ "$source_file" -nt "$target_file" ]; then
+            return 0
+        fi
+    done
+
+    if [ -d cbase ] \
+            && find cbase -type f -newer "$target_file" | grep -q .; then
+        return 0
+    fi
+
+    return 1
+}
+
 target_supported () {
     target_list=$1
     wanted=$2
