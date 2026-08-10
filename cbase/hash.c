@@ -107,9 +107,9 @@ struct Map {
     int64 slot_states_size;
 };
 
-#define CHECK_COMMON_MAP(FIELD) \
-    _Static_assert( \
-        OFFSET_OF(struct Map, FIELD) == OFFSET_OF(CommonMap, FIELD), \
+#define CHECK_COMMON_MAP(FIELD)                                       \
+    _Static_assert(                                                   \
+        offsetof(struct Map, FIELD) == offsetof(CommonMap, FIELD),    \
         "CommonMap and new Map must have the same offset for " #FIELD \
     )
 
