@@ -95,6 +95,7 @@
 #include <ftw.h>
 #include <libgen.h>
 #include <unistd.h>
+#include <getopt.h>
 #endif
 
 #if OS_WINDOWS
@@ -139,8 +140,6 @@
 #include "try_include.h"
 #include <utime.h>
 #define TRY_INCLUDE_WHICH <wordexp.h>
-#include "try_include.h"
-#define TRY_INCLUDE_WHICH <getopt.h>
 #include "try_include.h"
 #define TRY_INCLUDE_WHICH <fts.h>
 #include "try_include.h"
