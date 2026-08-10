@@ -7,12 +7,21 @@
 
 #include "platform_detection.h"
 
+#if CC_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
+
 #if OS_UNIX
 #define _DEFAULT_SOURCE
 #endif
 
 #if OS_LINUX && defined(__GLIBC__)
 #define _GNU_SOURCE
+#endif
+
+#if CC_CLANG
+    #pragma clang diagnostic pop
 #endif
 
 #include <assert.h>
