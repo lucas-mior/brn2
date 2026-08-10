@@ -48,9 +48,8 @@
 #include <float.h>
 #include <getopt.h>
 #include <inttypes.h>
-#if HAS_INCLUDE(<iso646.h>)
-#include <iso646.h>
-#endif
+#define TRY_INCLUDE_WHICH <iso646.h>
+#include "try_include.h"
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
@@ -68,20 +67,17 @@
 #include <wchar.h>
 #include <wctype.h>
 
-#if HAS_INCLUDE(<stdatomic.h>)
-#include <stdatomic.h>
+#define TRY_INCLUDE_WHICH <stdatomic.h>
+#include "try_include.h"
+
+#define TRY_INCLUDE_WHICH <stdnoreturn.h>
+#include "try_include.h"
+#if HAS_INCLUDE(<stdnoreturn.h>) && defined(noreturn)
+  #undef noreturn
 #endif
 
-#if HAS_INCLUDE(<stdnoreturn.h>)
-#include <stdnoreturn.h>
-  #if defined(noreturn)
-    #undef noreturn
-  #endif
-#endif
-
-#if HAS_INCLUDE(<uchar.h>)
-#include <uchar.h>
-#endif
+#define TRY_INCLUDE_WHICH <uchar.h>
+#include "try_include.h"
 
 #if !CC_TCC && !defined(__STDC_NO_COMPLEX__) \
         && HAS_INCLUDE(<complex.h>) && HAS_INCLUDE(<tgmath.h>)
@@ -89,8 +85,9 @@
 #include <tgmath.h>
 #endif
 
-#if !defined(__STDC_NO_THREADS__) && HAS_INCLUDE(<threads.h>)
-#include <threads.h>
+#if !defined(__STDC_NO_THREADS__)
+#define TRY_INCLUDE_WHICH <threads.h>
+#include "try_include.h"
 #endif
 
 #if OS_UNIX || OS_WINDOWS
@@ -110,56 +107,43 @@
 #endif
 
 #if OS_UNIX
-#if HAS_INCLUDE(<arpa/inet.h>)
-#include <arpa/inet.h>
-#endif
-#if HAS_INCLUDE(<fnmatch.h>)
-#include <fnmatch.h>
-#endif
-#if HAS_INCLUDE(<glob.h>)
-#include <glob.h>
-#endif
-#if HAS_INCLUDE(<grp.h>)
-#include <grp.h>
-#endif
+#define TRY_INCLUDE_WHICH <arpa/inet.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <fnmatch.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <glob.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <grp.h>
+#include "try_include.h"
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <pthread.h>
-#if HAS_INCLUDE(<pwd.h>)
-#include <pwd.h>
-#endif
-#if HAS_INCLUDE(<regex.h>)
-#include <regex.h>
-#endif
-#if HAS_INCLUDE(<spawn.h>)
-#include <spawn.h>
-#endif
-#if HAS_INCLUDE(<strings.h>)
-#include <strings.h>
-#endif
+#define TRY_INCLUDE_WHICH <pwd.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <regex.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <spawn.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <strings.h>
+#include "try_include.h"
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#if HAS_INCLUDE(<sys/resource.h>)
-#include <sys/resource.h>
-#endif
+#define TRY_INCLUDE_WHICH <sys/resource.h>
+#include "try_include.h"
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#if HAS_INCLUDE(<sys/uio.h>)
-#include <sys/uio.h>
-#endif
-#if HAS_INCLUDE(<sys/utsname.h>)
-#include <sys/utsname.h>
-#endif
+#define TRY_INCLUDE_WHICH <sys/uio.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <sys/utsname.h>
+#include "try_include.h"
 #include <sys/wait.h>
-#if HAS_INCLUDE(<termios.h>)
-#include <termios.h>
-#endif
+#define TRY_INCLUDE_WHICH <termios.h>
+#include "try_include.h"
 #include <utime.h>
-#if HAS_INCLUDE(<wordexp.h>)
-#include <wordexp.h>
-#endif
+#define TRY_INCLUDE_WHICH <wordexp.h>
+#include "try_include.h"
 #endif
 
 #if !defined(CBASE_HAS_FTS)
