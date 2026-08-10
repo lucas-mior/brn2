@@ -4,7 +4,15 @@
 #if !defined(PRIMITIVES_H)
 #define PRIMITIVES_H
 
+// libc.h is needed for limits.h and stdint.h
 #include "libc.h"
+
+// Note: int64_t is defined as long on unix systems,
+// while int64_t is defined as long long on windows.
+// defining int64 as long long creates a compatibility between the two,
+// allowing we to use %lld for printing them without warnings.
+// However, if in the future someone decides that long long should be something
+// other than 64 bits, this compatibility will be impossible.
 
 _Static_assert(CHAR_BIT == 8, "primitives.h requires CHAR_BIT == 8");
 
