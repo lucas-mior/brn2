@@ -49,15 +49,4 @@ _Static_assert(sizeof(uintptr) == sizeof(void *),
 _Static_assert(sizeof(intptr) == sizeof(void *),
                "intptr must match pointer width");
 
-#if defined(__has_include)
-  #if __has_include(<stdbool.h>)
-    #include <stdbool.h>
-    #define HAS_STDBOOl 1
-  #else
-    #define HAS_STDBOOL 0
-  #endif
-#else
-  #define HAS_STDBOOL 0
-#endif
-
 #endif /* PRIMITIVES_H */
