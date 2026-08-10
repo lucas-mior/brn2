@@ -372,12 +372,8 @@ generic_functions_sink(void) {
 
 void UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC(void);
 
-#if !defined(GENERIC_S_BSZ)
-#define GENERIC_S_BSZ 64
-#endif
-
 #if !defined(S_BSZ)
-#define S_BSZ GENERIC_S_BSZ
+#define S_BSZ 64
 #endif
 
 #define fprint(FP, ...)        fprint_0((FP),          __VA_ARGS__, (char *)0)
