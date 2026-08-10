@@ -30,28 +30,15 @@ CBASE_API_DEF void
 assert_file_contains(char *file, int32 line, char *func,
                      char *path, char *needle) {
     FILE *file_handle;
-    char buffer[4096];
+    char *buffer;
+    int32 buffer_len;
     bool found = false;
     int32 needle_len = strlen32(needle);
 
-    if ((file_handle = fopen(path, "r")) == NULL) {
-        assert_error(file, line, func,
-                     "Error opening %s for reading: %s.\n",
-                     path, strerror(errno));
+    if (!read_entire_file(path, &buffer, &buffer_len)) {
         TRAP();
     }
-    while (fgets(buffer, SIZEOF(buffer), file_handle)) {
-        int32 n = strlen32(buffer);
-        if (memmem64(buffer, n, needle, needle_len)) {
-            found = true;
-            break;
-        }
-    }
-    if (fclose(file_handle)) {
-        assert_error(file, line, func,
-                     "Error closing %s: %s.\n", path, strerror(errno));
-    }
-    if (!found) {
+    if (!memmem64(buffer, buffer_len, needle, needle_len)) {
         assert_error(file, line, func,
                      "Needle '%s' not found in '%s'.\n", needle, path);
         TRAP();
