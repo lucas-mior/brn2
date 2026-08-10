@@ -195,13 +195,14 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
-#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FMT, SYMBOL, MODE)            \
+#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(SIGNEDNESS, FMT, SYMBOL, MODE)      \
 static void                                                                    \
-a_both_##TYPE##_##MODE(char *file, int32 line, char *func,                     \
-                       char *name1, char *name2,                               \
-                       char *type1, char *type2,                               \
-                       llong bits1, llong bits2,                               \
-                       TYPE long long var1, TYPE long long var2) {             \
+a_both_##SIGNEDNESS##_##MODE(                                                  \
+    char *file, int32 line, char *func,                                        \
+    char *name1, char *name2,                                                  \
+    char *type1, char *type2,                                                  \
+    llong bits1, llong bits2,                                                  \
+    SIGNEDNESS long long var1, SIGNEDNESS long long var2) {                    \
     if (!(var1 SYMBOL var2)) {                                                 \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
