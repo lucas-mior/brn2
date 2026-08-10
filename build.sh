@@ -58,51 +58,43 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-if echo "$OS" | grep -q "Linux"; then
-    if echo "$OS" | grep -q "GNU"; then
-        GNUSOURCE="-D_GNU_SOURCE"
-    fi
-fi
-
 case "$target" in
 debug)
     CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -Wno-unused-function"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_benchmark"
     ;;
 perf)
     CFLAGS="$CFLAGS -g3 -Og -flto"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DBRN2_BENCHMARK=1"
+    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 callgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE"
     ;;
 test)
-    CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1"
+    CFLAGS="$CFLAGS -g3 -O0 -DDEBUGGING=1"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 check)
     CC=gcc
-    CFLAGS="$CFLAGS $GNUSOURCE -DDEBUGGING=1 -fanalyzer"
+    CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 build)
-    CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
-    CFLAGS="$CFLAGS $GNUSOURCE"
     ;;
 *)
     CFLAGS="$CFLAGS -O2"
@@ -126,7 +118,6 @@ if [ "$target" = "cross" ]; then
     fi
     CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
-    CFLAGS=$(option_remove "$CFLAGS" "-D_GNU_SOURCE")
 
     case $cross in
     x86_64-macos|aarch64-macos)
