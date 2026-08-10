@@ -773,6 +773,7 @@ main(void) {
             assert((print0(V(c), "\n")
                     == snprintf(buffer, SIZEOF(buffer), "%d\n", c)));
         }
+        print0("PRINTING a=", V(a), "; b=", V(b), "\n");
     }
 }
 
