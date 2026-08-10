@@ -13,9 +13,9 @@
 #endif
 
 #include "platform_detection.h"
+#include "libc.h"
 #include "primitives.h"
 #include "base_macros.h"
-#include "libc.h"
 
 static char *program = __FILE__;
 static int32 program_len UNUSED;
