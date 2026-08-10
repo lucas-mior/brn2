@@ -435,6 +435,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
     }
     if (length == 0) {
         free2(list->files, list->capacity*SIZEOF(*list->files));
+        list->files = NULL;
         list->length = 0;
         list->capacity = 0;
         return;
