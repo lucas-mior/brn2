@@ -256,20 +256,20 @@ typebits(enum Type type) {
         pointer = (void*)&(primitive.acharp);
         size = ((char*)(pointer + 1)) - (char*)pointer;
         break;
-    case TYPE_BOOL:    size = sizeof(bool);    break;
-    case TYPE_CHAR:    size = sizeof(char);    break;
-    case TYPE_SCHAR:   size = sizeof(schar);   break;
-    case TYPE_SHORT:   size = sizeof(short);   break;
-    case TYPE_INT:     size = sizeof(int);     break;
-    case TYPE_LONG:    size = sizeof(long);    break;
-    case TYPE_LLONG:   size = sizeof(llong);   break;
-    case TYPE_UCHAR:   size = sizeof(uchar);   break;
-    case TYPE_USHORT:  size = sizeof(ushort);  break;
-    case TYPE_UINT:    size = sizeof(uint);    break;
-    case TYPE_ULONG:   size = sizeof(ulong);   break;
-    case TYPE_ULLONG:  size = sizeof(ullong);  break;
-    case TYPE_FLOAT:   size = sizeof(float);   break;
-    case TYPE_DOUBLE:  size = sizeof(double);  break;
+    case TYPE_BOOL:    size = SIZEOF(bool);    break;
+    case TYPE_CHAR:    size = SIZEOF(char);    break;
+    case TYPE_SCHAR:   size = SIZEOF(schar);   break;
+    case TYPE_SHORT:   size = SIZEOF(short);   break;
+    case TYPE_INT:     size = SIZEOF(int);     break;
+    case TYPE_LONG:    size = SIZEOF(long);    break;
+    case TYPE_LLONG:   size = SIZEOF(llong);   break;
+    case TYPE_UCHAR:   size = SIZEOF(uchar);   break;
+    case TYPE_USHORT:  size = SIZEOF(ushort);  break;
+    case TYPE_UINT:    size = SIZEOF(uint);    break;
+    case TYPE_ULONG:   size = SIZEOF(ulong);   break;
+    case TYPE_ULLONG:  size = SIZEOF(ullong);  break;
+    case TYPE_FLOAT:   size = SIZEOF(float);   break;
+    case TYPE_DOUBLE:  size = SIZEOF(double);  break;
     case TYPE_OTHER:
     default: TRAP();
     }
