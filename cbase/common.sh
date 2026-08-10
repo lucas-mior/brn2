@@ -415,6 +415,9 @@ test_executable_path () {
         test_exe_suffix=$TEST_EXE_SUFFIX
     else
         case "${CC:-}" in
+        clang-cl|*/clang-cl)
+            test_exe_suffix=_test.exe
+            ;;
         cl|*/cl|cl.exe|*/cl.exe)
             test_exe_suffix=_test.exe
             ;;
@@ -424,8 +427,28 @@ test_executable_path () {
         esac
     fi
 
+    if [ "${TEST_TMPDIR+set}" = set ]; then
+        test_tmpdir=$TEST_TMPDIR
+    else
+        case "${CC:-}" in
+        clang-cl|*/clang-cl|cl|*/cl|cl.exe|*/cl.exe)
+            case "$(uname -a)" in
+            *MINGW*|*MSYS*|*CYGWIN*)
+                test_tmpdir=.test-tmp
+                ;;
+            *)
+                test_tmpdir=${TMPDIR:-/tmp}
+                ;;
+            esac
+            ;;
+        *)
+            test_tmpdir=${TMPDIR:-/tmp}
+            ;;
+        esac
+    fi
+
     printf '%s/%s%s\n' \
-        "${TEST_TMPDIR:-${TMPDIR:-/tmp}}" \
+        "$test_tmpdir" \
         "$test_module" \
         "$test_exe_suffix"
 }
