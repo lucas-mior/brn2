@@ -41,12 +41,4 @@ typedef ushort uint16;
 typedef uint   uint32;
 typedef ullong uint64;
 
-typedef ullong uintptr;
-typedef llong  intptr;
-
-_Static_assert(sizeof(uintptr) == sizeof(void *),
-               "uintptr must match pointer width");
-_Static_assert(sizeof(intptr) == sizeof(void *),
-               "intptr must match pointer width");
-
 #endif /* PRIMITIVES_H */
