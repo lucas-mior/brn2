@@ -46,7 +46,6 @@
 #include <errno.h>
 #include <fenv.h>
 #include <float.h>
-#include <getopt.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <locale.h>
@@ -137,28 +136,10 @@
 #include <utime.h>
 #define TRY_INCLUDE_WHICH <wordexp.h>
 #include "try_include.h"
-#endif
-
-#if !defined(CBASE_HAS_FTS)
-#if OS_UNIX
-  #if defined(__has_include)
-    #if __has_include(<fts.h>)
-      #define CBASE_HAS_FTS 1
-    #else
-      #define CBASE_HAS_FTS 0
-    #endif
-  #elif defined(__GLIBC__) || OS_MAC || OS_BSD
-    #define CBASE_HAS_FTS 1
-  #else
-    #define CBASE_HAS_FTS 0
-  #endif
-#else
-  #define CBASE_HAS_FTS 0
-#endif
-#endif
-
-#if CBASE_HAS_FTS
-#include <fts.h>
+#define TRY_INCLUDE_WHICH <getopt.h>
+#include "try_include.h"
+#define TRY_INCLUDE_WHICH <fts.h>
+#include "try_include.h"
 #endif
 
 #if OS_MAC || OS_BSD
