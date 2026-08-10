@@ -793,13 +793,13 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 
-#define ASSERT(C) do {                                                         \
-    if (!(C)) {                                                                \
+#define ASSERT(...) do {                                                       \
+    if (!(__VA_ARGS__)) {                                                      \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         } else {                                                               \
             fprintf(stderr, "Assertion '%s' failed at %s:%d:%s\n",             \
-                            #C, __FILE__, __LINE__, FUNC__);                   \
+                            #__VA_ARGS__, __FILE__, __LINE__, FUNC__);         \
             TRAP();                                                            \
         }                                                                      \
     }                                                                          \
