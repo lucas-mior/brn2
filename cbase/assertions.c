@@ -32,7 +32,6 @@ assert_file_contains(char *file, int32 line, char *func,
     FILE *file_handle;
     char *buffer;
     int32 buffer_len;
-    bool found = false;
     int32 needle_len = strlen32(needle);
 
     if (!read_entire_file(path, &buffer, &buffer_len)) {
