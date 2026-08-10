@@ -48,8 +48,6 @@
 #include <float.h>
 #include <getopt.h>
 #include <inttypes.h>
-#define TRY_INCLUDE_WHICH <iso646.h>
-#include "try_include.h"
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
@@ -62,33 +60,28 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
+#include <tgmath.h>
 #include <time.h>
+#include <uchar.h>
 #include <wchar.h>
 #include <wctype.h>
 
-#define TRY_INCLUDE_WHICH <stdatomic.h>
-#include "try_include.h"
-
-#define TRY_INCLUDE_WHICH <stdnoreturn.h>
-#include "try_include.h"
-#if HAS_INCLUDE(<stdnoreturn.h>) && defined(noreturn)
-  #undef noreturn
-#endif
-
-#define TRY_INCLUDE_WHICH <uchar.h>
-#include "try_include.h"
-
-#if !CC_TCC && !defined(__STDC_NO_COMPLEX__) \
-        && HAS_INCLUDE(<complex.h>) && HAS_INCLUDE(<tgmath.h>)
+#if !defined(__STDC_NO_COMPLEX__)
 #include <complex.h>
-#include <tgmath.h>
 #endif
 
-#if !defined(__STDC_NO_THREADS__)
-#define TRY_INCLUDE_WHICH <threads.h>
-#include "try_include.h"
+#if !OS_WINDOWS && !defined(__STDC_NO_THREADS__)
+#include <threads.h>
 #endif
+
+#if !defined(__STDC_NO_ATOMICS__)
+#include <stdatomic.h>
+#endif
+
+#define TRY_INCLUDE_WHICH <iso646.h>
+#include "try_include.h"
 
 #if OS_UNIX || OS_WINDOWS
 #include <fcntl.h>
