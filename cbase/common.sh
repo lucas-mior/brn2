@@ -198,7 +198,7 @@ gcc_flags_to_msvc() {
                 if command_exists cygpath; then
                     path=$(cygpath -m "$path" 2>/dev/null || printf '%s\n' "$path")
                 fi
-                flag="/I$path"
+                flag="/I $path"
                 ;;
             -D*)
                 flag="/D${flag#-D}"
