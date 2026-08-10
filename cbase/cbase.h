@@ -495,6 +495,10 @@ CBASE_API_DECL bool command_wait(Command *);
 #endif
 
 // Note: it is fine to typedef union in this case
+#if CBASE_CRT_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4324)
+#endif
 typedef union GenericArrayHeader {
     struct {
         int32 count;
@@ -502,6 +506,9 @@ typedef union GenericArrayHeader {
     };
     CbaseMaxAlign alignment;
 } GenericArrayHeader;
+#if CBASE_CRT_MSVC
+#pragma warning(pop)
+#endif
 
 CBASE_API_DECL void *generic_array_init(int32, int64);
 CBASE_API_DECL void *generic_array_grow(void *, int64);
