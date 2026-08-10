@@ -64,7 +64,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if !defined(_MSC_VER)
 #include <stdnoreturn.h>
+#endif
 #include <string.h>
 #if !defined(_MSC_VER)
 #include <tgmath.h>
@@ -120,6 +122,9 @@
 
 #if OS_WINDOWS
 #include <windows.h>
+#if defined(_MSC_VER) && !defined(noreturn)
+#define noreturn __declspec(noreturn)
+#endif
 #endif
 
 // POSIX headers
