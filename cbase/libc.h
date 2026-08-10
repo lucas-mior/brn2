@@ -86,17 +86,35 @@
 #include <stdatomic.h>
 #endif
 
-// POSIX headers that may work on windows using minGW or Cygwin
-#if OS_UNIX || OS_WINDOWS
+// POSIX-like headers provided by Unix and some Windows CRTs.
+#if CBASE_HAS_DIRENT_H
 #include <dirent.h>
+#endif
+#if CBASE_HAS_FCNTL_H
 #include <fcntl.h>
+#endif
+#if CBASE_HAS_FTW_H
 #include <ftw.h>
+#endif
+#if CBASE_HAS_GETOPT_H
 #include <getopt.h>
+#endif
+#if CBASE_HAS_LIBGEN_H
 #include <libgen.h>
+#endif
+#if CBASE_HAS_SYS_FILE_H
 #include <sys/file.h>
+#endif
+#if CBASE_HAS_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#if CBASE_HAS_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#if CBASE_HAS_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if CBASE_HAS_UNISTD_H
 #include <unistd.h>
 #endif
 
