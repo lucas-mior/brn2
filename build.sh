@@ -59,12 +59,6 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-if ! command xsel; then
-    xsel="cat"
-else
-    xsel="xsel"
-fi
-
 if echo "$OS" | grep -q "Linux"; then
     if echo "$OS" | grep -q "GNU"; then
         GNUSOURCE="-D_GNU_SOURCE"
@@ -264,7 +258,7 @@ test)
             if ! $test_exe; then
                 gdb --quiet \
                     -ex run -ex backtrace -ex quit \
-                    $test_exe 2>&1 | $xsel -i -b
+                    $test_exe 2>&1
                 exit 1
             fi
         else
