@@ -46,7 +46,7 @@ jobs:
       - name: Build with clang-cl
         run: |
           clang-cl --version
-          CC=clang-cl ./build.sh
+          CC=clang-cl ./build.sh test
 
   freebsd:
     runs-on: ubuntu-latest
