@@ -108,7 +108,6 @@ scandir(
     int64 pattern_length;
     int64 count;
     int64 capacity = 16;
-    int32 result;
     int32 wide_dir_length;
     (void)filter;
     (void)compar;

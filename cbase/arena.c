@@ -337,19 +337,6 @@ arena_functions_sink(void) {
 #include "cbase.h"
 // flags: -lm
 
-#if !defined(UTIL_C)
-static void
-memset64(void *buffer, int value, int64 size) {
-    if (size == 0) {
-        return;
-    }
-    ASSERT_NON_NEGATIVE(size);
-    ASSERT_LESS(size, SIZE_MAX);
-    memset(buffer, value, (size_t)size);
-    return;
-}
-#endif
-
 int
 main(void) {
     Arena *arena;
