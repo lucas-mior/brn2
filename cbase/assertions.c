@@ -974,6 +974,7 @@ main(void) {
         ASSERT_FILE_CONTAINS(path, "ontents");
     }
 
+    printf("All assertions tests passed.\n");
     exit(EXIT_SUCCESS);
 }
 #endif
