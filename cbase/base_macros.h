@@ -5,7 +5,7 @@
 // it only depends on platform_detection.h,
 // but not on anything else on cbase/
 // We also have to include libc.h,
-// so that platforms defining macros can be
+// so that macros defined by system headers can be
 // undefined before I define them.
 
 #if !defined(BASE_MACROS_H)
