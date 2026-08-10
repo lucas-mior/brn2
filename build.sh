@@ -32,7 +32,6 @@ OS=$(uname -a)
 CC=$(get_compiler "$target")
 
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
-CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
