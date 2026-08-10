@@ -149,6 +149,12 @@
 #if !defined(S_IWRITE) && defined(_S_IWRITE)
 #define S_IWRITE _S_IWRITE
 #endif
+#if !defined(S_IRUSR) && defined(S_IREAD)
+#define S_IRUSR S_IREAD
+#endif
+#if !defined(S_IWUSR) && defined(S_IWRITE)
+#define S_IWUSR S_IWRITE
+#endif
 #if !defined(O_BINARY) && defined(_O_BINARY)
 #define O_BINARY _O_BINARY
 #endif
@@ -200,6 +206,10 @@ int getopt_long(int, char **, char *, struct option *, int *);
 #if !defined(STDERR_FILENO)
 #define STDERR_FILENO _fileno(stderr)
 #endif
+#if !defined(PATH_MAX)
+#define PATH_MAX 4096
+#endif
+char *realpath(char *, char *);
 #endif
 
 #if OS_WINDOWS

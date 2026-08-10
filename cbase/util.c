@@ -745,6 +745,32 @@ util_filename_from(char *buffer, int64 size, int fd) {
 #endif
 }
 
+#if CBASE_CRT_MSVC
+CBASE_API_DEF char *
+realpath(char *path, char *resolved_path) {
+    char *buffer;
+    char *result;
+
+    if (path == NULL) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    buffer = resolved_path;
+    if ((buffer == NULL) && ((buffer = malloc(PATH_MAX)) == NULL)) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    result = _fullpath(buffer, path, PATH_MAX);
+    if ((result == NULL) && (resolved_path == NULL)) {
+        free(buffer);
+    }
+
+    return result;
+}
+#endif
+
 #if OS_WINDOWS
 static int
 strerror_r(int errnum, char *buffer, size_t size) {
@@ -2553,7 +2579,8 @@ util_functions_sink(void) {
 }
 #endif
 
-#if TESTING && OS_UNIX
+#if TESTING
+#if OS_UNIX
 CBASE_API_DEF bool
 test_command_exists(char *command) {
     char *path;
@@ -2617,9 +2644,11 @@ test_join_path(
 
     return;
 }
+#endif
 
 CBASE_API_DEF void
 test_make_temp_dir(char *buffer, int32 capacity, char *name) {
+#if OS_UNIX
     char *tmpdir;
     int32 len;
 
@@ -2639,8 +2668,52 @@ test_make_temp_dir(char *buffer, int32 capacity, char *name) {
     }
 
     return;
+#elif OS_WINDOWS
+    DWORD temp_len;
+    int32 prefix_len;
+
+    temp_len = GetTempPathA((DWORD)capacity, buffer);
+    if ((temp_len <= 0) || (temp_len >= (DWORD)capacity)) {
+        error("Temporary directory path too long.\n");
+        fatal(EXIT_FAILURE);
+    }
+
+    prefix_len = (int32)temp_len;
+    for (int32 i = 0; i < 10000; i += 1) {
+        DWORD error_code;
+        int32 len;
+
+        len = snprintf2(buffer + prefix_len, capacity - prefix_len,
+                        "%s_%lu_%d",
+                        name, (ulong)GetCurrentProcessId(), i);
+        if ((len <= 0) || (len >= (capacity - prefix_len))) {
+            error("Temporary directory path too long.\n");
+            fatal(EXIT_FAILURE);
+        }
+        if (CreateDirectoryA(buffer, NULL)) {
+            return;
+        }
+
+        error_code = GetLastError();
+        if (error_code != ERROR_ALREADY_EXISTS) {
+            error("Error creating temporary directory %s: windows error %lu.\n",
+                  buffer, (ulong)error_code);
+            fatal(EXIT_FAILURE);
+        }
+    }
+
+    error("Could not create a unique temporary directory.\n");
+    fatal(EXIT_FAILURE);
+#else
+    (void)buffer;
+    (void)capacity;
+    (void)name;
+    error("Temporary test directories are unsupported on this platform.\n");
+    fatal(EXIT_FAILURE);
+#endif
 }
 
+#if OS_UNIX
 static void
 test_remove_tree_children(char *path) {
     DIR *dir;
@@ -2670,9 +2743,11 @@ test_remove_tree_children(char *path) {
     xclosedir(dir, path);
     return;
 }
+#endif
 
 CBASE_API_DEF void
 test_remove_tree(char *path) {
+#if OS_UNIX
     struct stat statbuf;
 
     if (lstat(path, &statbuf) < 0) {
@@ -2694,8 +2769,29 @@ test_remove_tree(char *path) {
     }
 
     return;
+#elif OS_WINDOWS
+    DWORD error_code;
+
+    if (RemoveDirectoryA(path)) {
+        return;
+    }
+
+    error_code = GetLastError();
+    if ((error_code == ERROR_FILE_NOT_FOUND)
+        || (error_code == ERROR_PATH_NOT_FOUND)) {
+        return;
+    }
+
+    error("Error removing test directory %s: windows error %lu.\n",
+          path, (ulong)error_code);
+    return;
+#else
+    (void)path;
+    return;
+#endif
 }
 
+#if OS_UNIX
 CBASE_API_DEF bool
 test_symlink_supported(char *dir) {
     char link_path[PATH_MAX];
@@ -2750,6 +2846,7 @@ test_hardlink_supported(char *dir) {
     return supported;
 }
 #endif
+#endif
 
 #if TESTING_util
 #define CBASE_IMPLEMENT
@@ -2799,6 +2896,7 @@ write_file(char *path, void *data, int64 len) {
 #define WRITE_FILE(PATH, STRING) \
     write_file(PATH, STRING, strlen32(STRING))
 
+#if OS_LINUX
 static sig_atomic_t received_signal = false;
 static void
 signal_handler(int signal_number) {
@@ -2806,6 +2904,7 @@ signal_handler(int signal_number) {
     received_signal = true;
     return;
 }
+#endif
 
 static int
 util_test_qsort_cmp(void *a, void *b) {
@@ -2831,7 +2930,7 @@ main(int argc, char **argv) {
     (void)argv;
     (void)here_counter;
 
-#if TESTING && OS_UNIX
+#if TESTING
     test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "util");
 #endif
 
@@ -2900,7 +2999,8 @@ main(int argc, char **argv) {
         POWER_OF2_str_free(value_name);
     }
 
-    if (OS_LINUX && !DEBUGGING) {
+#if OS_LINUX
+    if (!DEBUGGING) {
         struct sigaction signal_action;
         signal_action.sa_handler = signal_handler;
         sigemptyset(&signal_action.sa_mask);
@@ -2912,6 +3012,7 @@ main(int argc, char **argv) {
         send_signal(argv[0], SIGUSR1);
         ASSERT(received_signal);
     }
+#endif
 
     srand((uint)time(NULL));
     for (int i = 0; i < 10; i += 1) {
@@ -3149,7 +3250,7 @@ main(int argc, char **argv) {
     (void)fwrite64;
     (void)fread64;
 
-#if TESTING && OS_UNIX
+#if TESTING
     test_remove_tree(temp_dir);
 #endif
 
