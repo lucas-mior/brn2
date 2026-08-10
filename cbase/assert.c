@@ -821,6 +821,24 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
     }                                                                          \
 } while (0)
 
+#define ASSERT_POSITIVE(VAR1) do {                                             \
+    llong p = VAR1;                                                            \
+    if (p < 0) {                                                               \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %lld > 0\n", #VAR1, p);                             \
+        TRAP();                                                                \
+    }                                                                          \
+} while (0)
+
+#define ASSERT_NEGATIVE(VAR1) do {                                             \
+    llong p = VAR1;                                                            \
+    if (p > 0) {                                                               \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %lld < 0\n", #VAR1, p);                             \
+        TRAP();                                                                \
+    }                                                                          \
+} while (0)
+
 #define ASSERT_FILE_CONTAINS(PATH, NEEDLE)           \
     assert_file_contains(__FILE__, __LINE__, FUNC__, \
                          PATH, NEEDLE)
