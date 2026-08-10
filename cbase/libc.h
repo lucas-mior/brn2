@@ -16,7 +16,7 @@
 #endif
 
 #if OS_UNIX && !defined(_XOPEN_SOURCE)
-  #define _XOPEN_SOURCE=700
+  #define _XOPEN_SOURCE 700
 #endif
 
 #if OS_UNIX && !defined(_DEFAULT_SOURCE)
