@@ -550,7 +550,7 @@ assert_double_close_ulps(double var1, double var2,
 }
 
 static bool
-assert_double_close_tolerance(double var1, double var2,
+assert_double_close_tol(double var1, double var2,
                               double tolerance,
                               double *diff_out,
                               double *tolerance_out) {
@@ -588,14 +588,14 @@ assert_double_failure(char *file, int32 line, char *func,
                       double var1, double var2, char *symbol,
                       double diff, double tolerance,
                       ullong ulps, ullong max_ulps,
-                      bool use_tolerance) {
+                      bool use_tol) {
     if (!DEBUGGING) {
         UNREACHABLE();
     }
     assert_error(file, line, func,
                  "[%s%lld]%s = %.17g %s %.17g = %s[%s%lld]\n",
                  type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
-    if (use_tolerance) {
+    if (use_tol) {
         fprintf(stderr,
                 "floating diff = %.17g, tolerance = %.17g\n",
                 diff, tolerance);
@@ -634,7 +634,7 @@ GENERATE_A_DOUBLE_CLOSE(not_close, "!~=", false)
 
 #undef GENERATE_A_DOUBLE_CLOSE
 
-#define GENERATE_A_DOUBLE_CLOSE_TOLERANCE(MODE, SYMBOL, EXPECT_CLOSE)          \
+#define GENERATE_A_DOUBLE_CLOSE_TOL(MODE, SYMBOL, EXPECT_CLOSE)          \
 static void                                                                    \
 a_double_##MODE(char *file, int32 line, char *func,                            \
                 char *name1, char *name2,                                      \
@@ -645,7 +645,7 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
     double diff;                                                               \
     double tolerance_abs;                                                      \
                                                                                \
-    if (assert_double_close_tolerance(var1, var2, tolerance,                   \
+    if (assert_double_close_tol(var1, var2, tolerance,                   \
                                       &diff, &tolerance_abs) != EXPECT_CLOSE) { \
         assert_double_failure(file, line, func, name1, name2,                  \
                               type1, type2, bits1, bits2,                      \
@@ -655,10 +655,10 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
     return;                                                                    \
 }
 
-GENERATE_A_DOUBLE_CLOSE_TOLERANCE(close_tolerance, "~=", true)
-GENERATE_A_DOUBLE_CLOSE_TOLERANCE(not_close_tolerance, "!~=", false)
+GENERATE_A_DOUBLE_CLOSE_TOL(close_tol, "~=", true)
+GENERATE_A_DOUBLE_CLOSE_TOL(not_close_tol, "!~=", false)
 
-#undef GENERATE_A_DOUBLE_CLOSE_TOLERANCE
+#undef GENERATE_A_DOUBLE_CLOSE_TOL
 
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL)                                    \
 static void                                                                    \
@@ -766,8 +766,8 @@ assert_functions_sink(void) {
     (void)a_double_not_equal;
     (void)a_double_more;
     (void)a_double_more_equal;
-    (void)a_double_close_tolerance;
-    (void)a_double_not_close_tolerance;
+    (void)a_double_close_tol;
+    (void)a_double_not_close_tol;
     (void)assert_file_contains;
     (void)assert_contains;
     (void)assert_not_contains;
@@ -1132,25 +1132,25 @@ _Generic((VAR1), \
     ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(close, VAR1, VAR2)
 
 #define ASSERT_CLOSE_3(VAR1, VAR2, TOL) \
-    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(close_tolerance, VAR1, VAR2, TOL)
+    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(close_tol, VAR1, VAR2, TOL)
 
 #define ASSERT_NOT_CLOSE_2(VAR1, VAR2) \
     ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(not_close, VAR1, VAR2)
 
 #define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL) \
-    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(not_close_tolerance, VAR1, VAR2, TOL)
+    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(not_close_tol, VAR1, VAR2, TOL)
 #else
 #define ASSERT_CLOSE_2(VAR1, VAR2) \
     ASSERT_DOUBLE_CLOSE_ULPS(close, VAR1, VAR2)
 
 #define ASSERT_CLOSE_3(VAR1, VAR2, TOL) \
-    ASSERT_DOUBLE_CLOSE_TOL(close_tolerance, VAR1, VAR2, TOL)
+    ASSERT_DOUBLE_CLOSE_TOL(close_tol, VAR1, VAR2, TOL)
 
 #define ASSERT_NOT_CLOSE_2(VAR1, VAR2) \
     ASSERT_DOUBLE_CLOSE_ULPS(not_close, VAR1, VAR2)
 
 #define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL) \
-    ASSERT_DOUBLE_CLOSE_TOL(not_close_tolerance, VAR1, VAR2, TOL)
+    ASSERT_DOUBLE_CLOSE_TOL(not_close_tol, VAR1, VAR2, TOL)
 #endif
 
 #define ASSERT_CLOSE(...)     SELECT_ON_NUM_ARGS(ASSERT_CLOSE_, __VA_ARGS__)
