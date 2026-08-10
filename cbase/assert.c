@@ -804,6 +804,15 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
     }                                                                          \
 } while (0)
 
+#define ASSERT_NULL(VAR1) do {                                                 \
+    void *p = VAR1;                                                            \
+    if (p != NULL) {                                                           \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %p == NULL\n", #VAR1, p);                           \
+        TRAP();                                                                \
+    }                                                                          \
+} while (0)
+
 #define ASSERT_FILE_CONTAINS(PATH, NEEDLE)           \
     assert_file_contains(__FILE__, __LINE__, FUNC__, \
                          PATH, NEEDLE)
@@ -1087,15 +1096,6 @@ _Generic((VAR1), \
 
 #define ASSERT_CLOSE(...) SELECT_ON_NUM_ARGS(ASSERT_CLOSE_, __VA_ARGS__)
 #define ASSERT_NOT_CLOSE(...) SELECT_ON_NUM_ARGS(ASSERT_NOT_CLOSE_, __VA_ARGS__)
-
-#define ASSERT_NULL(VAR1) do {                                                 \
-    void *p = VAR1;                                                            \
-    if (p != NULL) {                                                           \
-        assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %p == NULL\n", #VAR1, p);                           \
-        TRAP();                                                                \
-    }                                                                          \
-} while (0)
 
 #if TESTING_assert
 #define CBASE_IMPLEMENT
