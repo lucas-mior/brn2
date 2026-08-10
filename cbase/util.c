@@ -1531,11 +1531,35 @@ timediff(struct timespec t0, struct timespec t1) {
     return diff;
 }
 
+#if OS_WINDOWS
+static int32
+windows_time_monotonic(struct timespec *time) {
+    LARGE_INTEGER counter;
+    LARGE_INTEGER frequency;
+    LONGLONG seconds;
+    LONGLONG remainder;
+
+    if (!QueryPerformanceFrequency(&frequency)
+        || !QueryPerformanceCounter(&counter)) {
+        errno = EIO;
+        return -1;
+    }
+
+    seconds = counter.QuadPart / frequency.QuadPart;
+    remainder = counter.QuadPart % frequency.QuadPart;
+    time->tv_sec = (time_t)seconds;
+    time->tv_nsec = (long)((remainder*1000000000ll) / frequency.QuadPart);
+    return 0;
+}
+#endif
+
 CBASE_API_DEF void
 time_monotonic_precise(struct timespec *time) {
     int32 status;
 
-#if defined(CLOCK_MONOTONIC_RAW)
+#if OS_WINDOWS
+    status = windows_time_monotonic(time);
+#elif defined(CLOCK_MONOTONIC_RAW)
     status = clock_gettime(CLOCK_MONOTONIC_RAW, time);
 #elif defined(CLOCK_MONOTONIC)
     status = clock_gettime(CLOCK_MONOTONIC, time);
@@ -1561,7 +1585,9 @@ CBASE_API_DEF void
 time_monotonic_coarse(struct timespec *time) {
     int32 status;
 
-#if defined(CLOCK_MONOTONIC_COARSE)
+#if OS_WINDOWS
+    status = windows_time_monotonic(time);
+#elif defined(CLOCK_MONOTONIC_COARSE)
     status = clock_gettime(CLOCK_MONOTONIC_COARSE, time);
 #elif defined(CLOCK_MONOTONIC)
     status = clock_gettime(CLOCK_MONOTONIC, time);
