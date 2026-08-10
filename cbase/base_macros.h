@@ -4,11 +4,15 @@
 // this is almost completely self contained,
 // it only depends on platform_detection.h,
 // but not on anything else on cbase/
+// We also have to include libc.h,
+// so that platforms defining macros can be
+// undefined before I define them.
 
 #if !defined(BASE_MACROS_H)
 #define BASE_MACROS_H
 
 #include "platform_detection.h"
+#include "libc.h"
 
 #if !defined(CBASE_API_DECL)
 #define CBASE_API_DECL extern

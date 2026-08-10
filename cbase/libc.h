@@ -3,6 +3,7 @@
 
 // Note: all libc or main platform headers must be included here.
 // other files include them by `#include "cbase.h"` or `#include "libc.h"`
+// Avoid including system headers in other files.
 
 #include "platform_detection.h"
 
