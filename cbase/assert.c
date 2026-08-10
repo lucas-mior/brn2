@@ -214,17 +214,17 @@ a_both_##TYPE##_##MODE(char *file, int32 line, char *func,                     \
     return;                                                                    \
 }
 
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", ==, equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", ==, equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", ==, equal)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", !=, not_equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", !=, not_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", !=, not_equal)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", <, less)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", <, less)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", <=, less_equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", <,  less)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", <,  less)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", <=, less_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", <=, less_equal)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", >, more)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", >, more)
-GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed, "%lld", >=, more_equal)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", >,  more)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", >,  more)
+GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", >=, more_equal)
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(unsigned, "%llx", >=, more_equal)
 
 #undef GENERATE_ASSERT_INTEGERS_SAME_SIGN
