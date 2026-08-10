@@ -4,8 +4,7 @@
 #if !defined(PRIMITIVES_H)
 #define PRIMITIVES_H
 
-#include <limits.h>
-#include <stdint.h>
+#include "libc.h"
 
 _Static_assert(CHAR_BIT == 8, "primitives.h requires CHAR_BIT == 8");
 
