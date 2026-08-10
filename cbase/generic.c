@@ -380,9 +380,9 @@ void UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC(void);
 #define S_BSZ GENERIC_S_BSZ
 #endif
 
-#define fprint(FP, ...) fprint_0((FP), __VA_ARGS__, (char *)0)
+#define fprint(FP, ...)        fprint_0((FP), __VA_ARGS__, (char *)0)
 #define snprint(BUF, BSZ, ...) snprint_0((BUF), (BSZ), __VA_ARGS__, (char *)0)
-#define print0(...) fprint_0(stdout, __VA_ARGS__, (char *)0)
+#define print0(...)            fprint_0(stdout, __VA_ARGS__, (char *)0)
 
 #define S_(X) \
 toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X),      \
