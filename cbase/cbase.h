@@ -36,7 +36,7 @@ CBASE_API_DECL void *memrchr64(void *, int32, int64);
 #include "memory.h"
 #include "arena.h"
 
-#include "assert.c"
+#include "assertions.c"
 #include "generic.c"
 #include "minmax.c"
 
