@@ -551,9 +551,9 @@ assert_double_close_ulps(double var1, double var2,
 
 static bool
 assert_double_close_tol(double var1, double var2,
-                              double tolerance,
-                              double *diff_out,
-                              double *tolerance_out) {
+                        double tolerance,
+                        double *diff_out,
+                        double *tolerance_out) {
     bool handled;
     double diff;
 
@@ -634,7 +634,7 @@ GENERATE_A_DOUBLE_CLOSE(not_close, "!~=", false)
 
 #undef GENERATE_A_DOUBLE_CLOSE
 
-#define GENERATE_A_DOUBLE_CLOSE_TOL(MODE, SYMBOL, EXPECT_CLOSE)          \
+#define GENERATE_A_DOUBLE_CLOSE_TOL(MODE, SYMBOL, EXPECT_CLOSE)                \
 static void                                                                    \
 a_double_##MODE(char *file, int32 line, char *func,                            \
                 char *name1, char *name2,                                      \
@@ -645,8 +645,8 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
     double diff;                                                               \
     double tolerance_abs;                                                      \
                                                                                \
-    if (assert_double_close_tol(var1, var2, tolerance,                   \
-                                      &diff, &tolerance_abs) != EXPECT_CLOSE) { \
+    if (assert_double_close_tol(var1, var2, tolerance,                         \
+                                &diff, &tolerance_abs) != EXPECT_CLOSE) {      \
         assert_double_failure(file, line, func, name1, name2,                  \
                               type1, type2, bits1, bits2,                      \
                               var1, var2, SYMBOL, diff, tolerance_abs,         \
@@ -680,7 +680,7 @@ a_bool_##MODE(char *file, int32 line, char *func,                              \
             s2 = "true";                                                       \
         }                                                                      \
         assert_error(file, line, func,                                         \
-                     "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",         \
+                     "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",          \
                      type1, bits1, name1, s1, s2, name2, type2, bits2);        \
         TRAP();                                                                \
     }                                                                          \
