@@ -253,6 +253,7 @@ assembly)
     exit
     ;;
 test)
+    rm -rf /tmp/brn2* || true
     test "$2"
     exit
     ;;

@@ -1319,11 +1319,8 @@ main(int argc, char **argv) {
         command_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-#if OS_WINDOWS
-        COMMAND_PUSH(&cmd, "cmd", "/c", "exit 7");
-#else
+#if OS_UNIX
         COMMAND_PUSH(&cmd, "sh", "-c", "exit 7");
-#endif
         ASSERT(command_run_sync(&cmd, NULL));
         ASSERT_EQUAL(cmd.result.status, 7);
         ASSERT(cmd.result.exited);
@@ -1332,7 +1329,6 @@ main(int argc, char **argv) {
         command_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-#if OS_UNIX
         COMMAND_PUSH(&cmd,
                      "sh",
                      "-c",
