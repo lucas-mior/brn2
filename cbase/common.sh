@@ -38,7 +38,7 @@ get_compiler() {
     esac
 
     executable=$(echo "$CC" | awk '{print $1}')
-    if ! command -v "$executable"; then
+    if ! command -v "$executable" > /dev/null 2>&1; then
         CC=cc
     fi
 
