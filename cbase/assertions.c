@@ -39,7 +39,7 @@ assert_file_contains(char *file, int32 line, char *func,
     }
     if (!memmem64(buffer, buffer_len, needle, needle_len)) {
         assert_error(file, line, func,
-                     "Needle '%s' not found in '%s'.\n", needle, path);
+                     "Needle '%s' not found in file '%s'.\n", needle, path);
         TRAP();
     }
     return;
