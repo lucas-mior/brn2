@@ -1374,7 +1374,9 @@ util_equal_files(char *filename_a, char *filename_b) {
         equal = false;
         goto out;
     }
-    if ((stat_a.st_dev == stat_b.st_dev) && (stat_a.st_ino == stat_b.st_ino)) {
+    if ((stat_a.st_ino != 0)
+        && (stat_a.st_dev == stat_b.st_dev)
+        && (stat_a.st_ino == stat_b.st_ino)) {
         equal = true;
         goto out;
     }
@@ -3139,8 +3141,8 @@ main(int argc, char **argv) {
     }
 
     if (OS_WINDOWS) {
-        char *path2 = "aa\\cc";
-        int32 path_len;
+        char path2[] = "aa\\cc";
+        int32 path_len = strlen32(path2);
         ASSERT_EQUAL(basename2(path2, &path_len, NULL), "cc");
     }
 
@@ -3188,9 +3190,8 @@ main(int argc, char **argv) {
 
         util_filename_from(buffer2, sizeof(buffer2), fd);
         ASSERT_EQUAL(realpath(name, buffer3), buffer2);
-        xunlink(name);
-
         XCLOSE(&fd);
+        xunlink(name);
 
         for (int32 i = 0; i < (SIZEOF(name2) - 1); i += 1) {
             uint32 c = (uint32)rand() % (sizeof(characters) - 1);
