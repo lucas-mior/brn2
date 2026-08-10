@@ -121,11 +121,10 @@ if [ "$target" = "cross" ]; then
 
     case $cross in
     x86_64-macos|aarch64-macos)
-        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
+        CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
     *linux*)
-        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
     *windows*)
@@ -138,10 +137,9 @@ if [ "$target" = "cross" ]; then
 else
     case "$OS" in
     *Linux*)
-        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
         ;;
     *Darwin*)
-        CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
+        CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
         ;;
     esac
     LDFLAGS="$LDFLAGS -lpthread"
