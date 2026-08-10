@@ -325,7 +325,7 @@ test_run_binary () {
     if [ -n "${TEST_STDIN:-}" ]; then
         "$test_exe" < "$TEST_STDIN"
     else
-        "$test_exe"
+        "$test_exe" < /dev/null
     fi
 }
 
@@ -335,13 +335,13 @@ test_debugger () {
     if command_exists gdb; then
         gdb --quiet \
             -ex run -ex backtrace -ex quit \
-            "$test_exe" 2>&1 || true
+            "$test_exe" < /dev/null 2>&1 || true
     elif command_exists lldb; then
         lldb \
             --batch \
             --one-line "run" \
             --one-line "bt" \
-            -- "$test_exe" 2>&1 || true
+            -- "$test_exe" < /dev/null 2>&1 || true
     fi
 
     return 0
@@ -511,7 +511,7 @@ test_compile_and_run_source () {
     test_cmdline="$test_cmdline $test_ldflags $test_flags $test_tail_ldflags"
 
     trace_on
-    if $test_cmdline; then
+    if $test_cmdline < /dev/null; then
         if [ "$test_run_after_compile" != 0 ] \
                 && ! test_run_binary "$test_exe"; then
             test_debugger "$test_exe"
