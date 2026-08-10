@@ -2912,6 +2912,7 @@ main(int argc, char **argv) {
         ASSERT(util_equal_files(a, b));
     }
 
+#if OS_LINUX || CBASE_HAS_F_GETPATH || OS_WINDOWS
     {
         char characters[] = "abcdefghijklmnopqrstuvwxyz1234567890";
         char buffer2[4096];
@@ -2954,6 +2955,7 @@ main(int argc, char **argv) {
         XCLOSE(&fd);
         xunlink(buffer2);
     }
+#endif
 
     ASSERT_EQUAL(deg2rad(180.0), 3.141592653589793);
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
