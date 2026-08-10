@@ -152,7 +152,7 @@ a_strings_##MODE(char *file, int32 line, char *func,                           \
     }                                                                          \
     if (!(strcmp(var1, var2) SYMBOL 0)) {                                      \
         assert_error(file, line, func,                                         \
-                     "%s = %s " #SYMBOL " %s = %s\n",                        \
+                     "%s = %s " #SYMBOL " %s = %s\n",                          \
                      name1, var1, var2, name2);                                \
         TRAP();                                                                \
     }                                                                          \
@@ -178,7 +178,7 @@ a_pointers_##MODE(char *file, int32 line, char *func,                          \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(file, line, func,                                         \
-                     "%s = %p " #SYMBOL " %p = %s\n",                        \
+                     "%s = %p " #SYMBOL " %p = %s\n",                          \
                      name1, var1, var2, name2);                                \
         TRAP();                                                                \
     }                                                                          \
@@ -194,7 +194,7 @@ GENERATE_ASSERT_POINTERS(more_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
-#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FORMAT, SYMBOL, MODE)         \
+#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(TYPE, FMT, SYMBOL, MODE)            \
 static void                                                                    \
 a_both_##TYPE##_##MODE(char *file, int32 line, char *func,                     \
                        char *name1, char *name2,                               \
@@ -206,8 +206,7 @@ a_both_##TYPE##_##MODE(char *file, int32 line, char *func,                     \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(file, line, func,                                         \
-                     "[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT               \
-                     " = %s[%s%lld]\n",                                       \
+                     "[%s%lld]%s = "FMT" " #SYMBOL " "FMT" = %s[%s%lld]\n",    \
                      type1, bits1, name1, var1, var2, name2, type2, bits2);    \
         TRAP();                                                                \
     }                                                                          \
@@ -257,7 +256,7 @@ a_signed_unsigned##MODE(char *file, int32 line, char *func,                    \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(file, line, func,                                         \
-                     "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",     \
+                     "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",      \
                      type1, bits1, name1, var1, var2, name2, type2, bits2);    \
         TRAP();                                                                \
     }                                                                          \
@@ -285,7 +284,7 @@ a_unsigned_signed_##MODE(char *file, int32 line, char *func,                   \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(file, line, func,                                         \
-                     "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",     \
+                     "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",      \
                      type1, bits1, name1, var1, var2, name2, type2, bits2);    \
         TRAP();                                                                \
     }                                                                          \
@@ -313,7 +312,7 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(file, line, func,                                         \
-                     "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",         \
+                     "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",          \
                      type1, bits1, name1, var1, var2, name2, type2, bits2);    \
         TRAP();                                                                \
     }                                                                          \
@@ -805,27 +804,27 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
     }                                                                          \
 } while (0)
 
-#define ASSERT_FILE_CONTAINS(PATH, NEEDLE) \
+#define ASSERT_FILE_CONTAINS(PATH, NEEDLE)           \
     assert_file_contains(__FILE__, __LINE__, FUNC__, \
                          PATH, NEEDLE)
 
 #define ASSERT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
-    assert_contains(__FILE__, __LINE__, FUNC__, \
+    assert_contains(__FILE__, __LINE__, FUNC__,         \
                     HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
 #define ASSERT_NOT_CONTAINS(HAYSTACK, HAYSTACK_LEN, NEEDLE) \
-    assert_not_contains(__FILE__, __LINE__, FUNC__, \
+    assert_not_contains(__FILE__, __LINE__, FUNC__,         \
                         HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
 #define A_BOTH_SIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)             \
-    a_both_signed_##MODE(__FILE__, __LINE__, FUNC__,    \
+    a_both_signed_##MODE(__FILE__, __LINE__, FUNC__,              \
                          #VAR1, #VAR2,                            \
                          typename(TYPE1), typename(TYPE2),        \
                          typebits(TYPE1), typebits(TYPE2),        \
                          (llong)(VAR1), (llong)(VAR2))
 
 #define A_SIGNED_UNSIGNED(MODE, VAR1, VAR2, TYPE1, TYPE2)         \
-    a_signed_unsigned##MODE(__FILE__, __LINE__, FUNC__, \
+    a_signed_unsigned##MODE(__FILE__, __LINE__, FUNC__,           \
                             #VAR1, #VAR2,                         \
                             typename(TYPE1), typename(TYPE2),     \
                             typebits(TYPE1), typebits(TYPE2),     \
