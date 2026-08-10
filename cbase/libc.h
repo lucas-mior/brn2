@@ -7,8 +7,10 @@
 
 #include "platform_detection.h"
 
-#if defined(__GLIBC__)
-  #include <features.h>
+#if defined(__has_include)
+  #if __has_include(<features.h>)
+    #include <features.h>
+  #endif
 #endif
 
 #if CC_CLANG
