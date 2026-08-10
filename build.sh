@@ -211,61 +211,7 @@ assembly)
     exit
     ;;
 test)
-    find . -iname "*.c" | sort | while read -r src; do
-        trace_off
-        name=$(basename "$src")
-
-        if [ -n "$2" ] && [ "$name" != "$2" ]; then
-            continue
-        fi
-        if [ "$name" = "main.c" ]; then
-            continue
-        fi
-        if echo "$src" | grep -q "stc/"; then
-            continue
-        fi
-        name=$(echo "$name" | sed 's/\.c//')
-        test_exe="/tmp/${name}_test"
-
-        printf "\nTesting ${RED}${src}${RES} ...\n"
-
-        flags="$(awk '/\/\/ flags:/ { $1=$2=""; print $0 }' "$src")"
-        if [ "$name" = "windows_functions" ]; then
-            if ! zig version; then
-                continue
-            fi
-            # shellcheck disable=SC2030
-            CC="zig cc"
-            cmdline="$CC $CPPFLAGS $CFLAGS"
-            cmdline=$(option_remove "$cmdline" "-D_GNU_SOURCE")
-            cmdline="$cmdline -target x86_64-windows-gnu"
-            cmdline="$cmdline -Wno-unused-variable"
-            cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1"
-            cmdline="$cmdline $flags -o $test_exe $src"
-        else
-            cmdline="$CC $CPPFLAGS $CFLAGS"
-            cmdline="$cmdline -Wno-unused-variable"
-            cmdline="$cmdline -DTESTING_$name=1 -DTESTING=1"
-            cmdline="$cmdline -o $test_exe $src $LDFLAGS $flags"
-        fi
-
-        if [ "$name" = "cbase_main_separate_object" ]; then
-            cmdline=$(option_remove "$cmdline" "-DDEBUGGING=1")
-        fi
-
-        trace_on
-        if $cmdline; then
-            if ! $test_exe; then
-                gdb --quiet \
-                    -ex run -ex backtrace -ex quit \
-                    $test_exe 2>&1
-                exit 1
-            fi
-        else
-            exit 1
-        fi
-        trace_off
-    done
+    test "$2"
     exit
     ;;
 test_all)
