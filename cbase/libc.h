@@ -140,6 +140,24 @@
 #if !defined(S_IFREG) && defined(_S_IFREG)
 #define S_IFREG _S_IFREG
 #endif
+#if !defined(S_IREAD) && defined(_S_IREAD)
+#define S_IREAD _S_IREAD
+#endif
+#if !defined(S_IWRITE) && defined(_S_IWRITE)
+#define S_IWRITE _S_IWRITE
+#endif
+#if !defined(O_BINARY) && defined(_O_BINARY)
+#define O_BINARY _O_BINARY
+#endif
+#if !defined(O_CREAT) && defined(_O_CREAT)
+#define O_CREAT _O_CREAT
+#endif
+#if !defined(O_EXCL) && defined(_O_EXCL)
+#define O_EXCL _O_EXCL
+#endif
+#if !defined(O_RDWR) && defined(_O_RDWR)
+#define O_RDWR _O_RDWR
+#endif
 #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
 #define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
 #endif
@@ -148,6 +166,25 @@
 #endif
 #if !defined(S_ISLNK) && defined(S_IFMT) && defined(S_IFLNK)
 #define S_ISLNK(mode) (((mode) & S_IFMT) == S_IFLNK)
+#endif
+
+#if !CBASE_HAS_GETOPT_H
+#define no_argument       0
+#define required_argument 1
+#define optional_argument 2
+
+struct option {
+    char *name;
+    int has_arg;
+    int *flag;
+    int val;
+};
+
+extern char *optarg;
+extern int optind;
+extern int opterr;
+extern int optopt;
+int getopt_long(int, char **, char *, struct option *, int *);
 #endif
 
 #if CBASE_CRT_MSVC

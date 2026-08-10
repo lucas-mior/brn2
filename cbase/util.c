@@ -160,6 +160,116 @@ strequal(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
 
+#if !CBASE_HAS_GETOPT_H
+char *optarg = NULL;
+int optind = 1;
+int opterr = 1;
+int optopt = 0;
+
+CBASE_API_DEF int
+getopt_long(
+    int argc,
+    char **argv,
+    char *optstring,
+    struct option *longopts,
+    int *longindex
+) {
+    static char *short_position;
+    char *arg;
+    char *opt;
+
+    optarg = NULL;
+    if (short_position && *short_position) {
+        opt = strchr(optstring, *short_position);
+        optopt = *short_position++;
+        if ((opt == NULL) || (*opt == ':')) {
+            return '?';
+        }
+        if (opt[1] == ':') {
+            if (*short_position) {
+                optarg = short_position;
+                short_position = NULL;
+            } else if ((optind + 1) < argc) {
+                optarg = argv[++optind];
+                short_position = NULL;
+            } else {
+                short_position = NULL;
+                return '?';
+            }
+        }
+        if ((short_position == NULL) || (*short_position == '\0')) {
+            optind += 1;
+            short_position = NULL;
+        }
+        return optopt;
+    }
+
+    if (optind >= argc) {
+        return -1;
+    }
+    arg = argv[optind];
+    if ((arg[0] != '-') || (arg[1] == '\0')) {
+        return -1;
+    }
+    if (strcmp(arg, "--") == 0) {
+        optind += 1;
+        return -1;
+    }
+
+    if (arg[1] == '-') {
+        char *name = arg + 2;
+        char *value = strchr(name, '=');
+        int64 name_len;
+
+        if (value) {
+            name_len = value - name;
+            value += 1;
+        } else {
+            name_len = (int64)strlen(name);
+        }
+
+        for (int32 i = 0; longopts[i].name; i += 1) {
+            if (((int64)strlen(longopts[i].name) != name_len)
+                || memcmp(longopts[i].name, name, (size_t)name_len)) {
+                continue;
+            }
+            if (longindex) {
+                *longindex = i;
+            }
+            if (longopts[i].has_arg == required_argument) {
+                if (value) {
+                    optarg = value;
+                } else if ((optind + 1) < argc) {
+                    optarg = argv[++optind];
+                } else {
+                    optopt = longopts[i].val;
+                    optind += 1;
+                    return '?';
+                }
+            } else if (longopts[i].has_arg == optional_argument) {
+                optarg = value;
+            } else if (value) {
+                optopt = longopts[i].val;
+                optind += 1;
+                return '?';
+            }
+            optind += 1;
+            if (longopts[i].flag) {
+                *longopts[i].flag = longopts[i].val;
+                return 0;
+            }
+            return longopts[i].val;
+        }
+
+        optind += 1;
+        return '?';
+    }
+
+    short_position = arg + 1;
+    return getopt_long(argc, argv, optstring, longopts, longindex);
+}
+#endif
+
 static void
 striqual_validate_ascii_utf8(char *string, int32 string_len) {
     int32 bad_offset = 0;

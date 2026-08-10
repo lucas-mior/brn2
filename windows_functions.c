@@ -26,6 +26,54 @@ struct dirent {
 };
 #endif
 
+#if CBASE_CRT_MSVC
+static int
+mkstemp(char *template) {
+    char characters[] =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int64 len;
+
+    if (template == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    len = strlen32(template);
+    if ((len < 6) || (memcmp64(template + len - 6, "XXXXXX", 6) != 0)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    for (int32 attempt = 0; attempt < 100; attempt += 1) {
+        uint32 state;
+
+        state = (uint32)GetCurrentProcessId();
+        state ^= (uint32)GetCurrentThreadId();
+        state ^= (uint32)GetTickCount64();
+        state ^= (uint32)(attempt*2654435761u);
+        for (int32 i = 0; i < 6; i += 1) {
+            state = state*1103515245u + 12345u;
+            template[len - 6 + i]
+                = characters[state % (SIZEOF(characters) - 1)];
+        }
+
+        {
+            int fd = open(template, O_RDWR |O_CREAT |O_EXCL |O_BINARY,
+                          S_IREAD |S_IWRITE);
+            if (fd >= 0) {
+                return fd;
+            }
+            if (errno != EEXIST) {
+                return -1;
+            }
+        }
+    }
+
+    errno = EEXIST;
+    return -1;
+}
+#endif
+
 static void
 windows_set_errno(DWORD error_code) {
     switch (error_code) {

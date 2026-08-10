@@ -26,3 +26,5 @@ tags
 test
 test/
 tests
+*.obj
+*.obj
