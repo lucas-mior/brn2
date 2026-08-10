@@ -1163,6 +1163,12 @@ main(void) {
     ASSERT_ZERO(0);
     ASSERT_ZERO(0u);
     ASSERT_ZERO(0ll);
+
+    ASSERT_POSITIVE(1);
+    ASSERT_NEGATIVE(-1);
+
+    ASSERT_NON_NEGATIVE(0);
+    ASSERT_NON_POSITIVE(0);
     {
         char *string = NULL;
         void *pointer = NULL;
