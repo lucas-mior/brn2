@@ -43,7 +43,7 @@ assert_error(char *file, int32 line, char *func, char *format, ...) {
     va_list ap;
 
     fprintf(stderr,
-            "%s:%d:"RED("%s")"(): Assertion failed:\n", file, line, func);
+            "%s:%d:"RED("%s()")": Assertion failed:\n", file, line, func);
 
     va_start(ap, format);
     vfprintf(stderr, format, ap);
