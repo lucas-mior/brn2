@@ -44,19 +44,6 @@ assert_print_loc(char *file, int32 line, char *func) {
     return;
 }
 
-static void __attribute__((format(printf, 4, 5)))
-assert_error(char *file, int32 line, char *func, char *format, ...) {
-    va_list ap;
-
-    fprintf(stderr, "%s:%d:%s: ", file, line, func);
-
-    va_start(ap, format);
-    vfprintf(stderr, format, ap);
-    va_end(ap);
-
-    return;
-}
-
 static void __attribute__((noreturn))
 assert_fatal(void) {
     if (DEBUGGING) {
@@ -103,9 +90,9 @@ assert_file_contains(char *file, int32 line, char *func,
     int32 needle_len = assert_strlen32(needle);
 
     if ((file_handle = fopen(path, "r")) == NULL) {
-        assert_error(file, line, func,
-                     "Error opening %s for reading: %s.\n",
-                     path, strerror(errno));
+        assert_print_loc(file, line, func);
+        fprintf(stderr, "Error opening %s for reading: %s.\n",
+                path, strerror(errno));
         assert_fatal();
     }
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
@@ -116,12 +103,12 @@ assert_file_contains(char *file, int32 line, char *func,
         }
     }
     if (fclose(file_handle)) {
-        assert_error(file, line, func,
-                     "Error closing %s: %s.\n", path, strerror(errno));
+        assert_print_loc(file, line, func);
+        fprintf(stderr, "Error closing %s: %s.\n", path, strerror(errno));
     }
     if (!found) {
-        assert_error(file, line, func,
-                     "Needle '%s' not found in '%s'.\n", needle, path);
+        assert_print_loc(file, line, func);
+        fprintf(stderr, "Needle '%s' not found in '%s'.\n", needle, path);
         assert_fatal();
     }
     return;
@@ -132,9 +119,10 @@ assert_contains(char *file, int32 line, char *func,
                 char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = assert_strlen32(needle);
     if (assert_memmem(haystack, haystack_len, needle, needle_len) == NULL) {
-        assert_error(file, line, func,
-                     "expected to find substring:\n%.*s\n--- in ---\n%.*s",
-                     needle_len, needle, haystack_len, haystack);
+        assert_print_loc(file, line, func);
+        fprintf(stderr,
+                "expected to find substring:\n%.*s\n--- in ---\n%.*s",
+                needle_len, needle, haystack_len, haystack);
         assert_fatal();
     }
 }
@@ -144,9 +132,10 @@ assert_not_contains(char *file, int32 line, char *func,
                     char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = assert_strlen32(needle);
     if (assert_memmem(haystack, haystack_len, needle, needle_len)) {
-        assert_error(file, line, func,
-                     "expected to not find substring:\n%.*s\n--- in ---\n%.*s",
-                     needle_len, needle, haystack_len, haystack);
+        assert_print_loc(file, line, func);
+        fprintf(stderr,
+                "expected to not find substring:\n%.*s\n--- in ---\n%.*s",
+                needle_len, needle, haystack_len, haystack);
         assert_fatal();
     }
 }
