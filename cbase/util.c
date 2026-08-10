@@ -867,6 +867,7 @@ fatal(int status) {
     }
 }
 
+#if OS_UNIX
 CBASE_API_DEF void
 util_segv_handler(int32 unused) {
     char *message = "Memory error. Please send a bug report.\n";
@@ -879,6 +880,7 @@ util_segv_handler(int32 unused) {
     }
     _exit(EXIT_FAILURE);
 }
+#endif
 
 CBASE_API_DEF int32
 util_string_int32(int32 *number, char *string) {
@@ -2350,7 +2352,6 @@ util_functions_sink(void) {
     (void)command_run_async;
     (void)command_run_capture_all;
     (void)command_run_capture_combined;
-    (void)util_segv_handler;
     (void)util_filename_from;
     (void)util_string_int32;
     (void)util_die_notify;
@@ -2360,6 +2361,7 @@ util_functions_sink(void) {
     (void)xclosedir;
 #endif
 #if OS_UNIX
+    (void)util_segv_handler;
     (void)util_copy_file_sync;
     (void)util_copy_file_async;
     (void)send_signal;
@@ -2988,9 +2990,9 @@ main(int argc, char **argv) {
 
     NCALLS(1);
 
-    (void)util_segv_handler;
     (void)util_die_notify;
 #if OS_UNIX
+    (void)util_segv_handler;
     (void)util_copy_file_sync;
     (void)util_copy_file_async;
 #endif
