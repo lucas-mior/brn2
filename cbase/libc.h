@@ -131,6 +131,25 @@
 #include <unistd.h>
 #endif
 
+#if !defined(S_IFMT) && defined(_S_IFMT)
+#define S_IFMT _S_IFMT
+#endif
+#if !defined(S_IFDIR) && defined(_S_IFDIR)
+#define S_IFDIR _S_IFDIR
+#endif
+#if !defined(S_IFREG) && defined(_S_IFREG)
+#define S_IFREG _S_IFREG
+#endif
+#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
+#define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
+#endif
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
+#endif
+#if !defined(S_ISLNK) && defined(S_IFMT) && defined(S_IFLNK)
+#define S_ISLNK(mode) (((mode) & S_IFMT) == S_IFLNK)
+#endif
+
 #if CBASE_CRT_MSVC
 #if !defined(STDIN_FILENO)
 #define STDIN_FILENO _fileno(stdin)
