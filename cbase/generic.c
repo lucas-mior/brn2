@@ -465,8 +465,8 @@ _Generic((VARIABLE),              \
     default: 1                    \
 )
 
-#define TYPEID(VAR) \
-_Generic((VAR), \
+#define TYPEID(VAR)            \
+_Generic((VAR),                \
     void*:   TYPE_VOIDP,       \
     char*:   TYPE_CHARP,       \
     bool:    TYPE_BOOL,        \
