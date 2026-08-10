@@ -5,6 +5,7 @@
 #define PRIMITIVES_H
 
 #include <limits.h>
+#include <stdint.h>
 
 _Static_assert(CHAR_BIT == 8, "primitives.h requires CHAR_BIT == 8");
 
@@ -40,5 +41,8 @@ typedef uchar  uint8;
 typedef ushort uint16;
 typedef uint   uint32;
 typedef ullong uint64;
+
+typedef uintptr_t uintptr;
+typedef intptr_t  intptr;
 
 #endif /* PRIMITIVES_H */
