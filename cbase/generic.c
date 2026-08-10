@@ -384,24 +384,25 @@ void UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC(void);
 #define snprint(BUF, BSZ, ...) snprint_0((BUF), (BSZ), __VA_ARGS__, (char *)0)
 #define print0(...) fprint_0(stdout, __VA_ARGS__, (char *)0)
 
-#define S_(X) toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X), \
-    void *: "%p", \
-    char *: "%s", \
-    bool: "%i", \
-    char: "%c", \
-    schar: "%hhi", \
-    short: "%hi", \
-    int: "%i", \
-    long: "%li", \
-    llong: "%lli", \
-    uchar: "%hhu", \
-    ushort: "%hu", \
-    uint: "%u", \
-    ulong: "%lu", \
-    ullong: "%llu", \
-    float: "%." QUOTE(FLT_DIG) "g", \
-    double: "%." QUOTE(DBL_DIG) "g", \
-    default: "%p" \
+#define S_(X) \
+toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X),      \
+    void *:  "%p",                                      \
+    char *:  "%s",                                      \
+    bool:    "%i",                                      \
+    char:    "%c",                                      \
+    schar:   "%hhi",                                    \
+    short:   "%hi",                                     \
+    int:     "%i",                                      \
+    long:    "%li",                                     \
+    llong:   "%lli",                                    \
+    uchar:   "%hhu",                                    \
+    ushort:  "%hu",                                     \
+    uint:    "%u",                                      \
+    ulong:   "%lu",                                     \
+    ullong:  "%llu",                                    \
+    float:   "%." QUOTE(FLT_DIG) "g",                   \
+    double:  "%." QUOTE(DBL_DIG) "g",                   \
+    default: "%p"                                       \
 ), (X))
 
 #define V(X) "", S_(X), ""
