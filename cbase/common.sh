@@ -37,14 +37,6 @@ get_compiler() {
         ;;
     esac
 
-    if ! command -v "$CC" > /dev/null 2>&1 \
-            && [ "$CC" = cl ] \
-            && command -v cl.exe > /dev/null 2>&1; then
-        CC=cl.exe
-    elif ! command -v "$CC" > /dev/null 2>&1; then
-        CC=cc
-    fi
-
     echo "$CC"
 }
 
