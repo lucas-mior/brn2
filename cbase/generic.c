@@ -488,24 +488,24 @@ _Generic((VAR), \
 
 #define TYPEBITS(VAR) (SIZEOF(VAR)*CHAR_BIT)
 
-#define DOUBLE_GET(x) \
-_Generic((x), \
-    void*:   double_from_voidp,                                  \
-    char*:   double_from_charp,                                  \
-    bool:    double_from_bool,                                   \
-    char:    double_from_char,                                   \
-    schar:   double_from_schar,                                  \
-    short:   double_from_short,                                  \
-    int:     double_from_int,                                    \
-    long:    double_from_long,                                   \
-    llong:   double_from_llong,                                  \
-    uchar:   double_from_uchar,                                  \
-    ushort:  double_from_ushort,                                 \
-    uint:    double_from_uint,                                   \
-    ulong:   double_from_ulong,                                  \
-    ullong:  double_from_ullong,                                 \
-    float:   double_from_float,                                  \
-    double:  double_from_double,                                 \
+#define DOUBLE_GET(x)                                           \
+_Generic((x),                                                   \
+    void*:   double_from_voidp,                                 \
+    char*:   double_from_charp,                                 \
+    bool:    double_from_bool,                                  \
+    char:    double_from_char,                                  \
+    schar:   double_from_schar,                                 \
+    short:   double_from_short,                                 \
+    int:     double_from_int,                                   \
+    long:    double_from_long,                                  \
+    llong:   double_from_llong,                                 \
+    uchar:   double_from_uchar,                                 \
+    ushort:  double_from_ushort,                                \
+    uint:    double_from_uint,                                  \
+    ulong:   double_from_ulong,                                 \
+    ullong:  double_from_ullong,                                \
+    float:   double_from_float,                                 \
+    double:  double_from_double,                                \
     default: UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC            \
 )(x)
 
