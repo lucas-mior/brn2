@@ -5,7 +5,9 @@
 #define ASSERTIONS_C
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_assert 1
+#define TESTING_assertions 1
+#elif !defined(TESTING_assertions)
+#define TESTING_assertions 0
 #endif
 
 #include "cbase.h"
@@ -24,24 +26,6 @@ assert_error(char *file, int32 line, char *func, char *format, ...) {
     return;
 }
 
-static void *
-assert_memmem(char *haystack, int32 haystack_len,
-              char *needle, int32 needle_len) {
-    int32 i;
-
-    if ((haystack_len <= 0) || (needle_len <= 0)
-        || (needle_len > haystack_len)) {
-        return NULL;
-    }
-
-    for (i = 0; i <= haystack_len - needle_len; i += 1) {
-        if (!memcmp(haystack + i, needle, (size_t)needle_len)) {
-            return haystack + i;
-        }
-    }
-    return NULL;
-}
-
 CBASE_API_DEF void
 assert_file_contains(char *file, int32 line, char *func,
                      char *path, char *needle) {
@@ -58,7 +42,7 @@ assert_file_contains(char *file, int32 line, char *func,
     }
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
         int32 n = strlen32(buffer);
-        if (assert_memmem(buffer, n, needle, needle_len)) {
+        if (memmem64(buffer, n, needle, needle_len)) {
             found = true;
             break;
         }
@@ -79,7 +63,7 @@ CBASE_API_DEF void
 assert_contains(char *file, int32 line, char *func,
                 char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = strlen32(needle);
-    if (assert_memmem(haystack, haystack_len, needle, needle_len) == NULL) {
+    if (memmem64(haystack, haystack_len, needle, needle_len) == NULL) {
         assert_error(file, line, func,
                      "expected to find substring:\n%.*s\n--- in ---\n%.*s",
                      needle_len, needle, haystack_len, haystack);
@@ -91,7 +75,7 @@ CBASE_API_DEF void
 assert_not_contains(char *file, int32 line, char *func,
                     char *haystack, int32 haystack_len, char *needle) {
     int32 needle_len = strlen32(needle);
-    if (assert_memmem(haystack, haystack_len, needle, needle_len)) {
+    if (memmem64(haystack, haystack_len, needle, needle_len)) {
         assert_error(file, line, func,
                      "expected to not find substring:\n%.*s\n--- in ---\n%.*s",
                      needle_len, needle, haystack_len, haystack);
@@ -674,7 +658,7 @@ a_bool_less_equal(void *p, ...) {
 
 #undef GENERATE_ASSERT_BOOLS
 
-#if TESTING_assert
+#if TESTING_assertions
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
