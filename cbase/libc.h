@@ -46,18 +46,20 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <fenv.h>
 #include <float.h>
 #include <ftw.h>
 #include <getopt.h>
 #include <inttypes.h>
+#include <iso646.h>
 #include <libgen.h>
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
 #include <setjmp.h>
 #include <signal.h>
+#include <stdalign.h>
 #include <stdarg.h>
-#include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -69,16 +71,8 @@
 #include <wchar.h>
 #include <wctype.h>
 
-#if HAS_INCLUDE(<fenv.h>)
-#include <fenv.h>
-#endif
-
-#if HAS_INCLUDE(<iso646.h>)
-#include <iso646.h>
-#endif
-
-#if HAS_INCLUDE(<stdalign.h>)
-#include <stdalign.h>
+#if HAS_INCLUDE(<stdatomic.h>)
+#include <stdatomic.h>
 #endif
 
 #if HAS_INCLUDE(<stdnoreturn.h>)
