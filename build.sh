@@ -30,14 +30,7 @@ mkdir -p "$(dirname "$exe")"
 OS=$(uname -a)
 
 CC=$(get_compiler "$target")
-case "$target" in
-check)
-    CC=gcc
-    ;;
-cross)
-    CC="zig cc"
-    ;;
-esac
+
 case "$CC" in
 cl|*/cl.exe)
     cl_banner=$($CC 2>&1 || true)
@@ -59,10 +52,12 @@ cl|*/cl.exe)
     esac
     ;;
 esac
+
 is_msvc=0
 is_clang_cl=0
 is_cl=0
 msvc_compiler=clang-cl
+
 case "$CC" in
 clang-cl|*/clang-cl)
     is_msvc=1

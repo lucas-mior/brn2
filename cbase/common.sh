@@ -29,6 +29,9 @@ get_compiler() {
     fast_feedback)
         CC="${CC:-clang}"
         ;;
+    cross)
+        CC="zig cc"
+        ;;
     *)
         CC="${CC:-cc}"
         ;;
