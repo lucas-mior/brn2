@@ -797,7 +797,7 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         } else {                                                               \
-            assert_error(__FILE__, __LINE__, FUNC__, "%s\n", #__VA_ARGS__);      \
+            assert_error(__FILE__, __LINE__, FUNC__, "%s\n", #__VA_ARGS__);    \
             TRAP();                                                            \
         }                                                                      \
     }                                                                          \
