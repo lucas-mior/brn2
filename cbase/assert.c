@@ -1092,8 +1092,8 @@ _Generic((VAR1), \
 #define ASSERT_NULL(VAR1) do {                                                 \
     void *p = VAR1;                                                            \
     if (p != NULL) {                                                           \
-        assert_error(__FILE__, __LINE__, FUNC__, "%s = %p == NULL\n",          \
-                     #VAR1, p);                                                \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %p == NULL\n", #VAR1, p);                           \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
