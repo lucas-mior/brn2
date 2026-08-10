@@ -1132,9 +1132,9 @@ send_signal(char *executable, int32 signal_number) {
 #elif OS_UNIX
 CBASE_API_DEF void
 send_signal(char *executable, int32 signal_number) {
+    pid_t child;
     char signal_string[14];
     SNPRINTF(signal_string, "%d", signal_number);
-    pid_t child;
 
     switch (child = fork()) {
     case -1:

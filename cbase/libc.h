@@ -86,16 +86,16 @@
 
 // POSIX headers that may work on windows using minGW or Cygwin
 #if OS_UNIX || OS_WINDOWS
+#include <dirent.h>
 #include <fcntl.h>
+#include <ftw.h>
+#include <getopt.h>
+#include <libgen.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <dirent.h>
-#include <ftw.h>
-#include <libgen.h>
 #include <unistd.h>
-#include <getopt.h>
 #endif
 
 #if OS_WINDOWS
