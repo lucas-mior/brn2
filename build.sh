@@ -30,12 +30,45 @@ mkdir -p "$(dirname "$exe")"
 OS=$(uname -a)
 
 CC=$(get_compiler "$target")
+case "$target" in
+check)
+    CC=gcc
+    ;;
+cross)
+    CC="zig cc"
+    ;;
+esac
+is_clang_cl=0
+case "$CC" in
+clang-cl|*/clang-cl)
+    is_clang_cl=1
+    ;;
+esac
 
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 
-CFLAGS="$CFLAGS -std=c11"
-CFLAGS="$CFLAGS -Wfatal-errors"
-CFLAGS="$CFLAGS -Wextra -Wall -Wpedantic"
+if [ "$is_clang_cl" -eq 1 ]; then
+    if [ -z "$CLANG_CL_TARGET" ]; then
+        case "$OS" in
+        *Linux*|*Darwin*|*BSD*)
+            CLANG_CL_TARGET=$(cc -dumpmachine 2>/dev/null || true)
+            ;;
+        esac
+    fi
+    if [ -n "$CLANG_CL_TARGET" ]; then
+        CFLAGS="$CFLAGS --target=$CLANG_CL_TARGET"
+    fi
+    CFLAGS="$CFLAGS /std:c11"
+else
+    CFLAGS="$CFLAGS -std=c11"
+fi
+if [ "$is_clang_cl" -eq 1 ]; then
+    CFLAGS="$CFLAGS -Wfatal-errors /W4"
+    CFLAGS="$CFLAGS -Wno-constant-logical-operand"
+else
+    CFLAGS="$CFLAGS -Wfatal-errors"
+    CFLAGS="$CFLAGS -Wextra -Wall -Wpedantic"
+fi
 # CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 # CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
@@ -60,44 +93,80 @@ fi
 
 case "$target" in
 debug)
-    CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /Z7 /clang:-O0"
+    else
+        CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
+    fi
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
-    LDFLAGS="$LDFLAGS -lm"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        LDFLAGS="$LDFLAGS -Xlinker -lm"
+    else
+        LDFLAGS="$LDFLAGS -lm"
+    fi
     exe="bin/${program}_debug"
     ;;
 benchmark)
-    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /O2"
+    else
+        CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    fi
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_benchmark"
     ;;
 perf)
-    CFLAGS="$CFLAGS -g3 -Og -flto"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /Z7 /clang:-Og"
+    else
+        CFLAGS="$CFLAGS -g3 -Og -flto"
+    fi
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_perf"
     ;;
 valgrind)
-    CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /Z7 /clang:-O0"
+    else
+        CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
+    fi
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 callgrind)
-    CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /Z7 /clang:-O2"
+    else
+        CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
+    fi
     ;;
 test)
-    CFLAGS="$CFLAGS -g3 -O0 -DDEBUGGING=1"
-    LDFLAGS="$LDFLAGS -lm"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /Z7 /clang:-O0 -DDEBUGGING=1"
+        LDFLAGS="$LDFLAGS -Xlinker -lm"
+    else
+        CFLAGS="$CFLAGS -g3 -O0 -DDEBUGGING=1"
+        LDFLAGS="$LDFLAGS -lm"
+    fi
     ;;
 check)
-    CC=gcc
     CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 build)
-    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /O2"
+    else
+        CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    fi
     ;;
 fast_feedback)
     ;;
 *)
-    CFLAGS="$CFLAGS -O2"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        CFLAGS="$CFLAGS /O2"
+    else
+        CFLAGS="$CFLAGS -O2"
+    fi
     ;;
 esac
 
@@ -116,7 +185,6 @@ if [ "$target" = "cross" ]; then
         done
         exit "$status"
     fi
-    CC="zig cc"
     CFLAGS="$CFLAGS -target $cross"
 
     case $cross in
@@ -142,7 +210,11 @@ else
         CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
         ;;
     esac
-    LDFLAGS="$LDFLAGS -lpthread"
+    if [ "$is_clang_cl" -eq 1 ]; then
+        LDFLAGS="$LDFLAGS -Xlinker -lpthread"
+    else
+        LDFLAGS="$LDFLAGS -lpthread"
+    fi
 fi
 
 case "$target" in

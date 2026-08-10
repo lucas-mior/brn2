@@ -317,6 +317,23 @@ test_compile_and_run_source () {
         test_cmdline="$test_cc $CPPFLAGS $TEST_CPPFLAGS $CFLAGS $TEST_CFLAGS"
     fi
 
+    case "$test_cc" in
+    clang-cl|*/clang-cl)
+        test_flags_translated=
+        for test_flag in $test_flags; do
+            case "$test_flag" in
+            -lm|-lpthread)
+                test_flags_translated="$test_flags_translated -Xlinker $test_flag"
+                ;;
+            *)
+                test_flags_translated="$test_flags_translated $test_flag"
+                ;;
+            esac
+        done
+        test_flags=$test_flags_translated
+        ;;
+    esac
+
     if [ "${TEST_DISABLE_UNUSED_VARIABLE_WARNING:-1}" != 0 ]; then
         test_cmdline="$test_cmdline -Wno-unused-variable"
     fi
