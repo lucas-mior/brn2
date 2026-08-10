@@ -386,11 +386,11 @@ toString((char[S_BSZ]){ "" }, S_BSZ, _Generic((X),      \
     char *:  "%s",                                      \
     bool:    "%i",                                      \
     char:    "%c",                                      \
-    schar:   "%hhi",                                    \
-    short:   "%hi",                                     \
-    int:     "%i",                                      \
-    long:    "%li",                                     \
-    llong:   "%lli",                                    \
+    schar:   "%hhd",                                    \
+    short:   "%hd",                                     \
+    int:     "%d",                                      \
+    long:    "%ld",                                     \
+    llong:   "%lld",                                    \
     uchar:   "%hhu",                                    \
     ushort:  "%hu",                                     \
     uint:    "%u",                                      \
