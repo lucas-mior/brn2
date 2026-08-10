@@ -81,6 +81,7 @@
 #include <stdatomic.h>
 #endif
 
+// POSIX headers that may work on windows using minGW or Cygwin
 #if OS_UNIX || OS_WINDOWS
 #include <fcntl.h>
 #include <sys/file.h>
@@ -97,6 +98,7 @@
 #include <windows.h>
 #endif
 
+// POSIX headers
 #if OS_UNIX
 #define TRY_INCLUDE_WHICH <arpa/inet.h>
 #include "try_include.h"
