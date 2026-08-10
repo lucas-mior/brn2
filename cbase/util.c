@@ -276,19 +276,21 @@ optional_strlen32(char *string) {
 
 CBASE_API_DEF int32
 strlen32(char *string) {
+    int32 length;
     size_t len;
 
     ASSERT(string);
     len = strlen(string);
 
     if (DEBUGGING) {
-        if (len >= MAXOF(strlen32)) {
+        if (len >= MAXOF(length)) {
             error("Error: string (%.*s ...) is too long.\n", 50, string);
             fatal(EXIT_FAILURE);
         }
     }
 
-    return (int32)len;
+    length = (int32)len;
+    return length;
 }
 
 CBASE_API_DEF char *

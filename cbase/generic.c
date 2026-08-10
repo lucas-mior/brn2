@@ -446,50 +446,26 @@ _Generic((VARIABLE),              \
     bool:    0,                   \
     float:   -FLT_MAX,            \
     double:  -DBL_MAX,            \
-    schar  (*)(): SCHAR_MAX,      \
-    short  (*)(): SHRT_MAX,       \
-    int    (*)(): INT_MAX,        \
-    long   (*)(): LONG_MAX,       \
-    llong  (*)(): LLONG_MAX,      \
-    uchar  (*)(): 0,              \
-    ushort (*)(): 0,              \
-    uint   (*)(): 0u,             \
-    ulong  (*)(): 0ul,            \
-    ullong (*)(): 0ull,           \
-    float  (*)(): -FLT_MAX,       \
-    double (*)(): -DBL_MAX,       \
     default: 0                    \
 )
 
-#define MAXOF(VARIABLE)              \
-_Generic((VARIABLE),                 \
-    schar:        SCHAR_MAX,         \
-    short:        SHRT_MAX,          \
-    int:          INT_MAX,           \
-    long:         LONG_MAX,          \
-    llong:        LLONG_MAX,         \
-    uchar:        UCHAR_MAX,         \
-    ushort:       USHRT_MAX,         \
-    uint:         UINT_MAX,          \
-    ulong:        ULONG_MAX,         \
-    ullong:       ULLONG_MAX,        \
-    char:         CHAR_MAX,          \
-    bool:         1,                 \
-    float:        FLT_MAX,           \
-    double:       DBL_MAX,           \
-    schar  (*)(): SCHAR_MAX,         \
-    short  (*)(): SHRT_MAX,          \
-    int    (*)(): INT_MAX,           \
-    long   (*)(): LONG_MAX,          \
-    llong  (*)(): LLONG_MAX,         \
-    uchar  (*)(): SCHAR_MAX,         \
-    ushort (*)(): SHRT_MAX,          \
-    uint   (*)(): INT_MAX,           \
-    ulong  (*)(): LONG_MAX,          \
-    ullong (*)(): LLONG_MAX,         \
-    float  (*)(): FLT_MAX,           \
-    double (*)(): DBL_MAX,           \
-    default: 1                       \
+#define MAXOF(VARIABLE)           \
+_Generic((VARIABLE),              \
+    schar:   SCHAR_MAX,           \
+    short:   SHRT_MAX,            \
+    int:     INT_MAX,             \
+    long:    LONG_MAX,            \
+    llong:   LLONG_MAX,           \
+    uchar:   UCHAR_MAX,           \
+    ushort:  USHRT_MAX,           \
+    uint:    UINT_MAX,            \
+    ulong:   ULONG_MAX,           \
+    ullong:  ULLONG_MAX,          \
+    char:    CHAR_MAX,            \
+    bool:    1,                   \
+    float:   FLT_MAX,             \
+    double:  DBL_MAX,             \
+    default: 1                    \
 )
 
 #define TYPEID(VAR) \

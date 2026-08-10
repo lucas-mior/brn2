@@ -108,6 +108,7 @@ scandir(
     int64 pattern_length;
     int64 count;
     int64 capacity = 16;
+    int32 result;
     int32 wide_dir_length;
     (void)filter;
     (void)compar;
@@ -214,14 +215,15 @@ scandir(
         return -1;
     }
 
-    if (count >= MAXOF(scandir)) {
+    if (count >= MAXOF(result)) {
         scandir_list_free(list, count, capacity);
         errno = EOVERFLOW;
         return -1;
     }
 
+    result = (int32)count;
     *namelist = list;
-    return (int32)count;
+    return result;
 }
 
 static time_t
