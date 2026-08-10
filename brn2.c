@@ -18,6 +18,12 @@
 #include "windows_functions.c"
 #endif
 
+#if CBASE_CRT_MSVC
+#define BRN2_MKDIR(path, mode) mkdir(path)
+#else
+#define BRN2_MKDIR(path, mode) mkdir(path, mode)
+#endif
+
 typedef struct Work {
     void *(*function)(struct Work *);
     FileList *old_list;
@@ -1623,7 +1629,7 @@ main(void) {
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
-        if (mkdir(directory, 0777) < 0) {
+        if (BRN2_MKDIR(directory, 0777) < 0) {
             error("Error creating directory %s: %s.\n",
                   directory, strerror(errno));
             fatal(EXIT_FAILURE);
@@ -1776,7 +1782,7 @@ main(void) {
 #endif
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
-        if (mkdir(directory, 0777) < 0) {
+        if (BRN2_MKDIR(directory, 0777) < 0) {
             error("Error creating directory %s: %s.\n",
                   directory, strerror(errno));
             fatal(EXIT_FAILURE);
