@@ -430,6 +430,7 @@ test_compile_and_run_source () {
     test_ldflags="$TEST_LDFLAGS"
     test_tail_ldflags="$LDFLAGS"
     test_run_after_compile=1
+    test_msvc_compiler=
 
     mkdir -p "$(dirname "$test_exe")"
 
@@ -449,6 +450,7 @@ test_compile_and_run_source () {
     else
         case "$test_cc" in
         clang-cl|*/clang-cl)
+            test_msvc_compiler=clang-cl
             if [ -z "$CLANG_CL_TARGET" ]; then
                 case "$(uname -a)" in
                 *Linux*|*Darwin*|*BSD*)
@@ -459,7 +461,11 @@ test_compile_and_run_source () {
             if [ -n "$CLANG_CL_TARGET" ]; then
                 test_cmd_flags="$test_cmd_flags --target=$CLANG_CL_TARGET"
             fi
-            test_cmd_flags=$(gcc_flags_to_msvc $test_cmd_flags)
+            test_cmd_flags=$(gcc_flags_to_msvc "$test_msvc_compiler" $test_cmd_flags)
+            ;;
+        cl|*/cl|cl.exe|*/cl.exe)
+            test_msvc_compiler=cl
+            test_cmd_flags=$(gcc_flags_to_msvc "$test_msvc_compiler" $test_cmd_flags)
             ;;
         esac
         test_cmdline="$test_cc $test_cmd_flags"
@@ -478,16 +484,18 @@ test_compile_and_run_source () {
     fi
 
     test_added_flags="$test_added_flags $TEST_EXTRA_DEFS"
-    case "$test_cc" in
-    clang-cl|*/clang-cl)
-        test_added_flags=$(gcc_flags_to_msvc $test_added_flags)
-        test_flags=$(gcc_flags_to_msvc $test_flags)
-        test_ldflags=$(gcc_flags_to_msvc $test_ldflags)
-        test_tail_ldflags=$(gcc_flags_to_msvc $test_tail_ldflags)
-        ;;
-    esac
+    if [ -n "$test_msvc_compiler" ]; then
+        test_added_flags=$(gcc_flags_to_msvc "$test_msvc_compiler" $test_added_flags)
+        test_flags=$(gcc_flags_to_msvc "$test_msvc_compiler" $test_flags)
+        test_ldflags=$(gcc_flags_to_msvc "$test_msvc_compiler" $test_ldflags)
+        test_tail_ldflags=$(gcc_flags_to_msvc "$test_msvc_compiler" $test_tail_ldflags)
+    fi
     test_cmdline="$test_cmdline $test_added_flags"
-    test_cmdline="$test_cmdline -o $test_exe $test_src"
+    if [ "$test_msvc_compiler" = cl ]; then
+        test_cmdline="$test_cmdline /Fe$test_exe $test_src"
+    else
+        test_cmdline="$test_cmdline -o $test_exe $test_src"
+    fi
     test_cmdline="$test_cmdline $test_ldflags $test_flags $test_tail_ldflags"
 
     trace_on
