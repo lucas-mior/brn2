@@ -7,6 +7,35 @@
 #if !defined(PLATFORM_DETECTION_H)
 #define PLATFORM_DETECTION_H
 
+#if defined(__clang__)
+  #define CC_GCC 0
+  #define CC_CLANG 1
+  #define CC_TCC 0
+  #define CC_MSVC 0
+#elif defined(__GNUC__)
+  #define CC_GCC 1
+  #define CC_CLANG 0
+  #define CC_TCC 0
+  #define CC_MSVC 0
+#elif defined(__TINYC__)
+  #define CC_GCC 0
+  #define CC_CLANG 0
+  #define CC_TCC 1
+  #define CC_MSVC 0
+#elif defined(_MSC_VER)
+  #define CC_GCC 0
+  #define CC_CLANG 0
+  #define CC_TCC 0
+  #define CC_MSVC 1
+#else
+  #define CC_GCC 0
+  #define CC_CLANG 0
+  #define CC_TCC 0
+  #define CC_MSVC 0
+#endif
+
+#define CC_TOY !(CC_GCC || CC_CLANG || CC_TCC || CC_MSVC)
+
 #if defined(__linux__)
   #define OS_LINUX 1
   #define OS_MAC 0
@@ -83,35 +112,6 @@
 #if !defined(CBASE_HAS_GETTEXT)
 #define CBASE_HAS_GETTEXT OS_LINUX
 #endif
-
-#if defined(__clang__)
-  #define CC_GCC 0
-  #define CC_CLANG 1
-  #define CC_TCC 0
-  #define CC_MSVC 0
-#elif defined(__GNUC__)
-  #define CC_GCC 1
-  #define CC_CLANG 0
-  #define CC_TCC 0
-  #define CC_MSVC 0
-#elif defined(__TINYC__)
-  #define CC_GCC 0
-  #define CC_CLANG 0
-  #define CC_TCC 1
-  #define CC_MSVC 0
-#elif defined(_MSC_VER)
-  #define CC_GCC 0
-  #define CC_CLANG 0
-  #define CC_TCC 0
-  #define CC_MSVC 1
-#else
-  #define CC_GCC 0
-  #define CC_CLANG 0
-  #define CC_TCC 0
-  #define CC_MSVC 0
-#endif
-
-#define CC_TOY !(CC_GCC || CC_CLANG || CC_TCC || CC_MSVC)
 
 #if OS_WINDOWS
 #define RW_TYPE unsigned int
