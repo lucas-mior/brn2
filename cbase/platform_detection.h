@@ -36,74 +36,41 @@
 
 #define CC_TOY !(CC_GCC || CC_CLANG || CC_TCC || CC_MSVC)
 
+#if CC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmacro-redefined"
+#endif
+
+#define OS_LINUX   0
+#define OS_MAC     0
+#define OS_FREEBSD 0
+#define OS_NETBSD  0
+#define OS_OPENBSD 0
+#define OS_WINDOWS 0
+#define OS_WASM    0
+
 #if defined(__linux__)
   #define OS_LINUX 1
-  #define OS_MAC 0
-  #define OS_FREEBSD 0
-  #define OS_NETBSD 0
-  #define OS_OPENBSD 0
-  #define OS_WINDOWS 0
-  #define OS_WASM 0
 #elif defined(__APPLE__) && defined(__MACH__)
-  #define OS_LINUX 0
   #define OS_MAC 1
-  #define OS_FREEBSD 0
-  #define OS_NETBSD 0
-  #define OS_OPENBSD 0
-  #define OS_WINDOWS 0
-  #define OS_WASM 0
 #elif defined(__FreeBSD__)
-  #define OS_LINUX 0
   #define OS_MAC 0
-  #define OS_FREEBSD 1
-  #define OS_NETBSD 0
-  #define OS_OPENBSD 0
-  #define OS_WINDOWS 0
-  #define OS_WASM 0
 #elif defined(__NetBSD__)
-  #define OS_LINUX 0
-  #define OS_MAC 0
-  #define OS_FREEBSD 0
   #define OS_NETBSD 1
-  #define OS_OPENBSD 0
-  #define OS_WINDOWS 0
-  #define OS_WASM 0
 #elif defined(__OpenBSD__)
-  #define OS_LINUX 0
-  #define OS_MAC 0
-  #define OS_FREEBSD 0
-  #define OS_NETBSD 0
   #define OS_OPENBSD 1
-  #define OS_WINDOWS 0
-  #define OS_WASM 0
 #elif defined(_WIN32) || defined(_WIN64)
-  #define OS_LINUX 0
-  #define OS_MAC 0
-  #define OS_FREEBSD 0
-  #define OS_NETBSD 0
-  #define OS_OPENBSD 0
   #define OS_WINDOWS 1
-  #define OS_WASM 0
 #elif defined(__wasm__)
-  #define OS_LINUX 0
-  #define OS_MAC 0
-  #define OS_FREEBSD 0
-  #define OS_NETBSD 0
-  #define OS_OPENBSD 0
-  #define OS_WINDOWS 0
   #define OS_WASM 1
-#else
-  #define OS_LINUX 0
-  #define OS_MAC 0
-  #define OS_FREEBSD 0
-  #define OS_NETBSD 0
-  #define OS_OPENBSD 0
-  #define OS_WINDOWS 0
-  #define OS_WASM 0
 #endif
 
 #define OS_BSD (OS_FREEBSD | OS_NETBSD | OS_OPENBSD)
 #define OS_UNIX (OS_LINUX || OS_MAC || OS_BSD)
+
+#if CC_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #if !defined(CBASE_HAS_PROCFS)
 #define CBASE_HAS_PROCFS OS_LINUX
