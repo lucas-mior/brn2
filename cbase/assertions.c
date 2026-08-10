@@ -8,7 +8,7 @@
 #define TESTING_assert 1
 #endif
 
-#include "assertions.h"
+#include "cbase.h"
 
 CBASE_API_DEF void
 assert_error(char *file, int32 line, char *func, char *format, ...) {
