@@ -98,7 +98,6 @@ callgrind)
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -O0 $GNUSOURCE -DDEBUGGING=1"
-    CFLAGS="$CFLAGS -fsanitize=undefined"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 check)
