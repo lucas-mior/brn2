@@ -1558,7 +1558,8 @@ basename2(char *path, int32 *full_length, int32 *base_len) {
             p = bslash + 1;
         }
 
-        left -= length;
+        ASSERT(length < MAXOF(left));
+        left -= (int32)length;
     }
 
     if (base_len) {
