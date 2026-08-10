@@ -10,6 +10,10 @@
 
 #include "platform_detection.h"
 
+#if CBASE_CRT_MSVC && !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #if CC_CLANG
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wreserved-identifier"

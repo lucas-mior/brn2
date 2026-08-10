@@ -215,7 +215,9 @@ CBASE_API_DECL int32 parallel_for_max_threads_min_items(
 CBASE_API_DECL void write_all(int, char *, int64);
 CBASE_API_DECL bool write_entire_file(char *, char *, int64);
 CBASE_API_DECL int xclose(char *, int, int *, char *, char *);
+#if CBASE_HAS_DIRENT_H
 CBASE_API_DECL int xclosedir(DIR *, char *);
+#endif
 CBASE_API_DECL void xdup2(int, int);
 CBASE_API_DECL int xfclose(char *, int32, char *, FILE *, char *);
 CBASE_API_DECL FILE *xfopen(char *, int32, char *, char *, char *);

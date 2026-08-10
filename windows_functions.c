@@ -20,6 +20,12 @@
 #define S_IFLNK 0120000
 #endif
 
+#if !CBASE_HAS_DIRENT_H
+struct dirent {
+    char d_name[MAX_PATH];
+};
+#endif
+
 static void
 windows_set_errno(DWORD error_code) {
     switch (error_code) {

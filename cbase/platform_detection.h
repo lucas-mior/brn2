@@ -7,31 +7,23 @@
 #if !defined(PLATFORM_DETECTION_H)
 #define PLATFORM_DETECTION_H
 
+#define CC_GCC   0
+#define CC_CLANG 0
+#define CC_TCC   0
+#define CC_MSVC  0
+
 #if defined(__clang__)
-  #define CC_GCC 0
+  #undef CC_CLANG
   #define CC_CLANG 1
-  #define CC_TCC 0
-  #define CC_MSVC 0
 #elif defined(__GNUC__)
+  #undef CC_GCC
   #define CC_GCC 1
-  #define CC_CLANG 0
-  #define CC_TCC 0
-  #define CC_MSVC 0
 #elif defined(__TINYC__)
-  #define CC_GCC 0
-  #define CC_CLANG 0
+  #undef CC_TCC
   #define CC_TCC 1
-  #define CC_MSVC 0
 #elif defined(_MSC_VER)
-  #define CC_GCC 0
-  #define CC_CLANG 0
-  #define CC_TCC 0
+  #undef CC_MSVC
   #define CC_MSVC 1
-#else
-  #define CC_GCC 0
-  #define CC_CLANG 0
-  #define CC_TCC 0
-  #define CC_MSVC 0
 #endif
 
 #define CC_TOY !(CC_GCC || CC_CLANG || CC_TCC || CC_MSVC)
