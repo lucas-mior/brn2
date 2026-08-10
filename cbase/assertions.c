@@ -649,6 +649,7 @@ a_bool_less_equal(void *p, ...) {
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
+#if OS_LINUX
 static sig_atomic_t assertion_failed = false;
 static sigjmp_buf assert_env;
 
@@ -658,6 +659,7 @@ handler_failed_assertion(int unused) {
     assertion_failed = true;
     siglongjmp(assert_env, 1);
 }
+#endif
 
 int
 main(void) {
@@ -846,7 +848,10 @@ main(void) {
         /* ASSERT_MORE_EQUAL(a, x); */
         /* bool b = true; */
         /* ASSERT_EQUAL(b, 1); */
-    } {
+    } 
+
+#if OS_LINUX
+    {
         int a = 0;
         double b = 1;
         double close_a = 0.1 + 0.2;
@@ -940,6 +945,7 @@ main(void) {
         ASSERT(assertion_failed);
         assertion_failed = false;
     }
+#endif
 
     ASSERT(true);
     ASSERT(!false);
