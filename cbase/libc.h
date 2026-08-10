@@ -16,7 +16,7 @@
   #define _DEFAULT_SOURCE
 #endif
 
-#if OS_LINUX && defined(__GLIBC__) && !defined(_GNU_SOURCE)
+#if OS_LINUX && !defined(_GNU_SOURCE)
   #define _GNU_SOURCE
 #endif
 
