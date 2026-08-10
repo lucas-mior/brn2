@@ -39,7 +39,7 @@ CBASE_API_DECL void *memrchr64(void *, int32, int64);
 #include "memory.h"
 #include "arena.h"
 
-#include "assertions.c"
+#include "assertions.h"
 #include "generic.c"
 #include "minmax.c"
 
@@ -558,6 +558,7 @@ CBASE_API_DECL void generic_array_set_count(void *, int32);
 
 #include "arena.c"
 #include "memory.c"
+#include "assertions.c"
 #include "array.c"
 #include "utf8.c"
 #include "util.c"
