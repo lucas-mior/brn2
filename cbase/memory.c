@@ -75,23 +75,23 @@ allocations_unlock(void) {
 }
 #endif
 
-#define X64(FUNC) \
-CBASE_API_DEF void \
-CAT(FUNC, 64)(void *dest, void *source, int64 n) { \
-    if (n == 0) \
-        return; \
-    if (DEBUGGING) { \
-        if (n < 0) { \
-            error("Error: Invalid n = %lld\n", n); \
-            fatal(EXIT_FAILURE); \
-        } \
-        if ((ullong)n >= (ullong)SIZE_MAX) { \
+#define X64(FUNC)                                                 \
+CBASE_API_DEF void                                                \
+CAT(FUNC, 64)(void *dest, void *source, int64 n) {                \
+    if (n == 0)                                                   \
+        return;                                                   \
+    if (DEBUGGING) {                                              \
+        if (n < 0) {                                              \
+            error("Error: Invalid n = %lld\n", n);                \
+            fatal(EXIT_FAILURE);                                  \
+        }                                                         \
+        if ((ullong)n >= (ullong)SIZE_MAX) {                      \
             error("Error: n (%lld) is bigger than SIZEMAX\n", n); \
-            fatal(EXIT_FAILURE); \
-        } \
-    } \
-    FUNC(dest, source, (size_t)n); \
-    return; \
+            fatal(EXIT_FAILURE);                                  \
+        }                                                         \
+    }                                                             \
+    FUNC(dest, source, (size_t)n);                                \
+    return;                                                       \
 }
 
 X64(memcpy)

@@ -6,12 +6,19 @@ test_target=${BRN2_TEST_TARGET:-debug}
 
 ./build.sh "$test_target"
 
+exe_suffix=
+case "${CC:-}" in
+cl|*/cl|cl.exe|*/cl.exe)
+    exe_suffix=.exe
+    ;;
+esac
+
 case "$test_target" in
 "debug")
-    brn2="$PWD/bin/brn2_debug"
+    brn2="$PWD/bin/brn2_debug$exe_suffix"
     ;;
 "build")
-    brn2="$PWD/bin/brn2"
+    brn2="$PWD/bin/brn2$exe_suffix"
     ;;
 *)
     echo "Unsupported BRN2_TEST_TARGET: $test_target"

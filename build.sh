@@ -169,6 +169,16 @@ else
     esac
 fi
 
+if [ "$is_cl" -eq 1 ]; then
+    case "$exe" in
+    *.exe)
+        ;;
+    *)
+        exe="$exe.exe"
+        ;;
+    esac
+fi
+
 if [ "$is_msvc" -eq 1 ] && [ "$target" != "test" ]; then
     if [ -z "$CLANG_CL_TARGET" ]; then
         case "$OS" in

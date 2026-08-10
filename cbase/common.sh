@@ -409,7 +409,14 @@ test_executable_path () {
     if [ "${TEST_EXE_SUFFIX+set}" = set ]; then
         test_exe_suffix=$TEST_EXE_SUFFIX
     else
-        test_exe_suffix=_test
+        case "${CC:-}" in
+        cl|*/cl|cl.exe|*/cl.exe)
+            test_exe_suffix=_test.exe
+            ;;
+        *)
+            test_exe_suffix=_test
+            ;;
+        esac
     fi
 
     printf '%s/%s%s\n' \
