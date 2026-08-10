@@ -1780,6 +1780,8 @@ main(void) {
         SNPRINTF(directory_buffer, "/tmp/brn2_abcd_%lu",
                  (unsigned long)GetCurrentProcessId());
         directory = directory_buffer;
+#else
+        (void)directory_buffer;
 #endif
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
