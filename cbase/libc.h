@@ -27,6 +27,10 @@
   #define _GNU_SOURCE
 #endif
 
+#if defined(__NetBSD__) && !defined(_NETBSD_SOURCE)
+  #define _NETBSD_SOURCE
+#endif
+
 #if CC_CLANG
   #pragma clang diagnostic pop
 #endif
