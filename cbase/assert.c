@@ -594,8 +594,7 @@ assert_double_failure(char *file, int32 line, char *func,
     }
     assert_error(file, line, func,
                  "[%s%lld]%s = %.17g %s %.17g = %s[%s%lld]\n",
-                 type1, bits1, name1, var1, symbol, var2, name2, type2,
-                 bits2);
+                 type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
     if (use_tolerance) {
         fprintf(stderr,
                 "floating diff = %.17g, tolerance = %.17g\n",
