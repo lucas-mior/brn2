@@ -108,6 +108,7 @@
 
 #if OS_MAC || OS_BSD
 #include <sys/param.h>
+#include <sys/sysctl.h>
 #endif
 
 #if OS_LINUX
