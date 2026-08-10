@@ -153,8 +153,16 @@ else
     *Darwin*)
         CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
         ;;
+    *MINGW*|*MSYS*|*CYGWIN*)
+        ;;
     esac
-    LDFLAGS="$LDFLAGS -lpthread"
+    case "$OS" in
+    *MINGW*|*MSYS*|*CYGWIN*)
+        ;;
+    *)
+        LDFLAGS="$LDFLAGS -lpthread"
+        ;;
+    esac
 fi
 
 if [ "$is_clang_cl" -eq 1 ] && [ "$target" != "test" ]; then

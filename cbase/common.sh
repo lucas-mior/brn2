@@ -239,7 +239,14 @@ gcc_flags_to_msvc() {
                 flag="/clang:$flag"
                 ;;
             -lm|-lpthread)
-                flag="-Xlinker $flag"
+                case "$CLANG_CL_TARGET" in
+                *linux*|*darwin*|*bsd*)
+                    flag="-Xlinker $flag"
+                    ;;
+                *)
+                    continue
+                    ;;
+                esac
                 ;;
             -Xlinker)
                 next_is_linker_flag=1
