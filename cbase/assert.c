@@ -44,21 +44,13 @@ assert_print_loc(char *file, int32 line, char *func) {
     return;
 }
 
-static void __attribute__((noreturn))
-assert_fatal(void) {
-    if (DEBUGGING) {
-        TRAP();
-    }
-    exit(EXIT_FAILURE);
-}
-
 static int32
 assert_strlen32(char *string) {
     size_t length = strlen(string);
 
     if (length > INT32_MAX) {
         fprintf(stderr, "Assertion string is too long.\n");
-        assert_fatal();
+        TRAP();
     }
     return (int32)length;
 }
@@ -93,7 +85,7 @@ assert_file_contains(char *file, int32 line, char *func,
         assert_print_loc(file, line, func);
         fprintf(stderr, "Error opening %s for reading: %s.\n",
                 path, strerror(errno));
-        assert_fatal();
+        TRAP();
     }
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
         int32 n = assert_strlen32(buffer);
@@ -109,7 +101,7 @@ assert_file_contains(char *file, int32 line, char *func,
     if (!found) {
         assert_print_loc(file, line, func);
         fprintf(stderr, "Needle '%s' not found in '%s'.\n", needle, path);
-        assert_fatal();
+        TRAP();
     }
     return;
 }
@@ -123,7 +115,7 @@ assert_contains(char *file, int32 line, char *func,
         fprintf(stderr,
                 "expected to find substring:\n%.*s\n--- in ---\n%.*s",
                 needle_len, needle, haystack_len, haystack);
-        assert_fatal();
+        TRAP();
     }
 }
 
@@ -136,7 +128,7 @@ assert_not_contains(char *file, int32 line, char *func,
         fprintf(stderr,
                 "expected to not find substring:\n%.*s\n--- in ---\n%.*s",
                 needle_len, needle, haystack_len, haystack);
-        assert_fatal();
+        TRAP();
     }
 }
 
