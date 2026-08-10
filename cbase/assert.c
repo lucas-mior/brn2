@@ -620,9 +620,9 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
     ullong max_ulps;                                                           \
                                                                                \
     if (assert_double_close_ulps(var1, var2, kind1, kind2,                     \
-                                 &diff, &ulps, &max_ulps) != EXPECT_CLOSE) {    \
+                                 &diff, &ulps, &max_ulps) != EXPECT_CLOSE) {   \
         assert_double_failure(file, line, func, name1, name2,                  \
-                              type1, type2, bits1, bits2,                     \
+                              type1, type2, bits1, bits2,                      \
                               var1, var2, SYMBOL, diff, (double)0,             \
                               ulps, max_ulps, false);                          \
     }                                                                          \
@@ -643,12 +643,12 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
                 double var1, double var2,                                      \
                 double tolerance) {                                            \
     double diff;                                                               \
-    double tolerance_abs;                                                       \
+    double tolerance_abs;                                                      \
                                                                                \
     if (assert_double_close_tolerance(var1, var2, tolerance,                   \
                                       &diff, &tolerance_abs) != EXPECT_CLOSE) { \
         assert_double_failure(file, line, func, name1, name2,                  \
-                              type1, type2, bits1, bits2,                     \
+                              type1, type2, bits1, bits2,                      \
                               var1, var2, SYMBOL, diff, tolerance_abs,         \
                               0, 0, true);                                     \
     }                                                                          \
