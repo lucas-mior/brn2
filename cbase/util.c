@@ -880,23 +880,6 @@ util_segv_handler(int32 unused) {
     }
     _exit(EXIT_FAILURE);
 }
-#endif
-
-CBASE_API_DEF int32
-util_string_int32(int32 *number, char *string) {
-    char *endptr;
-    long x;
-    errno = 0;
-    x = strtol(string, &endptr, 10);
-    if ((errno != 0) || (string == endptr) || (*endptr != 0)) {
-        return -1;
-    } else if ((x > INT32_MAX) || (x < INT32_MIN)) {
-        return -1;
-    } else {
-        *number = (int32)x;
-        return 0;
-    }
-}
 
 CBASE_API_DEF noreturn void
 util_die_notify(char *program_name, char *format, ...) {
@@ -919,6 +902,23 @@ util_die_notify(char *program_name, char *format, ...) {
                buffer, NULL);
     }
     fatal(EXIT_FAILURE);
+}
+#endif
+
+CBASE_API_DEF int32
+util_string_int32(int32 *number, char *string) {
+    char *endptr;
+    long x;
+    errno = 0;
+    x = strtol(string, &endptr, 10);
+    if ((errno != 0) || (string == endptr) || (*endptr != 0)) {
+        return -1;
+    } else if ((x > INT32_MAX) || (x < INT32_MIN)) {
+        return -1;
+    } else {
+        *number = (int32)x;
+        return 0;
+    }
 }
 
 #if OS_UNIX
@@ -2354,7 +2354,6 @@ util_functions_sink(void) {
     (void)command_run_capture_combined;
     (void)util_filename_from;
     (void)util_string_int32;
-    (void)util_die_notify;
     (void)remove_escape_sequences;
     (void)xfclose;
 #if CBASE_HAS_DIRENT_H
@@ -2990,8 +2989,8 @@ main(int argc, char **argv) {
 
     NCALLS(1);
 
-    (void)util_die_notify;
 #if OS_UNIX
+    (void)util_die_notify;
     (void)util_segv_handler;
     (void)util_copy_file_sync;
     (void)util_copy_file_async;
