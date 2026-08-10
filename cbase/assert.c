@@ -806,6 +806,9 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 #define ASSERT_NULL(VAR1) do {                                                 \
     void *p = VAR1;                                                            \
     if (p != NULL) {                                                           \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %p == NULL\n", #VAR1, p);                           \
         TRAP();                                                                \
@@ -815,6 +818,9 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 #define ASSERT_ZERO(VAR1) do {                                                 \
     llong p = VAR1;                                                            \
     if (p != 0) {                                                              \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %lld == 0\n", #VAR1, p);                            \
         TRAP();                                                                \
@@ -824,6 +830,9 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 #define ASSERT_POSITIVE(VAR1) do {                                             \
     llong p = VAR1;                                                            \
     if (p <= 0) {                                                              \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %lld > 0\n", #VAR1, p);                             \
         TRAP();                                                                \
@@ -842,6 +851,9 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 #define ASSERT_NON_POSITIVE(VAR1) do {                                         \
     llong p = VAR1;                                                            \
     if (p > 0) {                                                               \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %lld <= 0\n", #VAR1, p);                            \
         TRAP();                                                                \
@@ -851,6 +863,9 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 #define ASSERT_NON_NEGATIVE(VAR1) do {                                         \
     llong p = VAR1;                                                            \
     if (p < 0) {                                                               \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %lld >= 0\n", #VAR1, p);                            \
         TRAP();                                                                \
