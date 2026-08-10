@@ -38,6 +38,27 @@ cross)
     CC="zig cc"
     ;;
 esac
+case "$CC" in
+cl|*/cl.exe)
+    cl_banner=$($CC 2>&1 || true)
+    case "$cl_banner" in
+    *"Microsoft "*" C/C++ "*" Compiler"*|*"Microsoft (R) C/C++"*)
+        ;;
+    *)
+        if [ -x "${CC}.exe" ]; then
+            CC="${CC}.exe"
+        elif command_exists cl.exe; then
+            CC=cl.exe
+        else
+            error "CC=cl did not resolve to the MSVC compiler.\n"
+            error "Found: %s\n" "$(command -v "$CC")"
+            error "Use CC=cl.exe or put the MSVC cl before this program in PATH.\n"
+            exit 1
+        fi
+        ;;
+    esac
+    ;;
+esac
 is_msvc=0
 is_clang_cl=0
 is_cl=0

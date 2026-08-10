@@ -500,7 +500,7 @@ typedef union GenericArrayHeader {
         int32 count;
         int32 cap;
     };
-    max_align_t alignment;
+    CbaseMaxAlign alignment;
 } GenericArrayHeader;
 
 CBASE_API_DECL void *generic_array_init(int32, int64);

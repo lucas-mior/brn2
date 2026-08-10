@@ -38,7 +38,7 @@ _Static_assert(sizeof(float)*CHAR_BIT == 32,
 _Static_assert(sizeof(double)*CHAR_BIT == 64,
                "assertions.c ULP comparison requires 64-bit double");
 
-static void __attribute__((format(printf, 4, 5)))
+static void ATTR_PRINTF(4, 5)
 assert_error(char *file, int32 line, char *func, char *format, ...) {
     va_list ap;
 

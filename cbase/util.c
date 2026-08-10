@@ -506,7 +506,7 @@ qsort64(void *base, int64 n, int64 size, int (*compar)(void *, void *)) {
     return;
 }
 
-CBASE_API_DEF int32 __attribute__((format(printf, 3, 4)))
+CBASE_API_DEF int32 ATTR_PRINTF(3, 4)
 snprintf2(char *buffer, int64 size, char *format, ...) {
     int n;
     va_list args;
@@ -756,7 +756,7 @@ xclosedir(DIR *dir, char *dirname) {
 }
 #endif
 
-CBASE_API_DEF void __attribute__((format(printf, 4, 5)))
+CBASE_API_DEF void ATTR_PRINTF(4, 5)
 error_impl(char *file, int32 line, char *func, char *format, ...) {
     char buffer[BUFSIZ];
     char *big_buffer = NULL;
