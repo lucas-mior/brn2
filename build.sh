@@ -38,10 +38,20 @@ cross)
     CC="zig cc"
     ;;
 esac
+is_msvc=0
 is_clang_cl=0
+is_cl=0
+msvc_compiler=clang-cl
 case "$CC" in
 clang-cl|*/clang-cl)
+    is_msvc=1
     is_clang_cl=1
+    msvc_compiler=clang-cl
+    ;;
+cl|*/cl|cl.exe|*/cl.exe)
+    is_msvc=1
+    is_cl=1
+    msvc_compiler=cl
     ;;
 esac
 
@@ -165,22 +175,24 @@ else
     esac
 fi
 
-if [ "$is_clang_cl" -eq 1 ] && [ "$target" != "test" ]; then
+if [ "$is_msvc" -eq 1 ] && [ "$target" != "test" ]; then
     if [ -z "$CLANG_CL_TARGET" ]; then
         case "$OS" in
         *Linux*|*Darwin*|*BSD*)
-            CLANG_CL_TARGET=$(cc -dumpmachine 2>/dev/null || true)
+            if [ "$is_clang_cl" -eq 1 ]; then
+                CLANG_CL_TARGET=$(cc -dumpmachine 2>/dev/null || true)
+            fi
             ;;
         esac
     fi
 
-    if [ -n "$CLANG_CL_TARGET" ]; then
+    if [ "$is_clang_cl" -eq 1 ] && [ -n "$CLANG_CL_TARGET" ]; then
         CFLAGS="$CFLAGS --target=$CLANG_CL_TARGET"
     fi
 
-    CPPFLAGS=$(gcc_flags_to_msvc $CPPFLAGS)
-    CFLAGS=$(gcc_flags_to_msvc $CFLAGS)
-    LDFLAGS=$(gcc_flags_to_msvc $LDFLAGS)
+    CPPFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $CPPFLAGS)
+    CFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $CFLAGS)
+    LDFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $LDFLAGS)
 fi
 
 case "$target" in
@@ -247,7 +259,11 @@ test_all)
 
     build_tags
 
-    $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
+    if [ "$is_cl" -eq 1 ]; then
+        $CC $CPPFLAGS $CFLAGS /Fe${exe} main.c $LDFLAGS
+    else
+        $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
+    fi
 
     trace_off
     ;;

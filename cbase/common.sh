@@ -185,8 +185,16 @@ option_remove() {
 }
 
 gcc_flags_to_msvc() {
+    compiler=clang-cl
     result=""
     next_is_linker_flag=0
+
+    case "${1:-}" in
+    clang-cl|cl)
+        compiler=$1
+        shift
+        ;;
+    esac
 
     for flag do
         if [ "$next_is_linker_flag" -eq 1 ]; then
@@ -198,7 +206,14 @@ gcc_flags_to_msvc() {
                 if command_exists cygpath; then
                     path=$(cygpath -m "$path" 2>/dev/null || printf '%s\n' "$path")
                 fi
-                flag="/clang:-I$path"
+                case "$compiler" in
+                clang-cl)
+                    flag="/clang:-I$path"
+                    ;;
+                cl)
+                    flag="/I$path"
+                    ;;
+                esac
                 ;;
             -D*)
                 flag="/D${flag#-D}"
@@ -213,41 +228,72 @@ gcc_flags_to_msvc() {
                 flag="/Z7"
                 ;;
             -O0)
-                flag="/clang:-O0"
+                case "$compiler" in
+                clang-cl) flag="/clang:-O0" ;;
+                cl) flag="/Od" ;;
+                esac
                 ;;
             -Og)
-                flag="/clang:-Og"
+                case "$compiler" in
+                clang-cl) flag="/clang:-Og" ;;
+                cl) flag="/Od" ;;
+                esac
                 ;;
             -O1)
-                flag="/clang:-O1"
+                case "$compiler" in
+                clang-cl) flag="/clang:-O1" ;;
+                cl) flag="/O1" ;;
+                esac
                 ;;
             -O2|-O3|-Ofast)
-                flag="/clang:-O2"
+                case "$compiler" in
+                clang-cl) flag="/clang:-O2" ;;
+                cl) flag="/O2" ;;
+                esac
                 ;;
             -Os|-Oz)
-                flag="/clang:$flag"
+                case "$compiler" in
+                clang-cl) flag="/clang:$flag" ;;
+                cl) flag="/O1" ;;
+                esac
                 ;;
             -Wall)
-                flag="/W4 /clang:-Wno-constant-logical-operand"
+                case "$compiler" in
+                clang-cl) flag="/W4 /clang:-Wno-constant-logical-operand" ;;
+                cl) flag="/W4" ;;
+                esac
                 ;;
             -Wextra|-Wpedantic)
                 continue
                 ;;
             -Wfatal-errors|-Wno-*|-W*)
-                flag="/clang:$flag"
+                case "$compiler" in
+                clang-cl) flag="/clang:$flag" ;;
+                cl) continue ;;
+                esac
                 ;;
             -fsanitize=undefined)
                 continue
                 ;;
             -flto|-march=*|-ftree-vectorize)
-                flag="/clang:$flag"
+                case "$compiler" in
+                clang-cl) flag="/clang:$flag" ;;
+                cl) continue ;;
+                esac
                 ;;
             -lm|-lpthread)
-                case "$CLANG_CL_TARGET" in
-                *linux*|*darwin*|*bsd*)
-                    flag="-Xlinker $flag"
+                case "$compiler" in
+                clang-cl)
+                    case "$CLANG_CL_TARGET" in
+                    *linux*|*darwin*|*bsd*)
+                        flag="-Xlinker $flag"
+                        ;;
+                    *)
+                        continue
+                        ;;
+                    esac
                     ;;
-                *)
+                cl)
                     continue
                     ;;
                 esac
