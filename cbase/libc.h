@@ -5,6 +5,9 @@
 // other files include them by `#include "cbase.h"` or `#include "libc.h"`
 // Avoid including system headers in other files.
 
+#if !defined(LIBC_H)
+#define LIBC_H
+
 #include "platform_detection.h"
 
 #if CC_CLANG
@@ -155,3 +158,5 @@
 #define MAP_ANON 0
 #define MAP_ANONYMOUS 0
 #endif
+
+#endif /* LIBC_H */
