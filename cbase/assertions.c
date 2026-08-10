@@ -29,7 +29,6 @@ assert_error(char *file, int32 line, char *func, char *format, ...) {
 CBASE_API_DEF void
 assert_file_contains(char *file, int32 line, char *func,
                      char *path, char *needle) {
-    FILE *file_handle;
     char *buffer;
     int32 buffer_len;
     int32 needle_len = strlen32(needle);
