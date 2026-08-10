@@ -66,13 +66,15 @@
 #include <stdlib.h>
 #include <stdnoreturn.h>
 #include <string.h>
+#if !defined(_MSC_VER)
 #include <tgmath.h>
+#endif
 #include <time.h>
 #include <wchar.h>
 #include <wctype.h>
 
 // optional C11 headers
-#if !defined(__STDC_NO_COMPLEX__)
+#if !defined(_MSC_VER) && !defined(__STDC_NO_COMPLEX__)
 #include <complex.h>
 #endif
 
