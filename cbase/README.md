@@ -4,7 +4,7 @@ Alternative description:
 "stuff that a sane programming language would provide by default".
 
 ## Usage (except include-based files)
-- users of cbase shall `#include "cbase.h"`.
+- users of cbase shall `#include "cbase.h"` before ANY OTHER INCLUDES.
 - one of the files shall `#define CBASE_IMPLEMENT 1` before including `cbase.h`
 
 ## Usage for include-based files like hash.c and xenums.c
