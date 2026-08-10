@@ -1112,6 +1112,9 @@ handler_failed_assertion(int unused) {
 
 int
 main(void) {
+    ASSERT(true);
+    ASSERT(!false);
+    ASSERT(1);
     {
         char *string = NULL;
         void *pointer = NULL;
