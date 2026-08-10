@@ -38,6 +38,12 @@ _Static_assert(sizeof(float)*CHAR_BIT == 32,
 _Static_assert(sizeof(double)*CHAR_BIT == 64,
                "assert.c ULP comparison requires 64-bit double");
 
+static void
+assert_print_loc(char *file, int32 line, char *func) {
+    fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func);
+    return;
+}
+
 static void __attribute__((format(printf, 4, 5)))
 assert_error(char *file, int32 line, char *func, char *format, ...) {
     va_list ap;
@@ -190,8 +196,7 @@ a_pointers_##MODE(char *file, int32 line, char *func,                          \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        assert_print_loc(file, line, func);                                    \
         fprintf(stderr,                                                        \
                 "%s = %p " #SYMBOL " %p = %s\n", name1, var1, var2, name2);    \
         TRAP();                                                                \
@@ -219,8 +224,7 @@ a_both_##TYPE##_##MODE(char *file, int32 line, char *func,                     \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        assert_print_loc(file, line, func);                                    \
         fprintf(stderr,                                                        \
                 "[%s%lld]%s = "FORMAT" " #SYMBOL " "FORMAT" = %s[%s%lld]\n",   \
                type1, bits1, name1, var1, var2, name2, type2, bits2);          \
@@ -271,8 +275,7 @@ a_signed_unsigned##MODE(char *file, int32 line, char *func,                    \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        assert_print_loc(file, line, func);                                    \
         fprintf(stderr,                                                        \
                 "[%s%lld]%s = %lld " #SYMBOL " %llu = %s[%s%lld]\n",           \
                 type1, bits1, name1, var1, var2, name2, type2, bits2);         \
@@ -301,8 +304,7 @@ a_unsigned_signed_##MODE(char *file, int32 line, char *func,                   \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        assert_print_loc(file, line, func);                                    \
         fprintf(stderr,                                                        \
                 "[%s%lld]%s = %llu " #SYMBOL " %lld = %s[%s%lld]\n",           \
                 type1, bits1, name1, var1, var2, name2, type2, bits2);         \
@@ -331,8 +333,7 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        assert_print_loc(file, line, func);                                    \
         fprintf(stderr,                                                        \
                 "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",               \
                 type1, bits1, name1, var1, var2, name2, type2, bits2);         \
@@ -613,8 +614,7 @@ assert_double_failure(char *file, int32 line, char *func,
     if (!DEBUGGING) {
         UNREACHABLE();
     }
-    fprintf(stderr,
-            "\nAssertion failed at %s:%d:%s\n", file, line, func);
+    assert_print_loc(file, line, func);
     fprintf(stderr,
             "[%s%lld]%s = %.17g %s %.17g = %s[%s%lld]\n",
             type1, bits1, name1, var1, symbol, var2, name2, type2, bits2);
@@ -702,8 +702,7 @@ a_bool_##MODE(char *file, int32 line, char *func,                              \
         if (var2) {                                                            \
             s2 = "true";                                                       \
         }                                                                      \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n", file, line, func);         \
+        assert_print_loc(file, line, func);                                    \
         fprintf(stderr, "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",       \
                         type1, bits1, name1, s1, s2, name2, type2, bits2);     \
         TRAP();                                                                \
@@ -1115,9 +1114,7 @@ _Generic((VAR1), \
 #define ASSERT_NULL(VAR1) do {                                                 \
     void *p = VAR1;                                                            \
     if (p != NULL) {                                                           \
-        fprintf(stderr,                                                        \
-                "\nAssertion failed at %s:%d:%s\n",                            \
-                __FILE__, __LINE__, FUNC__);                                   \
+        assert_print_loc(__FILE__, __LINE__, FUNC__);                          \
         fprintf(stderr, "%s = %p == NULL\n", #VAR1, p);                        \
         TRAP();                                                                \
     }                                                                          \
