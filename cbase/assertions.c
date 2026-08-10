@@ -24,17 +24,6 @@ assert_error(char *file, int32 line, char *func, char *format, ...) {
     return;
 }
 
-static int32
-assert_strlen32(char *string) {
-    size_t length = strlen(string);
-
-    if (length > INT32_MAX) {
-        fprintf(stderr, "Assertion string is too long.\n");
-        TRAP();
-    }
-    return (int32)length;
-}
-
 static void *
 assert_memmem(char *haystack, int32 haystack_len,
               char *needle, int32 needle_len) {
@@ -59,7 +48,7 @@ assert_file_contains(char *file, int32 line, char *func,
     FILE *file_handle;
     char buffer[4096];
     bool found = false;
-    int32 needle_len = assert_strlen32(needle);
+    int32 needle_len = strlen32(needle);
 
     if ((file_handle = fopen(path, "r")) == NULL) {
         assert_error(file, line, func,
@@ -68,7 +57,7 @@ assert_file_contains(char *file, int32 line, char *func,
         TRAP();
     }
     while (fgets(buffer, SIZEOF(buffer), file_handle)) {
-        int32 n = assert_strlen32(buffer);
+        int32 n = strlen32(buffer);
         if (assert_memmem(buffer, n, needle, needle_len)) {
             found = true;
             break;
@@ -89,7 +78,7 @@ assert_file_contains(char *file, int32 line, char *func,
 CBASE_API_DEF void
 assert_contains(char *file, int32 line, char *func,
                 char *haystack, int32 haystack_len, char *needle) {
-    int32 needle_len = assert_strlen32(needle);
+    int32 needle_len = strlen32(needle);
     if (assert_memmem(haystack, haystack_len, needle, needle_len) == NULL) {
         assert_error(file, line, func,
                      "expected to find substring:\n%.*s\n--- in ---\n%.*s",
@@ -101,7 +90,7 @@ assert_contains(char *file, int32 line, char *func,
 CBASE_API_DEF void
 assert_not_contains(char *file, int32 line, char *func,
                     char *haystack, int32 haystack_len, char *needle) {
-    int32 needle_len = assert_strlen32(needle);
+    int32 needle_len = strlen32(needle);
     if (assert_memmem(haystack, haystack_len, needle, needle_len)) {
         assert_error(file, line, func,
                      "expected to not find substring:\n%.*s\n--- in ---\n%.*s",
