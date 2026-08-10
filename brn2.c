@@ -541,7 +541,7 @@ brn2_threads_work_normalization(Work *arg) {
 
 static void
 brn2_slash_add(FileName *file) {
-    ASSERT(file->length > 0);
+    ASSERT_POSITIVE(file->length);
     if (file->name[file->length - 1] != '/') {
         file->name[file->length] = '/';
         file->name[file->length + 1] = '\0';

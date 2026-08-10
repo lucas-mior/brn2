@@ -1235,11 +1235,11 @@ main(void) {
         ASSERT_MORE_EQUAL(b, a);
     } {
         long a = -1;
-        ASSERT_NOT_EQUAL(a, 0);
-        ASSERT_LESS(a, 0);
-        ASSERT_LESS_EQUAL(a, 0);
-        ASSERT_MORE(0, a);
-        ASSERT_MORE_EQUAL(0, a);
+        ASSERT_NEGATIVE(a);
+        ASSERT_NEGATIVE(a);
+        ASSERT_NON_POSITIVE(a);
+        ASSERT_NEGATIVE(a);
+        ASSERT_NON_POSITIVE(a);
     } {
         double a = 0.123;
         ASSERT_NOT_EQUAL(a, 0.123000001);
