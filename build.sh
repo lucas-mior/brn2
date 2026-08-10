@@ -157,7 +157,7 @@ else
     LDFLAGS="$LDFLAGS -lpthread"
 fi
 
-if [ "$is_clang_cl" -eq 1 ]; then
+if [ "$is_clang_cl" -eq 1 ] && [ "$target" != "test" ]; then
     if [ -z "$CLANG_CL_TARGET" ]; then
         case "$OS" in
         *Linux*|*Darwin*|*BSD*)

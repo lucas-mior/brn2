@@ -393,6 +393,16 @@ test_compile_and_run_source () {
     else
         case "$test_cc" in
         clang-cl|*/clang-cl)
+            if [ -z "$CLANG_CL_TARGET" ]; then
+                case "$(uname -a)" in
+                *Linux*|*Darwin*|*BSD*)
+                    CLANG_CL_TARGET=$(cc -dumpmachine 2>/dev/null || true)
+                    ;;
+                esac
+            fi
+            if [ -n "$CLANG_CL_TARGET" ]; then
+                test_cmd_flags="$test_cmd_flags --target=$CLANG_CL_TARGET"
+            fi
             test_cmd_flags=$(gcc_flags_to_msvc $test_cmd_flags)
             ;;
         esac
