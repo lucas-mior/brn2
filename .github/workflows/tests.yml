@@ -32,6 +32,8 @@ jobs:
   windows-msvc:
     runs-on: windows-latest
     continue-on-error: true
+    env:
+      MSYS2_ARG_CONV_EXCL: "*"
     defaults:
       run:
         shell: bash
