@@ -14,6 +14,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#if CBASE_CRT_MSVC && !defined(_CRT_NONSTDC_NO_WARNINGS)
+#define _CRT_NONSTDC_NO_WARNINGS
+#endif
+
 #if CC_CLANG
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wreserved-identifier"
@@ -104,6 +108,9 @@
 #endif
 #if CBASE_HAS_GETOPT_H
 #include <getopt.h>
+#endif
+#if CBASE_HAS_IO_H
+#include <io.h>
 #endif
 #if CBASE_HAS_LIBGEN_H
 #include <libgen.h>
