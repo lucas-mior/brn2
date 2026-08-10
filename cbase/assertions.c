@@ -51,7 +51,8 @@ assert_contains(char *file, int32 line, char *func,
     int32 needle_len = strlen32(needle);
     if (memmem64(haystack, haystack_len, needle, needle_len) == NULL) {
         assert_error(file, line, func,
-                     "expected to find substring:\n%.*s\n-- in --\n%.*s\n",
+                     "expected to find substring'''\n"
+                     GREEN("%.*s")"''' in '''"BLUE("%.*s")"'''\n",
                      needle_len, needle, haystack_len, haystack);
         TRAP();
     }
@@ -63,7 +64,8 @@ assert_not_contains(char *file, int32 line, char *func,
     int32 needle_len = strlen32(needle);
     if (memmem64(haystack, haystack_len, needle, needle_len)) {
         assert_error(file, line, func,
-                     "expected to not find substring:\n%.*s\n-- in --\n%.*s\n",
+                     "expected to not find substring'''\n"
+                     GREEN("%.*s")"''' in '''"BLUE("%.*s")"'''\n",
                      needle_len, needle, haystack_len, haystack);
         TRAP();
     }
