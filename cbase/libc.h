@@ -64,10 +64,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 #include <wchar.h>
@@ -104,6 +100,13 @@
 
 #if !defined(__STDC_NO_THREADS__) && HAS_INCLUDE(<threads.h>)
 #include <threads.h>
+#endif
+
+#if OS_UNIX || OS_WINDOWS
+#include <sys/file.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #endif
 
 #if OS_WINDOWS
