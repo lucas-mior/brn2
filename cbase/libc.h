@@ -36,9 +36,9 @@
 #endif
 
 #if defined(__has_include)
-#define CBASE_HAS_INCLUDE(header) __has_include(header)
+#define HAS_INCLUDE(header) __has_include(header)
 #else
-#define CBASE_HAS_INCLUDE(header) 1
+#define HAS_INCLUDE(header) 1
 #endif
 
 #include <assert.h>
@@ -73,36 +73,36 @@
 #include <wchar.h>
 #include <wctype.h>
 
-#if CBASE_HAS_INCLUDE(<fenv.h>)
+#if HAS_INCLUDE(<fenv.h>)
 #include <fenv.h>
 #endif
 
-#if CBASE_HAS_INCLUDE(<iso646.h>)
+#if HAS_INCLUDE(<iso646.h>)
 #include <iso646.h>
 #endif
 
-#if CBASE_HAS_INCLUDE(<stdalign.h>)
+#if HAS_INCLUDE(<stdalign.h>)
 #include <stdalign.h>
 #endif
 
-#if CBASE_HAS_INCLUDE(<stdnoreturn.h>)
+#if HAS_INCLUDE(<stdnoreturn.h>)
 #include <stdnoreturn.h>
   #if defined(noreturn)
     #undef noreturn
   #endif
 #endif
 
-#if CBASE_HAS_INCLUDE(<uchar.h>)
+#if HAS_INCLUDE(<uchar.h>)
 #include <uchar.h>
 #endif
 
 #if !CC_TCC && !defined(__STDC_NO_COMPLEX__) \
-        && CBASE_HAS_INCLUDE(<complex.h>) && CBASE_HAS_INCLUDE(<tgmath.h>)
+        && HAS_INCLUDE(<complex.h>) && HAS_INCLUDE(<tgmath.h>)
 #include <complex.h>
 #include <tgmath.h>
 #endif
 
-#if !defined(__STDC_NO_THREADS__) && CBASE_HAS_INCLUDE(<threads.h>)
+#if !defined(__STDC_NO_THREADS__) && HAS_INCLUDE(<threads.h>)
 #include <threads.h>
 #endif
 
@@ -111,54 +111,54 @@
 #endif
 
 #if OS_UNIX
-#if CBASE_HAS_INCLUDE(<arpa/inet.h>)
+#if HAS_INCLUDE(<arpa/inet.h>)
 #include <arpa/inet.h>
 #endif
-#if CBASE_HAS_INCLUDE(<fnmatch.h>)
+#if HAS_INCLUDE(<fnmatch.h>)
 #include <fnmatch.h>
 #endif
-#if CBASE_HAS_INCLUDE(<glob.h>)
+#if HAS_INCLUDE(<glob.h>)
 #include <glob.h>
 #endif
-#if CBASE_HAS_INCLUDE(<grp.h>)
+#if HAS_INCLUDE(<grp.h>)
 #include <grp.h>
 #endif
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <pthread.h>
-#if CBASE_HAS_INCLUDE(<pwd.h>)
+#if HAS_INCLUDE(<pwd.h>)
 #include <pwd.h>
 #endif
-#if CBASE_HAS_INCLUDE(<regex.h>)
+#if HAS_INCLUDE(<regex.h>)
 #include <regex.h>
 #endif
-#if CBASE_HAS_INCLUDE(<spawn.h>)
+#if HAS_INCLUDE(<spawn.h>)
 #include <spawn.h>
 #endif
-#if CBASE_HAS_INCLUDE(<strings.h>)
+#if HAS_INCLUDE(<strings.h>)
 #include <strings.h>
 #endif
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#if CBASE_HAS_INCLUDE(<sys/resource.h>)
+#if HAS_INCLUDE(<sys/resource.h>)
 #include <sys/resource.h>
 #endif
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#if CBASE_HAS_INCLUDE(<sys/uio.h>)
+#if HAS_INCLUDE(<sys/uio.h>)
 #include <sys/uio.h>
 #endif
-#if CBASE_HAS_INCLUDE(<sys/utsname.h>)
+#if HAS_INCLUDE(<sys/utsname.h>)
 #include <sys/utsname.h>
 #endif
 #include <sys/wait.h>
-#if CBASE_HAS_INCLUDE(<termios.h>)
+#if HAS_INCLUDE(<termios.h>)
 #include <termios.h>
 #endif
 #include <utime.h>
-#if CBASE_HAS_INCLUDE(<wordexp.h>)
+#if HAS_INCLUDE(<wordexp.h>)
 #include <wordexp.h>
 #endif
 #endif
