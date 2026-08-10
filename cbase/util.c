@@ -366,6 +366,22 @@ memcmp64(void *left, void *right, int64 size) {
     return memcmp(left, right, (size_t)size);
 }
 
+CBASE_API_DEF uint32
+rand_int(void) {
+    static uint64 state = 0x853c49e6748fea9bull;
+    uint64 old_state = state;
+    uint32 xorshifted;
+    uint32 rot;
+    uint32 result;
+
+    state = old_state*6364136223846793005ull + 1442695040888963407ull;
+    xorshifted = (uint32)(((old_state >> 18u) ^ old_state) >> 27u);
+    rot = (uint32)(old_state >> 59u);
+    result = (xorshifted >> rot) | (xorshifted << ((0u - rot) & 31u));
+
+    return result;
+}
+
 CBASE_API_DEF char *
 remove_escape_sequences(char *data, int32 *data_len) {
     int32 old_len = *data_len;
