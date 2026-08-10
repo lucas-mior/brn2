@@ -41,6 +41,7 @@
 #define HAS_INCLUDE(header) 1
 #endif
 
+// mandatory C11 headers
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -67,6 +68,7 @@
 #include <wchar.h>
 #include <wctype.h>
 
+// optional C11 headers
 #if !defined(__STDC_NO_COMPLEX__)
 #include <complex.h>
 #endif
@@ -78,9 +80,6 @@
 #if !defined(__STDC_NO_ATOMICS__)
 #include <stdatomic.h>
 #endif
-
-#define TRY_INCLUDE_WHICH <iso646.h>
-#include "try_include.h"
 
 #if OS_UNIX || OS_WINDOWS
 #include <fcntl.h>
