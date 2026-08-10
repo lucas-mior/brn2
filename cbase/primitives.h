@@ -32,7 +32,7 @@ typedef unsigned long      ulong;
 typedef unsigned long long ullong;
 
 typedef signed char schar;
-typedef long long llong;
+typedef long long   llong;
 typedef long double ldouble;
 
 typedef schar  int8;
