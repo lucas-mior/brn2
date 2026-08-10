@@ -131,6 +131,18 @@
 #include <unistd.h>
 #endif
 
+#if CBASE_CRT_MSVC
+#if !defined(STDIN_FILENO)
+#define STDIN_FILENO _fileno(stdin)
+#endif
+#if !defined(STDOUT_FILENO)
+#define STDOUT_FILENO _fileno(stdout)
+#endif
+#if !defined(STDERR_FILENO)
+#define STDERR_FILENO _fileno(stderr)
+#endif
+#endif
+
 #if OS_WINDOWS
 #include <windows.h>
 #if defined(_MSC_VER) && !defined(noreturn)
