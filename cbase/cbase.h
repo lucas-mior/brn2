@@ -28,7 +28,7 @@ static int64 here_counter = 0;
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 CBASE_API_DECL int32 optional_strlen32(char *);
 CBASE_API_DECL int32 strlen32(char *);
-CBASE_API_DECL void fatal(int32) __attribute__((noreturn));
+CBASE_API_DECL noreturn void fatal(int32);
 CBASE_API_DECL void error_impl(char *, int32, char *, char *, ...)
     ATTR_PRINTF(4, 5);
 CBASE_API_DECL int memcmp64(void *, void *, int64);
@@ -94,7 +94,7 @@ CBASE_API_DECL void *util_copy_file_async_thread(void *);
 #endif
 
 CBASE_API_DECL bool util_is_integer(char *string);
-CBASE_API_DECL void util_segv_handler(int32) __attribute__((noreturn));
+CBASE_API_DECL noreturn void util_segv_handler(int32);
 CBASE_API_DECL int32 itoa2(char *, int32, llong);
 CBASE_API_DECL long atoi2(char *);
 CBASE_API_DECL char *basename2(char *, int32 *, int32 *);
@@ -416,9 +416,9 @@ typedef struct Command {
 
 CBASE_API_DECL void command_argv0_set(Command *, char *);
 CBASE_API_DECL void command_child_env_apply(Command *);
-CBASE_API_DECL void command_child_exec(
+CBASE_API_DECL noreturn void command_child_exec(
     Command *, enum CommandFlag, int [2], int [2], int [2]
-) __attribute__((noreturn));
+);
 #if OS_WINDOWS
 CBASE_API_DECL void command_windows_command_line(Command *, char *, int64);
 CBASE_API_DECL char *command_windows_argv0(Command *, char *, int32 *);

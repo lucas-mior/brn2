@@ -580,7 +580,7 @@ assert_double_close_tol(double var1, double var2,
     return diff <= tolerance;
 }
 
-static void __attribute((noreturn))
+static noreturn void
 assert_double_failure(char *file, int32 line, char *func,
                       char *name1, char *name2,
                       char *type1, char *type2,
@@ -690,22 +690,22 @@ a_bool_##MODE(char *file, int32 line, char *func,                              \
 GENERATE_ASSERT_BOOLS(equal, ==)
 GENERATE_ASSERT_BOOLS(not_equal, !=)
 
-static void __attribute((noreturn))
+static noreturn void
 a_bool_more(void *p, ...) {
     (void)p;
     TRAP();
 }
-static void __attribute((noreturn))
+static noreturn void
 a_bool_less(void *p, ...) {
     (void)p;
     TRAP();
 }
-static void __attribute((noreturn))
+static noreturn void
 a_bool_more_equal(void *p, ...) {
     (void)p;
     TRAP();
 }
-static void __attribute((noreturn))
+static noreturn void
 a_bool_less_equal(void *p, ...) {
     (void)p;
     TRAP();
@@ -1163,7 +1163,7 @@ _Generic((VAR1), \
 static sig_atomic_t assertion_failed = false;
 static sigjmp_buf assert_env;
 
-static void __attribute__((noreturn))
+static noreturn void
 handler_failed_assertion(int unused) {
     (void)unused;
     assertion_failed = true;

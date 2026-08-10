@@ -881,7 +881,7 @@ memory_functions_sink(void) {
 static sigjmp_buf test_jump_env;
 static bool caught_expected_fail = false;
 
-static void __attribute((noreturn))
+static noreturn void
 test_expected_fail_handler(int sig) {
     (void)sig;
     caught_expected_fail = true;
