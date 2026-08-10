@@ -489,7 +489,7 @@ _Generic((VAR), \
     default: TYPE_OTHER        \
 )
 
-#define TYPEBITS(VAR) (sizeof(VAR)*CHAR_BIT)
+#define TYPEBITS(VAR) (SIZEOF(VAR)*CHAR_BIT)
 
 #define DOUBLE_GET(x) \
 _Generic((x), \
@@ -734,7 +734,7 @@ main(void) {
         assert(strequal(S_(false), "0"));
         assert(strequal(SF("0x%02x", 10), "0x0a"));
 
-        n = snprint(buf, sizeof(buf),
+        n = snprint(buf, SIZEOF(buf),
                     "Now you can insert var" V(a) V(b) "s in situ:\n"
                     V(c) " divided by " V(d) " equals " V(c/d) "\n");
         assert(n == strlen2("Now you can insert variables in situ:\n"
@@ -743,20 +743,20 @@ main(void) {
         assert(strequal(buf, "Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));
 
-        n = snprint(buf, sizeof(buf),
+        n = snprint(buf, SIZEOF(buf),
                     "This is " W(e) " It's " V(strlen(e)) " characters long\n");
-        snprintf(expected, sizeof(expected),
+        snprintf(expected, SIZEOF(expected),
                  "This is %s It's %lu characters long\n",
                  e, (ulong)strlen(e));
         assert(n == strlen2(expected));
         assert(strequal(buf, expected));
 
-        n = snprint(buf, sizeof(buf),
+        n = snprint(buf, SIZEOF(buf),
                     "custom " VF("%04i", c) " " VF("%c", a) "\n");
         assert(n == strlen2("custom 0001 i\n"));
         assert(strequal(buf, "custom 0001 i\n"));
 
-        n = snprint(small, sizeof(small), "prefix-" W(e));
+        n = snprint(small, SIZEOF(small), "prefix-" W(e));
         assert(n == (int)(strlen("prefix-") + strlen(e)));
         assert(strequal(small, "prefix-"));
 
@@ -765,7 +765,7 @@ main(void) {
         n = fprint(fp, "file ", V(c), " ", VF("%04i", c), "\n");
         assert(n == strlen2("file 1 0001\n"));
         rewind(fp);
-        assert(fgets(buf, sizeof(buf), fp));
+        assert(fgets(buf, SIZEOF(buf), fp));
         assert(strequal(buf, "file 1 0001\n"));
         fclose(fp);
 
@@ -774,7 +774,7 @@ main(void) {
         {
             char buffer[16];
             assert((print0(V(c), "\n")
-                    == snprintf(buffer, sizeof(buffer), "%d\n", c)));
+                    == snprintf(buffer, SIZEOF(buffer), "%d\n", c)));
         }
     }
 }
