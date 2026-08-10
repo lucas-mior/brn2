@@ -31,6 +31,10 @@
   #define _NETBSD_SOURCE
 #endif
 
+#if OS_OPENBSD && !defined(_BSD_SOURCE)
+  #define _BSD_SOURCE
+#endif
+
 #if CC_CLANG
   #pragma clang diagnostic pop
 #endif
