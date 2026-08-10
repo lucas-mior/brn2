@@ -191,13 +191,17 @@
 #define MAP_POPULATE 0
 #endif
 
+#if OS_UNIX
 #if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
 #define MAP_ANON MAP_ANONYMOUS
 #elif !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 #define MAP_ANONYMOUS MAP_ANON
+#elif OS_FREEBSD
+#define MAP_ANON 0x1000
+#define MAP_ANONYMOUS MAP_ANON
 #elif !defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
-#define MAP_ANON 0
-#define MAP_ANONYMOUS 0
+#error "Anonymous mmap is unsupported on this platform"
+#endif
 #endif
 
 #endif /* LIBC_H */
