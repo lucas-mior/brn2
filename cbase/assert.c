@@ -202,7 +202,8 @@ a_both_##SIGNEDNESS##_##MODE(                                                  \
     char *name1, char *name2,                                                  \
     char *type1, char *type2,                                                  \
     llong bits1, llong bits2,                                                  \
-    SIGNEDNESS long long var1, SIGNEDNESS long long var2) {                    \
+    SIGNEDNESS long long var1, SIGNEDNESS long long var2                       \
+) {                                                                            \
     if (!(var1 SYMBOL var2)) {                                                 \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
