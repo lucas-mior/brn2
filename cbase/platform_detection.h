@@ -52,7 +52,7 @@
   #define OS_MAC 1
 #elif defined(__FreeBSD__)
   #undef OS_FREEBSD
-  #define OS_FREEBSD 0
+  #define OS_FREEBSD 1
 #elif defined(__NetBSD__)
   #undef OS_NETBSD
   #define OS_NETBSD 1
