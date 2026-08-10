@@ -45,4 +45,17 @@ typedef ullong uint64;
 typedef uintptr_t uintptr;
 typedef intptr_t  intptr;
 
+#if SCHAR_MIN != -128
+#error "This compiler/machine does not use 2's complement. Throw it out."
+#endif
+#if SHRT_MIN != -32768
+#error "This compiler/machine does not use 2's complement. Throw it out."
+#endif
+#if INT_MIN != -2147483648
+#error "This compiler/machine does not use 2's complement. Throw it out."
+#endif
+#if (LLONG_MIN + 1) != (-9223372036854775807)
+#error "This compiler/machine does not use 2's complement. Throw it out."
+#endif
+
 #endif /* PRIMITIVES_H */
