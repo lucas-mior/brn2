@@ -823,7 +823,7 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 
 #define ASSERT_POSITIVE(VAR1) do {                                             \
     llong p = VAR1;                                                            \
-    if (p < 0) {                                                               \
+    if (p <= 0) {                                                              \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %lld > 0\n", #VAR1, p);                             \
         TRAP();                                                                \
@@ -832,9 +832,27 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 
 #define ASSERT_NEGATIVE(VAR1) do {                                             \
     llong p = VAR1;                                                            \
-    if (p > 0) {                                                               \
+    if (p >= 0) {                                                              \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
                      "%s = %lld < 0\n", #VAR1, p);                             \
+        TRAP();                                                                \
+    }                                                                          \
+} while (0)
+
+#define ASSERT_NON_POSITIVE(VAR1) do {                                         \
+    llong p = VAR1;                                                            \
+    if (p > 0) {                                                               \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %lld <= 0\n", #VAR1, p);                            \
+        TRAP();                                                                \
+    }                                                                          \
+} while (0)
+
+#define ASSERT_NON_NEGATIVE(VAR1) do {                                         \
+    llong p = VAR1;                                                            \
+    if (p < 0) {                                                               \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %lld >= 0\n", #VAR1, p);                            \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
