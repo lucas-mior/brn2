@@ -1760,6 +1760,7 @@ main(void) {
         FileList old_stack = {0};
         FileList *old = &old_stack;
 
+        char directory_buffer[128];
         char *directory = "/tmp/brn2_abcd";
         char *filelist = "/tmp/brn2list.txt";
         char command_rmdir[128];
@@ -1768,6 +1769,11 @@ main(void) {
         qsort64(files2, LENGTH(files2), SIZEOF(*files2), files_compare);
         error("brn2.c: test 4 ...\n");
 
+#if OS_WINDOWS
+        SNPRINTF(directory_buffer, "/tmp/brn2_abcd_%lu",
+                 (unsigned long)GetCurrentProcessId());
+        directory = directory_buffer;
+#endif
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
         system(command_rmdir);
         if (mkdir(directory, 0777) < 0) {

@@ -74,6 +74,10 @@
 #define CBASE_HAS_DIRENT_H CBASE_HAS_POSIX_LIKE_HEADERS
 #endif
 
+#if !defined(CBASE_HAS_DIRECT_H)
+#define CBASE_HAS_DIRECT_H CBASE_CRT_MSVC
+#endif
+
 #if !defined(CBASE_HAS_FCNTL_H)
 #define CBASE_HAS_FCNTL_H (OS_UNIX || OS_WINDOWS)
 #endif

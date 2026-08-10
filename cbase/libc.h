@@ -97,6 +97,9 @@
 #endif
 
 // POSIX-like headers provided by Unix and some Windows CRTs.
+#if CBASE_HAS_DIRECT_H
+#include <direct.h>
+#endif
 #if CBASE_HAS_DIRENT_H
 #include <dirent.h>
 #endif
