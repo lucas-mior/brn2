@@ -40,7 +40,7 @@ _Static_assert(sizeof(double)*CHAR_BIT == 64,
 
 static void
 assert_print_loc(char *file, int32 line, char *func) {
-    fprintf(stderr, "\nAssertion failed at %s:%d:%s\n", file, line, func);
+    fprintf(stderr, "%s:%d:%s(): Assertion failed:\n", file, line, func);
     return;
 }
 
