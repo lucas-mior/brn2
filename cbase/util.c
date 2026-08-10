@@ -1609,6 +1609,7 @@ catfile(int where, char *file) {
 
 #if !OS_WINDOWS
 
+#if OS_UNIX
 #define XSIGNAL(NAME) [NAME] = #NAME
 static char *signal_names[] = {
     XSIGNAL(SIGABRT),
@@ -1670,6 +1671,8 @@ xkill(pid_t pid, int signum) {
     }
     return;
 }
+
+#endif /* OS_UNIX */
 
 #endif /* !OS_WINDOWS */
 
@@ -2998,9 +3001,11 @@ main(int argc, char **argv) {
     (void)free2_;
 
     (void)xmmap_commit;
+#if OS_UNIX
     (void)xkill;
     (void)xdup2;
     (void)xpipe;
+#endif
     (void)xunlink;
 
     (void)fwrite64;
