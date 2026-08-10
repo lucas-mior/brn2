@@ -2772,9 +2772,90 @@ test_remove_tree(char *path) {
 
     return;
 #elif OS_WINDOWS
+    WIN32_FIND_DATAA find_data;
+    HANDLE find_handle;
+    DWORD attributes;
     DWORD error_code;
 
-    if (RemoveDirectoryA(path)) {
+    attributes = GetFileAttributesA(path);
+    if (attributes == INVALID_FILE_ATTRIBUTES) {
+        error_code = GetLastError();
+        if ((error_code == ERROR_FILE_NOT_FOUND)
+            || (error_code == ERROR_PATH_NOT_FOUND)) {
+            return;
+        }
+
+        error("Error checking test path %s: windows error %lu.\n",
+              path, (ulong)error_code);
+        return;
+    }
+
+    if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
+        if (!(attributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+            char pattern[PATH_MAX];
+            int32 len;
+
+            len = snprintf2(pattern, SIZEOF(pattern), "%s/*", path);
+            if ((len <= 0) || (len >= SIZEOF(pattern))) {
+                error("Test path too long below %s.\n", path);
+                fatal(EXIT_FAILURE);
+            }
+
+            find_handle = FindFirstFileA(pattern, &find_data);
+            if (find_handle == INVALID_HANDLE_VALUE) {
+                error_code = GetLastError();
+                if (error_code != ERROR_FILE_NOT_FOUND) {
+                    error("Error reading test directory %s: windows error "
+                          "%lu.\n", path, (ulong)error_code);
+                    return;
+                }
+            } else {
+                do {
+                    char child[PATH_MAX];
+
+                    if (strequal(find_data.cFileName, ".")
+                        || strequal(find_data.cFileName, "..")) {
+                        continue;
+                    }
+
+                    len = snprintf2(child, SIZEOF(child), "%s/%s",
+                                    path, find_data.cFileName);
+                    if ((len <= 0) || (len >= SIZEOF(child))) {
+                        error("Test path too long below %s.\n", path);
+                        fatal(EXIT_FAILURE);
+                    }
+                    test_remove_tree(child);
+                } while (FindNextFileA(find_handle, &find_data));
+
+                error_code = GetLastError();
+                if ((error_code != ERROR_NO_MORE_FILES)
+                    && (error_code != ERROR_SUCCESS)) {
+                    error("Error reading test directory %s: windows error "
+                          "%lu.\n", path, (ulong)error_code);
+                }
+                if (!FindClose(find_handle)) {
+                    error("Error closing test directory %s: windows error "
+                          "%lu.\n", path, (ulong)GetLastError());
+                }
+            }
+        }
+
+        if (RemoveDirectoryA(path)) {
+            return;
+        }
+
+        error_code = GetLastError();
+        if ((error_code == ERROR_FILE_NOT_FOUND)
+            || (error_code == ERROR_PATH_NOT_FOUND)) {
+            return;
+        }
+
+        error("Error removing test directory %s: windows error %lu.\n",
+              path, (ulong)error_code);
+        return;
+    }
+
+    if (DeleteFileA(path)) {
         return;
     }
 
@@ -2784,7 +2865,7 @@ test_remove_tree(char *path) {
         return;
     }
 
-    error("Error removing test directory %s: windows error %lu.\n",
+    error("Error removing test path %s: windows error %lu.\n",
           path, (ulong)error_code);
     return;
 #else
