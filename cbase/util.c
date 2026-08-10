@@ -646,7 +646,6 @@ strerror_r(int errnum, char *buffer, size_t size) {
     char *error_message = strerror(errnum);
     int32 len = strlen32(error_message);
 
-    ASSERT_POSITIVE(size);
     memcpy64(buffer, error_message, MIN(len + 1, size - 1));
     buffer[size - 1] = '\0';
 

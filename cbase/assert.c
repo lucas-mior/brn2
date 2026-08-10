@@ -798,77 +798,77 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         } else {                                                               \
-            assert_error(__FILE__, __LINE__, FUNC__, "%s", #__VA_ARGS__);      \
+            assert_error(__FILE__, __LINE__, FUNC__, "%s\n", #__VA_ARGS__);      \
             TRAP();                                                            \
         }                                                                      \
     }                                                                          \
 } while (0)
 
 #define ASSERT_NULL(VAR1) do {                                                 \
-    void *p = VAR1;                                                            \
-    if (p != NULL) {                                                           \
+    void *ASSERT_NULL = VAR1;                                                  \
+    if (ASSERT_NULL != NULL) {                                                 \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %p == NULL\n", #VAR1, p);                           \
+                     "%s = %p == NULL\n", #VAR1, ASSERT_NULL);                 \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
 
 #define ASSERT_ZERO(VAR1) do {                                                 \
-    llong p = VAR1;                                                            \
-    if (p != 0) {                                                              \
+    llong ASSERT_ZERO = VAR1;                                                  \
+    if (ASSERT_ZERO != 0) {                                                    \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld == 0\n", #VAR1, p);                            \
+                     "%s = %lld == 0\n", #VAR1, ASSERT_ZERO);                  \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
 
 #define ASSERT_POSITIVE(VAR1) do {                                             \
-    llong p = VAR1;                                                            \
-    if (p <= 0) {                                                              \
+    llong ASSERT_POSITIVE = VAR1;                                              \
+    if (ASSERT_POSITIVE <= 0) {                                                \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld > 0\n", #VAR1, p);                             \
+                     "%s = %lld > 0\n", #VAR1, ASSERT_POSITIVE);               \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
 
 #define ASSERT_NEGATIVE(VAR1) do {                                             \
-    llong p = VAR1;                                                            \
-    if (p >= 0) {                                                              \
+    llong ASSERT_NEGATIVE = VAR1;                                              \
+    if (ASSERT_NEGATIVE >= 0) {                                                \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld < 0\n", #VAR1, p);                             \
+                     "%s = %lld < 0\n", #VAR1, ASSERT_NEGATIVE);               \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
 
 #define ASSERT_NON_POSITIVE(VAR1) do {                                         \
-    llong p = VAR1;                                                            \
-    if (p > 0) {                                                               \
+    llong ASSERT_NON_POSITIVE = VAR1;                                          \
+    if (ASSERT_NON_POSITIVE > 0) {                                             \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld <= 0\n", #VAR1, p);                            \
+                     "%s = %lld <= 0\n", #VAR1, ASSERT_NON_POSITIVE);          \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
 
 #define ASSERT_NON_NEGATIVE(VAR1) do {                                         \
-    llong p = VAR1;                                                            \
-    if (p < 0) {                                                               \
+    llong ASSERT_NON_NEGATIVE = VAR1;                                          \
+    if (ASSERT_NON_NEGATIVE < 0) {                                             \
         if (!DEBUGGING) {                                                      \
             UNREACHABLE();                                                     \
         }                                                                      \
         assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld >= 0\n", #VAR1, p);                            \
+                     "%s = %lld >= 0\n", #VAR1, ASSERT_NON_NEGATIVE);          \
         TRAP();                                                                \
     }                                                                          \
 } while (0)
