@@ -1350,9 +1350,17 @@ main(void) {
     (void)noop;
 
     {
-        char command[256];
-        char *filelist = "/tmp/brn2test";
-        SNPRINTF(command, "ls -a > %s", filelist);
+        char temp_dir[PATH_MAX];
+        char filelist[PATH_MAX];
+        char command[2*PATH_MAX];
+
+        test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "brn2");
+        SNPRINTF(filelist, "%s/brn2test", temp_dir);
+#if OS_WINDOWS
+        SNPRINTF(command, "dir /a /b > \"%s\"", filelist);
+#else
+        SNPRINTF(command, "ls -a > \"%s\"", filelist);
+#endif
 
         error("brn2.c: test 0...\n");
 
@@ -1368,7 +1376,7 @@ main(void) {
                 = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
-        system(command);
+        ASSERT_ZERO(system(command));
         brn2_list_from_dir(list1, ".");
         brn2_list_from_file(list2, filelist, true);
 
@@ -1393,15 +1401,23 @@ main(void) {
         arenas_destroy(list1->arenas, nthreads);
         arenas_destroy(list2->arenas, nthreads);
         unlink(filelist);
+        test_remove_tree(temp_dir);
     }
 
     {
-        char command[256];
-        char *filelist = "/tmp/brn2test";
+        char temp_dir[PATH_MAX];
+        char filelist[PATH_MAX];
+        char command[2*PATH_MAX];
         uint32 capacity_set;
         struct Hash_map *map;
 
-        SNPRINTF(command, "find . > %s", filelist);
+        test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "brn2");
+        SNPRINTF(filelist, "%s/brn2test", temp_dir);
+#if OS_WINDOWS
+        SNPRINTF(command, "dir /a /b /s . > \"%s\"", filelist);
+#else
+        SNPRINTF(command, "find . > \"%s\"", filelist);
+#endif
 
         error("brn2.c: test 1...\n");
 
@@ -1417,7 +1433,7 @@ main(void) {
                 = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
-        system(command);
+        ASSERT_ZERO(system(command));
 
         brn2_list_from_file(list1, filelist, true);
         brn2_list_from_lines(list2, filelist, true);
@@ -1481,6 +1497,7 @@ main(void) {
         arenas_destroy(list2->arenas, nthreads);
         hash_destroy_map(map);
         unlink(filelist);
+        test_remove_tree(temp_dir);
     }
 
     {
@@ -1489,12 +1506,19 @@ main(void) {
         char **argv;
         FILE *args;
 
-        char command[256];
-        char *filelist = "/tmp/brn2test";
+        char temp_dir[PATH_MAX];
+        char filelist[PATH_MAX];
+        char command[2*PATH_MAX];
         uint32 capacity_set;
         struct Hash_map *map;
 
-        SNPRINTF(command, "ls *.c > %s", filelist);
+        test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "brn2");
+        SNPRINTF(filelist, "%s/brn2test", temp_dir);
+#if OS_WINDOWS
+        SNPRINTF(command, "dir /b *.c > \"%s\"", filelist);
+#else
+        SNPRINTF(command, "ls *.c > \"%s\"", filelist);
+#endif
 
         error("brn2.c: test 2...\n");
 
@@ -1510,7 +1534,7 @@ main(void) {
                 = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
         }
 
-        system(command);
+        ASSERT_ZERO(system(command));
 
         brn2_list_from_file(list1, filelist, true);
 
@@ -1603,6 +1627,7 @@ main(void) {
         arenas_destroy(list1->arenas, nthreads);
         arenas_destroy(list2->arenas, nthreads);
         unlink(filelist);
+        test_remove_tree(temp_dir);
     }
     if (OS_LINUX) {
         FileList old_stack = {0};
@@ -1767,29 +1792,36 @@ main(void) {
         FileList old_stack = {0};
         FileList *old = &old_stack;
 
-        char directory_buffer[128];
+        char directory_buffer[PATH_MAX];
+        char filelist_buffer[PATH_MAX];
         char *directory = "/tmp/brn2_abcd";
         char *filelist = "/tmp/brn2list.txt";
+#if !OS_WINDOWS
         char command_rmdir[128];
+#endif
         FILE *args;
 
         qsort64(files2, LENGTH(files2), SIZEOF(*files2), files_compare);
         error("brn2.c: test 4 ...\n");
 
 #if OS_WINDOWS
-        SNPRINTF(directory_buffer, "/tmp/brn2_abcd_%lu",
-                 (unsigned long)GetCurrentProcessId());
+        test_make_temp_dir(directory_buffer, SIZEOF(directory_buffer), "brn2");
         directory = directory_buffer;
+        SNPRINTF(filelist_buffer, "%s/brn2list.txt", directory);
+        filelist = filelist_buffer;
 #else
         (void)directory_buffer;
+        (void)filelist_buffer;
 #endif
+#if !OS_WINDOWS
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
-        system(command_rmdir);
+        ASSERT_ZERO(system(command_rmdir));
         if (BRN2_MKDIR(directory, 0777) < 0) {
             error("Error creating directory %s: %s.\n",
                   directory, strerror(errno));
             fatal(EXIT_FAILURE);
         }
+#endif
         if (chdir(directory) < 0) {
             error("Error changing dir into %s: %s.\n",
                   directory, strerror(errno));
