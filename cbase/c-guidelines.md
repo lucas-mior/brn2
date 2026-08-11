@@ -134,9 +134,9 @@ typeof(var)  // good
     + if you are inside a callback that would be infeasible to pass an arena
       pointer
     + possible other reasons
-  * For tracking ownership, you can use handlers to a specific module of the
-    program that is responsible for allocating and freeing its objects. A good
-    example is `cbase/hash.c`
+  * For tracking ownership, you can use handlers to a specific module/type of
+    the program that is responsible for allocating and freeing its objects. A
+    good example is `cbase/hash.c`
   * For dynamic arrays, use the generic arrays defined in `cbase/array.c`, if
     possible.
 
