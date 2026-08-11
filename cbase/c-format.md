@@ -220,17 +220,6 @@ long lines so the 80-character limit rule is followed.
 static int32 function(int32 arg);
 ```
 
-## Mechanical rewrite rules
-
-Do not rewrite post-increment or post-decrement when it is part of an array
-append or fill expression:
-
-```c
-array[len++] = value;  // keep as is
-argv[i++] = "arg";     // keep as is
-items[count++] = item; // keep as is
-```
-
 ## Preprocessor directives
 Don't use `#ifdef` and `#ifndef`, use `#if defined()` and `#if !defined()`
 instead. Prefer explicitly setting the macro to 0 or 1 and checking its value
