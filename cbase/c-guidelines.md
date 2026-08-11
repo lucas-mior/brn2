@@ -580,6 +580,9 @@ default:
   * Don't use `memset(&my_struct, 0, SIZEOF(my_struct));`
 - To initialize a stack array to zero, use `MyType array[ARRAY_SIZE] = {0};`
   * Don't use `memset(&array, 0, SIZEOF(array));`
+- To initialize a heap struct to zero, use `*my_struct = (MyStruct){0};`
+  * Don't use `memset(my_struct, 0, SIZEOF(*my_struct));`
+- To initialize a heap array to zero, use `memset64`:
 - Try to keep the scope of variables reduced. Use of artificial blocks is
   sometimes useful:
   ```c
