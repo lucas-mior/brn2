@@ -953,8 +953,12 @@ main(void) {
     ASSERT_EQUAL(0 < 1, 1 < 3);
 
     {
-        char *path = "/tmp/test_assert.txt";
+        char temp_dir[PATH_MAX];
+        char path[PATH_MAX];
         FILE *file;
+
+        test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "assertions");
+        test_join_path(path, SIZEOF(path), temp_dir, "test_assert.txt");
 
         if ((file = XFOPEN(path, "w")) == NULL) {
             fatal(EXIT_FAILURE);
@@ -965,6 +969,7 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
         ASSERT_FILE_CONTAINS(path, "ontents");
+        test_remove_tree(temp_dir);
     }
 
     printf("All assertions tests passed.\n");
