@@ -274,6 +274,7 @@ scandir(
         return -1;
     }
 
+    list = realloc2(list, capacity, count, SIZEOF(*list));
     *namelist = list;
     return (int32)count;
 }

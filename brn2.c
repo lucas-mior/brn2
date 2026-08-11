@@ -163,12 +163,12 @@ brn2_list_from_dir(FileList *list, char *directory) {
         int64 size;
 
         if (brn2_is_invalid_name(name)) {
-            free(directory_list[i]);
+            free2(directory_list[i], SIZEOF(*directory_list[i]));
             continue;
         }
         if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
             error("File name too long. Skipping...\n");
-            free(directory_list[i]);
+            free2(directory_list[i], SIZEOF(*directory_list[i]));
             continue;
         }
 
@@ -191,10 +191,10 @@ brn2_list_from_dir(FileList *list, char *directory) {
             memcpy64(file->name, name, file->length + 1);
         }
 
-        free(directory_list[i]);
+        free2(directory_list[i], SIZEOF(*directory_list[i]));
         length += 1;
     }
-    free(directory_list);
+    free2(directory_list, (int64)number_files*SIZEOF(*directory_list));
     list->files = realloc2(list->files,
                            number_files, length, SIZEOF(*list->files));
     list->length = length;
