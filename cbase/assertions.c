@@ -646,6 +646,16 @@ a_bool_less_equal(void *p, ...) {
 
 #undef GENERATE_ASSERT_BOOLS
 
+#if 0 == TESTING_assertions
+static inline void
+assertions_functions_sink(void) {
+    (void)a_bool_more;
+    (void)a_bool_less;
+    (void)a_bool_more_equal;
+    (void)a_bool_less_equal;
+}
+#endif
+
 #if TESTING_assertions
 #define CBASE_IMPLEMENT
 #include "cbase.h"
