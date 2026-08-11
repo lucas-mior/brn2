@@ -78,7 +78,7 @@ fi
 
 case "$target" in
 debug)
-    CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
+    CFLAGS="$CFLAGS -g3 -Og -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
@@ -94,14 +94,14 @@ perf)
     exe="bin/${program}_perf"
     ;;
 valgrind)
-    CFLAGS="$CFLAGS -g3 -O0 -ftree-vectorize"
+    CFLAGS="$CFLAGS -g3 -Og -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 callgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     ;;
 test)
-    CFLAGS="$CFLAGS -g3 -O0 -DDEBUGGING=1"
+    CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 check)
