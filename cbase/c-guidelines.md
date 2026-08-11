@@ -277,7 +277,7 @@ strings. Prefer `memcpy64`, `memmem64`, or custom functions that operate on
 string with known length.
 
 ## Comparing strings:
-In general, avoid `strcmp()`:
+In general, avoid `strcmp()`, use the alternatives below instead:
 - For strings that are both null terminated and we don't know the length of
   either one:
   * use `strequal(s1, s2)`
