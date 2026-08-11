@@ -120,9 +120,9 @@ typeof(var)  // good
   * `free2` already checks if the passed pointer is NULL. Don't check if the
     pointer is NULL before calling `free2`.
 - Choose what is best in each situation:
-  * Use traditional `malloc2`, `realloc2`, and `free2`.
   * Use the `arena.c` bump allocator for groups of allocations with the same
     lifetime, either of equal or different sizes.
+  * Use traditional `malloc2`, `realloc2`, and `free2` when more appropriate.
   * Use the stack for small capped allocations.
 - Never use VLAs.
 - Some guidelines to avoid memory errors (use after free, double free, invalid
