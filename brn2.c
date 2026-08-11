@@ -128,11 +128,9 @@ brn2_list_from_args(FileList *list, int32 argc, char **argv) {
     return;
 }
 
+#if !OS_WINDOWS
 static int32
 brn2_scandir(char *directory, struct dirent ***directory_list) {
-#if OS_WINDOWS
-    return scandir(directory, directory_list, NULL, NULL);
-#else
     DIR *dir;
     struct dirent *entry;
     struct dirent **entries;
@@ -185,8 +183,8 @@ brn2_scandir(char *directory, struct dirent ***directory_list) {
     *directory_list = entries;
 
     return length;
-#endif
 }
+#endif
 
 void
 brn2_list_from_dir(FileList *list, char *directory) {

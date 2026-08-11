@@ -146,13 +146,8 @@ scandir_list_free(struct dirent **list, int64 count, int64 capacity) {
     return;
 }
 
-static int
-scandir(
-    const char *dir,
-    struct dirent ***namelist,
-    int (*filter)(const struct dirent *),
-    int (*compar)(const struct dirent **, const struct dirent **)
-) {
+static int32
+brn2_scandir(char *dir, struct dirent ***namelist) {
     WIN32_FIND_DATAW find_data;
     HANDLE find_handle;
     wchar_t *wide_pattern;
@@ -163,8 +158,6 @@ scandir(
     int64 count;
     int64 capacity = 16;
     int32 wide_dir_length;
-    (void)filter;
-    (void)compar;
 
     if ((dir == NULL) || (namelist == NULL)) {
         errno = EINVAL;
@@ -268,7 +261,7 @@ scandir(
         return -1;
     }
 
-    if (count >= MAXOF(scandir(NULL, NULL, NULL, NULL))) {
+    if (count >= MAXOF(brn2_scandir(NULL, NULL))) {
         scandir_list_free(list, count, capacity);
         errno = EOVERFLOW;
         return -1;
@@ -458,7 +451,7 @@ main(void) {
         FILE *ls_pipe;
         char buffer[1024];
 
-        if ((nfiles = scandir("./", &dirent, NULL, NULL)) <= 0) {
+        if ((nfiles = brn2_scandir("./", &dirent)) <= 0) {
             error("Error in scandir for windows.\n");
             fatal(EXIT_FAILURE);
         }
