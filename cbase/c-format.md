@@ -193,7 +193,28 @@ function(int32 arg) {
 }
 ```
 
-If the function header is long, and needs more than one line, put an extra new
+If the function header is long, and needs more than one line,
+break the line but keep the identation:
+```c
+// good
+static void
+function_with_long_name_and_multiple_arguments(void *pointer,
+                                               char *argument_long_name) {
+    return;
+}
+
+// bad
+static void
+function_with_long_name_and_multiple_arguments(
+    void *pointer,
+    char *argument_long_name
+) {
+    return;
+}
+```
+
+If the function header is long, and the identation makes it not fit in 80
+columns, break, put an extra new
 line before the closing parenthesis:
 ```c
 // bad
