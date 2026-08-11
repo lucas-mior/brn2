@@ -306,8 +306,8 @@ functions. Those are defined in cbase/.
 ## Error messages
 
 - Use the `error` or `error2` macro.
-  * `error` includes `__FILE__`, `__LINE__`, and `__func__`, so avoid using it
-    for error messages composed of multiple calls.
+  * `error` includes `__FILE__`, `__LINE__`, and `__func__`,
+    so avoid using it for error messages composed of multiple calls.
   * `error2` is simply a wrapper for `fprintf(stderr,`, so avoid using it if
     more context about the bug would be useful.
 
