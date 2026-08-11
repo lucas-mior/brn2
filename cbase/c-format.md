@@ -232,7 +232,7 @@ items[count++] = item; // keep as is
 ```
 
 ## Preprocessor directives
-Don't use `#ifdef` and `#ifndef`, use `#if defined()` and `if !defined()`
+Don't use `#ifdef` and `#ifndef`, use `#if defined()` and `#if !defined()`
 instead. Prefer explicitly setting the macro to 0 or 1 and checking its value
 directly instead of checking if it is defined:
 ```c
@@ -296,7 +296,7 @@ typedef Struct MyStruct {
 MyStruct my_struct = {
     .string = "string",
     .inner = {
-        .inner_string = "inner_string";
+        .inner_string = "inner_string",
     },
 };
 
