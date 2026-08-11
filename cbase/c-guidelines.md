@@ -496,6 +496,11 @@ if (pointer) {
 }
 ```
 
+For asserting that a pointer is NULL, use:
+```c
+ASSERT_NULL(pointer);
+```
+
 ## Assertions
 - Use the assertions defined in `cbase/assertions.c`.
   - `ASSERT(expression)`
