@@ -38,6 +38,7 @@ For formatting-only style rules, see `c-format.md`.
   * Include `primitives.h` and use the better aliases typedefed there.
 - Avoid using legacy C integers: `short`, `int`, `long`, and `long long`.
   * Prefer using `int16`, `int32`, and `int64` instead.
+    + See `cbase/primitives.h` to see how they are defined.
 - Boolean flags that are not used in hot loops or hot structs should use the
   `bool` type and the `true` and `false` keywords to communicate intent.
 - If a boolean variable is used in a very hot loop, `int32` may be preferable.
