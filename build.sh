@@ -137,7 +137,6 @@ if [ "$target" = "cross" ]; then
 
     case $cross in
     x86_64-macos|aarch64-macos)
-        CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
         LDFLAGS="$LDFLAGS -lpthread"
         ;;
     *linux*)
@@ -155,7 +154,6 @@ else
     *Linux*)
         ;;
     *Darwin*)
-        CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
         ;;
     *MINGW*|*MSYS*|*CYGWIN*)
         ;;
