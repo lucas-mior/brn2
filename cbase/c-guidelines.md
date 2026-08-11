@@ -137,6 +137,8 @@ typeof(var)  // good
   * For tracking ownership, you can use handlers to a specific module of the
     program that is responsible for allocating and freeing its objects. A good
     example is `cbase/hash.c`
+  * For dynamic arrays, use the generic arrays defined in `cbase/array.c`, if
+    possible.
 
 
 ### exiting the program
