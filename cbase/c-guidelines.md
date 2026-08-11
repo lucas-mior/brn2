@@ -653,7 +653,8 @@ default:
         return mask;
     }
 
-    // even better (now the important variable is initialized near the loop)
+    // even better (now the important variable is initialized near the loop,
+                    while also keeping conciseness)
     static uint32
     function(void *params) {
         double other_var;
