@@ -670,14 +670,16 @@ default:
   same line:
   ```c
   // bad
-  void my_function(ProgramOptions *options) {
+  void
+  my_function(ProgramOptions *options) {
       char *name;
 
       name = options->name;
   }
 
   // good
-  void my_function(ProgramOptions *options) {
+  void
+  my_function(ProgramOptions *options) {
       char *name = options->name;
   }
   ```
