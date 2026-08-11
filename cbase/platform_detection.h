@@ -40,7 +40,7 @@
   #undef OS_LINUX
   #define OS_LINUX 1
 #elif defined(__APPLE__) && defined(__MACH__)
-  #undef OS_MAX
+  #undef OS_MAC
   #define OS_MAC 1
 #elif defined(__FreeBSD__)
   #undef OS_FREEBSD
