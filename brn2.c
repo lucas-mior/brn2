@@ -128,6 +128,62 @@ brn2_list_from_args(FileList *list, int32 argc, char **argv) {
     return;
 }
 
+static int32
+brn2_scandir(char *directory, struct dirent ***directory_list) {
+    DIR *dir;
+    struct dirent *entry;
+    struct dirent **entries;
+    int32 length = 0;
+    int32 capacity = 256;
+    int32 error_code;
+
+    if ((dir = opendir(directory)) == NULL) {
+        return -1;
+    }
+
+    entries = malloc2(capacity*SIZEOF(*entries));
+
+    errno = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        if (length >= capacity) {
+            int64 old_capacity = capacity;
+
+            if (capacity > (MAXOF(capacity) / 2)) {
+                error("Error: too many files in directory '%s'.\n", directory);
+                fatal(EXIT_FAILURE);
+            }
+            capacity *= 2;
+            entries = realloc2(entries, old_capacity, capacity,
+                               SIZEOF(*entries));
+        }
+
+        entries[length] = malloc2(SIZEOF(*entries[length]));
+        memcpy64(entries[length], entry, SIZEOF(*entries[length]));
+        length += 1;
+    }
+
+    error_code = errno;
+    if (closedir(dir) < 0) {
+        if (error_code == 0) {
+            error_code = errno;
+        }
+    }
+
+    if (error_code != 0) {
+        for (int32 i = 0; i < length; i += 1) {
+            free2(entries[i], SIZEOF(*entries[i]));
+        }
+        free2(entries, capacity*SIZEOF(*entries));
+        errno = error_code;
+        return -1;
+    }
+
+    entries = realloc2(entries, capacity, length, SIZEOF(*entries));
+    *directory_list = entries;
+
+    return length;
+}
+
 void
 brn2_list_from_dir(FileList *list, char *directory) {
     struct dirent **directory_list;
@@ -146,7 +202,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         directory_length = 0;
     }
 
-    number_files = scandir(directory, &directory_list, NULL, NULL);
+    number_files = brn2_scandir(directory, &directory_list);
     if (number_files < 0) {
         error("Error scanning '%s': %s.\n", directory, strerror(errno));
         fatal(EXIT_FAILURE);
