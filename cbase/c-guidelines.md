@@ -281,9 +281,9 @@ In general, avoid `strcmp()`, use the alternatives below instead:
 - For strings that are both null terminated and we don't know the length of
   either one:
   * use `strequal(s1, s2)`
-- For strings that we know the length of the one (might be null terminated but
-  not necessarly), but we don't know the length of the other (the other must be
-  null terminated):
+- For strings that we know the length of the one (it might be null terminated
+  but not necessarly), but we don't know the length of the other (the other must
+  be null terminated):
   * use `STREQUAL(s1, s1_len, s2)`
 - For strings that we know the length of both (they might be null terminated,
   but not necessarly:
