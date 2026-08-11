@@ -39,7 +39,8 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
   union fields.
 - Space is forbidden after dot used for initializing struct fields (but space
   before the dot is fine).
-- Space is mandatory around all boolean operators (`!`, `&&`, and `||`).
+- Space is mandatory around boolean or and boolean and (`&&`, and `||`).
+- Space is forbidden around boolean negation (`!`).
 - Space is mandatory around all comparison operators.
 - In general, prefer `+= 1` instead of `++`.
   * Exception: dynamic arrays: use `array[len++] = value` instead of
