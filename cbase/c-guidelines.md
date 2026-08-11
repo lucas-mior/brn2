@@ -592,7 +592,7 @@ default:
     functions, declare variables at the top of the function and call it a day.
 
 - Variable that have a "default return" value, or a "stub" value, shall be
-  initialized:
+  initialized with the declaration:
   ```c
   // bad
   static bool function(void *parameters) {
