@@ -103,13 +103,15 @@ default:
   int32 x;
   int32 y;
   ```
-- Always use trailing commas for arrays:
+- Always use trailing commas for arrays (except when initializing to zero):
   ```c
   int32 array[] = {
       1,
       2,
       3,
   };
+
+  int32 array2[10] = {0};
   ```
 
 ## Curly braces
