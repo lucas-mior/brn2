@@ -1,6 +1,4 @@
 # C formatting style for 64-bit PC programming
-Use this together with c-guidelines.md
-
 ## Note
 When a rule says "prefer", avoid changing already-readable code unless the
 specific form is listed as bad. Exceptions listed under a "prefer" rule should
@@ -9,7 +7,6 @@ be preserved.
 For non-formatting coding guidelines, see `c-guidelines.md`.
 
 ## Whitespace and indentation
-
 - For indentation, never use tabs.
   * Use spaces for indentation.
   * Use 4 spaces for each indentation level.
@@ -17,7 +14,6 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Keep line length at maximum 80 characters.
 
 ## Operators
-
 - Space is mandatory around `+` and `-`.
   * But not when using `+=` or `-=`:
     ```c
