@@ -27,7 +27,8 @@ For formatting-only style rules, see `c-format.md`.
 - `const` keyword:
   * Never use it in function declarations nor definitions
   * You can use it for static constant global data
-  * You can use it for casts needed to interface with the C standard library.
+  * You can use it for casts needed to interface with the C standard library or
+    other stupid libraries.
 - Avoid using `size_t`, `ptrdiff_t`, and `ssize_t`.
   * Prefer `int64` or `int32` depending on context.
   * The only reason to use `size_t`, `ptrdiff_t`, and `ssize_t` is for casting
