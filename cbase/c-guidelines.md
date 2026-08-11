@@ -43,7 +43,7 @@ For formatting-only style rules, see `c-format.md`.
   `bool` type and the `true` and `false` keywords to communicate intent.
 - If a boolean variable is used in a very hot loop, `int32` may be preferable.
 - Do not confuse booleans with bits in bit flags. Use `#define BITFLAGS 1` in
-  `xenums.c` for up to 32 related flags that occupy 32 bits.
+  `xenums.c` for up to 32 related flags that occupy 1 bit each.
 - When casting to a smaller integer type, or when casting double to integer,
   and we are not sure if it fits, check first using the `MAXOF` macro:
   ```c
