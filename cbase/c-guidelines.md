@@ -125,6 +125,19 @@ typeof(var)  // good
     lifetime, either of equal or different sizes.
   * Use the stack for small capped allocations.
 - Never use VLAs.
+- Some guidelines to avoid memory errors (use after free, double free, invalid
+  free, leak):
+  * Use the arena allocator from `cbase/arena.c` as much as possible. 
+    Only use `malloc2`, `realloc2`, and `free2` if you
+    really need the flexibility, for instance:
+    + if you need to grow the allocation
+    + if you are inside a callback that would be infeasible to pass an arena
+      pointer
+    + possible other reasons
+  * For tracking ownership, you can use handlers to a specific module of the
+    program that is responsible for allocating and freeing its objects. A good
+    example is `cbase/hash.c`
+
 
 ### exiting the program
 - To exit from within `main()`, always use `exit()`, never `return`.
