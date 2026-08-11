@@ -745,6 +745,13 @@ int main(void) {
 #endif /* TESTING_file_prefix */
 ```
 
+## File organization
+- Add include guards for every C file, except the ones uses as templates like
+  `cbase/hash.c` and `cbase/xenums.c`.
+- The first file to be included is always `cbase.h`, or the build will break.
+  * Exceptions: Some files in `cbase/` are not allowed to include `cbase.h`
+    because `cbase.h` itself depends on them.
+
 ## Missing cases
 
 If these guides miss some case, decide based on the files in `cbase/`. If you
