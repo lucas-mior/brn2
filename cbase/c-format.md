@@ -285,7 +285,7 @@ MyStruct my_struct = {0};
 
 Also indent structs inside structs.
 ```c
-typedef Struct MyStruct {
+typedef struct MyStruct {
     char *string;
     struct {
         char *inner_string;
