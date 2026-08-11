@@ -140,7 +140,6 @@ typeof(var)  // good
   * For dynamic arrays, use the generic arrays defined in `cbase/array.c`, if
     possible.
 
-
 ### exiting the program
 - To exit from within `main()`, always use `exit()`, never `return`.
 - Fatal errors: use `fatal(EXIT_FAILURE)`
