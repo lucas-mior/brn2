@@ -41,6 +41,7 @@ assert_file_contains(char *file, int32 line, char *func,
                      "Needle '%s' not found in file '%s'.\n", needle, path);
         TRAP();
     }
+    free2(buffer, buffer_len + 1);
     return;
 }
 
