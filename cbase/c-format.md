@@ -245,7 +245,8 @@ Break lines longer than 80 characters with the backslash. Example:
 ```
 
 ## Initialization
-Use line breaks indentation for struct initialization:
+Use line breaks indentation for struct initialization,
+except when initializing to zero:
 
 ```c
 typedef struct MyStruct {
@@ -269,6 +270,14 @@ MyStruct my_struct = {
 
 // bad
 MyStruct my_struct = { .string = "string", .other = "other", };
+
+// bad
+MyStruct my_struct = {
+    0
+};
+
+// good
+MyStruct my_struct = {0};
 ```
 
 Also indent structs inside structs.
