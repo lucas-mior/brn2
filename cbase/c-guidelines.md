@@ -13,6 +13,7 @@ For formatting-only style rules, see `c-format.md`.
 - Use `CamelCase` for types.
 - Use `snake_case` for variables and functions.
 - Use `CAPITAL_SNAKE_CASE` for macros.
+  * Exception: `error` macro.
 - Variable names should be descriptive, but descriptiveness must be
   proportional to scope. Do not give `too_much_descriptive_name` to a variable
   that is only used inside a short loop.
