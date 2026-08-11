@@ -73,7 +73,7 @@ For formatting-only style rules, see `c-format.md`.
     signed integer is used on our side of the code, write a wrapper. The
     wrapper checks if the received value fits in the positive range of our
     signed integer type. Use `MAXOF()` macro defined in cbase/.
-  * For all other uses like arithmetic, indices, and sizes, offsets, etc, use
+  * For all other uses like arithmetic, indices, sizes, offsets, etc, use
     signed integers.
 
 ## Expressions and control flow
