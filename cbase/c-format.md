@@ -43,11 +43,7 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Space is forbidden around boolean negation (`!`).
 - Space is mandatory around all comparison operators.
 - In general, prefer `+= 1` instead of `++`.
-  * Exception: dynamic arrays: use `array[len++] = value` instead of
-    `array[len] = value; len += 1`.
 - In general, prefer `-= 1` instead of `--`.
-  * Exception: dynamic arrays: use `array[len--] = value` instead of
-    `array[len] = value; len -= 1`.
 
 ## Casts
 
