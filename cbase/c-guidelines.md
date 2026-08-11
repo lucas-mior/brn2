@@ -107,7 +107,6 @@ typeof(var)  // good
 ```
 
 ## Memory allocation
-
 - Avoid `malloc`, `calloc`, `realloc`, and `free`.
   * Use wrappers from `cbase/memory.c` that track allocations in debug builds
     instead:
