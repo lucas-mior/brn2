@@ -47,15 +47,17 @@ For formatting-only style rules, see `c-format.md`.
 - When casting to a smaller integer type, or when casting double to integer,
   and we are not sure if it fits, check first using the `MAXOF` macro:
   ```c
-  int64 value = function();
-  int32 result;
+  int32 function_that_returns_int32(void *param) {
+      int64 value = function_that_returns_int64(param);
 
-  if (value >= MAXOF(result)) {
-      error("Too large value\n");
-      fatal(EXIT_FAILURE);
+      // Note: MAXOF uses _Generic, it does not really runs the function below.
+      if (value >= MAXOF(function_that_returns_int32())) {
+          error("Too large value\n");
+          fatal(EXIT_FAILURE);
+      }
+
+      return (int32)value;
   }
-
-  result = (int32)value;
   ```
 - unsigned integers: avoid, prefer signed integers
   * use unsigned integers for bit flags and other bit-wise operated values.
