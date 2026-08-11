@@ -194,7 +194,7 @@ function(int32 arg) {
 ```
 
 If the function header is long, and needs more than one line,
-break the line but keep the identation:
+break the line but keep the identation, if it fits in 80 columns:
 ```c
 // good
 static void
