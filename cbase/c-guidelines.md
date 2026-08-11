@@ -625,8 +625,8 @@ default:
   * But initializing an "ORing" or "summing" variable is better done before the
     "ORing"/"summing" loop:
     ```c
-    // bad (this obscures the fact that 0 is not a dummy return, it is a valid
-    //      temporary state of the variable)
+    // bad (this obscures the fact that 0 is not a dummy return:
+    //      it is a valid temporary state of the variable)
     static uint32
     function(void *params) {
         uint32 mask = 0;
