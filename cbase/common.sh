@@ -4,11 +4,14 @@
 
 set -e
 
+RED="${RED:-"\033[01;38;2;255;000;000"}"
+
 error () {
     >&2 printf "$@"
     return
 }
 
+# shellcheck source=./cbase/functions_forbidden.sh
 . ./cbase/functions_forbidden.sh
 
 common_command_exists () {
