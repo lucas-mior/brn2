@@ -22,7 +22,10 @@
 #pragma clang diagnostic ignored "-Wstrict-prototypes"
 #endif
 
-extern void throwawayfunction();
+// when you need a valid symbol
+// to silence clangd warnings in include-based templates.
+typedef void ThrowAwayFunction();
+extern void throw_away_function();
 
 #if CC_CLANG
 #pragma clang diagnostic pop
