@@ -442,13 +442,14 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         int64 size;
 
         line += 1;
-        name_length = (int32)strcspn(buffer, "\n");
+        name_length = strlen32(buffer);
 
-        if (buffer[name_length] != '\n') {
+        if ((name_length <= 0) || (buffer[name_length - 1] != '\n')) {
             error("Too long file name at line %d.\n", line);
             fatal(EXIT_FAILURE);
         }
 
+        name_length -= 1;
         buffer[name_length] = '\0';
         if (is_old && brn2_is_invalid_name(buffer)) {
             continue;
@@ -1612,7 +1613,10 @@ main(void) {
                 error("Arguments file too long.\n");
                 fatal(EXIT_FAILURE);
             }
-            line_length = (int64)strcspn(argv[argc], "\n");
+            line_length = (int64)strlen32(argv[argc]);
+            if ((line_length > 0) && (argv[argc][line_length - 1] == '\n')) {
+                line_length -= 1;
+            }
             argv[argc][line_length] = '\0';
             argc += 1;
         }
