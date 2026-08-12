@@ -569,10 +569,10 @@ _Generic((VAR), \
 #define PRINT(VAR) PRINT_(VAR)
 #endif
 
-#define PRINTLN(VAR) do { \
+#define PRINTLN(VAR) do {                                         \
     fprintf(stderr, "%s:%d %s():", __FILE__, __LINE__, __func__); \
-    PRINT(VAR); \
-    fprintf(stderr, "\n"); \
+    PRINT(VAR);                                                   \
+    fprintf(stderr, "\n");                                        \
 } while (0)
 
 #if TESTING_generic
