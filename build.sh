@@ -343,7 +343,7 @@ if [ "$mode" = "test_all" ]; then
             continue
         fi
 
-        for compiler in clang gcc "zig cc"; do
+        for compiler in tcc clang gcc /opt/msvc/bin/x64/cl.exe; do
             printf "\nCC=${RED}${compiler}${RES}\n"
             CC="$compiler" $0 "$build_target" || exit 3
         done
