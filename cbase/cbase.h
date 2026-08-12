@@ -21,7 +21,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstrict-prototypes"
 #endif
+
 extern void throwawayfunction();
+
 #if CC_CLANG
 #pragma clang diagnostic pop
 #endif
