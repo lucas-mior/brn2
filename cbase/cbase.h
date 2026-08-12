@@ -162,7 +162,7 @@ extern bool strequal(char *, char *);
 extern bool strequal2(char *, int32, char *, int32);
 extern bool striqual(char *, char *);
 extern bool striqual2(char *, int32, char *, int32);
-CBASE_API_DEF bool optional_strequal(char *a, int32 a_len, char *b, int32 b_len);
+bool optional_strequal(char *a, int32 a_len, char *b, int32 b_len);
 extern int64 strftime2(char *, int64, char *, struct tm *);
 extern int strncmp32(char *, char *, int64);
 extern char *strncpy32(char *, char *, int64);
@@ -579,7 +579,7 @@ extern void generic_array_set_count(void *, int32);
     X(COMMAND_STDIN_TTY)           \
     X(COMMAND_CLOSE_STDIN)
 #define XENUMS_FUNCTIONS_ONLY 1
-#define XENUMS_LINKAGE CBASE_API_DEF
+#define XENUMS_LINKAGE 
 #define XENUMS_NO_TESTS 1
 #include "xenums.c"
 #undef XENUMS_NO_TESTS

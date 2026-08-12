@@ -32,7 +32,7 @@ extern void sort_shuffle(void *, int64, int64);
 #define SORT_COMPARE(A, B) compare_func(A, B)
 #endif
 
-CBASE_API_DEF void
+void
 sort_shuffle(void *array, int64 n, int64 size) {
     char *tmp = malloc2(size);
     char *arr = array;
@@ -52,7 +52,7 @@ sort_shuffle(void *array, int64 n, int64 size) {
     return;
 }
 
-CBASE_API_DEF void
+void
 sort_heapify(HeapNode *heap, int32 p, int32 i,
              int32 (*compare_func)(void *a, void *b)) {
     (void)compare_func;
@@ -87,7 +87,7 @@ sort_heapify(HeapNode *heap, int32 p, int32 i,
     return;
 }
 
-CBASE_API_DEF void
+void
 sort_merge_subsorted(
     void *array,
     int32 n,
