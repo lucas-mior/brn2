@@ -291,7 +291,7 @@ valgrind)
 
     trace_on
     find . \
-    | valgrind -s --tool=memcheck $dir/bin/brn2 -f -
+    | valgrind  --log-file=valgrind.txt -s --tool=memcheck $dir/bin/brn2 -f -
     # valgrind -s --tool=memcheck $dir/bin/brn2 -d .
     # valgrind -s --tool=memcheck $dir/bin/brn2 -f rename
     trace_off
