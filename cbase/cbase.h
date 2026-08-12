@@ -24,7 +24,7 @@ static time_t timezone_offset = 0;
 static int64 here_counter = 0;
 
 #define error(...) \
-    error_impl(__FILE__, __LINE__, (char *)__func__, __VA_ARGS__)
+    error_impl(__FILE__, __LINE__, FUNC__, __VA_ARGS__)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
 CBASE_API_DECL int32 optional_strlen32(char *);
 CBASE_API_DECL int32 strlen32(char *);
@@ -111,14 +111,8 @@ CBASE_API_DECL void *memchr64(void *, int32, int64);
 CBASE_API_DECL void normalize(char *restrict, int32 *restrict);
 CBASE_API_DECL bool parse_option(char **, char *, char *);
 CBASE_API_DECL char *path_basename(char *, int32);
-CBASE_API_DECL void print_timings(
-    char *,
-    int32,
-    char *,
-    int64,
-    struct timespec,
-    struct timespec
-);
+CBASE_API_DECL void print_timings(char *, int32, char *, int64,
+                                  struct timespec, struct timespec);
 CBASE_API_DECL void qsort64(void *, int64, int64, int (*)(void *, void *));
 CBASE_API_DECL uint32 rand_int(void);
 CBASE_API_DECL double rad2deg(double);
@@ -272,6 +266,14 @@ _Generic((VAR), \
     default: square_int64 \
 )(VAR)
 
+#define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, strlen32(B))
+#define strequal2_4(A, A_LEN, B, B_LEN) strequal2(A, A_LEN, B, B_LEN)
+#define STREQUAL(...) SELECT_ON_NUM_ARGS(strequal2_, __VA_ARGS__)
+
+#define striqual2_3(A, A_LEN, B)        striqual2(A, A_LEN, B, strlen32(B))
+#define striqual2_4(A, A_LEN, B, B_LEN) striqual2(A, A_LEN, B, B_LEN)
+#define STRIQUAL(...) SELECT_ON_NUM_ARGS(striqual2_, __VA_ARGS__)
+
 #define MEMMEM_3(LONG, LONG_LEN, SHORT) \
     memmem64(LONG, LONG_LEN, SHORT, strlen32(SHORT))
 #define MEMMEM_4(LONG, LONG_LEN, SHORT, LEN) \
@@ -314,14 +316,6 @@ _Generic((VAR), \
 #define SB_APPEND_3(BUILDER, STRING, LEN) \
     sb_append(BUILDER, STRING, (int32)(LEN))
 #define SB_APPEND(...) SELECT_ON_NUM_ARGS(SB_APPEND_, __VA_ARGS__)
-
-#define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, strlen32(B))
-#define strequal2_4(A, A_LEN, B, B_LEN) strequal2(A, A_LEN, B, B_LEN)
-#define STREQUAL(...) SELECT_ON_NUM_ARGS(strequal2_, __VA_ARGS__)
-
-#define striqual2_3(A, A_LEN, B)        striqual2(A, A_LEN, B, strlen32(B))
-#define striqual2_4(A, A_LEN, B, B_LEN) striqual2(A, A_LEN, B, B_LEN)
-#define STRIQUAL(...) SELECT_ON_NUM_ARGS(striqual2_, __VA_ARGS__)
 
 #define HERE here_impl(__FILE__, __LINE__, (char *)__func__)
 
