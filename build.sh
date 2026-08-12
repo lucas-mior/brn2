@@ -242,11 +242,6 @@ install)
     trace_off
     exit
     ;;
-assembly)
-    trace_on
-    $CC $CPPFLAGS $CFLAGS -S $LDFLAGS -o ${program}_$CC.S main.c
-    exit
-    ;;
 test)
     rm -rf /tmp/brn2* || true
     common_test "$target"
