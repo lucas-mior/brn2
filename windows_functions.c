@@ -461,7 +461,11 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
         while (fgets(buffer, SIZEOF(buffer), ls_pipe)) {
-            int64 length = (int64)strcspn(buffer, "\n");
+            int64 length = strlen32(buffer);
+
+            if ((length > 0) && (buffer[length - 1] == '\n')) {
+                length -= 1;
+            }
             buffer[length] = '\0';
             ASSERT(contains(buffer, length, dirent, &nfiles));
         }
