@@ -290,11 +290,13 @@ valgrind)
     ls > rename
 
     trace_on
-    find . \
-    | valgrind  --log-file=$dir/valgrind.txt -s --tool=memcheck \
-        $dir/bin/brn2 -f -
-    # valgrind -s --tool=memcheck $dir/bin/brn2 -d .
-    # valgrind -s --tool=memcheck $dir/bin/brn2 -f rename
+    # find . \
+    # | valgrind  --log-file=$dir/valgrind.txt -s --tool=memcheck \
+    #     $dir/bin/brn2 -f -
+    valgrind --log-file=$dir/valgrind.txt -s --tool=memcheck \
+        $dir/bin/brn2 -d .
+    # valgrind --log-file=$dir/valgrind.txt -s --tool=memcheck \
+    # $dir/bin/brn2 -f rename
     trace_off
     exit
     ;;
