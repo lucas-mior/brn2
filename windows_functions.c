@@ -20,7 +20,7 @@
 #define S_IFLNK 0120000
 #endif
 
-#if !CBASE_HAS_DIRENT_H
+#if !HAS_POSIX_WIN_SUBSET
 struct dirent {
     char d_name[MAX_PATH];
 };
