@@ -8,14 +8,14 @@ cd "$dir" || exit
 # shellcheck source=./cbase/common.sh
 . ./cbase/common.sh
 
-program=$(get_program "$0")
+program=$(common_get_program "$0")
 script=$(basename "$0")
 
-build_parse_args "$@"
+common_build_parse_args "$@"
 targets=$(cat ./targets)
-build_validate_mode "$script" "$targets"
+common_build_validate_mode "$script" "$targets"
 
-build_print_invocation "$script"
+common_build_print_invocation "$script"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -25,7 +25,7 @@ mkdir -p "$(dirname "$exe")"
 
 OS=$(uname -a)
 
-CC=$(get_compiler "$mode")
+CC=$(common_get_compiler "$mode")
 
 is_msvc=0
 is_clang_cl=0
@@ -189,9 +189,9 @@ if [ "$is_msvc" -eq 1 ] && [ "$mode" != "test" ]; then
         CFLAGS="$CFLAGS --target=$CLANG_CL_TARGET"
     fi
 
-    CPPFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $CPPFLAGS)
-    CFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $CFLAGS)
-    LDFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $LDFLAGS)
+    CPPFLAGS=$(common_gcc_flags_to_msvc "$msvc_compiler" $CPPFLAGS)
+    CFLAGS=$(common_gcc_flags_to_msvc "$msvc_compiler" $CFLAGS)
+    LDFLAGS=$(common_gcc_flags_to_msvc "$msvc_compiler" $LDFLAGS)
 fi
 
 case "$mode" in
@@ -205,15 +205,15 @@ uninstall)
     trace_on
 
     rm -f "${DESTDIR}${PREFIX}/bin/${program}"
-    uninstall_opt "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
-    uninstall_opt "completions/${program}.bash" \
+    common_uninstall_opt "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
+    common_uninstall_opt "completions/${program}.bash" \
         "${DESTDIR}${PREFIX}/share/bash-completion/completions/${program}"
-    uninstall_opt "completions/_${program}" \
+    common_uninstall_opt "completions/_${program}" \
         "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${program}"
-    uninstall_opt "completions/${program}.fish" \
+    common_uninstall_opt "completions/${program}.fish" \
         "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${program}.fish"
-    uninstall_opt "etc" "${DESTDIR}/etc/${program}"
-    uninstall_opt \
+    common_uninstall_opt "etc" "${DESTDIR}/etc/${program}"
+    common_uninstall_opt \
         "${program}.desktop" "${DESTDIR}/usr/share/applications/${program}.desktop"
 
     trace_off
@@ -227,15 +227,15 @@ install)
     fi
 
     install -Dm755 "$exe" "${DESTDIR}${PREFIX}/bin/${program}"
-    install_opt -Dm644 "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
-    install_opt -Dm644 "completions/${program}.bash" \
+    common_install_opt -Dm644 "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
+    common_install_opt -Dm644 "completions/${program}.bash" \
         "${DESTDIR}${PREFIX}/share/bash-completion/completions/${program}"
-    install_opt -Dm644 "completions/_${program}" \
+    common_install_opt -Dm644 "completions/_${program}" \
         "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${program}"
-    install_opt -Dm644 "completions/${program}.fish" \
+    common_install_opt -Dm644 "completions/${program}.fish" \
         "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${program}.fish"
-    install_opt -dm755 "etc" "${DESTDIR}/etc/${program}"
-    install_opt -Dm755 \
+    common_install_opt -dm755 "etc" "${DESTDIR}/etc/${program}"
+    common_install_opt -Dm755 \
         "${program}.desktop" \
         "${DESTDIR}/usr/share/applications/${program}.desktop"
 
@@ -249,7 +249,7 @@ assembly)
     ;;
 test)
     rm -rf /tmp/brn2* || true
-    test "$target"
+    common_test "$target"
     exit
     ;;
 test_all)
@@ -257,7 +257,7 @@ test_all)
 *)
     trace_on
 
-    build_tags
+    common_build_tags
 
     if [ "$is_cl" -eq 1 ]; then
         $CC $CPPFLAGS $CFLAGS /Fe${exe} main.c $LDFLAGS
