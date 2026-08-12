@@ -18,15 +18,15 @@ typedef struct HeapNode {
     int32 unused;
 } HeapNode;
 
-CBASE_API_DECL void sort_heapify(HeapNode *, int32, int32, int32 (*)(void *, void *));
-CBASE_API_DECL void sort_merge_subsorted(
+extern void sort_heapify(HeapNode *, int32, int32, int32 (*)(void *, void *));
+extern void sort_merge_subsorted(
     void *,
     int32,
     int32,
     int64,
     int32 (*)(void *, void *)
 );
-CBASE_API_DECL void sort_shuffle(void *, int64, int64);
+extern void sort_shuffle(void *, int64, int64);
 
 #if !defined(SORT_COMPARE)
 #define SORT_COMPARE(A, B) compare_func(A, B)

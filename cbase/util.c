@@ -39,14 +39,14 @@ here_impl(char *file, int32 line, char *func) {
 }
 
 #define SFA_LINKAGE CBASE_API_DEF
-#define SFA_SNPRINTF_LINKAGE CBASE_API_DECL
+#define SFA_SNPRINTF_LINKAGE extern
 #define SFA_TYPE char *
 #define SFA_NAME strings
 #define SFA_FORMAT "%s"
 #include "sfa.h"
 
 #define SFA_LINKAGE CBASE_API_DEF
-#define SFA_SNPRINTF_LINKAGE CBASE_API_DECL
+#define SFA_SNPRINTF_LINKAGE extern
 #define SFA_TYPE double
 #define SFA_NAME doubles
 #define SFA_FORMAT "%f"

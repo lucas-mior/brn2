@@ -14,10 +14,6 @@
 #include "platform_detection.h"
 #include "libc.h"
 
-#if !defined(CBASE_API_DECL)
-#define CBASE_API_DECL extern
-#endif
-
 #if !defined(CBASE_API_DEF)
 #define CBASE_API_DEF
 #endif
