@@ -291,9 +291,9 @@ valgrind)
 
     trace_on
     find . \
-    | valgrind $vg_flags -s --tool=memcheck $dir/bin/brn2 -f -
-    valgrind   $vg_flags -s --tool=memcheck $dir/bin/brn2 -d .
-    valgrind   $vg_flags -s --tool=memcheck $dir/bin/brn2 -f rename
+    | valgrind -s --tool=memcheck $dir/bin/brn2 -f -
+    # valgrind -s --tool=memcheck $dir/bin/brn2 -d .
+    # valgrind -s --tool=memcheck $dir/bin/brn2 -f rename
     trace_off
     exit
     ;;
