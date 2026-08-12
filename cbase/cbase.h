@@ -329,7 +329,7 @@ _Generic((VAR), \
     sb_append(BUILDER, STRING, (int32)(LEN))
 #define SB_APPEND(...) SELECT_ON_NUM_ARGS(SB_APPEND_, __VA_ARGS__)
 
-#define HERE here_impl(__FILE__, __LINE__, (char *)__func__)
+#define HERE here_impl(__FILE__, __LINE__, FUNC__)
 
 #define NCALLS(INTERVAL) do { \
     static int64 ncalls_ncalls = 1; \
