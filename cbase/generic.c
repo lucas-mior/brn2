@@ -553,11 +553,11 @@ _Generic((VAR), \
 )
 
 #if CC_GCC || CC_CLANG
-#define PRINT_DIAGNOSTIC_PUSH() do {                         \
+#define PRINT_DIAGNOSTIC_PUSH() do {                          \
     _Pragma("GCC diagnostic push")                            \
     _Pragma("GCC diagnostic ignored \"-Wpedantic\"")          \
 } while (0)
-#define PRINT_DIAGNOSTIC_POP() do {                          \
+#define PRINT_DIAGNOSTIC_POP() do {                           \
     _Pragma("GCC diagnostic pop")                             \
 } while (0)
 #define PRINT(VAR) do {                                       \
