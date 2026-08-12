@@ -17,19 +17,10 @@
 #include "primitives.h"
 #include "base_macros.h"
 
-#if CC_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wstrict-prototypes"
-#endif
-
 // when you need a valid symbol
 // to silence clangd warnings in include-based templates.
 typedef void ThrowAwayFunction();
 extern void throw_away_function();
-
-#if CC_CLANG
-#pragma clang diagnostic pop
-#endif
 
 static char UNUSED *program = __FILE__;
 static int32 UNUSED program_len;
