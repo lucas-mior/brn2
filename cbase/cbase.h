@@ -17,6 +17,15 @@
 #include "primitives.h"
 #include "base_macros.h"
 
+#if CC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstrict-prototypes"
+#endif
+extern void throwawayfunction();
+#if CC_CLANG
+#pragma clang diagnostic pop
+#endif
+
 static char UNUSED *program = __FILE__;
 static int32 UNUSED program_len;
 static bool UNUSED timezone_initialized = false;
