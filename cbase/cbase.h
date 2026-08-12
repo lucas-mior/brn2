@@ -17,11 +17,6 @@
 #include "primitives.h"
 #include "base_macros.h"
 
-// when you need a valid symbol
-// to silence clangd warnings in include-based templates.
-typedef void ThrowAwayFunction();
-extern void throw_away_function();
-
 static char UNUSED *program = __FILE__;
 static int32 UNUSED program_len;
 static bool UNUSED timezone_initialized = false;
@@ -561,6 +556,20 @@ extern void generic_array_set_count(void *, int32);
      (ARRAY)[ARRAY_HEADER(ARRAY)->count++] = (__VA_ARGS__))
 #define ARRAY_INIT(ARRAY, CAPACITY) \
     ((ARRAY) = generic_array_init((CAPACITY), SIZEOF(*(ARRAY))))
+
+#if CC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstrict-prototypes"
+#endif
+
+// when you need a valid symbol
+// to silence clangd warnings in include-based templates.
+typedef void ThrowAwayFunction();
+extern void throw_away_function();
+
+#if CC_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #include "meta.h"
 
