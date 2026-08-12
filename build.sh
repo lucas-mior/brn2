@@ -11,15 +11,11 @@ cd "$dir" || exit
 program=$(get_program "$0")
 script=$(basename "$0")
 
-target="${1:-debug}"
+build_parse_args "$@"
+targets=$(cat ./targets)
+build_validate_mode "$script" "$targets"
 
-if ! grep -q "$target" ./targets; then
-    echo "usage: $script <targets>"
-    cat ./targets
-    exit 1
-fi
-
-printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
+build_print_invocation "$script"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -29,7 +25,7 @@ mkdir -p "$(dirname "$exe")"
 
 OS=$(uname -a)
 
-CC=$(get_compiler "$target")
+CC=$(get_compiler "$mode")
 
 is_msvc=0
 is_clang_cl=0
@@ -76,7 +72,7 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-case "$target" in
+case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
@@ -119,8 +115,8 @@ fast_feedback)
     ;;
 esac
 
-if [ "$target" = "cross" ]; then
-    cross="$2"
+if [ "$mode" = "cross" ]; then
+    cross="$target"
     if [ "$cross" = "all" ]; then
         status=0
         for f in $(awk '/^cross / { print $NF }' ./targets); do
@@ -178,7 +174,7 @@ if [ "$is_cl" -eq 1 ]; then
     esac
 fi
 
-if [ "$is_msvc" -eq 1 ] && [ "$target" != "test" ]; then
+if [ "$is_msvc" -eq 1 ] && [ "$mode" != "test" ]; then
     if [ -z "$CLANG_CL_TARGET" ]; then
         case "$OS" in
         *Linux*|*Darwin*|*BSD*)
@@ -198,7 +194,7 @@ if [ "$is_msvc" -eq 1 ] && [ "$target" != "test" ]; then
     LDFLAGS=$(gcc_flags_to_msvc "$msvc_compiler" $LDFLAGS)
 fi
 
-case "$target" in
+case "$mode" in
 fast_feedback)
     trace_on
     $CC $CPPFLAGS $CFLAGS main.c -o "$exe" $LDFLAGS
@@ -253,7 +249,7 @@ assembly)
     ;;
 test)
     rm -rf /tmp/brn2* || true
-    test "$2"
+    test "$target"
     exit
     ;;
 test_all)
@@ -282,7 +278,7 @@ create_temp_files() {
     seq -w 2000000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
-case "$target" in
+case "$mode" in
 benchmark)
     create_temp_files
     ls > "rename"
@@ -336,20 +332,20 @@ check)
 esac
 
 trace_off
-if [ "$target" = "test_all" ]; then
-    while IFS= read -r target <&3; do
-        echo "target=$target"
+if [ "$mode" = "test_all" ]; then
+    while IFS= read -r build_target <&3; do
+        echo "target=$build_target"
 
-        echo "$target" | grep -Eq "^(# |$)" && continue
+        echo "$build_target" | grep -Eq "^(# |$)" && continue
 
-        if echo "$target" | grep -q "cross"; then
-            $0 $target
+        if echo "$build_target" | grep -q "cross"; then
+            $0 $build_target
             continue
         fi
 
         for compiler in clang gcc "zig cc"; do
             printf "\nCC=${RED}${compiler}${RES}\n"
-            CC="$compiler" $0 "$target" || exit 3
+            CC="$compiler" $0 "$build_target" || exit 3
         done
     done 3< ./targets
 fi
