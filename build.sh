@@ -74,7 +74,7 @@ fi
 
 case "$mode" in
 debug)
-    CFLAGS="$CFLAGS -g3 -Og -fsanitize=undefined"
+    CFLAGS="$CFLAGS -g3 -Og"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
