@@ -13,6 +13,7 @@
 
 #include "cbase.h"
 #include "brn2.h"
+#include "brn2_directory_entry.h"
 
 #if OS_WINDOWS
 #include "windows_functions.c"
@@ -130,10 +131,10 @@ brn2_list_from_args(FileList *list, int32 argc, char **argv) {
 
 #if !OS_WINDOWS
 static int32
-brn2_scandir(char *directory, struct dirent ***directory_list) {
+brn2_scandir(char *directory, Brn2DirectoryEntry ***directory_list) {
     DIR *dir;
     struct dirent *entry;
-    struct dirent **entries;
+    Brn2DirectoryEntry **entries;
     int32 length = 0;
     int32 capacity = 256;
     int32 error_code;
@@ -158,9 +159,15 @@ brn2_scandir(char *directory, struct dirent ***directory_list) {
                                SIZEOF(*entries));
         }
 
-        entries[length] = malloc2(SIZEOF(*entries[length]));
-        memcpy64(entries[length], entry, SIZEOF(*entries[length]));
-        length += 1;
+        {
+            int32 name_length = strlen32(entry->d_name);
+            int64 entry_size = brn2_directory_entry_size(name_length);
+
+            entries[length] = malloc2(entry_size);
+            entries[length]->name_length = name_length;
+            memcpy64(entries[length]->name, entry->d_name, name_length + 1);
+            length += 1;
+        }
     }
 
     error_code = errno;
@@ -172,7 +179,8 @@ brn2_scandir(char *directory, struct dirent ***directory_list) {
 
     if (error_code != 0) {
         for (int32 i = 0; i < length; i += 1) {
-            free2(entries[i], SIZEOF(*entries[i]));
+            free2(entries[i],
+                  brn2_directory_entry_size(entries[i]->name_length));
         }
         free2(entries, capacity*SIZEOF(*entries));
         errno = error_code;
@@ -188,7 +196,7 @@ brn2_scandir(char *directory, struct dirent ***directory_list) {
 
 void
 brn2_list_from_dir(FileList *list, char *directory) {
-    struct dirent **directory_list;
+    Brn2DirectoryEntry **directory_list;
     int32 length = 0;
     int32 directory_length;
     int32 number_files;
@@ -216,17 +224,20 @@ brn2_list_from_dir(FileList *list, char *directory) {
     for (int32 i = 0; i < number_files; i += 1) {
         FileName **file_pointer = &(list->files[length]);
         FileName *file;
-        char *name = directory_list[i]->d_name;
-        int32 name_length = strlen32(name);
+        char *name = directory_list[i]->name;
+        int32 name_length = directory_list[i]->name_length;
+        int64 directory_entry_size;
         int64 size;
 
+        directory_entry_size = brn2_directory_entry_size(name_length);
+
         if (brn2_is_invalid_name(name)) {
-            free2(directory_list[i], SIZEOF(*directory_list[i]));
+            free2(directory_list[i], directory_entry_size);
             continue;
         }
         if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
             error("File name too long. Skipping...\n");
-            free2(directory_list[i], SIZEOF(*directory_list[i]));
+            free2(directory_list[i], directory_entry_size);
             continue;
         }
 
@@ -249,7 +260,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
             memcpy64(file->name, name, file->length + 1);
         }
 
-        free2(directory_list[i], SIZEOF(*directory_list[i]));
+        free2(directory_list[i], directory_entry_size);
         length += 1;
     }
     free2(directory_list, (int64)number_files*SIZEOF(*directory_list));
