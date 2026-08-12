@@ -1,8 +1,32 @@
 # shellcheck shell=sh
 
+echo "sourcing functions_forbidden.sh..."
+
 common_libc_never=
 common_libc_cbase_only=
 common_libc_cbase_dir=
+
+common_test_source_matches_filter () {
+    test_src=$1
+    test_filter=$2
+
+    if [ -z "$test_filter" ]; then
+        return 0
+    fi
+
+    test_name=$(basename "$test_src")
+    test_module=${test_name%.c}
+    test_filter_base=$(basename "$test_filter")
+    test_filter_module=${test_filter_base%.c}
+
+    if [ "$test_src" = "$test_filter" ] \
+            || [ "$test_name" = "$test_filter_base" ] \
+            || [ "$test_module" = "$test_filter_module" ]; then
+        return 0
+    fi
+
+    return 1
+}
 
 if [ -f cbase/functions_never_use.txt ]; then
     common_libc_never=cbase/functions_never_use.txt
