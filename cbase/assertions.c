@@ -594,7 +594,7 @@ GENERATE_A_DOUBLE_CLOSE_TOL(not_close_tol, "!~=", false)
 #undef GENERATE_A_DOUBLE_CLOSE_TOL
 
 #define GENERATE_ASSERT_BOOLS(MODE, SYMBOL)                                    \
-void                                                             \
+void                                                                           \
 a_bool_##MODE(char *file, int32 line, char *func,                              \
               char *name1, char *name2,                                        \
               char *type1, char *type2,                                        \
