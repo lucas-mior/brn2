@@ -107,10 +107,14 @@ fast_feedback)
 esac
 
 if [ "$mode" = "cross" ]; then
+    ncross=$(echo "$cross_targets" | wc -l)
+    i=1
     cross="$target"
     if [ "$cross" = "all" ]; then
         status=0
         for f in $cross_targets; do
+            echo "$i / $ncross"
+            i=$((i+1))
             if ! "$0" cross "$f"; then
                 exit 1
             fi
