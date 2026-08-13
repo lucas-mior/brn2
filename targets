@@ -5,7 +5,6 @@ debug
 # install
 # uninstall
 # benchmark
-# perf
 # valgrind
 # test_all
 # check
