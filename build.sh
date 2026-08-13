@@ -236,14 +236,12 @@ test)
     common_test "$target"
     exit
     ;;
-test_all)
-    ;;
 cross)
     trace_on
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
     trace_off
     ;;
-benchmark|build|callgrind|check|debug|valgrind)
+benchmark|build|callgrind|debug|valgrind)
     common_build_tags
     trace_on
 
@@ -266,9 +264,28 @@ check)
     CC=clang CFLAGS="$CFLAGS" ./build.sh
     exit
     ;;
+test_all)
+    for build_target in debug build "test"; do
+        echo "target=$build_target"
+
+        for compiler in tcc clang gcc /opt/msvc/bin/x64/cl.exe; do
+            printf '\nCC=%s%s%s\n' "$RED" "$compiler" "$RES"
+            CC="$compiler" $0 "$build_target" || exit 3
+        done
+    done
+
+    for cross_target in $cross_targets; do
+        echo "target=cross $cross_target"
+        $0 cross "$cross_target" || exit 3
+    done
+
+    exit
+    ;;
 *)
     ;;
 esac
+
+# brn2 specific stuff below
 
 create_temp_files() {
     tmpdir="/tmp/brn2"
@@ -338,22 +355,3 @@ valgrind)
     exit
     ;;
 esac
-
-trace_off
-if [ "$mode" = "test_all" ]; then
-    for build_target in debug build "test"; do
-        echo "target=$build_target"
-
-        for compiler in tcc clang gcc /opt/msvc/bin/x64/cl.exe; do
-            printf '\nCC=%s%s%s\n' "$RED" "$compiler" "$RES"
-            CC="$compiler" $0 "$build_target" || exit 3
-        done
-    done
-
-    for cross_target in $cross_targets; do
-        echo "target=cross $cross_target"
-        $0 cross "$cross_target" || exit 3
-    done
-
-    exit
-fi
