@@ -649,6 +649,7 @@ a_bool_less_equal(void *p, ...) {
 #if 0 == TESTING_assert
 static inline void
 assert_functions_sink(void) {
+    (void)assert_functions_sink;
     (void)a_strings_less;
     (void)a_strings_less_equal;
     (void)a_strings_equal;
