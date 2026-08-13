@@ -29,19 +29,20 @@ is_clang_cl=0
 is_cl=0
 msvc_compiler=clang-cl
 
-add_pthread_flags() {
-    case "$1" in
-    *MINGW*|*MSYS*|*CYGWIN*|*mingw*|*msys*|*cygwin*|*windows*)
-        return 0
-        ;;
-    esac
+if [ "$mode" = "cross" ]; then
+    if [ "$target" != "all" ]; then
+        OS="$target"
+    fi
+fi
 
+case "$OS" in
+*MINGW*|*MSYS*|*CYGWIN*|*mingw*|*msys*|*cygwin*|*windows*)
+    ;;
+*)
     if [ "$is_msvc" -eq 0 ]; then
         CFLAGS="$CFLAGS -pthread"
     fi
-
-    return 0
-}
+esac
 
 case "$CC" in
 clang-cl|*/clang-cl)
@@ -89,40 +90,32 @@ debug)
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
-    add_pthread_flags "$OS"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_benchmark"
-    add_pthread_flags "$OS"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
-    add_pthread_flags "$OS"
     ;;
 callgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
-    add_pthread_flags "$OS"
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1"
     LDFLAGS="$LDFLAGS -lm"
-    add_pthread_flags "$OS"
     ;;
 check)
     CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
     LDFLAGS="$LDFLAGS -lm"
-    add_pthread_flags "$OS"
     ;;
 build)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
-    add_pthread_flags "$OS"
     ;;
 fast_feedback)
     CFLAGS="$CFLAGS -Werror"
-    add_pthread_flags "$OS"
     ;;
 cross)
     ncross=$(printf '%s\n' "$cross_targets" | wc -l)
@@ -148,7 +141,6 @@ cross)
         exe="bin/$program.exe"
         ;;
     *)
-        add_pthread_flags "$cross"
         ;;
     esac
     ;;
