@@ -12,6 +12,14 @@ project=$(common_get_program "$0")
 
 common_build_parse_args "$@"
 
+case "$mode" in
+debug|benchmark|valgrind|callgrind|test|check|build|fast_feedback|cross|uninstall|install|test_all)
+    ;;
+*)
+    common_build_unknown_mode
+    ;;
+esac
+
 common_build_print_invocation "$project"
 
 PREFIX="${PREFIX:-/usr/local}"
@@ -117,20 +125,8 @@ fast_feedback)
     CFLAGS="$CFLAGS -Werror"
     ;;
 cross)
-    ncross=$(printf '%s\n' "$cross_targets" | wc -l)
-    i=1
+    common_build_cross_all
     cross="$target"
-
-    if [ "$cross" = "all" ]; then
-        for cross_target in $cross_targets; do
-            echo "$i / $ncross"
-            i=$((i+1))
-            if ! "$0" cross "$cross_target" 2>&1 | head -n 200; then
-                exit 1
-            fi
-        done
-        exit 0
-    fi
 
     CFLAGS="$CFLAGS -Wno-padded"
     CFLAGS="$CFLAGS -target $cross"
@@ -146,10 +142,7 @@ cross)
 uninstall|install|test_all)
     ;;
 *)
-    if [ ! -f "$mode" ]; then
-        error "$0: Unknown mode=$mode\n"
-        exit 1
-    fi
+    common_build_unknown_mode
     ;;
 esac
 if [ "$is_cl" -eq 1 ]; then
@@ -264,21 +257,8 @@ check)
     exit
     ;;
 test_all)
-    for build_target in debug build "test"; do
-        echo "target=$build_target"
-
-        for compiler in tcc clang gcc /opt/msvc/bin/x64/cl.exe; do
-            printf '\nCC=%s%s%s\n' "$RED" "$compiler" "$RES"
-            CC="$compiler" $0 "$build_target" || exit 3
-        done
-    done
-
-    for cross_target in $cross_targets; do
-        echo "target=cross $cross_target"
-        $0 cross "$cross_target" || exit 3
-    done
-
-    exit
+    common_build_test_all "debug build test" \
+        tcc clang gcc /opt/msvc/bin/x64/cl.exe
     ;;
 *)
     ;;
