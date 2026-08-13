@@ -83,8 +83,6 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-known_mode=1
-
 case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og"
@@ -157,7 +155,10 @@ cross)
 uninstall|install|test_all)
     ;;
 *)
-    known_mode=0
+    if [ ! -f "$mode" ]; then
+        error "$0: Unknown mode=$mode"
+        exit 1
+    fi
     ;;
 esac
 if [ "$is_cl" -eq 1 ]; then
@@ -363,9 +364,4 @@ if [ "$mode" = "test_all" ]; then
     done
 
     exit
-fi
-
-if [ "$known_mode" -eq 0 ]; then
-    printf 'Unknown mode %s\n' "$mode"
-    exit 1
 fi
