@@ -356,13 +356,13 @@ rapidhash_internal(void *key, int64 len, uint64 seed, const uint64 *secret) {
 }
 
 RAPIDHASH_INLINE uint64
-rapidhash_withSeed(void *key, uint64 len, uint64 seed) {
+rapidhash_withSeed(void *key, int64 len, uint64 seed) {
     return rapidhash_internal(key, len, seed, rapid_secret);
 }
 
 static uint64
 rapidhash(void *key, int64 len) {
-    return rapidhash_withSeed(key, (uint64)len, rapid_seed);
+    return rapidhash_withSeed(key, len, rapid_seed);
 }
 
 typedef struct {
