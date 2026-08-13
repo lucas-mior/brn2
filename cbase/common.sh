@@ -70,9 +70,12 @@ common_get_program() {
     basename "$(readlink -f "$(dirname "$1")")"
 }
 
-cross_targets=$(zig targets \
-                | sed -n '/\.libc = \.{/,/},/ s/^[[:space:]]*"\(.*\)".*/\1/p' \
-                | grep -v "32")
+cross_targets=
+if common_command_exists zig; then
+    cross_targets=$(zig targets \
+                    | sed -n '/\.libc = \.{/,/},/ s/^[[:space:]]*"\(.*\)".*/\1/p' \
+                    | grep -v "32")
+fi
 echo "cross_targets = $cross_targets" > /dev/null
 
 common_outdated_includes () {

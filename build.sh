@@ -12,10 +12,12 @@ program=$(common_get_program "$0")
 script=$(basename "$0")
 
 common_build_parse_args "$@"
-targets=$(cat ./targets)
-common_build_validate_mode "$script" "$targets"
 
-common_build_print_invocation "$script"
+case "$mode" in
+benchmark|build|callgrind|check|cross|debug|fast_feedback|install|test|test_all|uninstall|valgrind)
+    common_build_print_invocation "$script"
+    ;;
+esac
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -105,7 +107,6 @@ fast_feedback)
     CFLAGS="$CFLAGS -Werror"
     ;;
 *)
-    CFLAGS="$CFLAGS -O2"
     ;;
 esac
 
@@ -113,7 +114,7 @@ if [ "$mode" = "cross" ]; then
     cross="$target"
     if [ "$cross" = "all" ]; then
         status=0
-        for f in $(awk '/^cross / { print $NF }' ./targets); do
+        for f in $cross_targets; do
             echo "running cross $f ..."
             if "$0" cross "$f"; then
                 echo "ran cross $f ..."
@@ -243,8 +244,7 @@ test)
     ;;
 test_all)
     ;;
-*)
-
+benchmark|build|callgrind|check|cross|debug|valgrind)
     common_build_tags
     trace_on
 
@@ -255,6 +255,8 @@ test_all)
     fi
 
     trace_off
+    ;;
+*)
     ;;
 esac
 
@@ -340,19 +342,28 @@ esac
 
 trace_off
 if [ "$mode" = "test_all" ]; then
-    while IFS= read -r build_target <&3; do
+    for build_target in debug build test; do
         echo "target=$build_target"
 
-        echo "$build_target" | grep -Eq "^(# |$)" && continue
-
-        if echo "$build_target" | grep -q "cross"; then
-            $0 $build_target
-            continue
-        fi
-
         for compiler in tcc clang gcc /opt/msvc/bin/x64/cl.exe; do
-            printf "\nCC=${RED}${compiler}${RES}\n"
+            printf '\nCC=%s%s%s\n' "$RED" "$compiler" "$RES"
             CC="$compiler" $0 "$build_target" || exit 3
         done
-    done 3< ./targets
+    done
+
+    for cross_target in $cross_targets; do
+        echo "target=cross $cross_target"
+        $0 cross "$cross_target" || exit 3
+    done
+
+    exit
 fi
+
+case "$mode" in
+benchmark|build|callgrind|check|cross|debug|fast_feedback|install|test|test_all|uninstall|valgrind)
+    ;;
+*)
+    echo "Unknown mode $mode"
+    exit 1
+    ;;
+esac
