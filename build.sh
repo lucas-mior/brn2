@@ -29,6 +29,20 @@ is_clang_cl=0
 is_cl=0
 msvc_compiler=clang-cl
 
+add_pthread_flags() {
+    case "$1" in
+    *MINGW*|*MSYS*|*CYGWIN*|*mingw*|*msys*|*cygwin*|*windows*)
+        return 0
+        ;;
+    esac
+
+    if [ "$is_msvc" -eq 0 ]; then
+        CFLAGS="$CFLAGS -pthread"
+    fi
+
+    return 0
+}
+
 case "$CC" in
 clang-cl|*/clang-cl)
     is_msvc=1
@@ -69,98 +83,83 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
+known_mode=1
+
 case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     exe="bin/${program}_debug"
+    add_pthread_flags "$OS"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_benchmark"
+    add_pthread_flags "$OS"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
+    add_pthread_flags "$OS"
     ;;
 callgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
+    add_pthread_flags "$OS"
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1"
     LDFLAGS="$LDFLAGS -lm"
+    add_pthread_flags "$OS"
     ;;
 check)
     CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
     LDFLAGS="$LDFLAGS -lm"
+    add_pthread_flags "$OS"
     ;;
 build)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    add_pthread_flags "$OS"
     ;;
 fast_feedback)
     CFLAGS="$CFLAGS -Werror"
+    add_pthread_flags "$OS"
     ;;
 cross)
-    CFLAGS="$CFLAGS -Wno-padded"
-    CFLAGS="$CFLAGS -target $cross"
-    ;;
-*)
-    if [ ! -f "$mode" ]; then
-        error "$0: Unknown mode=$mode"
-    fi
-    ;;
-esac
-
-if [ "$mode" = "cross" ]; then
-    ncross=$(echo "$cross_targets" | wc -l)
+    ncross=$(printf '%s\n' "$cross_targets" | wc -l)
     i=1
     cross="$target"
+
     if [ "$cross" = "all" ]; then
-        status=0
-        for f in $cross_targets; do
+        for cross_target in $cross_targets; do
             echo "$i / $ncross"
             i=$((i+1))
-            if ! "$0" cross "$f"; then
+            if ! "$0" cross "$cross_target" 2>&1 | head -n 200; then
                 exit 1
             fi
         done
-        exit "$status"
+        exit 0
     fi
 
-    case $cross in
-    x86_64-macos|aarch64-macos)
-        LDFLAGS="$LDFLAGS -lpthread"
-        ;;
-    *linux*)
-        LDFLAGS="$LDFLAGS -lpthread"
-        ;;
+    CFLAGS="$CFLAGS -Wno-padded"
+    CFLAGS="$CFLAGS -target $cross"
+
+    case "$cross" in
     *windows*)
         exe="bin/$program.exe"
         ;;
     *)
-        LDFLAGS="$LDFLAGS -lpthread"
+        add_pthread_flags "$cross"
         ;;
     esac
-else
-    case "$OS" in
-    *Linux*)
-        ;;
-    *Darwin*)
-        ;;
-    *MINGW*|*MSYS*|*CYGWIN*)
-        ;;
-    esac
-    case "$OS" in
-    *MINGW*|*MSYS*|*CYGWIN*)
-        ;;
-    *)
-        LDFLAGS="$LDFLAGS -lpthread"
-        ;;
-    esac
-fi
-
+    ;;
+uninstall|install|test_all)
+    ;;
+*)
+    known_mode=0
+    ;;
+esac
 if [ "$is_cl" -eq 1 ]; then
     case "$exe" in
     *.exe)
@@ -364,4 +363,9 @@ if [ "$mode" = "test_all" ]; then
     done
 
     exit
+fi
+
+if [ "$known_mode" -eq 0 ]; then
+    printf 'Unknown mode %s\n' "$mode"
+    exit 1
 fi
