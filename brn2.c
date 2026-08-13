@@ -128,68 +128,6 @@ brn2_list_from_args(FileList *list, int32 argc, char **argv) {
     return;
 }
 
-#if !OS_WINDOWS
-static int32
-brn2_scandir(char *directory, DirEntry **directory_list) {
-    DIR *dir;
-    struct dirent *entry;
-    DirEntry *entries;
-    int32 length = 0;
-    int32 capacity = 256;
-    int32 error_code;
-
-    if ((dir = opendir(directory)) == NULL) {
-        return -1;
-    }
-
-    entries = malloc2(capacity*SIZEOF(*entries));
-
-    errno = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        int32 name_len = strlen32(entry->d_name);
-
-        if (name_len >= SIZEOF(entries[0].name)) {
-            error("File name too long. Skipping...\n");
-            continue;
-        }
-
-        if (length >= capacity) {
-            int64 old_capacity = capacity;
-
-            if (capacity > (MAXOF(capacity) / 2)) {
-                error("Error: too many files in directory '%s'.\n", directory);
-                fatal(EXIT_FAILURE);
-            }
-            capacity *= 2;
-            entries = realloc2(entries, old_capacity, capacity,
-                               SIZEOF(*entries));
-        }
-
-        entries[length].name_len = name_len;
-        memcpy64(entries[length].name, entry->d_name, name_len + 1);
-        length += 1;
-    }
-
-    error_code = errno;
-    if (closedir(dir) < 0) {
-        if (error_code == 0) {
-            error_code = errno;
-        }
-    }
-
-    if (error_code != 0) {
-        free2(entries, capacity*SIZEOF(*entries));
-        errno = error_code;
-        return -1;
-    }
-
-    entries = realloc2(entries, capacity, length, SIZEOF(*entries));
-    *directory_list = entries;
-
-    return length;
-}
-#endif
-
 void
 brn2_list_from_dir(FileList *list, char *directory) {
     DirEntry *directory_list;
@@ -208,7 +146,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         directory_length = 0;
     }
 
-    number_files = brn2_scandir(directory, &directory_list);
+    number_files = get_directory_entries(directory, &directory_list);
     if (number_files < 0) {
         error("Error scanning '%s': %s.\n", directory, strerror(errno));
         fatal(EXIT_FAILURE);

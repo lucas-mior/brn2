@@ -49,6 +49,7 @@ typedef struct DirEntry {
     char name[256];
 } DirEntry;
 
+extern int32 get_directory_entries(char *, DirEntry **);
 extern int32 utf8_random_string(char *, int32, int32);
 extern int32 utf8_byte_position(char *, int32, int32);
 extern int32 utf8_capitalize_first_letters(char *, int32,
@@ -224,6 +225,10 @@ extern int xclosedir(DIR *, char *);
 #endif
 extern int xfclose(char *, int32, char *, FILE *, char *);
 extern FILE *xfopen(char *, int32, char *, char *, char *);
+#if OS_WINDOWS
+extern void windows_set_errno(DWORD);
+#endif
+
 #if OS_UNIX
 extern void xdup2(int, int);
 extern void xkill(pid_t, int);
@@ -589,6 +594,10 @@ extern void throw_away_function();
 #include "array.c"
 #include "utf8.c"
 #include "util.c"
+#if OS_WINDOWS
+#include "windows.c"
+#endif
+#include "directory.c"
 #include "threads.c"
 
 #define ENUM_NAME CommandFlag

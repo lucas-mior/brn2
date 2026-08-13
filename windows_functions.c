@@ -20,12 +20,6 @@
 #define S_IFLNK 0120000
 #endif
 
-#if !HAS_POSIX_WIN_SUBSET
-struct dirent {
-    char d_name[MAX_PATH];
-};
-#endif
-
 #if CBASE_CRT_MSVC
 static int
 mkstemp(char *template) {
@@ -73,197 +67,6 @@ mkstemp(char *template) {
     return -1;
 }
 #endif
-
-static void
-windows_set_errno(DWORD error_code) {
-    switch (error_code) {
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_PATH_NOT_FOUND:
-    case ERROR_INVALID_DRIVE:
-    case ERROR_BAD_NETPATH:
-    case ERROR_BAD_NET_NAME:
-        errno = ENOENT;
-        break;
-    case ERROR_ACCESS_DENIED:
-    case ERROR_NETWORK_ACCESS_DENIED:
-    case ERROR_WRITE_PROTECT:
-    case ERROR_SHARING_VIOLATION:
-    case ERROR_LOCK_VIOLATION:
-        errno = EACCES;
-        break;
-    case ERROR_FILE_EXISTS:
-    case ERROR_ALREADY_EXISTS:
-        errno = EEXIST;
-        break;
-    case ERROR_INVALID_PARAMETER:
-    case ERROR_INVALID_NAME:
-    case ERROR_BAD_PATHNAME:
-        errno = EINVAL;
-        break;
-    case ERROR_NO_UNICODE_TRANSLATION:
-        errno = EILSEQ;
-        break;
-    case ERROR_FILENAME_EXCED_RANGE:
-        errno = ENAMETOOLONG;
-        break;
-    case ERROR_NOT_ENOUGH_MEMORY:
-    case ERROR_OUTOFMEMORY:
-        errno = ENOMEM;
-        break;
-    case ERROR_TOO_MANY_OPEN_FILES:
-        errno = EMFILE;
-        break;
-    case ERROR_DISK_FULL:
-    case ERROR_HANDLE_DISK_FULL:
-        errno = ENOSPC;
-        break;
-    case ERROR_DIRECTORY:
-        errno = ENOTDIR;
-        break;
-    case ERROR_DIR_NOT_EMPTY:
-        errno = ENOTEMPTY;
-        break;
-    case ERROR_OPERATION_ABORTED:
-        errno = EINTR;
-        break;
-    case ERROR_BROKEN_PIPE:
-    case ERROR_NO_DATA:
-        errno = EPIPE;
-        break;
-    default:
-        errno = EIO;
-        break;
-    }
-    return;
-}
-
-static void
-scandir_list_free(DirEntry *list, int64 capacity) {
-    free2(list, capacity*SIZEOF(*list));
-    return;
-}
-
-static int32
-brn2_scandir(char *dir, DirEntry **namelist) {
-    WIN32_FIND_DATAW find_data;
-    HANDLE find_handle;
-    wchar_t *wide_pattern;
-    DirEntry *list;
-    DWORD error_code;
-    int64 pattern_capacity;
-    int64 pattern_length;
-    int64 count;
-    int64 capacity = 16;
-    int32 wide_dir_length;
-
-    if ((dir == NULL) || (namelist == NULL)) {
-        errno = EINVAL;
-        return -1;
-    }
-
-    wide_dir_length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
-                                          dir, -1, NULL, 0);
-    if (wide_dir_length <= 0) {
-        windows_set_errno(GetLastError());
-        return -1;
-    }
-
-    pattern_capacity = (int64)wide_dir_length + 2;
-    wide_pattern = malloc2(pattern_capacity*SIZEOF(*wide_pattern));
-    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, dir, -1,
-                            wide_pattern, wide_dir_length)
-        != wide_dir_length) {
-        error_code = GetLastError();
-        free2(wide_pattern, pattern_capacity*SIZEOF(*wide_pattern));
-        windows_set_errno(error_code);
-        return -1;
-    }
-
-    pattern_length = (int64)wide_dir_length - 1;
-    if ((pattern_length > 0)
-        && (wide_pattern[pattern_length - 1] != L'/')
-        && (wide_pattern[pattern_length - 1] != L'\\')) {
-        wide_pattern[pattern_length++] = L'\\';
-    }
-    wide_pattern[pattern_length++] = L'*';
-    wide_pattern[pattern_length] = L'\0';
-
-    find_handle = FindFirstFileW(wide_pattern, &find_data);
-    if (find_handle == INVALID_HANDLE_VALUE) {
-        error_code = GetLastError();
-        free2(wide_pattern, pattern_capacity*SIZEOF(*wide_pattern));
-        windows_set_errno(error_code);
-        return -1;
-    }
-    free2(wide_pattern, pattern_capacity*SIZEOF(*wide_pattern));
-
-    count = 0;
-    list = malloc2(capacity*SIZEOF(*list));
-    while (true) {
-        int32 name_len;
-        int32 utf8_length;
-
-        utf8_length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
-                                          find_data.cFileName, -1,
-                                          NULL, 0, NULL, NULL);
-        if (utf8_length <= 0) {
-            error_code = GetLastError();
-            FindClose(find_handle);
-            scandir_list_free(list, capacity);
-            windows_set_errno(error_code);
-            return -1;
-        }
-
-        name_len = utf8_length - 1;
-        if (name_len >= SIZEOF(list[0].name)) {
-            error("File name too long. Skipping...\n");
-        } else {
-            if (count >= capacity) {
-                int64 old_capacity = capacity;
-
-                capacity *= 2;
-                list = realloc2(list, old_capacity, capacity, SIZEOF(*list));
-            }
-
-            list[count].name_len = name_len;
-            if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
-                                    find_data.cFileName, -1, list[count].name,
-                                    utf8_length, NULL, NULL)
-                != utf8_length) {
-                error_code = GetLastError();
-                FindClose(find_handle);
-                scandir_list_free(list, capacity);
-                windows_set_errno(error_code);
-                return -1;
-            }
-            count += 1;
-        }
-
-        if (!FindNextFileW(find_handle, &find_data)) {
-            error_code = GetLastError();
-            break;
-        }
-    }
-
-    if (!FindClose(find_handle) && (error_code == ERROR_NO_MORE_FILES)) {
-        error_code = GetLastError();
-    }
-    if (error_code != ERROR_NO_MORE_FILES) {
-        scandir_list_free(list, capacity);
-        windows_set_errno(error_code);
-        return -1;
-    }
-
-    if (count >= MAXOF(brn2_scandir(NULL, NULL))) {
-        scandir_list_free(list, capacity);
-        errno = EOVERFLOW;
-        return -1;
-    }
-
-    list = realloc2(list, capacity, count, SIZEOF(*list));
-    *namelist = list;
-    return (int32)count;
-}
 
 static time_t
 filetime_to_time_t(FILETIME *filetime) {
@@ -444,7 +247,7 @@ main(void) {
         int32 dirent_capacity;
         int32 nfiles;
 
-        if ((nfiles = brn2_scandir("./", &dirent)) <= 0) {
+        if ((nfiles = get_directory_entries("./", &dirent)) <= 0) {
             error("Error in scandir for windows.\n");
             fatal(EXIT_FAILURE);
         }
