@@ -11,7 +11,6 @@
 #endif
 
 #include "cbase.h"
-#include "brn2_directory_entry.h"
 
 #if !OS_WINDOWS
 #error "ONLY INCLUDE THIS FILE IF COMPILING FOR WINDOWS"
@@ -139,20 +138,17 @@ windows_set_errno(DWORD error_code) {
 }
 
 static void
-scandir_list_free(Brn2DirectoryEntry **list, int64 count, int64 capacity) {
-    for (int64 i = 0; i < count; i += 1) {
-        free2(list[i], brn2_directory_entry_size(list[i]->name_length));
-    }
+scandir_list_free(DirEntry *list, int64 capacity) {
     free2(list, capacity*SIZEOF(*list));
     return;
 }
 
 static int32
-brn2_scandir(char *dir, Brn2DirectoryEntry ***namelist) {
+brn2_scandir(char *dir, DirEntry **namelist) {
     WIN32_FIND_DATAW find_data;
     HANDLE find_handle;
     wchar_t *wide_pattern;
-    Brn2DirectoryEntry **list;
+    DirEntry *list;
     DWORD error_code;
     int64 pattern_capacity;
     int64 pattern_length;
@@ -204,9 +200,7 @@ brn2_scandir(char *dir, Brn2DirectoryEntry ***namelist) {
     count = 0;
     list = malloc2(capacity*SIZEOF(*list));
     while (true) {
-        Brn2DirectoryEntry *dir_entry;
-        int64 dir_entry_size;
-        int32 name_length;
+        int32 name_len;
         int32 utf8_length;
 
         utf8_length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
@@ -215,35 +209,35 @@ brn2_scandir(char *dir, Brn2DirectoryEntry ***namelist) {
         if (utf8_length <= 0) {
             error_code = GetLastError();
             FindClose(find_handle);
-            scandir_list_free(list, count, capacity);
+            scandir_list_free(list, capacity);
             windows_set_errno(error_code);
             return -1;
         }
 
-        name_length = utf8_length - 1;
-        dir_entry_size = brn2_directory_entry_size(name_length);
-        dir_entry = malloc2(dir_entry_size);
-        dir_entry->name_length = name_length;
+        name_len = utf8_length - 1;
+        if (name_len >= SIZEOF(list[0].name)) {
+            error("File name too long. Skipping...\n");
+        } else {
+            if (count >= capacity) {
+                int64 old_capacity = capacity;
 
-        if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
-                                find_data.cFileName, -1, dir_entry->name,
-                                utf8_length, NULL, NULL)
-            != utf8_length) {
-            error_code = GetLastError();
-            free2(dir_entry, dir_entry_size);
-            FindClose(find_handle);
-            scandir_list_free(list, count, capacity);
-            windows_set_errno(error_code);
-            return -1;
+                capacity *= 2;
+                list = realloc2(list, old_capacity, capacity, SIZEOF(*list));
+            }
+
+            list[count].name_len = name_len;
+            if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
+                                    find_data.cFileName, -1, list[count].name,
+                                    utf8_length, NULL, NULL)
+                != utf8_length) {
+                error_code = GetLastError();
+                FindClose(find_handle);
+                scandir_list_free(list, capacity);
+                windows_set_errno(error_code);
+                return -1;
+            }
+            count += 1;
         }
-
-        if (count >= capacity) {
-            int64 old_capacity = capacity;
-
-            capacity *= 2;
-            list = realloc2(list, old_capacity, capacity, SIZEOF(*list));
-        }
-        list[count++] = dir_entry;
 
         if (!FindNextFileW(find_handle, &find_data)) {
             error_code = GetLastError();
@@ -255,13 +249,13 @@ brn2_scandir(char *dir, Brn2DirectoryEntry ***namelist) {
         error_code = GetLastError();
     }
     if (error_code != ERROR_NO_MORE_FILES) {
-        scandir_list_free(list, count, capacity);
+        scandir_list_free(list, capacity);
         windows_set_errno(error_code);
         return -1;
     }
 
     if (count >= MAXOF(brn2_scandir(NULL, NULL))) {
-        scandir_list_free(list, count, capacity);
+        scandir_list_free(list, capacity);
         errno = EOVERFLOW;
         return -1;
     }
@@ -398,11 +392,11 @@ static bool
 contains(
     char *buffer,
     int64 length,
-    Brn2DirectoryEntry **directory_entries,
+    DirEntry *directory_entries,
     int32 *number_files
 ) {
     for (int32 i = 0; i < *number_files; i += 1) {
-        char *from_scan = directory_entries[i]->name;
+        char *from_scan = directory_entries[i].name;
 
         if (strlen32(from_scan) != length) {
             continue;
@@ -410,11 +404,8 @@ contains(
 
         if (!memcmp64(buffer, from_scan, length)) {
             printf("%s == %s\n", buffer, from_scan);
-            if (i < (*number_files - 1)) {
-                *number_files -= 1;
-                free2(directory_entries[i],
-                      brn2_directory_entry_size(
-                          directory_entries[i]->name_length));
+            *number_files -= 1;
+            if (i < *number_files) {
                 memmove64(&directory_entries[i], &directory_entries[i + 1],
                           (*number_files - i)*SIZEOF(*directory_entries));
             }
@@ -447,15 +438,17 @@ main(void) {
     }
 
     {
-        Brn2DirectoryEntry **dirent;
-        int32 nfiles;
+        DirEntry *dirent;
         FILE *ls_pipe;
         char buffer[1024];
+        int32 dirent_capacity;
+        int32 nfiles;
 
         if ((nfiles = brn2_scandir("./", &dirent)) <= 0) {
             error("Error in scandir for windows.\n");
             fatal(EXIT_FAILURE);
         }
+        dirent_capacity = nfiles;
 
         if ((ls_pipe = popen("dir /b", "r")) == NULL) {
             error("Error in popen: %s.\n", strerror(errno));
@@ -471,9 +464,7 @@ main(void) {
             ASSERT(contains(buffer, length, dirent, &nfiles));
         }
 
-        for (int32 i = 0; i < nfiles; i += 1) {
-            free2(dirent[i], brn2_directory_entry_size(dirent[i]->name_length));
-        }
+        free2(dirent, (int64)dirent_capacity*SIZEOF(*dirent));
     }
 
     exit(EXIT_SUCCESS);

@@ -44,6 +44,11 @@ extern void *memrchr64(void *, int32, int64);
 
 #define UTF_INVALID 0xFFFD
 
+typedef struct DirEntry {
+    int32 name_len;
+    char name[256];
+} DirEntry;
+
 extern int32 utf8_random_string(char *, int32, int32);
 extern int32 utf8_byte_position(char *, int32, int32);
 extern int32 utf8_capitalize_first_letters(char *, int32,
