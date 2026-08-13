@@ -103,6 +103,8 @@ fast_feedback)
     CFLAGS="$CFLAGS -Werror"
     ;;
 cross)
+    CFLAGS="$CFLAGS -Wno-padded"
+    CFLAGS="$CFLAGS -target $cross"
     ;;
 *)
     if [ ! -f "$mode" ]; then
@@ -126,8 +128,6 @@ if [ "$mode" = "cross" ]; then
         done
         exit "$status"
     fi
-    CFLAGS="$CFLAGS -Wno-padded"
-    CFLAGS="$CFLAGS -target $cross"
 
     case $cross in
     x86_64-macos|aarch64-macos)
