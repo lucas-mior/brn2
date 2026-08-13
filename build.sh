@@ -244,9 +244,9 @@ test)
 test_all)
     ;;
 *)
-    trace_on
 
     common_build_tags
+    trace_on
 
     if [ "$is_cl" -eq 1 ]; then
         $CC $CPPFLAGS $CFLAGS /Fe${exe} main.c $LDFLAGS
