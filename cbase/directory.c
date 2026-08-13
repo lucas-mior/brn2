@@ -235,9 +235,7 @@ test_directory_entries_are_valid(DirEntry *entries, int32 length) {
 static void
 test_get_directory_entries_reads_directory(void) {
     DirEntry *entries = NULL;
-    int32 length;
-
-    length = get_directory_entries("cbase", &entries);
+    int32 length = get_directory_entries("cbase", &entries);
 
     ASSERT_POSITIVE(length);
     test_directory_entries_are_valid(entries, length);
