@@ -255,6 +255,17 @@ benchmark|build|callgrind|check|debug|valgrind)
 
     trace_off
     ;;
+check)
+    set +e
+    CC=gcc CFLAGS="-fanalyzer" ./build.sh
+
+    CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
+    CFLAGS="$CFLAGS -Xanalyzer -analyzer-werror"
+    CFLAGS="$CFLAGS -Xanalyzer -analyzer-opt-analyze-headers"
+    CFLAGS="$CFLAGS -Wno-unused-command-line-argument"
+    CC=clang CFLAGS="$CFLAGS" ./build.sh
+    exit
+    ;;
 *)
     ;;
 esac
@@ -324,17 +335,6 @@ valgrind)
         "$dir/$exe" -q -f "$original" --file-test "$rotated_right"
 
     trace_off
-    exit
-    ;;
-check)
-    set +e
-    CC=gcc CFLAGS="-fanalyzer" ./build.sh
-
-    CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
-    CFLAGS="$CFLAGS -Xanalyzer -analyzer-werror"
-    CFLAGS="$CFLAGS -Xanalyzer -analyzer-opt-analyze-headers"
-    CFLAGS="$CFLAGS -Wno-unused-command-line-argument"
-    CC=clang CFLAGS="$CFLAGS" ./build.sh
     exit
     ;;
 esac
