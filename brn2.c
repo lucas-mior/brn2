@@ -246,7 +246,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
     }
     padding = ALIGNMENT - ((uint64)map_size % ALIGNMENT);
     map_size += padding;
-    if (ftruncate(fd, map_size) < 0) {
+    if (ftruncate(fd, (off_t)map_size) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n",
               filename, map_size, strerror(errno));
         fatal(EXIT_FAILURE);

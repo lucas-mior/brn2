@@ -74,7 +74,9 @@ cross_targets=
 if common_command_exists zig; then
     cross_targets=$(zig targets \
                     | sed -n '/\.libc = \.{/,/},/ s/^[[:space:]]*"\(.*\)".*/\1/p' \
-                    | grep -v "32")
+                    | grep -v "32" \
+                    | grep -v -- "^arc-" \
+                    | grep -v -- "^armeb-")
 fi
 echo "cross_targets = $cross_targets" > /dev/null
 

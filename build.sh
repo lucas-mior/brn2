@@ -125,6 +125,7 @@ if [ "$mode" = "cross" ]; then
         done
         exit "$status"
     fi
+    CFLAGS="$CFLAGS -Wno-padded"
     CFLAGS="$CFLAGS -target $cross"
 
     case $cross in
