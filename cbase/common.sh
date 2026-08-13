@@ -81,7 +81,7 @@ if common_command_exists zig; then
                     | grep -v -- "^m68k-" \
                     | grep -v -- "^loongarch64-linux-gnusf" \
                     | grep -v -- "^sparc-" \
-                    | grep -v -- "^sparc64-linux-gnu" \
+                    | grep -v -- "^sparc64-" \
                     | grep -v -- "^csky-")
 fi
 echo "cross_targets = $cross_targets" > /dev/null

@@ -147,7 +147,7 @@ uninstall|install|test_all)
     ;;
 *)
     if [ ! -f "$mode" ]; then
-        error "$0: Unknown mode=$mode"
+        error "$0: Unknown mode=$mode\n"
         exit 1
     fi
     ;;
