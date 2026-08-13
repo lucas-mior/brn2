@@ -115,8 +115,9 @@ if [ "$mode" = "cross" ]; then
             if "$0" cross "$f"; then
                 echo "ran cross $f ..."
             else
-                status=1
-                echo "failed cross $f ..."
+                exit 1
+                # status=1
+                # echo "failed cross $f ..."
             fi
         done
         exit "$status"
@@ -241,7 +242,10 @@ test)
     ;;
 test_all)
     ;;
-benchmark|build|callgrind|check|cross|debug|valgrind)
+cross)
+    $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
+    ;;
+benchmark|build|callgrind|check|debug|valgrind)
     common_build_tags
     trace_on
 
