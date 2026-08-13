@@ -102,6 +102,8 @@ build)
 fast_feedback)
     CFLAGS="$CFLAGS -Werror"
     ;;
+cross)
+    ;;
 *)
     if [ ! -f "$mode" ]; then
         error "$0: Unknown mode=$mode"
