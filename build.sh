@@ -84,11 +84,6 @@ benchmark)
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
     exe="bin/${program}_benchmark"
     ;;
-perf)
-    CFLAGS="$CFLAGS -g3 -Og -flto"
-    CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
-    exe="bin/${program}_perf"
-    ;;
 valgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
@@ -328,18 +323,6 @@ valgrind)
     valgrind --log-file="$dir/valgrind.3.txt" -s --tool=memcheck \
         "$dir/$exe" -q -f "$original" --file-test "$rotated_right"
 
-    trace_off
-    exit
-    ;;
-perf)
-    create_temp_files
-
-    cd /tmp/brn2 || exit
-    trace_on
-    perf record -b -o $dir/perf.data $dir/$exe -s -q -d .
-    cd "$dir"
-    perf annotate $dir/$exe
-    perf report -v perf.data
     trace_off
     exit
     ;;
