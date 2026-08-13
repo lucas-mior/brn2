@@ -64,7 +64,7 @@ cl|*/cl|cl.exe|*/cl.exe)
     ;;
 esac
 
-CPPFLAGS="$CPPFLAGS -I$dir/cbase"
+CPPFLAGS="$CPPFLAGS -I. -Icbase"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
