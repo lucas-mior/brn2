@@ -341,7 +341,7 @@ esac
 
 trace_off
 if [ "$mode" = "test_all" ]; then
-    for build_target in debug build test; do
+    for build_target in debug build "test"; do
         echo "target=$build_target"
 
         for compiler in tcc clang gcc /opt/msvc/bin/x64/cl.exe; do
