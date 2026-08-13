@@ -205,4 +205,64 @@ get_directory_entries(char *directory, DirEntry **directory_list) {
 }
 #endif
 
+#if TESTING_directory
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
+static int32
+directory_entry_index(DirEntry *entries, int32 length, char *name) {
+    for (int32 i = 0; i < length; i += 1) {
+        if (strequal(entries[i].name, name)) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+static void
+test_directory_entries_are_valid(DirEntry *entries, int32 length) {
+    for (int32 i = 0; i < length; i += 1) {
+        ASSERT_NON_NEGATIVE(entries[i].name_len);
+        ASSERT_LESS(entries[i].name_len, SIZEOF(entries[i].name));
+        ASSERT_EQUAL(entries[i].name_len, strlen32(entries[i].name));
+        ASSERT_EQUAL(entries[i].name[entries[i].name_len], '\0');
+    }
+
+    return;
+}
+
+static void
+test_get_directory_entries_reads_directory(void) {
+    DirEntry *entries = NULL;
+    int32 length;
+
+    length = get_directory_entries("cbase", &entries);
+
+    ASSERT_POSITIVE(length);
+    test_directory_entries_are_valid(entries, length);
+    ASSERT_NON_NEGATIVE(directory_entry_index(entries, length, "cbase.h"));
+    ASSERT_NON_NEGATIVE(directory_entry_index(entries, length, "directory.c"));
+
+    free2(entries, (int64)length*SIZEOF(*entries));
+    return;
+}
+
+static void
+test_get_directory_entries_reports_missing_directory(void) {
+    DirEntry *entries = NULL;
+
+    ASSERT_EQUAL(get_directory_entries("cbase/this_directory_must_not_exist",
+                                       &entries), -1);
+    return;
+}
+
+int
+main(void) {
+    test_get_directory_entries_reads_directory();
+    test_get_directory_entries_reports_missing_directory();
+    exit(EXIT_SUCCESS);
+}
+#endif /* TESTING_directory */
+
 #endif
