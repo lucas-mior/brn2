@@ -24,7 +24,6 @@ exe="bin/$program"
 mkdir -p "$(dirname "$exe")"
 
 OS=$(uname -a)
-
 CC=$(common_get_compiler "$mode")
 
 is_msvc=0
