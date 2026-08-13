@@ -273,6 +273,22 @@ create_temp_files() {
     seq -w 2000000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
+valgrind_rotate_left() {
+    input=$1
+    output=$2
+
+    sed '1d' "$input" > "$output"
+    sed -n '1p' "$input" >> "$output"
+}
+
+valgrind_rotate_right() {
+    input=$1
+    output=$2
+
+    tail -n 1 "$input" > "$output"
+    sed '$d' "$input" >> "$output"
+}
+
 case "$mode" in
 benchmark)
     create_temp_files
@@ -287,17 +303,30 @@ benchmark)
     ;;
 valgrind)
     create_temp_files
-    ls > rename
+
+    valgrind_lists="/tmp/brn2-valgrind"
+    rm -rf "$valgrind_lists"
+    mkdir -p "$valgrind_lists"
+
+    original="$valgrind_lists/original"
+    shuffled="$valgrind_lists/shuffled"
+    rotated_left="$valgrind_lists/rotated-left"
+    rotated_right="$valgrind_lists/rotated-right"
+
+    LC_ALL=C ls > "$original"
+    shuf "$original" > "$shuffled"
+    valgrind_rotate_left "$original" "$rotated_left"
+    valgrind_rotate_right "$original" "$rotated_right"
 
     trace_on
 
-    find . \
-    | valgrind  --log-file=$dir/valgrind.txt -s --tool=memcheck \
-        $dir/bin/brn2 -f -
-    valgrind --log-file=$dir/valgrind.txt -s --tool=memcheck \
-        $dir/bin/brn2 -d .
-    valgrind --log-file=$dir/valgrind.txt -s --tool=memcheck \
-          $dir/bin/brn2 -f rename
+    cat "$original" \
+    | valgrind --log-file="$dir/valgrind.1.txt" -s --tool=memcheck \
+        "$dir/$exe" -q -f - --file-test "$shuffled"
+    valgrind --log-file="$dir/valgrind.2.txt" -s --tool=memcheck \
+        "$dir/$exe" -q -d . --file-test "$rotated_left"
+    valgrind --log-file="$dir/valgrind.3.txt" -s --tool=memcheck \
+        "$dir/$exe" -q -f "$original" --file-test "$rotated_right"
 
     trace_off
     exit
