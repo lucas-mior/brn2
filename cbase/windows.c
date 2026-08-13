@@ -77,4 +77,13 @@ windows_set_errno(DWORD error_code) {
 }
 #endif
 
+#if TESTING_windows
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
+int main(void) {
+    exit(EXIT_SUCCESS);
+}
+#endif
+
 #endif
