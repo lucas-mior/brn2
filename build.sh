@@ -8,17 +8,16 @@ cd "$dir" || exit
 # shellcheck source=./cbase/common.sh
 . ./cbase/common.sh
 
-program=$(common_get_program "$0")
-script=$(basename "$0")
+project=$(common_get_program "$0")
 
 common_build_parse_args "$@"
 
-common_build_print_invocation "$script"
+common_build_print_invocation "$project"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
-exe="bin/$program"
+exe="bin/$project"
 mkdir -p "$(dirname "$exe")"
 
 OS=$(uname -a)
@@ -89,12 +88,12 @@ debug)
     CFLAGS="$CFLAGS -g3 -Og"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
-    exe="bin/${program}_debug"
+    exe="bin/${project}_debug"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
-    exe="bin/${program}_benchmark"
+    exe="bin/${project}_benchmark"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
@@ -138,7 +137,7 @@ cross)
 
     case "$cross" in
     *windows*)
-        exe="bin/$program.exe"
+        exe="bin/$project.exe"
         ;;
     *)
         ;;
@@ -193,17 +192,17 @@ fast_feedback)
 uninstall)
     trace_on
 
-    rm -f "${DESTDIR}${PREFIX}/bin/${program}"
-    common_uninstall_opt "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
-    common_uninstall_opt "completions/${program}.bash" \
-        "${DESTDIR}${PREFIX}/share/bash-completion/completions/${program}"
-    common_uninstall_opt "completions/_${program}" \
-        "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${program}"
-    common_uninstall_opt "completions/${program}.fish" \
-        "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${program}.fish"
-    common_uninstall_opt "etc" "${DESTDIR}/etc/${program}"
+    rm -f "${DESTDIR}${PREFIX}/bin/${project}"
+    common_uninstall_opt "${project}.1" "${DESTDIR}${PREFIX}/man/man1/${project}.1"
+    common_uninstall_opt "completions/${project}.bash" \
+        "${DESTDIR}${PREFIX}/share/bash-completion/completions/${project}"
+    common_uninstall_opt "completions/_${project}" \
+        "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${project}"
+    common_uninstall_opt "completions/${project}.fish" \
+        "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${project}.fish"
+    common_uninstall_opt "etc" "${DESTDIR}/etc/${project}"
     common_uninstall_opt \
-        "${program}.desktop" "${DESTDIR}/usr/share/applications/${program}.desktop"
+        "${project}.desktop" "${DESTDIR}/usr/share/applications/${project}.desktop"
 
     trace_off
     exit
@@ -215,18 +214,18 @@ install)
         "$0" build
     fi
 
-    install -Dm755 "$exe" "${DESTDIR}${PREFIX}/bin/${program}"
-    common_install_opt -Dm644 "${program}.1" "${DESTDIR}${PREFIX}/man/man1/${program}.1"
-    common_install_opt -Dm644 "completions/${program}.bash" \
-        "${DESTDIR}${PREFIX}/share/bash-completion/completions/${program}"
-    common_install_opt -Dm644 "completions/_${program}" \
-        "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${program}"
-    common_install_opt -Dm644 "completions/${program}.fish" \
-        "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${program}.fish"
-    common_install_opt -dm755 "etc" "${DESTDIR}/etc/${program}"
+    install -Dm755 "$exe" "${DESTDIR}${PREFIX}/bin/${project}"
+    common_install_opt -Dm644 "${project}.1" "${DESTDIR}${PREFIX}/man/man1/${project}.1"
+    common_install_opt -Dm644 "completions/${project}.bash" \
+        "${DESTDIR}${PREFIX}/share/bash-completion/completions/${project}"
+    common_install_opt -Dm644 "completions/_${project}" \
+        "${DESTDIR}${PREFIX}/share/zsh/site-functions/_${project}"
+    common_install_opt -Dm644 "completions/${project}.fish" \
+        "${DESTDIR}${PREFIX}/share/fish/vendor_completions.d/${project}.fish"
+    common_install_opt -dm755 "etc" "${DESTDIR}/etc/${project}"
     common_install_opt -Dm755 \
-        "${program}.desktop" \
-        "${DESTDIR}/usr/share/applications/${program}.desktop"
+        "${project}.desktop" \
+        "${DESTDIR}/usr/share/applications/${project}.desktop"
 
     trace_off
     exit
