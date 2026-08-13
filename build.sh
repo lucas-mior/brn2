@@ -13,11 +13,7 @@ script=$(basename "$0")
 
 common_build_parse_args "$@"
 
-case "$mode" in
-benchmark|build|callgrind|check|cross|debug|fast_feedback|install|test|test_all|uninstall|valgrind)
-    common_build_print_invocation "$script"
-    ;;
-esac
+common_build_print_invocation "$script"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
