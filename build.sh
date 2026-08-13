@@ -324,11 +324,11 @@ valgrind)
 
     cat "$original" \
     | valgrind --log-file="$dir/valgrind.1.txt" -s --tool=memcheck \
-        "$dir/$exe" -q -f - --file-test "$shuffled"
+        "$dir/$exe" -q -f - --file-target "$shuffled"
     valgrind --log-file="$dir/valgrind.2.txt" -s --tool=memcheck \
-        "$dir/$exe" -q -d . --file-test "$rotated_left"
+        "$dir/$exe" -q -d . --file-target "$rotated_left"
     valgrind --log-file="$dir/valgrind.3.txt" -s --tool=memcheck \
-        "$dir/$exe" -q -f "$original" --file-test "$rotated_right"
+        "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
 
     trace_off
     exit

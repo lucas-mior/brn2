@@ -27,7 +27,7 @@ int32 (*print)(const char *, ...) = noop;
 static struct option options[] = {
     {"dir",       required_argument, NULL, 'd'},
     {"file",      required_argument, NULL, 'f'},
-    {"file-test", required_argument, NULL, 't'},
+    {"file-target", required_argument, NULL, 't'},
     {"explicit",  no_argument,       NULL, 'e'},
     {"fatal",     no_argument,       NULL, 'F'},
     {"help",      no_argument,       NULL, 'h'},
