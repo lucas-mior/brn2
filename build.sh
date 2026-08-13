@@ -103,6 +103,9 @@ fast_feedback)
     CFLAGS="$CFLAGS -Werror"
     ;;
 *)
+    if [ ! -f "$mode" ]; then
+        error "$0: Unknown mode=$mode"
+    fi
     ;;
 esac
 
@@ -360,12 +363,3 @@ if [ "$mode" = "test_all" ]; then
 
     exit
 fi
-
-case "$mode" in
-benchmark|build|callgrind|check|cross|debug|fast_feedback|install|test|test_all|uninstall|valgrind)
-    ;;
-*)
-    echo "Unknown mode $mode"
-    exit 1
-    ;;
-esac
