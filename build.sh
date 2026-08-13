@@ -111,13 +111,8 @@ if [ "$mode" = "cross" ]; then
     if [ "$cross" = "all" ]; then
         status=0
         for f in $cross_targets; do
-            echo "running cross $f ..."
-            if "$0" cross "$f"; then
-                echo "ran cross $f ..."
-            else
+            if ! "$0" cross "$f"; then
                 exit 1
-                # status=1
-                # echo "failed cross $f ..."
             fi
         done
         exit "$status"
@@ -243,7 +238,9 @@ test)
 test_all)
     ;;
 cross)
+    trace_on
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
+    trace_off
     ;;
 benchmark|build|callgrind|check|debug|valgrind)
     common_build_tags
