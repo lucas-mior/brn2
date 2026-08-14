@@ -50,7 +50,9 @@ static void *brn2_threads_work_hashes(Work *);
 static void *brn2_threads_work_normalization(Work *);
 static void *brn2_threads_work_changes(Work *);
 static inline bool brn2_is_invalid_name(char *);
+#if !BRN2_NORMALIZE_NAMES_BENCHMARK
 static void brn2_slash_add(FileName *);
+#endif
 static void brn2_list_from_lines(FileList *, char *, bool);
 
 #if OS_LINUX
@@ -523,6 +525,9 @@ brn2_threads_work_normalization(Work *arg) {
             file->length -= 2;
         }
 
+#if BRN2_NORMALIZE_NAMES_BENCHMARK
+        (void)old_list;
+#else
         if (old_list) {
             struct stat file_stat;
             if (lstat(file->name, &file_stat) < 0) {
@@ -544,10 +549,12 @@ brn2_threads_work_normalization(Work *arg) {
                 brn2_slash_add(file);
             }
         }
+#endif
     }
     return NULL;
 }
 
+#if !BRN2_NORMALIZE_NAMES_BENCHMARK
 static void
 brn2_slash_add(FileName *file) {
     ASSERT_POSITIVE(file->length);
@@ -558,6 +565,7 @@ brn2_slash_add(FileName *file) {
     }
     return;
 }
+#endif
 
 #define i_key FileName *
 #define i_cmp(a,b) brn2_compare(a,b)
