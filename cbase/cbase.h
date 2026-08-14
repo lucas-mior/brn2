@@ -203,6 +203,20 @@ extern int32 square_int32(int32);
 #include "mem_literal_short.h"
 #define MEM_LITERAL_SHORT_N 8
 #include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 9
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 10
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 11
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 12
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 13
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 14
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 15
+#include "mem_literal_short.h"
 
 INLINE UNUSED bool32
 strequal(char *s1, char *s2) {
@@ -355,22 +369,35 @@ _Generic((VAR), \
 
 #define STRLIT_ARRAY(LITERAL, SIZE) \
     ((void)SIZEOF(struct { \
-        _Static_assert(sizeof(LITERAL) < (SIZE), \
+        _Static_assert(sizeof(LITERAL) <= ((SIZE) + 1), \
                        "string literal does not fit in STRLIT_ARRAY"); \
         char dummy; \
     }), \
-    (alignas(ALIGNMENT)char[SIZE]){ LITERAL })
+    (alignas(ALIGNMENT) char[SIZE]){ LITERAL })
+
+#define MEM_LITERAL_SHORT_LENGTHS(X) \
+    X(2), \
+    X(3), \
+    X(4), \
+    X(5), \
+    X(6), \
+    X(7), \
+    X(8), \
+    X(9), \
+    X(10), \
+    X(11), \
+    X(12), \
+    X(13), \
+    X(14), \
+    X(15)
+
+#define MEM_LITERAL_SHORT_GENERIC_SLOT(N) \
+    char (*)[N]: CAT(mem_literal_short_, N)
 
 #define MEM_LITERAL_SHORT(HAYSTACK, HAYSTACK_LEN, LITERAL) \
 _Generic(&(char [STRLIT_LEN(LITERAL)]){0}, \
-    char (*)[2]: mem_literal_short_2, \
-    char (*)[3]: mem_literal_short_3, \
-    char (*)[4]: mem_literal_short_4, \
-    char (*)[5]: mem_literal_short_5, \
-    char (*)[6]: mem_literal_short_6, \
-    char (*)[7]: mem_literal_short_7, \
-    char (*)[8]: mem_literal_short_8 \
-)(HAYSTACK, HAYSTACK_LEN, STRLIT_ARRAY(LITERAL, 8))
+    MEM_LITERAL_SHORT_LENGTHS(MEM_LITERAL_SHORT_GENERIC_SLOT) \
+)(HAYSTACK, HAYSTACK_LEN, STRLIT_ARRAY(LITERAL, 16))
 
 #define BEGINS_WITH_3(STRING, STRING_LEN, PREFIX) \
     begins_with(STRING, STRING_LEN, PREFIX, strlen32(PREFIX))
