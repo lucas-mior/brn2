@@ -169,7 +169,7 @@ extern bool32 strequal(char *, char *);
 extern bool32 strequal2(char *, int32, char *, int32);
 extern bool32 striqual(char *, char *);
 extern bool32 striqual2(char *, int32, char *, int32);
-bool optional_strequal(char *a, int32 a_len, char *b, int32 b_len);
+bool32 optional_strequal(char *a, int32 a_len, char *b, int32 b_len);
 extern int64 strftime2(char *, int64, char *, struct tm *);
 extern int strncmp32(char *, char *, int64);
 extern char *strncpy32(char *, char *, int64);
