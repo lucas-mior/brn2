@@ -363,6 +363,7 @@ _Generic(&(char [LEN]){0}, \
     char (*)[7]: mem_literal_short_7, \
     char (*)[8]: mem_literal_short_8 \
 )(HAYSTACK, HAYSTACK_LEN, LITERAL)
+
 #define MEM_LITERAL_SHORT_3(HAYSTACK, HAYSTACK_LEN, LITERAL) \
     MEM_LITERAL_SHORT_3_(HAYSTACK, HAYSTACK_LEN, STRLIT(LITERAL))
 #define MEM_LITERAL_SHORT_3_(HAYSTACK, HAYSTACK_LEN, ...) \
