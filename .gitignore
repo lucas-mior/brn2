@@ -28,3 +28,4 @@ test/
 tests
 *.obj
 *.callgrind
+*.valgrind

@@ -496,30 +496,31 @@ brn2_threads_work_normalization(Work *arg) {
 
     for (int32 i = work->start; i < work->end; i += 1) {
         FileName *file = list->files[i];
+        char *name = ASSUME_ALIGNED_EXPR(file->name);
         char *p;
         int64 off = 0;
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem64(file->name + off,
+        while ((p = memmem64(name + off,
                              file->length - off,
                              STRLIT("//")))) {
-            off = p - file->name;
+            off = p - name;
 
             memmove64(&p[0], &p[1], file->length - off);
             file->length -= 1;
         }
 
-        while ((file->name[0] == '.') && (file->name[1] == '/')) {
-            memmove64(&file->name[0], &file->name[2], file->length - 1);
+        while ((name[0] == '.') && (name[1] == '/')) {
+            memmove64(&name[0], &name[2], file->length - 1);
             file->length -= 2;
         }
 
         off = 0;
-        while ((p = memmem64(file->name + off,
+        while ((p = memmem64(name + off,
                              file->length - off,
                              STRLIT("/./")))) {
-            off = p - file->name;
+            off = p - name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
             file->length -= 2;
@@ -530,10 +531,10 @@ brn2_threads_work_normalization(Work *arg) {
 #else
         if (old_list) {
             struct stat file_stat;
-            if (lstat(file->name, &file_stat) < 0) {
+            if (lstat(name, &file_stat) < 0) {
                 if (errno != ENOENT) {
                     error("Error in lstat('%s'): %s.\n",
-                          file->name, strerror(errno));
+                          name, strerror(errno));
                 }
                 work->old_list->files[i]->type = TYPE_ERR;
                 continue;
