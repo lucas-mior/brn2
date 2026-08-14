@@ -55,7 +55,7 @@ typedef struct FileName {
     uint64 hash;
     int32 length;
     enum Brn2FileType type;
-    char name[];
+    alignas(ALIGNMENT) char name[];
 } FileName;
 
 enum Brn2RenameExecutionMode {
