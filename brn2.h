@@ -36,7 +36,7 @@
 #endif
 
 #if !defined(BRN2_NORMALIZE_NAMES_BENCHMARK)
-#define BRN2_NORMALIZE_NAMES_BENCHMARK 1
+#define BRN2_NORMALIZE_NAMES_BENCHMARK 0
 #endif
 
 typedef struct File {
