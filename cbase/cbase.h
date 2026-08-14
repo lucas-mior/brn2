@@ -25,14 +25,41 @@ static int64 UNUSED here_counter = 0;
 
 #define error(...)  error_impl(__FILE__, __LINE__, FUNC__, __VA_ARGS__)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
-extern int32 optional_strlen32(char *);
-extern int32 strlen32(char *);
 extern noreturn void fatal(int32);
 extern void error_impl(char *, int32, char *, char *, ...)
     ATTR_PRINTF(4, 5);
 extern int memcmp64(void *, void *, int64);
 extern void *memmem64(void *, int64, void *, int64);
 extern void *memrchr64(void *, int32, int64);
+
+INLINE int32
+strlen32(char *string) {
+    size_t len;
+
+    if (DEBUGGING) {
+        if (string == NULL) {
+            TRAP();
+        }
+    }
+    len = strlen(string);
+
+    if (DEBUGGING) {
+        if (len >= INT32_MAX) {
+            error("Error: string (%.*s ...) is too long.\n", 50, string);
+            fatal(EXIT_FAILURE);
+        }
+    }
+
+    return (int32)len;
+}
+
+INLINE int32
+optional_strlen32(char *string) {
+    if (string == NULL) {
+        return 0;
+    }
+    return strlen32(string);
+}
 
 #include "i18n.h"
 #include "memory.h"

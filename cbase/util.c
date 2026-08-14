@@ -351,31 +351,6 @@ byte_matches_any(char byte, void *memory, int64 memory_len) {
     return memchr64(memory, byte, memory_len) != NULL;
 }
 
-int32
-optional_strlen32(char *string) {
-    if (string == NULL) {
-        return 0;
-    }
-    return strlen32(string);
-}
-
-int32
-strlen32(char *string) {
-    size_t len;
-
-    ASSERT(string);
-    len = strlen(string);
-
-    if (DEBUGGING) {
-        if (len >= MAXOF(strlen32(""))) {
-            error("Error: string (%.*s ...) is too long.\n", 50, string);
-            fatal(EXIT_FAILURE);
-        }
-    }
-
-    return (int32)len;
-}
-
 char *
 strncpy32(char *dest, char *source, int64 space) {
     if (DEBUGGING) {
