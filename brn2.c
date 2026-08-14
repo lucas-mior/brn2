@@ -14,6 +14,13 @@
 #include "cbase.h"
 #include "brn2.h"
 
+#if defined(__AVX2__) && (CC_GCC || CC_CLANG)
+#include <immintrin.h>
+#define BRN2_AVX2 1
+#else
+#define BRN2_AVX2 0
+#endif
+
 #if OS_WINDOWS
 #include "windows_functions.c"
 #endif
@@ -497,6 +504,105 @@ memmem_slash_dot_slash2(char *haystack, int64 haystack_len) {
 }
 
 static inline char *
+memmem_slash_slash3(char *haystack, int64 haystack_len) {
+    int64 i = 0;
+    int64 last;
+
+    if (haystack_len < 2) {
+        return NULL;
+    }
+
+#if BRN2_AVX2
+    {
+        __m256i slash = _mm256_set1_epi8('/');
+
+        for (; i + 33 <= haystack_len; i += 32) {
+            __m256i a;
+            __m256i b;
+            __m256i matches;
+            uint32 mask;
+
+            a = _mm256_loadu_si256(
+                (__m256i const *)(void *)(haystack + i)
+            );
+            b = _mm256_loadu_si256(
+                (__m256i const *)(void *)(haystack + i + 1)
+            );
+            matches = _mm256_and_si256(_mm256_cmpeq_epi8(a, slash),
+                                       _mm256_cmpeq_epi8(b, slash));
+            mask = (uint32)_mm256_movemask_epi8(matches);
+            if (mask != 0) {
+                return haystack + i + __builtin_ctz(mask);
+            }
+        }
+    }
+#endif
+
+    last = haystack_len - 1;
+    for (; i < last; i += 1) {
+        if ((haystack[i] == '/') && (haystack[i + 1] == '/')) {
+            return haystack + i;
+        }
+    }
+
+    return NULL;
+}
+
+static inline char *
+memmem_slash_dot_slash3(char *haystack, int64 haystack_len) {
+    int64 i = 0;
+    int64 last;
+
+    if (haystack_len < 3) {
+        return NULL;
+    }
+
+#if BRN2_AVX2
+    {
+        __m256i slash = _mm256_set1_epi8('/');
+        __m256i dot = _mm256_set1_epi8('.');
+
+        for (; i + 34 <= haystack_len; i += 32) {
+            __m256i a;
+            __m256i b;
+            __m256i c;
+            __m256i matches;
+            uint32 mask;
+
+            a = _mm256_loadu_si256(
+                (__m256i const *)(void *)(haystack + i)
+            );
+            b = _mm256_loadu_si256(
+                (__m256i const *)(void *)(haystack + i + 1)
+            );
+            c = _mm256_loadu_si256(
+                (__m256i const *)(void *)(haystack + i + 2)
+            );
+            matches = _mm256_and_si256(_mm256_cmpeq_epi8(a, slash),
+                                       _mm256_cmpeq_epi8(b, dot));
+            matches = _mm256_and_si256(matches,
+                                       _mm256_cmpeq_epi8(c, slash));
+            mask = (uint32)_mm256_movemask_epi8(matches);
+            if (mask != 0) {
+                return haystack + i + __builtin_ctz(mask);
+            }
+        }
+    }
+#endif
+
+    last = haystack_len - 2;
+    for (; i < last; i += 1) {
+        if ((haystack[i] == '/')
+            && (haystack[i + 1] == '.')
+            && (haystack[i + 2] == '/')) {
+            return haystack + i;
+        }
+    }
+
+    return NULL;
+}
+
+static inline char *
 memmem_slash_slash(char *haystack, int64 haystack_len) {
     char *candidate;
     char *end;
@@ -592,7 +698,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem_slash_slash2(name + off, file->length - off))) {
+        while ((p = memmem_slash_slash3(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[0], &p[1], file->length - off);
@@ -606,7 +712,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         off = 0;
         name = ASSUME_ALIGNED_EXPR(file->name);
-        while ((p = memmem_slash_dot_slash2(name + off, file->length - off))) {
+        while ((p = memmem_slash_dot_slash3(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
