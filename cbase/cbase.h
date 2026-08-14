@@ -353,7 +353,8 @@ _Generic((VAR), \
     memmem64(LONG, LONG_LEN, SHORT, LEN)
 #define MEMMEM(...) SELECT_ON_NUM_ARGS(MEMMEM_, __VA_ARGS__)
 
-#define STRLIT_ARRAY(LITERAL) ((char[8]){ LITERAL })
+#define STRLIT_ARRAY(LITERAL, SIZE) \
+    ((char[SIZE]){ LITERAL })
 
 #define MEM_LITERAL_SHORT(HAYSTACK, HAYSTACK_LEN, LITERAL) \
 _Generic(&(char [STRLIT_LEN(LITERAL)]){0}, \
