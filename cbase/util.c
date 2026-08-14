@@ -68,12 +68,8 @@ static char *notifiers[2] = {"dunstify", "notify-send"};
 
 #if !CBASE_HAS_SYSTEM_MEMMEM
 static void *
-cbase_memmem_fallback(
-    void *haystack,
-    size_t hay_len,
-    void *needle,
-    size_t needle_len
-) {
+cbase_memmem_fallback(void *haystack, size_t haystack_len,
+                      void *needle, size_t needle_len) {
     uchar *h = haystack;
     uchar *n = needle;
     uchar *end;
@@ -85,11 +81,11 @@ cbase_memmem_fallback(
     if ((haystack == NULL) || (needle == NULL)) {
         return NULL;
     }
-    if (hay_len < needle_len) {
+    if (haystack_len < needle_len) {
         return NULL;
     }
 
-    end = h + hay_len;
+    end = h + haystack_len;
     limit = end - needle_len + 1;
 
     while (h < limit) {
@@ -136,10 +132,10 @@ memrchr64(void *pointer, int32 value, int64 size) {
 }
 
 void *
-memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
+memmem64(void *haystack, int64 haystack_len, void *needle, int64 needle_len) {
     void *result;
 
-    if (hay_len <= 0) {
+    if (haystack_len <= 0) {
         return NULL;
     }
     if (needle_len <= 0) {
@@ -147,9 +143,9 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
     }
 
 #if CBASE_HAS_SYSTEM_MEMMEM
-    result = memmem(haystack, (size_t)hay_len, needle, (size_t)needle_len);
+    result = memmem(haystack, (size_t)haystack_len, needle, (size_t)needle_len);
 #else
-    result = cbase_memmem_fallback(haystack, (size_t)hay_len,
+    result = cbase_memmem_fallback(haystack, (size_t)haystack_len,
                                    needle, (size_t)needle_len);
 #endif
     return result;
