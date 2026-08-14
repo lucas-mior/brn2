@@ -13,7 +13,9 @@ project=$(common_get_program "$0")
 common_build_parse_args "$@"
 
 case "$mode" in
-debug|benchmark|valgrind|callgrind|test|check|build|fast_feedback|cross|uninstall|install|test_all)
+debug|benchmark|valgrind|callgrind)
+    ;;
+test|check|build|fast_feedback|cross|uninstall|install|test_all)
     ;;
 *)
     common_build_unknown_mode
