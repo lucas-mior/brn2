@@ -70,6 +70,9 @@
 #include <setjmp.h>
 #include <signal.h>
 #include <stdalign.h>
+#if !defined(alignas)
+#error "alignas not defined"
+#endif 
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
