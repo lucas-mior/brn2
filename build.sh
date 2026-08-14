@@ -110,7 +110,7 @@ valgrind)
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 callgrind)
-    CFLAGS="$CFLAGS -mavx -g3 -O3 -ftree-vectorize"
+    CFLAGS="$CFLAGS -mavx2 -g3 -O3 -ftree-vectorize"
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1 -Wno-unused-function"
