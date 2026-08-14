@@ -30,6 +30,7 @@ extern void error_impl(char *, int32, char *, char *, ...)
     ATTR_PRINTF(4, 5);
 extern int memcmp64(void *, void *, int64);
 extern void *memmem64(void *, int64, void *, int64);
+extern void *memchr64(void *, int32, int64);
 extern void *memrchr64(void *, int32, int64);
 
 INLINE int32
@@ -141,7 +142,6 @@ extern char *ends_with(char *, int32, char *, int32);
 extern void error_async_safe(char *);
 extern bool is_ident_char(char);
 extern bool is_ident_start_char(char);
-extern void *memchr64(void *, int32, int64);
 extern void normalize(char *restrict, int32 *restrict);
 extern bool parse_option(char **, char *, char *);
 extern char *path_basename(char *, int32);
@@ -188,6 +188,21 @@ extern int64 clamp_int64(int64, int64, int64);
 extern int32 clamp_int32(int32, int32, int32);
 extern int64 square_int64(int64);
 extern int32 square_int32(int32);
+
+#define MEM_LITERAL_SHORT_N 2
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 3
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 4
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 5
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 6
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 7
+#include "mem_literal_short.h"
+#define MEM_LITERAL_SHORT_N 8
+#include "mem_literal_short.h"
 
 INLINE UNUSED bool32
 strequal(char *s1, char *s2) {
@@ -337,6 +352,25 @@ _Generic((VAR), \
 #define MEMMEM_4(LONG, LONG_LEN, SHORT, LEN) \
     memmem64(LONG, LONG_LEN, SHORT, LEN)
 #define MEMMEM(...) SELECT_ON_NUM_ARGS(MEMMEM_, __VA_ARGS__)
+
+#define MEM_LITERAL_SHORT_SELECT(HAYSTACK, HAYSTACK_LEN, LITERAL, LEN) \
+_Generic(&(char [LEN]){0}, \
+    char (*)[2]: mem_literal_short_2, \
+    char (*)[3]: mem_literal_short_3, \
+    char (*)[4]: mem_literal_short_4, \
+    char (*)[5]: mem_literal_short_5, \
+    char (*)[6]: mem_literal_short_6, \
+    char (*)[7]: mem_literal_short_7, \
+    char (*)[8]: mem_literal_short_8 \
+)(HAYSTACK, HAYSTACK_LEN, LITERAL)
+#define MEM_LITERAL_SHORT_3(HAYSTACK, HAYSTACK_LEN, LITERAL) \
+    MEM_LITERAL_SHORT_3_(HAYSTACK, HAYSTACK_LEN, STRLIT(LITERAL))
+#define MEM_LITERAL_SHORT_3_(HAYSTACK, HAYSTACK_LEN, ...) \
+    MEM_LITERAL_SHORT_SELECT(HAYSTACK, HAYSTACK_LEN, __VA_ARGS__)
+#define MEM_LITERAL_SHORT_4(HAYSTACK, HAYSTACK_LEN, LITERAL, LEN) \
+    MEM_LITERAL_SHORT_SELECT(HAYSTACK, HAYSTACK_LEN, LITERAL, LEN)
+#define MEM_LITERAL_SHORT(...) \
+    SELECT_ON_NUM_ARGS(MEM_LITERAL_SHORT_, __VA_ARGS__)
 
 #define BEGINS_WITH_3(STRING, STRING_LEN, PREFIX) \
     begins_with(STRING, STRING_LEN, PREFIX, strlen32(PREFIX))

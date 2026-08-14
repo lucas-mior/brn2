@@ -458,7 +458,7 @@ brn2_is_invalid_name(char *filename) {
     return true;
 }
 
-static inline char *
+static inline UNUSED char *
 memmem_slash_slash(char *haystack, int64 haystack_len) {
     char *candidate;
     char *end;
@@ -484,7 +484,7 @@ memmem_slash_slash(char *haystack, int64 haystack_len) {
     return NULL;
 }
 
-static inline char *
+static inline UNUSED char *
 memmem_slash_dot_slash(char *haystack, int64 haystack_len) {
     char *candidate;
     char *end;
@@ -554,7 +554,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem_slash_slash(name + off, file->length - off))) {
+        while ((p = MEM_LITERAL_SHORT(name + off, file->length - off, "//"))) {
             off = p - name;
 
             memmove64(&p[0], &p[1], file->length - off);
@@ -568,7 +568,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         off = 0;
         name = ASSUME_ALIGNED_EXPR(file->name);
-        while ((p = memmem_slash_dot_slash(name + off, file->length - off))) {
+        while ((p = MEM_LITERAL_SHORT(name + off, file->length - off, "/./"))) {
             off = p - name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
