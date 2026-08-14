@@ -55,6 +55,8 @@ MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len, char *literal) {
     char *candidate;
     char *end;
 
+    ASSUME_ALIGNED(literal);
+
     if (haystack_len < MEM_LITERAL_SHORT_N) {
         return NULL;
     }
