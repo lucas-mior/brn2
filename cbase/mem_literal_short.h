@@ -4,12 +4,12 @@
 #include "base_macros.h"
 #include "primitives.h"
 
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ > 0)
-  #if !defined(CBASE_H)
-    #error "include cbase.h before mem_literal_short.h"
-  #endif
-#else
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
   #define MEM_LITERAL_SHORT_N 2
+#endif
+
+#if !defined(CBASE_H)
+#error "include cbase.h before mem_literal_short.h"
 #endif
 
 #if !defined(MEM_LITERAL_SHORT_N)

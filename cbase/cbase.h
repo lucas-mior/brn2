@@ -353,8 +353,8 @@ _Generic((VAR), \
     memmem64(LONG, LONG_LEN, SHORT, LEN)
 #define MEMMEM(...) SELECT_ON_NUM_ARGS(MEMMEM_, __VA_ARGS__)
 
-#define MEM_LITERAL_SHORT_SELECT(HAYSTACK, HAYSTACK_LEN, LITERAL, LEN) \
-_Generic(&(char [LEN]){0}, \
+#define MEM_LITERAL_SHORT(HAYSTACK, HAYSTACK_LEN, LITERAL) \
+_Generic(&(char [STRLIT_LEN(LITERAL)]){0}, \
     char (*)[2]: mem_literal_short_2, \
     char (*)[3]: mem_literal_short_3, \
     char (*)[4]: mem_literal_short_4, \
@@ -363,15 +363,6 @@ _Generic(&(char [LEN]){0}, \
     char (*)[7]: mem_literal_short_7, \
     char (*)[8]: mem_literal_short_8 \
 )(HAYSTACK, HAYSTACK_LEN, LITERAL)
-
-#define MEM_LITERAL_SHORT_3(HAYSTACK, HAYSTACK_LEN, LITERAL) \
-    MEM_LITERAL_SHORT_3_(HAYSTACK, HAYSTACK_LEN, STRLIT(LITERAL))
-#define MEM_LITERAL_SHORT_3_(HAYSTACK, HAYSTACK_LEN, ...) \
-    MEM_LITERAL_SHORT_SELECT(HAYSTACK, HAYSTACK_LEN, __VA_ARGS__)
-#define MEM_LITERAL_SHORT_4(HAYSTACK, HAYSTACK_LEN, LITERAL, LEN) \
-    MEM_LITERAL_SHORT_SELECT(HAYSTACK, HAYSTACK_LEN, LITERAL, LEN)
-#define MEM_LITERAL_SHORT(...) \
-    SELECT_ON_NUM_ARGS(MEM_LITERAL_SHORT_, __VA_ARGS__)
 
 #define BEGINS_WITH_3(STRING, STRING_LEN, PREFIX) \
     begins_with(STRING, STRING_LEN, PREFIX, strlen32(PREFIX))
