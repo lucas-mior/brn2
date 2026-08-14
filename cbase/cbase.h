@@ -176,11 +176,8 @@ strequal2(char *a, int32 a_len, char *b, int32 b_len) {
     if (a_len != b_len) {
         return false;
     }
-    if (memcmp64(a, b, a_len)) {
-        return false;
-    }
 
-    return true;
+    return !memcmp64(a, b, a_len);
 }
 
 INLINE bool32
