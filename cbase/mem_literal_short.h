@@ -23,11 +23,12 @@
     (memcmp((P) + 1, (L) + 1, MEM_LITERAL_SHORT_N - 1) == 0)
 
 INLINE UNUSED char *
-MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len, char *literal) {
+MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len,
+                           char *literal, int64 literal_len) {
     char *candidate;
     char *end;
 
-    ASSUME_ALIGNED(literal);
+    (void)literal_len;
 
     if (haystack_len < MEM_LITERAL_SHORT_N) {
         return NULL;
