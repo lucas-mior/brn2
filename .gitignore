@@ -27,4 +27,4 @@ test
 test/
 tests
 *.obj
-*.obj
+*.callgrind
