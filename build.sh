@@ -98,12 +98,12 @@ debug)
     CFLAGS="$CFLAGS -g3 -Og"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
-    exe="bin/${project}_debug"
+    exe="bin/${project}"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DBRN2_BENCHMARK=1"
-    exe="bin/${project}_benchmark"
+    exe="bin/${project}"
     ;;
 valgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
