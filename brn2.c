@@ -499,7 +499,9 @@ brn2_threads_work_normalization(Work *arg) {
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem64(file->name + off, file->length - off, "//", 2))) {
+        while ((p = memmem64(file->name + off,
+                             file->length - off,
+                             STRLIT("//")))) {
             off = p - file->name;
 
             memmove64(&p[0], &p[1], file->length - off);
@@ -512,7 +514,9 @@ brn2_threads_work_normalization(Work *arg) {
         }
 
         off = 0;
-        while ((p = memmem64(file->name + off, file->length - off, "/./", 3))) {
+        while ((p = memmem64(file->name + off,
+                             file->length - off,
+                             STRLIT("/./")))) {
             off = p - file->name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
