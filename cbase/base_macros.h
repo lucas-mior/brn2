@@ -106,7 +106,7 @@ _Generic((SIZE), \
 #endif
 #define ALIGN(x) ALIGN_POWER_OF_2(x, ALIGNMENT)
 
-#if defined(__GNUC__)
+#if CC_GCC || CC_CLANG
 #define ASSUME_ALIGNED_EXPR(X) __builtin_assume_aligned((X), ALIGNMENT)
 #define ASSUME_ALIGNED(X) do { \
     X = __builtin_assume_aligned(X, ALIGNMENT); \
