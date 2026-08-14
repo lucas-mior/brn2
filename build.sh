@@ -71,7 +71,7 @@ CPPFLAGS="$CPPFLAGS -I. -Icbase"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall -Wpedantic"
-# CFLAGS="$CFLAGS -Werror=all -Werror=extra"
+CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 # CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
 if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
@@ -113,7 +113,7 @@ callgrind)
     CFLAGS="$CFLAGS -g3 -O2 -ftree-vectorize"
     ;;
 test)
-    CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1"
+    CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1 -Wno-unused-function"
     LDFLAGS="$LDFLAGS -lm"
     ;;
 check)
@@ -333,17 +333,17 @@ callgrind|valgrind)
     cat "$original" \
     | valgrind -s                                                     \
        --log-file="$dir/valgrind.1.txt" --tool=$tool                  \
-       --callgrind-out-file=$dir/$(date "+%s").callgrind              \
+       --callgrind-out-file="$dir/$(date +%s).callgrind"              \
         "$dir/$exe" -q -f - --file-target "$shuffled"
 
     valgrind -s                                                       \
         --log-file="$dir/valgrind.2.txt" --tool=$tool                 \
-       --callgrind-out-file=$dir/$(date "+%s").callgrind              \
+       --callgrind-out-file="$dir/$(date +%s).callgrind"              \
         "$dir/$exe" -q -d . --file-target "$rotated_left"
 
     valgrind -s                                                       \
        --log-file="$dir/valgrind.3.txt" --tool=$tool                  \
-       --callgrind-out-file=$dir/$(date "+%s").callgrind              \
+       --callgrind-out-file="$dir/$(date +%s).callgrind"              \
         "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
 
     trace_off
