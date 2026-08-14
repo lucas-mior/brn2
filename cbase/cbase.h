@@ -373,7 +373,7 @@ _Generic((VAR), \
                        "string literal does not fit in STRLIT_ARRAY"); \
         char dummy; \
     }), \
-    (alignas(ALIGNMENT) char[SIZE]){ LITERAL })
+    (char[SIZE]){ LITERAL })
 
 #define MEM_LITERAL_SHORT_LENGTHS(X) \
     X(2), \
