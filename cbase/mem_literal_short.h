@@ -8,10 +8,6 @@
   #define MEM_LITERAL_SHORT_N 2
 #endif
 
-#if !defined(CBASE_H)
-#error "include cbase.h before mem_literal_short.h"
-#endif
-
 #if !defined(MEM_LITERAL_SHORT_N)
 #error "MEM_LITERAL_SHORT_N is undefined"
 #endif
