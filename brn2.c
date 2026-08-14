@@ -459,44 +459,6 @@ brn2_is_invalid_name(char *filename) {
 }
 
 static inline char *
-memmem_slash_slash2(char *haystack, int64 haystack_len) {
-    int64 last;
-
-    if (haystack_len < 2) {
-        return NULL;
-    }
-
-    last = haystack_len - 1;
-    for (int64 i = 0; i < last; i += 1) {
-        if ((haystack[i] == '/') && (haystack[i + 1] == '/')) {
-            return haystack + i;
-        }
-    }
-
-    return NULL;
-}
-
-static inline char *
-memmem_slash_dot_slash2(char *haystack, int64 haystack_len) {
-    int64 last;
-
-    if (haystack_len < 3) {
-        return NULL;
-    }
-
-    last = haystack_len - 2;
-    for (int64 i = 0; i < last; i += 1) {
-        if ((haystack[i] == '/')
-            && (haystack[i + 1] == '.')
-            && (haystack[i + 2] == '/')) {
-            return haystack + i;
-        }
-    }
-
-    return NULL;
-}
-
-static inline char *
 memmem_slash_slash(char *haystack, int64 haystack_len) {
     char *candidate;
     char *end;
@@ -592,7 +554,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem_slash_slash2(name + off, file->length - off))) {
+        while ((p = memmem_slash_slash(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[0], &p[1], file->length - off);
@@ -606,7 +568,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         off = 0;
         name = ASSUME_ALIGNED_EXPR(file->name);
-        while ((p = memmem_slash_dot_slash2(name + off, file->length - off))) {
+        while ((p = memmem_slash_dot_slash(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
