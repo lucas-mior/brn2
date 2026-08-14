@@ -155,11 +155,6 @@ memmem64(void *haystack, int64 hay_len, void *needle, int64 needle_len) {
     return result;
 }
 
-inline bool32
-strequal(char *s1, char *s2) {
-    return !strcmp(s1, s2);
-}
-
 #if !HAS_POSIX_WIN_SUBSET
 char *optarg = NULL;
 int optind = 1;

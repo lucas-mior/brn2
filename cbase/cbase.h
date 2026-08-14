@@ -165,7 +165,12 @@ extern int64 clamp_int64(int64, int64, int64);
 extern int32 clamp_int32(int32, int32, int32);
 extern int64 square_int64(int64);
 extern int32 square_int32(int32);
-extern bool32 strequal(char *, char *);
+
+INLINE bool32
+strequal(char *s1, char *s2) {
+    return !strcmp(s1, s2);
+}
+
 extern bool32 strequal2(char *, int32, char *, int32);
 extern bool32 striqual(char *, char *);
 extern bool32 striqual2(char *, int32, char *, int32);
