@@ -592,7 +592,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem_slash_slash(name + off, file->length - off))) {
+        while ((p = memmem_slash_slash2(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[0], &p[1], file->length - off);
@@ -606,7 +606,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         off = 0;
         name = ASSUME_ALIGNED_EXPR(file->name);
-        while ((p = memmem_slash_dot_slash(name + off, file->length - off))) {
+        while ((p = memmem_slash_dot_slash2(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[1], &p[3], file->length - off - 2);
