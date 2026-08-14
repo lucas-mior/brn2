@@ -459,6 +459,44 @@ brn2_is_invalid_name(char *filename) {
 }
 
 static inline char *
+memmem_slash_slash2(char *haystack, int64 haystack_len) {
+    int64 last;
+
+    if (haystack_len < 2) {
+        return NULL;
+    }
+
+    last = haystack_len - 1;
+    for (int64 i = 0; i < last; i += 1) {
+        if ((haystack[i] == '/') && (haystack[i + 1] == '/')) {
+            return haystack + i;
+        }
+    }
+
+    return NULL;
+}
+
+static inline char *
+memmem_slash_dot_slash2(char *haystack, int64 haystack_len) {
+    int64 last;
+
+    if (haystack_len < 3) {
+        return NULL;
+    }
+
+    last = haystack_len - 2;
+    for (int64 i = 0; i < last; i += 1) {
+        if ((haystack[i] == '/')
+            && (haystack[i + 1] == '.')
+            && (haystack[i + 2] == '/')) {
+            return haystack + i;
+        }
+    }
+
+    return NULL;
+}
+
+static inline char *
 memmem_slash_slash(char *haystack, int64 haystack_len) {
     char *candidate;
     char *end;
