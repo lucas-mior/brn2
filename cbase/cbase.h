@@ -365,7 +365,7 @@ _Generic(&(char [STRLIT_LEN(LITERAL)]){0}, \
     char (*)[6]: mem_literal_short_6, \
     char (*)[7]: mem_literal_short_7, \
     char (*)[8]: mem_literal_short_8 \
-)(HAYSTACK, HAYSTACK_LEN, STRLIT_ARRAY(LITERAL))
+)(HAYSTACK, HAYSTACK_LEN, STRLIT_ARRAY(LITERAL, 8))
 
 #define BEGINS_WITH_3(STRING, STRING_LEN, PREFIX) \
     begins_with(STRING, STRING_LEN, PREFIX, strlen32(PREFIX))
