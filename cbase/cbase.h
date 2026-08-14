@@ -166,12 +166,12 @@ extern int32 clamp_int32(int32, int32, int32);
 extern int64 square_int64(int64);
 extern int32 square_int32(int32);
 
-INLINE bool32
+INLINE UNUSED bool32
 strequal(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
 
-INLINE bool32
+INLINE UNUSED bool32
 strequal2(char *a, int32 a_len, char *b, int32 b_len) {
     if (a_len != b_len) {
         return false;
@@ -180,7 +180,7 @@ strequal2(char *a, int32 a_len, char *b, int32 b_len) {
     return !memcmp64(a, b, a_len);
 }
 
-INLINE bool32
+INLINE UNUSED bool32
 optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
     if ((a == NULL) || (b == NULL)) {
         return false;
