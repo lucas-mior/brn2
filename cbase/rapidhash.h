@@ -47,7 +47,7 @@
 #define NOEXCEPT
 #define RAPIDHASH_CONSTEXPR static const
 #if !defined(RAPIDHASH_INLINE)
-#if defined(__GNUC__)
+#if CC_GCC || CC_CLANG
 #define RAPIDHASH_INLINE static inline __attribute__((always_inline))
 #else
 #define RAPIDHASH_INLINE static inline
@@ -82,7 +82,7 @@
       || (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
     #define RAPIDHASH_BIG_ENDIAN
   #else
-#if defined(__GNUC__) || defined(__clang__)
+#if CC_GCC || CC_CLANG
     #warning "could not determine endianness! Falling back to little endian."
 #endif
     #define RAPIDHASH_LITTLE_ENDIAN
