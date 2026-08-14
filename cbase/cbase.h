@@ -171,10 +171,29 @@ strequal(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
 
-extern bool32 strequal2(char *, int32, char *, int32);
+INLINE bool32
+strequal2(char *a, int32 a_len, char *b, int32 b_len) {
+    if (a_len != b_len) {
+        return false;
+    }
+    if (memcmp64(a, b, a_len)) {
+        return false;
+    }
+
+    return true;
+}
+
+INLINE bool32
+optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
+    if ((a == NULL) || (b == NULL)) {
+        return false;
+    }
+
+    return strequal2(a, a_len, b, b_len);
+}
+
 extern bool32 striqual(char *, char *);
 extern bool32 striqual2(char *, int32, char *, int32);
-bool32 optional_strequal(char *a, int32 a_len, char *b, int32 b_len);
 extern int64 strftime2(char *, int64, char *, struct tm *);
 extern int strncmp32(char *, char *, int64);
 extern char *strncpy32(char *, char *, int64);

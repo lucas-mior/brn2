@@ -307,27 +307,6 @@ striqual(char *s1, char *s2) {
 }
 
 bool32
-optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
-    if ((a == NULL) || (b == NULL)) {
-        return false;
-    }
-
-    return strequal2(a, a_len, b, b_len);
-}
-
-bool32
-strequal2(char *a, int32 a_len, char *b, int32 b_len) {
-    if (a_len != b_len) {
-        return false;
-    }
-    if (memcmp64(a, b, a_len)) {
-        return false;
-    }
-
-    return true;
-}
-
-bool32
 striqual2(char *a, int32 a_len, char *b, int32 b_len) {
     if (DEBUGGING) {
         striqual_validate_ascii_utf8(a, a_len);
