@@ -2975,6 +2975,75 @@ util_test_qsort_cmp(void *a, void *b) {
     return 0;
 }
 
+#define ASSERT_MEM_LITERAL_OFFSET(HAYSTACK, HAYSTACK_LEN, LITERAL, OFFSET) \
+    do { \
+        char *mem_literal_haystack = (HAYSTACK); \
+        char *mem_literal_actual; \
+        char *mem_literal_expected; \
+        int64 mem_literal_offset = (OFFSET); \
+        int64 mem_literal_haystack_len = (HAYSTACK_LEN); \
+        if (mem_literal_offset < 0) { \
+            mem_literal_expected = NULL; \
+        } else { \
+            mem_literal_expected = mem_literal_haystack + mem_literal_offset; \
+        } \
+        mem_literal_actual = MEM_LITERAL_SHORT(mem_literal_haystack, \
+                                               mem_literal_haystack_len, \
+                                               LITERAL); \
+        ASSERT_EQUAL((void *)mem_literal_actual, \
+                     (void *)mem_literal_expected); \
+    } while (0)
+
+#define ASSERT_MEM_LITERAL(HAYSTACK, LITERAL, OFFSET) \
+    ASSERT_MEM_LITERAL_OFFSET(HAYSTACK, strlen32(HAYSTACK), LITERAL, OFFSET)
+
+static void
+util_test_mem_literal_short(void) {
+    char binary_haystack[] = {'x', 'a', '\0', 'b', 'y'};
+
+    ASSERT_NULL(MEM_LITERAL_SHORT(NULL, 2, "ab"));
+    ASSERT_NULL(MEM_LITERAL_SHORT("", 0, "ab"));
+
+    ASSERT_MEM_LITERAL("zzabyy", "ab", 2);
+    ASSERT_MEM_LITERAL("zzabcyy", "abc", 2);
+    ASSERT_MEM_LITERAL("zzabcdyy", "abcd", 2);
+    ASSERT_MEM_LITERAL("zzabcdeyy", "abcde", 2);
+    ASSERT_MEM_LITERAL("zzabcdefyy", "abcdef", 2);
+    ASSERT_MEM_LITERAL("zzabcdefgyy", "abcdefg", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghyy", "abcdefgh", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghiyy", "abcdefghi", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijyy", "abcdefghij", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijkyy", "abcdefghijk", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijklyy", "abcdefghijkl", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijklmyy", "abcdefghijklm", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijklmnyy", "abcdefghijklmn", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijklmnoyy", "abcdefghijklmno", 2);
+
+    ASSERT_MEM_LITERAL("abcd", "ab", 0);
+    ASSERT_MEM_LITERAL("xxabcd", "abcd", 2);
+    ASSERT_MEM_LITERAL("xxabcd", "cd", 4);
+    ASSERT_MEM_LITERAL("abxabzabc", "abc", 6);
+
+    ASSERT_MEM_LITERAL("xxxx", "ab", -1);
+    ASSERT_MEM_LITERAL("xxab", "abc", -1);
+    ASSERT_MEM_LITERAL_OFFSET("xxabc", 4, "abc", -1);
+
+    ASSERT_MEM_LITERAL_OFFSET(binary_haystack, SIZEOF(binary_haystack),
+                              "a\0b", 1);
+    ASSERT_MEM_LITERAL_OFFSET(binary_haystack, 3, "a\0b", -1);
+
+    ASSERT_MEM_LITERAL("zzabcdefghijklmnopqq", "abcdefghijklmnop", 2);
+    ASSERT_MEM_LITERAL("zzabcdefghijklmnoxqq", "abcdefghijklmnop", -1);
+    ASSERT_MEM_LITERAL_OFFSET("zzabcdefghijklmno",
+                              STRLIT_LEN("zzabcdefghijklmno"),
+                              "abcdefghijklmnop", -1);
+
+    return;
+}
+
+#undef ASSERT_MEM_LITERAL
+#undef ASSERT_MEM_LITERAL_OFFSET
+
 int
 main(int argc, char **argv) {
     char *s1 = "aaaabbbb";
@@ -2989,6 +3058,8 @@ main(int argc, char **argv) {
 #if TESTING
     test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "util");
 #endif
+
+    util_test_mem_literal_short();
 
     ASSERT(BEGINS_WITH(s1, strlen32(s1), "aaaa"));
     ASSERT(BEGINS_WITH(s1, strlen32(s1), "aaaabbbb"));
