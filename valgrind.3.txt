@@ -1,0 +1,12 @@
+==3252655== Callgrind, a call-graph generating cache profiler
+==3252655== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==3252655== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==3252655== Command: /home/lucas/.local/src/brn2/bin/brn2 -q -f /tmp/brn2-valgrind/original --file-target /tmp/brn2-valgrind/rotated-right
+==3252655== Parent PID: 3242646
+==3252655== 
+==3252655== For interactive control, run 'callgrind_control -h'.
+==3252655== 
+==3252655== Events    : Ir
+==3252655== Collected : 644903629
+==3252655== 
+==3252655== I   refs:      644,903,629
