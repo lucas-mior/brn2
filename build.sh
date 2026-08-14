@@ -274,7 +274,7 @@ create_temp_files() {
     mkdir -p "$tmpdir"
     cd "$tmpdir" || exit
 
-    seq -w 2000000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
+    seq -w 200000 | sed 's/^/0011223344/g' | xargs -P"$(nproc)" touch
 }
 
 valgrind_rotate_left() {
@@ -305,8 +305,14 @@ benchmark)
     rm $dir/$exe
     exit
     ;;
-valgrind)
+callgrind|valgrind)
     create_temp_files
+
+    if [ "$mode" = "valgrind" ]; then
+        tool="memcheck"
+    else
+        tool="$mode"
+    fi
 
     valgrind_lists="/tmp/brn2-valgrind"
     rm -rf "$valgrind_lists"
@@ -324,12 +330,12 @@ valgrind)
 
     trace_on
 
-    cat "$original" \
-    | valgrind --log-file="$dir/valgrind.1.txt" -s --tool=memcheck \
-        "$dir/$exe" -q -f - --file-target "$shuffled"
-    valgrind --log-file="$dir/valgrind.2.txt" -s --tool=memcheck \
+    # cat "$original" \
+    # | valgrind --log-file="$dir/valgrind.1.txt" -s --tool=$tool \
+    #     "$dir/$exe" -q -f - --file-target "$shuffled"
+    valgrind --log-file="$dir/valgrind.2.txt" -s --tool=$tool \
         "$dir/$exe" -q -d . --file-target "$rotated_left"
-    valgrind --log-file="$dir/valgrind.3.txt" -s --tool=memcheck \
+    valgrind --log-file="$dir/valgrind.3.txt" -s --tool=$tool \
         "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
 
     trace_off
