@@ -251,7 +251,22 @@ main(int argc, char **argv) {
 
     printf("ALIGNMENT: %lld\n", (llong)ALIGNMENT);
 
+#if BRN2_NORMALIZE_NAMES_BENCHMARK
+    {
+        struct timespec normalize_t0;
+        struct timespec normalize_t1;
+
+        time_monotonic_precise(&normalize_t0);
+        brn2_normalize_names(old, NULL);
+        time_monotonic_precise(&normalize_t1);
+        PRINT_TIMINGS(old->length,
+                      normalize_t0, normalize_t1,
+                      "brn2_normalize_names");
+        exit(EXIT_SUCCESS);
+    }
+#else
     brn2_normalize_names(old, NULL);
+#endif
 
     {
         int64 length_before;

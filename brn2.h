@@ -35,6 +35,10 @@
 #define BRN2_BENCHMARK 0
 #endif
 
+#if !defined(BRN2_NORMALIZE_NAMES_BENCHMARK)
+#define BRN2_NORMALIZE_NAMES_BENCHMARK 1
+#endif
+
 typedef struct File {
     char name[124];
     int32 fd;
