@@ -1,8 +1,15 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#if !defined(CBASE_H)
-#error "include cbase.h before mem_literal_short.h"
+#include "base_macros.h"
+#include "primitives.h"
+
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ > 0)
+  #if !defined(CBASE_H)
+    #error "include cbase.h before mem_literal_short.h"
+  #endif
+#else
+  #define MEM_LITERAL_SHORT_N 2
 #endif
 
 #if !defined(MEM_LITERAL_SHORT_N)
@@ -63,7 +70,7 @@ MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len,
     candidate = haystack;
     end = haystack + haystack_len - MEM_LITERAL_SHORT_N + 1;
     while (candidate < end) {
-        char *p = memchr64(candidate, literal[0], end - candidate);
+        char *p = memchr(candidate, literal[0], end - candidate);
 
         if (p == NULL) {
             return NULL;
