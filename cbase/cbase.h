@@ -172,18 +172,14 @@ extern char *sb_opt_cstr(StrBuilder *buffer);
 extern void send_signal(char *, int32);
 extern int32 snprintf2(char *, int64, char *, ...);
 extern StrBuilder *str_builder_array_append(StrBuilderArray *);
-extern bool str_builder_array_append_copy(StrBuilderArray *,
-                                                  StrBuilder *);
+extern bool str_builder_array_append_copy(StrBuilderArray *, StrBuilder *);
 extern void str_builder_array_clear(StrBuilderArray *);
-extern bool str_builder_array_copy(StrBuilderArray *,
-                                           StrBuilderArray *);
+extern bool str_builder_array_copy(StrBuilderArray *, StrBuilderArray *);
 extern void str_builder_array_destroy(StrBuilderArray *);
 extern void str_builder_array_init(StrBuilderArray *);
-extern void str_builder_array_move(StrBuilderArray *,
-                                           StrBuilderArray *);
+extern void str_builder_array_move(StrBuilderArray *, StrBuilderArray *);
 extern bool str_builder_array_reserve(StrBuilderArray *, int32);
-extern void str_builder_array_swap(StrBuilderArray *,
-                                           StrBuilderArray *);
+extern void str_builder_array_swap(StrBuilderArray *, StrBuilderArray *);
 extern int32 string_from_strings(char *, int32, char *, char **, int32);
 extern int32 string_from_doubles(char *, int32, char *, double *, int32);
 extern double clamp_double(double, double, double);
