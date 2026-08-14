@@ -459,18 +459,26 @@ brn2_is_invalid_name(char *filename) {
 }
 
 static inline char *
-memmem_slashslash(char *haystack, int64 haystack_len) {
-    int64 last;
+memmem_slash_slash(char *haystack, int64 haystack_len) {
+    char *candidate;
+    char *end;
 
     if (haystack_len < 2) {
         return NULL;
     }
 
-    last = haystack_len - 1;
-    for (int64 i = 0; i < last; i += 1) {
-        if ((haystack[i] == '/') && (haystack[i + 1] == '/')) {
-            return haystack + i;
+    candidate = haystack;
+    end = haystack + haystack_len - 1;
+    while (candidate < end) {
+        char *p = memchr64(candidate, '/', end - candidate);
+
+        if (p == NULL) {
+            return NULL;
         }
+        if (p[1] == '/') {
+            return p;
+        }
+        candidate = p + 1;
     }
 
     return NULL;
@@ -478,19 +486,25 @@ memmem_slashslash(char *haystack, int64 haystack_len) {
 
 static inline char *
 memmem_slash_dot_slash(char *haystack, int64 haystack_len) {
-    int64 last;
+    char *candidate;
+    char *end;
 
     if (haystack_len < 3) {
         return NULL;
     }
 
-    last = haystack_len - 2;
-    for (int64 i = 0; i < last; i += 1) {
-        if ((haystack[i] == '/')
-            && (haystack[i + 1] == '.')
-            && (haystack[i + 2] == '/')) {
-            return haystack + i;
+    candidate = haystack;
+    end = haystack + haystack_len - 2;
+    while (candidate < end) {
+        char *p = memchr64(candidate, '/', end - candidate);
+
+        if (p == NULL) {
+            return NULL;
         }
+        if ((p[1] == '.') && (p[2] == '/')) {
+            return p;
+        }
+        candidate = p + 1;
     }
 
     return NULL;
@@ -540,7 +554,7 @@ brn2_threads_work_normalization(Work *arg) {
 
         // Note: leading // is not preserved, even though it can be used for
         // special purposes in some operating systems.
-        while ((p = memmem_slashslash(name + off, file->length - off))) {
+        while ((p = memmem_slash_slash(name + off, file->length - off))) {
             off = p - name;
 
             memmove64(&p[0], &p[1], file->length - off);
