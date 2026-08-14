@@ -363,12 +363,12 @@ main(int argc, char **argv) {
                                              file->name, file->length,
                                              file->hash, index, j)) {
                 if (contains_newline) {
-                    error(RED("'%s'") " contains new line.", file->name);
+                    error2(RED("'%s'") " contains new line.", file->name);
                 } else {
-                    error(RED("'%s'") " repeated in the buffer.", file->name);
+                    error2(RED("'%s'") " repeated in the buffer.", file->name);
                 }
                 if (brn2_options_fatal) {
-                    error("\n");
+                    error2("\n");
                     fatal(EXIT_FAILURE);
                 }
 
