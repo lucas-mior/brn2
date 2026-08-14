@@ -330,20 +330,26 @@ callgrind|valgrind)
 
     trace_on
 
+    run_name="stdin-shuffled"
     cat "$original" \
     | valgrind -s                                                     \
-       --log-file="$dir/valgrind.1.txt" --tool=$tool                  \
-       --callgrind-out-file="$dir/$(date +%s).callgrind"              \
+       --log-file="$dir/valgrind-${run_name}.txt"                     \
+       --tool=$tool                                                   \
+       --callgrind-out-file="$dir/${run_name}$(date +%s).callgrind"   \
         "$dir/$exe" -q -f - --file-target "$shuffled"
 
+    run_name="dir-rotleft"
     valgrind -s                                                       \
-        --log-file="$dir/valgrind.2.txt" --tool=$tool                 \
-       --callgrind-out-file="$dir/$(date +%s).callgrind"              \
+       --log-file="$dir/valgrind-${run_name}.txt"                     \
+       --tool=$tool                                                   \
+       --callgrind-out-file="$dir/${run_name}$(date +%s).callgrind"   \
         "$dir/$exe" -q -d . --file-target "$rotated_left"
 
+    run_name="dir-rotright"
     valgrind -s                                                       \
-       --log-file="$dir/valgrind.3.txt" --tool=$tool                  \
-       --callgrind-out-file="$dir/$(date +%s).callgrind"              \
+       --log-file="$dir/valgrind-${run_name}.txt"                     \
+       --tool=$tool                                                   \
+       --callgrind-out-file="$dir/${run_name}$(date +%s).callgrind"   \
         "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
 
     trace_off
