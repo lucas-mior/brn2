@@ -248,6 +248,9 @@ main(int argc, char **argv) {
     if (!brn2_options_quiet) {
         printf("Normalizing filenames...\n");
     }
+
+    printf("ALIGNMENT: %lld\n", (llong)ALIGNMENT);
+
     brn2_normalize_names(old, NULL);
 
     {

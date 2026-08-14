@@ -333,17 +333,17 @@ callgrind|valgrind)
     cat "$original" \
     | valgrind -s                                                     \
        --log-file="$dir/valgrind.1.txt" --tool=$tool                  \
-       --callgrind-out-file=$dir/brn2_$1.out                          \
+       --callgrind-out-file=$dir/$(date "+%s").callgrind              \
         "$dir/$exe" -q -f - --file-target "$shuffled"
 
     valgrind -s                                                       \
         --log-file="$dir/valgrind.2.txt" --tool=$tool                 \
-       --callgrind-out-file=$dir/brn2_$1.out                          \
+       --callgrind-out-file=$dir/$(date "+%s").callgrind              \
         "$dir/$exe" -q -d . --file-target "$rotated_left"
 
     valgrind -s                                                       \
        --log-file="$dir/valgrind.3.txt" --tool=$tool                  \
-       --callgrind-out-file=$dir/brn2_$1.out                          \
+       --callgrind-out-file=$dir/$(date "+%s").callgrind              \
         "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
 
     trace_off
