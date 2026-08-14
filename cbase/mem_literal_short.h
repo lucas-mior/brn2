@@ -51,8 +51,7 @@
 #endif
 
 INLINE UNUSED char *
-MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len,
-                           char *literal) {
+MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len, char *literal) {
     char *candidate;
     char *end;
 
