@@ -123,7 +123,7 @@ _Generic((SIZE), \
 #if DEBUGGING
   #define INLINE static
 #else
-  #if defined(__GNUC__)
+  #if CC_GCC || CC_CLANG
     #define INLINE static inline __attribute__((always_inline))
   #else
     #define INLINE static inline
