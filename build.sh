@@ -121,7 +121,7 @@ check)
     LDFLAGS="$LDFLAGS -lm"
     ;;
 build)
-    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -Wno-error -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
     CFLAGS="$CFLAGS -Werror"
