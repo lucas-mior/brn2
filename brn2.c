@@ -553,6 +553,7 @@ brn2_threads_work_normalization(Work *arg) {
         }
 
         off = 0;
+        name = ASSUME_ALIGNED_EXPR(file->name);
         while ((p = memmem_slash_dot_slash(name + off, file->length - off))) {
             off = p - name;
 
