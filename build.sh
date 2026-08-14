@@ -110,7 +110,7 @@ valgrind)
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 callgrind)
-    CFLAGS="$CFLAGS -mavx -g3 -O2 -ftree-vectorize"
+    CFLAGS="$CFLAGS -mavx -g3 -O3 -ftree-vectorize"
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1 -Wno-unused-function"
@@ -335,6 +335,7 @@ callgrind|valgrind)
     | valgrind -s                                                     \
        --log-file="$dir/valgrind-${run_name}.valgrind"                \
        --tool=$tool                                                   \
+        --dump-instr=yes       \
        --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind" \
         "$dir/$exe" -q -f - --file-target "$shuffled"
 
