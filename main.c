@@ -437,14 +437,14 @@ main(int argc, char **argv) {
             command_free(&command);
             brn2_list_from_file(new, brn2_buffer.name, false);
 
-            srand(42);
+            rand_int_seed(42);
             for (int32 i = 0; i < new->length; i += 1) {
-                int32 rand1 = rand();
-                float x = (float)rand1 / (float)RAND_MAX;
+                int32 rand1 = rand_int();
+                float x = (float)rand1 / (float)INT32_MAX;
                 int32 length = new->files[i]->length;
                 if (x < 0.4f) {
                     for (int32 j = 0; j < length; j += 1) {
-                        int32 y = (int32)rand();
+                        int32 y = rand_int();
                         char c = allowed[y % (SIZEOF(allowed) - 1)];
                         new->files[i]->name[j] = c;
                     }
