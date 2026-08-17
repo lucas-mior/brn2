@@ -15,7 +15,7 @@ esac
 
 case "$test_target" in
 "debug")
-    brn2="$PWD/bin/brn2_debug$exe_suffix"
+    brn2="$PWD/bin/brn2$exe_suffix"
     ;;
 "build")
     brn2="$PWD/bin/brn2$exe_suffix"
