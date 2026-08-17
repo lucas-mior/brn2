@@ -39,8 +39,9 @@ MEM_LITERAL_SHORT_FUNCTION(char *haystack, int64 haystack_len,
 
     candidate = haystack;
     end = haystack + haystack_len - MEM_LITERAL_SHORT_N + 1;
+    ASSERT(end > candidate);
     while (candidate < end) {
-        char *p = memchr(candidate, literal[0], end - candidate);
+        char *p = memchr(candidate, literal[0], (size_t)(end - candidate));
 
         if (p == NULL) {
             return NULL;
