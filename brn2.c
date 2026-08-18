@@ -1332,8 +1332,6 @@ brn2_usage(FILE *stream) {
     exit((int)(stream == stderr));
 }
 
-// flags: -lm
-
 #if TESTING_brn2
 #define CBASE_IMPLEMENT
 #include "cbase.h"

@@ -890,7 +890,6 @@ random_string(Arena *arena, uint32 nbytes) {
     return string;
 }
 
-// flags: -lm
 int
 main(void) {
     struct timespec t0;
