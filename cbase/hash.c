@@ -785,17 +785,39 @@ hash_length(void *map) {
     return map2->length;
 }
 
+#if DEBUGGING
+
 INLINE double
 hash_pow(double x, double n) {
-    return x*n;
+    double base = x;
+    double result = 1.0;
+    uint32 exponent;
+
+    ASSERT_MORE_EQUAL(n, 0.0);
+    ASSERT_LESS_EQUAL(n, (double)UINT32_MAX);
+    exponent = (uint32)n;
+    ASSERT_EQUAL((double)exponent, n);
+
+    while (exponent > 0) {
+        if (exponent & 1u) {
+            result *= base;
+        }
+        exponent >>= 1;
+        base *= base;
+    }
+
+    return result;
 }
 
 INLINE double
 hash_round(double x) {
-    return x;
+    if (x < 0.0) {
+        return (double)((int64)(x - 0.5));
+    }
+
+    return (double)((int64)(x + 0.5));
 }
 
-#if DEBUGGING
 INLINE uint32
 hash_expected_collisions(void *map) {
     CommonMap *map2 = map;
@@ -883,6 +905,14 @@ main(void) {
 
     ASSERT(map);
     initial_capacity = map->capacity;
+
+#if DEBUGGING
+    ASSERT_EQUAL(hash_pow(2.0, 10.0), 1024.0);
+    ASSERT_EQUAL(hash_pow(0.5, 3.0), 0.125);
+    ASSERT_EQUAL(hash_round(1.49), 1.0);
+    ASSERT_EQUAL(hash_round(1.50), 2.0);
+    ASSERT_EQUAL(hash_round(-1.50), -2.0);
+#endif
 
     str1.len = strlen32(str1.s);
     str2.len = strlen32(str2.s);
