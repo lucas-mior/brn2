@@ -785,14 +785,24 @@ hash_length(void *map) {
     return map2->length;
 }
 
+INLINE double
+hash_pow(double x) {
+    return x;
+}
+
+INLINE double
+hash_round(double x) {
+    return x;
+}
+
 #if DEBUGGING
 INLINE uint32
 hash_expected_collisions(void *map) {
     CommonMap *map2 = map;
     double n = map2->length;
     double m = map2->capacity;
-    double result = n - m*(1 - pow((m - 1) / m, n));
-    return (uint32)(round(result));
+    double result = n - m*(1 - hash_pow((m - 1) / m, n));
+    return (uint32)(hash_round(result));
 }
 #endif
 
