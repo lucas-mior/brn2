@@ -786,7 +786,7 @@ hash_length(void *map) {
 }
 
 INLINE double
-hash_pow(double x) {
+hash_pow(double x, double n) {
     return x;
 }
 
