@@ -97,7 +97,6 @@ case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
-    LDFLAGS="$LDFLAGS -lm"
     exe="bin/${project}"
     ;;
 benchmark)
@@ -114,11 +113,9 @@ callgrind)
     ;;
 test)
     CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1 -Wno-unused-function"
-    LDFLAGS="$LDFLAGS -lm"
     ;;
 check)
     CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
-    LDFLAGS="$LDFLAGS -lm"
     ;;
 build)
     CFLAGS="$CFLAGS -Wno-error -O2 -flto -march=native -ftree-vectorize"
