@@ -123,7 +123,7 @@ main(int argc, char **argv) {
 #if BRN2_BENCHMARK
     struct timespec t0;
     struct timespec t1;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    time_monotonic_precise(&t0);
 #endif
 
     program_len = strlen32(argv[0]);
@@ -190,6 +190,10 @@ main(int argc, char **argv) {
     if ((argc - optind) >= 1) {
         mode = FILES_FROM_ARGS;
     }
+
+#if BRN2_BENCHMARK
+    (void)lines_test;
+#endif
 
     available_threads = util_nthreads();
     if (available_threads <= 0) {
@@ -580,8 +584,8 @@ main(int argc, char **argv) {
     }
 
 #if BRN2_BENCHMARK
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    PRINT_TIMINGS("before renames", t0, t1, old->length);
+    time_monotonic_precise(&t1);
+    PRINT_TIMINGS(old->length, t0, t1, "before renames");
 #endif
 
     {
@@ -618,8 +622,8 @@ main(int argc, char **argv) {
     }
 
 #if BRN2_BENCHMARK
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
-    brn2_timings("renames", t0, t1, old->length);
+    time_monotonic_precise(&t1);
+    PRINT_TIMINGS(old->length, t0, t1, "renames");
 #endif
 
     if (DEBUGGING) {

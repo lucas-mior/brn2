@@ -752,7 +752,7 @@ brn2_sort(FileList *old) {
     memcpy64(&copy, old, SIZEOF(*old));
     copy.files = malloc2(copy.length*SIZEOF(*(old->files)));
     memcpy64(copy.files, old->files, copy.length*SIZEOF(*(old->files)));
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    time_monotonic_precise(&t0);
 #endif
 
     partitions = brn2_threads(brn2_threads_work_sort,
@@ -768,7 +768,7 @@ brn2_sort(FileList *old) {
                          SIZEOF(*(old->files)), brn2_compare);
 
 #if SORT_BENCHMARK
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    time_monotonic_precise(&t1);
     qsort64(copy.files, copy.length, SIZEOF(*(copy.files)), brn2_compare);
     {
         bool sort_wrong = false;
