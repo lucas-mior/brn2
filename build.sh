@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-# shellcheck disable=SC2086,SC2031 
+# shellcheck disable=SC2086,SC2031
 
 dir=$(dirname "$(readlink -f "$0")")
 cd "$dir" || exit
@@ -45,7 +45,7 @@ if [ "$mode" = "cross" ]; then
 fi
 
 case "$OS" in
-*MINGW*|*MSYS*|*CYGWIN*|*mingw*|*msys*|*cygwin*|*windows*)
+*MINGW*|*mingw*|*windows*)
     ;;
 *)
     if [ "$is_msvc" -eq 0 ]; then

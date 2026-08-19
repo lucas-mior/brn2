@@ -47,6 +47,28 @@ jobs:
           clang-cl --version
           CC=clang-cl ./build.sh test
 
+  windows-msys2:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2 environment
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: true
+          install: >-
+            base-devel
+            gcc
+
+      - name: Build and Test
+        run: |
+          gcc --version
+          CC=gcc ./build.sh test
+
   freebsd:
     runs-on: ubuntu-latest
     name: FreeBSD VM
