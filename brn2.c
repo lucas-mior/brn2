@@ -14,10 +14,6 @@
 #include "cbase.h"
 #include "brn2.h"
 
-#if OS_WINDOWS
-#include "windows_functions.c"
-#endif
-
 #if CBASE_CRT_MSVC
 #define BRN2_MKDIR(path, mode) mkdir(path)
 #else

@@ -12,6 +12,10 @@
 
 #include "cbase.h"
 
+#if OS_WINDOWS
+#include "fs_windows.c"
+#endif
+
 void
 write_all(int fd, char *buffer, int64 left) {
     int64 written = 0;
