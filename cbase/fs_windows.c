@@ -68,6 +68,52 @@ mkstemp(char *template) {
 }
 #endif
 
+char *
+cbase_mkdtemp(char *template) {
+    char characters[] =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int64 len;
+
+    if (template == NULL) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    len = strlen32(template);
+    if ((len < 6) || (memcmp64(template + len - 6, "XXXXXX", 6) != 0)) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    for (int32 attempt = 0; attempt < 10000; attempt += 1) {
+        DWORD error_code;
+        uint32 state;
+
+        state = (uint32)GetCurrentProcessId();
+        state ^= (uint32)GetCurrentThreadId();
+        state ^= (uint32)GetTickCount64();
+        state ^= (uint32)(attempt*2654435761u);
+        for (int32 i = 0; i < 6; i += 1) {
+            state = state*1103515245u + 12345u;
+            template[len - 6 + i]
+                = characters[state % (SIZEOF(characters) - 1)];
+        }
+
+        if (CreateDirectoryA(template, NULL)) {
+            return template;
+        }
+
+        error_code = GetLastError();
+        if (error_code != ERROR_ALREADY_EXISTS) {
+            windows_set_errno(error_code);
+            return NULL;
+        }
+    }
+
+    errno = EEXIST;
+    return NULL;
+}
+
 static time_t
 filetime_to_time_t(FILETIME *filetime) {
     ULARGE_INTEGER u_large_integer;
