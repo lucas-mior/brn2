@@ -640,7 +640,7 @@ extern int32 generic_array_capacity(void *);
 extern void generic_array_set_count(void *, int32);
 
 #define ARRAY_HEADER(ARRAY) \
-    ((GenericArrayHeader *)ASSUME_ALIGNED_EXPR((void *)(ARRAY)) - 1)
+    ((GenericArrayHeader *)((void *)(ARRAY)) - 1)
 #define ARRAY_LEN(ARRAY) ((ARRAY) ? ARRAY_HEADER(ARRAY)->count : 0)
 #define ARRAY_CAPACITY(ARRAY) generic_array_capacity(ARRAY)
 #define ARRAY_RESERVE(ARRAY, NEEDED_COUNT) \
