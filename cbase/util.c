@@ -441,18 +441,6 @@ atoi2(char *str) {
     return atoi(str);
 }
 
-int64
-strftime2(char *buffer, int64 size, char *format, struct tm *time_info) {
-    int64 n;
-
-    n = (int64)strftime(buffer, (size_t)size, format, time_info);
-    if ((n <= 0) || (n >= size)) {
-        error("Error in strftime(\"%s\") (n = %lld).\n", format, n);
-        fatal(EXIT_FAILURE);
-    }
-    return n;
-}
-
 bool
 util_filename_from(char *buffer, int64 size, int fd) {
 #if OS_LINUX
@@ -1395,125 +1383,6 @@ dirname2(char *buffer, char *path, int32 *path_len) {
 }
 
 void
-print_timings(char *file, int32 line, char *func,
-              int64 nitems, struct timespec t0, struct timespec t1) {
-    llong seconds = t1.tv_sec - t0.tv_sec;
-    llong nanos = t1.tv_nsec - t0.tv_nsec;
-
-    double total_seconds = (double)seconds + (double)nanos / 1.0e9;
-    double micros_per = 1e6*(total_seconds / (double)nitems);
-
-    printf("\ntime elapsed %s:%d:%s\n", file, line, func);
-    printf("%gs = %gus per item.\n", total_seconds, micros_per);
-    return;
-}
-
-double
-timediff(struct timespec t0, struct timespec t1) {
-    llong sec = t1.tv_sec - t0.tv_sec;
-    llong nsec = t1.tv_nsec - t0.tv_nsec;
-    double diff = (double)sec + (double)nsec*1e-9;
-    return diff;
-}
-
-#if OS_WINDOWS
-static int32
-windows_time_monotonic(struct timespec *time) {
-    LARGE_INTEGER counter;
-    LARGE_INTEGER frequency;
-    LONGLONG seconds;
-    LONGLONG remainder;
-
-    if (!QueryPerformanceFrequency(&frequency)
-        || !QueryPerformanceCounter(&counter)) {
-        errno = EIO;
-        return -1;
-    }
-
-    seconds = counter.QuadPart / frequency.QuadPart;
-    remainder = counter.QuadPart % frequency.QuadPart;
-    time->tv_sec = (time_t)seconds;
-    time->tv_nsec = (long)((remainder*1000000000ll) / frequency.QuadPart);
-    return 0;
-}
-#endif
-
-#if defined(__EMSCRIPTEN__)
-static int32
-emscripten_time_monotonic(struct timespec *time) {
-    double seconds;
-
-    seconds = emscripten_get_now() / 1.0e3;
-    time->tv_sec = (time_t)seconds;
-    time->tv_nsec = (long)((seconds - (double)time->tv_sec)*1.0e9);
-
-    return 0;
-}
-#endif
-
-void
-time_monotonic_precise(struct timespec *time) {
-    int32 status;
-
-#if OS_WINDOWS
-    status = windows_time_monotonic(time);
-#elif defined(__EMSCRIPTEN__)
-    status = emscripten_time_monotonic(time);
-#elif defined(CLOCK_MONOTONIC_RAW)
-    status = clock_gettime(CLOCK_MONOTONIC_RAW, time);
-#elif defined(CLOCK_MONOTONIC)
-    status = clock_gettime(CLOCK_MONOTONIC, time);
-#else
-    struct timeval timeval;
-
-    status = gettimeofday(&timeval, NULL);
-    if (status == 0) {
-        time->tv_sec = timeval.tv_sec;
-        time->tv_nsec = timeval.tv_usec*1000;
-    }
-#endif
-
-    if (status < 0) {
-        error("Error reading precise monotonic clock: %s.\n",
-              strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-    return;
-}
-
-void
-time_monotonic_coarse(struct timespec *time) {
-    int32 status;
-
-#if OS_WINDOWS
-    status = windows_time_monotonic(time);
-#elif defined(__EMSCRIPTEN__)
-    status = emscripten_time_monotonic(time);
-#elif defined(CLOCK_MONOTONIC_COARSE)
-    status = clock_gettime(CLOCK_MONOTONIC_COARSE, time);
-#elif defined(CLOCK_MONOTONIC)
-    status = clock_gettime(CLOCK_MONOTONIC, time);
-#elif defined(CLOCK_MONOTONIC_RAW)
-    status = clock_gettime(CLOCK_MONOTONIC_RAW, time);
-#else
-    struct timeval timeval;
-
-    status = gettimeofday(&timeval, NULL);
-    if (status == 0) {
-        time->tv_sec = timeval.tv_sec;
-        time->tv_nsec = timeval.tv_usec*1000;
-    }
-#endif
-
-    if (status < 0) {
-        error("Error reading coarse monotonic clock: %s.\n",
-              strerror(errno));
-        fatal(EXIT_FAILURE);
-    }
-    return;
-}
-
-void
 catfile(int where, char *file) {
     int fd;
     char buffer[4096];
@@ -1605,35 +1474,6 @@ xkill(pid_t pid, int signum) {
 #endif /* OS_UNIX */
 
 #endif /* !OS_WINDOWS */
-
-#if OS_UNIX
-void
-timezone_init(void) {
-    time_t current_time;
-    struct tm local_tm;
-    struct tm gm_tm;
-
-    current_time = time(NULL);
-    localtime_r(&current_time, &local_tm);
-    gmtime_r(&current_time, &gm_tm);
-
-    timezone_offset = (local_tm.tm_hour - gm_tm.tm_hour)*3600;
-    timezone_offset += (local_tm.tm_min - gm_tm.tm_min)*60;
-
-    if (local_tm.tm_year < gm_tm.tm_year) {
-        timezone_offset -= 24*3600;
-    } else if (local_tm.tm_year > gm_tm.tm_year) {
-        timezone_offset += 24*3600;
-    } else if (local_tm.tm_yday < gm_tm.tm_yday) {
-        timezone_offset -= 24*3600;
-    } else if (local_tm.tm_yday > gm_tm.tm_yday) {
-        timezone_offset += 24*3600;
-    }
-
-    timezone_initialized = true;
-    return;
-}
-#endif
 
 bool
 path_missing(char *path) {
@@ -1853,14 +1693,11 @@ util_functions_sink(void) {
     (void)command_result_read_captured;
     (void)command_signal;
     (void)command_wait;
-    (void)timezone_init;
 #endif
     (void)dirname2;
     (void)basename2;
-    (void)strftime2;
     (void)bytes_pretty;
     (void)qsort64;
-    (void)print_timings;
 
     (void)xmmap_commit;
     (void)xstrdup;
@@ -1875,9 +1712,6 @@ util_functions_sink(void) {
     (void)rad2deg;
     (void)deg2rad;
     (void)path_basename;
-    (void)timediff;
-    (void)time_monotonic_coarse;
-    (void)time_monotonic_precise;
     (void)catfile;
     (void)parse_option;
     (void)command_print;
@@ -2377,8 +2211,6 @@ util_test_mem_literal_short(void) {
 
 int
 main(int argc, char **argv) {
-    struct timespec t0;
-    struct timespec t1;
     char temp_dir[PATH_MAX];
 
     (void)argc;
@@ -2390,11 +2222,6 @@ main(int argc, char **argv) {
 #endif
 
     util_test_mem_literal_short();
-
-    time_monotonic_precise(&t0);
-#if OS_UNIX
-    timezone_init();
-#endif
 
     {
         int a = 10;
@@ -2480,19 +2307,6 @@ main(int argc, char **argv) {
         ASSERT_EQUAL(src, dup);
         ASSERT_NOT_EQUAL((void *)src, (void *)dup);
         free2(dup, 12);
-    }
-
-    {
-        char b[128];
-        struct tm fixed_time;
-        fixed_time.tm_year = 126; // 2026
-        fixed_time.tm_mon = 2;   // March
-        fixed_time.tm_mday = 25;
-        fixed_time.tm_hour = 12;
-        fixed_time.tm_min = 0;
-        fixed_time.tm_sec = 0;
-        strftime2(b, sizeof(b), "%Y-%m-%d", &fixed_time);
-        ASSERT_EQUAL(b, "2026-03-25");
     }
 
     {
@@ -2671,8 +2485,6 @@ main(int argc, char **argv) {
     test_remove_tree(temp_dir);
 #endif
 
-    time_monotonic_precise(&t1);
-    PRINT_TIMINGS(1, t0, t1);
     exit(EXIT_SUCCESS);
 }
 
