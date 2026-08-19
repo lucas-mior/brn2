@@ -699,6 +699,7 @@ extern void throw_away_function();
 #include "array.c"
 #include "utf8.c"
 #include "util.c"
+#include "string.c"
 #if OS_WINDOWS
 #include "windows.c"
 #endif
