@@ -16,6 +16,7 @@
 
 #if CBASE_CRT_MSVC
 #define BRN2_MKDIR(path, mode) mkdir(path)
+static int lstat(const char *, struct stat *);
 #else
 #define BRN2_MKDIR(path, mode) mkdir(path, mode)
 #endif

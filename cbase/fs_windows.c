@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#if !defined(WINDOWS_FUNCTIONS_C)
-#define WINDOWS_FUNCTIONS_C
+#if !defined(FS_WINDOWS_C)
+#define FS_WINDOWS_C
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_fs_windows 1
@@ -272,6 +272,6 @@ main(void) {
 
     exit(EXIT_SUCCESS);
 }
-#endif
+#endif /* TESTING_fs_windows */
 
-#endif
+#endif /* FS_WINDOWS_C */
