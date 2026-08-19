@@ -5,9 +5,9 @@
 #define WINDOWS_FUNCTIONS_C
 
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_windows_functions 1
-#elif !defined(TESTING_windows_functions)
-#define TESTING_windows_functions 0
+#define TESTING_fs_windows 1
+#elif !defined(TESTING_fs_windows)
+#define TESTING_fs_windows 0
 #endif
 
 #include "cbase.h"
@@ -187,7 +187,7 @@ lstat(const char *path, struct stat *statbuf) {
     return 0;
 }
 
-#if TESTING_windows_functions
+#if TESTING_fs_windows
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 
