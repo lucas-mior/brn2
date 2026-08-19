@@ -704,6 +704,7 @@ extern void throw_away_function();
 #include "util.c"
 #include "string.c"
 #include "time.c"
+#include "fs.c"
 #if OS_WINDOWS
 #include "windows.c"
 #endif
