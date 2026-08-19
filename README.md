@@ -152,6 +152,15 @@ $ find . -type f -printf "%T@ %p\n" | sort -n | cut -d ' ' -f 2- | brn2 -s -f -
 - Print renamed files.
 - Faster algorithm to check for duplicated filenames.
 - Check if original files exist.
+- Works on windows.
+
+## Tested Operating systems
+- Linux
+- MacOS
+- FreeBSD
+- OpenBSD
+- NetBSD
+- Windows (cross compilation with zig cc and hosted compilation with msvc)
 
 ## License
 brn2 is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
