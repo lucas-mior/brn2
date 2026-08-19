@@ -916,17 +916,31 @@ test_make_temp_dir(char *buffer, int32 capacity, char *name) {
 #if OS_UNIX || OS_WINDOWS
     char *tmpdir;
     int32 len;
+    int32 prefix_len = 0;
 
-    if ((tmpdir = getenv("TMPDIR")) == NULL) {
+    tmpdir = getenv("TMPDIR");
 #if OS_WINDOWS
-        tmpdir = ".";
-#else
-        tmpdir = "/tmp";
-#endif
-    }
+    if (tmpdir == NULL) {
+        DWORD temp_len;
 
+        temp_len = GetTempPathA((DWORD)capacity, buffer);
+        if ((temp_len <= 0) || (temp_len >= (DWORD)capacity)) {
+            error("Temporary directory path too long.\n");
+            fatal(EXIT_FAILURE);
+        }
+        prefix_len = (int32)temp_len;
+        len = snprintf2(buffer + prefix_len, capacity - prefix_len,
+                        "%s_XXXXXX", name);
+    } else {
+        len = snprintf2(buffer, capacity, "%s/%s_XXXXXX", tmpdir, name);
+    }
+#else
+    if (tmpdir == NULL) {
+        tmpdir = "/tmp";
+    }
     len = snprintf2(buffer, capacity, "%s/%s_XXXXXX", tmpdir, name);
-    if ((len <= 0) || (len >= capacity)) {
+#endif
+    if ((len <= 0) || (len >= (capacity - prefix_len))) {
         error("Temporary directory path too long.\n");
         fatal(EXIT_FAILURE);
     }
