@@ -7,7 +7,7 @@
 
 #include "cbase.h"
 
-#if defined(__WIN32__)
+#if OS_WINDOWS
 #define BRN2_MAX_THREADS 1
 #else
 #define BRN2_MAX_THREADS 64

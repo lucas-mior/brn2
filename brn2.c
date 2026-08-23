@@ -1340,7 +1340,11 @@ bool brn2_options_implicit = false;
 bool brn2_options_quiet = false;
 bool brn2_options_autosolve = false;
 bool brn2_options_vim_split = false;
+#if BRN2_MAX_THREADS > 1
 int32 nthreads = 2;
+#else
+int32 nthreads = 1;
+#endif
 
 void
 brn2_print_list(FileList *list) {
