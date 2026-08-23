@@ -368,34 +368,34 @@ main(void) {
 
     ASSERT_EQUAL(TYPENAME(primitive.avoidp),
                  typename(TYPEID(primitive.avoidp)));
-    ASSERT(strequal(TYPENAME(primitive.acharp),
-                    typename(TYPEID(primitive.acharp))));
-    ASSERT(strequal(TYPENAME(primitive.abool),
-                    typename(TYPEID(primitive.abool))));
-    ASSERT(strequal(TYPENAME(primitive.aschar),
-                    typename(TYPEID(primitive.aschar))));
-    ASSERT(strequal(TYPENAME(primitive.ashort),
-                    typename(TYPEID(primitive.ashort))));
-    ASSERT(strequal(TYPENAME(primitive.aint),
-                    typename(TYPEID(primitive.aint))));
-    ASSERT(strequal(TYPENAME(primitive.along),
-                    typename(TYPEID(primitive.along))));
-    ASSERT(strequal(TYPENAME(primitive.allong),
-                    typename(TYPEID(primitive.allong))));
-    ASSERT(strequal(TYPENAME(primitive.auchar),
-                    typename(TYPEID(primitive.auchar))));
-    ASSERT(strequal(TYPENAME(primitive.aushort),
-                    typename(TYPEID(primitive.aushort))));
-    ASSERT(strequal(TYPENAME(primitive.auint),
-                    typename(TYPEID(primitive.auint))));
-    ASSERT(strequal(TYPENAME(primitive.aulong),
-                    typename(TYPEID(primitive.aulong))));
-    ASSERT(strequal(TYPENAME(primitive.aullong),
-                    typename(TYPEID(primitive.aullong))));
-    ASSERT(strequal(TYPENAME(primitive.afloat),
-                    typename(TYPEID(primitive.afloat))));
-    ASSERT(strequal(TYPENAME(primitive.adouble),
-                    typename(TYPEID(primitive.adouble))));
+    ASSERT_EQUAL(TYPENAME(primitive.acharp),
+                 typename(TYPEID(primitive.acharp)));
+    ASSERT_EQUAL(TYPENAME(primitive.abool),
+                 typename(TYPEID(primitive.abool)));
+    ASSERT_EQUAL(TYPENAME(primitive.aschar),
+                 typename(TYPEID(primitive.aschar)));
+    ASSERT_EQUAL(TYPENAME(primitive.ashort),
+                 typename(TYPEID(primitive.ashort)));
+    ASSERT_EQUAL(TYPENAME(primitive.aint),
+                 typename(TYPEID(primitive.aint)));
+    ASSERT_EQUAL(TYPENAME(primitive.along),
+                 typename(TYPEID(primitive.along)));
+    ASSERT_EQUAL(TYPENAME(primitive.allong),
+                 typename(TYPEID(primitive.allong)));
+    ASSERT_EQUAL(TYPENAME(primitive.auchar),
+                 typename(TYPEID(primitive.auchar)));
+    ASSERT_EQUAL(TYPENAME(primitive.aushort),
+                 typename(TYPEID(primitive.aushort)));
+    ASSERT_EQUAL(TYPENAME(primitive.auint),
+                 typename(TYPEID(primitive.auint)));
+    ASSERT_EQUAL(TYPENAME(primitive.aulong),
+                 typename(TYPEID(primitive.aulong)));
+    ASSERT_EQUAL(TYPENAME(primitive.aullong),
+                 typename(TYPEID(primitive.aullong)));
+    ASSERT_EQUAL(TYPENAME(primitive.afloat),
+                 typename(TYPEID(primitive.afloat)));
+    ASSERT_EQUAL(TYPENAME(primitive.adouble),
+                 typename(TYPEID(primitive.adouble)));
 
     {
         int32 var_int32;
@@ -469,15 +469,15 @@ main(void) {
         FILE *fp;
         int n;
 
-        ASSERT(strequal(S_(a), "i"));
-        ASSERT(strequal(S_(b), "able"));
-        ASSERT(strequal(S_(c), "1"));
-        ASSERT(strequal(S_((uint)42), "42"));
-        ASSERT(strequal(S_((long)-42), "-42"));
-        ASSERT(strequal(S_((ullong)42), "42"));
-        ASSERT(strequal(S_(true), "1"));
-        ASSERT(strequal(S_(false), "0"));
-        ASSERT(strequal(SF("0x%02x", 10), "0x0a"));
+        ASSERT_EQUAL(S_(a), "i");
+        ASSERT_EQUAL(S_(b), "able");
+        ASSERT_EQUAL(S_(c), "1");
+        ASSERT_EQUAL(S_((uint)42), "42");
+        ASSERT_EQUAL(S_((long)-42), "-42");
+        ASSERT_EQUAL(S_((ullong)42), "42");
+        ASSERT_EQUAL(S_(true), "1");
+        ASSERT_EQUAL(S_(false), "0");
+        ASSERT_EQUAL(SF("0x%02x", 10), "0x0a");
 
         n = snprint(buf, SIZEOF(buf),
                     "Now you can insert var" V(a) V(b) "s in situ:\n"
@@ -485,8 +485,8 @@ main(void) {
         ASSERT(n == strlen32("Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));
 
-        ASSERT(strequal(buf, "Now you can insert variables in situ:\n"
-                            "1 divided by 8 equals 0.125\n"));
+        ASSERT_EQUAL(buf, "Now you can insert variables in situ:\n"
+                          "1 divided by 8 equals 0.125\n");
 
         n = snprint(buf, SIZEOF(buf),
                     "This is " W(e) " It's " V(strlen(e)) " characters long\n");
@@ -494,16 +494,16 @@ main(void) {
                  "This is %s It's %lu characters long\n",
                  e, (ulong)strlen(e));
         ASSERT(n == strlen32(expected));
-        ASSERT(strequal(buf, expected));
+        ASSERT_EQUAL(buf, expected);
 
         n = snprint(buf, SIZEOF(buf),
                     "custom " VF("%04i", c) " " VF("%c", a) "\n");
         ASSERT(n == strlen32("custom 0001 i\n"));
-        ASSERT(strequal(buf, "custom 0001 i\n"));
+        ASSERT_EQUAL(buf, "custom 0001 i\n");
 
         n = snprint(small2, SIZEOF(small2), "prefix-" W(e));
         ASSERT(n == (int)(strlen("prefix-") + strlen(e)));
-        ASSERT(strequal(small2, "prefix-"));
+        ASSERT_EQUAL(small2, "prefix-");
 
         fp = tmpfile();
         ASSERT(fp);
@@ -511,7 +511,7 @@ main(void) {
         ASSERT(n == strlen32("file 1 0001\n"));
         rewind(fp);
         ASSERT(fgets(buf, SIZEOF(buf), fp));
-        ASSERT(strequal(buf, "file 1 0001\n"));
+        ASSERT_EQUAL(buf, "file 1 0001\n");
         fclose(fp);
 
         n = print0("print ", V(a), " ", W(b), "\n");
