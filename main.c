@@ -25,19 +25,19 @@ static int32 narenas;
 int32 (*print)(const char *, ...) = noop;
 
 static struct option options[] = {
-    {"dir",       required_argument, NULL, 'd'},
-    {"file",      required_argument, NULL, 'f'},
+    {"dir",         required_argument, NULL, 'd'},
+    {"file",        required_argument, NULL, 'f'},
     {"file-target", required_argument, NULL, 't'},
-    {"explicit",  no_argument,       NULL, 'e'},
-    {"fatal",     no_argument,       NULL, 'F'},
-    {"help",      no_argument,       NULL, 'h'},
-    {"implicit",  no_argument,       NULL, 'i'},
-    {"quiet",     no_argument,       NULL, 'q'},
-    {"sort",      no_argument,       NULL, 's'},
-    {"verbose",   no_argument,       NULL, 'v'},
-    {"autosolve", no_argument,       NULL, 'a'},
-    {"vim-split", no_argument,       NULL, 'V'},
-    {NULL,        0,                 NULL, 0},
+    {"explicit",    no_argument,       NULL, 'e'},
+    {"fatal",       no_argument,       NULL, 'F'},
+    {"help",        no_argument,       NULL, 'h'},
+    {"implicit",    no_argument,       NULL, 'i'},
+    {"quiet",       no_argument,       NULL, 'q'},
+    {"sort",        no_argument,       NULL, 's'},
+    {"verbose",     no_argument,       NULL, 'v'},
+    {"autosolve",   no_argument,       NULL, 'a'},
+    {"vim-split",   no_argument,       NULL, 'V'},
+    {NULL,          0,                 NULL, 0},
 };
 
 enum Brn2InputMode {
