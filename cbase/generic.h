@@ -54,7 +54,6 @@ union Primitive {
     double adouble;
 };
 
-extern int strlen2(char *);
 extern int fprint_0(FILE *restrict, ...);
 extern int snprint_0(char *restrict, int64, ...);
 extern char *toString(char *restrict, int64, char *restrict, ...);

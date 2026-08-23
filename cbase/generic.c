@@ -17,11 +17,6 @@
 #include "cbase.h"
 
 int
-strlen2(char *string) {
-    return (int)strlen(string);
-}
-
-int
 fprint_0(FILE *restrict fp, ... /* strings, NULL */) {
     int count = 0;
     char *s;
@@ -36,7 +31,7 @@ fprint_0(FILE *restrict fp, ... /* strings, NULL */) {
             return -1;
         }
 
-        slen = strlen2(s);
+        slen = strlen32(s);
         if ((int64)INT_MAX - (int64)count < slen) {
             count = INT_MAX;
         } else {
@@ -70,7 +65,7 @@ snprint_0(char *restrict buf, int64 bufSize, ... /* strings, NULL */) {
     }
 
     while ((s = va_arg(ap, char *))) {
-        int64 sLen = strlen2(s);
+        int64 sLen = strlen32(s);
         requiredLen += sLen;
 
         if (dst && remainingLen) {
@@ -484,7 +479,7 @@ main(void) {
         n = snprint(buf, SIZEOF(buf),
                     "Now you can insert var" V(a) V(b) "s in situ:\n"
                     V(c) " divided by " V(d) " equals " V(c/d) "\n");
-        assert(n == strlen2("Now you can insert variables in situ:\n"
+        assert(n == strlen32("Now you can insert variables in situ:\n"
                             "1 divided by 8 equals 0.125\n"));
 
         assert(strequal(buf, "Now you can insert variables in situ:\n"
@@ -495,12 +490,12 @@ main(void) {
         snprintf(expected, SIZEOF(expected),
                  "This is %s It's %lu characters long\n",
                  e, (ulong)strlen(e));
-        assert(n == strlen2(expected));
+        assert(n == strlen32(expected));
         assert(strequal(buf, expected));
 
         n = snprint(buf, SIZEOF(buf),
                     "custom " VF("%04i", c) " " VF("%c", a) "\n");
-        assert(n == strlen2("custom 0001 i\n"));
+        assert(n == strlen32("custom 0001 i\n"));
         assert(strequal(buf, "custom 0001 i\n"));
 
         n = snprint(small2, SIZEOF(small2), "prefix-" W(e));
@@ -510,14 +505,14 @@ main(void) {
         fp = tmpfile();
         assert(fp);
         n = fprint(fp, "file ", V(c), " ", VF("%04i", c), "\n");
-        assert(n == strlen2("file 1 0001\n"));
+        assert(n == strlen32("file 1 0001\n"));
         rewind(fp);
         assert(fgets(buf, SIZEOF(buf), fp));
         assert(strequal(buf, "file 1 0001\n"));
         fclose(fp);
 
         n = print0("print ", V(a), " ", W(b), "\n");
-        assert(n == strlen2("print i able\n"));
+        assert(n == strlen32("print i able\n"));
         {
             char buffer[16];
             assert((print0(V(c), "\n")
