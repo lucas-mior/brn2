@@ -121,6 +121,7 @@ GENERATE_COMPARE_DOUBLE(max, >)
 #if 0 == TESTING_minmax
 static inline void
 minmax_functions_sink(void) {
+    (void)minmax_functions_sink;
     (void)get_pointer_min;
     (void)get_pointer_max;
     (void)get_both_signed_min;
