@@ -104,6 +104,9 @@ toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
     return buf;
 }
 
+MSVC_WARNING_PUSH()
+MSVC_WARNING_DISABLE(4702)
+
 double
 double_from_voidp(void *x) {
     (void)x;
@@ -131,6 +134,8 @@ double_from_char(char x) {
     TRAP();
     return 0.0;  // NOLINT
 }
+
+MSVC_WARNING_POP()
 
 static void
 check_integer_fits_in_double(llong x) {
@@ -274,6 +279,9 @@ typename(enum Type type) {
     }
 }
 
+MSVC_WARNING_PUSH()
+MSVC_WARNING_DISABLE(4702)
+
 double
 double_get(union Primitive var, enum Type type) {
     switch (type) {
@@ -332,6 +340,8 @@ double_get(union Primitive var, enum Type type) {
     }
     return (double)0.0;
 }
+
+MSVC_WARNING_POP()
 
 #if TESTING_generic
 #define CBASE_IMPLEMENT
