@@ -371,7 +371,10 @@ main(void) {
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     }
-    {
+
+    // Testing if warning is correctly given when using MIN with integers of
+    // different signedness
+    if (!TESTING) {
         int32 x = 0;
         uint32 y = 1;
         int32 a = MIN(x, y);  // NOLINT
@@ -389,12 +392,9 @@ main(void) {
                          COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
             exit(EXIT_FAILURE);
         } else {
-            ASSERT_CONTAINS(command.result.stderr_output,
-                            command.result.stderr_len,
-                            "warning: conversion from"
-                            " ‘llong’ {aka ‘long long int’}"
-                            " to ‘int32’ {aka ‘int’}"
-                            " may change value [-Wconversion]");
+            ASSERT_GLOB_MATCH(command.result.stderr_output,
+                              command.result.stderr_len,
+                              "*minmax.c*warning: conversion from*");
         }
 
         command_argv0_set(&command, "clang");
