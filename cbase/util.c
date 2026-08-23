@@ -1068,12 +1068,6 @@ util_test_qsort_cmp(void *a, void *b) {
 #define ASSERT_MEM_LITERAL(HAYSTACK, LITERAL, OFFSET) \
     ASSERT_MEM_LITERAL_OFFSET(HAYSTACK, strlen32(HAYSTACK), LITERAL, OFFSET)
 
-#define ASSERT_GLOB_MATCH(STRING, GLOB) \
-    ASSERT(util_glob_match(STRING, strlen32(STRING), GLOB, strlen32(GLOB)))
-
-#define ASSERT_GLOB_NO_MATCH(STRING, GLOB) \
-    ASSERT(!util_glob_match(STRING, strlen32(STRING), GLOB, strlen32(GLOB)))
-
 static void
 util_test_mem_literal_short(void) {
     char binary_haystack[] = {'x', 'a', '\0', 'b', 'y'};
@@ -1155,8 +1149,8 @@ main(int argc, char **argv) {
         ASSERT_GLOB_NO_MATCH("abc", "*d");
         ASSERT_GLOB_NO_MATCH("abc", "a*c*d");
 
-        ASSERT(util_glob_match(binary, SIZEOF(binary),
-                               binary_glob, SIZEOF(binary_glob)));
+        ASSERT_GLOB_MATCH(binary, SIZEOF(binary),
+                          binary_glob, SIZEOF(binary_glob));
     }
 
     {

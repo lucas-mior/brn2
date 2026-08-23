@@ -381,11 +381,10 @@ main(void) {
         Command command = {0};
 
         COMMAND_PUSH(&command, "gcc", "-std=c11");
-        COMMAND_PUSH(&command, "-Wall", "-Wextra", "-Wpedantic");
         COMMAND_PUSH(&command, "-Wconversion");
         COMMAND_PUSH(&command, "-o", "/tmp/a.out");
-
         command_printf(&command, "%s", __FILE__);
+
         if (!command_run(&command,
                          COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
             exit(EXIT_FAILURE);
@@ -399,6 +398,8 @@ main(void) {
         }
 
         command_argv0_set(&command, "clang");
+        COMMAND_PUSH(&command, "-Wshorten-64-to-32");
+
         if (!command_run(&command,
                          COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
             exit(EXIT_FAILURE);
