@@ -372,8 +372,10 @@ main(void) {
         ASSERT_EQUAL(max, b);
     }
 
-    // Testing if warning is correctly given when using MIN with integers of
-    // different signedness
+    // Testing if conversion warnings are correctly given
+    // when using MIN with integers of different signedness.
+    // This block only is compiled from the self-compiling block below,
+    // so that normal compilation (TESTING=1) does not give warnings
     if (!TESTING) {
         int32 x = 0;
         uint32 y = 1;
