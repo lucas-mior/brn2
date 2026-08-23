@@ -366,8 +366,8 @@ main(void) {
     ASSERT(MAXOF(primitive.aullong) == ULLONG_MAX);
     ASSERT(MAXOF(primitive.abool)   == 1);
 
-    ASSERT(strequal(TYPENAME(primitive.avoidp),
-                    typename(TYPEID(primitive.avoidp))));
+    ASSERT_EQUAL(TYPENAME(primitive.avoidp),
+                 typename(TYPEID(primitive.avoidp)));
     ASSERT(strequal(TYPENAME(primitive.acharp),
                     typename(TYPEID(primitive.acharp))));
     ASSERT(strequal(TYPENAME(primitive.abool),
