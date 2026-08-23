@@ -489,10 +489,10 @@ main(void) {
                           "1 divided by 8 equals 0.125\n");
 
         n = snprint(buf, SIZEOF(buf),
-                    "This is " W(e) " It's " V(strlen(e)) " characters long\n");
+                    "This is " W(e) " It's " V(strlen32(e)) " characters long\n");
         snprintf(expected, SIZEOF(expected),
                  "This is %s It's %lu characters long\n",
-                 e, (ulong)strlen(e));
+                 e, (ulong)strlen32(e));
         ASSERT(n == strlen32(expected));
         ASSERT_EQUAL(buf, expected);
 
@@ -502,7 +502,7 @@ main(void) {
         ASSERT_EQUAL(buf, "custom 0001 i\n");
 
         n = snprint(small2, SIZEOF(small2), "prefix-" W(e));
-        ASSERT(n == (int)(strlen("prefix-") + strlen(e)));
+        ASSERT(n == (int)(strlen32("prefix-") + strlen32(e)));
         ASSERT_EQUAL(small2, "prefix-");
 
         fp = tmpfile();
