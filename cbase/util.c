@@ -1124,9 +1124,6 @@ main(int argc, char **argv) {
     util_test_mem_literal_short();
 
     {
-        char binary[] = {'a', '\0', 'c'};
-        char binary_glob[] = {'a', '*', 'c'};
-
         ASSERT_GLOB_MATCH("", "");
         ASSERT_GLOB_MATCH("", "*");
         ASSERT_GLOB_MATCH("abc", "abc");
@@ -1148,9 +1145,6 @@ main(int argc, char **argv) {
         ASSERT_GLOB_NO_MATCH("abc", "ab*d");
         ASSERT_GLOB_NO_MATCH("abc", "*d");
         ASSERT_GLOB_NO_MATCH("abc", "a*c*d");
-
-        ASSERT_GLOB_MATCH(binary, SIZEOF(binary),
-                          binary_glob, SIZEOF(binary_glob));
     }
 
     {

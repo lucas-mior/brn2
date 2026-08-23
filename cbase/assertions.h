@@ -291,8 +291,8 @@ do {                                                                         \
 
 #define ASSERT_GLOB_NO_MATCH_2(STRING, GLOB) \
     ASSERT_GLOB_MATCH_IMPL(STRING, strlen32(STRING), GLOB, strlen32(GLOB), false)
-#define ASSERT_GLOB_NO_MATCH_4(STRING, STRING_LEN, GLOB, GLOB_LEN) \
-    ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, GLOB_LEN, false)
+#define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB) \
+    ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, strlen32(GLOB), false)
 #define ASSERT_GLOB_NO_MATCH(...) \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_NO_MATCH_, __VA_ARGS__)
 

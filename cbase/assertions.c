@@ -957,11 +957,9 @@ main(void) {
         ASSERT_NOT_CONTAINS(haystack, 10, "gamma");
         ASSERT_NOT_CONTAINS(binary_haystack, SIZEOF(binary_haystack), "bc");
         ASSERT_GLOB_MATCH(haystack, "alpha*gamma");
-        ASSERT_GLOB_MATCH(binary_haystack, SIZEOF(binary_haystack),
-                          "a*d", strlen32("a*d"));
+        ASSERT_GLOB_MATCH(binary_haystack, SIZEOF(binary_haystack), "a*d");
         ASSERT_GLOB_NO_MATCH(haystack, "alpha*delta");
-        ASSERT_GLOB_NO_MATCH(binary_haystack, SIZEOF(binary_haystack),
-                             "a*c", strlen32("a*c"));
+        ASSERT_GLOB_NO_MATCH(binary_haystack, SIZEOF(binary_haystack), "a*c");
     } {
         // uncomment to trigger linking error
         /* double x = 0.1; */
