@@ -276,5 +276,7 @@ expect_failure \
     --fatal --autosolve -f "rename" -t "rename2"
 check_unchanged "expected" a b c
 
+echo "$0 completed successfully"
+
 cd ../..
 rm -rf "autosolve-tests"
