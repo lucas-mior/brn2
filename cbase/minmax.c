@@ -371,6 +371,32 @@ main(void) {
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     }
+    {
+        int32 x = 0;
+        uint32 y = 1;
+        int32 a = MIN(x, y);
+        (void)a;
+    }
+    {
+        Command command = {0};
+
+        COMMAND_PUSH(&command, "gcc", "-std=c11");
+        COMMAND_PUSH(&command, "-Wall", "-Wextra", "-Wpedantic");
+        COMMAND_PUSH(&command, "-Wconversion");
+
+        command_printf(&command, "%s", __FILE__);
+        if (!command_run(&command,
+                         COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
+            exit(EXIT_FAILURE);
+        } else {
+            ASSERT_CONTAINS(command.result.stderr_output,
+                            strlen32(command.result.stderr_output),
+                            "warning: conversion from"
+                            " ‘llong’ {aka ‘long long int’}"
+                            " to ‘int32’ {aka ‘int’}"
+                            " may change value [-Wconversion]");
+        }
+    }
     exit(EXIT_SUCCESS);
 }
 #endif
