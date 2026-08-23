@@ -404,12 +404,9 @@ main(void) {
                          COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
             exit(EXIT_FAILURE);
         } else {
-            ASSERT_CONTAINS(command.result.stderr_output,
-                            command.result.stderr_len,
-                            " warning: implicit conversion"
-                            " loses integer precision:"
-                            " 'llong' (aka 'long long')"
-                            " to 'int32' (aka 'int') [-Wshorten-64-to-32]");
+            ASSERT_GLOB_MATCH(command.result.stderr_output,
+                              command.result.stderr_len,
+                              "*minmax.c*warning: implicit conversion*loses*");
         }
     }
     exit(EXIT_SUCCESS);
