@@ -518,34 +518,38 @@ _Generic((VAR1),                                                        \
     }                                                                          \
 } while (0)
 
-#define ASSERT_EQUAL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {                   \
-    char *ASSERT_EQUAL_VAR1 = VAR1;                                           \
-    int32 ASSERT_EQUAL_VAR1_LEN = VAR1_LEN;                                   \
-    char *ASSERT_EQUAL_VAR2 = VAR2;                                           \
-    int32 ASSERT_EQUAL_VAR2_LEN = VAR2_LEN;                                   \
-    if (ASSERT_EQUAL_VAR1 == NULL) {                                          \
-        assert_error(__FILE__, __LINE__, FUNC__, "%s is NULL.\n", #VAR1);     \
-        TRAP();                                                               \
-    }                                                                         \
-    if (ASSERT_EQUAL_VAR2 == NULL) {                                          \
-        assert_error(__FILE__, __LINE__, FUNC__, "%s is NULL.\n", #VAR2);     \
-        TRAP();                                                               \
-    }                                                                         \
-    if (ASSERT_EQUAL_VAR1_LEN != ASSERT_EQUAL_VAR2_LEN) {                     \
-        assert_error(__FILE__, __LINE__, FUNC__,                              \
-                     "%s length = %d == %s length = %d\n",                   \
-                     #VAR1, ASSERT_EQUAL_VAR1_LEN,                            \
-                     #VAR2, ASSERT_EQUAL_VAR2_LEN);                           \
-        TRAP();                                                               \
-    }                                                                         \
-    if (memcmp64(ASSERT_EQUAL_VAR1, ASSERT_EQUAL_VAR2,                        \
-                 ASSERT_EQUAL_VAR1_LEN) != 0) {                               \
-        assert_error(__FILE__, __LINE__, FUNC__,                              \
-                     "%s = %.*s == %s = %.*s\n",                             \
-                     #VAR1, ASSERT_EQUAL_VAR1_LEN, ASSERT_EQUAL_VAR1,         \
-                     #VAR2, ASSERT_EQUAL_VAR2_LEN, ASSERT_EQUAL_VAR2);        \
-        TRAP();                                                               \
-    }                                                                         \
+#define ASSERT_EQUAL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {                    \
+    char *ASSERT_EQUAL_VAR1 = VAR1;                                            \
+    int32 ASSERT_EQUAL_VAR1_LEN = VAR1_LEN;                                    \
+    char *ASSERT_EQUAL_VAR2 = VAR2;                                            \
+    int32 ASSERT_EQUAL_VAR2_LEN = VAR2_LEN;                                    \
+                                                                               \
+    if (ASSERT_EQUAL_VAR2 && (ASSERT_EQUAL_VAR1 == NULL)) {                    \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s is NULL while %s is not\n", #VAR1, #VAR2);            \
+        TRAP();                                                                \
+    }                                                                          \
+    if (ASSERT_EQUAL_VAR1 && (ASSERT_EQUAL_VAR2 == NULL)) {                    \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s is NULL while %s is not\n", #VAR2, #VAR1);            \
+        TRAP();                                                                \
+    }                                                                          \
+                                                                               \
+    if (ASSERT_EQUAL_VAR1_LEN != ASSERT_EQUAL_VAR2_LEN) {                      \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "len(%s) = %d == %d = len(%s)\n",                         \
+                     #VAR1, ASSERT_EQUAL_VAR1_LEN,                             \
+                     ASSERT_EQUAL_VAR2_LEN, #VAR2);                            \
+        TRAP();                                                                \
+    }                                                                          \
+    if (memcmp64(ASSERT_EQUAL_VAR1, ASSERT_EQUAL_VAR2,                         \
+                 ASSERT_EQUAL_VAR1_LEN) != 0) {                                \
+        assert_error(__FILE__, __LINE__, FUNC__,                               \
+                     "%s = %.*s == %.*s = %s\n",                               \
+                     #VAR1, ASSERT_EQUAL_VAR1_LEN, ASSERT_EQUAL_VAR1,          \
+                     ASSERT_EQUAL_VAR2_LEN, ASSERT_EQUAL_VAR2, #VAR2);         \
+        TRAP();                                                                \
+    }                                                                          \
 } while (0)
 
 #define ASSERT_EQUAL(...) SELECT_ON_NUM_ARGS(ASSERT_EQUAL_, __VA_ARGS__)
