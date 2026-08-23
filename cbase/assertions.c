@@ -76,12 +76,14 @@ void                                                                           \
 a_strings_##MODE(char *file, int32 line, char *func,                           \
                  char *name1, char *name2,                                     \
                  char *var1, char *var2) {                                     \
-    if (var1 == NULL) {                                                        \
-        assert_error(file, line, func, "%s is NULL.\n", name1);                \
+    if (var2 && (var1 == NULL)) {                                              \
+        assert_error(file, line, func,                                         \
+                     "%s is NULL, %s is \"%s\"\n", name1, name2, var2);        \
         TRAP();                                                                \
     }                                                                          \
-    if (var2 == NULL) {                                                        \
-        assert_error(file, line, func, "%s is NULL.\n", name2);                \
+    if (var1 && (var2 == NULL)) {                                              \
+        assert_error(file, line, func,                                         \
+                     "%s is NULL, %s is \"%s\"\n", name2, name1, var1);        \
         TRAP();                                                                \
     }                                                                          \
     if (!(strcmp(var1, var2) SYMBOL 0)) {                                      \
