@@ -38,20 +38,20 @@ _Static_assert(sizeof(float)*CHAR_BIT == 32,
 _Static_assert(sizeof(double)*CHAR_BIT == 64,
                "assertions.c ULP comparison requires 64-bit double");
 
-extern void assert_error(char *, int32, char *, char *, ...)
+void assert_error(char *, int32, char *, char *, ...)
     ATTR_PRINTF(4, 5);
-extern void assert_file_contains(char *, int32, char *,
+void assert_file_contains(char *, int32, char *,
                                         char *, char *);
-extern void assert_contains(char *, int32, char *,
+void assert_contains(char *, int32, char *,
                                     char *, int32, char *);
-extern void assert_not_contains(char *, int32, char *,
+void assert_not_contains(char *, int32, char *,
                                         char *, int32, char *);
-extern void assert_glob_match_failed(char *, int32, char *,
+void assert_glob_match_failed(char *, int32, char *,
                                      char *, char *, char *, int32,
                                      char *, int32, bool);
 
 #define ASSERT_DECLARE_STRINGS(MODE)                                           \
-extern void a_strings_##MODE(char *, int32, char *,                            \
+void a_strings_##MODE(char *, int32, char *,                            \
                              char *, char *, char *, char *);
 ASSERT_DECLARE_STRINGS(less)
 ASSERT_DECLARE_STRINGS(less_equal)
@@ -62,7 +62,7 @@ ASSERT_DECLARE_STRINGS(more_equal)
 #undef ASSERT_DECLARE_STRINGS
 
 #define ASSERT_DECLARE_POINTERS(MODE)                                          \
-extern void a_pointers_##MODE(char *, int32, char *,                           \
+void a_pointers_##MODE(char *, int32, char *,                           \
                               char *, char *, void *, void *);
 ASSERT_DECLARE_POINTERS(less)
 ASSERT_DECLARE_POINTERS(less_equal)
@@ -73,7 +73,7 @@ ASSERT_DECLARE_POINTERS(more_equal)
 #undef ASSERT_DECLARE_POINTERS
 
 #define ASSERT_DECLARE_INTEGERS(SIGN, MODE)                                    \
-extern void a_both_##SIGN##_##MODE(char *, int32, char *,                      \
+void a_both_##SIGN##_##MODE(char *, int32, char *,                      \
                                    char *, char *, char *, char *,             \
                                    llong, llong, SIGN long long,               \
                                    SIGN long long);
@@ -92,7 +92,7 @@ ASSERT_DECLARE_INTEGERS(unsigned, more_equal)
 #undef ASSERT_DECLARE_INTEGERS
 
 #define ASSERT_DECLARE_SIGNED_UNSIGNED(MODE)                                   \
-extern void a_signed_unsigned##MODE(char *, int32, char *,                     \
+void a_signed_unsigned##MODE(char *, int32, char *,                     \
                                     char *, char *, char *, char *,            \
                                     llong, llong, llong, ullong);
 ASSERT_DECLARE_SIGNED_UNSIGNED(less)
@@ -104,7 +104,7 @@ ASSERT_DECLARE_SIGNED_UNSIGNED(more_equal)
 #undef ASSERT_DECLARE_SIGNED_UNSIGNED
 
 #define ASSERT_DECLARE_UNSIGNED_SIGNED(MODE) \
-extern void a_unsigned_signed_##MODE(char *, int32, char *,            \
+void a_unsigned_signed_##MODE(char *, int32, char *,            \
                                      char *, char *, char *, char *,   \
                                      llong, llong, ullong, llong);
 ASSERT_DECLARE_UNSIGNED_SIGNED(less)
@@ -116,7 +116,7 @@ ASSERT_DECLARE_UNSIGNED_SIGNED(more_equal)
 #undef ASSERT_DECLARE_UNSIGNED_SIGNED
 
 #define ASSERT_DECLARE_DOUBLE(MODE)                                    \
-extern void a_double_##MODE(char *, int32, char *,                     \
+void a_double_##MODE(char *, int32, char *,                     \
                             char *, char *, char *, char *,            \
                             llong, llong, double, double);
 ASSERT_DECLARE_DOUBLE(less)
@@ -128,7 +128,7 @@ ASSERT_DECLARE_DOUBLE(more_equal)
 #undef ASSERT_DECLARE_DOUBLE
 
 #define ASSERT_DECLARE_DOUBLE_CLOSE(MODE)                                  \
-extern void a_double_##MODE(char *, int32, char *,                         \
+void a_double_##MODE(char *, int32, char *,                         \
                                   char *, char *, char *, char *,          \
                                   llong, llong, int, int, double, double);
 ASSERT_DECLARE_DOUBLE_CLOSE(close)
@@ -136,7 +136,7 @@ ASSERT_DECLARE_DOUBLE_CLOSE(not_close)
 #undef ASSERT_DECLARE_DOUBLE_CLOSE
 
 #define ASSERT_DECLARE_DOUBLE_CLOSE_TOL(MODE)                              \
-extern void a_double_##MODE(char *, int32, char *,                         \
+void a_double_##MODE(char *, int32, char *,                         \
                                   char *, char *, char *, char *,          \
                                   llong, llong, double, double, double);
 ASSERT_DECLARE_DOUBLE_CLOSE_TOL(close_tol)
@@ -144,16 +144,16 @@ ASSERT_DECLARE_DOUBLE_CLOSE_TOL(not_close_tol)
 #undef ASSERT_DECLARE_DOUBLE_CLOSE_TOL
 
 #define ASSERT_DECLARE_BOOL(MODE)                                          \
-extern void a_bool_##MODE(char *, int32, char *,                           \
+void a_bool_##MODE(char *, int32, char *,                           \
                                 char *, char *, char *, char *,            \
                                 llong, llong, bool, bool);
 ASSERT_DECLARE_BOOL(equal)
 ASSERT_DECLARE_BOOL(not_equal)
 #undef ASSERT_DECLARE_BOOL
-extern noreturn void a_bool_more(void *, ...);
-extern noreturn void a_bool_less(void *, ...);
-extern noreturn void a_bool_more_equal(void *, ...);
-extern noreturn void a_bool_less_equal(void *, ...);
+noreturn void a_bool_more(void *, ...);
+noreturn void a_bool_less(void *, ...);
+noreturn void a_bool_more_equal(void *, ...);
+noreturn void a_bool_less_equal(void *, ...);
 
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGNED(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGNED(void);
