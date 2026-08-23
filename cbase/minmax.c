@@ -397,6 +397,19 @@ main(void) {
                             " to ‘int32’ {aka ‘int’}"
                             " may change value [-Wconversion]");
         }
+        command_argv0_set(&command, "clang");
+
+        if (!command_run(&command,
+                         COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
+            exit(EXIT_FAILURE);
+        } else {
+            ASSERT_CONTAINS(command.result.stderr_output,
+                            strlen32(command.result.stderr_output),
+                            " warning: implicit conversion"
+                            " loses integer precision:"
+                            " 'llong' (aka 'long long')"
+                            " to 'int32' (aka 'int') [-Wshorten-64-to-32]");
+        }
     }
     exit(EXIT_SUCCESS);
 }
