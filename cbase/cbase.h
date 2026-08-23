@@ -708,6 +708,7 @@ extern void throw_away_function();
 
 #include "arena.c"
 #include "memory.c"
+#include "generic.c"
 #include "assertions.c"
 #include "array.c"
 #include "utf8.c"

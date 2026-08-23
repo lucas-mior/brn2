@@ -16,6 +16,328 @@
 
 #include "cbase.h"
 
+int
+strlen2(char *string) {
+    return (int)strlen(string);
+}
+
+int
+fprint_0(FILE *restrict fp, ... /* strings, NULL */) {
+    int count = 0;
+    char *s;
+
+    va_list ap;
+    va_start(ap, fp);
+
+    while ((s = (char *)va_arg(ap, char *))) {
+        int64 slen;
+        if (fputs(s, fp) == EOF) {
+            va_end(ap);
+            return -1;
+        }
+
+        slen = strlen2(s);
+        if ((int64)INT_MAX - (int64)count < slen) {
+            count = INT_MAX;
+        } else {
+            count += (int32)slen;
+        }
+    }
+
+    va_end(ap);
+    return count;
+}
+
+int
+snprint_0(char *restrict buf, int64 bufSize, ... /* strings, NULL */) {
+    va_list ap;
+    int64 remainingLen;
+    int64 requiredLen = 0;
+    char *dst = buf;
+    char *s;
+
+    assert(bufSize >= 0);
+    if (bufSize) {
+        remainingLen = bufSize - 1;
+    } else {
+        remainingLen = 0;
+    }
+
+    va_start(ap, bufSize);
+
+    if (buf && bufSize) {
+        buf[0] = '\0';
+    }
+
+    while ((s = va_arg(ap, char *))) {
+        int64 sLen = strlen2(s);
+        requiredLen += sLen;
+
+        if (dst && remainingLen) {
+            int64 copyLen;
+            if (remainingLen < sLen) {
+                copyLen = remainingLen;
+            } else {
+                copyLen = sLen;
+            }
+            memcpy(dst, s, (size_t)copyLen);
+            dst += copyLen;
+            remainingLen -= copyLen;
+            *dst = '\0';
+        }
+    }
+
+    va_end(ap);
+    if (requiredLen > (int64)INT_MAX) {
+        return INT_MAX;
+    }
+    return (int)requiredLen;
+}
+
+/* Like snprintf but returns a pointer to the buffer. */
+char *
+toString(char *restrict buf, int64 bufSize, char *restrict fmt, ...) {
+    va_list ap;
+
+    assert(buf);
+    assert(bufSize > 0);
+    assert(fmt);
+
+    va_start(ap, fmt);
+    vsnprintf(buf, (size_t)bufSize, fmt, ap);
+    va_end(ap);
+    return buf;
+}
+
+double
+double_from_voidp(void *x) {
+    (void)x;
+    TRAP();
+    return 0.0;  // NOLINT
+}
+
+double
+double_from_charp(char *x) {
+    (void)x;
+    TRAP();
+    return 0.0;  // NOLINT
+}
+
+double
+double_from_bool(bool x) {
+    (void)x;
+    TRAP();
+    return 0.0;  // NOLINT
+}
+
+double
+double_from_char(char x) {
+    (void)x;
+    TRAP();
+    return 0.0;  // NOLINT
+}
+
+static void
+check_integer_fits_in_double(llong x) {
+    if (x > (1ll << DBL_MANT_DIG)) {
+        TRAP();
+    }
+    if (x < -(1ll << DBL_MANT_DIG)) {
+        TRAP();
+    }
+    return;
+}
+
+double
+double_from_schar(schar x) {
+    return (double)x;
+}
+
+double
+double_from_short(short x) {
+    return (double)x;
+}
+
+double
+double_from_int(int x) {
+    return (double)x;
+}
+
+double
+double_from_long(long x) {
+    check_integer_fits_in_double((llong)x);
+    return (double)x;
+}
+
+double
+double_from_llong(llong x) {
+    check_integer_fits_in_double(x);
+    return (double)x;
+}
+
+double
+double_from_uchar(uchar x) {
+    return (double)x;
+}
+
+double
+double_from_ushort(ushort x) {
+    return (double)x;
+}
+
+double
+double_from_uint(uint x) {
+    return (double)x;
+}
+
+double
+double_from_ulong(ulong x) {
+#if ULONG_MAX >= LLONG_MAX
+    if ((ullong)x >= (ullong)LLONG_MAX) {
+        TRAP();
+    }
+#endif
+    check_integer_fits_in_double((llong)x);
+    return (double)x;
+}
+
+double
+double_from_ullong(ullong x) {
+    if (x >= (ullong)LLONG_MAX) {
+        TRAP();
+    }
+    check_integer_fits_in_double((llong)x);
+    return (double)x;
+}
+
+double
+double_from_float(float x) {
+    return (double)x;
+}
+
+double
+double_from_double(double x)  {
+    return (double)x;
+}
+
+llong
+typebits(enum Type type) {
+    llong size = 0;
+    union Primitive primitive;
+    void **pointer;
+
+    switch (type) {
+    case TYPE_VOIDP:
+        pointer = &(primitive.avoidp);
+        size = ((char*)(pointer + 1)) - (char*)pointer;
+        break;
+    case TYPE_CHARP:
+        pointer = (void*)&(primitive.acharp);
+        size = ((char*)(pointer + 1)) - (char*)pointer;
+        break;
+    case TYPE_BOOL:    size = SIZEOF(bool);    break;
+    case TYPE_CHAR:    size = SIZEOF(char);    break;
+    case TYPE_SCHAR:   size = SIZEOF(schar);   break;
+    case TYPE_SHORT:   size = SIZEOF(short);   break;
+    case TYPE_INT:     size = SIZEOF(int);     break;
+    case TYPE_LONG:    size = SIZEOF(long);    break;
+    case TYPE_LLONG:   size = SIZEOF(llong);   break;
+    case TYPE_UCHAR:   size = SIZEOF(uchar);   break;
+    case TYPE_USHORT:  size = SIZEOF(ushort);  break;
+    case TYPE_UINT:    size = SIZEOF(uint);    break;
+    case TYPE_ULONG:   size = SIZEOF(ulong);   break;
+    case TYPE_ULLONG:  size = SIZEOF(ullong);  break;
+    case TYPE_FLOAT:   size = SIZEOF(float);   break;
+    case TYPE_DOUBLE:  size = SIZEOF(double);  break;
+    case TYPE_OTHER:
+    default: TRAP();
+    }
+    return size*CHAR_BIT;
+}
+
+char *
+typename(enum Type type) {
+    switch (type) {
+    case TYPE_VOIDP:  return "void*";
+    case TYPE_CHARP:  return "char*";
+    case TYPE_BOOL:   return "bool";
+    case TYPE_CHAR:   return "char";
+    case TYPE_SCHAR:  return "schar";
+    case TYPE_SHORT:  return "short";
+    case TYPE_INT:    return "int";
+    case TYPE_LONG:   return "long";
+    case TYPE_LLONG:  return "llong";
+    case TYPE_UCHAR:  return "uchar";
+    case TYPE_USHORT: return "ushort";
+    case TYPE_UINT:   return "uint";
+    case TYPE_ULONG:  return "ulong";
+    case TYPE_ULLONG: return "ullong";
+    case TYPE_FLOAT:  return "float";
+    case TYPE_DOUBLE: return "double";
+    case TYPE_OTHER:
+    default:           return "unknown type";
+    }
+}
+
+double
+double_get(union Primitive var, enum Type type) {
+    switch (type) {
+    case TYPE_VOIDP:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_CHARP:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_BOOL:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_CHAR:
+        TRAP();
+        break;  // NOLINT
+    case TYPE_SCHAR:
+        return (double)var.aschar;
+    case TYPE_SHORT:
+        return (double)var.ashort;
+    case TYPE_INT:
+        return (double)var.aint;
+    case TYPE_LONG:
+        check_integer_fits_in_double(var.along);
+        return (double)var.along;
+    case TYPE_LLONG:
+        check_integer_fits_in_double(var.allong);
+        return (double)var.allong;
+    case TYPE_UCHAR:
+        return (double)var.auchar;
+    case TYPE_USHORT:
+        return (double)var.aushort;
+    case TYPE_UINT:
+        return (double)var.auint;
+    case TYPE_ULONG:
+#if ULONG_MAX >= LLONG_MAX
+        if (var.aulong >= (ullong)LLONG_MAX) {
+            TRAP();
+        }
+#endif
+        check_integer_fits_in_double((llong)var.aulong);
+        return (double)var.aulong;
+    case TYPE_ULLONG:
+        if (var.aullong >= (ullong)LLONG_MAX) {
+            TRAP();
+        }
+        check_integer_fits_in_double((llong)var.aullong);
+        return (double)var.aullong;
+    case TYPE_FLOAT:
+        return (double)var.afloat;
+    case TYPE_DOUBLE:
+        return (double)var.adouble;
+    case TYPE_OTHER:
+    default:
+        TRAP();
+        break;  // NOLINT
+    }
+    return (double)0.0;
+}
+
 #if TESTING_generic
 int
 main(void) {
