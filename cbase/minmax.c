@@ -390,7 +390,7 @@ main(void) {
             exit(EXIT_FAILURE);
         } else {
             ASSERT_CONTAINS(command.result.stderr_output,
-                            strlen32(command.result.stderr_output),
+                            command.result.stderr_len,
                             "warning: conversion from"
                             " ‘llong’ {aka ‘long long int’}"
                             " to ‘int32’ {aka ‘int’}"
@@ -405,7 +405,7 @@ main(void) {
             exit(EXIT_FAILURE);
         } else {
             ASSERT_CONTAINS(command.result.stderr_output,
-                            strlen32(command.result.stderr_output),
+                            command.result.stderr_len,
                             " warning: implicit conversion"
                             " loses integer precision:"
                             " 'llong' (aka 'long long')"
