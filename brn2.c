@@ -730,7 +730,7 @@ brn2_threads(
     work.map = map;
 
     return parallel_for_max_threads_min_items(length, nthreads, 1,
-                                             brn2_parallel_work, &work);
+                                              brn2_parallel_work, &work);
 }
 
 #define SORT_BENCHMARK 0
