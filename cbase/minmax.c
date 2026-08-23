@@ -383,6 +383,7 @@ main(void) {
         COMMAND_PUSH(&command, "gcc", "-std=c11");
         COMMAND_PUSH(&command, "-Wall", "-Wextra", "-Wpedantic");
         COMMAND_PUSH(&command, "-Wconversion");
+        COMMAND_PUSH(&command, "-o", "/tmp/a.out");
 
         command_printf(&command, "%s", __FILE__);
         if (!command_run(&command,
