@@ -397,8 +397,8 @@ main(void) {
                             " to ‘int32’ {aka ‘int’}"
                             " may change value [-Wconversion]");
         }
-        command_argv0_set(&command, "clang");
 
+        command_argv0_set(&command, "clang");
         if (!command_run(&command,
                          COMMAND_CAPTURE_STDOUT|COMMAND_CAPTURE_STDERR)) {
             exit(EXIT_FAILURE);
