@@ -409,7 +409,7 @@ _Generic((VAR), \
     char (*)[N]: CAT(mem_literal_short_, N)
 
 #define MEM_LITERAL_SHORT(HAYSTACK, HAYSTACK_LEN, LITERAL) \
-_Generic(&(char [STRLIT_LEN(LITERAL)]){0}, \
+_Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
     MEM_LITERAL_SHORT_LENGTHS(MEM_LITERAL_SHORT_GENERIC_SLOT), \
     default: memmem64 \
 )(HAYSTACK, HAYSTACK_LEN, LITERAL, STRLIT_LEN(LITERAL))
