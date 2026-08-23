@@ -382,7 +382,7 @@ main(void) {
         int32 a = MIN(x, y);  // NOLINT
         (void)a;
     }
-    {
+    if (OS_LINUX) {
         Command command = {0};
 
         COMMAND_PUSH(&command, "gcc", "-std=c11");
