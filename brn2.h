@@ -7,11 +7,7 @@
 
 #include "cbase.h"
 
-#if OS_WINDOWS
-#define BRN2_MAX_THREADS 1
-#else
 #define BRN2_MAX_THREADS 64
-#endif
 
 #define BRN2_PATH_MAX 4096
 #define BRN2_ARENA_SIZE SIZEGB(1)
