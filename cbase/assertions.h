@@ -257,8 +257,8 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
     assert_not_contains(__FILE__, __LINE__, FUNC__,         \
                         HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
-#define ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, GLOB_LEN, EXPECTED) \
-do {                                                                         \
+#define ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, GLOB_LEN, EXPECTED)  \
+do {                                                                          \
     char *ASSERT_GLOB_STRING = (STRING);                                      \
     int32 ASSERT_GLOB_STRING_LEN = (STRING_LEN);                              \
     char *ASSERT_GLOB_GLOB = (GLOB);                                          \
