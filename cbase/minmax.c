@@ -374,7 +374,7 @@ main(void) {
     {
         int32 x = 0;
         uint32 y = 1;
-        int32 a = MIN(x, y);
+        int32 a = MIN(x, y);  // NOLINT
         (void)a;
     }
     {
