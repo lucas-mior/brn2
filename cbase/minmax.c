@@ -297,7 +297,7 @@ _Generic((VAR2),                                         \
 #define MINMAX_COMPARE_MSVC(MODE, VAR1, VAR2)             \
 _Generic((VAR1),                                         \
     int:    MINMAX_COMPARE_MSVC_TYPE(MODE, VAR1, VAR2, int), \
-    long:   MINMAX_COMPARE_MSVC_TYPE(MODE, VAR1, VAR2, long), \
+    llong:   MINMAX_COMPARE_MSVC_TYPE(MODE, VAR1, VAR2, llong), \
     default: MINMAX_COMPARE(MODE, VAR1, VAR2)              \
 )
 
