@@ -67,7 +67,7 @@ optional_strlen32(char *string) {
 #include "arena.h"
 
 #include "assertions.h"
-#include "generic.c"
+#include "generic.h"
 #include "minmax.c"
 
 #define UTF_INVALID 0xFFFD
