@@ -334,6 +334,9 @@ double_get(union Primitive var, enum Type type) {
 }
 
 #if TESTING_generic
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
 int
 main(void) {
     union Primitive primitive;
