@@ -254,6 +254,7 @@ CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
         #undef X
         #undef XENUM_ALIAS_ST_1
         #undef XENUM_ALIAS_ST_2
+
         case CAT(ENUM_PREFIX_, LAST):
             return QUOTE(ENUM_PREFIX_) "LAST";
         default:
