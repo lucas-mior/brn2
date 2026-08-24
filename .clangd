@@ -1,5 +1,7 @@
 Diagnostics:
   UnusedIncludes: None
-  Suppress: "pp_including_mainfile_in_preamble"
+  Suppress: 
+    - "pp_including_mainfile_in_preamble"
+    - "*nonfixed underlying type*"
 CompileFlags:
   Add: [-Wno-undefined-internal, -Wno-strict-prototypes, -Wno-documentation-unknown-command, -Wno-unused-function]
