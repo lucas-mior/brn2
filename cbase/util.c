@@ -52,7 +52,7 @@ here_impl(char *file, int32 line, char *func) {
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
-static int
+int
 fdtruncate64(int32 fd, int64 len) {
     off_t len_offt;
     if (len >= MAXOF(len_offt)) {

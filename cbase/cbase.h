@@ -34,6 +34,8 @@ void *memchr64(void *, int32, int64);
 void *memrchr64(void *, int32, int64);
 extern bool util_glob_match(char *, int32, char *, int32);
 
+int fdtruncate64(int32 fd, int64 len);
+
 INLINE int32
 strlen32(char *string) {
     size_t len;
