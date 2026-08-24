@@ -96,8 +96,6 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     fi
 fi
 
-CC=cc
-
 case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og"
