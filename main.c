@@ -471,6 +471,7 @@ main(int argc, char **argv) {
 #else
         while (true) {
             int32 status;
+            Command command = {0};
 
             if (lines_test == NULL) {
                 if (isatty(fileno(stdin))) {
@@ -489,31 +490,26 @@ main(int argc, char **argv) {
                     }
                 }
 
-                {
-                    Command command = {0};
-
-                    if (brn2_options_vim_split) {
-                        COMMAND_PUSH(
-                            &command,
-                            "vim",
-                            "-O",
-                            brn2_buffer_old.name,
-                            brn2_buffer.name,
-                            "-c",
-                            "wincmd h | set nomodifiable "
-                            "scrollbind cursorbind cursorline",
-                            "-c",
-                            "wincmd l | set scrollbind cursorbind",
-                            "-c",
-                            " | au QuitPre */brn2.* quitall"
-                        );
-                    } else {
-                        COMMAND_PUSH(&command, editor, brn2_buffer.name);
-                    }
-
-                    status = main_command_run(&command);
-                    command_free(&command);
+                if (brn2_options_vim_split) {
+                    COMMAND_PUSH(
+                        &command,
+                        "vim",
+                        "-O",
+                        brn2_buffer_old.name,
+                        brn2_buffer.name,
+                        "-c",
+                        "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
+                        "-c",
+                        "wincmd l | set scrollbind cursorbind",
+                        "-c",
+                        " | au QuitPre */brn2.* quitall"
+                    );
+                } else {
+                    COMMAND_PUSH(&command, editor, brn2_buffer.name);
                 }
+
+                status = main_command_run(&command);
+                command_free(&command);
 
                 if (status != 0) {
                     if (OS_WINDOWS) {
