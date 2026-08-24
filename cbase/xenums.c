@@ -273,7 +273,7 @@ CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
      || (BEGINS_WITH_4(name, strlen32(name), QUOTE(ENUM_PREFIX_),              \
                        strlen32(QUOTE(ENUM_PREFIX_)))                          \
          && XENUM_TOKEN_EQUALS(token, token_len,                               \
-                               name + strlen32(QUOTE(ENUM_PREFIX_)))))
+                               &(name)[strlen32(QUOTE(ENUM_PREFIX_))])))
 
 XENUMS_LINKAGE enum ENUM_NAME
 CAT(ENUM_PREFIX_, parse)(char *string) {
