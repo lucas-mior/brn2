@@ -109,14 +109,13 @@ _Static_assert((ENUM_UNDERLYING_TYPE)-1 > 0,
 // Passing multiple ENUM names for the same value will break compilation.
 enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
 #if ENUM_BITFLAGS == 0
-    #define XENUM_DEF_1(e)        e,
-    #define XENUM_DEF_2(e, alias) e,
+    #define XENUM_1(e)        e,
+    #define XENUM_2(e, alias) e,
 #else
-    #define XENUM_DEF_1(e)                                                     \
-        e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_IDX),
-    #define XENUM_DEF_2(e, v) e = v,
+    #define XENUM_1(e)        e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_IDX),
+    #define XENUM_2(e, v) e = v,
 #endif
-    #define X(...)            SELECT_ON_NUM_ARGS(XENUM_DEF_, __VA_ARGS__)
+    #define X(...)            SELECT_ON_NUM_ARGS(XENUM_, __VA_ARGS__)
 
 #if ENUM_BITFLAGS
     CAT(ENUM_PREFIX_, NONE) = 0,
@@ -124,8 +123,8 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
     ENUM_FIELDS
 
     #undef X
-    #undef XENUM_DEF_1
-    #undef XENUM_DEF_2
+    #undef XENUM_1
+    #undef XENUM_2
     CAT(ENUM_PREFIX_, LAST)
 };
 #endif
