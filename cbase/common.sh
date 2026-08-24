@@ -40,7 +40,6 @@ alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 common_get_compiler() {
-    echo "common_get_compiler. CC=$CC"
     case "$1" in
     debug|test)
         CC="${CC:-tcc}"
@@ -72,11 +71,7 @@ common_get_compiler() {
                 CC="gcc"
             fi
         fi
-        
-        echo "common_get_compiler. CC=$CC"
     fi
-    echo "common_get_compiler. CC=$CC"
-    exit
 
     echo "$CC"
 }

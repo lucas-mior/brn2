@@ -31,10 +31,7 @@ exe="bin/$project"
 mkdir -p "$(dirname "$exe")"
 
 OS=$(uname -a)
-echo "before common_get_compiler CC=$CC"
 CC=$(common_get_compiler "$mode")
-echo "after common_get_compiler CC=$CC"
-exit 1
 
 is_msvc=0
 is_clang_cl=0
@@ -78,8 +75,6 @@ CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
 if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
-    echo "this works CC=$CC"
-    exit 1
     CFLAGS="$CFLAGS -Weverything"
     CFLAGS="$CFLAGS -Wno-assign-enum"
     CFLAGS="$CFLAGS -Wno-c++-keyword"
@@ -96,9 +91,6 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-unused-macros"
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
-else
-    echo "this not works CC=$CC"
-    exit 1
 fi
 
 case "$mode" in
