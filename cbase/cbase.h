@@ -507,11 +507,9 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
     X(COMMAND_STDIN_TTY)           \
     X(COMMAND_CLOSE_STDIN)
 #define XENUMS_DECLARE_ONLY 1
-#define XENUMS_LINKAGE extern
 #define XENUMS_NO_TESTS 1
 #include "xenums.c"
 #undef XENUMS_NO_TESTS
-#undef XENUMS_LINKAGE
 
 typedef struct CommandResult {
     int64 pid;
@@ -741,11 +739,9 @@ void throw_away_function();
     X(COMMAND_STDIN_TTY)           \
     X(COMMAND_CLOSE_STDIN)
 #define XENUMS_FUNCTIONS_ONLY 1
-#define XENUMS_LINKAGE 
 #define XENUMS_NO_TESTS 1
 #include "xenums.c"
 #undef XENUMS_NO_TESTS
-#undef XENUMS_LINKAGE
 
 #include "command.c"
 #include "cbase.h"

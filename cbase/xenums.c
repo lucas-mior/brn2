@@ -70,10 +70,6 @@
 #define XENUMS_FUNCTIONS_ONLY 0
 #endif
 
-#if !defined(XENUMS_LINKAGE)
-#define XENUMS_LINKAGE static
-#endif
-
 #if XENUMS_FUNCTIONS_ONLY == 0
 #if ENUM_BITFLAGS
 enum CAT(ENUM_NAME, _BitIndices) ENUM_UNDERLYING_TYPE_SPEC {
@@ -129,14 +125,14 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
 };
 #endif
 
-XENUMS_LINKAGE void CAT(ENUM_PREFIX_, str_free)(char *);
-XENUMS_LINKAGE char *CAT(ENUM_PREFIX_, str)(enum ENUM_NAME);
-XENUMS_LINKAGE void CAT(ENUM_PREFIX_, alias_free)(char *);
-XENUMS_LINKAGE char *CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME);
-XENUMS_LINKAGE enum ENUM_NAME CAT(ENUM_PREFIX_, parse)(char *);
+void CAT(ENUM_PREFIX_, str_free)(char *);
+char *CAT(ENUM_PREFIX_, str)(enum ENUM_NAME);
+void CAT(ENUM_PREFIX_, alias_free)(char *);
+char *CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME);
+enum ENUM_NAME CAT(ENUM_PREFIX_, parse)(char *);
 
 #if XENUMS_DECLARE_ONLY == 0
-XENUMS_LINKAGE void
+void
 CAT(ENUM_PREFIX_, str_free)(char *str) {
     (void)str;
 #if ENUM_BITFLAGS
@@ -145,13 +141,13 @@ CAT(ENUM_PREFIX_, str_free)(char *str) {
     return;
 }
 
-XENUMS_LINKAGE void
+void
 CAT(ENUM_PREFIX_, alias_free)(char *str) {
     CAT(ENUM_PREFIX_, str_free)(str);
     return;
 }
 
-XENUMS_LINKAGE char *
+char *
 CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
     switch (val) {
@@ -238,7 +234,7 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #endif
 }
 
-XENUMS_LINKAGE char *
+char *
 CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
     switch (val) {
@@ -275,7 +271,7 @@ CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
          && XENUM_TOKEN_EQUALS(token, token_len,                               \
                                &(name)[strlen32(QUOTE(ENUM_PREFIX_))])))
 
-XENUMS_LINKAGE enum ENUM_NAME
+enum ENUM_NAME
 CAT(ENUM_PREFIX_, parse)(char *string) {
     ENUM_UNDERLYING_TYPE result = 0;
     char *p = string;
@@ -391,7 +387,6 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 
 #undef XENUMS_DECLARE_ONLY
 #undef XENUMS_FUNCTIONS_ONLY
-#undef XENUMS_LINKAGE
 
 #undef ENUM_NAME
 #undef ENUM_PREFIX_
