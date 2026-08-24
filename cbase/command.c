@@ -131,6 +131,7 @@ command_result_append(
 #if OS_WINDOWS
 typedef struct CommandWindowsCaptureFile {
     HANDLE handle;
+    uint32 padding;
     char path[PATH_MAX];
 } CommandWindowsCaptureFile;
 
@@ -346,6 +347,7 @@ command_windows_command_line(
     for (int32 i = 0; i < command->argc; i += 1) {
         char *argument;
         int32 argument_len;
+        bool needs_quotes;
 
         if (i == 0) {
             argument = command_windows_argv0(command,
@@ -356,7 +358,7 @@ command_windows_command_line(
             argument_len = command->argvs_lens[i];
         }
 
-        bool needs_quotes = argument_len == 0;
+        needs_quotes = argument_len == 0;
 
         for (int32 k = 0; k < argument_len; k += 1) {
             if ((argument[k] == ' ') || (argument[k] == '\t')) {

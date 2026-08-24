@@ -431,7 +431,7 @@ xclose(char *file, int line, int *fd, char *fd_var_name, char *filename) {
         char itoa_buffer[32];
         ITOA(itoa_buffer, line);
 
-        strerror_r(errno, error_buffer, sizeof(error_buffer));
+        (void)strerror_r(errno, error_buffer, sizeof(error_buffer));
 
         error_async_safe(file);
         error_async_safe(":");
