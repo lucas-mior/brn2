@@ -38,20 +38,18 @@ here_impl(char *file, int32 line, char *func) {
     return;
 }
 
-#define CLAMP_LINKAGE 
 #define CLAMP_TYPE double
 #include "clamp.h"
 
-#define CLAMP_LINKAGE 
 #define CLAMP_TYPE int64
 #include "clamp.h"
 
-#define CLAMP_LINKAGE 
 #define CLAMP_TYPE int32
 #include "clamp.h"
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
+#if OS_UNIX
 int
 fdtruncate64(int32 fd, int64 len) {
     off_t len_offt;
@@ -62,6 +60,7 @@ fdtruncate64(int32 fd, int64 len) {
     len_offt = (off_t)len;
     return ftruncate(fd, len_offt);
 }
+#endif
 
 #if !CBASE_HAS_SYSTEM_MEMMEM
 static void *
