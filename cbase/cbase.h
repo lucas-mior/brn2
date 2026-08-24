@@ -330,8 +330,10 @@ void xpthread_create(
 void xpthread_join(pthread_t *, void **);
 void xpthread_mutex_destroy(pthread_mutex_t *);
 void xpthread_mutex_init(pthread_mutex_t *, pthread_mutexattr_t *);
-void xpthread_mutex_lock(pthread_mutex_t *);
-void xpthread_mutex_unlock(pthread_mutex_t *);
+void xpthread_mutex_lock(pthread_mutex_t *mutex)
+    ATTR_EXCLUSIVE_LOCK(*mutex);
+void xpthread_mutex_unlock(pthread_mutex_t *mutex)
+    ATTR_UNLOCK(*mutex);
 #endif
 extern int xunlink(char *);
 extern bool xregular_file_exists(char *);

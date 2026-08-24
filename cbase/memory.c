@@ -39,13 +39,15 @@ static struct Hash_alloc_map *allocations = NULL;
 static pthread_mutex_t allocations_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void
-allocations_lock(void) {
+allocations_lock(void)
+    ATTR_NO_THREAD_SAFETY_ANALYSIS {
     xpthread_mutex_lock(&allocations_mutex);
     return;
 }
 
 static void
-allocations_unlock(void) {
+allocations_unlock(void)
+    ATTR_NO_THREAD_SAFETY_ANALYSIS {
     xpthread_mutex_unlock(&allocations_mutex);
     return;
 }
