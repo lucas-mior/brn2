@@ -339,7 +339,11 @@ main(void) {
         llong max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, a);
-    } {
+    }
+
+    MSVC_WARNING_PUSH()
+    MSVC_WARNING_DISABLE(4018)
+    {
         int a = 1;
         uint b = 2;
         llong min = MIN(a, b);
@@ -367,7 +371,10 @@ main(void) {
         llong max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
-    } {
+    }
+    MSVC_WARNING_POP()
+
+    {
         llong a = -1;
         llong min = MIN(a, 0);
         llong max = MAX(a, 0);
