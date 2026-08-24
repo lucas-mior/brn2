@@ -644,6 +644,9 @@ common_gcc_flags_to_msvc() {
             -Wextra|-Wpedantic)
                 continue
                 ;;
+            -Werror)
+                flag="/WX"
+                ;;
             -Wfatal-errors|-Wno-*|-W*)
                 case "$compiler" in
                 clang-cl) flag="/clang:$flag" ;;
