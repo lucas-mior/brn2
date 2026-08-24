@@ -91,9 +91,7 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
     CFLAGS="$CFLAGS -Wno-unused-macros"
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
-    if echo "$CFLAGS" | grep -- "-Werror"; then
-        CFLAGS="$CFLAGS -Wno-unknown-warning-option"
-    fi
+    CFLAGS="$CFLAGS -Wno-error=unknown-warning-option"
 fi
 
 case "$mode" in
