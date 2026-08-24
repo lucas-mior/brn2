@@ -600,29 +600,29 @@ _Generic((VAR1),                                                               \
 )
 
 #if CC_GCC || CC_CLANG
-#define ASSERT_CLOSE_2(VAR1, VAR2)                                             \
-    ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(close, VAR1, VAR2)
-
-#define ASSERT_CLOSE_3(VAR1, VAR2, TOL)                                        \
-    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(close_tol, VAR1, VAR2, TOL)
-
-#define ASSERT_NOT_CLOSE_2(VAR1, VAR2)                                         \
-    ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(not_close, VAR1, VAR2)
-
-#define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL)                                    \
-    ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(not_close_tol, VAR1, VAR2, TOL)
+    #define ASSERT_CLOSE_2(VAR1, VAR2)                                         \
+        ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(close, VAR1, VAR2)
+    
+    #define ASSERT_CLOSE_3(VAR1, VAR2, TOL)                                    \
+        ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(close_tol, VAR1, VAR2, TOL)
+    
+    #define ASSERT_NOT_CLOSE_2(VAR1, VAR2)                                     \
+        ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(not_close, VAR1, VAR2)
+    
+    #define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL)                                \
+        ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(not_close_tol, VAR1, VAR2, TOL)
 #else
-#define ASSERT_CLOSE_2(VAR1, VAR2)                                             \
-    ASSERT_DOUBLE_CLOSE_ULPS(close, VAR1, VAR2)
-
-#define ASSERT_CLOSE_3(VAR1, VAR2, TOL)                                        \
-    ASSERT_DOUBLE_CLOSE_TOL(close_tol, VAR1, VAR2, TOL)
-
-#define ASSERT_NOT_CLOSE_2(VAR1, VAR2)                                         \
-    ASSERT_DOUBLE_CLOSE_ULPS(not_close, VAR1, VAR2)
-
-#define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL)                                    \
-    ASSERT_DOUBLE_CLOSE_TOL(not_close_tol, VAR1, VAR2, TOL)
+    #define ASSERT_CLOSE_2(VAR1, VAR2)                                         \
+        ASSERT_DOUBLE_CLOSE_ULPS(close, VAR1, VAR2)
+    
+    #define ASSERT_CLOSE_3(VAR1, VAR2, TOL)                                    \
+        ASSERT_DOUBLE_CLOSE_TOL(close_tol, VAR1, VAR2, TOL)
+    
+    #define ASSERT_NOT_CLOSE_2(VAR1, VAR2)                                     \
+        ASSERT_DOUBLE_CLOSE_ULPS(not_close, VAR1, VAR2)
+    
+    #define ASSERT_NOT_CLOSE_3(VAR1, VAR2, TOL)                                \
+        ASSERT_DOUBLE_CLOSE_TOL(not_close_tol, VAR1, VAR2, TOL)
 #endif
 
 #define ASSERT_CLOSE(...)     SELECT_ON_NUM_ARGS(ASSERT_CLOSE_, __VA_ARGS__)
