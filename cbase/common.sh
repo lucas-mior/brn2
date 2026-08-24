@@ -40,6 +40,7 @@ alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 common_get_compiler() {
+    echo "common_get_compiler. CC=$CC"
     case "$1" in
     debug|test)
         CC="${CC:-tcc}"
@@ -61,8 +62,12 @@ common_get_compiler() {
     fi
 
     if [ "$CC" = "cc" ]; then
+        echo "common_get_compiler. CC==cc"
         CC=$(basename "$(readlink -f "$(command -v cc)")")
+        echo "common_get_compiler. CC=$CC"
     fi
+    echo "common_get_compiler. CC=$CC"
+    exit
 
     echo "$CC"
 }
