@@ -348,20 +348,20 @@ main(void) {
         ASSERT_EQUAL(max, b);
     } {
         llong a = -1;
-        ulong b = 0;
+        ullong b = 0;
         double min = (double)MIN(a, b);
         double max = (double)MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     } {
         llong a = MINOF(a);
-        ulong b = MAXOF(a);
+        ullong b = MAXOF(a);
         double min = (double)MIN(a, b);
         ullong max = (ullong)MAX(a, b);
         ASSERT_EQUAL((llong)min, a);
         ASSERT_EQUAL(max, b);
     } {
-        ulong a = MINOF(a);
+        ullong a = MINOF(a);
         llong b = MAXOF(b);
         llong min = MIN(a, b);
         llong max = MAX(a, b);
