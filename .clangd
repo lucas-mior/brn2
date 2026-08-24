@@ -3,4 +3,4 @@ Diagnostics:
   Suppress: 
     - "pp_including_mainfile_in_preamble"
 CompileFlags:
-  Add: [-Wno-undefined-internal, -Wno-strict-prototypes, -Wno-documentation-unknown-command, -Wno-unused-function, -Wno-elaborated-enum-base, -fms-extensions, -Wno-microsoft-fixed-enum, -Wno-microsoft-enum-forward-reference]
+  Add: [-Wno-undefined-internal, -Wno-strict-prototypes, -Wno-documentation-unknown-command, -Wno-unused-function, -Wno-elaborated-enum-base, -Wno-microsoft-fixed-enum, -Wno-microsoft-enum-forward-reference]
