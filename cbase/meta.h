@@ -19,21 +19,21 @@
     X(TOKEN_PREPROC)
 
 #if defined(CBASE_H)
-#define ENUM_NAME TokenKind
-#define ENUM_BITFLAGS 0
-#define ENUM_PREFIX_ TOKEN_
-#define ENUM_FIELDS TOKEN_KIND_FIELDS
-#define XENUMS_DECLARE_ONLY 1
-#define XENUMS_NO_TESTS 1
-#include "xenums.c"
-#undef XENUMS_NO_TESTS
+  #define ENUM_NAME TokenKind
+  #define ENUM_BITFLAGS 0
+  #define ENUM_PREFIX_ TOKEN_
+  #define ENUM_FIELDS TOKEN_KIND_FIELDS
+  #define XENUMS_DECLARE_ONLY 1
+  #define XENUMS_NO_TESTS 1
+  #include "xenums.c"
+  #undef XENUMS_NO_TESTS
 #else
-enum TokenKind {
-    #define X(E) E,
-    TOKEN_KIND_FIELDS
-    #undef X
-    TOKEN_LAST,
-};
+  enum TokenKind {
+      #define X(E) E,
+      TOKEN_KIND_FIELDS
+      #undef X
+      TOKEN_LAST,
+  };
 #endif
 
 enum TokenizeFlags {
