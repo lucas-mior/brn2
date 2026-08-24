@@ -113,7 +113,7 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
     #define XENUM_2(e, alias) e,
 #else
     #define XENUM_1(e)        e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_IDX),
-    #define XENUM_2(e, v) e = v,
+    #define XENUM_2(e, v)     e = v,
 #endif
     #define X(...)            SELECT_ON_NUM_ARGS(XENUM_, __VA_ARGS__)
 
