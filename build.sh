@@ -94,6 +94,9 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
     CFLAGS="$CFLAGS -Wno-error=unknown-warning-option"
 fi
+if [ "$is_clang_cl" -eq 1 ]; then
+    CFLAGS="$CFLAGS -Wno-error=unknown-warning-option"
+fi
 
 case "$mode" in
 debug)
