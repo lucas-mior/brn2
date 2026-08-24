@@ -2,13 +2,7 @@
 // Copyright (c) 2022 Patel, Nimai <nimai.m.patel@gmail.com>
 // Copyright (c) 2026 Mior, Lucas
 
-#ifndef BRN2_FULL_UNITY_BUILD
-#define BRN2_FULL_UNITY_BUILD 1
-#endif
-
-#if BRN2_FULL_UNITY_BUILD
 #define CBASE_IMPLEMENT
-#endif
 #include "cbase.h"
 
 #include "brn2.h"
