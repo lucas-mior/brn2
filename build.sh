@@ -31,7 +31,10 @@ exe="bin/$project"
 mkdir -p "$(dirname "$exe")"
 
 OS=$(uname -a)
+echo "before common_get_compiler CC=$CC"
 CC=$(common_get_compiler "$mode")
+echo "after common_get_compiler CC=$CC"
+exit 1
 
 is_msvc=0
 is_clang_cl=0
