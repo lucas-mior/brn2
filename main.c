@@ -517,16 +517,16 @@ main(int argc, char **argv) {
 
                 if (status != 0) {
                     if (OS_WINDOWS) {
-                        Command command = {0};
+                        Command command_windows = {0};
 
-                        COMMAND_PUSH(&command,
+                        COMMAND_PUSH(&command_windows,
                                      "Notepad.exe",
                                      brn2_buffer.name);
-                        if (main_command_run(&command) < 0) {
-                            command_free(&command);
+                        if (main_command_run(&command_windows) < 0) {
+                            command_free(&command_windows);
                             fatal(EXIT_FAILURE);
                         }
-                        command_free(&command);
+                        command_free(&command_windows);
                     } else {
                         fatal(EXIT_FAILURE);
                     }
