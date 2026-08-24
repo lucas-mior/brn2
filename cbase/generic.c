@@ -499,12 +499,18 @@ main(void) {
         s = S_(c);
         ASSERT_EQUAL(s, "1");
 
-        ASSERT_EQUAL(S_((uint)42), "42");
-        ASSERT_EQUAL(S_((long)-42), "-42");
-        ASSERT_EQUAL(S_((ullong)42), "42");
-        ASSERT_EQUAL(S_(true), "1");
-        ASSERT_EQUAL(S_(false), "0");
-        ASSERT_EQUAL(SF("0x%02x", 10), "0x0a");
+        s = S_((uint)42);
+        ASSERT_EQUAL(s, "42");
+        s = S_((long)-42);
+        ASSERT_EQUAL(s, "-42");
+        s = S_((ullong)42);
+        ASSERT_EQUAL(s, "42");
+        s = S_(true);
+        ASSERT_EQUAL(s, "1");
+        s = S_(false);
+        ASSERT_EQUAL(s, "0");
+        s = SF("0x%02x", 10);
+        ASSERT_EQUAL(s, "0x0a");
 
         n = snprint(buf, SIZEOF(buf),
                     "Now you can insert var" V(a) V(b) "s in situ:\n"
