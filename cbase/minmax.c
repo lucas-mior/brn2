@@ -400,12 +400,14 @@ main(void) {
     // when using MIN with integers of different signedness.
     // This block only is compiled from the self-compiling block below,
     // so that normal compilation (TESTING=1) does not give warnings
+#if !CC_MSVC
     if (!TESTING) {
         int32 x = 0;
         uint32 y = 1;
         int32 a = MIN(x, y);  // NOLINT
         (void)a;
     }
+#endif
     if (OS_LINUX) {
         Command command = {0};
 
