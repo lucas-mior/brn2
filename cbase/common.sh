@@ -64,6 +64,15 @@ common_get_compiler() {
     if [ "$CC" = "cc" ]; then
         echo "common_get_compiler. CC==cc"
         CC=$(basename "$(realpath "$(command -v cc)")")
+        
+        if [ "$CC" = "cc" ]; then
+            if cc --version 2>&1 | grep -qi "clang"; then
+                CC="clang"
+            elif cc --version 2>&1 | grep -qi "gcc"; then
+                CC="gcc"
+            fi
+        fi
+        
         echo "common_get_compiler. CC=$CC"
     fi
     echo "common_get_compiler. CC=$CC"
