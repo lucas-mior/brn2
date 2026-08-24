@@ -61,7 +61,7 @@ common_get_compiler() {
     fi
 
     if [ "$CC" = "cc" ]; then
-        CC=$(basename "$(readlink -f "$(which cc)")")
+        CC=$(basename "$(readlink -f "$(command -v cc)")")
     fi
 
     echo "$CC"
