@@ -1237,7 +1237,7 @@ main(int argc, char **argv) {
     ASSERT_EQUAL(rad2deg(3.141592653589793), 180.0);
     ASSERT_POSITIVE(util_nthreads());
 
-    ASSERT_EQUAL(CLAMP(0.0, -0.1, 0.1),   0.0);
+    ASSERT_EQUAL(CLAMP(2.0, -2.1, 2.1),   2.0);
     ASSERT_EQUAL(CLAMP(0.2, -0.1, 0.1),   0.1);
     ASSERT_EQUAL(CLAMP(-0.2, -0.1, 0.1), -0.1);
 
