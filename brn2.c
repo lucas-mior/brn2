@@ -332,7 +332,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
 
 cleanup:
     munmap(map, (size_t)map_size);
-    if (ftruncate(fd, map_size - padding) < 0) {
+    if (ftruncate64(fd, map_size - padding) < 0) {
         error("Error in ftruncate(%s, %lld): %s.\n",
               filename, map_size - padding, strerror(errno));
         fatal(EXIT_FAILURE);

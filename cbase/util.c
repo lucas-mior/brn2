@@ -52,6 +52,17 @@ here_impl(char *file, int32 line, char *func) {
 
 static char *notifiers[2] = {"dunstify", "notify-send"};
 
+static int
+ftruncate64(int32 fd, int64 len) {
+    off_t len_offt;
+    if (len >= MAXOF(len_offt)) {
+        error("ftruncate with length bigger than off_t supports.\n");
+        fatal(EXIT_FAILURE);
+    }
+    len_offt = (off_t)len;
+    return ftruncate(fd, len_offt);
+}
+
 #if !CBASE_HAS_SYSTEM_MEMMEM
 static void *
 cbase_memmem_fallback(void *haystack, size_t haystack_len,
