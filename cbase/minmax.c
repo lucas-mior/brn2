@@ -323,10 +323,10 @@ main(void) {
         ASSERT_EQUAL(max, y);
     }
     {
-        long min01 = MIN(0, 1);
-        long min11 = MIN(1, 1);
-        long max11 = MAX(1, 1);
-        long max01 = MAX(0, 1);
+        llong min01 = MIN(0, 1);
+        llong min11 = MIN(1, 1);
+        llong max11 = MAX(1, 1);
+        llong max01 = MAX(0, 1);
 
         ASSERT_ZERO(min01);
         ASSERT_EQUAL(min11, 1);
@@ -335,42 +335,42 @@ main(void) {
     } {
         int a = 1;
         int b = 1;
-        long min = MIN(a, b);
-        long max = MAX(a, b);
+        llong min = MIN(a, b);
+        llong max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, a);
     } {
         int a = 1;
         uint b = 2;
-        long min = MIN(a, b);
-        long max = MAX(a, b);
+        llong min = MIN(a, b);
+        llong max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     } {
-        long a = -1;
+        llong a = -1;
         ulong b = 0;
         double min = (double)MIN(a, b);
         double max = (double)MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     } {
-        long a = MINOF(a);
+        llong a = MINOF(a);
         ulong b = MAXOF(a);
         double min = (double)MIN(a, b);
         ullong max = (ullong)MAX(a, b);
-        ASSERT_EQUAL((long)min, a);
+        ASSERT_EQUAL((llong)min, a);
         ASSERT_EQUAL(max, b);
     } {
         ulong a = MINOF(a);
-        long b = MAXOF(b);
-        long min = MIN(a, b);
-        long max = MAX(a, b);
+        llong b = MAXOF(b);
+        llong min = MIN(a, b);
+        llong max = MAX(a, b);
         ASSERT_EQUAL(min, a);
         ASSERT_EQUAL(max, b);
     } {
-        long a = -1;
-        long min = MIN(a, 0);
-        long max = MAX(a, 0);
+        llong a = -1;
+        llong min = MIN(a, 0);
+        llong max = MAX(a, 0);
         ASSERT_EQUAL(min, -1);
         ASSERT_ZERO(max);
     } {
