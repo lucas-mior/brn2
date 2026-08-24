@@ -58,6 +58,9 @@ common_get_compiler() {
     executable=$(echo "$CC" | awk '{print $1}')
     if ! command -v "$executable" > /dev/null 2>&1; then
         CC=cc
+    fi
+
+    if [ "$CC" = "cc" ]; then
         CC=$(basename "$(readlink -f "$(which cc)")")
     fi
 
