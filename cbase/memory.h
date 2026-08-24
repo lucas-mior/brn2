@@ -39,16 +39,16 @@
 #define DEBUGGING_MEMORY DEBUGGING
 #endif
 
-extern void free2_(void *, int64);
-extern void free_debug(char *, int32, char *, void *, int64);
-extern void *malloc_debug(char *, int32, char *, int64, bool);
-extern void memcpy64(void *, void *, int64);
-extern void memmove64(void *, void *, int64);
-extern void memory_check(void);
-extern void memset64(void *, int, int64);
-extern void *realloc4(void *, int64, int64, int64);
-extern void *realloc_debug(char *, int32, char *, void *, int64, int64, int64);
-extern void *realloc_flex_debug(
+void free2_(void *, int64);
+void free_debug(char *, int32, char *, void *, int64);
+void *malloc_debug(char *, int32, char *, int64, bool);
+void memcpy64(void *, void *, int64);
+void memmove64(void *, void *, int64);
+void memory_check(void);
+void memset64(void *, int, int64);
+void *realloc4(void *, int64, int64, int64);
+void *realloc_debug(char *, int32, char *, void *, int64, int64, int64);
+void *realloc_flex_debug(
     char *,
     int32,
     char *,
@@ -58,13 +58,13 @@ extern void *realloc_flex_debug(
     int64,
     int64
 );
-extern void *xmalloc(int64, bool);
-extern void *xmemdup(void *, int64);
-extern void *xmmap_commit(int64 *);
-extern void xmunmap(void *, int64);
-extern void *xrealloc(void *, int64);
-extern char *xstrdup(char *);
-extern char *xstrndup(char *, int64);
+void *xmalloc(int64, bool);
+void *xmemdup(void *, int64);
+void *xmmap_commit(int64 *);
+void xmunmap(void *, int64);
+void *xrealloc(void *, int64);
+char *xstrdup(char *);
+char *xstrndup(char *, int64);
 
 #if DEBUGGING_MEMORY
 #define malloc2_zero(SIZE) \
