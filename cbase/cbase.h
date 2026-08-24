@@ -451,12 +451,10 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
 #define XCLOSE_2(FD, NAME) xclose(__FILE__, __LINE__, FD, #FD, NAME)
 #define XCLOSE(...) SELECT_ON_NUM_ARGS(XCLOSE_, __VA_ARGS__)
 
-#define XFOPEN(FILENAME, MODE)                                                 \
+#define XFOPEN(FILENAME, MODE) \
     xfopen(__FILE__, __LINE__, FUNC__, FILENAME, MODE)
-#define XFCLOSE(F, FILENAME) do {                                              \
-    int XFCLOSE = xfclose(__FILE__, __LINE__, FUNC__, F, FILENAME)             \
-    (void)XFCLOSE;                                                             \
-} while (0)
+#define XFCLOSE(F, FILENAME) \
+    xfclose(__FILE__, __LINE__, FUNC__, F, FILENAME)
 
 #define SB_APPEND_2(BUILDER, STRING) \
     sb_append(BUILDER, STRING, strlen32(STRING))
