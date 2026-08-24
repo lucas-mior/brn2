@@ -728,6 +728,7 @@ void throw_away_function();
 #define ENUM_NAME CommandFlag
 #define ENUM_BITFLAGS 1
 #define ENUM_PREFIX_ COMMAND_
+#define ENUM_UNDERLYING_TYPE uint32
 #define ENUM_FIELDS \
     X(COMMAND_CAPTURE_STDOUT)      \
     X(COMMAND_CAPTURE_STDERR)      \
