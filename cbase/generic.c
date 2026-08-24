@@ -406,6 +406,9 @@ main(void) {
                  typename(TYPEID(primitive.afloat)));
     ASSERT_EQUAL(TYPENAME(primitive.adouble),
                  typename(TYPEID(primitive.adouble)));
+#if CC_MSVC
+    (void)primitive;
+#endif
 
     {
         int32 var_int32;
