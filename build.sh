@@ -78,6 +78,7 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Weverything"
     CFLAGS="$CFLAGS -Wno-assign-enum"
     CFLAGS="$CFLAGS -Wno-c++-keyword"
+    CFLAGS="$CFLAGS -Wno-c++98-compat"
     CFLAGS="$CFLAGS -Wno-cast-qual"
     CFLAGS="$CFLAGS -Wno-char-subscripts"
     CFLAGS="$CFLAGS -Wno-constant-logical-operand"
