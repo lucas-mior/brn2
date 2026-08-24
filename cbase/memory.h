@@ -39,29 +39,33 @@
 #define DEBUGGING_MEMORY DEBUGGING
 #endif
 
-void memcpy64(void *, void *, int64);
-void memmove64(void *, void *, int64);
-void memset64(void *, int, int64);
+void memcpy64(void *dest, void *source, int64 n);
+void memmove64(void *dest, void *source, int64 n);
+void memset64(void *buffer, int value, int64 size);
 
 void memory_check(void);
-void free2_(void *, int64);
-void free_debug(char *, int32, char *,
-                void *, int64);
-void *malloc_debug(char *, int32, char *,
-                   int64, bool);
-void *realloc4(void *, int64, int64, int64);
-void *realloc_debug(char *, int32, char *,
-                    void *, int64, int64, int64);
-void *realloc_flex_debug(char *, int32, char *,
-                         void *, int64, int64, int64, int64);
+void free2_(void *pointer, int64 size);
+void free_debug(char *file, int32 line, char *func,
+                void *pointer, int64 size);
+void *malloc_debug(char *file, int32 line, char *func,
+                   int64 size, bool zero);
+void *realloc4(void *old,
+               int64 old_capacity, int64 new_capacity, int64 obj_size);
+void *realloc_debug(char *file, int32 line, char *func,
+                    void *old, int64 old_capacity, int64 new_capacity,
+                    int64 obj_size);
+void *realloc_flex_debug(char *file, int32 line, char *func,
+                         void *old, int64 struct_size,
+                         int64 old_capacity, int64 new_capacity,
+                         int64 obj_size);
 
-void *xmalloc(int64, bool);
-void *xmemdup(void *, int64);
-void *xmmap_commit(int64 *);
-void xmunmap(void *, int64);
-void *xrealloc(void *, int64);
-char *xstrdup(char *);
-char *xstrndup(char *, int64);
+void *xmalloc(int64 size, bool zero);
+void *xmemdup(void *source, int64 size);
+void *xmmap_commit(int64 *size);
+void xmunmap(void *p, int64 size);
+void *xrealloc(void *old, int64 new_size);
+char *xstrdup(char *string);
+char *xstrndup(char *s, int64 n);
 
 #if DEBUGGING_MEMORY
 #define malloc2_zero(SIZE)                                                     \
