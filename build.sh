@@ -75,7 +75,7 @@ CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
 if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
-    echo "this works"
+    echo "this works CC=$CC"
     exit 1
     CFLAGS="$CFLAGS -Weverything"
     CFLAGS="$CFLAGS -Wno-assign-enum"
@@ -94,7 +94,7 @@ if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
     CFLAGS="$CFLAGS -Wno-unused-macros"
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 else
-    echo "this not works"
+    echo "this not works CC=$CC"
     exit 1
 fi
 
