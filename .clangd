@@ -2,5 +2,6 @@ Diagnostics:
   UnusedIncludes: None
   Suppress: 
     - "pp_including_mainfile_in_preamble"
+    - "err_enum_redeclare_fixed_mismatch"
 CompileFlags:
   Add: [-Wno-undefined-internal, -Wno-strict-prototypes, -Wno-documentation-unknown-command, -Wno-unused-function, -Wno-elaborated-enum-base, -Wno-microsoft-fixed-enum, -Wno-microsoft-enum-forward-reference]
