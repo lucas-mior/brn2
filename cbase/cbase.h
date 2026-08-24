@@ -149,7 +149,7 @@ void normalize(char *restrict, int32 *restrict);
 extern bool parse_option(char **, char *, char *);
 extern char *path_basename(char *, int32);
 void print_timings(char *, int32, char *, int64,
-                          struct timespec, struct timespec);
+                   struct timespec, struct timespec);
 void qsort64(void *, int64, int64, int (*)(void *, void *));
 void rand_int_seed(uint64);
 extern int32 rand_int(void);
