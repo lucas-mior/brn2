@@ -477,6 +477,7 @@ main(void) {
     }
 
     {
+        char *s;
         char a = 'i';
         char *b = "able";
         int c = 1;
@@ -490,9 +491,14 @@ main(void) {
         FILE *fp;
         int n;
 
-        ASSERT_EQUAL(S_(a), "i");
-        ASSERT_EQUAL(S_(b), "able");
-        ASSERT_EQUAL(S_(c), "1");
+
+        s = S_(a);
+        ASSERT_EQUAL(s, "i");
+        s = S_(b);
+        ASSERT_EQUAL(s, "able");
+        s = S_(c);
+        ASSERT_EQUAL(s, "1");
+
         ASSERT_EQUAL(S_((uint)42), "42");
         ASSERT_EQUAL(S_((long)-42), "-42");
         ASSERT_EQUAL(S_((ullong)42), "42");
