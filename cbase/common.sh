@@ -61,7 +61,6 @@ common_get_compiler() {
     fi
 
     if [ "$CC" = "cc" ]; then
-        echo "common_get_compiler. CC==cc"
         CC=$(basename "$(realpath "$(command -v cc)")")
         
         if [ "$CC" = "cc" ]; then
