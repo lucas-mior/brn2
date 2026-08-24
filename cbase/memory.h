@@ -64,24 +64,24 @@ char *xstrdup(char *);
 char *xstrndup(char *, int64);
 
 #if DEBUGGING_MEMORY
-#define malloc2_zero(SIZE) \
+#define malloc2_zero(SIZE)                                                     \
     malloc_debug(__FILE__, __LINE__, FUNC, SIZE, true)
-#define malloc2(SIZE) \
+#define malloc2(SIZE)                                                          \
     malloc_debug(__FILE__, __LINE__, FUNC, SIZE, false)
-#define realloc2(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE) \
-    realloc_debug(__FILE__, __LINE__, FUNC, OLD, OLD_CAPACITY, \
+#define realloc2(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE)                 \
+    realloc_debug(__FILE__, __LINE__, FUNC, OLD, OLD_CAPACITY,                 \
                   NEW_CAPACITY, OBJECT_SIZE)
-#define realloc_flex(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE) \
-    realloc_flex_debug(__FILE__, __LINE__, FUNC, OLD, SIZEOF(*(OLD)), \
+#define realloc_flex(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE)             \
+    realloc_flex_debug(__FILE__, __LINE__, FUNC, OLD, SIZEOF(*(OLD)),          \
                        OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE)
-#define free2(POINTER, SIZE) \
+#define free2(POINTER, SIZE)                                                   \
     free_debug(__FILE__, __LINE__, FUNC, POINTER, SIZE)
 #else
 #define malloc2_zero(SIZE) xmalloc(SIZE, true)
 #define malloc2(SIZE) xmalloc(SIZE, false)
-#define realloc2(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE) \
+#define realloc2(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE)                 \
     realloc4(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE)
-#define realloc_flex(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE) \
+#define realloc_flex(OLD, OLD_CAPACITY, NEW_CAPACITY, OBJECT_SIZE)             \
     xrealloc(OLD, SIZEOF(*(OLD)) + (OBJECT_SIZE)*(NEW_CAPACITY))
 #define free2(POINTER, SIZE) free2_(POINTER, SIZE)
 #endif
