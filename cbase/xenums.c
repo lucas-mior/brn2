@@ -264,29 +264,16 @@ CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
 #endif
 }
 
-CBASE_PRIVATE bool
-CAT(ENUM_PREFIX_, token_equals)(char *token, int32 token_len, char *name) {
-    int32 name_len = strlen32(name);
-    if (token_len != name_len) {
-        return false;
-    }
-    return !strncmp32(token, name, token_len);
-}
+#define XENUM_TOKEN_EQUALS(token, token_len, name)                             \
+    ((token_len) == strlen32(name)                                             \
+     && BEGINS_WITH_4(token, token_len, name, token_len))
 
-CBASE_PRIVATE bool
-CAT(ENUM_PREFIX_, token_equals_enum_name)(char *token, int32 token_len,
-                                          char *name) {
-    char *prefix = QUOTE(ENUM_PREFIX_);
-    int32 prefix_len = strlen32(prefix);
-
-    if (CAT(ENUM_PREFIX_, token_equals)(token, token_len, name)) {
-        return true;
-    }
-    if (strncmp32(name, prefix, prefix_len)) {
-        return false;
-    }
-    return CAT(ENUM_PREFIX_, token_equals)(token, token_len, name + prefix_len);
-}
+#define XENUM_TOKEN_EQUALS_ENUM_NAME(token, token_len, name)                   \
+    (XENUM_TOKEN_EQUALS(token, token_len, name)                                \
+     || (BEGINS_WITH_4(name, strlen32(name), QUOTE(ENUM_PREFIX_),              \
+                       strlen32(QUOTE(ENUM_PREFIX_)))                          \
+         && XENUM_TOKEN_EQUALS(token, token_len,                               \
+                               name + strlen32(QUOTE(ENUM_PREFIX_)))))
 
 XENUMS_LINKAGE enum ENUM_NAME
 CAT(ENUM_PREFIX_, parse)(char *string) {
@@ -322,17 +309,15 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
         }
 
 #if ENUM_BITFLAGS
-        if (CAT(ENUM_PREFIX_, token_equals)(token, token_len,
-                                            QUOTE(ENUM_PREFIX_) "NONE")
-            || CAT(ENUM_PREFIX_, token_equals)(token, token_len, "NONE")) {
+        if (XENUM_TOKEN_EQUALS(token, token_len, QUOTE(ENUM_PREFIX_) "NONE")
+            || XENUM_TOKEN_EQUALS(token, token_len, "NONE")) {
             matched = 1;
         }
 #endif
 
 #if ENUM_BITFLAGS == 0
-        if (CAT(ENUM_PREFIX_, token_equals)(token, token_len,
-                                            QUOTE(ENUM_PREFIX_) "LAST")
-            || CAT(ENUM_PREFIX_, token_equals)(token, token_len, "LAST")) {
+        if (XENUM_TOKEN_EQUALS(token, token_len, QUOTE(ENUM_PREFIX_) "LAST")
+            || XENUM_TOKEN_EQUALS(token, token_len, "LAST")) {
             result = (ENUM_UNDERLYING_TYPE)CAT(ENUM_PREFIX_, LAST);
             matched = 1;
         }
@@ -341,8 +326,7 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
 #if ENUM_BITFLAGS
         #define XENUM_PARSE_ONE(e)                                             \
             if (!matched                                                       \
-                && CAT(ENUM_PREFIX_, token_equals_enum_name)(token, token_len, \
-                                                            #e)) {             \
+                && XENUM_TOKEN_EQUALS_ENUM_NAME(token, token_len, #e)) {       \
                 result |= (ENUM_UNDERLYING_TYPE)e;                             \
                 matched = 1;                                                   \
             }
@@ -351,16 +335,14 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
 #else
         #define XENUM_PARSE_ONE(e)                                             \
             if (!matched                                                       \
-                && CAT(ENUM_PREFIX_, token_equals_enum_name)(token, token_len, \
-                                                            #e)) {             \
+                && XENUM_TOKEN_EQUALS_ENUM_NAME(token, token_len, #e)) {       \
                 result = (ENUM_UNDERLYING_TYPE)e;                              \
                 matched = 1;                                                   \
             }
         #define XENUM_PARSE_ALIAS(e, alias)                                    \
             XENUM_PARSE_ONE(e)                                                 \
             if (!matched                                                       \
-                && CAT(ENUM_PREFIX_, token_equals)(token, token_len,           \
-                                                       #alias)) {              \
+                && XENUM_TOKEN_EQUALS(token, token_len, #alias)) {             \
                 result = (ENUM_UNDERLYING_TYPE)e;                              \
                 matched = 1;                                                   \
             }
@@ -389,6 +371,9 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
 
     return (enum ENUM_NAME)result;
 }
+
+#undef XENUM_TOKEN_EQUALS
+#undef XENUM_TOKEN_EQUALS_ENUM_NAME
 
 #if 0 == TESTING_xenums
 static inline void
