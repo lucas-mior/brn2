@@ -34,6 +34,7 @@
       #undef X
       TOKEN_LAST,
   };
+  typedef struct StrBuilder StrBuilder;
 #endif
 
 enum TokenizeFlags {
