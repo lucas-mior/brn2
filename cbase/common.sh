@@ -63,7 +63,7 @@ common_get_compiler() {
 
     if [ "$CC" = "cc" ]; then
         echo "common_get_compiler. CC==cc"
-        CC=$(basename "$(readlink -f "$(command -v cc)")")
+        CC=$(basename "$(realpath "$(command -v cc)")")
         echo "common_get_compiler. CC=$CC"
     fi
     echo "common_get_compiler. CC=$CC"
