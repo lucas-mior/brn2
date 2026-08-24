@@ -7,18 +7,34 @@
 #include "primitives.h"
 #include "base_macros.h"
 
+#define TOKEN_KIND_FIELDS \
+    X(TOKEN_UNKNOWN)      \
+    X(TOKEN_SPACE)        \
+    X(TOKEN_NEWLINE)      \
+    X(TOKEN_IDENT)        \
+    X(TOKEN_LITERAL)      \
+    X(TOKEN_COMMENT)      \
+    X(TOKEN_OPERATOR)     \
+    X(TOKEN_PUNCT)        \
+    X(TOKEN_PREPROC)
+
+#if defined(CBASE_H)
+#define ENUM_NAME TokenKind
+#define ENUM_BITFLAGS 0
+#define ENUM_PREFIX_ TOKEN_
+#define ENUM_FIELDS TOKEN_KIND_FIELDS
+#define XENUMS_DECLARE_ONLY 1
+#define XENUMS_NO_TESTS 1
+#include "xenums.c"
+#undef XENUMS_NO_TESTS
+#else
 enum TokenKind {
-    TOKEN_UNKNOWN,
-    TOKEN_SPACE,
-    TOKEN_NEWLINE,
-    TOKEN_IDENT,
-    TOKEN_LITERAL,
-    TOKEN_COMMENT,
-    TOKEN_OPERATOR,
-    TOKEN_PUNCT,
-    TOKEN_PREPROC,
+    #define X(E) E,
+    TOKEN_KIND_FIELDS
+    #undef X
     TOKEN_LAST,
 };
+#endif
 
 enum TokenizeFlags {
     TOKENIZE_DEFAULT = 0,
@@ -63,8 +79,6 @@ typedef struct Document {
 extern char *TOKEN_str(enum TokenKind);
 extern void TOKEN_str_free(char *);
 extern enum TokenKind TOKEN_parse(char *);
-extern bool TOKEN_token_equals(char *, int32, char *);
-extern bool TOKEN_token_equals_enum_name(char *, int32, char *);
 
 extern int32 token_is_val(Token, char *);
 extern int32 token_is_ptr(Token *, char *);
