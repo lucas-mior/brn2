@@ -29,3 +29,4 @@ tests
 *.obj
 *.callgrind
 *.valgrind
+msvc-generic-c-warnings.txt

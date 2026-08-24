@@ -422,6 +422,14 @@ main(void) {
         ASSERT(MINOF(var_int64) == INT64_MIN);
         ASSERT(MINOF(var_uint32) == 0u);
         ASSERT(MINOF(var_uint64) == 0ull);
+
+#if CC_MSVC
+        // msvc does not silence warnings of variables used in _Generic
+        (void)var_int32;
+        (void)var_uint32;
+        (void)var_int64;
+        (void)var_uint64;
+#endif
     }
 
     {
