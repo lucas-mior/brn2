@@ -1716,7 +1716,10 @@ main(void) {
         qsort64(files, LENGTH(files), SIZEOF(*files), files_compare);
 
         SNPRINTF(command_rmdir, "rm -rf %s", directory);
-        system(command_rmdir);
+        if (system(command_rmdir)) {
+            error("error executing %s.\n", command_rmdir);
+            fatal(EXIT_FAILURE);
+        }
         if (BRN2_MKDIR(directory, 0777) < 0) {
             error("Error creating directory %s: %s.\n",
                   directory, strerror(errno));
