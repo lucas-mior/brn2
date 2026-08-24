@@ -2,6 +2,5 @@ Diagnostics:
   UnusedIncludes: None
   Suppress: 
     - "pp_including_mainfile_in_preamble"
-    - "*nonfixed underlying type*"
 CompileFlags:
-  Add: [-Wno-undefined-internal, -Wno-strict-prototypes, -Wno-documentation-unknown-command, -Wno-unused-function]
+  Add: [-Wno-undefined-internal, -Wno-strict-prototypes, -Wno-documentation-unknown-command, -Wno-unused-function, -Wno-elaborated-enum-base, -fms-extensions, -Wno-microsoft-fixed-enum, -Wno-microsoft-enum-forward-reference]
