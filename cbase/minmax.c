@@ -381,10 +381,10 @@ main(void) {
         ASSERT_EQUAL(min, -1);
         ASSERT_ZERO(max);
     } {
-        double a = 0.123;
-        double min = MIN(a, 0);
-        double max = MAX(a, 0);
-        ASSERT_EQUAL(min, 0.0);
+        double a = 2.123;
+        double min = MIN(a, 2);
+        double max = MAX(a, 2);
+        ASSERT_EQUAL(min, 2.0);
         ASSERT_EQUAL(max, a);
     } {
         int array[100];
