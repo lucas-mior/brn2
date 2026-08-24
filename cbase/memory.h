@@ -39,25 +39,22 @@
 #define DEBUGGING_MEMORY DEBUGGING
 #endif
 
-void free2_(void *, int64);
-void free_debug(char *, int32, char *, void *, int64);
-void *malloc_debug(char *, int32, char *, int64, bool);
 void memcpy64(void *, void *, int64);
 void memmove64(void *, void *, int64);
-void memory_check(void);
 void memset64(void *, int, int64);
+
+void memory_check(void);
+void free2_(void *, int64);
+void free_debug(char *, int32, char *,
+                void *, int64);
+void *malloc_debug(char *, int32, char *,
+                   int64, bool);
 void *realloc4(void *, int64, int64, int64);
-void *realloc_debug(char *, int32, char *, void *, int64, int64, int64);
-void *realloc_flex_debug(
-    char *,
-    int32,
-    char *,
-    void *,
-    int64,
-    int64,
-    int64,
-    int64
-);
+void *realloc_debug(char *, int32, char *,
+                    void *, int64, int64, int64);
+void *realloc_flex_debug(char *, int32, char *,
+                         void *, int64, int64, int64, int64);
+
 void *xmalloc(int64, bool);
 void *xmemdup(void *, int64);
 void *xmmap_commit(int64 *);
