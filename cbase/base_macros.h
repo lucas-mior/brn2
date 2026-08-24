@@ -181,14 +181,14 @@ _Generic((SIZE), \
   #define __has_attribute(x) 0
 #endif
 
-#if CC_CLANG && __has_attribute(exclusive_lock_function)
+#if CC_CLANG && OS_FREEBSD && __has_attribute(exclusive_lock_function)
   #define ATTR_EXCLUSIVE_LOCK(...) \
     __attribute__((exclusive_lock_function(__VA_ARGS__)))
 #else
   #define ATTR_EXCLUSIVE_LOCK(...)
 #endif
 
-#if CC_CLANG && __has_attribute(unlock_function)
+#if CC_CLANG && OS_FREEBSD && __has_attribute(unlock_function)
   #define ATTR_UNLOCK(...) __attribute__((unlock_function(__VA_ARGS__)))
 #else
   #define ATTR_UNLOCK(...)
