@@ -171,6 +171,7 @@ if [ "$is_msvc" -eq 1 ] && [ "$mode" != "test" ]; then
 
     CPPFLAGS=$(common_gcc_flags_to_msvc "$msvc_compiler" $CPPFLAGS)
     CFLAGS=$(common_gcc_flags_to_msvc "$msvc_compiler" $CFLAGS)
+    CFLAGS="$CFLAGS /nologo"
     LDFLAGS=$(common_gcc_flags_to_msvc "$msvc_compiler" $LDFLAGS)
 fi
 

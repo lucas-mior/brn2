@@ -870,6 +870,9 @@ common_test_compile_and_run_source () {
             test_cmd_flags=$(common_msvc_add_utf8_cflags $test_cmd_flags)
             ;;
         esac
+        if [ -n "$test_msvc_compiler" ]; then
+            test_cmd_flags="$test_cmd_flags /nologo"
+        fi
         test_cmdline="$test_cc $test_cmd_flags"
     fi
 
