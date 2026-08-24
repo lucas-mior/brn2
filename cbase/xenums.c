@@ -17,8 +17,8 @@
 #endif
 
 #if !defined(CBASE_H)
-  #if defined(ENUM_NAME) || defined(ENUM_PREFIX_) \
-      || defined(ENUM_FIELDS) || defined(ENUM_BITFLAGS) \
+  #if defined(ENUM_NAME) || defined(ENUM_PREFIX_)                              \
+      || defined(ENUM_FIELDS) || defined(ENUM_BITFLAGS)                        \
       || defined(ENUM_UNDERLYING_TYPE)
     #error "include cbase.h before configuring xenums.c"
   #endif
@@ -39,14 +39,14 @@
 #define ENUM_NAME TestFlags
 #define ENUM_PREFIX_ TEST_FLAGS_
 #define ENUM_BITFLAGS 1
-#define ENUM_FIELDS \
-    X(TEST_FLAGS_READ) \
-    X(TEST_FLAGS_WRITE) \
-    X(TEST_FLAGS_EXEC) \
+#define ENUM_FIELDS                                                            \
+    X(TEST_FLAGS_READ)                                                         \
+    X(TEST_FLAGS_WRITE)                                                        \
+    X(TEST_FLAGS_EXEC)                                                         \
     X(TEST_FLAGS_READ_WRITE, TEST_FLAGS_READ|TEST_FLAGS_WRITE)
 #endif
 
-#if !defined(__INCLUDE_LEVEL__) || (__INCLUDE_LEVEL__ >= 1) \
+#if !defined(__INCLUDE_LEVEL__) || (__INCLUDE_LEVEL__ >= 1)                    \
     || (TESTING_xenums == 0)
   #if !defined(ENUM_NAME)
     #error "ENUM_NAME is not defined"
@@ -112,7 +112,7 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
     #define XENUM_DEF_1(e)        e,
     #define XENUM_DEF_2(e, alias) e,
 #else
-    #define XENUM_DEF_1(e) \
+    #define XENUM_DEF_1(e)                                                     \
         e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_IDX),
     #define XENUM_DEF_2(e, v) e = v,
 #endif
@@ -156,9 +156,9 @@ XENUMS_LINKAGE char *
 CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
     switch (val) {
-        #define XENUM_ST_1(e)    case e: \
+        #define XENUM_ST_1(e)    case e:                                       \
                                      return #e;
-        #define XENUM_ST_2(e, v) case e: \
+        #define XENUM_ST_2(e, v) case e:                                       \
                                      return #e;
         #define X(...)           SELECT_ON_NUM_ARGS(XENUM_ST_, __VA_ARGS__)
 
@@ -182,9 +182,9 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
         return xstrdup("NONE");
     }
 
-    #define XENUM_EXACT(e) \
-        if (val == e) { \
-            return xstrdup(#e); \
+    #define XENUM_EXACT(e)                                                     \
+        if (val == e) {                                                        \
+            return xstrdup(#e);                                                \
         }
     #define XENUM_EXACT_1(e)    XENUM_EXACT(e)
     #define XENUM_EXACT_2(e, v) XENUM_EXACT(e)
@@ -197,25 +197,25 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
     #undef XENUM_EXACT_2
     #undef XENUM_EXACT
 
-    #define XENUM(e) \
-        if (val && ((val & e) == e)) { \
-            char *name = #e; \
-            int32 len = strlen32(name); \
-            int32 new_cap; \
-            new_cap = buffer_len + len + 1; \
-            if (is_first == 0) { \
-                new_cap += 1; \
-            } \
-            buffer = realloc2(buffer, buffer_cap, new_cap, SIZEOF(*buffer)); \
-            buffer_cap = new_cap; \
-            if (is_first == 0) { \
-                buffer[buffer_len] = '|'; \
-                buffer_len += 1; \
-            } \
-            memcpy64(buffer + buffer_len, name, len); \
-            buffer_len += len; \
-            is_first = 0; \
-            val &= (ENUM_UNDERLYING_TYPE)~e; \
+    #define XENUM(e)                                                           \
+        if (val && ((val & e) == e)) {                                         \
+            char *name = #e;                                                   \
+            int32 len = strlen32(name);                                        \
+            int32 new_cap;                                                     \
+            new_cap = buffer_len + len + 1;                                    \
+            if (is_first == 0) {                                               \
+                new_cap += 1;                                                  \
+            }                                                                  \
+            buffer = realloc2(buffer, buffer_cap, new_cap, SIZEOF(*buffer));   \
+            buffer_cap = new_cap;                                              \
+            if (is_first == 0) {                                               \
+                buffer[buffer_len] = '|';                                      \
+                buffer_len += 1;                                               \
+            }                                                                  \
+            memcpy64(buffer + buffer_len, name, len);                          \
+            buffer_len += len;                                                 \
+            is_first = 0;                                                      \
+            val &= (ENUM_UNDERLYING_TYPE)~e;                                   \
         }
 
     #define XENUM_FL_1(e)    XENUM(e)
@@ -243,9 +243,9 @@ XENUMS_LINKAGE char *
 CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
 #if ENUM_BITFLAGS == 0
     switch (val) {
-        #define XENUM_ALIAS_ST_1(e)        case e: \
+        #define XENUM_ALIAS_ST_1(e)        case e:                             \
                                                return #e;
-        #define XENUM_ALIAS_ST_2(e, alias) case e: \
+        #define XENUM_ALIAS_ST_2(e, alias) case e:                             \
                                                return #alias;
         #define X(...) SELECT_ON_NUM_ARGS(XENUM_ALIAS_ST_, __VA_ARGS__)
 
@@ -339,35 +339,35 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
 #endif
 
 #if ENUM_BITFLAGS
-        #define XENUM_PARSE_ONE(e) \
-            if (!matched \
+        #define XENUM_PARSE_ONE(e)                                             \
+            if (!matched                                                       \
                 && CAT(ENUM_PREFIX_, token_equals_enum_name)(token, token_len, \
-                                                            #e)) { \
-                result |= (ENUM_UNDERLYING_TYPE)e; \
-                matched = 1; \
+                                                            #e)) {             \
+                result |= (ENUM_UNDERLYING_TYPE)e;                             \
+                matched = 1;                                                   \
             }
         #define XENUM_PARSE_1(e)    XENUM_PARSE_ONE(e)
         #define XENUM_PARSE_2(e, v) XENUM_PARSE_ONE(e)
 #else
-        #define XENUM_PARSE_ONE(e) \
-            if (!matched \
+        #define XENUM_PARSE_ONE(e)                                             \
+            if (!matched                                                       \
                 && CAT(ENUM_PREFIX_, token_equals_enum_name)(token, token_len, \
-                                                            #e)) { \
-                result = (ENUM_UNDERLYING_TYPE)e; \
-                matched = 1; \
+                                                            #e)) {             \
+                result = (ENUM_UNDERLYING_TYPE)e;                              \
+                matched = 1;                                                   \
             }
-        #define XENUM_PARSE_ALIAS(e, alias) \
-            XENUM_PARSE_ONE(e) \
-            if (!matched \
-                && CAT(ENUM_PREFIX_, token_equals)(token, token_len, \
-                                                       #alias)) { \
-                result = (ENUM_UNDERLYING_TYPE)e; \
-                matched = 1; \
+        #define XENUM_PARSE_ALIAS(e, alias)                                    \
+            XENUM_PARSE_ONE(e)                                                 \
+            if (!matched                                                       \
+                && CAT(ENUM_PREFIX_, token_equals)(token, token_len,           \
+                                                       #alias)) {              \
+                result = (ENUM_UNDERLYING_TYPE)e;                              \
+                matched = 1;                                                   \
             }
         #define XENUM_PARSE_1(e)        XENUM_PARSE_ONE(e)
         #define XENUM_PARSE_2(e, alias) XENUM_PARSE_ALIAS(e, alias)
 #endif
-        #define X(...) \
+        #define X(...)                                                         \
             SELECT_ON_NUM_ARGS(XENUM_PARSE_, __VA_ARGS__)
 
         ENUM_FIELDS
@@ -415,16 +415,17 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #undef ENUM_UNDERLYING_TYPE
 #undef ENUM_UNDERLYING_TYPE_SPEC
 
-#if TESTING_xenums && !defined(TESTING_xenums_started) \
+#if TESTING_xenums                         \
+    && !defined(TESTING_xenums_started)    \
     && !defined(XENUMS_NO_TESTS)
 #define TESTING_xenums_started
 
 #define ENUM_NAME TestNormal
 #define ENUM_PREFIX_ TEST_NORMAL_
 #define ENUM_BITFLAGS 0
-#define ENUM_FIELDS \
-    X(TEST_NORMAL_APPLE) \
-    X(TEST_NORMAL_BANANA, banana) \
+#define ENUM_FIELDS                        \
+    X(TEST_NORMAL_APPLE)                   \
+    X(TEST_NORMAL_BANANA, banana)          \
     X(TEST_NORMAL_CHERRY, cherry)
 #include "xenums.c"
 
