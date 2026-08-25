@@ -1009,13 +1009,13 @@ command_start(Command *command, enum CommandFlag flags) {
     return 0;
 }
 
-bool
+int32
 command_wait(Command *command) {
     int status;
 
     if (command->result.pid <= 0) {
         command_error_set(command, EINVAL);
-        return false;
+        return command_error_return(command);
     }
 
     while (waitpid((pid_t)command->result.pid, &status, 0) < 0) {
@@ -1024,11 +1024,11 @@ command_wait(Command *command) {
         }
         command_error_set(command, errno);
         error("Error waiting for child: %s.\n", strerror(errno));
-        return false;
+        return command_error_return(command);
     }
 
     command_status_from_wait(status, &command->result);
-    return true;
+    return 0;
 }
 
 bool
@@ -1069,8 +1069,8 @@ command_run(Command *command, enum CommandFlag flags) {
         return err;
     }
     if (flags & COMMAND_DETACHED) {
-        if (!command_wait(command)) {
-            return command_error_return(command);
+        if ((err = command_wait(command)) < 0) {
+            return err;
         }
         return 0;
     }
@@ -1083,8 +1083,8 @@ command_run(Command *command, enum CommandFlag flags) {
             return command_error_return(command);
         }
     }
-    if (!command_wait(command)) {
-        return command_error_return(command);
+    if ((err = command_wait(command)) < 0) {
+        return err;
     }
     return 0;
 #elif OS_WINDOWS
@@ -1815,7 +1815,7 @@ main(int argc, char **argv) {
         COMMAND_PUSH(&cmd, "sh", "-c", "exit 9");
         ASSERT(command_run_async(&cmd, COMMAND_NEW_PROCESS_GROUP));
         ASSERT_POSITIVE(cmd.result.pid);
-        ASSERT(command_wait(&cmd));
+        ASSERT_ZERO(command_wait(&cmd));
         ASSERT_EQUAL(cmd.result.status, 9);
 
         command_reset(&cmd);
@@ -1830,7 +1830,7 @@ main(int argc, char **argv) {
                                  |COMMAND_CAPTURE_STDERR));
         ASSERT_POSITIVE(cmd.result.pid);
         command_result_read_captured(&cmd);
-        ASSERT(command_wait(&cmd));
+        ASSERT_ZERO(command_wait(&cmd));
         ASSERT_EQUAL(cmd.result.stdout_output, "asyncout");
         ASSERT_EQUAL(cmd.result.stderr_output, "asyncerr");
         ASSERT_ZERO(cmd.result.status);

@@ -617,7 +617,7 @@ int32 command_start(Command *, enum CommandFlag);
 int32 command_status_from_wait(int, CommandResult *);
 char *command_str(Command *, int32 *);
 void command_vector_reserve(char ***, int32 **, int32 *, int32, int32);
-bool command_wait(Command *);
+int32 command_wait(Command *);
 
 #define COMMAND_PUSH(CMD, ...) \
     command_push_array(CMD, \
