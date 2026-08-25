@@ -464,7 +464,9 @@ main(int argc, char **argv) {
         }
 #else
         while (true) {
-            if (lines_target == NULL) {
+            if (lines_target) {
+                brn2_list_from_file(new, lines_target, false);
+            } else {
                 int32 status;
                 Command command = {0};
 
@@ -520,8 +522,6 @@ main(int argc, char **argv) {
                     }
                 }
                 brn2_list_from_file(new, brn2_buffer.name, false);
-            } else {
-                brn2_list_from_file(new, lines_target, false);
             }
 
             if (new->length <= 0) {
