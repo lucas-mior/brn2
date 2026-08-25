@@ -1143,12 +1143,12 @@ command_run_capture_all(Command *command) {
                        |COMMAND_CAPTURE_STDERR);
 }
 
-bool
+int32
 command_run_capture_combined(Command *command) {
     return command_run(command,
                        COMMAND_CAPTURE_STDOUT
                        |COMMAND_CAPTURE_STDERR
-                       |COMMAND_MERGE_STDERR) == 0;
+                       |COMMAND_MERGE_STDERR);
 }
 
 void
@@ -1630,7 +1630,7 @@ main(int argc, char **argv) {
                      "sh",
                      "-c",
                      "printf stdout; printf stderr >&2; exit 7");
-        ASSERT(command_run_capture_combined(&cmd));
+        ASSERT_ZERO((command_run_capture_combined(&cmd)));
         ASSERT_EQUAL(cmd.result.output, "stdoutstderr");
         ASSERT_EQUAL(cmd.result.stdout_output, "stdoutstderr");
         ASSERT_EQUAL(cmd.result.stderr_output, "");
@@ -1775,7 +1775,7 @@ main(int argc, char **argv) {
                      "cmd",
                      "/C",
                      "echo stdout&echo stderr>&2&exit /B 7");
-        ASSERT(command_run_capture_combined(&cmd));
+        ASSERT_ZERO((command_run_capture_combined(&cmd)));
         ASSERT_EQUAL(cmd.result.output, "stdout\r\nstderr\r\n");
         ASSERT_EQUAL(cmd.result.stdout_output, "stdout\r\nstderr\r\n");
         ASSERT_EQUAL(cmd.result.stderr_output, "");
