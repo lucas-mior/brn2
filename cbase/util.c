@@ -485,10 +485,23 @@ itoa2(char *str, int32 size, llong num) {
 // high level, returns negative on failure
 int32
 optional_atoi2(char *str, int32 str_len, llong *result) {
-    return -EINVAL;
+    if (str == NULL) {
+        return -EINVAL;
+    }
+    while ((i < str_len)
+           && ((str[i] == ' ') || (str[i] == '\f') || (str[i] == '\n')
+               || (str[i] == '\r') || (str[i] == '\t')
+               || (str[i] == '\v'))) {
+        i += 1;
+    }
 }
 
-// low level without error checking.
+// low level without error checking, returns 0 on invalid input.
+// only to be used in the following situations:
+// - when the string was pre-parsed, 
+//   so we know that it will not get invalid input
+// - or when the caller only needs positive values;
+//   zero is used as "don't use this number" or "do 0 actions of this thing"
 llong
 atoi2(char *str, int32 str_len) {
     int32 i = 0;
@@ -504,13 +517,6 @@ atoi2(char *str, int32 str_len) {
 
     if ((str == NULL) || (str_len <= 0)) {
         return 0;
-    }
-
-    while ((i < str_len)
-           && ((str[i] == ' ') || (str[i] == '\f') || (str[i] == '\n')
-               || (str[i] == '\r') || (str[i] == '\t')
-               || (str[i] == '\v'))) {
-        i += 1;
     }
 
     if ((i < str_len) && ((str[i] == '-') || (str[i] == '+'))) {
