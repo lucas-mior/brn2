@@ -548,7 +548,10 @@ parse_integer(char *str, int32 str_len, llong *result) {
 // - when the string was pre-parsed, 
 //   so we know that it will not get invalid input
 // - or when the caller only needs positive values;
-//   zero is used as "don't use this number" or "do 0 actions of this thing"
+//   in this case, zero is used as one of:
+//   - "don't use this number"
+//   - "do 0 actions of this thing"
+//   - "do this forever, don't limit it"
 llong
 atoi2(char *str, int32 str_len) {
     int32 i = 0;
