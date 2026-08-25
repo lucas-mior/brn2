@@ -434,7 +434,8 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
         // error condition
     }
     ```
-- Functions that return a pointer can return NULL in case they fail
+- Functions that return a pointer can return NULL in case they fail: use this
+  pattern when an optional object is not available.
 - Other functions can return a `bool`: `true` means that the functions succeded,
   `false` means that the function failed. If information about the error could
   be useful, organize the function to have a struct pointer parameter that fills
