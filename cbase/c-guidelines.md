@@ -238,10 +238,8 @@ Exceptions to this rule are:
 
 - Macros `ENDS_WITH` and `BEGINS_WITH`: they use a macro trick to allow passing
   only the string, or also passing the string length. See `cbase.h`.
-- Functions that in general only operate on short strings, commonly literals.
-  For instance, a function that wants to know where in the buffer a fragment
-  `"needle"` is can simply pass the `"needle"` argument and let the function
-  call `strlen32()` inside.
+- Functions that in general only operate on short literals. In this case it is
+  ok to let the function call `strlen32` inside.
 - `StrBuilder`: use this struct and its functions to build long, dynamic
   strings. Do not use it where a single
   `SNPRINTF(stack_array, "format_string", args);` would be enough.
