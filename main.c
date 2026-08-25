@@ -494,8 +494,7 @@ main(int argc, char **argv) {
                 int32 rand1 = rand_int();
                 float x = (float)rand1 / (float)INT32_MAX;
                 if (x < 0.4f) {
-                    random_filename(new->files[i]->name,
-                                    new->files[i]->length);
+                    random_filename(new->files[i]->name, new->files[i]->length);
                 }
             }
             brn2_normalize_names(old, new);
