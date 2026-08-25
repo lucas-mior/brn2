@@ -445,10 +445,19 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
     ```
 - Functions that return a pointer can return NULL in case they fail: use this
   pattern when an optional object is not available.
-- Other functions can return a `bool`: `true` means that the functions succeded,
-  `false` means that the function failed. If information about the error could
-  be useful, organize the function to have a struct pointer parameter that fills
-  with data about the error/success status.
+- Use bool only for predicates. Names like is_*, has_*, can_*, contains_*,
+  matches_* should return boolean answers. Failure to answer the question should
+  usually be impossible, asserted, or represented some other way.
+- Use signed integer status for fallible actions. Names like read_*, write_*,
+  parse_*, rename_*, init_*, open_*, build_*, resolve_*, normalize_* should
+  return a signed status/result. 0 means success when there is no payload;
+  non-negative values may be successful counts/indices/lengths; negative values
+  are errors.
+- Use out-parameters when the natural return value is data. For operations that
+  need to return a pointer, string, struct, or multiple outputs, return the
+  status code and write the result through an out-parameter. Keep NULL returns
+  for optional lookup/not-found-style APIs where the caller genuinely does not
+      care why it was absent.
 
 ## More on if expressions
 Don't use logical negation and equality for bounds checking:
