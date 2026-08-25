@@ -534,7 +534,7 @@ str_builder_array_copy(StrBuilderArray *dest, StrBuilderArray *source) {
 
     str_builder_array_init(&replacement);
     if (source) {
-        if (!str_builder_array_reserve(&replacement, source->len)) {
+        if (str_builder_array_reserve(&replacement, source->len) < 0) {
             str_builder_array_destroy(&replacement);
             return false;
         }
@@ -588,22 +588,25 @@ str_builder_array_swap(StrBuilderArray *left, StrBuilderArray *right) {
     return;
 }
 
-bool
+int32
 str_builder_array_reserve(StrBuilderArray *array, int32 extra) {
     int64 needed;
     int32 old_cap;
     int32 new_cap;
 
     if (array == NULL) {
-        return false;
+        return -EINVAL;
     }
-    if (extra <= 0) {
-        return true;
+    if (extra < 0) {
+        return -EINVAL;
+    }
+    if (extra == 0) {
+        return array->cap;
     }
 
     needed = (int64)array->len + extra;
     if (needed <= array->cap) {
-        return true;
+        return array->cap;
     }
     if (needed >= MAXOF(array->cap)) {
         error("StrBuilderArray only supports fewer than 2GB items.\n");
@@ -627,14 +630,14 @@ str_builder_array_reserve(StrBuilderArray *array, int32 extra) {
     array->items = realloc2(array->items, old_cap, new_cap,
                             SIZEOF(*array->items));
     array->cap = new_cap;
-    return true;
+    return array->cap;
 }
 
 StrBuilder *
 str_builder_array_append(StrBuilderArray *array) {
     StrBuilder *item;
 
-    if (!str_builder_array_reserve(array, 1)) {
+    if (str_builder_array_reserve(array, 1) < 0) {
         return NULL;
     }
 
