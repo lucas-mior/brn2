@@ -500,10 +500,12 @@ xfopen(char *file, int32 line, char *func, char *filename, char *mode) {
 
 int
 xfclose(char *file, int32 line, char *func, FILE *f, char *filename) {
+    int err;
     if (fclose(f)) {
+        err = errno;
         error_impl(file, line, func,
                    "Error closing %s: %s.\n", filename, strerror(errno));
-        return -1;
+        return -err;
     }
     return 0;
 }
@@ -1089,11 +1091,7 @@ read_entire_file(char *path, char **file_bytes) {
         return -err;
     }
     bytes[read_len] = '\0';
-    if (XFCLOSE(file, path) != 0) {
-        err = errno;
-        if (err == 0) {
-            err = EIO;
-        }
+    if ((err = XFCLOSE(file, path)) < 0) {
         free2(bytes, (len + 1)*SIZEOF(*bytes));
         return -err;
     }
@@ -1146,12 +1144,8 @@ write_entire_file(char *path, char *text, int64 text_len) {
         return -err;
     }
 
-    if (XFCLOSE(file, path) != 0) {
-        err = errno;
-        if (err == 0) {
-            err = EIO;
-        }
-        return -err;
+    if ((err = XFCLOSE(file, path)) < 0) {
+        return err;
     }
     return write_len;
 }
