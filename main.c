@@ -561,15 +561,18 @@ main(int argc, char **argv) {
             main_capacity = hash_capacity(newlist_map);
             brn2_create_hashes(new, main_capacity);
 
-            if (!brn2_verify(new, old, oldlist_map,
-                             newlist_map, new->indexes)) {
-                brn2_free_list(new);
+            if (brn2_verify(new, old, oldlist_map, newlist_map, new->indexes)) {
+                break;
+            }
+
+            brn2_free_list(new);
+            if (lines_target) {
+                exit(EXIT_FAILURE);
+            } else {
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
-            } else {
-                break;
             }
         }
 #endif
