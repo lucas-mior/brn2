@@ -465,9 +465,10 @@ main(int argc, char **argv) {
 #else
         while (true) {
             int32 status;
-            Command command = {0};
 
             if (lines_target == NULL) {
+                Command command = {0};
+
                 if (isatty(fileno(stdin))) {
                     clearerr(stdin);
                 } else {
