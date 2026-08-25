@@ -329,13 +329,13 @@ main(int argc, char **argv) {
         int32 j = 0;
 
         for (int32 i = 0; i < old->length; i += 1) {
-            FileName *file = old->files[i];
-            if (file->type == TYPE_ERR) {
-                fprintf(stderr, "Removing '%s' from list.\n", file->name);
+            FileName *filename = old->files[i];
+            if (filename->type == TYPE_ERR) {
+                fprintf(stderr, "Removing '%s' from list.\n", filename->name);
                 continue;
             }
             if (j != i) {
-                old->files[j] = file;
+                old->files[j] = filename;
             }
             j += 1;
         }
