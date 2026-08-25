@@ -484,11 +484,9 @@ main(int argc, char **argv) {
                              "0123456789";
             Command command = {0};
 
-            COMMAND_PUSH(&command,
-                         "shuf",
-                         brn2_buffer.name,
-                         "-o",
-                         brn2_buffer.name);
+            COMMAND_PUSH(&command, "shuf", brn2_buffer.name);
+            COMMAND_PUSH(&command, "-o", brn2_buffer.name);
+
             main_command_run(&command);
             command_free(&command);
             brn2_list_from_file(new, brn2_buffer.name, false);
