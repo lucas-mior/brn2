@@ -1130,10 +1130,10 @@ command_run_async(Command *command, enum CommandFlag flags) {
     return command_run(command, flags);
 }
 
-bool
+int32
 command_run_capture(Command *command, enum CommandFlag flags) {
     flags |= COMMAND_CAPTURE_STDOUT;
-    return command_run(command, flags) == 0;
+    return command_run(command, flags);
 }
 
 bool
@@ -1656,7 +1656,7 @@ main(int argc, char **argv) {
 
         COMMAND_PUSH(&cmd, "cat");
         ASSERT_ZERO((command_stdin_buffer_set(&cmd, STRLIT("stdin-buffer"))));
-        ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
+        ASSERT_ZERO((command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT)));
         ASSERT_EQUAL(cmd.result.stdout_output, "stdin-buffer");
         ASSERT_ZERO(cmd.result.status);
 
@@ -1714,7 +1714,7 @@ main(int argc, char **argv) {
 
             COMMAND_PUSH(&cmd, "cat");
             ASSERT_ZERO((command_stdin_buffer_set(&cmd, empty_input, 0)));
-            ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
+            ASSERT_ZERO((command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT)));
             ASSERT_EQUAL(cmd.result.stdout_output, "");
             ASSERT_ZERO(cmd.result.status);
         }
@@ -1736,7 +1736,7 @@ main(int argc, char **argv) {
 
             command_cwd_set(&cmd, test_cwd);
             COMMAND_PUSH(&cmd, "pwd", "-P");
-            ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
+            ASSERT_ZERO((command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT)));
             ASSERT_EQUAL(cmd.result.stdout_output, expected_cwd);
             command_cwd_clear(&cmd);
             test_remove_tree(test_cwd);
@@ -1753,7 +1753,7 @@ main(int argc, char **argv) {
                      "printf %s:%s "
                      "$COMMAND_TEST_VALUE "
                      "$COMMAND_TEST_NUMBER");
-        ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
+        ASSERT_ZERO((command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT)));
         ASSERT_EQUAL(cmd.result.stdout_output, "works:42");
         command_env_clear(&cmd);
 
