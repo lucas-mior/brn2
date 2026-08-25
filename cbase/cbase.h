@@ -177,7 +177,7 @@ char *sb_opt_cstr(StrBuilder *buffer);
 void send_signal(char *, int32);
 int32 snprintf2(char *, int64, char *, ...);
 StrBuilder *str_builder_array_append(StrBuilderArray *);
-bool str_builder_array_append_copy(StrBuilderArray *, StrBuilder *);
+int32 str_builder_array_append_copy(StrBuilderArray *, StrBuilder *);
 void str_builder_array_clear(StrBuilderArray *);
 int32 str_builder_array_copy(StrBuilderArray *, StrBuilderArray *);
 void str_builder_array_destroy(StrBuilderArray *);

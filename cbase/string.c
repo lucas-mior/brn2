@@ -540,10 +540,10 @@ str_builder_array_copy(StrBuilderArray *dest, StrBuilderArray *source) {
             return err;
         }
         for (int32 i = 0; i < source->len; i += 1) {
-            if (!str_builder_array_append_copy(&replacement,
-                                               &source->items[i])) {
+            if ((err = str_builder_array_append_copy(
+                     &replacement, &source->items[i])) < 0) {
                 str_builder_array_destroy(&replacement);
-                return -EINVAL;
+                return err;
             }
         }
     }
@@ -648,24 +648,30 @@ str_builder_array_append(StrBuilderArray *array) {
     return item;
 }
 
-bool
+int32
 str_builder_array_append_copy(StrBuilderArray *array, StrBuilder *item) {
     StrBuilder *dest;
+    int32 err;
+    int32 index;
 
-    if (item == NULL) {
-        return false;
+    if ((array == NULL) || (item == NULL)) {
+        return -EINVAL;
     }
 
-    dest = str_builder_array_append(array);
-    if (dest == NULL) {
-        return false;
+    if ((err = str_builder_array_reserve(array, 1)) < 0) {
+        return err;
     }
+
+    index = array->len;
+    dest = &array->items[index];
+    array->len += 1;
+    sb_init(dest);
     if (!sb_copy(dest, item)) {
         array->len -= 1;
         sb_free(dest);
-        return false;
+        return -EINVAL;
     }
-    return true;
+    return index;
 }
 
 #if 0 == TESTING_string
