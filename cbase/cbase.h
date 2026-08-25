@@ -223,6 +223,10 @@ int32 square_int32(int32);
 #define MEM_LITERAL_SHORT_N 15
 #include "mem_literal_short.h"
 
+// only call on null terminated strings
+// avoid this function,
+// prefer to always know the length of at least the first string
+// and use the STREQUAL macro.
 INLINE UNUSED bool32
 strequal(char *s1, char *s2) {
     if (DEBUGGING) {
@@ -233,6 +237,7 @@ strequal(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
 
+// don't call directly, use STREQUAL macro instead
 INLINE UNUSED bool32
 strequal2(char *a, int32 a_len, char *b, int32 b_len) {
     if (DEBUGGING) {
