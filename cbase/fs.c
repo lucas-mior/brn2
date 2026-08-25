@@ -325,16 +325,18 @@ util_filename_from(char *buffer, int64 size, int fd) {
         return (int32)len;
     }
 #elif CBASE_HAS_F_GETPATH
-    static char buffer2[MAXPATHLEN];
-    int64 len;
+    {
+        static char buffer2[MAXPATHLEN];
+        int64 len;
 
-    if (fcntl(fd, F_GETPATH, buffer2) < 0) {
-        return -errno;
+        if (fcntl(fd, F_GETPATH, buffer2) < 0) {
+            return -errno;
+        }
+        len = MIN(strlen32(buffer2), size - 1);
+        memcpy64(buffer, buffer2, len + 1);
+        buffer[len] = '\0';
+        return (int32)len;
     }
-    len = MIN(strlen32(buffer2), size - 1);
-    memcpy64(buffer, buffer2, len + 1);
-    buffer[len] = '\0';
-    return (int32)len;
 #elif OS_WINDOWS
     {
         HANDLE h;
