@@ -75,7 +75,7 @@ static int32
 main_command_run(Command *command) {
     int32 status = -1;
 
-    if (command_run(command, COMMAND_STDIN_TTY)) {
+    if (command_run(command, COMMAND_STDIN_TTY) == 0) {
         status = command->result.status;
         if (!command->result.exited) {
             status = -1;

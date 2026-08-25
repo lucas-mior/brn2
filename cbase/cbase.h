@@ -606,7 +606,7 @@ void command_result_free(CommandResult *);
 void command_result_init(CommandResult *);
 void command_result_read_captured(Command *);
 void command_result_process_io(Command *, enum CommandFlag);
-bool command_run(Command *, enum CommandFlag);
+int32 command_run(Command *, enum CommandFlag);
 bool command_run_async(Command *, enum CommandFlag);
 bool command_run_capture(Command *, enum CommandFlag);
 bool command_run_capture_all(Command *);
