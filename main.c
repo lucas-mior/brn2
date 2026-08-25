@@ -487,7 +487,6 @@ main(int argc, char **argv) {
             command_free(&command);
             brn2_list_from_file(new, brn2_buffer.path, false);
 
-            rand_int_seed(42);
             for (int32 i = 0; i < new->length; i += 1) {
                 int32 rand1 = rand_int();
                 float x = (float)rand1 / (float)INT32_MAX;
