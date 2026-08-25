@@ -452,7 +452,8 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
   parse_*, rename_*, init_*, open_*, build_*, resolve_*, normalize_* should
   return a signed status/result. 0 means success when there is no payload;
   non-negative values may be successful counts/indices/lengths; negative values
-  are errors.
+  are errors. Then the user can use a function to get the error string by
+  negating the error returned.
 - Use out-parameters when the natural return value is data. For operations that
   need to return a pointer, string, struct, or multiple outputs, return the
   status code and write the result through an out-parameter. Keep NULL returns
