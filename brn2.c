@@ -423,7 +423,9 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
         read_failed = true;
     }
     if (close_lines) {
-        XFCLOSE(lines, filename);
+        if (XFCLOSE(lines, filename) < 0) {
+            read_failed = true;
+        }
     }
     if (read_failed) {
         fatal(EXIT_FAILURE);

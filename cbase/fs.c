@@ -503,8 +503,11 @@ xfclose(char *file, int32 line, char *func, FILE *f, char *filename) {
     int err;
     if (fclose(f)) {
         err = errno;
+        if (err == 0) {
+            err = EIO;
+        }
         error_impl(file, line, func,
-                   "Error closing %s: %s.\n", filename, strerror(errno));
+                   "Error closing %s: %s.\n", filename, strerror(err));
         return -err;
     }
     return 0;
