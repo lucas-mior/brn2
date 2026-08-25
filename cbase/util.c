@@ -373,13 +373,13 @@ rand_int(void) {
 }
 
 void
-random_filename(char *buffer, int32 length) {
+random_filename_inplace(char *buffer, int32 buffer_len) {
     char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                      "abcdefghijklmnopqrstuvwxyz"
                      "!@#$%&*()[]-=_+<>,"
                      "0123456789";
 
-    for (int32 i = 0; i < length; i += 1) {
+    for (int32 i = 0; i < buffer_len; i += 1) {
         int32 j = rand_int() % (SIZEOF(allowed) - 1);
         buffer[i] = allowed[j];
     }
@@ -905,7 +905,7 @@ util_functions_sink(void) {
     (void)util_functions_sink;
     (void)rand_int_seed;
     (void)rand_int;
-    (void)random_filename;
+    (void)random_filename_inplace;
     (void)util_is_integer;
     (void)util_glob_match;
     (void)is_ident_start_char;
