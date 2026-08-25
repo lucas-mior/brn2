@@ -482,11 +482,11 @@ itoa2(char *str, int32 size, llong num) {
     return i;
 }
 
-long
+llong
 atoi2(char *str, int32 str_len) {
     int32 i = 0;
-    long value = 0;
-    long sign = 1;
+    llong value = 0;
+    llong sign = 1;
 
     if ((str == NULL) || (str_len <= 0)) {
         return 0;
