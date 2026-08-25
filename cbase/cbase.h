@@ -151,6 +151,7 @@ extern char *path_basename(char *, int32);
 void print_timings(char *, int32, char *, int64,
                    struct timespec, struct timespec);
 void qsort64(void *, int64, int64, int (*)(void *, void *));
+void random_filename(char *, int32);
 void rand_int_seed(uint64);
 extern int32 rand_int(void);
 extern double rad2deg(double);

@@ -373,6 +373,21 @@ rand_int(void) {
 }
 
 void
+random_filename(char *buffer, int32 length) {
+    char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                     "abcdefghijklmnopqrstuvwxyz"
+                     "!@#$%&*()[]-=_+<>,"
+                     "0123456789";
+
+    for (int32 i = 0; i < length; i += 1) {
+        int32 j = rand_int() % (SIZEOF(allowed) - 1);
+        buffer[i] = allowed[j];
+    }
+
+    return;
+}
+
+void
 qsort64(void *base, int64 n, int64 size, int (*compar)(void *, void *)) {
 #if CC_CLANG
 #pragma clang diagnostic push
@@ -890,6 +905,7 @@ util_functions_sink(void) {
     (void)util_functions_sink;
     (void)rand_int_seed;
     (void)rand_int;
+    (void)random_filename;
     (void)util_is_integer;
     (void)util_glob_match;
     (void)is_ident_start_char;

@@ -96,6 +96,7 @@ xarena_create(int64 size, char *name) {
     return arena;
 }
 
+#if !BRN2_BENCHMARK
 static void
 main_edit_buffer(FileList *new, char *editor) {
     int32 status;
@@ -153,6 +154,7 @@ main_edit_buffer(FileList *new, char *editor) {
     brn2_list_from_file(new, brn2_buffer.path, false);
     return;
 }
+#endif
 
 int
 main(int argc, char **argv) {
@@ -478,30 +480,22 @@ main(int argc, char **argv) {
     {
 #if BRN2_BENCHMARK
         {
-            char allowed[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                             "abcdefghijklmnopqrstuvwxyz"
-                             "!@#$%&*()[]-=_+<>,"
-                             "0123456789";
             Command command = {0};
 
-            COMMAND_PUSH(&command, "shuf", brn2_buffer.name);
-            COMMAND_PUSH(&command, "-o", brn2_buffer.name);
+            COMMAND_PUSH(&command, "shuf", brn2_buffer.path);
+            COMMAND_PUSH(&command, "-o", brn2_buffer.path);
 
             main_command_run(&command);
             command_free(&command);
-            brn2_list_from_file(new, brn2_buffer.name, false);
+            brn2_list_from_file(new, brn2_buffer.path, false);
 
             rand_int_seed(42);
             for (int32 i = 0; i < new->length; i += 1) {
                 int32 rand1 = rand_int();
                 float x = (float)rand1 / (float)INT32_MAX;
-                int32 length = new->files[i]->length;
                 if (x < 0.4f) {
-                    for (int32 j = 0; j < length; j += 1) {
-                        int32 y = rand_int();
-                        char c = allowed[y % (SIZEOF(allowed) - 1)];
-                        new->files[i]->name[j] = c;
-                    }
+                    random_filename(new->files[i]->name,
+                                    new->files[i]->length);
                 }
             }
             brn2_normalize_names(old, new);
