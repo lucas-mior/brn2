@@ -216,12 +216,10 @@ command_windows_capture_file_cleanup(CommandWindowsCaptureFile *capture) {
 }
 
 static bool
-command_windows_capture_file_read(
-    Command *command,
-    CommandWindowsCaptureFile *capture,
-    char **output,
-    int32 *output_len
-) {
+command_windows_capture_file_read(Command *command,
+                                  CommandWindowsCaptureFile *capture,
+                                  char **output,
+                                  int32 *output_len) {
     int32 read_len;
 
     if (!command_windows_capture_file_close(command, capture)) {
