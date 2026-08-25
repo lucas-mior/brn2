@@ -493,7 +493,7 @@ atoi2(char *str, int32 str_len) {
         char buffer[128];
         int32 buffer_len;
         buffer_len = itoa2(buffer, SIZEOF(buffer), LLONG_MAX);
-        ASSERT_LESS(str_len, buffer_len);
+        ASSERT_LESS_EQUAL(str_len, buffer_len);
     }
 
     if ((str == NULL) || (str_len <= 0)) {
