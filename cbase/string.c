@@ -628,8 +628,8 @@ str_builder_array_reserve(StrBuilderArray *array, int32 extra) {
         }
     }
 
-    array->items = realloc2(array->items, old_cap, new_cap,
-                            SIZEOF(*array->items));
+    array->items = realloc2(array->items,
+                            old_cap, new_cap, SIZEOF(*array->items));
     array->cap = new_cap;
     return array->cap;
 }
