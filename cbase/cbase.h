@@ -81,25 +81,26 @@ typedef struct DirEntry {
 } DirEntry;
 
 int32 get_directory_entries(char *, DirEntry **);
-int32 utf8_random_string(char *, int32, int32);
-int32 utf8_byte_position(char *, int32, int32);
-int32 utf8_capitalize_first_letters(char *, int32,
-                                                   char *, int32);
-int32 utf8_char_width(uint32);
-int32 utf8_characters(char *, int32);
-int32 utf8_cut_width(char *, int32, int32);
-int32 utf8_decode(char *, int32, uint32 *);
-uint32 utf8_decode_byte(char, int32 *);
-int32 utf8_decode_raw(char *, uint32 *, int32);
-int32 utf8_encode(uint32, char *, int32);
-char utf8_encode_byte(uint32, int32);
-int32 utf8_encode_raw(uint32, char *);
-bool utf8_has_bom(char *, int32);
-bool utf8_valid(char *, int32, int32 *);
-int32 utf8_next_position(char *, int32, int32);
-int32 utf8_suffix_width_position(char *, int32, int32);
-int32 utf8_validate(uint32 *, int32);
-int32 utf8_width(char *, int32);
+int32 utf8_random_string(char *buffer, int32 capacity, int32 min_len);
+int32 utf8_byte_position(char *string, int32 string_len, int32 character);
+int32 utf8_capitalize_first_letters(char *string, int32 string_len,
+                                    char *buffer, int32 buffer_capacity);
+int32 utf8_char_width(uint32 rune);
+int32 utf8_characters(char *string, int32 string_len);
+int32 utf8_cut_width(char *string, int32 string_len, int32 max_width);
+int32 utf8_decode(char *string, int32 string_len, uint32 *rune);
+uint32 utf8_decode_byte(char c, int32 *i);
+int32 utf8_decode_raw(char *c, uint32 *u, int32 clen);
+int32 utf8_encode(uint32 rune, char *buffer, int32 buffer_capacity);
+char utf8_encode_byte(uint32 u, int32 i);
+int32 utf8_encode_raw(uint32 u, char *c);
+bool utf8_has_bom(char *text, int32 text_len);
+bool utf8_valid(char *text, int32 text_len, int32 *bad_offset);
+int32 utf8_next_position(char *string, int32 string_len, int32 byte);
+int32 utf8_suffix_width_position(char *string, int32 string_len,
+                                 int32 max_width);
+int32 utf8_validate(uint32 *u, int32 i);
+int32 utf8_width(char *string, int32 string_len);
 
 #if !defined(MAX_FILES_COPY)
 #define MAX_FILES_COPY 256
