@@ -485,15 +485,62 @@ itoa2(char *str, int32 size, llong num) {
 // high level, returns negative on failure
 int32
 optional_atoi2(char *str, int32 str_len, llong *result) {
-    if (str == NULL) {
+    int32 i = 0;
+    llong value = 0;
+    llong limit = -LLONG_MAX;
+    bool negative = false;
+    bool has_digit = false;
+
+    if ((str == NULL) || (result == NULL) || (str_len < 0)) {
         return -EINVAL;
     }
+
     while ((i < str_len)
            && ((str[i] == ' ') || (str[i] == '\f') || (str[i] == '\n')
                || (str[i] == '\r') || (str[i] == '\t')
                || (str[i] == '\v'))) {
         i += 1;
     }
+
+    if ((i < str_len) && ((str[i] == '-') || (str[i] == '+'))) {
+        negative = str[i] == '-';
+        if (negative) {
+            limit = LLONG_MIN;
+        }
+        i += 1;
+    }
+
+    while ((i < str_len) && (str[i] >= '0') && (str[i] <= '9')) {
+        llong digit = str[i] - '0';
+
+        has_digit = true;
+        if (value < (limit + digit)/10) {
+            return -ERANGE;
+        }
+        value = value*10 - digit;
+        i += 1;
+    }
+
+    if (!has_digit) {
+        return -EINVAL;
+    }
+
+    while ((i < str_len)
+           && ((str[i] == ' ') || (str[i] == '\f') || (str[i] == '\n')
+               || (str[i] == '\r') || (str[i] == '\t')
+               || (str[i] == '\v'))) {
+        i += 1;
+    }
+    if (i < str_len) {
+        return -EINVAL;
+    }
+
+    if (negative) {
+        *result = value;
+    } else {
+        *result = -value;
+    }
+    return 0;
 }
 
 // low level without error checking, returns 0 on invalid input.
