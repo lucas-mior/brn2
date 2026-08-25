@@ -179,7 +179,7 @@ int32 snprintf2(char *, int64, char *, ...);
 StrBuilder *str_builder_array_append(StrBuilderArray *);
 bool str_builder_array_append_copy(StrBuilderArray *, StrBuilder *);
 void str_builder_array_clear(StrBuilderArray *);
-bool str_builder_array_copy(StrBuilderArray *, StrBuilderArray *);
+int32 str_builder_array_copy(StrBuilderArray *, StrBuilderArray *);
 void str_builder_array_destroy(StrBuilderArray *);
 void str_builder_array_init(StrBuilderArray *);
 void str_builder_array_move(StrBuilderArray *, StrBuilderArray *);

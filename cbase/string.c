@@ -521,35 +521,36 @@ str_builder_array_destroy(StrBuilderArray *array) {
     return;
 }
 
-bool
+int32
 str_builder_array_copy(StrBuilderArray *dest, StrBuilderArray *source) {
     StrBuilderArray replacement;
+    int32 err;
 
     if (dest == NULL) {
-        return false;
+        return -EINVAL;
     }
     if (dest == source) {
-        return true;
+        return dest->len;
     }
 
     str_builder_array_init(&replacement);
     if (source) {
-        if (str_builder_array_reserve(&replacement, source->len) < 0) {
+        if ((err = str_builder_array_reserve(&replacement, source->len)) < 0) {
             str_builder_array_destroy(&replacement);
-            return false;
+            return err;
         }
         for (int32 i = 0; i < source->len; i += 1) {
             if (!str_builder_array_append_copy(&replacement,
                                                &source->items[i])) {
                 str_builder_array_destroy(&replacement);
-                return false;
+                return -EINVAL;
             }
         }
     }
 
     str_builder_array_destroy(dest);
     *dest = replacement;
-    return true;
+    return dest->len;
 }
 
 void
