@@ -1093,7 +1093,7 @@ read_entire_file(char *path, char **file_bytes) {
     bytes[read_len] = '\0';
     if ((err = XFCLOSE(file, path)) < 0) {
         free2(bytes, (len + 1)*SIZEOF(*bytes));
-        return -err;
+        return err;
     }
 
     *file_bytes = bytes;
