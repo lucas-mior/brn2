@@ -134,7 +134,7 @@ void *util_copy_file_async_thread(void *);
 bool util_is_integer(char *string);
 noreturn void util_segv_handler(int32);
 int32 itoa2(char *, int32, llong);
-int32 optional_atoi2(char *, int32, llong *);
+int32 parse_integer(char *, int32, llong *);
 llong atoi2(char *, int32);
 char *basename2(char *, int32 *, int32 *);
 char *begins_with(char *, int32, char *, int32);

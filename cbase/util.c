@@ -484,7 +484,7 @@ itoa2(char *str, int32 size, llong num) {
 
 // high level, returns negative on failure
 int32
-optional_atoi2(char *str, int32 str_len, llong *result) {
+parse_integer(char *str, int32 str_len, llong *result) {
     int32 i = 0;
     llong value = 0;
     llong limit = -LLONG_MAX;
