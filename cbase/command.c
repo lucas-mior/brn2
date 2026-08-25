@@ -898,7 +898,7 @@ command_child_exec(
     _exit(127);
 }
 
-bool
+int32
 command_start(Command *command, enum CommandFlag flags) {
     int stdin_pipe[2] = {-1, -1};
     int stdout_pipe[2] = {-1, -1};
@@ -911,11 +911,11 @@ command_start(Command *command, enum CommandFlag flags) {
 
     if (command->argc <= 0) {
         command_error_set(command, EINVAL);
-        return false;
+        return command_error_return(command);
     }
     if ((flags & COMMAND_DETACHED) && command_flags_capture(flags)) {
         command_error_set(command, EINVAL);
-        return false;
+        return command_error_return(command);
     }
     if ((command->stdin_buffer != NULL)
         && (flags & (COMMAND_ASYNC
@@ -923,7 +923,7 @@ command_start(Command *command, enum CommandFlag flags) {
                      |COMMAND_STDIN_TTY
                      |COMMAND_CLOSE_STDIN))) {
         command_error_set(command, EINVAL);
-        return false;
+        return command_error_return(command);
     }
 
     if (command->stdin_buffer != NULL) {
@@ -932,7 +932,7 @@ command_start(Command *command, enum CommandFlag flags) {
             command_error_set(command, errno);
             XCLOSE(&stdin_pipe[0]);
             XCLOSE(&stdin_pipe[1]);
-            return false;
+            return command_error_return(command);
         }
     }
     if (flags & COMMAND_CAPTURE_STDOUT) {
@@ -1006,7 +1006,7 @@ command_start(Command *command, enum CommandFlag flags) {
         command->result.stderr_fd = stderr_pipe[0];
     }
 
-    return true;
+    return 0;
 }
 
 bool
@@ -1058,11 +1058,15 @@ command_signal(Command *command, int32 signal_number, bool process_group) {
 
 int32
 command_run(Command *command, enum CommandFlag flags) {
+#if OS_UNIX
+    int32 err;
+#endif
+
     flags = command_flags_normalized(flags);
 
 #if OS_UNIX
-    if (!command_start(command, flags)) {
-        return command_error_return(command);
+    if ((err = command_start(command, flags)) < 0) {
+        return err;
     }
     if (flags & COMMAND_DETACHED) {
         if (!command_wait(command)) {
