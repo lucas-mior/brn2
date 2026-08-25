@@ -271,10 +271,10 @@ Exceptions to this rule are:
   test suites, then it is okay to simply pass the `char *` without the length.
 
 Considering all that, most `string.h` functions from the C standard library are
-to be avoided. `strcpy`, `strcat`, `strstr`, and `strtok` are almost always the
-wrong choice once you have the habit of always knowing the length of your
-strings. Prefer `memcpy64`, `memmem64`, or custom functions that operate on
-string with known length.
+to be avoided. `strcpy`, `strcat`, `strstr`, and `strtok` are always the wrong
+choice once you have the habit of always knowing the length of your strings.
+Prefer `memcpy64`, `memmem64`, or custom functions that operate on string with
+known length.
 
 ## Comparing strings:
 In general, avoid `strcmp()`, use the alternatives below instead:
