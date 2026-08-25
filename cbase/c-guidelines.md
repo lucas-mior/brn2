@@ -469,6 +469,10 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
   need to return a pointer, string, struct, or multiple outputs, return the
   status/result code and write the data through out-parameters.
 
+- Do not return `bool` from fallible action functions just because the caller
+  currently ignores the reason for failure. Return a signed status/result and let
+  the caller ignore the specific negative value if it does not care.
+
 ## More on if expressions
 Don't use logical negation and equality for bounds checking:
 

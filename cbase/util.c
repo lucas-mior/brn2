@@ -844,22 +844,22 @@ xkill(pid_t pid, int signum) {
 
 #endif /* !OS_WINDOWS */
 
-bool
+int32
 parse_option(char **parsed, char *arg, char *option_name) {
     char name_equal[256];
     char *tmp;
     int32 length = SNPRINTF(name_equal, "%s=", option_name);
     int32 arg_len;
     if (arg == NULL) {
-        return false;
+        return 0;
     }
     arg_len = strlen32(arg);
 
     if ((tmp = BEGINS_WITH(arg, arg_len, name_equal, length))) {
         *parsed = tmp;
-        return true;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
 bool

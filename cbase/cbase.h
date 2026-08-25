@@ -147,7 +147,7 @@ void error_async_safe(char *);
 bool is_ident_char(char);
 bool is_ident_start_char(char);
 void normalize(char *restrict, int32 *restrict);
-bool parse_option(char **, char *, char *);
+int32 parse_option(char **, char *, char *);
 char *path_basename(char *, int32);
 void print_timings(char *, int32, char *, int64,
                    struct timespec, struct timespec);
@@ -491,7 +491,7 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
 } while (0)
 
 #define PARSE_OPTION(ARG, NAME) \
-    if (parse_option(&(NAME), ARG, #NAME)) { \
+    if (parse_option(&(NAME), ARG, #NAME) > 0) { \
         continue; \
     }
 
