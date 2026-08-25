@@ -427,11 +427,12 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
 ### Return value for errors
 - Most functions should be writen in a way that they can't fail. They either
   return/do the right thing, or they exit the program. Actually, most functions
-  are really impossible to fail, so they should never exit nor return error. For
-  library-like code, it is necessary to not exit from the program, but
-  assertions from `cbase/assertions.h` are welcome. The only exception is memory
-  allocation: as of now, we don't handle out of memory conditions, always exit
-  if fail (see `cbase/memory.h` and `cbase/memory.c`).
+  are really impossible to fail (unless hardware error, but we can't detect that
+  anyway), so they should never exit nor return error. For library-like code, it
+  is necessary to not exit from the program, but assertions from
+  `cbase/assertions.h` are welcome. The only exception is memory allocation: as
+  of now, we don't handle out of memory conditions, always exit if fail (see
+  `cbase/memory.h` and `cbase/memory.c`).
 
 
 - Functions that return an index, or another form of non negative integer,
