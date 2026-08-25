@@ -433,8 +433,6 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
   `cbase/assertions.h` are welcome. The only exception is memory allocation: as
   of now, we don't handle out of memory conditions, always exit if fail (see
   `cbase/memory.h` and `cbase/memory.c`).
-
-
 - Functions that return an index, or another form of non negative integer,
   can return -1 (or other negative number if already available)
   to indicate that the function failed.
