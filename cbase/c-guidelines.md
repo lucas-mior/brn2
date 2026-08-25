@@ -419,6 +419,10 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
 }
 ```
 
+Avoid checking against `-1` for functions that return -1 or negative integer on
+error. Check `< 0` instead, since it works for the case where the negative
+result encodes an error number.
+
 ### Control flow and error handling
 - Avoid `goto`. Use it only for common cleanup logic.
 
