@@ -428,6 +428,16 @@ sb_append_byte_if_not(StrBuilder *str_builder, char byte) {
 }
 
 void
+sb_itoa(StrBuilder *str_builder, llong num) {
+    char buffer[22];
+    int32 len;
+
+    len = ITOA(buffer, num);
+    sb_append(str_builder, buffer, len);
+    return;
+}
+
+void
 sb_printf(StrBuilder *str_builder, char *fmt, ...) {
     va_list ap;
     va_list ap2;
@@ -692,6 +702,7 @@ string_functions_sink(void) {
     (void)string_from_doubles;
     (void)string_from_strings;
     (void)sb_append_byte_if_not;
+    (void)sb_itoa;
     (void)sb_move;
     (void)sb_opt_cstr;
     (void)sb_printf;
@@ -744,6 +755,20 @@ main(void) {
         ASSERT_MORE(builder.cap, old_cap);
         ASSERT_EQUAL(builder.data,
                      "0123456789abcde123456789abcde");
+        sb_free(&builder);
+    }
+
+    {
+        StrBuilder builder = {0};
+
+        SB_APPEND(&builder, "x");
+        sb_itoa(&builder, 0);
+        SB_APPEND(&builder, " ");
+        sb_itoa(&builder, -9223372036854775807LL - 1);
+        SB_APPEND(&builder, " ");
+        sb_itoa(&builder, 9223372036854775807LL);
+        ASSERT_EQUAL(builder.data,
+                     "x0 -9223372036854775808 9223372036854775807");
         sb_free(&builder);
     }
 
