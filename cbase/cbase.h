@@ -337,8 +337,8 @@ void xpthread_mutex_lock(pthread_mutex_t *mutex) ATTR_EXCLUSIVE_LOCK(*mutex);
 void xpthread_mutex_unlock(pthread_mutex_t *mutex) ATTR_UNLOCK(*mutex);
 #endif
 
-extern int xunlink(char *);
-extern bool xregular_file_exists(char *);
+int xunlink(char *);
+bool xregular_file_exists(char *);
 void test_make_temp_dir(char *, int32, char *);
 void test_remove_tree(char *);
 void test_join_path(char *, int64, char *, char *);
