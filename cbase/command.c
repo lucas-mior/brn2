@@ -1031,13 +1031,13 @@ command_wait(Command *command) {
     return 0;
 }
 
-bool
+int32
 command_signal(Command *command, int32 signal_number, bool process_group) {
     pid_t pid;
 
     if (command->result.pid <= 0) {
         command_error_set(command, EINVAL);
-        return false;
+        return command_error_return(command);
     }
 
     pid = (pid_t)command->result.pid;
@@ -1049,10 +1049,10 @@ command_signal(Command *command, int32 signal_number, bool process_group) {
         command_error_set(command, errno);
         error("Error sending signal %d to child: %s.\n",
               signal_number, strerror(errno));
-        return false;
+        return command_error_return(command);
     }
 
-    return true;
+    return 0;
 }
 #endif
 
