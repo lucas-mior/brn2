@@ -225,6 +225,11 @@ int32 square_int32(int32);
 
 INLINE UNUSED bool32
 strequal(char *s1, char *s2) {
+    if (DEBUGGING) {
+        if ((s1 == NULL) || (s2 == NULL)) {
+            TRAP();
+        }
+    }
     return !strcmp(s1, s2);
 }
 
