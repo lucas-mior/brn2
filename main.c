@@ -489,8 +489,8 @@ main(int argc, char **argv) {
 
             for (int32 i = 0; i < new->length; i += 1) {
                 int32 rand1 = rand_int();
-                float x = (float)rand1 / (float)INT32_MAX;
-                if (x < 0.4f) {
+                double x = (double)rand1 / (double)INT32_MAX;
+                if (x < 0.4) {
                     random_filename_inplace(new->files[i]->name,
                                             new->files[i]->length);
                 }
