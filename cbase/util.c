@@ -615,8 +615,9 @@ atoi2sat(char *str, int32 str_len) {
         if (value < (limit + digit)/10) {
             if (negative) {
                 return MINOF(value);
+            } else {
+                return MAXOF(value);
             }
-            return MAXOF(value);
         }
         value = value*10 - digit;
         i += 1;
