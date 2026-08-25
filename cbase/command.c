@@ -1136,11 +1136,11 @@ command_run_capture(Command *command, enum CommandFlag flags) {
     return command_run(command, flags);
 }
 
-bool
+int32
 command_run_capture_all(Command *command) {
     return command_run(command,
                        COMMAND_CAPTURE_STDOUT
-                       |COMMAND_CAPTURE_STDERR) == 0;
+                       |COMMAND_CAPTURE_STDERR);
 }
 
 bool
@@ -1644,7 +1644,7 @@ main(int argc, char **argv) {
                      "sh",
                      "-c",
                      "printf stdout; printf stderr >&2; exit 6");
-        ASSERT(command_run_capture_all(&cmd));
+        ASSERT_ZERO((command_run_capture_all(&cmd)));
         ASSERT_EQUAL(cmd.result.stdout_output, "stdout");
         ASSERT_EQUAL(cmd.result.stderr_output, "stderr");
         ASSERT_EQUAL(cmd.result.stdout_len, 6);
@@ -1680,7 +1680,7 @@ main(int argc, char **argv) {
             ASSERT_ZERO((command_stdin_buffer_set(&cmd,
                                                   stdin_data,
                                                   COMMAND_STDIN_TEST_LEN)));
-            ASSERT(command_run_capture_all(&cmd));
+            ASSERT_ZERO((command_run_capture_all(&cmd)));
             ASSERT_EQUAL(cmd.result.stdout_output, "done");
             ASSERT_ZERO(cmd.result.status);
             free2(stdin_data, COMMAND_STDIN_TEST_LEN);
@@ -1701,7 +1701,7 @@ main(int argc, char **argv) {
             ASSERT_ZERO((command_stdin_buffer_set(&cmd,
                                                   stdin_data,
                                                   COMMAND_EPIPE_TEST_LEN)));
-            ASSERT(command_run_capture_all(&cmd));
+            ASSERT_ZERO((command_run_capture_all(&cmd)));
             ASSERT_EQUAL(cmd.result.status, 3);
             free2(stdin_data, COMMAND_EPIPE_TEST_LEN);
         }
@@ -1789,7 +1789,7 @@ main(int argc, char **argv) {
                      "cmd",
                      "/C",
                      "echo stdout&echo stderr>&2&exit /B 6");
-        ASSERT(command_run_capture_all(&cmd));
+        ASSERT_ZERO((command_run_capture_all(&cmd)));
         ASSERT_EQUAL(cmd.result.stdout_output, "stdout\r\n");
         ASSERT_EQUAL(cmd.result.stderr_output, "stderr\r\n");
         ASSERT_EQUAL(cmd.result.stdout_len, 8);
