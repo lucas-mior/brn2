@@ -558,13 +558,6 @@ atoi2(char *str, int32 str_len) {
     llong value = 0;
     llong sign = 1;
 
-    if (DEBUGGING) {
-        char buffer[128];
-        int32 buffer_len;
-        buffer_len = itoa2(buffer, SIZEOF(buffer), LLONG_MAX);
-        ASSERT_LESS_EQUAL(str_len, buffer_len);
-    }
-
     if ((str == NULL) || (str_len <= 0)) {
         return 0;
     }
@@ -577,7 +570,14 @@ atoi2(char *str, int32 str_len) {
     }
 
     while ((i < str_len) && (str[i] >= '0') && (str[i] <= '9')) {
-        value = value*10 + str[i] - '0';
+        llong digit = str[i] - '0';
+
+        if (DEBUGGING) {
+            if (value > (MAXOF(value) - digit)/10) {
+                return 0;
+            }
+        }
+        value = value*10 + digit;
         i += 1;
     }
 
