@@ -536,8 +536,8 @@ main(int argc, char **argv) {
             if (old->length != new->length) {
                 error("You are renaming " RED("%d") " file%.*s "
                       "but buffer contains " RED("%d") " file name%.*s\n",
-                      old->length, old->length != 1, "s", new->length,
-                      new->length != 1, "s");
+                      old->length, old->length != 1, "s",
+                      new->length, new->length != 1, "s");
                 brn2_free_list(new);
                 printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
