@@ -110,7 +110,7 @@ main(int argc, char **argv) {
     char *editor;
     char *directory = ".";
     char *lines = NULL;
-    char *lines_test = NULL;
+    char *lines_target = NULL;
     enum Brn2InputMode mode = FILES_FROM_DIR;
     int32 opt;
 
@@ -144,7 +144,7 @@ main(int argc, char **argv) {
             if (optarg == NULL) {
                 brn2_usage(stderr);
             }
-            lines_test = optarg;
+            lines_target = optarg;
             break;
         case '?':
             brn2_usage(stderr);
@@ -186,7 +186,7 @@ main(int argc, char **argv) {
     }
 
 #if BRN2_BENCHMARK
-    (void)lines_test;
+    (void)lines_target;
 #endif
 
     available_threads = util_nthreads();
@@ -467,7 +467,7 @@ main(int argc, char **argv) {
             int32 status;
             Command command = {0};
 
-            if (lines_test == NULL) {
+            if (lines_target == NULL) {
                 if (isatty(fileno(stdin))) {
                     clearerr(stdin);
                 } else {
@@ -521,7 +521,7 @@ main(int argc, char **argv) {
                 }
                 brn2_list_from_file(new, brn2_buffer.name, false);
             } else {
-                brn2_list_from_file(new, lines_test, false);
+                brn2_list_from_file(new, lines_target, false);
             }
 
             if (new->length <= 0) {
