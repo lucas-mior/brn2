@@ -307,8 +307,6 @@ main(int argc, char **argv) {
         printf("Normalizing filenames...\n");
     }
 
-    printf("ALIGNMENT: %lld\n", (llong)ALIGNMENT);
-
 #if BRN2_NORMALIZE_NAMES_BENCHMARK
     {
         struct timespec normalize_t0;
