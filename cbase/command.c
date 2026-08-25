@@ -1261,21 +1261,23 @@ command_push_array(Command *command, int32 argc, char **argv) {
     return;
 }
 
-bool
+int32
 command_stdin_buffer_set(Command *command, char *data, int64 data_len) {
     if (command == NULL) {
-        return false;
+        return -EINVAL;
     }
     if (data_len < 0) {
-        return false;
+        command_error_set(command, EINVAL);
+        return command_error_return(command);
     }
     if (data == NULL) {
-        return false;
+        command_error_set(command, EINVAL);
+        return command_error_return(command);
     }
 
     command->stdin_buffer = data;
     command->stdin_buffer_len = data_len;
-    return true;
+    return 0;
 }
 
 void
@@ -1653,7 +1655,7 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
 
         COMMAND_PUSH(&cmd, "cat");
-        ASSERT(command_stdin_buffer_set(&cmd, STRLIT("stdin-buffer")));
+        ASSERT_ZERO((command_stdin_buffer_set(&cmd, STRLIT("stdin-buffer"))));
         ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
         ASSERT_EQUAL(cmd.result.stdout_output, "stdin-buffer");
         ASSERT_ZERO(cmd.result.status);
@@ -1661,7 +1663,7 @@ main(int argc, char **argv) {
         command_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
         ASSERT(cmd.stdin_buffer == NULL);
-        ASSERT(!command_stdin_buffer_set(&cmd, NULL, 0));
+        ASSERT_NEGATIVE((command_stdin_buffer_set(&cmd, NULL, 0)));
 
         {
             enum {
@@ -1675,9 +1677,9 @@ main(int argc, char **argv) {
                          "sh",
                          "-c",
                          "cat >/dev/null; printf done");
-            ASSERT(command_stdin_buffer_set(&cmd,
-                                            stdin_data,
-                                            COMMAND_STDIN_TEST_LEN));
+            ASSERT_ZERO((command_stdin_buffer_set(&cmd,
+                                                  stdin_data,
+                                                  COMMAND_STDIN_TEST_LEN)));
             ASSERT(command_run_capture_all(&cmd));
             ASSERT_EQUAL(cmd.result.stdout_output, "done");
             ASSERT_ZERO(cmd.result.status);
@@ -1696,9 +1698,9 @@ main(int argc, char **argv) {
             stdin_data = malloc2(COMMAND_EPIPE_TEST_LEN);
             memset64(stdin_data, 'x', COMMAND_EPIPE_TEST_LEN);
             COMMAND_PUSH(&cmd, "sh", "-c", "exit 3");
-            ASSERT(command_stdin_buffer_set(&cmd,
-                                            stdin_data,
-                                            COMMAND_EPIPE_TEST_LEN));
+            ASSERT_ZERO((command_stdin_buffer_set(&cmd,
+                                                  stdin_data,
+                                                  COMMAND_EPIPE_TEST_LEN)));
             ASSERT(command_run_capture_all(&cmd));
             ASSERT_EQUAL(cmd.result.status, 3);
             free2(stdin_data, COMMAND_EPIPE_TEST_LEN);
@@ -1711,7 +1713,7 @@ main(int argc, char **argv) {
             char *empty_input = "";
 
             COMMAND_PUSH(&cmd, "cat");
-            ASSERT(command_stdin_buffer_set(&cmd, empty_input, 0));
+            ASSERT_ZERO((command_stdin_buffer_set(&cmd, empty_input, 0)));
             ASSERT(command_run_capture(&cmd, COMMAND_CAPTURE_STDOUT));
             ASSERT_EQUAL(cmd.result.stdout_output, "");
             ASSERT_ZERO(cmd.result.status);

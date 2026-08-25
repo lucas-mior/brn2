@@ -590,7 +590,7 @@ void command_push_owned_length(
     int32
 );
 void command_push_split(Command *, char *, char *);
-bool command_stdin_buffer_set(Command *, char *, int64);
+int32 command_stdin_buffer_set(Command *, char *, int64);
 void command_stdin_buffer_clear(Command *);
 void command_reset(Command *);
 void command_result_append(
