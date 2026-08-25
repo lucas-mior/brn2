@@ -263,22 +263,22 @@ sb_clear(StrBuilder *str_builder) {
     return;
 }
 
-bool
+int32
 sb_copy(StrBuilder *dest, StrBuilder *source) {
     if (dest == NULL) {
-        return false;
+        return -EINVAL;
     }
     if (dest == source) {
-        return true;
+        return dest->len;
     }
     if (source == NULL) {
         sb_free(dest);
-        return true;
+        return dest->len;
     }
 
     sb_clear(dest);
     sb_append(dest, source->data, source->len);
-    return true;
+    return dest->len;
 }
 
 void
@@ -666,10 +666,10 @@ str_builder_array_append_copy(StrBuilderArray *array, StrBuilder *item) {
     dest = &array->items[index];
     array->len += 1;
     sb_init(dest);
-    if (!sb_copy(dest, item)) {
+    if ((err = sb_copy(dest, item)) < 0) {
         array->len -= 1;
         sb_free(dest);
-        return -EINVAL;
+        return err;
     }
     return index;
 }

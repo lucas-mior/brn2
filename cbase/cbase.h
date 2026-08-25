@@ -164,7 +164,7 @@ void sb_append(StrBuilder *, char *, int32);
 void sb_append_byte(StrBuilder *, char);
 void sb_append_byte_if_not(StrBuilder *, char);
 void sb_clear(StrBuilder *);
-bool sb_copy(StrBuilder *, StrBuilder *);
+int32 sb_copy(StrBuilder *, StrBuilder *);
 void sb_free(StrBuilder *);
 void sb_init(StrBuilder *);
 void sb_move(StrBuilder *, StrBuilder *);
