@@ -14,10 +14,6 @@
 #include "platform_detection.h"
 #include "libc.h"
 
-#if !defined(CBASE_PRIVATE)
-#define CBASE_PRIVATE static
-#endif
-
 #define S(...) #__VA_ARGS__
 #define QUOTE(x) S(x)
 
