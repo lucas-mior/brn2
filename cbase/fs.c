@@ -336,34 +336,36 @@ util_filename_from(char *buffer, int64 size, int fd) {
     buffer[len] = '\0';
     return (int32)len;
 #elif OS_WINDOWS
-    HANDLE h;
-    DWORD len;
-    intptr h2 = _get_osfhandle(fd);
+    {
+        HANDLE h;
+        DWORD len;
+        intptr h2 = _get_osfhandle(fd);
 
-    if ((h = (HANDLE)h2) == INVALID_HANDLE_VALUE) {
-        return -EINVAL;
-    }
-    if (size > MAXOF((DWORD)0)) {
-        return -EINVAL;
-    }
+        if ((h = (HANDLE)h2) == INVALID_HANDLE_VALUE) {
+            return -EINVAL;
+        }
+        if (size > MAXOF((DWORD)0)) {
+            return -EINVAL;
+        }
 
-    len = GetFinalPathNameByHandleA(h, buffer, (DWORD)size,
-                                    FILE_NAME_NORMALIZED);
+        len = GetFinalPathNameByHandleA(h, buffer, (DWORD)size,
+                                        FILE_NAME_NORMALIZED);
 
-    if (len <= 0) {
-        windows_set_errno(GetLastError());
-        return -errno;
-    }
-    if (len >= size) {
-        return -ENAMETOOLONG;
-    }
+        if (len <= 0) {
+            windows_set_errno(GetLastError());
+            return -errno;
+        }
+        if (len >= size) {
+            return -ENAMETOOLONG;
+        }
 
-    if (strncmp32(buffer, "\\\\?\\", 4) == 0) {
-        memmove64(buffer, buffer + 4, len - 3);
-        len -= 4;
-    }
+        if (strncmp32(buffer, "\\\\?\\", 4) == 0) {
+            memmove64(buffer, buffer + 4, len - 3);
+            len -= 4;
+        }
 
-    return (int32)len;
+        return (int32)len;
+    }
 #else
     (void)fd;
     return -ENOSYS;
