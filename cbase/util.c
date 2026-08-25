@@ -545,7 +545,7 @@ parse_integer(char *str, int32 str_len, llong *result) {
 
 // low level without error checking, returns 0 on invalid input.
 // only to be used in the following situations:
-// - when the string was pre-parsed, 
+// - when the string was pre-parsed,
 //   so we know that it will not get invalid input
 // - or when the caller only needs positive values;
 //   in this case, zero is used as one of:
@@ -556,15 +556,17 @@ llong
 atoi2(char *str, int32 str_len) {
     int32 i = 0;
     llong value = 0;
-    llong sign = 1;
+    llong limit = -MAXOF(value);
+    bool negative = false;
 
     if ((str == NULL) || (str_len <= 0)) {
         return 0;
     }
 
     if ((i < str_len) && ((str[i] == '-') || (str[i] == '+'))) {
-        if (str[i] == '-') {
-            sign = -1;
+        negative = str[i] == '-';
+        if (negative) {
+            limit = MINOF(value);
         }
         i += 1;
     }
@@ -573,15 +575,57 @@ atoi2(char *str, int32 str_len) {
         llong digit = str[i] - '0';
 
         if (DEBUGGING) {
-            if (value > (MAXOF(value) - digit)/10) {
+            if (value < (limit + digit)/10) {
                 TRAP("overflow");
             }
         }
-        value = value*10 + digit;
+        value = value*10 - digit;
         i += 1;
     }
 
-    return sign*value;
+    if (negative) {
+        return value;
+    }
+    return -value;
+}
+
+// Like atoi2, but saturates on overflow instead of trapping.
+llong
+atoi2sat(char *str, int32 str_len) {
+    int32 i = 0;
+    llong value = 0;
+    llong limit = -MAXOF(value);
+    bool negative = false;
+
+    if ((str == NULL) || (str_len <= 0)) {
+        return 0;
+    }
+
+    if ((i < str_len) && ((str[i] == '-') || (str[i] == '+'))) {
+        negative = str[i] == '-';
+        if (negative) {
+            limit = MINOF(value);
+        }
+        i += 1;
+    }
+
+    while ((i < str_len) && (str[i] >= '0') && (str[i] <= '9')) {
+        llong digit = str[i] - '0';
+
+        if (value < (limit + digit)/10) {
+            if (negative) {
+                return MINOF(value);
+            }
+            return MAXOF(value);
+        }
+        value = value*10 - digit;
+        i += 1;
+    }
+
+    if (negative) {
+        return value;
+    }
+    return -value;
 }
 
 void ATTR_PRINTF(4, 5)
@@ -1037,6 +1081,7 @@ util_functions_sink(void) {
     (void)free_debug;
 
     (void)atoi2;
+    (void)atoi2sat;
 #if OS_UNIX
     (void)command_run_capture;
     (void)command_run_sync;
@@ -1322,7 +1367,22 @@ main(int argc, char **argv) {
     ASSERT_EQUAL(atoi2("-123x", 4), -123);
     ASSERT_EQUAL(atoi2("99", 1), 9);
     ASSERT_EQUAL(atoi2("42", 0), 0);
-    ASSERT_TRAPS(atoi2(STRLIT("9999999999999999999999999999999999")), 0);
+    ASSERT_EQUAL(atoi2(STRLIT("9223372036854775807")), LLONG_MAX);
+    ASSERT_EQUAL(atoi2(STRLIT("-9223372036854775808")), LLONG_MIN);
+    ASSERT_TRAPS(atoi2(STRLIT("9223372036854775808")));
+    ASSERT_TRAPS(atoi2(STRLIT("-9223372036854775809")));
+
+    ASSERT_EQUAL(atoi2sat("-123x", 4), -123);
+    ASSERT_EQUAL(atoi2sat("99", 1), 9);
+    ASSERT_EQUAL(atoi2sat("42", 0), 0);
+    ASSERT_EQUAL(atoi2sat(STRLIT("9223372036854775807")), LLONG_MAX);
+    ASSERT_EQUAL(atoi2sat(STRLIT("-9223372036854775808")), LLONG_MIN);
+    ASSERT_EQUAL(atoi2sat(STRLIT("9223372036854775808")), LLONG_MAX);
+    ASSERT_EQUAL(atoi2sat(STRLIT("-9223372036854775809")), LLONG_MIN);
+    ASSERT_EQUAL(atoi2sat(STRLIT("999999999999999999999999999999")),
+                 LLONG_MAX);
+    ASSERT_EQUAL(atoi2sat(STRLIT("-999999999999999999999999999999")),
+                 LLONG_MIN);
 
     {
         int32 n;
