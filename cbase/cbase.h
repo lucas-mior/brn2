@@ -491,7 +491,7 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
 } while (0)
 
 #define PARSE_OPTION(ARG, NAME) \
-    if (parse_option(&(NAME), ARG, #NAME) > 0) { \
+    if (parse_option(&(NAME), ARG, #NAME) >= 0) { \
         continue; \
     }
 

@@ -851,15 +851,15 @@ parse_option(char **parsed, char *arg, char *option_name) {
     int32 length = SNPRINTF(name_equal, "%s=", option_name);
     int32 arg_len;
     if (arg == NULL) {
-        return 0;
+        return -1;
     }
     arg_len = strlen32(arg);
 
     if ((tmp = BEGINS_WITH(arg, arg_len, name_equal, length))) {
         *parsed = tmp;
-        return 1;
+        return 0;
     }
-    return 0;
+    return -1;
 }
 
 bool
