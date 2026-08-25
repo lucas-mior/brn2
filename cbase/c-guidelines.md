@@ -426,7 +426,14 @@ for (int32 i = 0; i < LENGTH(some_array); i += 1) {
 
 ### Return value for errors
 - Functions that return an index, or another form of non negative integer,
-  can return -1 to indicate that the function failed.
+  can return -1 (or other negative number if already available)
+  to indicate that the function failed.
+  * Check for errors in those functions by doing:
+    ```c
+    if ((idx = my_function()) < 0) {
+        // error condition
+    }
+    ```
 - Functions that return a pointer can return NULL in case they fail
 - Other functions can return a `bool`: `true` means that the functions succeded,
   `false` means that the function failed. If information about the error could
