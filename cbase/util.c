@@ -483,8 +483,35 @@ itoa2(char *str, int32 size, llong num) {
 }
 
 long
-atoi2(char *str) {
-    return atoi(str);
+atoi2(char *str, int32 str_len) {
+    int32 i = 0;
+    long value = 0;
+    long sign = 1;
+
+    if ((str == NULL) || (str_len <= 0)) {
+        return 0;
+    }
+
+    while ((i < str_len)
+           && ((str[i] == ' ') || (str[i] == '\f') || (str[i] == '\n')
+               || (str[i] == '\r') || (str[i] == '\t')
+               || (str[i] == '\v'))) {
+        i += 1;
+    }
+
+    if ((i < str_len) && ((str[i] == '-') || (str[i] == '+'))) {
+        if (str[i] == '-') {
+            sign = -1;
+        }
+        i += 1;
+    }
+
+    while ((i < str_len) && (str[i] >= '0') && (str[i] <= '9')) {
+        value = value*10 + str[i] - '0';
+        i += 1;
+    }
+
+    return sign*value;
 }
 
 void ATTR_PRINTF(4, 5)
@@ -1218,9 +1245,13 @@ main(int argc, char **argv) {
     for (int i = 0; i < 10; i += 1) {
         int n = rand_int() - INT32_MAX / 2;
         char itoa_buffer[32];
-        ITOA(itoa_buffer, n);
-        ASSERT_EQUAL(atoi2(itoa_buffer), n);
+        int32 itoa_len = ITOA(itoa_buffer, n);
+        ASSERT_EQUAL(atoi2(itoa_buffer, itoa_len), n);
     }
+
+    ASSERT_EQUAL(atoi2("  -123x", 7), -123);
+    ASSERT_EQUAL(atoi2("99", 1), 9);
+    ASSERT_EQUAL(atoi2("42", 0), 0);
 
     {
         int32 n;
