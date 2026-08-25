@@ -310,18 +310,20 @@ util_filename_from(char *buffer, int64 size, int fd) {
     }
 
 #if OS_LINUX
-    char linkpath[64];
-    ssize_t len;
+    {
+        char linkpath[64];
+        ssize_t len;
 
-    SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
-    if ((len = readlink(linkpath, buffer, (size_t)(size - 1))) < 0) {
-        return -errno;
+        SNPRINTF(linkpath, "/proc/self/fd/%d", fd);
+        if ((len = readlink(linkpath, buffer, (size_t)(size - 1))) < 0) {
+            return -errno;
+        }
+        if (len > MAXOF((int32)0)) {
+            return -ENAMETOOLONG;
+        }
+        buffer[len] = '\0';
+        return (int32)len;
     }
-    if (len > MAXOF((int32)0)) {
-        return -ENAMETOOLONG;
-    }
-    buffer[len] = '\0';
-    return (int32)len;
 #elif CBASE_HAS_F_GETPATH
     static char buffer2[MAXPATHLEN];
     int64 len;
