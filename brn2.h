@@ -36,7 +36,7 @@
 #endif
 
 typedef struct File {
-    char name[124];
+    char path[124];
     int32 fd;
     FILE *stream;
 } File;

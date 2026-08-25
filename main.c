@@ -63,9 +63,9 @@ write_fatal(int32 fd, char *buffer, int64 size, int32 line) {
 static void
 delete_brn2_buffer(void) {
     if (!DEBUGGING) {
-        unlink(brn2_buffer.name);
+        unlink(brn2_buffer.path);
         if (brn2_options_vim_split) {
-            unlink(brn2_buffer_old.name);
+            unlink(brn2_buffer_old.path);
         }
     }
     return;
@@ -121,7 +121,7 @@ main_edit_buffer(FileList *new, char *editor) {
         COMMAND_PUSH(
             &command,
             "vim",
-            "-O", brn2_buffer_old.name, brn2_buffer.name,
+            "-O", brn2_buffer_old.path, brn2_buffer.path,
             "-c",
             "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
             "-c",
@@ -130,7 +130,7 @@ main_edit_buffer(FileList *new, char *editor) {
             " | au QuitPre */brn2.* quitall"
         );
     } else {
-        COMMAND_PUSH(&command, editor, brn2_buffer.name);
+        COMMAND_PUSH(&command, editor, brn2_buffer.path);
     }
 
     status = main_command_run(&command);
@@ -140,7 +140,7 @@ main_edit_buffer(FileList *new, char *editor) {
         if (OS_WINDOWS) {
             Command command_windows = {0};
 
-            COMMAND_PUSH(&command_windows, "Notepad.exe", brn2_buffer.name);
+            COMMAND_PUSH(&command_windows, "Notepad.exe", brn2_buffer.path);
             if (main_command_run(&command_windows) < 0) {
                 command_free(&command_windows);
                 fatal(EXIT_FAILURE);
@@ -150,7 +150,7 @@ main_edit_buffer(FileList *new, char *editor) {
             fatal(EXIT_FAILURE);
         }
     }
-    brn2_list_from_file(new, brn2_buffer.name, false);
+    brn2_list_from_file(new, brn2_buffer.path, false);
     return;
 }
 
@@ -381,10 +381,10 @@ main(int argc, char **argv) {
         }
 #endif
 
-        SNPRINTF(brn2_buffer.name, "%s/%s", temp, "brn2.new.XXXXXX");
-        if ((brn2_buffer.fd = mkstemp(brn2_buffer.name)) < 0) {
+        SNPRINTF(brn2_buffer.path, "%s/%s", temp, "brn2.new.XXXXXX");
+        if ((brn2_buffer.fd = mkstemp(brn2_buffer.path)) < 0) {
             error("Error opening '%s': %s.\n",
-                  brn2_buffer.name, strerror(errno));
+                  brn2_buffer.path, strerror(errno));
             fatal(EXIT_FAILURE);
         }
 #if CC_GCC || CC_CLANG
@@ -392,10 +392,10 @@ main(int argc, char **argv) {
 #endif
 
         if (brn2_options_vim_split) {
-            SNPRINTF(brn2_buffer_old.name, "%s/%s", temp, "brn2.old.XXXXXX");
-            if ((brn2_buffer_old.fd = mkstemp(brn2_buffer_old.name)) < 0) {
+            SNPRINTF(brn2_buffer_old.path, "%s/%s", temp, "brn2.old.XXXXXX");
+            if ((brn2_buffer_old.fd = mkstemp(brn2_buffer_old.path)) < 0) {
                 error("Error opening '%s': %s.\n",
-                      brn2_buffer_old.name, strerror(errno));
+                      brn2_buffer_old.path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
         }
