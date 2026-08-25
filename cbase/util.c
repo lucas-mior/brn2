@@ -448,10 +448,7 @@ itoa2(char *str, int32 size, llong num) {
     int i = 0;
     bool negative = false;
 
-    if (size < 22) {
-        error("Error in itoa2: buffer is too small.\n");
-        fatal(EXIT_FAILURE);
-    }
+    ASSERT(size >= 22);
 
     if (num < 0) {
         negative = true;
