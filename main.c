@@ -96,6 +96,64 @@ xarena_create(int64 size, char *name) {
     return arena;
 }
 
+static void
+main_edit_buffer(FileList *new, char *editor) {
+    int32 status;
+    Command command = {0};
+
+    if (isatty(fileno(stdin))) {
+        clearerr(stdin);
+    } else {
+        char *tty_path;
+        if (OS_WINDOWS) {
+            tty_path = "CONIN$";
+        } else {
+            tty_path = "/dev/tty";
+        }
+
+        if (freopen(tty_path, "r", stdin) == NULL) {
+            error("Error reopening stdin: %s.\n", strerror(errno));
+            fatal(EXIT_FAILURE);
+        }
+    }
+
+    if (brn2_options_vim_split) {
+        COMMAND_PUSH(
+            &command,
+            "vim",
+            "-O", brn2_buffer_old.name, brn2_buffer.name,
+            "-c",
+            "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
+            "-c",
+            "wincmd l | set scrollbind cursorbind",
+            "-c",
+            " | au QuitPre */brn2.* quitall"
+        );
+    } else {
+        COMMAND_PUSH(&command, editor, brn2_buffer.name);
+    }
+
+    status = main_command_run(&command);
+    command_free(&command);
+
+    if (status != 0) {
+        if (OS_WINDOWS) {
+            Command command_windows = {0};
+
+            COMMAND_PUSH(&command_windows, "Notepad.exe", brn2_buffer.name);
+            if (main_command_run(&command_windows) < 0) {
+                command_free(&command_windows);
+                fatal(EXIT_FAILURE);
+            }
+            command_free(&command_windows);
+        } else {
+            fatal(EXIT_FAILURE);
+        }
+    }
+    brn2_list_from_file(new, brn2_buffer.name, false);
+    return;
+}
+
 int
 main(int argc, char **argv) {
     FileList old_stack = {0};
@@ -467,61 +525,7 @@ main(int argc, char **argv) {
             if (lines_target) {
                 brn2_list_from_file(new, lines_target, false);
             } else {
-                int32 status;
-                Command command = {0};
-
-                if (isatty(fileno(stdin))) {
-                    clearerr(stdin);
-                } else {
-                    char *tty_path;
-                    if (OS_WINDOWS) {
-                        tty_path = "CONIN$";
-                    } else {
-                        tty_path = "/dev/tty";
-                    }
-
-                    if (freopen(tty_path, "r", stdin) == NULL) {
-                        error("Error reopening stdin: %s.\n", strerror(errno));
-                        fatal(EXIT_FAILURE);
-                    }
-                }
-
-                if (brn2_options_vim_split) {
-                    COMMAND_PUSH(
-                        &command,
-                        "vim",
-                        "-O", brn2_buffer_old.name, brn2_buffer.name,
-                        "-c",
-                        "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
-                        "-c",
-                        "wincmd l | set scrollbind cursorbind",
-                        "-c",
-                        " | au QuitPre */brn2.* quitall"
-                    );
-                } else {
-                    COMMAND_PUSH(&command, editor, brn2_buffer.name);
-                }
-
-                status = main_command_run(&command);
-                command_free(&command);
-
-                if (status != 0) {
-                    if (OS_WINDOWS) {
-                        Command command_windows = {0};
-
-                        COMMAND_PUSH(&command_windows,
-                                     "Notepad.exe",
-                                     brn2_buffer.name);
-                        if (main_command_run(&command_windows) < 0) {
-                            command_free(&command_windows);
-                            fatal(EXIT_FAILURE);
-                        }
-                        command_free(&command_windows);
-                    } else {
-                        fatal(EXIT_FAILURE);
-                    }
-                }
-                brn2_list_from_file(new, brn2_buffer.name, false);
+                main_edit_buffer(new, editor);
             }
 
             if (new->length <= 0) {
