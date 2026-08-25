@@ -239,8 +239,14 @@ strequal2(char *a, int32 a_len, char *b, int32 b_len) {
 
 INLINE UNUSED bool32
 optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
-    if ((a == NULL) || (b == NULL)) {
+    if (a && (b == NULL)) {
         return false;
+    }
+    if (b && (a == NULL)) {
+        return false;
+    }
+    if ((a == NULL) && (b == NULL)) {
+        return true;
     }
 
     return strequal2(a, a_len, b, b_len);
