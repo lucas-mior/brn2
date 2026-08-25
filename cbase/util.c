@@ -574,7 +574,7 @@ atoi2(char *str, int32 str_len) {
 
         if (DEBUGGING) {
             if (value > (MAXOF(value) - digit)/10) {
-                return 0;
+                TRAP();
             }
         }
         value = value*10 + digit;
