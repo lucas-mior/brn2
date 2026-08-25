@@ -429,11 +429,12 @@ sb_append_byte_if_not(StrBuilder *str_builder, char byte) {
 
 void
 sb_itoa(StrBuilder *str_builder, llong num) {
-    char buffer[22];
     int32 len;
 
-    len = ITOA(buffer, num);
-    sb_append(str_builder, buffer, len);
+    sb_reserve(str_builder, 21);
+    len = itoa2(str_builder->data + str_builder->len,
+                str_builder->cap - str_builder->len, num);
+    str_builder->len += len;
     return;
 }
 
