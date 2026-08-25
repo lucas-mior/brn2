@@ -1117,7 +1117,11 @@ write_entire_file(char *path, char *text, int64 text_len) {
         return false;
     }
 
-    if ((text_len > 0) && (fwrite64(text, 1, text_len, file) != text_len)) {
+    if (text_len == 0) {
+        return true;
+    }
+
+    if (fwrite64(text, 1, text_len, file) != text_len) {
         error("Error writing %lld bytes to %s: %s.",
               text_len, path, strerror(errno));
         XFCLOSE(file, path);
