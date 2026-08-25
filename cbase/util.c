@@ -482,11 +482,19 @@ itoa2(char *str, int32 size, llong num) {
     return i;
 }
 
+// low level without error checking.
 llong
 atoi2(char *str, int32 str_len) {
     int32 i = 0;
     llong value = 0;
     llong sign = 1;
+
+    if (DEBUGGING) {
+        char buffer[128];
+        int32 buffer_len;
+        buffer_len = itoa2(buffer, SIZEOF(buffer), LLONG_MAX);
+        ASSERT_LESS(str_len, buffer_len);
+    }
 
     if ((str == NULL) || (str_len <= 0)) {
         return 0;
