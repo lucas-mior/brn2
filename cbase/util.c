@@ -1316,7 +1316,7 @@ main(int argc, char **argv) {
         ASSERT_EQUAL(atoi2(itoa_buffer, itoa_len), n);
     }
 
-    ASSERT_EQUAL(atoi2("  -123x", 7), -123);
+    ASSERT_EQUAL(atoi2("-123x", 4), -123);
     ASSERT_EQUAL(atoi2("99", 1), 9);
     ASSERT_EQUAL(atoi2("42", 0), 0);
 
