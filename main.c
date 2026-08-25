@@ -488,9 +488,7 @@ main(int argc, char **argv) {
                     COMMAND_PUSH(
                         &command,
                         "vim",
-                        "-O",
-                        brn2_buffer_old.name,
-                        brn2_buffer.name,
+                        "-O", brn2_buffer_old.name, brn2_buffer.name,
                         "-c",
                         "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
                         "-c",
