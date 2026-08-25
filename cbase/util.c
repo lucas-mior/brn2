@@ -574,7 +574,7 @@ atoi2(char *str, int32 str_len) {
 
         if (DEBUGGING) {
             if (value > (MAXOF(value) - digit)/10) {
-                TRAP();
+                TRAP("overflow");
             }
         }
         value = value*10 + digit;
@@ -1322,6 +1322,7 @@ main(int argc, char **argv) {
     ASSERT_EQUAL(atoi2("-123x", 4), -123);
     ASSERT_EQUAL(atoi2("99", 1), 9);
     ASSERT_EQUAL(atoi2("42", 0), 0);
+    ASSERT_TRAPS(atoi2(STRLIT("9999999999999999999999999999999999")), 0);
 
     {
         int32 n;
