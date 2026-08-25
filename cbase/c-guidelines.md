@@ -293,7 +293,7 @@ In general, avoid `strcmp()`, use the alternatives below instead:
 ## Checking if a string begins or ends with something:
 Don't use `strncmp` to check if a string begins or ends with something.
 Instead use:
-- `BEGINS_WITH(string, string_len, "suffix_as_literal")` or
+- `BEGINS_WITH(string, string_len, "prefix_as_literal")` or
   `BEGINS_WITH(string, string_len, prefix, prefix_len)`
 - `ENDS_WITH(string, string_len, "suffix_as_literal")` or
   `ENDS_WITH(string, string_len, suffix, suffix_len)`
