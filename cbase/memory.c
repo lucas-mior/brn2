@@ -912,8 +912,8 @@ typedef struct TestString {
     if (sigsetjmp(test_jump_env, 1) == 0) { \
         BLOCK; \
         fprintf(stderr, \
-                "Error: Code block at %s:%d did not fail as expected.\n", \
-                __FILE__, __LINE__); \
+                "Error: Code block at %s:%d:%s() did not fail as expected.\n", \
+                __FILE__, __LINE__, FUNC__); \
         exit(EXIT_FAILURE); \
     } \
     ASSERT(caught_expected_fail); \
