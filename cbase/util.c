@@ -482,6 +482,12 @@ itoa2(char *str, int32 size, llong num) {
     return i;
 }
 
+// high level, returns negative on failure
+int32
+optional_atoi2(char *str, int32 str_len, llong *result) {
+    return -EINVAL;
+}
+
 // low level without error checking.
 llong
 atoi2(char *str, int32 str_len) {
