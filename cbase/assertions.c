@@ -146,6 +146,96 @@ assert_glob_match_failed(char *file, int32 line, char *func,
     return;
 }
 
+#define GENERATE_ASSERT_SIGNED(MODE, SYMBOL, EXPECTED)                         \
+void                                                                           \
+a_sign_signed_##MODE(char *file, int32 line, char *func,                       \
+                     char *name, llong var) {                                  \
+    if (!(var SYMBOL 0)) {                                                     \
+        assert_error(file, line, func, "%s = %lld " EXPECTED "\n", name, var); \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
+}
+
+GENERATE_ASSERT_SIGNED(positive, >, "> 0")
+GENERATE_ASSERT_SIGNED(negative, <, "< 0")
+GENERATE_ASSERT_SIGNED(non_positive, <=, "<= 0")
+GENERATE_ASSERT_SIGNED(non_negative, >=, ">= 0")
+
+#undef GENERATE_ASSERT_SIGNED
+
+void
+a_sign_unsigned_positive(char *file, int32 line, char *func,
+                         char *name, ullong var) {
+    if (var == 0) {
+        assert_error(file, line, func, "%s = %llu > 0\n", name, var);
+        if (!DEBUGGING) {
+            UNREACHABLE();
+        }
+        TRAP();
+    }
+    return;
+}
+
+void
+a_sign_unsigned_negative(char *file, int32 line, char *func,
+                         char *name, ullong var) {
+    assert_error(file, line, func, "%s = %llu < 0\n", name, var);
+    if (!DEBUGGING) {
+        UNREACHABLE();
+    }
+    TRAP();
+}
+
+void
+a_sign_unsigned_non_positive(char *file, int32 line, char *func,
+                             char *name, ullong var) {
+    if (var > 0) {
+        assert_error(file, line, func, "%s = %llu <= 0\n", name, var);
+        if (!DEBUGGING) {
+            UNREACHABLE();
+        }
+        TRAP();
+    }
+    return;
+}
+
+void
+a_sign_unsigned_non_negative(char *file, int32 line, char *func,
+                             char *name, ullong var) {
+    (void)file;
+    (void)line;
+    (void)func;
+    (void)name;
+    (void)var;
+    return;
+}
+
+#define GENERATE_ASSERT_DOUBLE_SIGN(MODE, SYMBOL, EXPECTED)                    \
+void                                                                           \
+a_sign_double_##MODE(char *file, int32 line, char *func,                       \
+                     char *name, double var) {                                 \
+    if (!(var SYMBOL (double)0)) {                                             \
+        assert_error(file, line, func, "%s = %.17g " EXPECTED "\n",           \
+                     name, var);                                               \
+        if (!DEBUGGING) {                                                      \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+        TRAP();                                                                \
+    }                                                                          \
+    return;                                                                    \
+}
+
+GENERATE_ASSERT_DOUBLE_SIGN(positive, >, "> 0")
+GENERATE_ASSERT_DOUBLE_SIGN(negative, <, "< 0")
+GENERATE_ASSERT_DOUBLE_SIGN(non_positive, <=, "<= 0")
+GENERATE_ASSERT_DOUBLE_SIGN(non_negative, >=, ">= 0")
+
+#undef GENERATE_ASSERT_DOUBLE_SIGN
+
 #define GENERATE_ASSERT_STRINGS(MODE, SYMBOL)                                  \
 void                                                                           \
 a_strings_##MODE(char *file, int32 line, char *func,                           \
@@ -753,6 +843,21 @@ assert_functions_sink(void) {
     (void)a_pointers_more;
     (void)a_pointers_more_equal;
 
+    (void)a_sign_signed_positive;
+    (void)a_sign_signed_negative;
+    (void)a_sign_signed_non_positive;
+    (void)a_sign_signed_non_negative;
+
+    (void)a_sign_unsigned_positive;
+    (void)a_sign_unsigned_negative;
+    (void)a_sign_unsigned_non_positive;
+    (void)a_sign_unsigned_non_negative;
+
+    (void)a_sign_double_positive;
+    (void)a_sign_double_negative;
+    (void)a_sign_double_non_positive;
+    (void)a_sign_double_non_negative;
+
     (void)a_both_signed_less;
     (void)a_both_signed_less_equal;
     (void)a_both_signed_equal;
@@ -823,6 +928,23 @@ main(void) {
 
     ASSERT_NON_NEGATIVE(0);
     ASSERT_NON_POSITIVE(0);
+    {
+        double positive = 0.5;
+        double negative = -0.5;
+        float positive_f = 0.5f;
+        float negative_f = -0.5f;
+
+        ASSERT_POSITIVE(positive);
+        ASSERT_POSITIVE(positive_f);
+        ASSERT_NEGATIVE(negative);
+        ASSERT_NEGATIVE(negative_f);
+        ASSERT_NON_POSITIVE(0.0);
+        ASSERT_NON_POSITIVE(negative);
+        ASSERT_NON_POSITIVE(negative_f);
+        ASSERT_NON_NEGATIVE(0.0f);
+        ASSERT_NON_NEGATIVE(positive);
+        ASSERT_NON_NEGATIVE(positive_f);
+    }
     {
         char *string = NULL;
         void *pointer = NULL;
@@ -1032,6 +1154,10 @@ main(void) {
         ASSERT_TRAPS(ASSERT_LESS(b, a));
         ASSERT_TRAPS(ASSERT_MORE_EQUAL(a, b));
         ASSERT_TRAPS(ASSERT_LESS_EQUAL(b, a));
+        ASSERT_TRAPS(ASSERT_POSITIVE(-0.5));
+        ASSERT_TRAPS(ASSERT_NEGATIVE(0.5f));
+        ASSERT_TRAPS(ASSERT_NON_POSITIVE(0.5));
+        ASSERT_TRAPS(ASSERT_NON_NEGATIVE(-0.5f));
         ASSERT_TRAPS(ASSERT_LESS((void *)&array[1], (void *)&array[0]));
         ASSERT_TRAPS(ASSERT_EQUAL(true, false));
         ASSERT_TRAPS(ASSERT_NOT_CLOSE(close_a, close_b));

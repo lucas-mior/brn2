@@ -164,6 +164,39 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_VOIDP(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
+void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_SIGN(void *, ...);
+
+#define ASSERT_DECLARE_SIGN(MODE)                                             \
+void a_sign_signed_##MODE(char *, int32, char *, char *, llong);              \
+void a_sign_unsigned_##MODE(char *, int32, char *, char *, ullong);           \
+void a_sign_double_##MODE(char *, int32, char *, char *, double);
+ASSERT_DECLARE_SIGN(positive)
+ASSERT_DECLARE_SIGN(negative)
+ASSERT_DECLARE_SIGN(non_positive)
+ASSERT_DECLARE_SIGN(non_negative)
+#undef ASSERT_DECLARE_SIGN
+
+#if CHAR_MIN < 0
+#define ASSERT_SIGN_CHAR(MODE) a_sign_signed_##MODE
+#else
+#define ASSERT_SIGN_CHAR(MODE) a_sign_unsigned_##MODE
+#endif
+
+#define ASSERT_SIGN_FUNCTION(MODE, VAR1)                                      \
+_Generic((VAR1),                                                              \
+    char:    ASSERT_SIGN_CHAR(MODE),                                          \
+    schar:   a_sign_signed_##MODE,                                            \
+    short:   a_sign_signed_##MODE,                                            \
+    int:     a_sign_signed_##MODE,                                            \
+    long:    a_sign_signed_##MODE,                                            \
+    llong:   a_sign_signed_##MODE,                                            \
+    float:   a_sign_double_##MODE,                                            \
+    double:  a_sign_double_##MODE,                                            \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_SIGN                         \
+)
+
+#define ASSERT_SIGN(MODE, VAR1)                                               \
+    ASSERT_SIGN_FUNCTION(MODE, VAR1)(__FILE__, __LINE__, FUNC__, #VAR1, VAR1)
 
 #define ASSERT(...) do {                                                       \
     if (!(__VA_ARGS__)) {                                                      \
@@ -200,50 +233,10 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
     }                                                                          \
 } while (0)
 
-#define ASSERT_POSITIVE(VAR1) do {                                             \
-    llong ASSERT_POSITIVE = VAR1;                                              \
-    if (ASSERT_POSITIVE <= 0) {                                                \
-        if (!DEBUGGING) {                                                      \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-        assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld > 0\n", #VAR1, ASSERT_POSITIVE);               \
-        TRAP();                                                                \
-    }                                                                          \
-} while (0)
-
-#define ASSERT_NEGATIVE(VAR1) do {                                             \
-    llong ASSERT_NEGATIVE = VAR1;                                              \
-    if (ASSERT_NEGATIVE >= 0) {                                                \
-        assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld < 0\n", #VAR1, ASSERT_NEGATIVE);               \
-        TRAP();                                                                \
-    }                                                                          \
-} while (0)
-
-#define ASSERT_NON_POSITIVE(VAR1) do {                                         \
-    llong ASSERT_NON_POSITIVE = VAR1;                                          \
-    if (ASSERT_NON_POSITIVE > 0) {                                             \
-        if (!DEBUGGING) {                                                      \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-        assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld <= 0\n", #VAR1, ASSERT_NON_POSITIVE);          \
-        TRAP();                                                                \
-    }                                                                          \
-} while (0)
-
-#define ASSERT_NON_NEGATIVE(VAR1) do {                                         \
-    llong ASSERT_NON_NEGATIVE = VAR1;                                          \
-    if (ASSERT_NON_NEGATIVE < 0) {                                             \
-        if (!DEBUGGING) {                                                      \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-        assert_error(__FILE__, __LINE__, FUNC__,                               \
-                     "%s = %lld >= 0\n", #VAR1, ASSERT_NON_NEGATIVE);          \
-        TRAP();                                                                \
-    }                                                                          \
-} while (0)
+#define ASSERT_POSITIVE(VAR1)     ASSERT_SIGN(positive, VAR1)
+#define ASSERT_NEGATIVE(VAR1)     ASSERT_SIGN(negative, VAR1)
+#define ASSERT_NON_POSITIVE(VAR1) ASSERT_SIGN(non_positive, VAR1)
+#define ASSERT_NON_NEGATIVE(VAR1) ASSERT_SIGN(non_negative, VAR1)
 
 #if OS_UNIX
 extern sigjmp_buf assert_traps_env;
