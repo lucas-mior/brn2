@@ -848,11 +848,6 @@ assert_functions_sink(void) {
     (void)a_sign_signed_non_positive;
     (void)a_sign_signed_non_negative;
 
-    (void)a_sign_unsigned_positive;
-    (void)a_sign_unsigned_negative;
-    (void)a_sign_unsigned_non_positive;
-    (void)a_sign_unsigned_non_negative;
-
     (void)a_sign_double_positive;
     (void)a_sign_double_negative;
     (void)a_sign_double_non_positive;

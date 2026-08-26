@@ -168,7 +168,6 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_SIGN(void *, ...);
 
 #define ASSERT_DECLARE_SIGN(MODE)                                             \
 void a_sign_signed_##MODE(char *, int32, char *, char *, llong);              \
-void a_sign_unsigned_##MODE(char *, int32, char *, char *, ullong);           \
 void a_sign_double_##MODE(char *, int32, char *, char *, double);
 ASSERT_DECLARE_SIGN(positive)
 ASSERT_DECLARE_SIGN(negative)
