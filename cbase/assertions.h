@@ -184,7 +184,6 @@ ASSERT_DECLARE_SIGN(non_negative)
 
 #define ASSERT_SIGN_FUNCTION(MODE, VAR1)                                      \
 _Generic((VAR1),                                                              \
-    char:    ASSERT_SIGN_CHAR(MODE),                                          \
     schar:   a_sign_signed_##MODE,                                            \
     short:   a_sign_signed_##MODE,                                            \
     int:     a_sign_signed_##MODE,                                            \
@@ -193,10 +192,7 @@ _Generic((VAR1),                                                              \
     float:   a_sign_double_##MODE,                                            \
     double:  a_sign_double_##MODE,                                            \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_SIGN                         \
-)
-
-#define ASSERT_SIGN(MODE, VAR1)                                               \
-    ASSERT_SIGN_FUNCTION(MODE, VAR1)(__FILE__, __LINE__, FUNC__, #VAR1, VAR1)
+)(__FILE__, __LINE__, FUNC__, #VAR1, VAR1)
 
 #define ASSERT(...) do {                                                       \
     if (!(__VA_ARGS__)) {                                                      \
@@ -233,10 +229,10 @@ _Generic((VAR1),                                                              \
     }                                                                          \
 } while (0)
 
-#define ASSERT_POSITIVE(VAR1)     ASSERT_SIGN(positive, VAR1)
-#define ASSERT_NEGATIVE(VAR1)     ASSERT_SIGN(negative, VAR1)
-#define ASSERT_NON_POSITIVE(VAR1) ASSERT_SIGN(non_positive, VAR1)
-#define ASSERT_NON_NEGATIVE(VAR1) ASSERT_SIGN(non_negative, VAR1)
+#define ASSERT_POSITIVE(VAR1)     ASSERT_SIGN_FUNCTION(positive, VAR1)
+#define ASSERT_NEGATIVE(VAR1)     ASSERT_SIGN_FUNCTION(negative, VAR1)
+#define ASSERT_NON_POSITIVE(VAR1) ASSERT_SIGN_FUNCTION(non_positive, VAR1)
+#define ASSERT_NON_NEGATIVE(VAR1) ASSERT_SIGN_FUNCTION(non_negative, VAR1)
 
 #if OS_UNIX
 extern sigjmp_buf assert_traps_env;
