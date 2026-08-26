@@ -128,11 +128,9 @@ assert_glob_match_impl(char *file, int32 line, char *func,
                        char *string, int32 string_len,
                        char *glob, int32 glob_len,
                        bool expected) {
-    char *expected_text;
-    bool matched;
+    if (util_glob_match(string, string_len, glob, glob_len) != expected) {
+        char *expected_text;
 
-    matched = util_glob_match(string, string_len, glob, glob_len);
-    if (matched != expected) {
         if (expected) {
             expected_text = "expected glob to match";
         } else {
