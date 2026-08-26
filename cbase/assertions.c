@@ -123,6 +123,61 @@ assert_not_contains(char *file, int32 line, char *func,
 }
 
 void
+ASSERT_EQUAL_3(char *file, int32 line, char *func,
+               char *name1, char *name2,
+               char *var1, int32 var1_len, char *var2) {
+    int32 var2_len;
+
+    if (var1 == NULL) {
+        assert_error(file, line, func, "%s is NULL.\n", name1);
+        TRAP();
+    }
+    if (var2 == NULL) {
+        assert_error(file, line, func, "%s is NULL.\n", name2);
+        TRAP();
+    }
+
+    var2_len = strlen32(var2);
+    if (!strequal2(var1, var1_len, var2, var2_len)) {
+        assert_error(file, line, func, "%s = %.*s == %s = %s\n",
+                     name1, var1_len, var1, name2, var2);
+        TRAP();
+    }
+
+    return;
+}
+
+void
+ASSERT_EQUAL_4(char *file, int32 line, char *func,
+               char *name1, char *name2,
+               char *var1, int32 var1_len, char *var2, int32 var2_len) {
+    if (var2 && (var1 == NULL)) {
+        assert_error(file, line, func,
+                     "%s is NULL while %s is not\n", name1, name2);
+        TRAP();
+    }
+    if (var1 && (var2 == NULL)) {
+        assert_error(file, line, func,
+                     "%s is NULL while %s is not\n", name2, name1);
+        TRAP();
+    }
+
+    if (var1_len != var2_len) {
+        assert_error(file, line, func,
+                     "len(%s) = %d == %d = len(%s)\n",
+                     name1, var1_len, var2_len, name2);
+        TRAP();
+    }
+    if (memcmp64(var1, var2, var1_len) != 0) {
+        assert_error(file, line, func, "%s = %.*s == %.*s = %s\n",
+                     name1, var1_len, var1, var2_len, var2, name2);
+        TRAP();
+    }
+
+    return;
+}
+
+void
 assert_glob_match_impl(char *file, int32 line, char *func,
                        char *string_name, char *glob_name,
                        char *string, int32 string_len,
@@ -850,6 +905,8 @@ assert_functions_sink(void) {
     (void)assert_file_contains;
     (void)assert_contains;
     (void)assert_not_contains;
+    (void)ASSERT_EQUAL_3;
+    (void)ASSERT_EQUAL_4;
 
     (void)a_bool_equal;
     (void)a_bool_not_equal;
