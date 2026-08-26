@@ -209,7 +209,6 @@ _Generic((VAR1),                                                               \
         } else {                                                               \
             UNREACHABLE();                                                     \
         }                                                                      \
-        TRAP();                                                                \
     }                                                                          \
 } while (0)
 
