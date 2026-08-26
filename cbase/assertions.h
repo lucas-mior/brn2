@@ -181,16 +181,11 @@ ASSERT_DECLARE_SIGN(non_negative)
 #define ASSERT_SIGN_CHAR(MODE) a_sign_unsigned_##MODE
 #endif
 
-#define ASSERT_SIGN_FUNCTION(MODE, VAR1)                                      \
-_Generic((VAR1),                                                              \
-    schar:   a_sign_signed_##MODE,                                            \
-    short:   a_sign_signed_##MODE,                                            \
-    int:     a_sign_signed_##MODE,                                            \
-    long:    a_sign_signed_##MODE,                                            \
-    llong:   a_sign_signed_##MODE,                                            \
-    float:   a_sign_double_##MODE,                                            \
-    double:  a_sign_double_##MODE,                                            \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_SIGN                         \
+#define ASSERT_SIGN_FUNCTION(MODE, VAR1)                  \
+_Generic((VAR1),                                          \
+    float:   a_sign_double_##MODE,                        \
+    double:  a_sign_double_##MODE,                        \
+    default: a_sign_signed_##MODE                         \
 )(__FILE__, __LINE__, FUNC__, #VAR1, VAR1)
 
 #define ASSERT(...) do {                                                       \
