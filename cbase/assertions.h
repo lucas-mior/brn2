@@ -38,8 +38,8 @@ _Static_assert(sizeof(float)*CHAR_BIT == 32,
 _Static_assert(sizeof(double)*CHAR_BIT == 64,
                "assertions.c ULP comparison requires 64-bit double");
 
-void assert_error(char *, int32, char *, char *, ...)
-    ATTR_PRINTF(4, 5);
+void assert_error(char *, int32, char *,
+                  char *, ...) ATTR_PRINTF(4, 5);
 void assert_file_contains(char *, int32, char *,
                           char *, char *);
 void assert_contains(char *, int32, char *,
@@ -75,8 +75,8 @@ ASSERT_DECLARE_POINTERS(more_equal)
 #define ASSERT_DECLARE_INTEGERS(SIGN, MODE)                                    \
 void a_both_##SIGN##_##MODE(char *, int32, char *,                             \
                             char *, char *, char *, char *,                    \
-                            llong, llong, SIGN long long,                      \
-                            SIGN long long);
+                            llong, llong,                                      \
+                            SIGN long long, SIGN long long);
 ASSERT_DECLARE_INTEGERS(signed, less)
 ASSERT_DECLARE_INTEGERS(signed, less_equal)
 ASSERT_DECLARE_INTEGERS(signed, equal)
@@ -166,26 +166,22 @@ void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_FIRST(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND(void);
 void UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_SIGN(void *, ...);
 
-#define ASSERT_DECLARE_SIGN(MODE)                                             \
-void a_sign_signed_##MODE(char *, int32, char *, char *, llong);              \
+#define ASSERT_DECLARE_SIGN(MODE)                                              \
+void a_sign_integer_##MODE(char *, int32, char *, char *, llong);              \
 void a_sign_double_##MODE(char *, int32, char *, char *, double);
+
 ASSERT_DECLARE_SIGN(positive)
 ASSERT_DECLARE_SIGN(negative)
 ASSERT_DECLARE_SIGN(non_positive)
 ASSERT_DECLARE_SIGN(non_negative)
+
 #undef ASSERT_DECLARE_SIGN
 
-#if CHAR_MIN < 0
-#define ASSERT_SIGN_CHAR(MODE) a_sign_signed_##MODE
-#else
-#define ASSERT_SIGN_CHAR(MODE) a_sign_unsigned_##MODE
-#endif
-
-#define ASSERT_SIGN_FUNCTION(MODE, VAR1)                  \
-_Generic((VAR1),                                          \
-    float:   a_sign_double_##MODE,                        \
-    double:  a_sign_double_##MODE,                        \
-    default: a_sign_signed_##MODE                         \
+#define ASSERT_SIGN_FUNCTION(MODE, VAR1)                                       \
+_Generic((VAR1),                                                               \
+    float:   a_sign_double_##MODE,                                             \
+    double:  a_sign_double_##MODE,                                             \
+    default: a_sign_integer_##MODE                                             \
 )(__FILE__, __LINE__, FUNC__, #VAR1, VAR1)
 
 #define ASSERT(...) do {                                                       \
