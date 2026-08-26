@@ -49,9 +49,9 @@ void assert_not_contains(char *, int32, char *,
 void assert_glob_match_impl(char *, int32, char *,
                             char *, char *, char *, int32,
                             char *, int32, bool);
-void ASSERT_EQUAL_3(char *, int32, char *,
+void assert_equal_3(char *, int32, char *,
                     char *, char *, char *, int32, char *);
-void ASSERT_EQUAL_4(char *, int32, char *,
+void assert_equal_4(char *, int32, char *,
                     char *, char *, char *, int32, char *, int32);
 
 #define ASSERT_DECLARE_STRINGS(MODE)                                           \
@@ -493,7 +493,7 @@ _Generic((VAR1),                                                               \
     char *ASSERT_EQUAL_VAR1 = VAR1;                                            \
     int32 ASSERT_EQUAL_VAR1_LEN = VAR1_LEN;                                    \
     char *ASSERT_EQUAL_VAR2 = VAR2;                                            \
-    ASSERT_EQUAL_3(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,                   \
+    assert_equal_3(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,                   \
                    ASSERT_EQUAL_VAR1, ASSERT_EQUAL_VAR1_LEN,                   \
                    ASSERT_EQUAL_VAR2);                                         \
 } while (0)
@@ -503,7 +503,7 @@ _Generic((VAR1),                                                               \
     int32 ASSERT_EQUAL_VAR1_LEN = VAR1_LEN;                                    \
     char *ASSERT_EQUAL_VAR2 = VAR2;                                            \
     int32 ASSERT_EQUAL_VAR2_LEN = VAR2_LEN;                                    \
-    ASSERT_EQUAL_4(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,                   \
+    assert_equal_4(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,                   \
                    ASSERT_EQUAL_VAR1, ASSERT_EQUAL_VAR1_LEN,                   \
                    ASSERT_EQUAL_VAR2, ASSERT_EQUAL_VAR2_LEN);                  \
 } while (0)
