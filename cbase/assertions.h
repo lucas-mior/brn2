@@ -46,6 +46,9 @@ void assert_contains(char *, int32, char *,
                      char *, int32, char *);
 void assert_not_contains(char *, int32, char *,
                          char *, int32, char *);
+void assert_glob_match_impl(char *, int32, char *,
+                            char *, char *, char *, int32,
+                            char *, int32, bool);
 void assert_glob_match_failed(char *, int32, char *,
                               char *, char *, char *, int32,
                               char *, int32, bool);
@@ -263,42 +266,22 @@ void assert_traps_restore(char *, int32, char *);
     assert_not_contains(__FILE__, __LINE__, FUNC__,                            \
                         HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
-#define ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, GLOB_LEN, EXPECTED)   \
-do {                                                                           \
-    char *ASSERT_GLOB_STRING = (STRING);                                       \
-    int32 ASSERT_GLOB_STRING_LEN = (STRING_LEN);                               \
-    char *ASSERT_GLOB_GLOB = (GLOB);                                           \
-    int32 ASSERT_GLOB_GLOB_LEN = (GLOB_LEN);                                   \
-    bool ASSERT_GLOB_EXPECTED = (EXPECTED);                                    \
-    bool ASSERT_GLOB_MATCHED;                                                  \
-                                                                               \
-    ASSERT_GLOB_MATCHED = util_glob_match(ASSERT_GLOB_STRING,                  \
-                                          ASSERT_GLOB_STRING_LEN,              \
-                                          ASSERT_GLOB_GLOB,                    \
-                                          ASSERT_GLOB_GLOB_LEN);               \
-    if (ASSERT_GLOB_MATCHED != ASSERT_GLOB_EXPECTED) {                         \
-        assert_glob_match_failed(__FILE__, __LINE__, FUNC__,                   \
-                                 #STRING, #GLOB,                               \
-                                 ASSERT_GLOB_STRING,                           \
-                                 ASSERT_GLOB_STRING_LEN,                       \
-                                 ASSERT_GLOB_GLOB,                             \
-                                 ASSERT_GLOB_GLOB_LEN,                         \
-                                 ASSERT_GLOB_EXPECTED);                        \
-        TRAP();                                                                \
-    }                                                                          \
-} while (0)
-
 #define ASSERT_GLOB_MATCH_2(STRING, GLOB)                                      \
-    ASSERT_GLOB_MATCH_IMPL(STRING, strlen32(STRING), GLOB, strlen32(GLOB), true)
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+                           STRING, strlen32(STRING), GLOB, strlen32(GLOB), true)
 #define ASSERT_GLOB_MATCH_3(STRING, STRING_LEN, GLOB)                          \
-    ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, strlen32(GLOB), true)
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+                           STRING, STRING_LEN, GLOB, strlen32(GLOB), true)
 #define ASSERT_GLOB_MATCH(...)                                                 \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_MATCH_, __VA_ARGS__)
 
 #define ASSERT_GLOB_NO_MATCH_2(STRING, GLOB)                                   \
-    ASSERT_GLOB_MATCH_IMPL(STRING, strlen32(STRING), GLOB, strlen32(GLOB), false)
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+                           STRING, strlen32(STRING), GLOB, strlen32(GLOB),     \
+                           false)
 #define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB)                       \
-    ASSERT_GLOB_MATCH_IMPL(STRING, STRING_LEN, GLOB, strlen32(GLOB), false)
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+                           STRING, STRING_LEN, GLOB, strlen32(GLOB), false)
 #define ASSERT_GLOB_NO_MATCH(...)                                              \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_NO_MATCH_, __VA_ARGS__)
 

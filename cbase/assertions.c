@@ -123,6 +123,23 @@ assert_not_contains(char *file, int32 line, char *func,
 }
 
 void
+assert_glob_match_impl(char *file, int32 line, char *func,
+                       char *string_name, char *glob_name,
+                       char *string, int32 string_len,
+                       char *glob, int32 glob_len,
+                       bool expected) {
+    bool matched;
+
+    matched = util_glob_match(string, string_len, glob, glob_len);
+    if (matched != expected) {
+        assert_glob_match_failed(file, line, func, string_name, glob_name,
+                                 string, string_len, glob, glob_len, expected);
+        TRAP();
+    }
+    return;
+}
+
+void
 assert_glob_match_failed(char *file, int32 line, char *func,
                          char *string_name, char *glob_name,
                          char *string, int32 string_len,
