@@ -128,38 +128,26 @@ assert_glob_match_impl(char *file, int32 line, char *func,
                        char *string, int32 string_len,
                        char *glob, int32 glob_len,
                        bool expected) {
+    char *expected_text;
     bool matched;
 
     matched = util_glob_match(string, string_len, glob, glob_len);
     if (matched != expected) {
-        assert_glob_match_failed(file, line, func, string_name, glob_name,
-                                 string, string_len, glob, glob_len, expected);
+        if (expected) {
+            expected_text = "expected glob to match";
+        } else {
+            expected_text = "expected glob to not match";
+        }
+
+        assert_error(file, line, func,
+                     "%s:\n"
+                     "  string: %s[%d] = '''"BLUE("%.*s")"'''\n"
+                     "  glob:   %s[%d] = '''"GREEN("%.*s")"'''\n",
+                     expected_text,
+                     string_name, string_len, string_len, string,
+                     glob_name, glob_len, glob_len, glob);
         TRAP();
     }
-    return;
-}
-
-void
-assert_glob_match_failed(char *file, int32 line, char *func,
-                         char *string_name, char *glob_name,
-                         char *string, int32 string_len,
-                         char *glob, int32 glob_len,
-                         bool expected) {
-    char *expected_text;
-
-    if (expected) {
-        expected_text = "expected glob to match";
-    } else {
-        expected_text = "expected glob to not match";
-    }
-
-    assert_error(file, line, func,
-                 "%s:\n"
-                 "  string: %s[%d] = '''"BLUE("%.*s")"'''\n"
-                 "  glob:   %s[%d] = '''"GREEN("%.*s")"'''\n",
-                 expected_text,
-                 string_name, string_len, string_len, string,
-                 glob_name, glob_len, glob_len, glob);
     return;
 }
 

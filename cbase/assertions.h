@@ -49,9 +49,6 @@ void assert_not_contains(char *, int32, char *,
 void assert_glob_match_impl(char *, int32, char *,
                             char *, char *, char *, int32,
                             char *, int32, bool);
-void assert_glob_match_failed(char *, int32, char *,
-                              char *, char *, char *, int32,
-                              char *, int32, bool);
 
 #define ASSERT_DECLARE_STRINGS(MODE)                                           \
 void a_strings_##MODE(char *, int32, char *,                                   \
