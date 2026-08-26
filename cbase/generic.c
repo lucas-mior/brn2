@@ -476,7 +476,7 @@ main(void) {
         PRINTLN(var_uint - (uint)var_int);
     }
 
-    {
+    if (false) {
         char *s;
         char a = 'i';
         char *b = "able";
