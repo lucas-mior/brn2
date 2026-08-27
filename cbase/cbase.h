@@ -485,16 +485,10 @@ _Generic((char (*)[STRLIT_LEN(LITERAL)])0, \
 #define XFCLOSE(F, FILENAME) \
     xfclose(__FILE__, __LINE__, FUNC__, F, FILENAME)
 
-static inline void __attribute__((format(printf, 1, 2), always_inline))
-check_no_fmt(const char *str, ...) {
-    (void)str;
-    return;
-}
-
 #define SB_APPEND_2(BUILDER, STRING) \
     sb_append(BUILDER, STRING, strlen32(STRING))
 #define SB_APPEND_3(BUILDER, STRING, LEN) \
-    check_no_fmt(STRING); sb_append(BUILDER, STRING, LEN)
+    sb_append(BUILDER, STRING, LEN)
 #define SB_APPEND(...) SELECT_ON_NUM_ARGS(SB_APPEND_, __VA_ARGS__)
 
 #define HERE here_impl(__FILE__, __LINE__, FUNC__)
