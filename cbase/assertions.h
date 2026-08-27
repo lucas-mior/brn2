@@ -380,13 +380,13 @@ _Generic((VAR2),                                                               \
     int:     A_UNSIGN_SIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_INT    ),           \
     long:    A_UNSIGN_SIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_LONG   ),           \
     llong:   A_UNSIGN_SIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_LLONG  ),           \
-    uchar:   A_BOTH_UNSIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_UCHAR  ),         \
-    ushort:  A_BOTH_UNSIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_USHORT ),         \
-    uint:    A_BOTH_UNSIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_UINT   ),         \
-    ulong:   A_BOTH_UNSIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_ULONG  ),         \
-    ullong:  A_BOTH_UNSIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_ULLONG ),         \
-    float:   A_BOTH_DOUBLE(MODE,       VAR1, VAR2, TYPE1, TYPE_FLOAT  ),       \
-    double:  A_BOTH_DOUBLE(MODE,       VAR1, VAR2, TYPE1, TYPE_DOUBLE ),       \
+    uchar:   A_BOTH_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_UCHAR  ),           \
+    ushort:  A_BOTH_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_USHORT ),           \
+    uint:    A_BOTH_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_UINT   ),           \
+    ulong:   A_BOTH_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_ULONG  ),           \
+    ullong:  A_BOTH_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_ULLONG ),           \
+    float:   A_BOTH_DOUBLE(MODE,   VAR1, VAR2, TYPE1, TYPE_FLOAT  ),           \
+    double:  A_BOTH_DOUBLE(MODE,   VAR1, VAR2, TYPE1, TYPE_DOUBLE ),           \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGN()                     \
 )
 #define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                          \
@@ -454,9 +454,9 @@ _Generic((VAR1),                                                               \
     uint:    A_FIRST_UNSIGN(MODE, VAR1, VAR2, TYPE_UINT   ),                   \
     ulong:   A_FIRST_UNSIGN(MODE, VAR1, VAR2, TYPE_ULONG  ),                   \
     ullong:  A_FIRST_UNSIGN(MODE, VAR1, VAR2, TYPE_ULLONG ),                   \
-    float:   A_FIRST_DOUBLE(MODE,   VAR1, VAR2, TYPE_FLOAT  ),                 \
-    double:  A_FIRST_DOUBLE(MODE,   VAR1, VAR2, TYPE_DOUBLE ),                 \
-    bool:    A_FIRST_BOOL(MODE,     VAR1, VAR2, TYPE_BOOL),                    \
+    float:   A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE_FLOAT  ),                   \
+    double:  A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE_DOUBLE ),                   \
+    bool:    A_FIRST_BOOL(MODE,   VAR1, VAR2, TYPE_BOOL),                      \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE()                     \
 )
 
