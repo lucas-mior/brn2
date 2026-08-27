@@ -349,13 +349,13 @@ _Generic((VAR2),                                                               \
     int:     A_BOTH_SIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_INT    ),           \
     long:    A_BOTH_SIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_LONG   ),           \
     llong:   A_BOTH_SIGN(MODE,     VAR1, VAR2, TYPE1, TYPE_LLONG  ),           \
-    uchar:   A_SIGN_UNSIGN(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ),             \
-    ushort:  A_SIGN_UNSIGN(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ),             \
-    uint:    A_SIGN_UNSIGN(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ),             \
-    ulong:   A_SIGN_UNSIGN(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ),             \
-    ullong:  A_SIGN_UNSIGN(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),             \
-    float:   A_BOTH_DOUBLE(MODE,     VAR1, VAR2, TYPE1, TYPE_FLOAT  ),         \
-    double:  A_BOTH_DOUBLE(MODE,     VAR1, VAR2, TYPE1, TYPE_DOUBLE ),         \
+    uchar:   A_SIGN_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_UCHAR  ),           \
+    ushort:  A_SIGN_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_USHORT ),           \
+    uint:    A_SIGN_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_UINT   ),           \
+    ulong:   A_SIGN_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_ULONG  ),           \
+    ullong:  A_SIGN_UNSIGN(MODE,   VAR1, VAR2, TYPE1, TYPE_ULLONG ),           \
+    float:   A_BOTH_DOUBLE(MODE,   VAR1, VAR2, TYPE1, TYPE_FLOAT  ),           \
+    double:  A_BOTH_DOUBLE(MODE,   VAR1, VAR2, TYPE1, TYPE_DOUBLE ),           \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_SIGN()                       \
 )
 #define A_BOTH_UNSIGN(MODE, VAR1, VAR2, TYPE1, TYPE2)                          \
