@@ -443,7 +443,7 @@ _Generic((VAR1),                                                               \
         void *: A_POINTERS(MODE, VAR1, VAR2),                                  \
         default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CHARP()           \
     ),                                                                         \
-    char:    A_FIRST_CHAR(MODE,     VAR1, VAR2),                               \
+    char:    A_FIRST_CHAR(MODE,   VAR1, VAR2),                                 \
     schar:   A_FIRST_SIGN(MODE,   VAR1, VAR2, TYPE_SCHAR  ),                   \
     short:   A_FIRST_SIGN(MODE,   VAR1, VAR2, TYPE_SHORT  ),                   \
     int:     A_FIRST_SIGN(MODE,   VAR1, VAR2, TYPE_INT    ),                   \
