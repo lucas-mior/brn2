@@ -13,7 +13,7 @@ project=$(common_get_program "$0")
 common_build_parse_args "$@"
 
 case "$mode" in
-debug|benchmark|valgrind|callgrind)
+debug|debug-fast|benchmark|valgrind|callgrind)
     ;;
 test|check|build|fast_feedback|cross|uninstall|install|test_all)
     ;;
@@ -103,6 +103,10 @@ debug)
     CFLAGS="$CFLAGS -g3 -Og"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     exe="bin/${project}"
+    ;;
+debug-fast)
+    CFLAGS="$CFLAGS -Wno-error -g2 -O2 -flto -march=native -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 benchmark)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
@@ -238,7 +242,7 @@ cross)
     $CC $CPPFLAGS $CFLAGS -o ${exe} main.c $LDFLAGS
     trace_off
     ;;
-benchmark|build|callgrind|debug|valgrind)
+benchmark|build|callgrind|debug|debug-fast|valgrind)
     common_build_tags
     trace_on
 

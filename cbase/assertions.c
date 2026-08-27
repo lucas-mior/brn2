@@ -259,7 +259,7 @@ assert_glob_match_impl(char *file, int32 line, char *func,
 #define GENERATE_ASSERT_SIGNED(MODE, SYMBOL, EXPECTED)                         \
 void                                                                           \
 a_sign_integer_##MODE(char *file, int32 line, char *func,                      \
-                     char *name, llong var) {                                  \
+                      char *name, llong var) {                                 \
     if (!(var SYMBOL 0)) {                                                     \
         if (DEBUGGING) {                                                       \
             assert_error(file, line, func,                                     \
