@@ -30,3 +30,4 @@ tests
 *.callgrind
 *.valgrind
 first-bad-commit.txt
+cbase/glibc_functions.txt
