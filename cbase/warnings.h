@@ -29,5 +29,8 @@
   #pragma clang diagnostic ignored "-Wused-but-marked-unused"
 #endif
 
+#if DEBUGGING || TESTING
+  #pragma clang diagnostic ignored "-Wno-unused-function"
+#endif
 
 #endif

@@ -81,7 +81,7 @@ fi
 case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og"
-    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     exe="bin/${project}"
     ;;
 debug-fast)
@@ -101,7 +101,7 @@ callgrind)
     CFLAGS="$CFLAGS -mavx2 -g3 -O3 -ftree-vectorize"
     ;;
 test)
-    CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1 -Wno-unused-function"
+    CFLAGS="$CFLAGS -g3 -Og -DDEBUGGING=1"
     ;;
 check)
     CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
