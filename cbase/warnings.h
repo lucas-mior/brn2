@@ -30,7 +30,7 @@
 #endif
 
 #if DEBUGGING || TESTING
-  #pragma clang diagnostic ignored "-Wno-unused-function"
+  #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
 #endif
