@@ -74,26 +74,6 @@ CFLAGS="$CFLAGS -Wfatal-errors"
 # CFLAGS="$CFLAGS -Werror=all -Werror=extra"
 # CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
-if [ "$CC" = "clang" ] || [ "$CC" = "zig cc" ]; then
-    CFLAGS="$CFLAGS -Weverything"
-    CFLAGS="$CFLAGS -Wno-assign-enum"
-    CFLAGS="$CFLAGS -Wno-c++-keyword"
-    CFLAGS="$CFLAGS -Wno-c++98-compat"
-    CFLAGS="$CFLAGS -Wno-cast-qual"
-    CFLAGS="$CFLAGS -Wno-char-subscripts"
-    CFLAGS="$CFLAGS -Wno-constant-logical-operand"
-    CFLAGS="$CFLAGS -Wno-covered-switch-default"
-    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
-    CFLAGS="$CFLAGS -Wno-float-equal"
-    CFLAGS="$CFLAGS -Wno-format-nonliteral"
-    CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
-    CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
-    CFLAGS="$CFLAGS -Wno-pre-c11-compat"
-    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
-    CFLAGS="$CFLAGS -Wno-unused-macros"
-    CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
-    CFLAGS="$CFLAGS -Wno-error=unknown-warning-option"
-fi
 if [ "$is_clang_cl" -eq 1 ]; then
     CFLAGS="$CFLAGS -Wno-error=unknown-warning-option"
 fi
