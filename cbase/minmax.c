@@ -10,10 +10,10 @@
 #define TESTING_minmax 0
 #endif
 
+#include "platform_detection.h"
 #include "libc.h"
 #include "primitives.h"
 #include "base_macros.h"
-#include "platform_detection.h"
 
 #define GENERATE_COMPARE_POINTERS(MODE, SYMBOL)                                \
 static void *                                                                  \
