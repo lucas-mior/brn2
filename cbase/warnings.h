@@ -1,6 +1,8 @@
 #if !defined(WARNINGS_H)
 #define WARNINGS_H
 
+#include "platform_detection.h"
+
 #if CC_GCC || CC_CLANG
 #pragma GCC diagnostic warning "-Wall"
 #pragma GCC diagnostic warning "-Wextra"
