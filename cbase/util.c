@@ -674,9 +674,8 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= m)) {
-        error2(
-                "%s:%d %s(): Error in vsnprintf(\"%s\") (n = %d).\n",
-                file, line, func, format, n);
+        error2("%s:%d:%s(): Error in vsnprintf(\"%s\") (n = %d).\n",
+               file, line, func, format, n);
         fatal(EXIT_FAILURE);
     }
 
@@ -705,10 +704,10 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
             execlp(notifiers[i],
                    notifiers[i], "-u", "critical", program, pbuffer, NULL);
         }
-        error2( "Error executing notifier: %s.\n", strerror(errno));
+        error2("Error executing notifier: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     case -1:
-        error2( "Error forking: %s.\n", strerror(errno));
+        error2("Error forking: %s.\n", strerror(errno));
         break;
     default:
         break;
@@ -862,7 +861,7 @@ send_signal(char *executable, int32 signal_number) {
             if (errno == EINTR) {
                 continue;
             }
-            error2( "Error waiting for child: %s.\n", strerror(errno));
+            error2("Error waiting for child: %s.\n", strerror(errno));
             fatal(EXIT_FAILURE);
         }
     }
@@ -1025,7 +1024,7 @@ void
 warn(char *fmt, ...) {
     va_list ap;
 
-    error2( "%s: "RED ("warning:"), program);
+    error2("%s: "RED ("warning:"), program);
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
