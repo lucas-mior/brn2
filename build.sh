@@ -107,7 +107,7 @@ check)
     CFLAGS="$CFLAGS -DDEBUGGING=1 -fanalyzer"
     ;;
 build)
-    CFLAGS="$CFLAGS -Wno-error -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
     CFLAGS="$CFLAGS -Werror"
