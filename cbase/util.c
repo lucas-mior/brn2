@@ -406,8 +406,12 @@ qsort64(void *base, int64 n, int64 size, int (*compar)(void *, void *)) {
         return;
     }
     if (DEBUGGING) {
-        if ((size <= 0) || (n < 0)) {
-            error("Error: Invalid size(%lld) or n(%lld)\n", size, n);
+        if (size <= 0) {
+            error("Error: invalid object size = %lld.\n", size);
+            fatal(EXIT_FAILURE);
+        }
+        if (n < 0) {
+            error("Error: invalid object count = %lld.\n", n);
             fatal(EXIT_FAILURE);
         }
         if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
