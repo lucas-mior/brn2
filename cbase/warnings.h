@@ -30,7 +30,9 @@
 #endif
 
 #if DEBUGGING || TESTING
-  #pragma clang diagnostic ignored "-Wunused-function"
+  #if CC_GCC || CC_CLANG
+    #pragma GCC diagnostic ignored "-Wunused-function"
+  #endif
 #endif
 
 #endif
