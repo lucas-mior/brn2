@@ -418,11 +418,11 @@ qsort64(void *base, int64 n, int64 size, int (*compar)(void *, void *)) {
             error("Error: Overflow (size=%lld*%lld=n)\n", size, n);
             fatal(EXIT_FAILURE);
         }
-        if ((ullong)size > (ullong)SIZE_MAX) {
+        if ((ullong)size >= (ullong)SIZE_MAX) {
             error("Error: Size (%lld) is bigger than SIZEMAX\n", size);
             fatal(EXIT_FAILURE);
         }
-        if ((ullong)n > (ullong)SIZE_MAX) {
+        if ((ullong)n >= (ullong)SIZE_MAX) {
             error("Error: Number (%lld) is bigger than SIZEMAX\n", n);
             fatal(EXIT_FAILURE);
         }
