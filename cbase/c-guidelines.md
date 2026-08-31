@@ -467,8 +467,11 @@ Initialize it directly:
 StructType s = {0};
 
 // If it needs to be allocated
-StructType s = malloc2(sizeof(*s));
+StructType *s = malloc2(sizeof(*s));
 *s = (StructType){0};
+
+// If it is on the stack, but after the declaration:
+s = (StructType){0};
 ```
 
 ### Return value for errors
