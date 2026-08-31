@@ -34,6 +34,10 @@
   #if CC_GCC || CC_CLANG
     #pragma GCC diagnostic ignored "-Wunused-function"
   #endif
+#else
+  #if CC_GCC || CC_CLANG
+    #pragma GCC diagnostic ignored "-Wno-error"
+  #endif
 #endif
 
 #endif
