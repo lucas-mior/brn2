@@ -27,6 +27,7 @@
   #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
   #pragma clang diagnostic ignored "-Wunused-macros"
   #pragma clang diagnostic ignored "-Wused-but-marked-unused"
+  #pragma clang diagnostic ignored "-Wpadded"
 #endif
 
 #if DEBUGGING || TESTING
