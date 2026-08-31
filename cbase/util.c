@@ -415,7 +415,7 @@ qsort64(void *base, int64 n, int64 size, int (*compar)(void *, void *)) {
             fatal(EXIT_FAILURE);
         }
         if ((size_t)size >= (SIZE_MAX / (size_t)n)) {
-            error("Error: Overflow (%lld*%lld)\n", size, n);
+            error("Error: Overflow (size=%lld*%lld=n)\n", size, n);
             fatal(EXIT_FAILURE);
         }
         if ((ullong)size >= (ullong)SIZE_MAX) {
