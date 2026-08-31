@@ -14,13 +14,13 @@
 
 void
 here_impl(char *file, int32 line, char *func) {
+    static here_counter = 0;
 #if OS_UNIX
     char buffer[4096];
 #endif
 
-    fprintf(stderr,
-            "\n===== HERE(%lld): %s:%d (%s)\n",
-            here_counter++, file, line, func);
+    error2("\n======== HERE(%lld): %s:%d:%s()\n",
+           here_counter++, file, line, func);
 #if OS_UNIX
     SNPRINTF(buffer, "%s:%d:%s\n", file, line, func);
     switch (fork()) {
@@ -674,7 +674,7 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= m)) {
-        fprintf(stderr,
+        error2(
                 "%s:%d %s(): Error in vsnprintf(\"%s\") (n = %d).\n",
                 file, line, func, format, n);
         fatal(EXIT_FAILURE);
@@ -705,10 +705,10 @@ error_impl(char *file, int32 line, char *func, char *format, ...) {
             execlp(notifiers[i],
                    notifiers[i], "-u", "critical", program, pbuffer, NULL);
         }
-        fprintf(stderr, "Error executing notifier: %s.\n", strerror(errno));
+        error2( "Error executing notifier: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     case -1:
-        fprintf(stderr, "Error forking: %s.\n", strerror(errno));
+        error2( "Error forking: %s.\n", strerror(errno));
         break;
     default:
         break;
@@ -862,7 +862,7 @@ send_signal(char *executable, int32 signal_number) {
             if (errno == EINTR) {
                 continue;
             }
-            fprintf(stderr, "Error waiting for child: %s.\n", strerror(errno));
+            error2( "Error waiting for child: %s.\n", strerror(errno));
             fatal(EXIT_FAILURE);
         }
     }
@@ -1025,11 +1025,11 @@ void
 warn(char *fmt, ...) {
     va_list ap;
 
-    fprintf(stderr, "%s: "RED ("warning:"), program);
+    error2( "%s: "RED ("warning:"), program);
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
-    fprintf(stderr, "\n");
+    error2( "\n");
 
     return;
 }
@@ -1060,7 +1060,6 @@ util_functions_sink(void) {
     (void)is_ident_start_char;
     (void)warn;
     (void)here_impl;
-    (void)here_counter;
     (void)command_result_free;
     (void)command_argv0_set;
     (void)command_free;
@@ -1295,7 +1294,6 @@ int
 main(int argc, char **argv) {
     (void)argc;
     (void)argv;
-    (void)here_counter;
 
     util_test_mem_literal_short();
 
