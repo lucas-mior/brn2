@@ -73,10 +73,6 @@ CFLAGS="$CFLAGS -Wfatal-errors"
 # CFLAGS="$CFLAGS -Wpedantic"
 # CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
-if [ "$is_clang_cl" -eq 1 ]; then
-    CFLAGS="$CFLAGS -Wno-error=unknown-warning-option"
-fi
-
 case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og"
