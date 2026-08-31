@@ -300,14 +300,21 @@ util_glob_match(char *string, int32 string_len, char *glob, int32 glob_len) {
     int32 star_string_i = 0;
 
     if (DEBUGGING) {
-        if ((string_len < 0) || (glob_len < 0)) {
-            error("Error: Invalid string_len=%d or glob_len=%d.\n",
-                  string_len, glob_len);
+        if (string_len < 0) {
+            error("Invalid string len = %d\n", string_len);
             fatal(EXIT_FAILURE);
         }
-        if (((string == NULL) && (string_len > 0))
-            || ((glob == NULL) && (glob_len > 0))) {
-            error("Error: NULL glob match input with non-zero length.\n");
+        if (string_len < 0) {
+            error("Invalid glob len = %d\n", glob_len);
+            fatal(EXIT_FAILURE);
+        }
+
+        if ((string == NULL) && (string_len > 0)) {
+            error("Error: string is NULL but length is positive.\n");
+            fatal(EXIT_FAILURE);
+        }
+        if ((glob == NULL) && (glob_len > 0)) {
+            error("Error: glob is NULL but length is positive.\n");
             fatal(EXIT_FAILURE);
         }
     }
