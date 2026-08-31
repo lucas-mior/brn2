@@ -14,7 +14,7 @@
 
 void
 here_impl(char *file, int32 line, char *func) {
-    static here_counter = 0;
+    static llong here_counter = 0;
 #if OS_UNIX
     char buffer[4096];
 #endif
