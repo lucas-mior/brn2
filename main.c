@@ -48,8 +48,7 @@ write_fatal(int32 fd, char *buffer, int64 size, int32 line) {
     int64 w;
 
     if ((w = write64(fd, buffer, size)) != size) {
-        error("Error writing %lld bytes to buffer (line %d)",
-              size, line);
+        error("Error writing %lld bytes to buffer (line %d)", size, line);
         if (w < 0) {
             error(": %s", strerror(errno));
         }
@@ -266,10 +265,8 @@ main(int argc, char **argv) {
 
         SNPRINTF(buffer_old, "arena_old[%d]", i);
         SNPRINTF(buffer_new, "arena_new[%d]", i);
-        old->arenas[i] = xarena_create(BRN2_ARENA_SIZE / narenas,
-                                       buffer_old);
-        new->arenas[i] = xarena_create(BRN2_ARENA_SIZE / narenas,
-                                       buffer_new);
+        old->arenas[i] = xarena_create(BRN2_ARENA_SIZE / narenas, buffer_old);
+        new->arenas[i] = xarena_create(BRN2_ARENA_SIZE / narenas, buffer_new);
     }
 
     switch (mode) {
