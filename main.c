@@ -46,7 +46,6 @@ static File brn2_buffer_old;
 static void
 write_fatal(int32 fd, char *buffer, int64 size, int32 line) {
     int64 w;
-    int unsu;
 
     if ((w = write64(fd, buffer, size)) != size) {
         error("Error writing %lld bytes to buffer (line %d)",
