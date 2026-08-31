@@ -443,7 +443,7 @@ snprintf2(char *buffer, int64 size, char *format, ...) {
     va_end(args);
 
     if ((n < 0) || (n >= size)) {
-        fprintf(stderr, "Error in vsnprintf(\"%s\") (n = %d)\n", format, n);
+        error2("Error in vsnprintf(\"%s\") (n = %d)\n", format, n);
         fatal(EXIT_FAILURE);
     }
     return n;
