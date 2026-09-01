@@ -840,7 +840,8 @@ send_signal(char *executable, int32 signal_number) {
         sb_clear(&buffer);
     }
 
-    closedir(processes);
+    sb_free(&buffer);
+    xclosedir(processes);
     return;
 }
 #elif OS_UNIX
