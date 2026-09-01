@@ -781,6 +781,7 @@ send_signal(char *executable, int32 signal_number) {
 
     if ((processes = opendir("/proc")) == NULL) {
         error("Error opening /proc: %s\n", strerror(errno));
+        sb_free(&buffer);
         return;
     }
 
@@ -801,21 +802,20 @@ send_signal(char *executable, int32 signal_number) {
             continue;
         }
 
+        sb_clear(&buffer);
         d_name_len = strlen32(process->d_name);
 
-        SB_APPEND(&buffer, "/proc");
+        SB_APPEND(&buffer, "/proc/");
         SB_APPEND(&buffer, process->d_name, d_name_len);
         SB_APPEND(&buffer, "/cmdline");
 
         if ((cmdline = open(buffer.data, O_RDONLY)) < 0) {
-            sb_clear(&buffer);
             continue;
         }
 
         errno = 0;
         if ((r = read64(cmdline, command, sizeof(command))) <= 0) {
             XCLOSE(&cmdline, buffer.data);
-            sb_clear(&buffer);
             continue;
         }
         XCLOSE(&cmdline, buffer.data);
@@ -837,11 +837,10 @@ send_signal(char *executable, int32 signal_number) {
                 }
             }
         }
-        sb_clear(&buffer);
     }
 
     sb_free(&buffer);
-    xclosedir(processes);
+    xclosedir(processes, "/proc");
     return;
 }
 #elif OS_UNIX
