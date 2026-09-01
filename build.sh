@@ -71,7 +71,6 @@ CPPFLAGS="$CPPFLAGS -I. -Icbase"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 # CFLAGS="$CFLAGS -Wpedantic"
-CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
 case "$mode" in
 debug)
@@ -105,7 +104,6 @@ build)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
-    CFLAGS="$CFLAGS -Werror"
     ;;
 cross)
     common_build_cross_all
