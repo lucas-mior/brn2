@@ -402,7 +402,7 @@ _Generic((VAR), \
     default: square_int64 \
 )(VAR)
 
-#define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, strlen32(B))
+#define strequal2_3(A, A_LEN, B)        strequal2(A, A_LEN, B, STRLIT_LEN(B))
 #define strequal2_4(A, A_LEN, B, B_LEN) strequal2(A, A_LEN, B, B_LEN)
 #define STREQUAL(...) SELECT_ON_NUM_ARGS(strequal2_, __VA_ARGS__)
 
