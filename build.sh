@@ -80,7 +80,7 @@ debug)
     exe="bin/${project}"
     ;;
 debug-fast)
-    CFLAGS="$CFLAGS -Wno-error -g2 -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -g2 -O2 -flto -march=native -ftree-vectorize"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
     ;;
 benchmark)
