@@ -231,11 +231,12 @@
   #pragma clang diagnostic ignored "-Wpadded"
   #pragma clang diagnostic ignored "-Wpre-c11-compat"
   #pragma clang diagnostic ignored "-Wtentative-definition-compat"
-  CBASE_CLANG_DIAGNOSTIC_WARNING("-Wunknown-warning-option")
   #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
   #pragma clang diagnostic ignored "-Wunused-macros"
   #pragma clang diagnostic ignored "-Wused-but-marked-unused"
   #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+  #pragma clang diagnostic warning "-Wunknown-warning-option"
 #endif
 
 #if DEBUGGING || TESTING
