@@ -71,6 +71,7 @@ CPPFLAGS="$CPPFLAGS -I. -Icbase"
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 # CFLAGS="$CFLAGS -Wpedantic"
+LDFLAGS="$LDFLAGS -lm"
 
 case "$mode" in
 debug)
