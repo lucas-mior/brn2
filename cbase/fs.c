@@ -1127,6 +1127,7 @@ read_entire_file(char *path, char **file_bytes) {
     }
 
     *file_bytes = bytes;
+    ASSERT(*file_bytes != NULL);
     return (int32)read_len;
 }
 
