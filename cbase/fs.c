@@ -1096,7 +1096,7 @@ read_entire_file(char *path, char **file_bytes) {
         XFCLOSE(file, path);
         return -EFBIG;
     }
-    if (fseek(file, 0, SEEK_SET) != 0) {
+    if (fseek(file, 0, SEEK_SET) < 0) {
         err = errno;
         if (err == 0) {
             err = EIO;
