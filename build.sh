@@ -312,12 +312,12 @@ callgrind|valgrind)
 
     for run_name in stdin-shuffled dir-rotleft dir-rotright; do
         set -- valgrind -s                                            \
-            "--log-file=$dir/valgrind-${run_name}.valgrind"           \
-            "--tool=$tool"
+            --log-file="$dir/valgrind-${run_name}.valgrind"           \
+            --tool="$tool"
 
         if [ "$mode" = "callgrind" ]; then
             set -- "$@"                                               \
-                "--callgrind-out-file=$dir/z-${run_name}$(date +%s).callgrind"
+                --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind"
         fi
 
         case "$run_name" in
