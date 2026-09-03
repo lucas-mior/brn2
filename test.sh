@@ -11,6 +11,8 @@ cl|*/cl|cl.exe|*/cl.exe)
     ;;
 esac
 
+brn2="$PWD/bin/brn2${exe_suffix}"
+
 run_brn2 () {
     if command -v gdb >/dev/null 2>&1; then
         gdb -q -nx -batch --return-child-result \
