@@ -1114,7 +1114,7 @@ read_entire_file(char *path, char **file_bytes) {
     }
     if (read_len != len) {
         err = errno;
-        if (err == 0) {
+        if (err <= 0) {
             err = EIO;
         }
         error("Error reading "RED("%s")": %s.\n", path, strerror(err));
