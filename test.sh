@@ -2,27 +2,12 @@
 
 set -e
 
-test_target=${BRN2_TEST_TARGET:-debug}
-
 ./build.sh debug-fast
 
 exe_suffix=
 case "${CC:-}" in
 cl|*/cl|cl.exe|*/cl.exe)
     exe_suffix=.exe
-    ;;
-esac
-
-case "$test_target" in
-"debug")
-    brn2="$PWD/bin/brn2$exe_suffix"
-    ;;
-"build")
-    brn2="$PWD/bin/brn2$exe_suffix"
-    ;;
-*)
-    echo "Unsupported BRN2_TEST_TARGET: $test_target"
-    exit 1
     ;;
 esac
 
