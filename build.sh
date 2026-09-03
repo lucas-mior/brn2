@@ -322,14 +322,14 @@ callgrind|valgrind)
 
         case "$run_name" in
         stdin-shuffled)
-            cat "$original"                                           \
-            | "$@" "$dir/$exe" -q -f - --file-target "$shuffled"
+            cat "$original" \
+            | "$@" $dir/$exe -q -f - --file-target "$shuffled"
             ;;
         dir-rotleft)
-            "$@" "$dir/$exe" -q -d . --file-target "$rotated_left"
+            "$@"   $dir/$exe -q -d . --file-target "$rotated_left"
             ;;
         dir-rotright)
-            "$@" "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
+            "$@"   $dir/$exe -q -f "$original" --file-target "$rotated_right"
             ;;
         esac
     done
