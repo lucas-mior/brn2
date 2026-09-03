@@ -311,17 +311,17 @@ callgrind|valgrind)
     trace_on
 
     CALLGRIND_OPTS=""
+
+    run_name="stdin-shuffled"
     if [ "$mode" = "callgrind" ]; then
         CALLGRIND_OPTS="--callgrind-out-file=$dir/z-${run_name}$(date +%s).callgrind"
     fi
-
-    run_name="stdin-shuffled"
     cat "$original" \
     | valgrind -s                                                     \
        --log-file="$dir/valgrind-${run_name}.valgrind"                \
        --tool=$tool                                                   \
-       "$CALLGRIND_OPTS"                                              \
-        "$dir/$exe" -q -f - --file-target "$shuffled"
+       $CALLGRIND_OPTS                                                \
+        $dir/$exe -q -f - --file-target "$shuffled"
 
     run_name="dir-rotleft"
     if [ "$mode" = "callgrind" ]; then
@@ -330,8 +330,8 @@ callgrind|valgrind)
     valgrind -s                                                       \
        --log-file="$dir/valgrind-${run_name}.valgrind"                \
        --tool=$tool                                                   \
-       "$CALLGRIND_OPTS"                                              \
-        "$dir/$exe" -q -d . --file-target "$rotated_left"
+       $CALLGRIND_OPTS                                                \
+        $dir/$exe -q -d . --file-target "$rotated_left"
 
     run_name="dir-rotright"
     if [ "$mode" = "callgrind" ]; then
@@ -340,8 +340,8 @@ callgrind|valgrind)
     valgrind -s                                                       \
        --log-file="$dir/valgrind-${run_name}.valgrind"                \
        --tool=$tool                                                   \
-       "$CALLGRIND_OPTS"                                              \
-        "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
+       $CALLGRIND_OPTS                                                \
+        $dir/$exe -q -f "$original" --file-target "$rotated_right"
 
     trace_off
     exit
