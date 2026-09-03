@@ -31,3 +31,4 @@ tests
 *.valgrind
 first-bad-commit.txt
 cbase/glibc_functions.txt
+static-analyzers-warnings.txt
