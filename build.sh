@@ -315,23 +315,22 @@ callgrind|valgrind)
     | valgrind -s                                                     \
        --log-file="$dir/valgrind-${run_name}.valgrind"                \
        --tool=$tool                                                   \
-        --dump-instr=yes       \
        --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind" \
         "$dir/$exe" -q -f - --file-target "$shuffled"
 
-    # run_name="dir-rotleft"
-    # valgrind -s                                                       \
-    #    --log-file="$dir/valgrind-${run_name}.valgrind"                \
-    #    --tool=$tool                                                   \
-    #    --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind" \
-    #     "$dir/$exe" -q -d . --file-target "$rotated_left"
+    run_name="dir-rotleft"
+    valgrind -s                                                       \
+       --log-file="$dir/valgrind-${run_name}.valgrind"                \
+       --tool=$tool                                                   \
+       --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind" \
+        "$dir/$exe" -q -d . --file-target "$rotated_left"
 
-    # run_name="dir-rotright"
-    # valgrind -s                                                       \
-    #    --log-file="$dir/valgrind-${run_name}.valgrind"                \
-    #    --tool=$tool                                                   \
-    #    --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind" \
-    #     "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
+    run_name="dir-rotright"
+    valgrind -s                                                       \
+       --log-file="$dir/valgrind-${run_name}.valgrind"                \
+       --tool=$tool                                                   \
+       --callgrind-out-file="$dir/z-${run_name}$(date +%s).callgrind" \
+        "$dir/$exe" -q -f "$original" --file-target "$rotated_right"
 
     trace_off
     exit
