@@ -4,7 +4,7 @@ set -e
 
 test_target=${BRN2_TEST_TARGET:-debug}
 
-./build.sh "$test_target"
+./build.sh debug-fast
 
 exe_suffix=
 case "${CC:-}" in
