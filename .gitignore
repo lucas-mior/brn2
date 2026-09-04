@@ -14,6 +14,7 @@ compile_commands.json
 *.exe
 *.git/
 *.o
+*.a
 *.pdb
 *.qbe
 rename
