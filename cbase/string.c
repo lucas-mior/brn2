@@ -747,6 +747,12 @@ main(void) {
                      "x0 -9223372036854775808 9223372036854775807");
         sb_free(&builder);
     }
+    {
+        StrBuilder builder = {0};
+        sb_bytes_pretty(&builder, INT32_MAX);
+        ASSERT_EQUAL(builder.data, "2.0000GB");
+        sb_free(&builder);
+    }
 
     {
         char b[64];
