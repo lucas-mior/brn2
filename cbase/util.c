@@ -939,8 +939,11 @@ deg2rad(double degrees) {
     return degrees*DEG2RAD;
 }
 
-int32
+static int32
 double_format(char *buffer, int32 size, double number) {
+    (void)buffer;
+    (void)size;
+    (void)number;
     return -1;
 }
 
