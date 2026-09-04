@@ -206,6 +206,11 @@ void str_builder_array_swap(StrBuilderArray *left, StrBuilderArray *right);
 // terminating '\0'. Negative return values are errno-style failures:
 // -EINVAL for invalid input, -ENOSPC when capacity is insufficient, and
 // -ERANGE when the requested precision is unsupported.
+//
+// This layer exposes shortest round-trip, fixed precision, and scientific
+// precision formatting. It intentionally does not expose a %g/general format
+// helper: exact %g behavior needs a separate policy layer to choose between
+// fixed and scientific output and to handle trailing-zero rules.
 int32 format_float32_shortest(char *buffer, int64 capacity, float value);
 int32 format_float64_shortest(char *buffer, int64 capacity, double value);
 int32 format_float64_fixed(char *buffer, int64 capacity, double value,
