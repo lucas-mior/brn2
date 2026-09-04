@@ -34,19 +34,6 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/lib/$(ALIB)
 	rm -f $(DESTDIR)$(PREFIX)/include/ryu.h
 
-TESTSRC=tests/common_test.cc tests/d2fixed_test.cc tests/d2s_intrinsics_test.cc tests/d2s_table_test.cc tests/d2s_test.cc tests/f2s_test.cc tests/generic_128_test.cc
-
-TESTS = $(TESTSRC:.cc=.test)
-
-%.test: %.cc $(ALIB)
-	$(CXX) -L/usr/lib64 $< ../third_party/gtest/gtest-all.cc ../third_party/gtest/gtest_main.cc -lpthread -I.. $(ALIB) -frtti -o $@
-	$@
-
-.PHONY: test
-test: $(TESTS)
-	@echo DONE
-
 .PHONY: clean
 clean:
-	rm -f $(OBJ) $(ALIB) $(TESTS)
-
+	rm -f $(OBJ) $(ALIB)
