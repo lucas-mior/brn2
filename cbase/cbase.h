@@ -837,6 +837,7 @@ void throw_away_function();
 #include "threads.c"
 
 #include "some_math.c"
+#include "format.c"
 
 #define ENUM_NAME CommandFlag
 #define ENUM_BITFLAGS 1
