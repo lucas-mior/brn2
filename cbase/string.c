@@ -749,8 +749,8 @@ main(void) {
     }
     {
         StrBuilder builder = {0};
-        sb_bytes_pretty(&builder, INT32_MAX);
-        ASSERT_EQUAL(builder.data, "2.0000GB");
+        sb_bytes_pretty(&builder, UINT32_MAX);
+        ASSERT_EQUAL(builder.data, "4.0000GB");
         sb_free(&builder);
     }
 
