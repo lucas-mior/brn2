@@ -167,12 +167,12 @@ XENUMS_LINKAGE int32
 CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
 #if ENUM_BITFLAGS == 0
     switch (val) {
-        #define XX_1(e)           case e:                                      \
-                                     *out = #e;                                \
-                                     return STRLIT_LEN(#e);
-        #define XX_2(e, v)        case e:                                      \
-                                     *out = #e;                                \
-                                     return STRLIT_LEN(#e);
+        #define XX_1(e)    case e:                                             \
+                               *out = #e;                                      \
+                               return STRLIT_LEN(#e);
+        #define XX_2(e, v) case e:                                             \
+                               *out = #e;                                      \
+                               return STRLIT_LEN(#e);
         #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
         ENUM_FIELDS
@@ -180,6 +180,7 @@ CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
         #undef XX
         #undef XX_1
         #undef XX_2
+
         case CAT(ENUM_PREFIX_, COUNT):
             *out = QUOTE(ENUM_PREFIX_) "COUNT";
             return STRLIT_LEN(QUOTE(ENUM_PREFIX_) "COUNT");
@@ -198,13 +199,13 @@ CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
         return STRLIT_LEN("NONE");
     }
 
-    #define XENUM_EXACT(e)                                                     \
+    #define XX_EXACT(e)                                                        \
         if (val == e) {                                                        \
             *out = xstrndup(#e, STRLIT_LEN(#e));                               \
             return STRLIT_LEN(#e);                                             \
         }
-    #define XX_1(e)    XENUM_EXACT(e)
-    #define XX_2(e, v) XENUM_EXACT(e)
+    #define XX_1(e)    XX_EXACT(e)
+    #define XX_2(e, v) XX_EXACT(e)
     #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
     ENUM_FIELDS
@@ -212,9 +213,9 @@ CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
     #undef XX
     #undef XX_1
     #undef XX_2
-    #undef XENUM_EXACT
+    #undef XX_EXACT
 
-    #define XENUM(e)                                                           \
+    #define XX_BITCHECK(e)                                                     \
         if (val && ((val & e) == e)) {                                         \
             char *name = #e;                                                   \
             int32 len = STRLIT_LEN(#e);                                        \
@@ -237,8 +238,8 @@ CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
             val &= (ENUM_UNDERLYING_TYPE)~e;                                   \
         }
 
-    #define XX_1(e)    XENUM(e)
-    #define XX_2(e, v) XENUM(e)
+    #define XX_1(e)    XX_BITCHECK(e)
+    #define XX_2(e, v) XX_BITCHECK(e)
     #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
     ENUM_FIELDS
@@ -246,7 +247,7 @@ CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
     #undef XX
     #undef XX_1
     #undef XX_2
-    #undef XENUM
+    #undef XX_BITCHECK
 
     if (val) {
         error2("Error: bit flags enum contains invalid bit set.\n");
@@ -271,12 +272,12 @@ XENUMS_LINKAGE int32
 CAT(ENUM_PREFIX_, alias_len)(enum ENUM_NAME val, char **out) {
 #if ENUM_BITFLAGS == 0
     switch (val) {
-        #define XX_1(e)                 case e:                                \
-                                               *out = #e;                      \
-                                               return STRLIT_LEN(#e);
-        #define XX_2(e, alias)          case e:                                \
-                                               *out = #alias;                  \
-                                               return STRLIT_LEN(#alias);
+        #define XX_1(e)        case e:                                         \
+                                   *out = #e;                                  \
+                                   return STRLIT_LEN(#e);
+        #define XX_2(e, alias) case e:                                         \
+                                   *out = #alias;                              \
+                                   return STRLIT_LEN(#alias);
         #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
         ENUM_FIELDS
@@ -344,8 +345,8 @@ CAT(ENUM_PREFIX_, parse)(char *string) {
         }
         token_len = (int32)(p - token);
         if (token_len <= 0) {
-            error2("Error: invalid enum parse character '%c' in %s.\n", *p,
-                   string);
+            error2("Error: invalid enum parse character '%c' in %s.\n",
+                   *p, string);
             TRAP();
         }
 
