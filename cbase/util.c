@@ -940,6 +940,11 @@ deg2rad(double degrees) {
 }
 
 int32
+double_format(char *buffer, int32 size, double number) {
+    return -1;
+}
+
+int32
 bytes_pretty(char *buffer, int64 raw) {
     char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
     double aux_pretty;
