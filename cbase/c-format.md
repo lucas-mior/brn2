@@ -133,11 +133,11 @@ function(void) {
                   x, y);
 
     // bad (one format argument is left on the format-string line)
-    printf("%s = %.17g\n", states[i],
+    printf("%s = %g\n", states[i],
            X[final_step*nstates + i]);
 
     // good (format string is separate; format arguments stay together)
-    printf("%s = %.17g\n",
+    printf("%s = %g\n",
            states[i], X[final_step*nstates + i]);
 
     return;
