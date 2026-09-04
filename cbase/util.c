@@ -939,14 +939,6 @@ deg2rad(double degrees) {
     return degrees*DEG2RAD;
 }
 
-static int32
-double_format(char *buffer, int32 size, double number) {
-    (void)buffer;
-    (void)size;
-    (void)number;
-    return -1;
-}
-
 int32
 bytes_pretty(char *buffer, int64 raw) {
     char *suffixes[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
