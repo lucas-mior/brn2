@@ -140,8 +140,144 @@ format_float64_scientific(char *buffer, int64 capacity, double value,
 }
 
 #if TESTING_format
+static void
+test_format_float32_shortest(float value, char *expected) {
+    char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
+    int32 len;
+
+    len = format_float32_shortest(buffer, SIZEOF(buffer), value);
+    ASSERT_EQUAL(len, strlen32(expected));
+    ASSERT_EQUAL(buffer, expected);
+
+    return;
+}
+
+static void
+test_format_float64_shortest(double value, char *expected) {
+    char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
+    int32 len;
+
+    len = format_float64_shortest(buffer, SIZEOF(buffer), value);
+    ASSERT_EQUAL(len, strlen32(expected));
+    ASSERT_EQUAL(buffer, expected);
+
+    return;
+}
+
+static void
+test_format_float64_fixed(double value, int32 precision, char *expected) {
+    char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
+    int32 len;
+
+    len = format_float64_fixed(buffer, SIZEOF(buffer), value, precision);
+    ASSERT_EQUAL(len, strlen32(expected));
+    ASSERT_EQUAL(buffer, expected);
+
+    return;
+}
+
+static void
+test_format_float64_scientific(double value, int32 precision, char *expected) {
+    char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
+    int32 len;
+
+    len = format_float64_scientific(buffer, SIZEOF(buffer), value, precision);
+    ASSERT_EQUAL(len, strlen32(expected));
+    ASSERT_EQUAL(buffer, expected);
+
+    return;
+}
+
+static uint32
+test_format_float32_bits(float value) {
+    uint32 bits;
+
+    memcpy(&bits, &value, SIZEOF(bits));
+    return bits;
+}
+
+static uint64
+test_format_float64_bits(double value) {
+    uint64 bits;
+
+    memcpy(&bits, &value, SIZEOF(bits));
+    return bits;
+}
+
+static void
+test_format_float32_round_trip(float value) {
+    char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
+    char *end;
+    float parsed;
+    int32 len;
+
+    len = format_float32_shortest(buffer, SIZEOF(buffer), value);
+    ASSERT_POSITIVE(len);
+
+    end = NULL;
+    parsed = strtof(buffer, &end);
+    ASSERT(end == buffer + len);
+    ASSERT_EQUAL(test_format_float32_bits(parsed),
+                 test_format_float32_bits(value));
+
+    return;
+}
+
+static void
+test_format_float64_round_trip(double value) {
+    char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
+    char *end;
+    double parsed;
+    int32 len;
+
+    len = format_float64_shortest(buffer, SIZEOF(buffer), value);
+    ASSERT_POSITIVE(len);
+
+    end = NULL;
+    parsed = strtod(buffer, &end);
+    ASSERT(end == buffer + len);
+    ASSERT_EQUAL(test_format_float64_bits(parsed),
+                 test_format_float64_bits(value));
+
+    return;
+}
+
 int
 main(void) {
+    char buffer[16];
+
+    test_format_float64_shortest(0.0, "0E0");
+    test_format_float64_shortest(-0.0, "-0E0");
+    test_format_float64_shortest(1.0, "1E0");
+    test_format_float64_shortest(0.1, "1E-1");
+    test_format_float64_shortest(1234567.89, "1.23456789E6");
+    test_format_float64_shortest(1e-7, "1E-7");
+
+    test_format_float32_shortest(0.0f, "0E0");
+    test_format_float32_shortest(-0.0f, "-0E0");
+    test_format_float32_shortest(1.0f, "1E0");
+    test_format_float32_shortest(0.1f, "1E-1");
+    test_format_float32_shortest(1e-7f, "1E-7");
+
+    test_format_float64_fixed(1.25, 2, "1.25");
+    test_format_float64_fixed(1.2, 4, "1.2000");
+    test_format_float64_fixed(-0.0, 3, "-0.000");
+
+    test_format_float64_scientific(1234.0, 2, "1.23e+03");
+    test_format_float64_scientific(0.00123, 3, "1.230e-03");
+
+    ASSERT_EQUAL(format_float64_shortest(NULL, 64, 1.0), -EINVAL);
+    ASSERT_EQUAL(format_float64_shortest(buffer, 0, 1.0), -EINVAL);
+    ASSERT_EQUAL(format_float64_fixed(buffer, SIZEOF(buffer), 1.0, -1),
+                 -EINVAL);
+    ASSERT_EQUAL(format_float64_fixed(buffer, 4, 1.25, 2), -ENOSPC);
+    ASSERT_EQUAL(format_float64_fixed(buffer, SIZEOF(buffer), 1.0,
+                                      FORMAT_FLOAT_MAX_PRECISION + 1),
+                 -ERANGE);
+
+    test_format_float64_round_trip(0.1);
+    test_format_float32_round_trip(0.1f);
+
     exit(EXIT_SUCCESS);
 }
 #endif
