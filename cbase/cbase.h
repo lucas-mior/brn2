@@ -178,6 +178,7 @@ void sb_clear(StrBuilder *);
 int32 sb_copy(StrBuilder *, StrBuilder *);
 void sb_free(StrBuilder *);
 void sb_itoa(StrBuilder *, llong);
+void sb_bytes_pretty(StrBuilder *str_builder, llong size);
 void sb_move(StrBuilder *, StrBuilder *);
 void sb_printf(StrBuilder *, char *, ...);
 void sb_reserve(StrBuilder *, int64);

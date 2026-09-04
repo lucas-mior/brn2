@@ -405,6 +405,16 @@ sb_itoa(StrBuilder *str_builder, llong num) {
 }
 
 void
+sb_bytes_pretty(StrBuilder *str_builder, llong size) {
+    int32 len;
+
+    sb_reserve(str_builder, 16);
+    len = bytes_pretty(str_builder->data, size);
+    str_builder->len += len;
+    return;
+}
+
+void
 sb_printf(StrBuilder *str_builder, char *fmt, ...) {
     va_list ap;
     va_list ap2;
