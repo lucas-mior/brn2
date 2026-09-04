@@ -202,6 +202,17 @@ void str_builder_array_init(StrBuilderArray *);
 void str_builder_array_move(StrBuilderArray *dest, StrBuilderArray *source);
 int32 str_builder_array_reserve(StrBuilderArray *array, int32 extra);
 void str_builder_array_swap(StrBuilderArray *left, StrBuilderArray *right);
+// Float formatting functions return the formatted byte count, excluding the
+// terminating '\0'. Negative return values are errno-style failures:
+// -EINVAL for invalid input, -ENOSPC when capacity is insufficient, and
+// -ERANGE when the requested precision is unsupported.
+int32 format_float32_shortest(char *buffer, int64 capacity, float value);
+int32 format_float64_shortest(char *buffer, int64 capacity, double value);
+int32 format_float64_fixed(char *buffer, int64 capacity, double value,
+                           int32 precision);
+int32 format_float64_scientific(char *buffer, int64 capacity, double value,
+                                int32 precision);
+
 int32 string_from_strings(char *buffer, int32 size, char *separator,
                           char **array, int32 length);
 int32 string_from_doubles(char *buffer, int32 size, char *separator,
