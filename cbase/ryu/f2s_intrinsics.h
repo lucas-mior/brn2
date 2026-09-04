@@ -38,15 +38,18 @@
 
 static inline uint32_t pow5factor_32(uint32_t value) {
   uint32_t count = 0;
+  uint32_t q;
+  uint32_t r;
+
   for (;;) {
     assert(value != 0);
-    const uint32_t q = value / 5;
-    const uint32_t r = value % 5;
+    q = value / 5;
+    r = value % 5;
     if (r != 0) {
       break;
     }
     value = q;
-    ++count;
+    count += 1;
   }
   return count;
 }
@@ -65,21 +68,30 @@ static inline bool multipleOfPowerOf2_32(const uint32_t value, const uint32_t p)
 // It seems to be slightly faster to avoid uint128_t here, although the
 // generated code for uint128_t looks slightly nicer.
 static inline uint32_t mulShift32(const uint32_t m, const uint64_t factor, const int32_t shift) {
-  assert(shift > 32);
-
   // The casts here help MSVC to avoid calls to the __allmul library
   // function.
-  const uint32_t factorLo = (uint32_t)(factor);
-  const uint32_t factorHi = (uint32_t)(factor >> 32);
-  const uint64_t bits0 = (uint64_t)m * factorLo;
-  const uint64_t bits1 = (uint64_t)m * factorHi;
+  uint32_t factorLo = (uint32_t)(factor);
+  uint32_t factorHi = (uint32_t)(factor >> 32);
+  uint64_t bits0 = (uint64_t)m * factorLo;
+  uint64_t bits1 = (uint64_t)m * factorHi;
+#if defined(RYU_32_BIT_PLATFORM)
+  uint32_t bits0Hi;
+  uint32_t bits1Lo;
+  uint32_t bits1Hi;
+  int32_t s;
+#else
+  uint64_t sum;
+  uint64_t shiftedSum;
+#endif
+
+  assert(shift > 32);
 
 #if defined(RYU_32_BIT_PLATFORM)
   // On 32-bit platforms we can avoid a 64-bit shift-right since we only
   // need the upper 32 bits of the result and the shift value is > 32.
-  const uint32_t bits0Hi = (uint32_t)(bits0 >> 32);
-  uint32_t bits1Lo = (uint32_t)(bits1);
-  uint32_t bits1Hi = (uint32_t)(bits1 >> 32);
+  bits0Hi = (uint32_t)(bits0 >> 32);
+  bits1Lo = (uint32_t)(bits1);
+  bits1Hi = (uint32_t)(bits1 >> 32);
   bits1Lo += bits0Hi;
   bits1Hi += (bits1Lo < bits0Hi);
   if (shift >= 64) {
@@ -87,12 +99,12 @@ static inline uint32_t mulShift32(const uint32_t m, const uint64_t factor, const
     // This could now be slower than the !defined(RYU_32_BIT_PLATFORM) case.
     return (uint32_t)(bits1Hi >> (shift - 64));
   } else {
-    const int32_t s = shift - 32;
+    s = shift - 32;
     return (bits1Hi << (32 - s)) | (bits1Lo >> s);
   }
 #else // RYU_32_BIT_PLATFORM
-  const uint64_t sum = (bits0 >> 32) + bits1;
-  const uint64_t shiftedSum = sum >> (shift - 32);
+  sum = (bits0 >> 32) + bits1;
+  shiftedSum = sum >> (shift - 32);
   assert(shiftedSum <= UINT32_MAX);
   return (uint32_t) shiftedSum;
 #endif // RYU_32_BIT_PLATFORM
