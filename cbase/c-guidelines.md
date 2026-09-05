@@ -236,7 +236,7 @@ typedef struct MyStruct {
 In general, we must always know the lengths of our strings:
 - Pass string length around when we already know it (see below).
 - Use STRLIT("literal") when needed to pass a string and its length to a
-  function without repeating the literal itself.
+  function/struct without repeating the literal itself.
 - Use `memchr64`, `memmem64`, or other function to parse whatever we are
   parsing. Example:
   ```c
@@ -270,6 +270,47 @@ In general, we must always know the lengths of our strings:
 
 In general, pass `char *string` and `int32 string_len` around. Also use this
 convention in struct definitions.
+
+If the string is expected to be appended to later, use StrBuilder directly:
+```c
+// bad
+typedef struct MyStruct {
+    char *string;
+    int32 string_len;
+    int32 string_cap;
+
+    char *other;
+    int32 other_len;
+    int32 other_cap;
+} MyStruct;
+
+// good
+typedef struct MyStruct {
+    StrBuilder string;
+    StrBuilder other;
+} MyStruct;
+```
+
+If the string is not expected to be appended to:
+```c
+// bad
+typedef struct MyStruct {
+    char *string;
+    int32 string_len;
+
+    char *other;
+    int32 other_len;
+} MyStruct;
+
+// good
+typedef struct MyStruct {
+    char *string;
+    char *other;
+
+    int32 string_len;
+    int32 other_len;
+} MyStruct;
+```
 
 That means to also avoid calling `strlen32`:
 
@@ -329,6 +370,13 @@ to be avoided. `strcpy`, `strcat`, `strstr`, and `strtok` are always the wrong
 choice once you have the habit of always knowing the length of your strings.
 Prefer `memcpy64`, `memmem64`, or custom functions that operate on string with
 known length.
+
+Also, never create stupid string helpers like
+`<module>_string_copy`,
+`<module>_string_equal`,
+`<module>_string_destroy`,
+`<module>_string_free`, etc. Use StrBuilder, memcpy64, xstrndup, whatever,
+but NEVER create helper like those.
 
 ## Comparing strings:
 In general, avoid `strcmp()`, use the alternatives below instead:
