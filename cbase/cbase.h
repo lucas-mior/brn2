@@ -198,7 +198,6 @@ int32 str_builder_array_append_copy(StrBuilderArray *array, StrBuilder *item);
 void str_builder_array_clear(StrBuilderArray *);
 int32 str_builder_array_copy(StrBuilderArray *dest, StrBuilderArray *source);
 void str_builder_array_destroy(StrBuilderArray *);
-void str_builder_array_init(StrBuilderArray *);
 void str_builder_array_move(StrBuilderArray *dest, StrBuilderArray *source);
 int32 str_builder_array_reserve(StrBuilderArray *array, int32 extra);
 void str_builder_array_swap(StrBuilderArray *left, StrBuilderArray *right);

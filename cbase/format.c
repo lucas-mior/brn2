@@ -58,13 +58,13 @@ format_float_validate_precision(int32 precision) {
 }
 
 static int32
-format_float_copy(char *buffer, int64 capacity, char *source,
-                  int32 source_len) {
+format_float_copy(char *buffer, int64 capacity,
+                  char *source, int32 source_len) {
     ASSERT(buffer != NULL);
-    ASSERT(capacity > 0);
+    ASSERT_POSITIVE(capacity);
     ASSERT(source != NULL);
-    ASSERT(source_len >= 0);
-    ASSERT(source_len < FORMAT_FLOAT_RYU_BUFFER_SIZE);
+    ASSERT_NON_NEGATIVE(source_len);
+    ASSERT_LESS(source_len, FORMAT_FLOAT_RYU_BUFFER_SIZE);
 
     if ((int64)source_len >= capacity) {
         return -ENOSPC;

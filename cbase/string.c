@@ -476,14 +476,6 @@ sb_steal_exact(StrBuilder *str_builder, int32 *len) {
 }
 
 void
-str_builder_array_init(StrBuilderArray *array) {
-    array->items = NULL;
-    array->len = 0;
-    array->cap = 0;
-    return;
-}
-
-void
 str_builder_array_clear(StrBuilderArray *array) {
     if (array == NULL) {
         return;
@@ -504,13 +496,13 @@ str_builder_array_destroy(StrBuilderArray *array) {
 
     str_builder_array_clear(array);
     free2(array->items, array->cap*SIZEOF(*array->items));
-    str_builder_array_init(array);
+    *array = (StrBuilderArray){0};
     return;
 }
 
 int32
 str_builder_array_copy(StrBuilderArray *dest, StrBuilderArray *source) {
-    StrBuilderArray replacement;
+    StrBuilderArray replacement = {0};
     int32 err;
 
     if (dest == NULL) {
@@ -520,7 +512,6 @@ str_builder_array_copy(StrBuilderArray *dest, StrBuilderArray *source) {
         return dest->len;
     }
 
-    str_builder_array_init(&replacement);
     if (source) {
         if ((err = str_builder_array_reserve(&replacement, source->len)) < 0) {
             str_builder_array_destroy(&replacement);
@@ -551,11 +542,11 @@ str_builder_array_move(StrBuilderArray *dest, StrBuilderArray *source) {
 
     str_builder_array_destroy(dest);
     if (source == NULL) {
-        str_builder_array_init(dest);
+        *dest = (StrBuilderArray){0};
         return;
     }
     *dest = *source;
-    str_builder_array_init(source);
+    *source = (StrBuilderArray){0};
     return;
 }
 
