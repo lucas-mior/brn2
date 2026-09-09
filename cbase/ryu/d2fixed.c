@@ -264,7 +264,6 @@ static inline void append_d_digits(const uint32_t olength, uint32_t digits, char
     c = (digits % 100) << 1;
     digits /= 100;
     memcpy(result + olength + 1 - i - 2, DIGIT_TABLE + c, 2);
-    i += 2;
   }
   if (digits >= 10) {
     c = digits << 1;
@@ -777,7 +776,6 @@ int d2exp_buffered_n(double d, uint32_t precision, char* result) {
   printf("lastDigit=%u\n", lastDigit);
 #endif
   // 0 = don't round up; 1 = round up unconditionally; 2 = round up if odd.
-  roundUp = 0;
   if (lastDigit != 5) {
     roundUp = lastDigit > 5;
   } else {
