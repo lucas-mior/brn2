@@ -545,7 +545,7 @@ brn2_threads_work_normalization(Work *arg) {
 
     for (int32 i = work->start; i < work->end; i += 1) {
         FileName *file = list->files[i];
-        char *name = ASSUME_ALIGNED_EXPR(file->name);
+        char *name = file->name;
         char *p;
         int64 off = 0;
 
@@ -564,7 +564,7 @@ brn2_threads_work_normalization(Work *arg) {
         }
 
         off = 0;
-        name = ASSUME_ALIGNED_EXPR(file->name);
+        name = file->name;
         while ((p = MEM_LITERAL_SHORT(name + off, file->length - off, "/./"))) {
             off = p - name;
 
