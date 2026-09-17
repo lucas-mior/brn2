@@ -2223,7 +2223,7 @@ fmt_float_force_decimal_point(char *body, int32 body_len,
         return -EOVERFLOW;
     }
 
-    memmove(body + exponent_index + 1, body + exponent_index,
+    memmove64(body + exponent_index + 1, body + exponent_index,
             (body_len - exponent_index));
     body[exponent_index] = '.';
     return body_len + 1;
@@ -2715,7 +2715,7 @@ fmt_decimal_round_digits(char *digits, int32 *len, int32 keep,
     if (keep >= INT32_MAX) {
         return -EOVERFLOW;
     }
-    memmove(digits + 1, digits, keep);
+    memmove64(digits + 1, digits, keep);
     digits[0] = '1';
     *len = keep + 1;
     return 0;
@@ -2913,7 +2913,7 @@ fmt_long_double_scientific_digits(FormatBinaryFloat *parts, ldouble value,
         return integer_digit_len;
     }
     while (integer_digit_len < significant_len) {
-        memmove(digits + 1, digits, integer_digit_len);
+        memmove64(digits + 1, digits, integer_digit_len);
         digits[0] = '0';
         integer_digit_len += 1;
     }
@@ -3124,7 +3124,7 @@ fmt_long_double_strip_trailing_zeros(char *body, int32 body_len) {
     }
 
     if (exponent_index < body_len) {
-        memmove(body + end, body + exponent_index,
+        memmove64(body + end, body + exponent_index,
                 (body_len - exponent_index));
         end += body_len - exponent_index;
     }
@@ -3769,7 +3769,7 @@ fmt_float_strip_trailing_zeros(char *body, int32 body_len) {
     }
 
     if (exponent_index < body_len) {
-        memmove(body + end, body + exponent_index,
+        memmove64(body + end, body + exponent_index,
                 (body_len - exponent_index));
         end += body_len - exponent_index;
     }
@@ -3870,7 +3870,7 @@ fmt_float_generate_body(FormatSpec *spec, double value,
     }
 
     if (buffer[0] == '-') {
-        memmove(buffer, buffer + 1, (body_len - 1));
+        memmove64(buffer, buffer + 1, (body_len - 1));
         body_len -= 1;
     }
     if ((spec->flags & FORMAT_FLAG_ALTERNATE) != 0) {
