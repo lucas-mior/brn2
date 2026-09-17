@@ -494,7 +494,7 @@ fmt_parse_spec(char *cursor, char **next, FormatSpec *spec) {
     ASSERT(next != NULL);
     ASSERT(spec != NULL);
 
-    memset(spec, 0, SIZEOF(*spec));
+    memset64(spec, 0, SIZEOF(*spec));
 
     if (*cursor == '\0') {
         return -EINVAL;
@@ -662,7 +662,7 @@ fmt_sink_write_repeat(FormatSink *sink, char byte, int64 len) {
     }
 
     copy_len = MIN(len, available);
-    memset(sink->buffer + sink->written, byte, copy_len);
+    memset64(sink->buffer + sink->written, byte, copy_len);
     sink->written += copy_len;
     sink->buffer[sink->written] = '\0';
     return;
@@ -1341,7 +1341,7 @@ static void
 fmt_big_uint_zero(FormatBigUInt *value) {
     ASSERT(value != NULL);
 
-    memset(value->words, 0, SIZEOF(value->words));
+    memset64(value->words, 0, SIZEOF(value->words));
     value->len = 0;
     return;
 }
@@ -1561,7 +1561,7 @@ fmt_big_uint_shift_left(FormatBigUInt *value, int32 shift) {
     }
 
     memcpy64(original, value->words, (original_len*SIZEOF(original[0])));
-    memset(value->words, 0, SIZEOF(value->words));
+    memset64(value->words, 0, SIZEOF(value->words));
     value->len = new_len;
     for (int32 i = 0; i < original_len; i += 1) {
         uint64 shifted;
@@ -3414,7 +3414,7 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
     } else {
         digits = malloc2(digit_capacity);
     }
-    memset(digits, '0', digit_capacity);
+    memset64(digits, '0', digit_capacity);
 
     if (parts.zero) {
         first_digit = '0';
@@ -4371,7 +4371,7 @@ test_fmt_sink_capacity(char *format, char *expected) {
         int32 copied;
         int32 len;
 
-        memset(buffer, 0x7f, SIZEOF(buffer));
+        memset64(buffer, 0x7f, SIZEOF(buffer));
         len = fmt_test_snprintf(buffer, capacity, format);
         ASSERT_EQUAL(len, expected_len);
 
@@ -4402,7 +4402,7 @@ test_fmt_integer_capacity(char *expected, char *format, ...) {
         int32 copied;
         int32 len;
 
-        memset(buffer, 0x7f, SIZEOF(buffer));
+        memset64(buffer, 0x7f, SIZEOF(buffer));
         va_start(args, format);
         len = fmt_vsnprintf(buffer, capacity, format, args);
         va_end(args);
@@ -4435,7 +4435,7 @@ test_fmt_bytes_capacity(char *expected, int32 expected_len,
         int32 copied;
         int32 len;
 
-        memset(buffer, 0x7f, SIZEOF(buffer));
+        memset64(buffer, 0x7f, SIZEOF(buffer));
         va_start(args, format);
         len = fmt_vsnprintf(buffer, capacity, format, args);
         va_end(args);
@@ -4557,13 +4557,13 @@ test_fmt_char_string_outputs(void) {
     test_fmt_bytes_capacity("x=abc n=7 c=Z", 13, "x=%s n=%d c=%c",
                                "abc", 7, 'Z');
 
-    memset(buffer, 0x7f, SIZEOF(buffer));
+    memset64(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*s", -1,
                                       "abc"), -EINVAL);
     ASSERT_EQUAL(buffer[0], '\0');
     ASSERT_EQUAL(buffer[1], (char)0x7f);
 
-    memset(buffer, 0x7f, SIZEOF(buffer));
+    memset64(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*s", 1,
                                       (char *)NULL), -EINVAL);
     ASSERT_EQUAL(buffer[0], '\0');
@@ -4595,7 +4595,7 @@ test_fmt_pointer_count_outputs(void) {
     test_fmt_bytes_capacity("abcd", 4, "ab%ncd", &count32);
     ASSERT_EQUAL(count32, 2);
 
-    memset(buffer, 0x7f, SIZEOF(buffer));
+    memset64(buffer, 0x7f, SIZEOF(buffer));
     count32 = -1;
     ASSERT_EQUAL(fmt_test_snprintf(buffer, 2, "abcd%n", &count32), 4);
     ASSERT_EQUAL(count32, 4);
@@ -5102,8 +5102,8 @@ test_fmt_sink_validation(void) {
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%*d",
                                       INT32_MIN, 0), -EOVERFLOW);
 
-    memset(buffer, 0x7f, SIZEOF(buffer));
-    memset(buffer, 0x7f, SIZEOF(buffer));
+    memset64(buffer, 0x7f, SIZEOF(buffer));
+    memset64(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%"), -EINVAL);
     ASSERT_EQUAL(buffer[0], '\0');
     ASSERT_EQUAL(buffer[1], (char)0x7f);
