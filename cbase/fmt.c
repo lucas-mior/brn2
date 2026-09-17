@@ -5273,12 +5273,10 @@ main(void) {
 
     ASSERT_EQUAL(fmt_float64_shortest(NULL, 64, 1.0), -EINVAL);
     ASSERT_EQUAL(fmt_float64_shortest(buffer, 0, 1.0), -EINVAL);
-    ASSERT_EQUAL(fmt_float64_fixed(buffer, SIZEOF(buffer), 1.0, -1),
-                 -EINVAL);
+    ASSERT_EQUAL(fmt_float64_fixed(buffer, SIZEOF(buffer), 1.0, -1), -EINVAL);
     ASSERT_EQUAL(fmt_float64_fixed(buffer, 4, 1.25, 2), -ENOSPC);
     ASSERT_EQUAL(fmt_float64_fixed(buffer, SIZEOF(buffer), 1.0,
-                                      FORMAT_FLOAT_MAX_PRECISION + 1),
-                 -ERANGE);
+                                   FORMAT_FLOAT_MAX_PRECISION + 1), -ERANGE);
 
     test_fmt_float64_round_trip(0.1);
     test_fmt_float32_round_trip(0.1f);
