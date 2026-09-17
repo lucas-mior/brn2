@@ -607,7 +607,7 @@ fmt_sink_write(FormatSink *sink, char *data, int64 len) {
     }
 
     copy_len = MIN(len, available);
-    memcpy(sink->buffer + sink->written, data, (size_t)copy_len);
+    memcpy64(sink->buffer + sink->written, data, (size_t)copy_len);
     sink->written += copy_len;
     sink->buffer[sink->written] = '\0';
     return;
@@ -1494,7 +1494,7 @@ fmt_host_is_little_endian(void) {
     uchar bytes[SIZEOF(one)];
 
     one = 1;
-    memcpy(bytes, &one, (size_t)SIZEOF(one));
+    memcpy64(bytes, &one, (size_t)SIZEOF(one));
     return bytes[0] == 1;
 }
 
@@ -1560,7 +1560,7 @@ fmt_big_uint_shift_left(FormatBigUInt *value, int32 shift) {
         return -EOVERFLOW;
     }
 
-    memcpy(original, value->words, (size_t)(original_len*SIZEOF(original[0])));
+    memcpy64(original, value->words, (size_t)(original_len*SIZEOF(original[0])));
     memset(value->words, 0, (size_t)SIZEOF(value->words));
     value->len = new_len;
     for (int32 i = 0; i < original_len; i += 1) {
@@ -1774,7 +1774,7 @@ fmt_big_uint_to_decimal(FormatBigUInt *value, char *buffer,
             buffer[len] = '0';
             len += 1;
         }
-        memcpy(buffer + len, digits, (size_t)digit_len);
+        memcpy64(buffer + len, digits, (size_t)digit_len);
         len += digit_len;
     }
 
@@ -1871,7 +1871,7 @@ fmt_decode_binary64_long_double(ldouble value,
     ASSERT(parts != NULL);
     ASSERT(SIZEOF(ldouble) == SIZEOF(double));
 
-    memcpy(&bits, &value, (size_t)SIZEOF(bits));
+    memcpy64(&bits, &value, (size_t)SIZEOF(bits));
     negative = (bits >> 63) != 0;
     fraction_mask = (UINT64_C(1)
                      << FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS) - 1;
@@ -1920,7 +1920,7 @@ fmt_decode_x87_long_double(ldouble value, FormatBinaryFloat *parts) {
         return -ENOSYS;
     }
 
-    memcpy(bytes, &value, (size_t)SIZEOF(bytes));
+    memcpy64(bytes, &value, (size_t)SIZEOF(bytes));
     significand = fmt_read_le_uint64(bytes);
     sign_exp = (uint32)bytes[8] | ((uint32)bytes[9] << 8);
     negative = (sign_exp & UINT32_C(0x8000)) != 0;
@@ -1969,7 +1969,7 @@ fmt_decode_binary128_long_double(ldouble value,
         return -ENOSYS;
     }
 
-    memcpy(bytes, &value, (size_t)SIZEOF(bytes));
+    memcpy64(bytes, &value, (size_t)SIZEOF(bytes));
     if (fmt_host_is_little_endian()) {
         low = fmt_read_le_uint64(bytes);
         high = fmt_read_le_uint64(bytes + 8);
@@ -2163,18 +2163,18 @@ fmt_float_special_body(double value, FormatSpec *spec,
 
     if (isnan(value)) {
         if (fmt_float_is_upper(spec->conversion)) {
-            memcpy(body, "NAN", 3);
+            memcpy64(body, "NAN", 3);
         } else {
-            memcpy(body, "nan", 3);
+            memcpy64(body, "nan", 3);
         }
         *body_len = 3;
         return 0;
     }
     if (isinf(value)) {
         if (fmt_float_is_upper(spec->conversion)) {
-            memcpy(body, "INF", 3);
+            memcpy64(body, "INF", 3);
         } else {
-            memcpy(body, "inf", 3);
+            memcpy64(body, "inf", 3);
         }
         *body_len = 3;
         return 0;
@@ -2380,7 +2380,7 @@ fmt_buffer_write(char *buffer, int32 capacity, int32 len,
     if (source_len > capacity - len) {
         return -EOVERFLOW;
     }
-    memcpy(buffer + len, source, (size_t)source_len);
+    memcpy64(buffer + len, source, (size_t)source_len);
     return len + source_len;
 }
 
@@ -2514,18 +2514,18 @@ fmt_long_double_special_body(ldouble value, FormatSpec *spec,
 
     if (isnan(value)) {
         if (fmt_float_is_upper(spec->conversion)) {
-            memcpy(body, "NAN", 3);
+            memcpy64(body, "NAN", 3);
         } else {
-            memcpy(body, "nan", 3);
+            memcpy64(body, "nan", 3);
         }
         *body_len = 3;
         return 0;
     }
     if (isinf(value)) {
         if (fmt_float_is_upper(spec->conversion)) {
-            memcpy(body, "INF", 3);
+            memcpy64(body, "INF", 3);
         } else {
-            memcpy(body, "inf", 3);
+            memcpy64(body, "inf", 3);
         }
         *body_len = 3;
         return 0;
@@ -3601,7 +3601,7 @@ fmt_float_generate_hex_body(FormatSpec *spec, double value,
     ASSERT(fmt_float_is_hex(spec->conversion));
 
     upper = fmt_float_is_upper(spec->conversion);
-    memcpy(&bits, &value, (size_t)SIZEOF(bits));
+    memcpy64(&bits, &value, (size_t)SIZEOF(bits));
     fraction_mask = (UINT64_C(1) << FORMAT_DOUBLE_FRACTION_BITS) - 1;
     exponent_bits = (bits >> FORMAT_DOUBLE_FRACTION_BITS) & 0x7ff;
     fraction = bits & fraction_mask;
@@ -4105,7 +4105,7 @@ fmt_float_copy(char *buffer, int64 capacity,
         return -ENOSPC;
     }
 
-    memcpy(buffer, source, (size_t)source_len);
+    memcpy64(buffer, source, (size_t)source_len);
     buffer[source_len] = '\0';
     return source_len;
 }
@@ -4658,7 +4658,7 @@ static double
 fmt_test_double_from_bits(uint64 bits) {
     double value;
 
-    memcpy(&value, &bits, (size_t)SIZEOF(value));
+    memcpy64(&value, &bits, (size_t)SIZEOF(value));
     return value;
 }
 
@@ -5167,7 +5167,7 @@ static uint32
 test_fmt_float32_bits(float value) {
     uint32 bits;
 
-    memcpy(&bits, &value, SIZEOF(bits));
+    memcpy64(&bits, &value, SIZEOF(bits));
     return bits;
 }
 
@@ -5175,7 +5175,7 @@ static uint64
 test_fmt_float64_bits(double value) {
     uint64 bits;
 
-    memcpy(&bits, &value, SIZEOF(bits));
+    memcpy64(&bits, &value, SIZEOF(bits));
     return bits;
 }
 
