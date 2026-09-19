@@ -772,7 +772,7 @@ ASSERT(pointer != NULL);
   - `ASSERT_MORE_EQUAL(number expr 1, number expr 2)`
   - `ASSERT_CONTAINS(haystack, haystack_len, needle)`
   - `ASSERT_NOT_CONTAINS(haystack, haystack_len, needle)`
-  - `ASSERT_FILE_CONTAINS(haystack, haystack_len, needle)`
+  - `ASSERT_FILE_CONTAINS(path, needle)`
   * They all use `__builtin_unreachable` if the condition fails if not
     debugging. Don't use them for non-debugging assertions.
     + Assertions that must happen in non-debugging builds, must be explicit code
