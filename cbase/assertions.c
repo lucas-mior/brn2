@@ -1275,6 +1275,12 @@ main(void) {
         ASSERT_OUTSIDE(&separate, array, array + LENGTH(array));
         ASSERT_OUTSIDE(&array[4], array, array + LENGTH(array));
     } {
+        int32 x = 5;
+
+        ASSERT_BETWEEN(x, 5, 10);
+        ASSERT_BETWEEN(x, 0, 5);
+        ASSERT_BETWEEN(x, 0, 10);
+    } {
         // uncomment to trigger linking error
         /* double x = 0.1; */
         /* void *a = NULL; */
@@ -1315,6 +1321,8 @@ main(void) {
         ASSERT_TRAPS(ASSERT_GLOB_NO_MATCH("alpha beta gamma", "alpha*gamma"));
         ASSERT_TRAPS(ASSERT_OUTSIDE(array, array + LENGTH(array), array));
         ASSERT_TRAPS(ASSERT_OUTSIDE(&array[0], array, array + LENGTH(array)));
+        ASSERT_TRAPS(ASSERT_BETWEEN(-1, 0, 1));
+        ASSERT_TRAPS(ASSERT_BETWEEN(2, 0, 1));
     }
 #endif
 

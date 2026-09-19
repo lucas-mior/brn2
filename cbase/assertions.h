@@ -320,6 +320,20 @@ void assert_traps_restore(char *, int32, char *);
                    ASSERT_OUTSIDE_END);                                        \
 } while (0)
 
+#define ASSERT_BETWEEN(X, MIN_LIMIT, MAX_LIMIT) do {                           \
+    if (((X) < (MIN_LIMIT)) || ((X) > (MAX_LIMIT))) {                          \
+        if (DEBUGGING) {                                                       \
+            assert_error(__FILE__, __LINE__, FUNC__,                           \
+                         "[%s%lld]%s = %s between [%lld, %lld]\n",             \
+                         TYPENAME(X), TYPEBITS(X), #X, S_(X),                 \
+                         (llong)(MIN_LIMIT), (llong)(MAX_LIMIT));              \
+            TRAP();                                                            \
+        } else {                                                               \
+            UNREACHABLE();                                                     \
+        }                                                                      \
+    }                                                                          \
+} while (0)
+
 #define A_BOTH_SIGN(MODE, VAR1, VAR2, TYPE1, TYPE2)                            \
     a_both_signed_##MODE(__FILE__, __LINE__, FUNC__,                           \
                          #VAR1, #VAR2,                                         \
