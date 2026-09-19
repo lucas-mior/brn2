@@ -754,7 +754,7 @@ brn2_sort(FileList *old) {
 
     partitions = brn2_threads(brn2_threads_work_sort,
                               old->length, old, NULL, NULL, 0, NULL);
-    ASSERT(partitions >= 1);
+    ASSERT_POSITIVE(partitions);
     if (partitions == 1) {
         return;
     }
