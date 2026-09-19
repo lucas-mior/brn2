@@ -333,7 +333,7 @@ main(void) {
 
     time_monotonic_precise(&t0);
     time_monotonic_coarse(&t1);
-    ASSERT_MORE_EQUAL(time_monotonic_now(), 0);
+    ASSERT_NON_NEGATIVE(time_monotonic_now());
     ASSERT_EQUAL(time_elapsed_ns(100, 250), 150);
     ASSERT_EQUAL(time_elapsed_ms(1000000, 4000000), 3);
 #if OS_UNIX
