@@ -818,8 +818,10 @@ ASSERT(pointer != NULL);
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT_LESS(a, 0)`
 - Prefer `ASSERT_NON_POSITIVE(value);` instead of `ASSERT_LESS_EQUAL(a, 0)`
 - Prefer `ASSERT_NON_NEGATIVE(value);` instead of `ASSERT_MORE_EQUAL(a, 0)`
-- Prefer `ASSERT_BETWEEN(value, min, max);`
+- Prefer `ASSERT_BETWEEN(value, 0, max);`
   instead of `ASSERT_MORE_EQUAL(value, 0); ASSERT_LESS_EQUAL(value, max);`
+- Prefer `ASSERT_BETWEEM(value, 0, SIZE - 1);`
+  instead of `ASSERT_NON_NEGATIVE(value); ASSERT_LESS(value, min, SIZE):`
 
 ## Modules
 
