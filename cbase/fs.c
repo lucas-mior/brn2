@@ -1287,7 +1287,6 @@ test_remove_tree_children(char *path) {
 
     while ((entry = readdir(dir)) != NULL) {
         char child[PATH_MAX];
-        int32 len;
 
         if (strequal(entry->d_name, ".") || strequal(entry->d_name, "..")) {
             continue;
