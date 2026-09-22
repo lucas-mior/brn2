@@ -806,6 +806,8 @@ ASSERT(pointer != NULL);
   ASSERT(!access(path, F_OK));
   ```
 - Prefer `ASSERT_ZERO(value);` instead of `ASSERT(value == 0)`.
+  * Note: if zero means "function succeded", use
+    `ASSERT(!function_call());` instead of `ASSERT_ZERO(function_call());`
 - Prefer `ASSERT_POSITIVE(value);` instead of `ASSERT(value > 0)`.
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT(value < 0)`.
 - Prefer `ASSERT_NON_POSITIVE(value);` instead of `ASSERT(value <= 0)`.
@@ -816,6 +818,8 @@ ASSERT(pointer != NULL);
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT_LESS(a, 0)`
 - Prefer `ASSERT_NON_POSITIVE(value);` instead of `ASSERT_LESS_EQUAL(a, 0)`
 - Prefer `ASSERT_NON_NEGATIVE(value);` instead of `ASSERT_MORE_EQUAL(a, 0)`
+- Prefer `ASSERT_BETWEEN(value, min, max);`
+  instead of `ASSERT_MORE_EQUAL(value, 0); ASSERT_LESS_EQUAL(value, max);`
 
 ## Modules
 

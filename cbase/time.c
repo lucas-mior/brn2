@@ -341,7 +341,7 @@ main(void) {
     ASSERT(timezone_initialized);
 #endif
     time_monotonic_precise(&t1);
-    ASSERT_MORE_EQUAL(timediff(t0, t1), 0.0);
+    ASSERT_NON_NEGATIVE(timediff(t0, t1));
     PRINT_TIMINGS(1, t0, t1);
 
     exit(EXIT_SUCCESS);
