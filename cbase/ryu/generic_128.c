@@ -31,7 +31,7 @@
 #ifdef RYU_DEBUG
 #include <inttypes.h>
 #include <stdio.h>
-static char* ryu_s(uint128_t v) {
+static char* s(uint128_t v) {
   int len = decimalLength(v);
   char* b = (char*) malloc((len + 1) * sizeof(char));
   for (int i = 0; i < len; i++) {
@@ -134,7 +134,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
   const bool acceptBounds = even;
 
 #ifdef RYU_DEBUG
-  printf("-> %s %s * 2^%d\n", ieeeSign ? "-" : "+", ryu_s(m2), e2 + 2);
+  printf("-> %s %s * 2^%d\n", ieeeSign ? "-" : "+", s(m2), e2 + 2);
 #endif
 
   // Step 2: Determine the interval of legal decimal representations.
@@ -162,9 +162,8 @@ struct floating_decimal_128 generic_binary_to_decimal(
     vp = mulShift(4 * m2 + 2, pow5, i);
     vm = mulShift(4 * m2 - 1 - mmShift, pow5, i);
 #ifdef RYU_DEBUG
-    printf("%s * 2^%d / 10^%d\n", ryu_s(mv), e2, q);
-    printf("V+=%s\nV =%s\nV-=%s\n",
-        ryu_s(vp), ryu_s(vr), ryu_s(vm));
+    printf("%s * 2^%d / 10^%d\n", s(mv), e2, q);
+    printf("V+=%s\nV =%s\nV-=%s\n", s(vp), s(vr), s(vm));
 #endif
     // floor(log_5(2^128)) = 55, this is very conservative
     if (q <= 55) {
@@ -194,10 +193,9 @@ struct floating_decimal_128 generic_binary_to_decimal(
     vp = mulShift(4 * m2 + 2, pow5, j);
     vm = mulShift(4 * m2 - 1 - mmShift, pow5, j);
 #ifdef RYU_DEBUG
-    printf("%s * 5^%d / 10^%d\n", ryu_s(mv), -e2, q);
+    printf("%s * 5^%d / 10^%d\n", s(mv), -e2, q);
     printf("%d %d %d %d\n", q, i, k, j);
-    printf("V+=%s\nV =%s\nV-=%s\n",
-        ryu_s(vp), ryu_s(vr), ryu_s(vm));
+    printf("V+=%s\nV =%s\nV-=%s\n", s(vp), s(vr), s(vm));
 #endif
     if (q <= 1) {
       // {vr,vp,vm} is trailing zeros if {mv,mp,mm} has at least q trailing 0 bits.
@@ -224,8 +222,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
   }
 #ifdef RYU_DEBUG
   printf("e10=%d\n", e10);
-  printf("V+=%s\nV =%s\nV-=%s\n",
-      ryu_s(vp), ryu_s(vr), ryu_s(vm));
+  printf("V+=%s\nV =%s\nV-=%s\n", s(vp), s(vr), s(vm));
   printf("vm is trailing zeros=%s\n", vmIsTrailingZeros ? "true" : "false");
   printf("vr is trailing zeros=%s\n", vrIsTrailingZeros ? "true" : "false");
 #endif
@@ -245,8 +242,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
     ++removed;
   }
 #ifdef RYU_DEBUG
-  printf("V+=%s\nV =%s\nV-=%s\n",
-      ryu_s(vp), ryu_s(vr), ryu_s(vm));
+  printf("V+=%s\nV =%s\nV-=%s\n", s(vp), s(vr), s(vm));
   printf("d-10=%s\n", vmIsTrailingZeros ? "true" : "false");
 #endif
   if (vmIsTrailingZeros) {
@@ -260,7 +256,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
     }
   }
 #ifdef RYU_DEBUG
-  printf("%s %d\n", ryu_s(vr), lastRemovedDigit);
+  printf("%s %d\n", s(vr), lastRemovedDigit);
   printf("vr is trailing zeros=%s\n", vrIsTrailingZeros ? "true" : "false");
 #endif
   if (vrIsTrailingZeros && (lastRemovedDigit == 5) && (vr % 2 == 0)) {
@@ -273,9 +269,8 @@ struct floating_decimal_128 generic_binary_to_decimal(
   const int32_t exp = e10 + removed;
 
 #ifdef RYU_DEBUG
-  printf("V+=%s\nV =%s\nV-=%s\n",
-      ryu_s(vp), ryu_s(vr), ryu_s(vm));
-  printf("O=%s\n", ryu_s(output));
+  printf("V+=%s\nV =%s\nV-=%s\n", s(vp), s(vr), s(vm));
+  printf("O=%s\n", s(output));
   printf("EXP=%d\n", exp);
 #endif
 
@@ -313,7 +308,7 @@ int generic_to_chars(const struct floating_decimal_128 v, char* const result) {
   const uint32_t olength = decimalLength(output);
 
 #ifdef RYU_DEBUG
-  printf("DIGITS=%s\n", ryu_s(v.mantissa));
+  printf("DIGITS=%s\n", s(v.mantissa));
   printf("OLEN=%u\n", olength);
   printf("EXP=%u\n", v.exponent + olength);
 #endif

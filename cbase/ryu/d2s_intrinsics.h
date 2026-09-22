@@ -288,13 +288,12 @@ static inline uint64_t mulShift64(const uint64_t m, const uint64_t* const mul, c
   uint64_t high1;                                   // 128
   const uint64_t low1 = umul128(m, mul[1], &high1); // 64
   uint64_t high0;                                   // 64
-  uint64_t sum;
   umul128(m, mul[0], &high0);                       // 0
-  sum = high0 + low1;
+  const uint64_t sum = high0 + low1;
   if (sum < high0) {
     ++high1; // overflow into high1
   }
-  return shiftright128(sum, high1, (uint32_t) (j - 64));
+  return shiftright128(sum, high1, j - 64);
 }
 
 static inline uint64_t mulShiftAll64(const uint64_t m, const uint64_t* const mul, const int32_t j,
@@ -311,34 +310,28 @@ static inline uint64_t mulShift64(const uint64_t m, const uint64_t* const mul, c
   uint64_t high1;                                   // 128
   const uint64_t low1 = umul128(m, mul[1], &high1); // 64
   uint64_t high0;                                   // 64
-  uint64_t sum;
   umul128(m, mul[0], &high0);                       // 0
-  sum = high0 + low1;
+  const uint64_t sum = high0 + low1;
   if (sum < high0) {
     ++high1; // overflow into high1
   }
-  return shiftright128(sum, high1, (uint32_t) (j - 64));
+  return shiftright128(sum, high1, j - 64);
 }
 
 // This is faster if we don't have a 64x64->128-bit multiplication.
 static inline uint64_t mulShiftAll64(uint64_t m, const uint64_t* const mul, const int32_t j,
   uint64_t* const vp, uint64_t* const vm, const uint32_t mmShift) {
-  uint64_t tmp;
-  uint64_t lo;
-  uint64_t hi;
-  uint64_t mid;
-  uint64_t lo2;
-  uint64_t mid2;
-  uint64_t hi2;
   m <<= 1;
   // m is maximum 55 bits
-  lo = umul128(m, mul[0], &tmp);
-  mid = tmp + umul128(m, mul[1], &hi);
+  uint64_t tmp;
+  const uint64_t lo = umul128(m, mul[0], &tmp);
+  uint64_t hi;
+  const uint64_t mid = tmp + umul128(m, mul[1], &hi);
   hi += mid < tmp; // overflow into hi
 
-  lo2 = lo + mul[0];
-  mid2 = mid + mul[1] + (lo2 < lo);
-  hi2 = hi + (mid2 < mid);
+  const uint64_t lo2 = lo + mul[0];
+  const uint64_t mid2 = mid + mul[1] + (lo2 < lo);
+  const uint64_t hi2 = hi + (mid2 < mid);
   *vp = shiftright128(mid2, hi2, (uint32_t) (j - 64 - 1));
 
   if (mmShift == 1) {
