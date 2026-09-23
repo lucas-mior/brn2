@@ -615,15 +615,381 @@ format_sink_finish(FormatSink *sink) {
     return (int32)sink->total;
 }
 
+static void
+format_sink_write_repeat(FormatSink *sink, char byte, int64 len) {
+    int64 available;
+    int64 copy_len;
+
+    ASSERT(sink != NULL);
+    ASSERT_NON_NEGATIVE(len);
+
+    if (sink->status < 0) {
+        return;
+    }
+
+    format_sink_add_total(sink, len);
+    if (sink->status < 0) {
+        return;
+    }
+    if (sink->capacity <= 0) {
+        return;
+    }
+
+    ASSERT(sink->buffer != NULL);
+    ASSERT_LESS(sink->written, sink->capacity);
+
+    available = sink->capacity - 1 - sink->written;
+    if (available <= 0) {
+        return;
+    }
+
+    copy_len = MIN(len, available);
+    memset(sink->buffer + sink->written, byte, (size_t)copy_len);
+    sink->written += copy_len;
+    sink->buffer[sink->written] = '\0';
+    return;
+}
+
+static bool
+format_is_signed_integer_conversion(char conversion) {
+    return conversion == 'd' || conversion == 'i';
+}
+
+typedef struct FormatArgs {
+    va_list args;
+} FormatArgs;
+
+static int32
+format_load_dynamic_width_precision(FormatSpec *spec, FormatArgs *args) {
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if (spec->width_kind == FORMAT_WIDTH_ARG) {
+        int32 width = va_arg(args->args, int32);
+
+        if (width < 0) {
+            spec->flags |= FORMAT_FLAG_LEFT;
+            spec->width = -(int64)width;
+        } else {
+            spec->width = width;
+        }
+        spec->width_kind = FORMAT_WIDTH_LITERAL;
+    }
+
+    if (spec->precision_kind == FORMAT_PRECISION_ARG) {
+        int32 precision = va_arg(args->args, int32);
+
+        if (precision < 0) {
+            spec->precision = 0;
+            spec->precision_kind = FORMAT_PRECISION_NONE;
+        } else {
+            spec->precision = precision;
+            spec->precision_kind = FORMAT_PRECISION_LITERAL;
+        }
+    }
+
+    return 0;
+}
+
+typedef struct FormatIntegerValue {
+    uint64 magnitude;
+    bool negative;
+} FormatIntegerValue;
+
+static uint64
+format_signed_magnitude(int64 value, bool *negative) {
+    ASSERT(negative != NULL);
+
+    if (value < 0) {
+        *negative = true;
+        return (uint64)(-(value + 1)) + 1;
+    }
+
+    *negative = false;
+    return (uint64)value;
+}
+
+static FormatIntegerValue
+format_read_signed_integer(FormatSpec *spec, FormatArgs *args) {
+    FormatIntegerValue value;
+    int64 signed_value;
+
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if (spec->length == FORMAT_LENGTH_HH) {
+        signed_value = (int8)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_H) {
+        signed_value = (int16)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_LL) {
+        signed_value = va_arg(args->args, int64);
+    } else if (spec->length == FORMAT_LENGTH_W8) {
+        signed_value = (int8)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_W16) {
+        signed_value = (int16)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_W32) {
+        signed_value = va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_W64) {
+        signed_value = va_arg(args->args, int64);
+    } else {
+        ASSERT(spec->length == FORMAT_LENGTH_NONE);
+        signed_value = va_arg(args->args, int32);
+    }
+
+    value.magnitude = format_signed_magnitude(signed_value, &value.negative);
+    return value;
+}
+
+static FormatIntegerValue
+format_read_unsigned_integer(FormatSpec *spec, FormatArgs *args) {
+    FormatIntegerValue value;
+
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    value.negative = false;
+    if (spec->length == FORMAT_LENGTH_HH) {
+        value.magnitude = (uint8)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_H) {
+        value.magnitude = (uint16)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_LL) {
+        value.magnitude = va_arg(args->args, uint64);
+    } else if (spec->length == FORMAT_LENGTH_W8) {
+        value.magnitude = (uint8)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_W16) {
+        value.magnitude = (uint16)va_arg(args->args, int32);
+    } else if (spec->length == FORMAT_LENGTH_W32) {
+        value.magnitude = va_arg(args->args, uint32);
+    } else if (spec->length == FORMAT_LENGTH_W64) {
+        value.magnitude = va_arg(args->args, uint64);
+    } else {
+        ASSERT(spec->length == FORMAT_LENGTH_NONE);
+        value.magnitude = va_arg(args->args, uint32);
+    }
+
+    return value;
+}
+
+static int32
+format_integer_base(char conversion) {
+    if (conversion == 'b' || conversion == 'B') {
+        return 2;
+    }
+    if (conversion == 'o') {
+        return 8;
+    }
+    if (conversion == 'x' || conversion == 'X') {
+        return 16;
+    }
+
+    return 10;
+}
+
+static int32
+format_integer_digits(char *digits, uint64 value, int32 base, bool upper) {
+    char lower_digits[] = "0123456789abcdef";
+    char upper_digits[] = "0123456789ABCDEF";
+    char reversed[64];
+    char *digit_table;
+    int32 len;
+
+    ASSERT(digits != NULL);
+    ASSERT(base == 2 || base == 8 || base == 10 || base == 16);
+
+    if (upper) {
+        digit_table = upper_digits;
+    } else {
+        digit_table = lower_digits;
+    }
+
+    if (value == 0) {
+        digits[0] = '0';
+        return 1;
+    }
+
+    len = 0;
+    while (value > 0) {
+        uint64 digit = value%(uint64)base;
+
+        reversed[len] = digit_table[digit];
+        value /= (uint64)base;
+        len += 1;
+    }
+
+    for (int32 i = 0; i < len; i += 1) {
+        digits[i] = reversed[len - 1 - i];
+    }
+
+    return len;
+}
+
+static int64
+format_pad_len(int64 width, int64 used) {
+    if (width > used) {
+        return width - used;
+    }
+
+    return 0;
+}
+
+static int32
+format_integer_prefix(FormatSpec *spec, FormatIntegerValue value,
+                      char *prefix, int32 digit_len, int64 precision_zeros) {
+    ASSERT(spec != NULL);
+    ASSERT(prefix != NULL);
+    ASSERT_NON_NEGATIVE(digit_len);
+    ASSERT_NON_NEGATIVE(precision_zeros);
+
+    if (format_is_signed_integer_conversion(spec->conversion)) {
+        if (value.negative) {
+            prefix[0] = '-';
+            return 1;
+        }
+        if ((spec->flags & FORMAT_FLAG_SIGN) != 0) {
+            prefix[0] = '+';
+            return 1;
+        }
+        if ((spec->flags & FORMAT_FLAG_SPACE) != 0) {
+            prefix[0] = ' ';
+            return 1;
+        }
+        return 0;
+    }
+
+    if ((spec->flags & FORMAT_FLAG_ALTERNATE) == 0) {
+        return 0;
+    }
+    if (spec->conversion == 'o') {
+        if (value.magnitude == 0 && digit_len == 0) {
+            prefix[0] = '0';
+            return 1;
+        }
+        if (value.magnitude != 0 && precision_zeros == 0) {
+            prefix[0] = '0';
+            return 1;
+        }
+        return 0;
+    }
+    if (value.magnitude == 0) {
+        return 0;
+    }
+    if (spec->conversion == 'x') {
+        prefix[0] = '0';
+        prefix[1] = 'x';
+        return 2;
+    }
+    if (spec->conversion == 'X') {
+        prefix[0] = '0';
+        prefix[1] = 'X';
+        return 2;
+    }
+    if (spec->conversion == 'b') {
+        prefix[0] = '0';
+        prefix[1] = 'b';
+        return 2;
+    }
+    if (spec->conversion == 'B') {
+        prefix[0] = '0';
+        prefix[1] = 'B';
+        return 2;
+    }
+
+    return 0;
+}
+
+static void
+format_write_integer(FormatSink *sink, FormatSpec *spec,
+                     FormatIntegerValue value) {
+    char digits[64];
+    char prefix[2];
+    int32 base;
+    int32 digit_len;
+    int32 prefix_len;
+    int64 precision_zeros;
+    int64 zero_pad;
+    int64 inner_len;
+    int64 spaces;
+    bool upper;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+
+    base = format_integer_base(spec->conversion);
+    upper = spec->conversion == 'X' || spec->conversion == 'B';
+    if (value.magnitude == 0 && format_has_precision(spec)
+        && spec->precision == 0) {
+        digit_len = 0;
+    } else {
+        digit_len = format_integer_digits(digits, value.magnitude, base, upper);
+    }
+
+    precision_zeros = 0;
+    if (format_has_precision(spec) && spec->precision > digit_len) {
+        precision_zeros = spec->precision - digit_len;
+    }
+
+    prefix_len = format_integer_prefix(spec, value, prefix, digit_len,
+                                       precision_zeros);
+    inner_len = prefix_len + precision_zeros + digit_len;
+
+    zero_pad = 0;
+    if ((spec->flags & FORMAT_FLAG_ZERO) != 0
+        && (spec->flags & FORMAT_FLAG_LEFT) == 0
+        && !format_has_precision(spec)) {
+        zero_pad = format_pad_len(spec->width, inner_len);
+    }
+
+    spaces = format_pad_len(spec->width, inner_len + zero_pad);
+    if ((spec->flags & FORMAT_FLAG_LEFT) == 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    if (prefix_len > 0) {
+        format_sink_write(sink, prefix, prefix_len);
+    }
+    format_sink_write_repeat(sink, '0', zero_pad);
+    format_sink_write_repeat(sink, '0', precision_zeros);
+    if (digit_len > 0) {
+        format_sink_write(sink, digits, digit_len);
+    }
+    if ((spec->flags & FORMAT_FLAG_LEFT) != 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    return;
+}
+
+static int32
+format_handle_integer(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
+    FormatIntegerValue value;
+    int32 status;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if ((status = format_load_dynamic_width_precision(spec, args)) < 0) {
+        return status;
+    }
+
+    if (format_is_signed_integer_conversion(spec->conversion)) {
+        value = format_read_signed_integer(spec, args);
+    } else {
+        value = format_read_unsigned_integer(spec, args);
+    }
+
+    format_write_integer(sink, spec, value);
+    return sink->status;
+}
+
+
 static int32 UNUSED
 format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
                       va_list args) {
+    FormatArgs format_args;
     FormatSink sink;
     char *literal;
     char *cursor;
+    int32 result;
     int32 status;
-
-    (void)args;
 
     if (format == NULL) {
         return -EINVAL;
@@ -632,6 +998,7 @@ format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
         return status;
     }
 
+    va_copy(format_args.args, args);
     literal = format;
     cursor = format;
     while (*cursor != '\0') {
@@ -644,23 +1011,37 @@ format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
 
         format_sink_write(&sink, literal, cursor - literal);
         if (sink.status < 0) {
-            return format_sink_finish(&sink);
+            result = format_sink_finish(&sink);
+            goto done;
         }
 
         cursor += 1;
         if ((status = format_parse_spec(cursor, &cursor, &spec)) < 0) {
-            return status;
+            result = status;
+            goto done;
         }
-        if (spec.conversion != '%') {
-            return -ENOSYS;
+        if (format_is_integer_conversion(spec.conversion)) {
+            status = format_handle_integer(&sink, &spec, &format_args);
+            if (status < 0) {
+                result = status;
+                goto done;
+            }
+        } else if (spec.conversion == '%') {
+            format_sink_write_byte(&sink, '%');
+        } else {
+            result = -ENOSYS;
+            goto done;
         }
 
-        format_sink_write_byte(&sink, '%');
         literal = cursor;
     }
 
     format_sink_write(&sink, literal, cursor - literal);
-    return format_sink_finish(&sink);
+    result = format_sink_finish(&sink);
+
+done:
+    va_end(format_args.args);
+    return result;
 }
 
 static int32
@@ -983,6 +1364,106 @@ test_format_sink_capacity(char *format, char *expected) {
 }
 
 static void
+test_format_integer_capacity(char *expected, char *format, ...) {
+    char buffer[256];
+    int32 expected_len;
+
+    expected_len = strlen32(expected);
+    ASSERT_LESS(expected_len + 2, SIZEOF(buffer));
+
+    for (int32 capacity = 0; capacity <= expected_len + 2; capacity += 1) {
+        va_list args;
+        int32 copied;
+        int32 len;
+
+        memset(buffer, 0x7f, SIZEOF(buffer));
+        va_start(args, format);
+        len = format_vsnprintf_impl(buffer, capacity, format, args);
+        va_end(args);
+        ASSERT_EQUAL(len, expected_len);
+
+        if (capacity == 0) {
+            ASSERT_EQUAL(buffer[0], (char)0x7f);
+            continue;
+        }
+
+        copied = MIN(expected_len, capacity - 1);
+        ASSERT_EQUAL(buffer, copied, expected, copied);
+        ASSERT_EQUAL(buffer[copied], '\0');
+        ASSERT_EQUAL(buffer[capacity], (char)0x7f);
+    }
+
+    return;
+}
+
+static void
+test_format_integer_outputs(void) {
+    test_format_integer_capacity("0", "%d", 0);
+    test_format_integer_capacity("-123", "%i", -123);
+    test_format_integer_capacity("-2147483648", "%d", INT32_MIN);
+    test_format_integer_capacity("4294967295", "%u", (uint32)UINT32_MAX);
+    test_format_integer_capacity("12", "%o", (uint32)10);
+    test_format_integer_capacity("abc", "%x", (uint32)0xabc);
+    test_format_integer_capacity("ABC", "%X", (uint32)0xabc);
+    test_format_integer_capacity("1010", "%b", (uint32)10);
+    test_format_integer_capacity("1010", "%B", (uint32)10);
+
+    test_format_integer_capacity("+42", "%+d", 42);
+    test_format_integer_capacity(" 42", "% d", 42);
+    test_format_integer_capacity("+42", "%+ d", 42);
+    test_format_integer_capacity("-0000042", "%08d", -42);
+    test_format_integer_capacity("42    ", "%-6d", 42);
+    test_format_integer_capacity("   00042", "%8.5d", 42);
+    test_format_integer_capacity("   00042", "%08.5d", 42);
+    test_format_integer_capacity("00042   ", "%-8.5d", 42);
+    test_format_integer_capacity("", "%.0d", 0);
+    test_format_integer_capacity("     ", "%5.0d", 0);
+
+    test_format_integer_capacity("012", "%#o", (uint32)10);
+    test_format_integer_capacity("0", "%#.0o", (uint32)0);
+    test_format_integer_capacity("    0", "%#5.0o", (uint32)0);
+    test_format_integer_capacity("012", "%#.3o", (uint32)10);
+    test_format_integer_capacity("00012", "%#.5o", (uint32)10);
+    test_format_integer_capacity("0x2a", "%#x", (uint32)42);
+    test_format_integer_capacity("0X2A", "%#X", (uint32)42);
+    test_format_integer_capacity("0b101", "%#b", (uint32)5);
+    test_format_integer_capacity("0B101", "%#B", (uint32)5);
+    test_format_integer_capacity(" 0x0a", "%#5.2x", (uint32)10);
+    test_format_integer_capacity("00000012", "%#08o", (uint32)10);
+
+    test_format_integer_capacity("42    ", "%*d", -6, 42);
+    test_format_integer_capacity("00042", "%0*d", 5, 42);
+    test_format_integer_capacity("42", "%.*d", -1, 42);
+    test_format_integer_capacity("00042", "%.*d", 5, 42);
+    test_format_integer_capacity("   00042", "%*.*d", 8, 5, 42);
+
+    test_format_integer_capacity("-1 2a 3", "%d %x %u", -1,
+                                 (uint32)0x2a, (uint32)3);
+
+    test_format_integer_capacity("18", "%hhd", 0x12);
+    test_format_integer_capacity("44", "%hhu", 300);
+    test_format_integer_capacity("-1234", "%hd", -1234);
+    test_format_integer_capacity("65535", "%hu", 65535);
+    test_format_integer_capacity("-9223372036854775808", "%lld",
+                                 (int64)INT64_MIN);
+    test_format_integer_capacity("18446744073709551615", "%llu",
+                                 (uint64)UINT64_MAX);
+
+    test_format_integer_capacity("-128", "%w8d", -128);
+    test_format_integer_capacity("255", "%w8u", 255);
+    test_format_integer_capacity("65535", "%w16u", 65535);
+    test_format_integer_capacity("-2147483648", "%w32d", INT32_MIN);
+    test_format_integer_capacity("4294967295", "%w32u",
+                                 (uint32)UINT32_MAX);
+    test_format_integer_capacity("-9223372036854775808", "%w64d",
+                                 (int64)INT64_MIN);
+    test_format_integer_capacity("18446744073709551615", "%w64u",
+                                 (uint64)UINT64_MAX);
+
+    return;
+}
+
+static void
 test_format_sink_validation(void) {
     char buffer[8];
     FormatSink sink;
@@ -991,9 +1472,12 @@ test_format_sink_validation(void) {
     ASSERT_EQUAL(format_test_snprintf(NULL, 1, "abc"), -EINVAL);
     ASSERT_EQUAL(format_test_snprintf(buffer, -1, "abc"), -EINVAL);
     ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), NULL), -EINVAL);
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%*d",
+                                      INT32_MIN, 0), -EOVERFLOW);
 
     memset(buffer, 0x7f, SIZEOF(buffer));
-    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%d"), -ENOSYS);
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%s", "x"),
+                 -ENOSYS);
     ASSERT_EQUAL(buffer[0], '\0');
     ASSERT_EQUAL(buffer[1], (char)0x7f);
 
@@ -1122,6 +1606,7 @@ main(void) {
     test_format_sink_capacity("abc%%def", "abc%def");
     test_format_parser_valid_specs();
     test_format_parser_invalid_specs();
+    test_format_integer_outputs();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
