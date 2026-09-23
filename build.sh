@@ -128,8 +128,6 @@ uninstall|install|test_all)
     ;;
 esac
 
-common_build_cbase_objects
-
 if [ "$is_cl" -eq 1 ]; then
     case "$exe" in
     *.exe)

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#if defined(RYU_OBJECT)
-#define TESTING_ryu 0
-#elif defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#if !defined(RYU_C)
+#define RYU_C
+
+#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_ryu 1
 #elif !defined(TESTING_ryu)
 #define TESTING_ryu 0
@@ -11,10 +12,15 @@
 
 #include "cbase.h"
 
+#if 0 == TESTING_ryu
 #define RYU_IMPLEMENT
 #include "ryu.h"
+#endif
 
 #if TESTING_ryu
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
 #define RYU_IMPLEMENT
 #include "ryu.h"
 
@@ -60,3 +66,5 @@ main(void) {
     exit(EXIT_SUCCESS);
 }
 #endif /* TESTING_ryu */
+
+#endif /* RYU_C */

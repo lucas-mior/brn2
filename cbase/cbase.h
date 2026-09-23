@@ -22,23 +22,10 @@
 #include "primitives.h"
 #include "base_macros.h"
 
-#if defined(CBASE_SEPARATE_OBJECTS)
-extern char *program;
-extern int32 program_len;
-extern bool timezone_initialized;
-extern time_t timezone_offset;
-#if defined(CBASE_OBJECT)
-char *program = __FILE__;
-int32 program_len;
-bool timezone_initialized = false;
-time_t timezone_offset = 0;
-#endif
-#else
 static char UNUSED *program = __FILE__;
 static int32 UNUSED program_len;
 static bool UNUSED timezone_initialized = false;
 static time_t UNUSED timezone_offset = 0;
-#endif
 
 #define error(...)  error_impl(__FILE__, __LINE__, FUNC__, __VA_ARGS__)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
@@ -881,8 +868,7 @@ void throw_away_function();
 #endif /* CBASE_H */
 
 #if defined(CBASE_IMPLEMENT) && defined(CBASE_DECLARATIONS_COMPLETE) \
-        && !defined(CBASE_IMPLEMENTED) \
-        && (!defined(CBASE_SEPARATE_OBJECTS) || defined(CBASE_OBJECT))
+        && !defined(CBASE_IMPLEMENTED)
 #define CBASE_IMPLEMENTED 1
 
 #include "arena.c"
@@ -897,9 +883,7 @@ void throw_away_function();
 #include "string.c"
 #include "time.c"
 #include "fs.c"
-#if !defined(RYU_SEPARATE_OBJECTS)
 #include "ryu.c"
-#endif
 #if OS_WINDOWS
 #include "windows.c"
 #endif

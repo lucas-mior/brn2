@@ -8,8 +8,7 @@
 
 #endif /* CBASE_RYU_H */
 
-#if defined(RYU_IMPLEMENT) && !defined(RYU_IMPLEMENTED) \
-        && (!defined(RYU_SEPARATE_OBJECTS) || defined(RYU_OBJECT))
+#if defined(RYU_IMPLEMENT) && !defined(RYU_IMPLEMENTED)
 #define RYU_IMPLEMENTED 1
 
 #define to_chars ryu_d2s_to_chars
