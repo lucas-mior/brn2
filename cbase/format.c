@@ -1642,12 +1642,22 @@ format_load_float_width_precision(FormatSpec *spec, FormatArgs *args) {
 
 static bool
 format_float_is_upper(char conversion) {
-    return conversion == 'F' || conversion == 'E';
+    return conversion == 'F' || conversion == 'E' || conversion == 'G';
 }
 
 static bool
 format_float_is_fixed(char conversion) {
     return conversion == 'f' || conversion == 'F';
+}
+
+static bool
+format_float_is_scientific(char conversion) {
+    return conversion == 'e' || conversion == 'E';
+}
+
+static bool
+format_float_is_general(char conversion) {
+    return conversion == 'g' || conversion == 'G';
 }
 
 static int32
@@ -1659,6 +1669,8 @@ format_float_temp_capacity(FormatSpec *spec, int64 *capacity) {
 
     if (format_float_is_fixed(spec->conversion)) {
         prefix = FORMAT_FLOAT_MAX_FIXED_PREFIX;
+    } else if (format_float_is_general(spec->conversion)) {
+        prefix = 32;
     } else {
         prefix = FORMAT_FLOAT_MAX_EXP_PREFIX;
     }
@@ -1769,6 +1781,162 @@ format_float_force_decimal_point(char *body, int32 body_len,
 
 static int32
 format_float_generate_body(FormatSpec *spec, double value,
+                           char *buffer, int32 capacity);
+
+static int32
+format_float_parse_exponent(char *body, int32 body_len,
+                            int32 *exponent) {
+    int32 index;
+    int64 value;
+    int32 sign;
+
+    ASSERT(body != NULL);
+    ASSERT_NON_NEGATIVE(body_len);
+    ASSERT(exponent != NULL);
+
+    index = 0;
+    while (index < body_len && body[index] != 'e'
+           && body[index] != 'E') {
+        index += 1;
+    }
+    if (index >= body_len) {
+        return -EINVAL;
+    }
+
+    index += 1;
+    if (index >= body_len) {
+        return -EINVAL;
+    }
+
+    sign = 1;
+    if (body[index] == '-') {
+        sign = -1;
+        index += 1;
+    } else if (body[index] == '+') {
+        index += 1;
+    }
+    if (index >= body_len || !format_is_digit(body[index])) {
+        return -EINVAL;
+    }
+
+    value = 0;
+    while (index < body_len) {
+        int32 digit;
+
+        if (!format_is_digit(body[index])) {
+            return -EINVAL;
+        }
+        digit = format_digit_value(body[index]);
+        if (value > (INT32_MAX - digit)/10) {
+            return -EOVERFLOW;
+        }
+        value = value*10 + digit;
+        index += 1;
+    }
+
+    if (sign < 0) {
+        value = -value;
+    }
+    *exponent = (int32)value;
+    return 0;
+}
+
+static int32
+format_float_strip_trailing_zeros(char *body, int32 body_len) {
+    int32 exponent_index;
+    int32 point_index;
+    int32 end;
+
+    ASSERT(body != NULL);
+    ASSERT_NON_NEGATIVE(body_len);
+
+    exponent_index = body_len;
+    point_index = -1;
+    for (int32 i = 0; i < body_len; i += 1) {
+        if (body[i] == '.') {
+            point_index = i;
+        } else if (body[i] == 'e' || body[i] == 'E') {
+            exponent_index = i;
+            break;
+        }
+    }
+    if (point_index < 0) {
+        return body_len;
+    }
+
+    end = exponent_index;
+    while (end > point_index + 1 && body[end - 1] == '0') {
+        end -= 1;
+    }
+    if (end == point_index + 1) {
+        end = point_index;
+    }
+
+    if (exponent_index < body_len) {
+        memmove(body + end, body + exponent_index,
+                (size_t)(body_len - exponent_index));
+        end += body_len - exponent_index;
+    }
+
+    return end;
+}
+
+static int32
+format_float_generate_general_body(FormatSpec *spec, double value,
+                                   char *buffer, int32 capacity) {
+    FormatSpec work_spec;
+    int32 exponent;
+    int32 body_len;
+    int32 status;
+
+    ASSERT(spec != NULL);
+    ASSERT(buffer != NULL);
+    ASSERT_POSITIVE(capacity);
+    ASSERT(format_float_is_general(spec->conversion));
+    ASSERT(spec->precision >= 1);
+
+    work_spec = *spec;
+    if (format_float_is_upper(spec->conversion)) {
+        work_spec.conversion = 'E';
+    } else {
+        work_spec.conversion = 'e';
+    }
+    work_spec.precision = spec->precision - 1;
+    body_len = format_float_generate_body(&work_spec, value, buffer,
+                                          capacity);
+    if (body_len < 0) {
+        return body_len;
+    }
+
+    if ((status = format_float_parse_exponent(buffer, body_len,
+                                              &exponent)) < 0) {
+        return status;
+    }
+
+    if (exponent >= -4 && exponent < spec->precision) {
+        work_spec = *spec;
+        if (format_float_is_upper(spec->conversion)) {
+            work_spec.conversion = 'F';
+        } else {
+            work_spec.conversion = 'f';
+        }
+        work_spec.precision = spec->precision - (exponent + 1);
+        body_len = format_float_generate_body(&work_spec, value, buffer,
+                                              capacity);
+        if (body_len < 0) {
+            return body_len;
+        }
+    }
+
+    if ((spec->flags & FORMAT_FLAG_ALTERNATE) == 0) {
+        body_len = format_float_strip_trailing_zeros(buffer, body_len);
+    }
+
+    return body_len;
+}
+
+static int32
+format_float_generate_body(FormatSpec *spec, double value,
                            char *buffer, int32 capacity) {
     int32 body_len;
 
@@ -1784,6 +1952,11 @@ format_float_generate_body(FormatSpec *spec, double value,
             return status;
         }
         return body_len;
+    }
+
+    if (format_float_is_general(spec->conversion)) {
+        return format_float_generate_general_body(spec, value, buffer,
+                                                  capacity);
     }
 
     if (format_float_is_fixed(spec->conversion)) {
@@ -1873,13 +2046,16 @@ format_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
         return -ENOSYS;
     }
     if (!format_float_is_fixed(spec->conversion)
-        && spec->conversion != 'e'
-        && spec->conversion != 'E') {
+        && !format_float_is_scientific(spec->conversion)
+        && !format_float_is_general(spec->conversion)) {
         return -ENOSYS;
     }
 
     if ((status = format_load_float_width_precision(spec, args)) < 0) {
         return status;
+    }
+    if (format_float_is_general(spec->conversion) && spec->precision == 0) {
+        spec->precision = 1;
     }
     if ((status = format_float_temp_capacity(spec, &capacity64)) < 0) {
         return status;
@@ -2716,6 +2892,46 @@ test_format_printf_float_outputs(void) {
 }
 
 static void
+test_format_printf_general_outputs(void) {
+    char buffer[64];
+
+    test_format_bytes_capacity("1.25", 4, "%g", 1.25);
+    test_format_bytes_capacity("123456", 6, "%g", 123456.0);
+    test_format_bytes_capacity("1.23457e+06", 11, "%g", 1234567.0);
+    test_format_bytes_capacity("0.0001", 6, "%g", 0.0001);
+    test_format_bytes_capacity("9.9999e-05", 10, "%g", 0.000099999);
+    test_format_bytes_capacity("1e-05", 5, "%g", 0.00001);
+    test_format_bytes_capacity("99999.9", 7, "%g", 99999.9);
+    test_format_bytes_capacity("1e+05", 5, "%.5g", 99999.9);
+    test_format_bytes_capacity("1e+05", 5, "%.4g", 99999.0);
+    test_format_bytes_capacity("0.0001", 6, "%.4g", 0.000099999);
+    test_format_bytes_capacity("1", 1, "%.0g", 1.25);
+    test_format_bytes_capacity("1.", 2, "%#.0g", 1.25);
+    test_format_bytes_capacity("0.0000", 6, "%#.5g", 0.0);
+    test_format_bytes_capacity("1.2500", 6, "%#.5g", 1.25);
+    test_format_bytes_capacity("100.00", 6, "%#.5g", 100.0);
+    test_format_bytes_capacity("9.9999e-05", 10, "%#.5g", 0.000099999);
+    test_format_bytes_capacity("      1.25", 10, "%10.4g", 1.25);
+    test_format_bytes_capacity("0000001.25", 10, "%010.4g", 1.25);
+    test_format_bytes_capacity("-000000000", 10, "%010.4g", -0.0);
+    test_format_bytes_capacity("1.25      ", 10, "%-10.4g", 1.25);
+    test_format_bytes_capacity("1.23457E+06", 11, "%G", 1234567.0);
+    test_format_bytes_capacity("9.99990E-05", 11, "%#.6G", 0.000099999);
+    test_format_bytes_capacity("INF", 3, "%G", INFINITY);
+    test_format_bytes_capacity("NAN", 3, "%G", NAN);
+    test_format_bytes_capacity("nan", 3, "%g", NAN);
+
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%.*g",
+                                      -1, 1.25), 4);
+    ASSERT_EQUAL(buffer, "1.25");
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%.*g",
+                                      0, 123.0), 5);
+    ASSERT_EQUAL(buffer, "1e+02");
+
+    return;
+}
+
+static void
 test_format_sink_validation(void) {
     char buffer[8];
     FormatSink sink;
@@ -2728,11 +2944,6 @@ test_format_sink_validation(void) {
                                       INT32_MIN, 0), -EOVERFLOW);
 
     memset(buffer, 0x7f, SIZEOF(buffer));
-    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%g", 1.0),
-                 -ENOSYS);
-    ASSERT_EQUAL(buffer[0], '\0');
-    ASSERT_EQUAL(buffer[1], (char)0x7f);
-
     memset(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%"), -EINVAL);
     ASSERT_EQUAL(buffer[0], '\0');
@@ -2863,6 +3074,7 @@ main(void) {
     test_format_wide_char_string_outputs();
     test_format_pointer_count_outputs();
     test_format_printf_float_outputs();
+    test_format_printf_general_outputs();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
