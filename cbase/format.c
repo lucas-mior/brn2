@@ -12,11 +12,6 @@
 
 #include "cbase.h"
 
-#if TESTING_format && !defined(CBASE_IMPLEMENT)
-#define CBASE_IMPLEMENT
-#include "cbase.h"
-#endif
-
 #include "ryu.h"
 
 #if !defined(EOVERFLOW)
@@ -4485,6 +4480,9 @@ sb_float64_fixed(StrBuilder *sb, double value, int32 precision) {
 }
 
 #if TESTING_format
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
 static int32
 format_test_snprintf(char *buffer, int64 capacity, char *format, ...) {
     va_list args;
