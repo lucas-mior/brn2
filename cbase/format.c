@@ -1450,6 +1450,174 @@ format_handle_char_string(FormatSink *sink, FormatSpec *spec,
 }
 
 
+static void
+format_write_pointer(FormatSink *sink, FormatSpec *spec, void *pointer) {
+    char digits[64];
+    char prefix[] = {'0', 'x'};
+    uintptr value;
+    int32 digit_len;
+    int64 inner_len;
+    int64 spaces;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+
+    value = (uintptr)pointer;
+    digit_len = format_integer_digits(digits, (uint64)value, 16, false);
+    inner_len = 2 + digit_len;
+    spaces = format_pad_len(spec->width, inner_len);
+
+    if ((spec->flags & FORMAT_FLAG_LEFT) == 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    format_sink_write(sink, prefix, 2);
+    format_sink_write(sink, digits, digit_len);
+    if ((spec->flags & FORMAT_FLAG_LEFT) != 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    return;
+}
+
+static int32
+format_handle_pointer(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
+    int32 status;
+    void *pointer;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if ((status = format_load_dynamic_width(spec, args)) < 0) {
+        return status;
+    }
+
+    pointer = va_arg(args->args, void *);
+    format_write_pointer(sink, spec, pointer);
+    return sink->status;
+}
+
+static bool
+format_count_fits(FormatSpec *spec, int64 count) {
+    ASSERT(spec != NULL);
+    ASSERT_NON_NEGATIVE(count);
+
+    if (spec->length == FORMAT_LENGTH_HH
+        || spec->length == FORMAT_LENGTH_W8) {
+        return count <= INT8_MAX;
+    }
+    if (spec->length == FORMAT_LENGTH_H
+        || spec->length == FORMAT_LENGTH_W16) {
+        return count <= INT16_MAX;
+    }
+    if (spec->length == FORMAT_LENGTH_LL
+        || spec->length == FORMAT_LENGTH_W64) {
+        return count <= INT64_MAX;
+    }
+
+    ASSERT(spec->length == FORMAT_LENGTH_NONE
+           || spec->length == FORMAT_LENGTH_W32);
+    return count <= INT32_MAX;
+}
+
+static int32
+format_store_count(FormatSpec *spec, FormatArgs *args, int64 count) {
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+    ASSERT_NON_NEGATIVE(count);
+
+    if (!format_count_fits(spec, count)) {
+        return -EOVERFLOW;
+    }
+
+    if (spec->length == FORMAT_LENGTH_HH) {
+        int8 *pointer = va_arg(args->args, int8 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = (int8)count;
+        return 0;
+    }
+    if (spec->length == FORMAT_LENGTH_H) {
+        int16 *pointer = va_arg(args->args, int16 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = (int16)count;
+        return 0;
+    }
+    if (spec->length == FORMAT_LENGTH_LL) {
+        int64 *pointer = va_arg(args->args, int64 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = count;
+        return 0;
+    }
+    if (spec->length == FORMAT_LENGTH_W8) {
+        int8 *pointer = va_arg(args->args, int8 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = (int8)count;
+        return 0;
+    }
+    if (spec->length == FORMAT_LENGTH_W16) {
+        int16 *pointer = va_arg(args->args, int16 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = (int16)count;
+        return 0;
+    }
+    if (spec->length == FORMAT_LENGTH_W32) {
+        int32 *pointer = va_arg(args->args, int32 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = (int32)count;
+        return 0;
+    }
+    if (spec->length == FORMAT_LENGTH_W64) {
+        int64 *pointer = va_arg(args->args, int64 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = count;
+        return 0;
+    }
+
+    ASSERT(spec->length == FORMAT_LENGTH_NONE);
+    {
+        int32 *pointer = va_arg(args->args, int32 *);
+
+        if (pointer == NULL) {
+            return -EINVAL;
+        }
+        *pointer = (int32)count;
+        return 0;
+    }
+}
+
+static int32
+format_handle_count(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if (sink->status < 0) {
+        return sink->status;
+    }
+    return format_store_count(spec, args, sink->total);
+}
+
+
 static int32 UNUSED
 format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
                       va_list args) {
@@ -1497,6 +1665,18 @@ format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
             }
         } else if (spec.conversion == 'c' || spec.conversion == 's') {
             status = format_handle_char_string(&sink, &spec, &format_args);
+            if (status < 0) {
+                result = status;
+                goto done;
+            }
+        } else if (spec.conversion == 'p') {
+            status = format_handle_pointer(&sink, &spec, &format_args);
+            if (status < 0) {
+                result = status;
+                goto done;
+            }
+        } else if (spec.conversion == 'n') {
+            status = format_handle_count(&sink, &spec, &format_args);
             if (status < 0) {
                 result = status;
                 goto done;
@@ -1799,9 +1979,14 @@ test_format_parser_invalid_specs(void) {
     ASSERT_EQUAL(format_test_validate("%05s"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%.2c"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%#p"), -EINVAL);
+    ASSERT_EQUAL(format_test_validate("%0p"), -EINVAL);
+    ASSERT_EQUAL(format_test_validate("%+p"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%.2p"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%10n"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%-n"), -EINVAL);
+    ASSERT_EQUAL(format_test_validate("%+n"), -EINVAL);
+    ASSERT_EQUAL(format_test_validate("%.0n"), -EINVAL);
+    ASSERT_EQUAL(format_test_validate("%ln"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%5%"), -EINVAL);
     ASSERT_EQUAL(format_test_validate("%.0%"), -EINVAL);
 
@@ -2110,6 +2295,87 @@ test_format_wide_char_string_outputs(void) {
 }
 
 static void
+test_format_pointer_count_outputs(void) {
+    char buffer[16];
+    void *pointer;
+    int8 count8;
+    int16 count16;
+    int32 count32;
+    int64 count64;
+
+    pointer = (void *)(uintptr)0x1234;
+    test_format_bytes_capacity("0x0", 3, "%p", (void *)NULL);
+    test_format_bytes_capacity("   0x0", 6, "%6p", (void *)NULL);
+    test_format_bytes_capacity("0x0   ", 6, "%-6p", (void *)NULL);
+    test_format_bytes_capacity("0x1234", 6, "%p", pointer);
+    test_format_bytes_capacity("p=0x1234.", 9, "p=%p.", pointer);
+    test_format_bytes_capacity("   0x0", 6, "%*p", 6, (void *)NULL);
+    test_format_bytes_capacity("0x0   ", 6, "%*p", -6, (void *)NULL);
+
+    count32 = -1;
+    test_format_bytes_capacity("abcd", 4, "ab%ncd", &count32);
+    ASSERT_EQUAL(count32, 2);
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    count32 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, 2, "abcd%n", &count32), 4);
+    ASSERT_EQUAL(count32, 4);
+    ASSERT_EQUAL(buffer[0], 'a');
+    ASSERT_EQUAL(buffer[1], '\0');
+    ASSERT_EQUAL(buffer[2], (char)0x7f);
+
+    count8 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%hhn",
+                                      &count8), 3);
+    ASSERT_EQUAL(count8, 3);
+
+    count16 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%hn",
+                                      &count16), 3);
+    ASSERT_EQUAL(count16, 3);
+
+    count64 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%lln",
+                                      &count64), 3);
+    ASSERT_EQUAL(count64, 3);
+
+    count8 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%w8n",
+                                      &count8), 3);
+    ASSERT_EQUAL(count8, 3);
+
+    count16 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%w16n",
+                                      &count16), 3);
+    ASSERT_EQUAL(count16, 3);
+
+    count32 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%w32n",
+                                      &count32), 3);
+    ASSERT_EQUAL(count32, 3);
+
+    count64 = -1;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%w64n",
+                                      &count64), 3);
+    ASSERT_EQUAL(count64, 3);
+
+    count8 = -7;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%128d%hhn", 0,
+                                      &count8), -EOVERFLOW);
+    ASSERT_EQUAL(count8, -7);
+
+    count16 = -7;
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%32768d%hn", 0,
+                                      &count16), -EOVERFLOW);
+    ASSERT_EQUAL(count16, -7);
+
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "abc%n",
+                                      (int32 *)NULL), -EINVAL);
+
+    return;
+}
+
+static void
 test_format_sink_validation(void) {
     char buffer[8];
     FormatSink sink;
@@ -2255,6 +2521,7 @@ main(void) {
     test_format_integer_outputs();
     test_format_char_string_outputs();
     test_format_wide_char_string_outputs();
+    test_format_pointer_count_outputs();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
