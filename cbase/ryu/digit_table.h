@@ -17,8 +17,6 @@
 #ifndef RYU_DIGIT_TABLE_H
 #define RYU_DIGIT_TABLE_H
 
-#include "cbase.h"
-
 // A table of all two-digit numbers. This is used to speed up decimal digit
 // generation by copying pairs of digits into the final output.
 static const char DIGIT_TABLE[200] = {
