@@ -4546,23 +4546,22 @@ test_format_parser_valid_specs(void) {
     spec = format_test_parse_one("%%");
     ASSERT_EQUAL(spec.conversion, '%');
     ASSERT_EQUAL(spec.flags, 0);
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_NONE);
+    ASSERT(spec.length == FORMAT_LENGTH_NONE);
 
     spec = format_test_parse_one("%08.3d");
     ASSERT_EQUAL(spec.conversion, 'd');
     ASSERT_EQUAL(spec.flags, FORMAT_FLAG_ZERO);
-    ASSERT_EQUAL((int32)spec.width_kind, (int32)FORMAT_WIDTH_LITERAL);
+    ASSERT(spec.width_kind == FORMAT_WIDTH_LITERAL);
     ASSERT_EQUAL(spec.width, 8);
-    ASSERT_EQUAL((int32)spec.precision_kind,
-                 (int32)FORMAT_PRECISION_LITERAL);
+    ASSERT(spec.precision_kind == FORMAT_PRECISION_LITERAL);
     ASSERT_EQUAL(spec.precision, 3);
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_NONE);
+    ASSERT(spec.length == FORMAT_LENGTH_NONE);
 
     spec = format_test_parse_one("%*.*f");
     ASSERT_EQUAL(spec.conversion, 'f');
-    ASSERT_EQUAL((int32)spec.width_kind, (int32)FORMAT_WIDTH_ARG);
-    ASSERT_EQUAL((int32)spec.precision_kind, (int32)FORMAT_PRECISION_ARG);
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_NONE);
+    ASSERT(spec.width_kind == FORMAT_WIDTH_ARG);
+    ASSERT(spec.precision_kind == FORMAT_PRECISION_ARG);
+    ASSERT(spec.length == FORMAT_LENGTH_NONE);
 
     spec = format_test_parse_one("%-+ #0w32x");
     ASSERT_EQUAL(spec.conversion, 'x');
@@ -4571,38 +4570,37 @@ test_format_parser_valid_specs(void) {
                              |FORMAT_FLAG_SPACE
                              |FORMAT_FLAG_ALTERNATE
                              |FORMAT_FLAG_ZERO);
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_W32);
+    ASSERT(spec.length == FORMAT_LENGTH_W32);
 
     spec = format_test_parse_one("%hhd");
     ASSERT_EQUAL(spec.conversion, 'd');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_HH);
+    ASSERT(spec.length == FORMAT_LENGTH_HH);
 
     spec = format_test_parse_one("%llu");
     ASSERT_EQUAL(spec.conversion, 'u');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_LL);
+    ASSERT(spec.length == FORMAT_LENGTH_LL);
 
     spec = format_test_parse_one("%w64B");
     ASSERT_EQUAL(spec.conversion, 'B');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_W64);
+    ASSERT(spec.length == FORMAT_LENGTH_W64);
 
     spec = format_test_parse_one("%lc");
     ASSERT_EQUAL(spec.conversion, 'c');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_L);
+    ASSERT(spec.length == FORMAT_LENGTH_L);
 
     spec = format_test_parse_one("%.5ls");
     ASSERT_EQUAL(spec.conversion, 's');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_L);
-    ASSERT_EQUAL((int32)spec.precision_kind,
-                 (int32)FORMAT_PRECISION_LITERAL);
+    ASSERT(spec.length == FORMAT_LENGTH_L);
+    ASSERT(spec.precision_kind == FORMAT_PRECISION_LITERAL);
     ASSERT_EQUAL(spec.precision, 5);
 
     spec = format_test_parse_one("%La");
     ASSERT_EQUAL(spec.conversion, 'a');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_BIG_L);
+    ASSERT(spec.length == FORMAT_LENGTH_BIG_L);
 
     spec = format_test_parse_one("%w16n");
     ASSERT_EQUAL(spec.conversion, 'n');
-    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_W16);
+    ASSERT(spec.length == FORMAT_LENGTH_W16);
 
     ASSERT_EQUAL(format_test_validate("a %% b %08d %*.*s"), 0);
     return;
@@ -5256,7 +5254,7 @@ test_format_long_double_scaled(ldouble value, int32 decimal_places,
     ASSERT_EQUAL(format_decompose_long_double(value, &parts), 0);
     ASSERT_EQUAL(format_binary_float_scaled_decimal(&parts, decimal_places,
                                                     &integer, &remainder), 0);
-    ASSERT_EQUAL((int32)remainder, (int32)expected_rem);
+    ASSERT(remainder == expected_rem);
     len = format_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
     ASSERT_EQUAL(len, strlen32(expected));
     ASSERT_EQUAL(buffer, expected);
@@ -5276,7 +5274,8 @@ test_format_long_double_decomposition(void) {
 
     ASSERT_EQUAL(format_decompose_long_double((ldouble)INFINITY, &parts),
                  -EINVAL);
-    ASSERT_EQUAL(format_decompose_long_double(NAN, &parts), -EINVAL);
+    ASSERT_EQUAL(format_decompose_long_double((ldouble)NAN, &parts),
+                 -EINVAL);
 
     test_format_long_double_parts(0.0L, false, 0, 0);
     test_format_long_double_parts(-0.0L, true, 0, 0);
