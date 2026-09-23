@@ -19,6 +19,10 @@
 
 #include "ryu.h"
 
+#if !defined(EOVERFLOW)
+#define EOVERFLOW ERANGE
+#endif
+
 enum {
     FORMAT_FLOAT_RYU_BUFFER_SIZE = 2000,
     FORMAT_FLOAT_MAX_PRECISION = 1024,
@@ -32,6 +36,155 @@ _Static_assert(FORMAT_FLOAT_MAX_FIXED_PREFIX
 _Static_assert(FORMAT_FLOAT_MAX_EXP_PREFIX
                + FORMAT_FLOAT_MAX_PRECISION < FORMAT_FLOAT_RYU_BUFFER_SIZE,
                "format scientific temporary buffer is too small");
+
+typedef struct FormatSink {
+    char *buffer;
+    int64 capacity;
+    int64 written;
+    int64 total;
+    int32 status;
+} FormatSink;
+
+static int32
+format_sink_init(FormatSink *sink, char *buffer, int64 capacity) {
+    ASSERT(sink != NULL);
+
+    if (capacity < 0) {
+        return -EINVAL;
+    }
+    if (capacity > 0 && buffer == NULL) {
+        return -EINVAL;
+    }
+
+    sink->buffer = buffer;
+    sink->capacity = capacity;
+    sink->written = 0;
+    sink->total = 0;
+    sink->status = 0;
+
+    if (capacity > 0) {
+        buffer[0] = '\0';
+    }
+
+    return 0;
+}
+
+static void
+format_sink_add_total(FormatSink *sink, int64 len) {
+    ASSERT(sink != NULL);
+    ASSERT_NON_NEGATIVE(len);
+
+    if (sink->status < 0) {
+        return;
+    }
+    if (len > INT64_MAX - sink->total) {
+        sink->status = -EOVERFLOW;
+        return;
+    }
+
+    sink->total += len;
+    return;
+}
+
+static void
+format_sink_write(FormatSink *sink, char *data, int64 len) {
+    int64 available;
+    int64 copy_len;
+
+    ASSERT(sink != NULL);
+    ASSERT(data != NULL);
+    ASSERT_NON_NEGATIVE(len);
+
+    if (sink->status < 0) {
+        return;
+    }
+
+    format_sink_add_total(sink, len);
+    if (sink->status < 0) {
+        return;
+    }
+    if (sink->capacity <= 0) {
+        return;
+    }
+
+    ASSERT(sink->buffer != NULL);
+    ASSERT_LESS(sink->written, sink->capacity);
+
+    available = sink->capacity - 1 - sink->written;
+    if (available <= 0) {
+        return;
+    }
+
+    copy_len = MIN(len, available);
+    memcpy(sink->buffer + sink->written, data, (size_t)copy_len);
+    sink->written += copy_len;
+    sink->buffer[sink->written] = '\0';
+    return;
+}
+
+static void
+format_sink_write_byte(FormatSink *sink, char byte) {
+    format_sink_write(sink, &byte, 1);
+    return;
+}
+
+static int32
+format_sink_finish(FormatSink *sink) {
+    ASSERT(sink != NULL);
+
+    if (sink->status < 0) {
+        return sink->status;
+    }
+    if (sink->total > INT32_MAX) {
+        return -EOVERFLOW;
+    }
+
+    return (int32)sink->total;
+}
+
+static int32 UNUSED
+format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
+                      va_list args) {
+    FormatSink sink;
+    char *literal;
+    char *cursor;
+    int32 status;
+
+    (void)args;
+
+    if (format == NULL) {
+        return -EINVAL;
+    }
+    if ((status = format_sink_init(&sink, buffer, capacity)) < 0) {
+        return status;
+    }
+
+    literal = format;
+    cursor = format;
+    while (*cursor != '\0') {
+        if (*cursor != '%') {
+            cursor += 1;
+            continue;
+        }
+
+        format_sink_write(&sink, literal, cursor - literal);
+        if (sink.status < 0) {
+            return format_sink_finish(&sink);
+        }
+
+        cursor += 1;
+        if (*cursor != '%') {
+            return -EINVAL;
+        }
+
+        format_sink_write_byte(&sink, '%');
+        cursor += 1;
+        literal = cursor;
+    }
+
+    format_sink_write(&sink, literal, cursor - literal);
+    return format_sink_finish(&sink);
+}
 
 static int32
 format_float_validate_buffer(char *buffer, int64 capacity) {
@@ -168,6 +321,74 @@ sb_float64_fixed(StrBuilder *sb, double value, int32 precision) {
 }
 
 #if TESTING_format
+static int32
+format_test_snprintf(char *buffer, int64 capacity, char *format, ...) {
+    va_list args;
+    int32 len;
+
+    va_start(args, format);
+    len = format_vsnprintf_impl(buffer, capacity, format, args);
+    va_end(args);
+    return len;
+}
+
+static void
+test_format_sink_capacity(char *format, char *expected) {
+    char buffer[128];
+    int32 expected_len;
+
+    expected_len = strlen32(expected);
+    ASSERT_LESS(expected_len + 2, SIZEOF(buffer));
+
+    for (int32 capacity = 0; capacity <= expected_len + 2; capacity += 1) {
+        int32 copied;
+        int32 len;
+
+        memset(buffer, 0x7f, SIZEOF(buffer));
+        len = format_test_snprintf(buffer, capacity, format);
+        ASSERT_EQUAL(len, expected_len);
+
+        if (capacity == 0) {
+            ASSERT_EQUAL(buffer[0], (char)0x7f);
+            continue;
+        }
+
+        copied = MIN(expected_len, capacity - 1);
+        ASSERT_EQUAL(buffer, copied, expected, copied);
+        ASSERT_EQUAL(buffer[copied], '\0');
+        ASSERT_EQUAL(buffer[capacity], (char)0x7f);
+    }
+
+    return;
+}
+
+static void
+test_format_sink_validation(void) {
+    char buffer[8];
+    FormatSink sink;
+
+    ASSERT_EQUAL(format_test_snprintf(NULL, 0, "abc"), 3);
+    ASSERT_EQUAL(format_test_snprintf(NULL, 1, "abc"), -EINVAL);
+    ASSERT_EQUAL(format_test_snprintf(buffer, -1, "abc"), -EINVAL);
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), NULL), -EINVAL);
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%d"), -EINVAL);
+    ASSERT_EQUAL(buffer[0], '\0');
+    ASSERT_EQUAL(buffer[1], (char)0x7f);
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%"), -EINVAL);
+    ASSERT_EQUAL(buffer[0], '\0');
+    ASSERT_EQUAL(buffer[1], (char)0x7f);
+
+    ASSERT_EQUAL(format_sink_init(&sink, buffer, SIZEOF(buffer)), 0);
+    sink.total = (int64)INT32_MAX + 1;
+    ASSERT_EQUAL(format_sink_finish(&sink), -EOVERFLOW);
+
+    return;
+}
+
 static void
 test_format_float32_shortest(float value, char *expected) {
     char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
@@ -273,6 +494,13 @@ test_format_float64_round_trip(double value) {
 int
 main(void) {
     char buffer[16];
+
+    test_format_sink_capacity("", "");
+    test_format_sink_capacity("abc", "abc");
+    test_format_sink_capacity("%%", "%");
+    test_format_sink_capacity("a%%b%%c", "a%b%c");
+    test_format_sink_capacity("abc%%def", "abc%def");
+    test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
     test_format_float64_shortest(-0.0, "-0E0");
