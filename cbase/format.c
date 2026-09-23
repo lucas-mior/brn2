@@ -40,6 +40,15 @@ enum {
     FORMAT_UNICODE_SURROGATE_LAST = 0xDFFF,
     FORMAT_UNICODE_SURROGATE_LOW_FIRST = 0xDC00,
     FORMAT_UNICODE_SURROGATE_MASK = 0x3FF,
+    FORMAT_BIG_UINT_WORD_BITS = 32,
+    FORMAT_BIG_UINT_MAX_WORDS = 640,
+    FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS = 52,
+    FORMAT_LONG_DOUBLE_DOUBLE_EXPONENT_BIAS = 1023,
+    FORMAT_LONG_DOUBLE_X87_FRACTION_BITS = 63,
+    FORMAT_LONG_DOUBLE_X87_EXPONENT_BIAS = 16383,
+    FORMAT_LONG_DOUBLE_X87_EXPONENT_MASK = 0x7fff,
+    FORMAT_LONG_DOUBLE_BINARY128_FRACTION_BITS = 112,
+    FORMAT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS = 16383,
 };
 
 _Static_assert(FORMAT_FLOAT_MAX_FIXED_PREFIX
@@ -1621,6 +1630,704 @@ format_handle_count(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
         return sink->status;
     }
     return format_store_count(spec, args, sink->total);
+}
+
+
+typedef struct FormatBigUInt {
+    uint32 words[FORMAT_BIG_UINT_MAX_WORDS];
+    int32 len;
+} FormatBigUInt;
+
+enum FormatRemainderHalf {
+    FORMAT_REMAINDER_ZERO,
+    FORMAT_REMAINDER_LESS_HALF,
+    FORMAT_REMAINDER_HALF,
+    FORMAT_REMAINDER_MORE_HALF,
+};
+
+typedef struct FormatBinaryFloat {
+    FormatBigUInt significand;
+    int32 binary_exponent;
+    int32 precision_bits;
+    bool negative;
+    bool zero;
+} FormatBinaryFloat;
+
+static void
+format_big_uint_zero(FormatBigUInt *value) {
+    ASSERT(value != NULL);
+
+    memset(value->words, 0, (size_t)SIZEOF(value->words));
+    value->len = 0;
+    return;
+}
+
+static void
+format_big_uint_normalize(FormatBigUInt *value) {
+    ASSERT(value != NULL);
+    ASSERT_MORE_EQUAL(value->len, 0);
+    ASSERT_LESS_EQUAL(value->len, FORMAT_BIG_UINT_MAX_WORDS);
+
+    while (value->len > 0 && value->words[value->len - 1] == 0) {
+        value->len -= 1;
+    }
+    return;
+}
+
+static bool
+format_big_uint_is_zero(FormatBigUInt *value) {
+    ASSERT(value != NULL);
+
+    return value->len == 0;
+}
+
+static int32
+format_big_uint_ensure_word(FormatBigUInt *value, int32 index) {
+    ASSERT(value != NULL);
+    ASSERT_NON_NEGATIVE(index);
+
+    if (index >= FORMAT_BIG_UINT_MAX_WORDS) {
+        return -EOVERFLOW;
+    }
+    while (value->len <= index) {
+        value->words[value->len] = 0;
+        value->len += 1;
+    }
+    return 0;
+}
+
+static int32
+format_big_uint_set_bit(FormatBigUInt *value, int32 bit_index) {
+    int32 word_index;
+    int32 bit_offset;
+    int32 status;
+
+    ASSERT(value != NULL);
+    ASSERT_NON_NEGATIVE(bit_index);
+
+    word_index = bit_index/FORMAT_BIG_UINT_WORD_BITS;
+    bit_offset = bit_index%FORMAT_BIG_UINT_WORD_BITS;
+    if ((status = format_big_uint_ensure_word(value, word_index)) < 0) {
+        return status;
+    }
+
+    value->words[word_index] |= UINT32_C(1) << bit_offset;
+    return 0;
+}
+
+static int32
+format_big_uint_from_uint64(FormatBigUInt *value, uint64 source) {
+    ASSERT(value != NULL);
+
+    format_big_uint_zero(value);
+    if (source == 0) {
+        return 0;
+    }
+
+    value->words[0] = (uint32)source;
+    value->words[1] = (uint32)(source >> 32);
+    value->len = 2;
+    format_big_uint_normalize(value);
+    return 0;
+}
+
+static int32
+format_big_uint_from_uint128_parts(FormatBigUInt *value, uint64 low,
+                                   uint64 high) {
+    ASSERT(value != NULL);
+
+    format_big_uint_zero(value);
+    value->words[0] = (uint32)low;
+    value->words[1] = (uint32)(low >> 32);
+    value->words[2] = (uint32)high;
+    value->words[3] = (uint32)(high >> 32);
+    value->len = 4;
+    format_big_uint_normalize(value);
+    return 0;
+}
+
+static uint64
+format_read_le_uint64(uchar *bytes) {
+    uint64 value;
+
+    ASSERT(bytes != NULL);
+
+    value = 0;
+    for (int32 i = 7; i >= 0; i -= 1) {
+        value <<= 8;
+        value |= bytes[i];
+    }
+    return value;
+}
+
+static uint64
+format_read_be_uint64(uchar *bytes) {
+    uint64 value;
+
+    ASSERT(bytes != NULL);
+
+    value = 0;
+    for (int32 i = 0; i < 8; i += 1) {
+        value <<= 8;
+        value |= bytes[i];
+    }
+    return value;
+}
+
+static bool
+format_host_is_little_endian(void) {
+    uint32 one;
+    uchar bytes[SIZEOF(one)];
+
+    one = 1;
+    memcpy(bytes, &one, (size_t)SIZEOF(one));
+    return bytes[0] == 1;
+}
+
+static int32 UNUSED
+format_big_uint_bit_len(FormatBigUInt *value) {
+    uint32 top;
+    int32 bits;
+
+    ASSERT(value != NULL);
+
+    if (value->len == 0) {
+        return 0;
+    }
+
+    top = value->words[value->len - 1];
+    bits = 0;
+    while (top > 0) {
+        bits += 1;
+        top >>= 1;
+    }
+    return (value->len - 1)*FORMAT_BIG_UINT_WORD_BITS + bits;
+}
+
+static bool
+format_big_uint_test_bit(FormatBigUInt *value, int32 bit_index) {
+    int32 word_index;
+    int32 bit_offset;
+
+    ASSERT(value != NULL);
+    ASSERT_NON_NEGATIVE(bit_index);
+
+    word_index = bit_index/FORMAT_BIG_UINT_WORD_BITS;
+    bit_offset = bit_index%FORMAT_BIG_UINT_WORD_BITS;
+    if (word_index >= value->len) {
+        return false;
+    }
+    return (value->words[word_index] & (UINT32_C(1) << bit_offset)) != 0;
+}
+
+static int32
+format_big_uint_shift_left(FormatBigUInt *value, int32 shift) {
+    uint32 original[FORMAT_BIG_UINT_MAX_WORDS];
+    int32 original_len;
+    int32 word_shift;
+    int32 bit_shift;
+    int32 new_len;
+
+    ASSERT(value != NULL);
+    ASSERT_NON_NEGATIVE(shift);
+
+    if (value->len == 0 || shift == 0) {
+        return 0;
+    }
+
+    original_len = value->len;
+    word_shift = shift/FORMAT_BIG_UINT_WORD_BITS;
+    bit_shift = shift%FORMAT_BIG_UINT_WORD_BITS;
+    new_len = original_len + word_shift;
+    if (bit_shift != 0) {
+        new_len += 1;
+    }
+    if (new_len > FORMAT_BIG_UINT_MAX_WORDS) {
+        return -EOVERFLOW;
+    }
+
+    memcpy(original, value->words, (size_t)(original_len*SIZEOF(original[0])));
+    memset(value->words, 0, (size_t)SIZEOF(value->words));
+    value->len = new_len;
+    for (int32 i = 0; i < original_len; i += 1) {
+        uint64 shifted;
+        int32 index;
+
+        shifted = (uint64)original[i] << bit_shift;
+        index = i + word_shift;
+        value->words[index] |= (uint32)shifted;
+        if (bit_shift != 0) {
+            value->words[index + 1] |= (uint32)(shifted >> 32);
+        }
+    }
+
+    format_big_uint_normalize(value);
+    return 0;
+}
+
+static void
+format_big_uint_shift_right(FormatBigUInt *value, int32 shift) {
+    int32 word_shift;
+    int32 bit_shift;
+
+    ASSERT(value != NULL);
+    ASSERT_NON_NEGATIVE(shift);
+
+    if (value->len == 0 || shift == 0) {
+        return;
+    }
+
+    word_shift = shift/FORMAT_BIG_UINT_WORD_BITS;
+    bit_shift = shift%FORMAT_BIG_UINT_WORD_BITS;
+    if (word_shift >= value->len) {
+        format_big_uint_zero(value);
+        return;
+    }
+
+    for (int32 i = 0; i + word_shift < value->len; i += 1) {
+        uint32 low;
+        uint32 high;
+
+        low = value->words[i + word_shift];
+        high = 0;
+        if (bit_shift != 0 && i + word_shift + 1 < value->len) {
+            high = value->words[i + word_shift + 1];
+        }
+        if (bit_shift == 0) {
+            value->words[i] = low;
+        } else {
+            value->words[i] = (low >> bit_shift)
+                              |(high << (FORMAT_BIG_UINT_WORD_BITS
+                                         - bit_shift));
+        }
+    }
+    value->len -= word_shift;
+    format_big_uint_normalize(value);
+    return;
+}
+
+static bool
+format_big_uint_has_low_bits(FormatBigUInt *value, int32 bits) {
+    int32 full_words;
+    int32 partial_bits;
+
+    ASSERT(value != NULL);
+    ASSERT_NON_NEGATIVE(bits);
+
+    if (bits == 0 || value->len == 0) {
+        return false;
+    }
+
+    full_words = bits/FORMAT_BIG_UINT_WORD_BITS;
+    partial_bits = bits%FORMAT_BIG_UINT_WORD_BITS;
+    for (int32 i = 0; i < full_words && i < value->len; i += 1) {
+        if (value->words[i] != 0) {
+            return true;
+        }
+    }
+    if (partial_bits != 0 && full_words < value->len) {
+        uint32 mask;
+
+        mask = (UINT32_C(1) << partial_bits) - 1;
+        if ((value->words[full_words] & mask) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static enum FormatRemainderHalf
+format_big_uint_remainder_half(FormatBigUInt *value, int32 bits) {
+    int32 half_bit;
+
+    ASSERT(value != NULL);
+    ASSERT_POSITIVE(bits);
+
+    if (!format_big_uint_has_low_bits(value, bits)) {
+        return FORMAT_REMAINDER_ZERO;
+    }
+
+    half_bit = bits - 1;
+    if (!format_big_uint_test_bit(value, half_bit)) {
+        return FORMAT_REMAINDER_LESS_HALF;
+    }
+    if (format_big_uint_has_low_bits(value, half_bit)) {
+        return FORMAT_REMAINDER_MORE_HALF;
+    }
+    return FORMAT_REMAINDER_HALF;
+}
+
+static int32
+format_big_uint_mul_small(FormatBigUInt *value, uint32 factor) {
+    uint64 carry;
+
+    ASSERT(value != NULL);
+
+    if (value->len == 0 || factor == 1) {
+        return 0;
+    }
+    if (factor == 0) {
+        format_big_uint_zero(value);
+        return 0;
+    }
+
+    carry = 0;
+    for (int32 i = 0; i < value->len; i += 1) {
+        uint64 product;
+
+        product = (uint64)value->words[i]*factor + carry;
+        value->words[i] = (uint32)product;
+        carry = product >> 32;
+    }
+    if (carry != 0) {
+        int32 status;
+
+        status = format_big_uint_ensure_word(value, value->len);
+        if (status < 0) {
+            return status;
+        }
+        value->words[value->len - 1] = (uint32)carry;
+    }
+    return 0;
+}
+
+static uint32
+format_big_uint_div_small(FormatBigUInt *value, uint32 divisor) {
+    uint64 remainder;
+
+    ASSERT(value != NULL);
+    ASSERT_POSITIVE(divisor);
+
+    remainder = 0;
+    for (int32 i = value->len - 1; i >= 0; i -= 1) {
+        uint64 current;
+        uint64 quotient;
+
+        current = (remainder << 32) | value->words[i];
+        quotient = current/divisor;
+        remainder = current%divisor;
+        value->words[i] = (uint32)quotient;
+    }
+    format_big_uint_normalize(value);
+    return (uint32)remainder;
+}
+
+static int32 UNUSED
+format_big_uint_to_decimal(FormatBigUInt *value, char *buffer,
+                           int32 capacity) {
+    enum { GROUP_BASE = 1000000000, GROUP_DIGITS = 9 };
+    uint32 groups[FORMAT_BIG_UINT_MAX_WORDS*2];
+    FormatBigUInt work;
+    int32 group_count;
+    int32 len;
+
+    ASSERT(value != NULL);
+    ASSERT(buffer != NULL);
+    ASSERT_POSITIVE(capacity);
+
+    if (value->len == 0) {
+        if (capacity < 2) {
+            return -EOVERFLOW;
+        }
+        buffer[0] = '0';
+        buffer[1] = '\0';
+        return 1;
+    }
+
+    work = *value;
+    group_count = 0;
+    while (!format_big_uint_is_zero(&work)) {
+        groups[group_count] = format_big_uint_div_small(&work, GROUP_BASE);
+        group_count += 1;
+    }
+
+    len = format_integer_digits(buffer, groups[group_count - 1], 10, false);
+    if (len >= capacity) {
+        return -EOVERFLOW;
+    }
+
+    for (int32 i = group_count - 2; i >= 0; i -= 1) {
+        char digits[GROUP_DIGITS];
+        int32 digit_len;
+        int32 zeros;
+
+        digit_len = format_integer_digits(digits, groups[i], 10, false);
+        zeros = GROUP_DIGITS - digit_len;
+        if (len + zeros + digit_len >= capacity) {
+            return -EOVERFLOW;
+        }
+        for (int32 j = 0; j < zeros; j += 1) {
+            buffer[len] = '0';
+            len += 1;
+        }
+        memcpy(buffer + len, digits, (size_t)digit_len);
+        len += digit_len;
+    }
+
+    buffer[len] = '\0';
+    return len;
+}
+
+static int32 UNUSED
+format_binary_float_to_exact_integer(FormatBinaryFloat *parts,
+                                     FormatBigUInt *integer) {
+    int32 shift;
+
+    ASSERT(parts != NULL);
+    ASSERT(integer != NULL);
+
+    *integer = parts->significand;
+    if (parts->zero) {
+        return 0;
+    }
+
+    if (parts->binary_exponent >= 0) {
+        return format_big_uint_shift_left(integer, parts->binary_exponent);
+    }
+
+    shift = -parts->binary_exponent;
+    if (format_big_uint_has_low_bits(integer, shift)) {
+        return -ERANGE;
+    }
+    format_big_uint_shift_right(integer, shift);
+    return 0;
+}
+
+static int32 UNUSED
+format_binary_float_scaled_decimal(FormatBinaryFloat *parts,
+                                   int32 decimal_places,
+                                   FormatBigUInt *integer,
+                                   enum FormatRemainderHalf *remainder) {
+    int32 binary_shift;
+    int32 status;
+
+    ASSERT(parts != NULL);
+    ASSERT_NON_NEGATIVE(decimal_places);
+    ASSERT(integer != NULL);
+    ASSERT(remainder != NULL);
+
+    *integer = parts->significand;
+    *remainder = FORMAT_REMAINDER_ZERO;
+    if (parts->zero) {
+        return 0;
+    }
+
+    for (int32 i = 0; i < decimal_places; i += 1) {
+        if ((status = format_big_uint_mul_small(integer, 5)) < 0) {
+            return status;
+        }
+    }
+
+    binary_shift = parts->binary_exponent + decimal_places;
+    if (binary_shift >= 0) {
+        return format_big_uint_shift_left(integer, binary_shift);
+    }
+
+    binary_shift = -binary_shift;
+    *remainder = format_big_uint_remainder_half(integer, binary_shift);
+    format_big_uint_shift_right(integer, binary_shift);
+    return 0;
+}
+
+static int32
+format_binary_float_set_zero(FormatBinaryFloat *parts, bool negative,
+                             int32 precision_bits) {
+    ASSERT(parts != NULL);
+    ASSERT_POSITIVE(precision_bits);
+
+    format_big_uint_zero(&parts->significand);
+    parts->binary_exponent = 0;
+    parts->precision_bits = precision_bits;
+    parts->negative = negative;
+    parts->zero = true;
+    return 0;
+}
+
+static int32
+format_decode_binary64_long_double(ldouble value,
+                                   FormatBinaryFloat *parts) {
+    uint64 fraction_mask;
+    uint64 exponent_bits;
+    uint64 fraction;
+    uint64 bits;
+    bool negative;
+
+    ASSERT(parts != NULL);
+    ASSERT(SIZEOF(ldouble) == SIZEOF(double));
+
+    memcpy(&bits, &value, (size_t)SIZEOF(bits));
+    negative = (bits >> 63) != 0;
+    fraction_mask = (UINT64_C(1)
+                     << FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS) - 1;
+    exponent_bits = (bits >> FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS)
+                    & 0x7ff;
+    fraction = bits & fraction_mask;
+
+    if (exponent_bits == 0 && fraction == 0) {
+        return format_binary_float_set_zero(parts, negative, DBL_MANT_DIG);
+    }
+    if (exponent_bits == 0x7ff) {
+        return -EINVAL;
+    }
+
+    format_big_uint_zero(&parts->significand);
+    if (exponent_bits == 0) {
+        format_big_uint_from_uint64(&parts->significand, fraction);
+        parts->binary_exponent = 1 - FORMAT_LONG_DOUBLE_DOUBLE_EXPONENT_BIAS
+                                 - FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS;
+    } else {
+        format_big_uint_from_uint64(&parts->significand,
+                                    (UINT64_C(1)
+                                     << FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS)
+                                    |fraction);
+        parts->binary_exponent = (int32)exponent_bits
+                                 - FORMAT_LONG_DOUBLE_DOUBLE_EXPONENT_BIAS
+                                 - FORMAT_LONG_DOUBLE_DOUBLE_FRACTION_BITS;
+    }
+    parts->precision_bits = DBL_MANT_DIG;
+    parts->negative = negative;
+    parts->zero = false;
+    return 0;
+}
+
+static int32
+format_decode_x87_long_double(ldouble value, FormatBinaryFloat *parts) {
+    uchar bytes[SIZEOF(ldouble)];
+    uint64 significand;
+    uint32 sign_exp;
+    uint32 exponent_bits;
+    bool negative;
+
+    ASSERT(parts != NULL);
+
+    if (!format_host_is_little_endian() || SIZEOF(ldouble) < 10) {
+        return -ENOSYS;
+    }
+
+    memcpy(bytes, &value, (size_t)SIZEOF(bytes));
+    significand = format_read_le_uint64(bytes);
+    sign_exp = (uint32)bytes[8] | ((uint32)bytes[9] << 8);
+    negative = (sign_exp & UINT32_C(0x8000)) != 0;
+    exponent_bits = sign_exp & FORMAT_LONG_DOUBLE_X87_EXPONENT_MASK;
+
+    if (exponent_bits == 0 && significand == 0) {
+        return format_binary_float_set_zero(parts, negative, LDBL_MANT_DIG);
+    }
+    if (exponent_bits == FORMAT_LONG_DOUBLE_X87_EXPONENT_MASK) {
+        return -EINVAL;
+    }
+    if (exponent_bits != 0
+        && (significand & (UINT64_C(1)
+                           << FORMAT_LONG_DOUBLE_X87_FRACTION_BITS)) == 0) {
+        return -EINVAL;
+    }
+
+    format_big_uint_from_uint64(&parts->significand, significand);
+    if (exponent_bits == 0) {
+        parts->binary_exponent = 1 - FORMAT_LONG_DOUBLE_X87_EXPONENT_BIAS
+                                 - FORMAT_LONG_DOUBLE_X87_FRACTION_BITS;
+    } else {
+        parts->binary_exponent = (int32)exponent_bits
+                                 - FORMAT_LONG_DOUBLE_X87_EXPONENT_BIAS
+                                 - FORMAT_LONG_DOUBLE_X87_FRACTION_BITS;
+    }
+    parts->precision_bits = LDBL_MANT_DIG;
+    parts->negative = negative;
+    parts->zero = false;
+    return 0;
+}
+
+static int32
+format_decode_binary128_long_double(ldouble value,
+                                    FormatBinaryFloat *parts) {
+    uchar bytes[SIZEOF(ldouble)];
+    uint64 fraction_high;
+    uint64 exponent_bits;
+    uint64 high;
+    uint64 low;
+    bool negative;
+
+    ASSERT(parts != NULL);
+
+    if (SIZEOF(ldouble) != 16) {
+        return -ENOSYS;
+    }
+
+    memcpy(bytes, &value, (size_t)SIZEOF(bytes));
+    if (format_host_is_little_endian()) {
+        low = format_read_le_uint64(bytes);
+        high = format_read_le_uint64(bytes + 8);
+    } else {
+        high = format_read_be_uint64(bytes);
+        low = format_read_be_uint64(bytes + 8);
+    }
+
+    negative = (high >> 63) != 0;
+    exponent_bits = (high >> 48) & 0x7fff;
+    fraction_high = high & UINT64_C(0x0000ffffffffffff);
+
+    if (exponent_bits == 0 && fraction_high == 0 && low == 0) {
+        return format_binary_float_set_zero(parts, negative, LDBL_MANT_DIG);
+    }
+    if (exponent_bits == 0x7fff) {
+        return -EINVAL;
+    }
+
+    format_big_uint_from_uint128_parts(&parts->significand, low,
+                                       fraction_high);
+    if (exponent_bits != 0) {
+        int32 status;
+
+        status = format_big_uint_set_bit(
+            &parts->significand,
+            FORMAT_LONG_DOUBLE_BINARY128_FRACTION_BITS);
+        if (status < 0) {
+            return status;
+        }
+        parts->binary_exponent = (int32)exponent_bits
+            - FORMAT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS
+            - FORMAT_LONG_DOUBLE_BINARY128_FRACTION_BITS;
+    } else {
+        parts->binary_exponent = 1
+            - FORMAT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS
+            - FORMAT_LONG_DOUBLE_BINARY128_FRACTION_BITS;
+    }
+    parts->precision_bits = LDBL_MANT_DIG;
+    parts->negative = negative;
+    parts->zero = false;
+    return 0;
+}
+
+static int32 UNUSED
+format_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
+    ASSERT(parts != NULL);
+
+    if (!isfinite(value)) {
+        return -EINVAL;
+    }
+    format_big_uint_zero(&parts->significand);
+    parts->binary_exponent = 0;
+    parts->precision_bits = 0;
+    parts->negative = false;
+    parts->zero = false;
+
+    if (FLT_RADIX != 2) {
+        return -ENOSYS;
+    }
+    if (LDBL_MANT_DIG == DBL_MANT_DIG && LDBL_MAX_EXP == DBL_MAX_EXP) {
+        if (SIZEOF(ldouble) != SIZEOF(double)) {
+            return -ENOSYS;
+        }
+        return format_decode_binary64_long_double(value, parts);
+    }
+    if (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384) {
+        return format_decode_x87_long_double(value, parts);
+    }
+    if (LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384) {
+        return format_decode_binary128_long_double(value, parts);
+    }
+
+    return -ENOSYS;
 }
 
 static bool
@@ -3347,6 +4054,146 @@ test_format_printf_hex_float_outputs(void) {
     return;
 }
 
+
+static bool
+format_test_long_double_supported(void) {
+    FormatBinaryFloat parts;
+    int32 status;
+
+    status = format_decompose_long_double(1.0L, &parts);
+    if (status == -ENOSYS) {
+        return false;
+    }
+    ASSERT_EQUAL(status, 0);
+    return true;
+}
+
+static void
+test_format_long_double_parts(ldouble value, bool negative,
+                              int32 bit_len, int32 binary_exponent) {
+    FormatBinaryFloat parts;
+
+    ASSERT_EQUAL(format_decompose_long_double(value, &parts), 0);
+    ASSERT(parts.negative == negative);
+    ASSERT(parts.zero == (bit_len == 0));
+    ASSERT_EQUAL(parts.precision_bits, LDBL_MANT_DIG);
+    ASSERT_EQUAL(format_big_uint_bit_len(&parts.significand), bit_len);
+    ASSERT_EQUAL(parts.binary_exponent, binary_exponent);
+    return;
+}
+
+static void
+test_format_long_double_exact_integer(ldouble value, char *expected) {
+    char buffer[128];
+    FormatBinaryFloat parts;
+    FormatBigUInt integer;
+    int32 len;
+
+    ASSERT_EQUAL(format_decompose_long_double(value, &parts), 0);
+    ASSERT_EQUAL(format_binary_float_to_exact_integer(&parts, &integer), 0);
+    len = format_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
+    ASSERT_EQUAL(len, strlen32(expected));
+    ASSERT_EQUAL(buffer, expected);
+    return;
+}
+
+static void
+test_format_long_double_scaled(ldouble value, int32 decimal_places,
+                               char *expected,
+                               enum FormatRemainderHalf expected_rem) {
+    char buffer[128];
+    FormatBinaryFloat parts;
+    FormatBigUInt integer;
+    enum FormatRemainderHalf remainder;
+    int32 len;
+
+    ASSERT_EQUAL(format_decompose_long_double(value, &parts), 0);
+    ASSERT_EQUAL(format_binary_float_scaled_decimal(&parts, decimal_places,
+                                                    &integer, &remainder), 0);
+    ASSERT_EQUAL(remainder, expected_rem);
+    len = format_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
+    ASSERT_EQUAL(len, strlen32(expected));
+    ASSERT_EQUAL(buffer, expected);
+    return;
+}
+
+static void
+test_format_long_double_decomposition(void) {
+    FormatBinaryFloat parts;
+    FormatBigUInt integer;
+    ldouble true_min;
+    int32 expected_exp;
+
+    if (!format_test_long_double_supported()) {
+        return;
+    }
+
+    ASSERT_EQUAL(format_decompose_long_double(INFINITY, &parts), -EINVAL);
+    ASSERT_EQUAL(format_decompose_long_double(NAN, &parts), -EINVAL);
+
+    test_format_long_double_parts(0.0L, false, 0, 0);
+    test_format_long_double_parts(-0.0L, true, 0, 0);
+    test_format_long_double_parts(1.0L, false, LDBL_MANT_DIG,
+                                  1 - LDBL_MANT_DIG);
+    test_format_long_double_parts(-1.0L, true, LDBL_MANT_DIG,
+                                  1 - LDBL_MANT_DIG);
+    test_format_long_double_parts(0.5L, false, LDBL_MANT_DIG,
+                                  -LDBL_MANT_DIG);
+    test_format_long_double_parts(2.0L, false, LDBL_MANT_DIG,
+                                  2 - LDBL_MANT_DIG);
+
+    expected_exp = LDBL_MIN_EXP - LDBL_MANT_DIG;
+    test_format_long_double_parts(LDBL_MIN, false, LDBL_MANT_DIG,
+                                  expected_exp);
+
+    expected_exp = LDBL_MAX_EXP - LDBL_MANT_DIG;
+    test_format_long_double_parts(LDBL_MAX, false, LDBL_MANT_DIG,
+                                  expected_exp);
+    ASSERT_EQUAL(format_decompose_long_double(LDBL_MAX, &parts), 0);
+    ASSERT_EQUAL(format_binary_float_to_exact_integer(&parts, &integer), 0);
+    ASSERT_EQUAL(format_big_uint_bit_len(&integer), LDBL_MAX_EXP);
+
+    true_min = ldexpl(1.0L, LDBL_MIN_EXP - LDBL_MANT_DIG);
+    if (true_min != 0.0L) {
+        test_format_long_double_parts(true_min, false, 1,
+                                      LDBL_MIN_EXP - LDBL_MANT_DIG);
+    }
+
+    return;
+}
+
+static void
+test_format_long_double_decimal_helpers(void) {
+    FormatBinaryFloat parts;
+    FormatBigUInt integer;
+
+    if (!format_test_long_double_supported()) {
+        return;
+    }
+
+    test_format_long_double_exact_integer(0.0L, "0");
+    test_format_long_double_exact_integer(1.0L, "1");
+    test_format_long_double_exact_integer(2.0L, "2");
+    test_format_long_double_exact_integer(ldexpl(1.0L, 64),
+                                          "18446744073709551616");
+
+    ASSERT_EQUAL(format_decompose_long_double(0.5L, &parts), 0);
+    ASSERT_EQUAL(format_binary_float_to_exact_integer(&parts, &integer),
+                 -ERANGE);
+
+    test_format_long_double_scaled(0.125L, 3, "125",
+                                   FORMAT_REMAINDER_ZERO);
+    test_format_long_double_scaled(0.25L, 0, "0",
+                                   FORMAT_REMAINDER_LESS_HALF);
+    test_format_long_double_scaled(0.5L, 0, "0",
+                                   FORMAT_REMAINDER_HALF);
+    test_format_long_double_scaled(0.75L, 0, "0",
+                                   FORMAT_REMAINDER_MORE_HALF);
+    test_format_long_double_scaled(1.25L, 1, "12",
+                                   FORMAT_REMAINDER_HALF);
+    return;
+}
+
 static void
 test_format_sink_validation(void) {
     char buffer[8];
@@ -3492,6 +4339,8 @@ main(void) {
     test_format_printf_float_outputs();
     test_format_printf_general_outputs();
     test_format_printf_hex_float_outputs();
+    test_format_long_double_decomposition();
+    test_format_long_double_decimal_helpers();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
