@@ -4246,7 +4246,7 @@ format_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     return status;
 }
 
-static int32 UNUSED
+static int32
 format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
                       va_list args) {
     FormatArgs format_args;
@@ -4331,6 +4331,22 @@ format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
 done:
     va_end(format_args.args);
     return result;
+}
+
+int32 ATTR_PRINTF(3, 0)
+format_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
+    return format_vsnprintf_impl(buffer, capacity, format, args);
+}
+
+int32 ATTR_PRINTF(3, 4)
+format_snprintf(char *buffer, int64 capacity, char *format, ...) {
+    va_list args;
+    int32 len;
+
+    va_start(args, format);
+    len = format_vsnprintf(buffer, capacity, format, args);
+    va_end(args);
+    return len;
 }
 
 static int32
@@ -5412,6 +5428,49 @@ test_format_printf_long_double_outputs(void) {
     return;
 }
 
+static int32
+format_test_public_vsnprintf(char *buffer, int64 capacity, char *format, ...) {
+    va_list args;
+    int32 len;
+
+    va_start(args, format);
+    len = format_vsnprintf(buffer, capacity, format, args);
+    va_end(args);
+    return len;
+}
+
+static void
+test_format_public_api(void) {
+    char buffer[32];
+    char tiny[4];
+    int32 len;
+    int32 count;
+
+    len = format_snprintf(buffer, SIZEOF(buffer), "public:%d:%s",
+                          42, "ok");
+    ASSERT_EQUAL(len, 12);
+    ASSERT_EQUAL(buffer, len + 1, "public:42:ok", 13);
+
+    len = format_snprintf(tiny, SIZEOF(tiny), "abcdef");
+    ASSERT_EQUAL(len, 6);
+    ASSERT_EQUAL(tiny, SIZEOF(tiny), "abc", 4);
+
+    len = format_snprintf(NULL, 0, "abcdef");
+    ASSERT_EQUAL(len, 6);
+
+    len = format_test_public_vsnprintf(buffer, SIZEOF(buffer), "%s:%.*s",
+                                       NULL, 3, "a\0b");
+    ASSERT_EQUAL(len, 10);
+    ASSERT_EQUAL(buffer, len + 1, "(null):a\0b", 11);
+
+    count = -1;
+    len = format_snprintf(tiny, SIZEOF(tiny), "abcd%n", &count);
+    ASSERT_EQUAL(len, 4);
+    ASSERT_EQUAL(count, 4);
+    ASSERT_EQUAL(tiny, SIZEOF(tiny), "abc", 4);
+    return;
+}
+
 static void
 test_format_sink_validation(void) {
     char buffer[8];
@@ -5560,6 +5619,7 @@ main(void) {
     test_format_printf_long_double_outputs();
     test_format_long_double_decomposition();
     test_format_long_double_decimal_helpers();
+    test_format_public_api();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
