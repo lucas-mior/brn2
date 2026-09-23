@@ -28,6 +28,12 @@ enum {
     FORMAT_FLOAT_MAX_PRECISION = 1024,
     FORMAT_FLOAT_MAX_FIXED_PREFIX = 312,
     FORMAT_FLOAT_MAX_EXP_PREFIX = 8,
+    FORMAT_UTF8_MAX_BYTES = 4,
+    FORMAT_UNICODE_MAX = 0x10FFFF,
+    FORMAT_UNICODE_SURROGATE_FIRST = 0xD800,
+    FORMAT_UNICODE_SURROGATE_LAST = 0xDFFF,
+    FORMAT_UNICODE_SURROGATE_LOW_FIRST = 0xDC00,
+    FORMAT_UNICODE_SURROGATE_MASK = 0x3FF,
 };
 
 _Static_assert(FORMAT_FLOAT_MAX_FIXED_PREFIX
@@ -1114,6 +1120,314 @@ format_handle_string(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     return sink->status;
 }
 
+
+static bool
+format_unicode_is_surrogate(uint32 rune) {
+    return BETWEEN(rune, FORMAT_UNICODE_SURROGATE_FIRST,
+                   FORMAT_UNICODE_SURROGATE_LAST);
+}
+
+static int32
+format_encode_utf8_scalar(uint32 rune, char *buffer, int32 *len) {
+    ASSERT(buffer != NULL);
+    ASSERT(len != NULL);
+
+    if (rune > FORMAT_UNICODE_MAX || format_unicode_is_surrogate(rune)) {
+        return -EILSEQ;
+    }
+
+    *len = utf8_encode_raw(rune, buffer);
+    if (*len <= 0 || *len > FORMAT_UTF8_MAX_BYTES) {
+        return -EILSEQ;
+    }
+
+    return 0;
+}
+
+static int32
+format_wint_to_rune(wint_t value, uint32 *rune) {
+    uint64 raw;
+
+    ASSERT(rune != NULL);
+
+    raw = (uint64)value;
+    if (raw > FORMAT_UNICODE_MAX) {
+        return -EILSEQ;
+    }
+
+    *rune = (uint32)raw;
+    if (format_unicode_is_surrogate(*rune)) {
+        return -EILSEQ;
+    }
+
+    return 0;
+}
+
+static int32
+format_wchar32_to_rune(wchar_t value, uint32 *rune) {
+    uint64 raw;
+
+    ASSERT(rune != NULL);
+
+    raw = (uint64)value;
+    if (raw > FORMAT_UNICODE_MAX) {
+        return -EILSEQ;
+    }
+
+    *rune = (uint32)raw;
+    if (format_unicode_is_surrogate(*rune)) {
+        return -EILSEQ;
+    }
+
+    return 0;
+}
+
+static bool
+format_wchar16_is_high_surrogate(uint32 code_unit) {
+    return BETWEEN(code_unit, FORMAT_UNICODE_SURROGATE_FIRST,
+                   FORMAT_UNICODE_SURROGATE_LOW_FIRST - 1);
+}
+
+static bool
+format_wchar16_is_low_surrogate(uint32 code_unit) {
+    return BETWEEN(code_unit, FORMAT_UNICODE_SURROGATE_LOW_FIRST,
+                   FORMAT_UNICODE_SURROGATE_LAST);
+}
+
+static uint32
+format_wchar16_pair_to_rune(uint32 high, uint32 low) {
+    uint32 high_bits;
+    uint32 low_bits;
+
+    ASSERT(format_wchar16_is_high_surrogate(high));
+    ASSERT(format_wchar16_is_low_surrogate(low));
+
+    high_bits = (high - FORMAT_UNICODE_SURROGATE_FIRST)
+                & FORMAT_UNICODE_SURROGATE_MASK;
+    low_bits = (low - FORMAT_UNICODE_SURROGATE_LOW_FIRST)
+               & FORMAT_UNICODE_SURROGATE_MASK;
+    return 0x10000 + (high_bits << 10) + low_bits;
+}
+
+static int32
+format_wide_string_next_rune(wchar_t *string, int64 index, uint32 *rune,
+                             int64 *consumed) {
+    ASSERT(string != NULL);
+    ASSERT_NON_NEGATIVE(index);
+    ASSERT(rune != NULL);
+    ASSERT(consumed != NULL);
+
+    if (SIZEOF(wchar_t) == 2) {
+        uint32 first;
+
+        first = (uint16)string[index];
+        if (format_wchar16_is_high_surrogate(first)) {
+            uint32 second = (uint16)string[index + 1];
+
+            if (!format_wchar16_is_low_surrogate(second)) {
+                return -EILSEQ;
+            }
+            *rune = format_wchar16_pair_to_rune(first, second);
+            *consumed = 2;
+            return 0;
+        }
+        if (format_wchar16_is_low_surrogate(first)) {
+            return -EILSEQ;
+        }
+
+        *rune = first;
+        *consumed = 1;
+        return 0;
+    }
+
+    if (SIZEOF(wchar_t) == 4) {
+        int32 status;
+
+        if ((status = format_wchar32_to_rune(string[index], rune)) < 0) {
+            return status;
+        }
+        *consumed = 1;
+        return 0;
+    }
+
+    return -EILSEQ;
+}
+
+static int32
+format_load_wide_string_precision(FormatSpec *spec, FormatArgs *args) {
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if (spec->precision_kind == FORMAT_PRECISION_ARG) {
+        int32 precision = va_arg(args->args, int32);
+
+        if (precision < 0) {
+            spec->precision = 0;
+            spec->precision_kind = FORMAT_PRECISION_NONE;
+        } else {
+            spec->precision = precision;
+            spec->precision_kind = FORMAT_PRECISION_LITERAL;
+        }
+    }
+
+    return 0;
+}
+
+static int32
+format_wide_string_utf8_len(wchar_t *string, int64 limit, int64 *len) {
+    int64 total;
+    int64 index;
+
+    ASSERT(string != NULL);
+    ASSERT(len != NULL);
+    ASSERT(limit >= -1);
+
+    total = 0;
+    index = 0;
+    while (string[index] != 0) {
+        char encoded[FORMAT_UTF8_MAX_BYTES];
+        int64 consumed;
+        uint32 rune;
+        int32 encoded_len;
+        int32 status;
+
+        if ((status = format_wide_string_next_rune(string, index, &rune,
+                                                   &consumed)) < 0) {
+            return status;
+        }
+        if ((status = format_encode_utf8_scalar(rune, encoded,
+                                                &encoded_len)) < 0) {
+            return status;
+        }
+        if (limit >= 0 && encoded_len > limit - total) {
+            break;
+        }
+        if (encoded_len > INT64_MAX - total) {
+            return -EOVERFLOW;
+        }
+
+        total += encoded_len;
+        index += consumed;
+    }
+
+    *len = total;
+    return 0;
+}
+
+static void
+format_write_wide_string_utf8(FormatSink *sink, wchar_t *string, int64 len) {
+    int64 written;
+    int64 index;
+
+    ASSERT(sink != NULL);
+    ASSERT(string != NULL);
+    ASSERT_NON_NEGATIVE(len);
+
+    written = 0;
+    index = 0;
+    while (written < len) {
+        char encoded[FORMAT_UTF8_MAX_BYTES];
+        int64 consumed;
+        uint32 rune;
+        int32 encoded_len;
+        int32 status;
+
+        status = format_wide_string_next_rune(string, index, &rune, &consumed);
+        ASSERT_EQUAL(status, 0);
+        status = format_encode_utf8_scalar(rune, encoded, &encoded_len);
+        ASSERT_EQUAL(status, 0);
+        ASSERT(encoded_len <= len - written);
+
+        format_sink_write(sink, encoded, encoded_len);
+        written += encoded_len;
+        index += consumed;
+    }
+    return;
+}
+
+static int32
+format_handle_wide_char(FormatSink *sink, FormatSpec *spec,
+                        FormatArgs *args) {
+    char encoded[FORMAT_UTF8_MAX_BYTES];
+    uint32 rune;
+    int32 encoded_len;
+    int32 status;
+    wint_t value;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if ((status = format_load_dynamic_width(spec, args)) < 0) {
+        return status;
+    }
+
+    value = va_arg(args->args, wint_t);
+    if ((status = format_wint_to_rune(value, &rune)) < 0) {
+        return status;
+    }
+    if ((status = format_encode_utf8_scalar(rune, encoded,
+                                            &encoded_len)) < 0) {
+        return status;
+    }
+
+    format_write_padded_bytes(sink, spec, encoded, encoded_len);
+    return sink->status;
+}
+
+static int32
+format_handle_wide_string(FormatSink *sink, FormatSpec *spec,
+                          FormatArgs *args) {
+    int64 limit;
+    int64 len;
+    int64 spaces;
+    int32 status;
+    wchar_t *string;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if ((status = format_load_dynamic_width(spec, args)) < 0) {
+        return status;
+    }
+    if ((status = format_load_wide_string_precision(spec, args)) < 0) {
+        return status;
+    }
+
+    string = va_arg(args->args, wchar_t *);
+    if (string == NULL) {
+        char *null_string = "(null)";
+
+        if (format_has_precision(spec)) {
+            len = format_string_len_limited(null_string, spec->precision);
+        } else {
+            len = format_string_len_limited(null_string, INT64_MAX);
+        }
+        format_write_padded_bytes(sink, spec, null_string, len);
+        return sink->status;
+    }
+
+    if (format_has_precision(spec)) {
+        limit = spec->precision;
+    } else {
+        limit = -1;
+    }
+    if ((status = format_wide_string_utf8_len(string, limit, &len)) < 0) {
+        return status;
+    }
+
+    spaces = format_pad_len(spec->width, len);
+    if ((spec->flags & FORMAT_FLAG_LEFT) == 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    format_write_wide_string_utf8(sink, string, len);
+    if ((spec->flags & FORMAT_FLAG_LEFT) != 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    return sink->status;
+}
+
 static int32
 format_handle_char_string(FormatSink *sink, FormatSpec *spec,
                           FormatArgs *args) {
@@ -1121,14 +1435,17 @@ format_handle_char_string(FormatSink *sink, FormatSpec *spec,
     ASSERT(spec != NULL);
     ASSERT(args != NULL);
 
-    if (spec->length == FORMAT_LENGTH_L) {
-        return -ENOSYS;
-    }
     if (spec->conversion == 'c') {
+        if (spec->length == FORMAT_LENGTH_L) {
+            return format_handle_wide_char(sink, spec, args);
+        }
         return format_handle_char(sink, spec, args);
     }
 
     ASSERT(spec->conversion == 's');
+    if (spec->length == FORMAT_LENGTH_L) {
+        return format_handle_wide_string(sink, spec, args);
+    }
     return format_handle_string(sink, spec, args);
 }
 
@@ -1704,6 +2021,94 @@ test_format_char_string_outputs(void) {
     return;
 }
 
+
+static void
+test_format_wide_char_string_outputs(void) {
+    char nul_char_expected[] = {'\0'};
+    char e_acute[] = {(char)0xC3, (char)0xA9};
+    char euro[] = {(char)0xE2, (char)0x82, (char)0xAC};
+    char emoji[] = {(char)0xF0, (char)0x9F, (char)0x98, (char)0x80};
+    char wide_text_expected[] = {
+        'A', (char)0xC3, (char)0xA9,
+        (char)0xE2, (char)0x82, (char)0xAC,
+    };
+    char wide_text_precision_expected[] = {
+        'A', (char)0xC3, (char)0xA9,
+    };
+    char wide_text_width_expected[] = {
+        ' ', ' ', 'A', (char)0xC3, (char)0xA9,
+    };
+    char wide_text_left_expected[] = {
+        'A', (char)0xC3, (char)0xA9, ' ', ' ',
+    };
+    wchar_t wide_text[] = {'A', 0x00E9, 0x20AC, 0};
+    wchar_t bad_high[] = {(wchar_t)0xD800, 0};
+    wchar_t bad_low[] = {(wchar_t)0xDC00, 0};
+    char buffer[32];
+
+    test_format_bytes_capacity("A", 1, "%lc", (wint_t)'A');
+    test_format_bytes_capacity(e_acute, 2, "%lc", (wint_t)0x00E9);
+    test_format_bytes_capacity(euro, 3, "%lc", (wint_t)0x20AC);
+    test_format_bytes_capacity(emoji, 4, "%lc", (wint_t)0x1F600);
+    test_format_bytes_capacity("  A", 3, "%3lc", (wint_t)'A');
+    test_format_bytes_capacity("A  ", 3, "%-3lc", (wint_t)'A');
+    test_format_bytes_capacity(nul_char_expected, 1, "%lc", (wint_t)0);
+
+    test_format_bytes_capacity(wide_text_expected, 6, "%ls", wide_text);
+    test_format_bytes_capacity(wide_text_precision_expected, 3, "%.3ls",
+                               wide_text);
+    test_format_bytes_capacity(wide_text_precision_expected, 3, "%.4ls",
+                               wide_text);
+    test_format_bytes_capacity(wide_text_width_expected, 5, "%5.3ls",
+                               wide_text);
+    test_format_bytes_capacity(wide_text_left_expected, 5, "%-5.3ls",
+                               wide_text);
+    test_format_bytes_capacity(wide_text_precision_expected, 3, "%.*ls", 3,
+                               wide_text);
+    test_format_bytes_capacity(wide_text_expected, 6, "%.*ls", -1,
+                               wide_text);
+    test_format_bytes_capacity("(null)", 6, "%ls", (wchar_t *)NULL);
+    test_format_bytes_capacity("(nu", 3, "%.3ls", (wchar_t *)NULL);
+
+    {
+        wchar_t wide_emoji[3] = {0};
+
+        if (SIZEOF(wchar_t) == 2) {
+            wide_emoji[0] = (wchar_t)0xD83D;
+            wide_emoji[1] = (wchar_t)0xDE00;
+        } else {
+            wide_emoji[0] = (wchar_t)0x1F600;
+        }
+        test_format_bytes_capacity(emoji, 4, "%ls", wide_emoji);
+    }
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%lc",
+                                      (wint_t)0xD800), -EILSEQ);
+    ASSERT_EQUAL(buffer[0], '\0');
+    ASSERT_EQUAL(buffer[1], (char)0x7f);
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%lc",
+                                      (wint_t)0x110000), -EILSEQ);
+    ASSERT_EQUAL(buffer[0], '\0');
+    ASSERT_EQUAL(buffer[1], (char)0x7f);
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%ls",
+                                      bad_high), -EILSEQ);
+    ASSERT_EQUAL(buffer[0], '\0');
+    ASSERT_EQUAL(buffer[1], (char)0x7f);
+
+    memset(buffer, 0x7f, SIZEOF(buffer));
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%ls",
+                                      bad_low), -EILSEQ);
+    ASSERT_EQUAL(buffer[0], '\0');
+    ASSERT_EQUAL(buffer[1], (char)0x7f);
+
+    return;
+}
+
 static void
 test_format_sink_validation(void) {
     char buffer[8];
@@ -1849,6 +2254,7 @@ main(void) {
     test_format_parser_invalid_specs();
     test_format_integer_outputs();
     test_format_char_string_outputs();
+    test_format_wide_char_string_outputs();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
