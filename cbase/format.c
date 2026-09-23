@@ -139,6 +139,34 @@ format_float64_scientific(char *buffer, int64 capacity, double value,
     return format_float_copy(buffer, capacity, temp, len);
 }
 
+void
+sb_float64(StrBuilder *str_builder, double value) {
+    int32 len;
+
+    sb_reserve(str_builder, FORMAT_FLOAT_RYU_BUFFER_SIZE);
+    len = (int32)d2s_buffered_n(value, str_builder->data + str_builder->len);
+    str_builder->len += len;
+    str_builder->data[str_builder->len] = '\0';
+    return;
+}
+
+void
+sb_float64_fixed(StrBuilder *sb, double value, int32 precision) {
+    int32 status;
+    int32 len;
+
+    if ((status = format_float_validate_precision(precision)) < 0) {
+        error("Invalid float precision %d.\n", precision);
+        fatal(EXIT_FAILURE);
+    }
+
+    sb_reserve(sb, FORMAT_FLOAT_RYU_BUFFER_SIZE);
+    len = d2fixed_buffered_n(value, (uint32_t)precision, sb->data + sb->len);
+    sb->len += len;
+    sb->data[sb->len] = '\0';
+    return;
+}
+
 #if TESTING_format
 static void
 test_format_float32_shortest(float value, char *expected) {
@@ -265,6 +293,17 @@ main(void) {
 
     test_format_float64_scientific(1234.0, 2, "1.23e+03");
     test_format_float64_scientific(0.00123, 3, "1.230e-03");
+
+    {
+        StrBuilder builder = {0};
+
+        SB_APPEND(&builder, "x=");
+        sb_float64(&builder, 0.1);
+        SB_APPEND(&builder, " y=");
+        sb_float64_fixed(&builder, 1.25, 2);
+        ASSERT_EQUAL(builder.data, "x=1E-1 y=1.25");
+        sb_free(&builder);
+    }
 
     ASSERT_EQUAL(format_float64_shortest(NULL, 64, 1.0), -EINVAL);
     ASSERT_EQUAL(format_float64_shortest(buffer, 0, 1.0), -EINVAL);

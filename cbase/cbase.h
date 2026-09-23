@@ -207,6 +207,8 @@ void sb_clear(StrBuilder *);
 int32 sb_copy(StrBuilder *dest, StrBuilder *source);
 void sb_free(StrBuilder *);
 void sb_itoa(StrBuilder *str_builder, llong num);
+void sb_float64(StrBuilder *str_builder, double value);
+void sb_float64_fixed(StrBuilder *str_builder, double value, int32 precision);
 void sb_bytes_pretty(StrBuilder *str_builder, llong size);
 void sb_move(StrBuilder *dest, StrBuilder *source);
 void sb_printf(StrBuilder *str_builder, char *fmt, ...);
