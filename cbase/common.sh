@@ -757,7 +757,7 @@ common_test_source_is_excluded () {
     test_src=$1
     test_name=$(basename "$test_src")
     test_module=${test_name%.c}
-    test_exclude_pattern="(^|/)stc/"
+    test_exclude_pattern="(^|/)(stc|bin/obj)/"
 
     if [ "${TEST_SKIP_MAIN:-1}" != 0 ] \
             && echo "$test_name" | grep -Eq '^main[^/]*\.c$'; then
@@ -860,9 +860,14 @@ common_test_compile_and_run_source () {
         fi
 
         test_cc="zig cc"
-        test_cmdline="$test_cc $test_cmd_flags"
-        test_cmdline=$(common_option_remove "$test_cmdline" "-D_GNU_SOURCE")
-        test_cmdline="$test_cmdline -target x86_64-windows-gnu"
+        test_windows_target=x86_64-windows-gnu
+        test_windows_flags=$(common_option_remove \
+            "$test_cmd_flags" "-D_GNU_SOURCE")
+        test_windows_flags=$(common_option_remove \
+            "$test_windows_flags" "-DCBASE_SEPARATE_OBJECTS=1")
+        test_windows_flags=$(common_option_remove \
+            "$test_windows_flags" "-DRYU_SEPARATE_OBJECTS=1")
+        test_cmdline="$test_cc $test_windows_flags -target $test_windows_target"
         test_tail_ldflags=${TEST_WINDOWS_LDFLAGS:-}
         test_run_after_compile=${TEST_WINDOWS_RUN:-1}
     else
@@ -879,12 +884,14 @@ common_test_compile_and_run_source () {
             if [ -n "$CLANG_CL_TARGET" ]; then
                 test_cmd_flags="$test_cmd_flags --target=$CLANG_CL_TARGET"
             fi
-            test_cmd_flags=$(common_gcc_flags_to_msvc "$test_msvc_compiler" $test_cmd_flags)
+            test_cmd_flags=$(common_gcc_flags_to_msvc \
+                "$test_msvc_compiler" $test_cmd_flags)
             test_cmd_flags=$(common_msvc_add_utf8_cflags $test_cmd_flags)
             ;;
         cl|*/cl|cl.exe|*/cl.exe)
             test_msvc_compiler=cl
-            test_cmd_flags=$(common_gcc_flags_to_msvc "$test_msvc_compiler" $test_cmd_flags)
+            test_cmd_flags=$(common_gcc_flags_to_msvc \
+                "$test_msvc_compiler" $test_cmd_flags)
             test_cmd_flags=$(common_msvc_add_utf8_cflags $test_cmd_flags)
             ;;
         esac
@@ -908,8 +915,10 @@ common_test_compile_and_run_source () {
 
     test_added_flags="$test_added_flags $TEST_EXTRA_DEFS"
     if [ -n "$test_msvc_compiler" ]; then
-        test_added_flags=$(common_gcc_flags_to_msvc "$test_msvc_compiler" $test_added_flags)
-        test_tail_ldflags=$(common_gcc_flags_to_msvc "$test_msvc_compiler" $test_tail_ldflags)
+        test_added_flags=$(common_gcc_flags_to_msvc \
+            "$test_msvc_compiler" $test_added_flags)
+        test_tail_ldflags=$(common_gcc_flags_to_msvc \
+            "$test_msvc_compiler" $test_tail_ldflags)
     fi
     test_cmdline="$test_cmdline $test_added_flags"
     if [ "$test_msvc_compiler" = cl ]; then
@@ -920,7 +929,10 @@ common_test_compile_and_run_source () {
     test_cmdline="$test_cmdline $test_tail_ldflags"
 
     trace_on
-    if $test_cmdline < /dev/null; then
+    $test_cmdline < /dev/null
+    compiled=$?
+    trace_off
+    if [ $compiled ]; then
         if [ "$test_run_after_compile" != 0 ] \
                 && ! common_test_run_binary "$test_exe"; then
             common_test_debugger "$test_exe"
@@ -929,7 +941,6 @@ common_test_compile_and_run_source () {
     else
         exit 1
     fi
-    trace_off
 
     return 0
 }
@@ -986,6 +997,250 @@ common_test () {
         common_test_compile_and_run_source "$test_src"
     done
 
+    return 0
+}
+
+common_build_cbase_objects_compile () {
+    if [ "$#" -ne 4 ]; then
+        error "common_build_cbase_objects_compile <cc> <flags> <object_dir> "
+        error "<compiler_style>\n"
+        exit 1
+    fi
+
+    cbase_object_cc=$1
+    cbase_object_flags=$2
+    cbase_object_dir=$3
+    cbase_object_compiler_style=$4
+    cbase_object_library="$cbase_object_dir/libcbase.a"
+    cbase_object_ryu="$cbase_object_dir/ryu.o"
+    cbase_object_flags_file="$cbase_object_dir/flags"
+    cbase_object_wrapper_dir="$cbase_object_dir/wrappers"
+    cbase_object_ar=${AR:-ar}
+    cbase_object_sources="
+        arena
+        allocator
+        memory
+        generic
+        assertions
+        array
+        utf8
+        ascii_normalization
+        util
+        string
+        time
+        fs
+        windows
+        directory
+        threads
+        some_math
+        format
+        command
+        meta_common
+        meta_tokenize
+        meta_parse
+        meta_generate
+    "
+
+    if [ "$cbase_object_compiler_style" = msvc ] \
+            && [ -z "${AR:-}" ] \
+            && common_command_exists llvm-ar; then
+        cbase_object_ar=llvm-ar
+    fi
+
+    cbase_object_flags_text="CC=$cbase_object_cc
+AR=$cbase_object_ar
+FLAGS=$cbase_object_flags
+STYLE=$cbase_object_compiler_style"
+    cbase_object_rebuild_all=0
+    cbase_object_archive_changed=0
+    cbase_object_objects=""
+
+    mkdir -p "$cbase_object_dir" "$cbase_object_wrapper_dir"
+
+    if [ ! -f "$cbase_object_flags_file" ] \
+            || ! printf '%s\n' "$cbase_object_flags_text" \
+                | cmp -s - "$cbase_object_flags_file"; then
+        cbase_object_rebuild_all=1
+        rm -f "$cbase_object_dir"/*.o "$cbase_object_library"
+        printf '%s\n' "$cbase_object_flags_text" > "$cbase_object_flags_file"
+    fi
+
+    for cbase_object_name in $cbase_object_sources; do
+        cbase_object_source="cbase/$cbase_object_name.c"
+        cbase_object_wrapper="$cbase_object_wrapper_dir/$cbase_object_name.c"
+        cbase_object_output="$cbase_object_dir/$cbase_object_name.o"
+        cbase_object_wrapper_text="#define TESTING_$cbase_object_name 0
+#include \"cbase/$cbase_object_name.c\""
+
+        if [ ! -f "$cbase_object_wrapper" ] \
+                || ! printf '%s\n' "$cbase_object_wrapper_text" \
+                    | cmp -s - "$cbase_object_wrapper"; then
+            printf '%s\n' "$cbase_object_wrapper_text" \
+                > "$cbase_object_wrapper"
+        fi
+
+        cbase_object_rebuild=$cbase_object_rebuild_all
+        if [ ! -f "$cbase_object_output" ] \
+                || [ "$cbase_object_source" -nt "$cbase_object_output" ] \
+                || [ "$cbase_object_wrapper" -nt "$cbase_object_output" ] \
+                || find cbase -type f -name '*.h' \
+                    -newer "$cbase_object_output" -print | grep -q . \
+                || find cbase -type f \
+                    \( -name 'hash.c' -o -name 'minmax.c' \
+                       -o -name 'xenums.c' -o -name 'fs_windows.c' \) \
+                    -newer "$cbase_object_output" -print | grep -q .; then
+            cbase_object_rebuild=1
+        fi
+
+        if [ "$cbase_object_rebuild" -ne 0 ]; then
+            trace_on
+            case "$cbase_object_compiler_style" in
+            gcc)
+                $cbase_object_cc $cbase_object_flags \
+                    -c "$cbase_object_wrapper" -o "$cbase_object_output"
+                ;;
+            msvc)
+                $cbase_object_cc $cbase_object_flags \
+                    /c "$cbase_object_wrapper" /Fo"$cbase_object_output"
+                ;;
+            *)
+                error "Unknown compiler style %s.\n" \
+                    "$cbase_object_compiler_style"
+                exit 1
+                ;;
+            esac
+            trace_off
+            cbase_object_archive_changed=1
+        fi
+
+        cbase_object_objects="$cbase_object_objects $cbase_object_output"
+    done
+
+    cbase_object_state_wrapper="$cbase_object_wrapper_dir/cbase_state.c"
+    cbase_object_state="$cbase_object_dir/cbase_state.o"
+    cbase_object_state_wrapper_text='#define CBASE_OBJECT 1
+#include "cbase/cbase.h"'
+    if [ ! -f "$cbase_object_state_wrapper" ] \
+            || ! printf '%s\n' "$cbase_object_state_wrapper_text" \
+                | cmp -s - "$cbase_object_state_wrapper"; then
+        printf '%s\n' "$cbase_object_state_wrapper_text" \
+            > "$cbase_object_state_wrapper"
+    fi
+
+    cbase_object_rebuild=$cbase_object_rebuild_all
+    if [ ! -f "$cbase_object_state" ] \
+            || [ "$cbase_object_state_wrapper" -nt "$cbase_object_state" ] \
+            || find cbase -type f -name '*.h' \
+                -newer "$cbase_object_state" -print | grep -q .; then
+        cbase_object_rebuild=1
+    fi
+
+    if [ "$cbase_object_rebuild" -ne 0 ]; then
+        trace_on
+        case "$cbase_object_compiler_style" in
+        gcc)
+            $cbase_object_cc $cbase_object_flags \
+                -c "$cbase_object_state_wrapper" -o "$cbase_object_state"
+            ;;
+        msvc)
+            $cbase_object_cc $cbase_object_flags \
+                /c "$cbase_object_state_wrapper" /Fo"$cbase_object_state"
+            ;;
+        esac
+        trace_off
+        cbase_object_archive_changed=1
+    fi
+    cbase_object_objects="$cbase_object_objects $cbase_object_state"
+
+    if [ "$cbase_object_archive_changed" -ne 0 ] \
+            || [ ! -f "$cbase_object_library" ]; then
+        rm -f "$cbase_object_library"
+        trace_on
+        # shellcheck disable=SC2086
+        $cbase_object_ar rcs "$cbase_object_library" $cbase_object_objects
+        trace_off
+    fi
+
+    cbase_object_ryu_rebuild=$cbase_object_rebuild_all
+    if [ ! -f "$cbase_object_ryu" ] \
+            || [ cbase/ryu.c -nt "$cbase_object_ryu" ] \
+            || [ cbase/ryu.h -nt "$cbase_object_ryu" ] \
+            || find cbase/ryu -type f \( -name '*.c' -o -name '*.h' \) \
+                -newer "$cbase_object_ryu" -print | grep -q .; then
+        cbase_object_ryu_rebuild=1
+    fi
+
+    if [ "$cbase_object_ryu_rebuild" -ne 0 ]; then
+        trace_on
+        case "$cbase_object_compiler_style" in
+        gcc)
+            $cbase_object_cc $cbase_object_flags \
+                -DRYU_OBJECT=1 -c cbase/ryu.c -o "$cbase_object_ryu"
+            ;;
+        msvc)
+            $cbase_object_cc $cbase_object_flags \
+                /DRYU_OBJECT=1 /c cbase/ryu.c /Fo"$cbase_object_ryu"
+            ;;
+        esac
+        trace_off
+    fi
+
+    COMMON_CBASE_OBJECTS="$cbase_object_library $cbase_object_ryu"
+    return 0
+}
+
+common_build_cbase_objects () {
+    case "${mode:-}" in
+    debug|debug-fast|test|valgrind)
+        ;;
+    *)
+        return 0
+        ;;
+    esac
+
+    cbase_object_dir=${CBASE_OBJECT_DIR:-bin/obj/$mode/cbase}
+    cbase_object_flags="$CPPFLAGS $CFLAGS"
+    cbase_object_compiler_style=gcc
+
+    if [ "$mode" = test ]; then
+        cbase_object_flags="$cbase_object_flags -DTESTING=1"
+    fi
+
+    CPPFLAGS="$CPPFLAGS -DCBASE_SEPARATE_OBJECTS=1"
+    CPPFLAGS="$CPPFLAGS -DRYU_SEPARATE_OBJECTS=1"
+    cbase_object_flags="$cbase_object_flags -DCBASE_SEPARATE_OBJECTS=1"
+    cbase_object_flags="$cbase_object_flags -DRYU_SEPARATE_OBJECTS=1"
+
+    case "$CC" in
+    clang-cl|*/clang-cl)
+        cbase_object_compiler_style=msvc
+        if [ -z "${CLANG_CL_TARGET:-}" ]; then
+            case "${OS:-$(uname -a)}" in
+            *Linux*|*Darwin*|*BSD*)
+                CLANG_CL_TARGET=$(cc -dumpmachine 2>/dev/null || true)
+                ;;
+            esac
+        fi
+        if [ -n "${CLANG_CL_TARGET:-}" ]; then
+            cbase_object_flags="$cbase_object_flags --target=$CLANG_CL_TARGET"
+        fi
+        cbase_object_flags=$(common_gcc_flags_to_msvc \
+            clang-cl $cbase_object_flags)
+        cbase_object_flags=$(common_msvc_add_utf8_cflags $cbase_object_flags)
+        cbase_object_flags="$cbase_object_flags /nologo"
+        ;;
+    cl|*/cl|cl.exe|*/cl.exe)
+        cbase_object_compiler_style=msvc
+        cbase_object_flags=$(common_gcc_flags_to_msvc cl $cbase_object_flags)
+        cbase_object_flags=$(common_msvc_add_utf8_cflags $cbase_object_flags)
+        cbase_object_flags="$cbase_object_flags /nologo"
+        ;;
+    esac
+
+    common_build_cbase_objects_compile \
+        "$CC" "$cbase_object_flags" "$cbase_object_dir" \
+        "$cbase_object_compiler_style"
+    LDFLAGS="$COMMON_CBASE_OBJECTS $LDFLAGS"
     return 0
 }
 

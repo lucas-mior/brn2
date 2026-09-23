@@ -11,7 +11,6 @@
 #endif
 
 #include "cbase.h"
-#include "ryu.h"
 
 #if !defined(EOVERFLOW)
 #define EOVERFLOW ERANGE

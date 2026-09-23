@@ -22,10 +22,23 @@
 #include "primitives.h"
 #include "base_macros.h"
 
+#if defined(CBASE_SEPARATE_OBJECTS)
+extern char *program;
+extern int32 program_len;
+extern bool timezone_initialized;
+extern time_t timezone_offset;
+#if defined(CBASE_OBJECT)
+char *program = __FILE__;
+int32 program_len;
+bool timezone_initialized = false;
+time_t timezone_offset = 0;
+#endif
+#else
 static char UNUSED *program = __FILE__;
 static int32 UNUSED program_len;
 static bool UNUSED timezone_initialized = false;
 static time_t UNUSED timezone_offset = 0;
+#endif
 
 #define error(...)  error_impl(__FILE__, __LINE__, FUNC__, __VA_ARGS__)
 #define error2(...) fprintf(stderr, __VA_ARGS__)
@@ -80,6 +93,7 @@ optional_strlen32(char *string) {
 #include "allocator.h"
 #include "memory.h"
 #include "arena.h"
+#include "ryu.h"
 
 #include "assertions.h"
 #include "generic.h"
@@ -863,9 +877,12 @@ void throw_away_function();
 
 #include "meta.h"
 
+#define CBASE_DECLARATIONS_COMPLETE 1
 #endif /* CBASE_H */
 
-#if defined(CBASE_IMPLEMENT) && !defined(CBASE_IMPLEMENTED)
+#if defined(CBASE_IMPLEMENT) && defined(CBASE_DECLARATIONS_COMPLETE) \
+        && !defined(CBASE_IMPLEMENTED) \
+        && (!defined(CBASE_SEPARATE_OBJECTS) || defined(CBASE_OBJECT))
 #define CBASE_IMPLEMENTED 1
 
 #include "arena.c"
@@ -880,6 +897,9 @@ void throw_away_function();
 #include "string.c"
 #include "time.c"
 #include "fs.c"
+#if !defined(RYU_SEPARATE_OBJECTS)
+#include "ryu.c"
+#endif
 #if OS_WINDOWS
 #include "windows.c"
 #endif
@@ -888,25 +908,6 @@ void throw_away_function();
 
 #include "some_math.c"
 #include "format.c"
-
-#define ENUM_NAME CommandFlag
-#define ENUM_BITFLAGS 1
-#define ENUM_PREFIX_ COMMAND_
-#define ENUM_UNDERLYING_TYPE uint32
-#define ENUM_FIELDS                   \
-    XX(COMMAND_CAPTURE_STDOUT)        \
-    XX(COMMAND_CAPTURE_STDERR)        \
-    XX(COMMAND_MERGE_STDERR)          \
-    XX(COMMAND_ASYNC)                 \
-    XX(COMMAND_DETACHED)              \
-    XX(COMMAND_NEW_SESSION)           \
-    XX(COMMAND_NEW_PROCESS_GROUP)     \
-    XX(COMMAND_STDIN_TTY)             \
-    XX(COMMAND_CLOSE_STDIN)
-#define XENUMS_FUNCTIONS_ONLY 1
-#define XENUMS_NO_TESTS 1
-#include "xenums.c"
-#undef XENUMS_NO_TESTS
 
 #include "command.c"
 #include "cbase.h"

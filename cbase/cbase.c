@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
-#if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
+#if defined(CBASE_OBJECT)
+#define TESTING_cbase 0
+#elif defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_cbase 1
 #elif !defined(TESTING_cbase)
 #define TESTING_cbase 0

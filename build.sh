@@ -127,6 +127,9 @@ uninstall|install|test_all)
     common_build_unknown_mode
     ;;
 esac
+
+common_build_cbase_objects
+
 if [ "$is_cl" -eq 1 ]; then
     case "$exe" in
     *.exe)
