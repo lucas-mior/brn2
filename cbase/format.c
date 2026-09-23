@@ -5351,12 +5351,9 @@ test_format_printf_long_double_outputs(void) {
     test_format_bytes_capacity("1.", 2, "%#.0Lf", (ldouble)1.25);
     test_format_bytes_capacity("  1.25", 6, "%6.2Lf", (ldouble)1.25);
     test_format_bytes_capacity("1.25  ", 6, "%-6.2Lf", (ldouble)1.25);
-    test_format_bytes_capacity("0000001.25", 10, "%010.2Lf",
-                               (ldouble)1.25);
-    test_format_bytes_capacity("+000001.25", 10, "%+010.2Lf",
-                               (ldouble)1.25);
-    test_format_bytes_capacity("-000001.25", 10, "%010.2Lf",
-                               (ldouble)-1.25);
+    test_format_bytes_capacity("0000001.25", 10, "%010.2Lf", (ldouble)1.25);
+    test_format_bytes_capacity("+000001.25", 10, "%+010.2Lf", (ldouble)1.25);
+    test_format_bytes_capacity("-000001.25", 10, "%010.2Lf", (ldouble)-1.25);
     test_format_bytes_capacity("-0.000", 6, "%.3Lf", (ldouble)-0.0L);
     test_format_bytes_capacity("0.125", 5, "%.3Lf", (ldouble)0.125L);
     test_format_bytes_capacity("2", 1, "%.0Lf", (ldouble)1.5L);
@@ -5367,12 +5364,9 @@ test_format_printf_long_double_outputs(void) {
     test_format_bytes_capacity("1e+00", 5, "%.0Le", (ldouble)1.25);
     test_format_bytes_capacity("1.e+00", 6, "%#.0Le", (ldouble)1.25);
     test_format_bytes_capacity("1.25E+00", 8, "%.2LE", (ldouble)1.25);
-    test_format_bytes_capacity("+001.25e+00", 11, "%+011.2Le",
-                               (ldouble)1.25);
-    test_format_bytes_capacity("1.250e-03", 9, "%.3Le",
-                               (ldouble)0.00125L);
-    test_format_bytes_capacity("1.00e+03", 8, "%.2Le",
-                               (ldouble)999.9L);
+    test_format_bytes_capacity("+001.25e+00", 11, "%+011.2Le", (ldouble)1.25);
+    test_format_bytes_capacity("1.250e-03", 9, "%.3Le", (ldouble)0.00125L);
+    test_format_bytes_capacity("1.00e+03", 8, "%.2Le", (ldouble)999.9L);
 
     test_format_bytes_capacity("inf", 3, "%Lf", (ldouble)INFINITY);
     test_format_bytes_capacity("-inf", 4, "%Lf", (ldouble)-INFINITY);
@@ -5387,18 +5381,14 @@ test_format_printf_long_double_outputs(void) {
 
     test_format_bytes_capacity("1", 1, "%Lg", (ldouble)1.0);
     test_format_bytes_capacity("1.25", 4, "%Lg", (ldouble)1.25);
-    test_format_bytes_capacity("1.23457e+06", 11, "%Lg",
-                               (ldouble)1234567.0L);
+    test_format_bytes_capacity("1.23457e+06", 11, "%Lg", (ldouble)1234567.0L);
     test_format_bytes_capacity("0.0001", 6, "%Lg", (ldouble)0.0001L);
     test_format_bytes_capacity("1e-05", 5, "%Lg", (ldouble)0.00001L);
     test_format_bytes_capacity("1.", 2, "%#.0Lg", (ldouble)1.25L);
     test_format_bytes_capacity("1.2500", 6, "%#.5Lg", (ldouble)1.25L);
-    test_format_bytes_capacity("      1.25", 10, "%10.4Lg",
-                               (ldouble)1.25L);
-    test_format_bytes_capacity("0000001.25", 10, "%010.4Lg",
-                               (ldouble)1.25L);
-    test_format_bytes_capacity("1.250E+00", 9, "%.3LE",
-                               (ldouble)1.25L);
+    test_format_bytes_capacity("      1.25", 10, "%10.4Lg", (ldouble)1.25L);
+    test_format_bytes_capacity("0000001.25", 10, "%010.4Lg", (ldouble)1.25L);
+    test_format_bytes_capacity("1.250E+00", 9, "%.3LE", (ldouble)1.25L);
     test_format_bytes_capacity("1.25", 4, "%.3LG", (ldouble)1.25L);
     test_format_bytes_capacity("INF", 3, "%LG", (ldouble)INFINITY);
     test_format_bytes_capacity("inf", 3, "%Lg", (ldouble)INFINITY);
@@ -5409,10 +5399,8 @@ test_format_printf_long_double_outputs(void) {
     test_format_bytes_capacity("0x1.8p+0", 8, "%La", (ldouble)1.5L);
     test_format_bytes_capacity("0X1.8P+0", 8, "%LA", (ldouble)1.5L);
     test_format_bytes_capacity("+0x1.8p+0", 9, "%+La", (ldouble)1.5L);
-    test_format_bytes_capacity("0x0000001.8p+0", 14, "%014La",
-                               (ldouble)1.5L);
-    test_format_bytes_capacity("0x1.0000p+0", 11, "%.4La",
-                               (ldouble)1.0L);
+    test_format_bytes_capacity("0x0000001.8p+0", 14, "%014La", (ldouble)1.5L);
+    test_format_bytes_capacity("0x1.0000p+0", 11, "%.4La", (ldouble)1.0L);
     test_format_bytes_capacity("0x1.p+0", 7, "%#.0La", (ldouble)1.0L);
     test_format_bytes_capacity("0x2p+0", 6, "%.0La", (ldouble)1.5L);
     test_format_bytes_capacity("INF", 3, "%LA", (ldouble)INFINITY);
