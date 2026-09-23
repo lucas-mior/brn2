@@ -25,6 +25,8 @@
 
 enum {
     FORMAT_FLOAT_RYU_BUFFER_SIZE = 2000,
+    FORMAT_FLOAT_PRINTF_STACK_BUFFER_SIZE = 4096,
+    FORMAT_FLOAT_PRINTF_MAX_TEMP_SIZE = 1024*1024,
     FORMAT_FLOAT_MAX_PRECISION = 1024,
     FORMAT_FLOAT_MAX_FIXED_PREFIX = 312,
     FORMAT_FLOAT_MAX_EXP_PREFIX = 8,
@@ -1617,6 +1619,294 @@ format_handle_count(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     return format_store_count(spec, args, sink->total);
 }
 
+static int32
+format_load_float_width_precision(FormatSpec *spec, FormatArgs *args) {
+    int32 status;
+
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if ((status = format_load_dynamic_width_precision(spec, args)) < 0) {
+        return status;
+    }
+    if (!format_has_precision(spec)) {
+        spec->precision = 6;
+        spec->precision_kind = FORMAT_PRECISION_LITERAL;
+    }
+    if (spec->precision > INT32_MAX) {
+        return -EOVERFLOW;
+    }
+
+    return 0;
+}
+
+static bool
+format_float_is_upper(char conversion) {
+    return conversion == 'F' || conversion == 'E';
+}
+
+static bool
+format_float_is_fixed(char conversion) {
+    return conversion == 'f' || conversion == 'F';
+}
+
+static int32
+format_float_temp_capacity(FormatSpec *spec, int64 *capacity) {
+    int64 prefix;
+
+    ASSERT(spec != NULL);
+    ASSERT(capacity != NULL);
+
+    if (format_float_is_fixed(spec->conversion)) {
+        prefix = FORMAT_FLOAT_MAX_FIXED_PREFIX;
+    } else {
+        prefix = FORMAT_FLOAT_MAX_EXP_PREFIX;
+    }
+
+    if (spec->precision > INT64_MAX - prefix - 8) {
+        return -EOVERFLOW;
+    }
+
+    *capacity = prefix + spec->precision + 8;
+    if (*capacity > FORMAT_FLOAT_PRINTF_MAX_TEMP_SIZE) {
+        return -EOVERFLOW;
+    }
+
+    return 0;
+}
+
+static char
+format_float_sign(double value, FormatSpec *spec) {
+    ASSERT(spec != NULL);
+
+    if (signbit(value)) {
+        return '-';
+    }
+    if ((spec->flags & FORMAT_FLAG_SIGN) != 0) {
+        return '+';
+    }
+    if ((spec->flags & FORMAT_FLAG_SPACE) != 0) {
+        return ' ';
+    }
+
+    return '\0';
+}
+
+static int32
+format_float_special_body(double value, FormatSpec *spec,
+                          char *body, int32 *body_len) {
+    ASSERT(spec != NULL);
+    ASSERT(body != NULL);
+    ASSERT(body_len != NULL);
+
+    if (isnan(value)) {
+        if (format_float_is_upper(spec->conversion)) {
+            memcpy(body, "NAN", 3);
+        } else {
+            memcpy(body, "nan", 3);
+        }
+        *body_len = 3;
+        return 0;
+    }
+    if (isinf(value)) {
+        if (format_float_is_upper(spec->conversion)) {
+            memcpy(body, "INF", 3);
+        } else {
+            memcpy(body, "inf", 3);
+        }
+        *body_len = 3;
+        return 0;
+    }
+
+    return -EINVAL;
+}
+
+static void
+format_float_uppercase_body(char *body, int32 body_len) {
+    ASSERT(body != NULL);
+    ASSERT_NON_NEGATIVE(body_len);
+
+    for (int32 i = 0; i < body_len; i += 1) {
+        if (body[i] == 'e') {
+            body[i] = 'E';
+        }
+    }
+    return;
+}
+
+static int32
+format_float_force_decimal_point(char *body, int32 body_len,
+                                 int32 capacity) {
+    int32 exponent_index;
+    bool found_point;
+
+    ASSERT(body != NULL);
+    ASSERT_NON_NEGATIVE(body_len);
+    ASSERT(body_len < capacity);
+
+    exponent_index = body_len;
+    found_point = false;
+    for (int32 i = 0; i < body_len; i += 1) {
+        if (body[i] == '.') {
+            found_point = true;
+        } else if (body[i] == 'e' || body[i] == 'E') {
+            exponent_index = i;
+            break;
+        }
+    }
+    if (found_point) {
+        return body_len;
+    }
+    if (body_len + 1 >= capacity) {
+        return -EOVERFLOW;
+    }
+
+    memmove(body + exponent_index + 1, body + exponent_index,
+            (size_t)(body_len - exponent_index));
+    body[exponent_index] = '.';
+    return body_len + 1;
+}
+
+static int32
+format_float_generate_body(FormatSpec *spec, double value,
+                           char *buffer, int32 capacity) {
+    int32 body_len;
+
+    ASSERT(spec != NULL);
+    ASSERT(buffer != NULL);
+    ASSERT_POSITIVE(capacity);
+
+    if (isnan(value) || isinf(value)) {
+        int32 status;
+
+        status = format_float_special_body(value, spec, buffer, &body_len);
+        if (status < 0) {
+            return status;
+        }
+        return body_len;
+    }
+
+    if (format_float_is_fixed(spec->conversion)) {
+        body_len = d2fixed_buffered_n(value, (uint32_t)spec->precision,
+                                      buffer);
+    } else {
+        body_len = d2exp_buffered_n(value, (uint32_t)spec->precision,
+                                    buffer);
+    }
+    if (body_len <= 0 || body_len >= capacity) {
+        return -EOVERFLOW;
+    }
+
+    if (buffer[0] == '-') {
+        memmove(buffer, buffer + 1, (size_t)(body_len - 1));
+        body_len -= 1;
+    }
+    if ((spec->flags & FORMAT_FLAG_ALTERNATE) != 0) {
+        body_len = format_float_force_decimal_point(buffer, body_len,
+                                                    capacity);
+        if (body_len < 0) {
+            return body_len;
+        }
+    }
+    if (format_float_is_upper(spec->conversion)) {
+        format_float_uppercase_body(buffer, body_len);
+    }
+
+    return body_len;
+}
+
+static void
+format_write_float(FormatSink *sink, FormatSpec *spec,
+                   double value, char *body, int32 body_len) {
+    char sign;
+    int64 zero_pad;
+    int64 inner_len;
+    int64 spaces;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(body != NULL);
+    ASSERT_NON_NEGATIVE(body_len);
+
+    sign = format_float_sign(value, spec);
+    inner_len = body_len;
+    if (sign != '\0') {
+        inner_len += 1;
+    }
+
+    zero_pad = 0;
+    if ((spec->flags & FORMAT_FLAG_ZERO) != 0
+        && (spec->flags & FORMAT_FLAG_LEFT) == 0) {
+        zero_pad = format_pad_len(spec->width, inner_len);
+    }
+
+    spaces = format_pad_len(spec->width, inner_len + zero_pad);
+    if ((spec->flags & FORMAT_FLAG_LEFT) == 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    if (sign != '\0') {
+        format_sink_write_byte(sink, sign);
+    }
+    format_sink_write_repeat(sink, '0', zero_pad);
+    format_sink_write(sink, body, body_len);
+    if ((spec->flags & FORMAT_FLAG_LEFT) != 0) {
+        format_sink_write_repeat(sink, ' ', spaces);
+    }
+    return;
+}
+
+static int32
+format_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
+    char stack_buffer[FORMAT_FLOAT_PRINTF_STACK_BUFFER_SIZE];
+    char *body;
+    double value;
+    int64 capacity64;
+    int32 body_len;
+    int32 capacity;
+    int32 status;
+
+    ASSERT(sink != NULL);
+    ASSERT(spec != NULL);
+    ASSERT(args != NULL);
+
+    if (spec->length == FORMAT_LENGTH_BIG_L) {
+        return -ENOSYS;
+    }
+    if (!format_float_is_fixed(spec->conversion)
+        && spec->conversion != 'e'
+        && spec->conversion != 'E') {
+        return -ENOSYS;
+    }
+
+    if ((status = format_load_float_width_precision(spec, args)) < 0) {
+        return status;
+    }
+    if ((status = format_float_temp_capacity(spec, &capacity64)) < 0) {
+        return status;
+    }
+    ASSERT(capacity64 <= INT32_MAX);
+    capacity = (int32)capacity64;
+
+    if (capacity <= SIZEOF(stack_buffer)) {
+        body = stack_buffer;
+    } else {
+        body = malloc2(capacity);
+    }
+
+    value = va_arg(args->args, double);
+    body_len = format_float_generate_body(spec, value, body, capacity);
+    if (body_len >= 0) {
+        format_write_float(sink, spec, value, body, body_len);
+        status = sink->status;
+    } else {
+        status = body_len;
+    }
+
+    if (body != stack_buffer) {
+        free2(body, capacity);
+    }
+    return status;
+}
 
 static int32 UNUSED
 format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
@@ -1677,6 +1967,12 @@ format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
             }
         } else if (spec.conversion == 'n') {
             status = format_handle_count(&sink, &spec, &format_args);
+            if (status < 0) {
+                result = status;
+                goto done;
+            }
+        } else if (format_is_float_conversion(spec.conversion)) {
+            status = format_handle_float(&sink, &spec, &format_args);
             if (status < 0) {
                 result = status;
                 goto done;
@@ -2376,6 +2672,50 @@ test_format_pointer_count_outputs(void) {
 }
 
 static void
+test_format_printf_float_outputs(void) {
+    char buffer[64];
+
+    test_format_bytes_capacity("1.250000", 8, "%f", 1.25);
+    test_format_bytes_capacity("1.25", 4, "%.2f", 1.25);
+    test_format_bytes_capacity("1", 1, "%.0f", 1.25);
+    test_format_bytes_capacity("1.", 2, "%#.0f", 1.25);
+    test_format_bytes_capacity("  1.25", 6, "%6.2f", 1.25);
+    test_format_bytes_capacity("1.25  ", 6, "%-6.2f", 1.25);
+    test_format_bytes_capacity("0000001.25", 10, "%010.2f", 1.25);
+    test_format_bytes_capacity("+000001.25", 10, "%+010.2f", 1.25);
+    test_format_bytes_capacity("-000001.25", 10, "%010.2f", -1.25);
+    test_format_bytes_capacity(" 1.25", 5, "% .2f", 1.25);
+    test_format_bytes_capacity("-0.000", 6, "%.3f", -0.0);
+
+    test_format_bytes_capacity("1.250000e+00", 12, "%e", 1.25);
+    test_format_bytes_capacity("1.25e+00", 8, "%.2e", 1.25);
+    test_format_bytes_capacity("1e+00", 5, "%.0e", 1.25);
+    test_format_bytes_capacity("1.e+00", 6, "%#.0e", 1.25);
+    test_format_bytes_capacity("1.25E+00", 8, "%.2E", 1.25);
+    test_format_bytes_capacity("+001.25e+00", 11, "%+011.2e", 1.25);
+
+    test_format_bytes_capacity("inf", 3, "%f", INFINITY);
+    test_format_bytes_capacity("-inf", 4, "%f", -INFINITY);
+    test_format_bytes_capacity("+inf", 4, "%+f", INFINITY);
+    test_format_bytes_capacity(" inf", 4, "% f", INFINITY);
+    test_format_bytes_capacity("00000inf", 8, "%08f", INFINITY);
+    test_format_bytes_capacity("INF", 3, "%F", INFINITY);
+    test_format_bytes_capacity("INF", 3, "%E", INFINITY);
+    test_format_bytes_capacity("nan", 3, "%f", NAN);
+    test_format_bytes_capacity("NAN", 3, "%F", NAN);
+
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%.*f",
+                                      -1, 1.25), 8);
+    ASSERT_EQUAL(buffer, "1.250000");
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%Lf",
+                                      (ldouble)1.0), -ENOSYS);
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%.1048576f",
+                                      1.0), -EOVERFLOW);
+
+    return;
+}
+
+static void
 test_format_sink_validation(void) {
     char buffer[8];
     FormatSink sink;
@@ -2388,7 +2728,7 @@ test_format_sink_validation(void) {
                                       INT32_MIN, 0), -EOVERFLOW);
 
     memset(buffer, 0x7f, SIZEOF(buffer));
-    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%f", 1.0),
+    ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%g", 1.0),
                  -ENOSYS);
     ASSERT_EQUAL(buffer[0], '\0');
     ASSERT_EQUAL(buffer[1], (char)0x7f);
@@ -2522,6 +2862,7 @@ main(void) {
     test_format_char_string_outputs();
     test_format_wide_char_string_outputs();
     test_format_pointer_count_outputs();
+    test_format_printf_float_outputs();
     test_format_sink_validation();
 
     test_format_float64_shortest(0.0, "0E0");
