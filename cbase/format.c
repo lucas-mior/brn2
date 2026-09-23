@@ -1233,7 +1233,8 @@ format_wide_string_next_rune(wchar_t *string, int64 index, uint32 *rune,
     ASSERT(rune != NULL);
     ASSERT(consumed != NULL);
 
-    if (SIZEOF(wchar_t) == 2) {
+#if WCHAR_MAX <= 0xffff
+    {
         uint32 first;
 
         first = (uint16)string[index];
@@ -1255,8 +1256,8 @@ format_wide_string_next_rune(wchar_t *string, int64 index, uint32 *rune,
         *consumed = 1;
         return 0;
     }
-
-    if (SIZEOF(wchar_t) == 4) {
+#elif WCHAR_MAX <= 0xffffffffu
+    {
         int32 status;
 
         if ((status = format_wchar32_to_rune(string[index], rune)) < 0) {
@@ -1265,8 +1266,9 @@ format_wide_string_next_rune(wchar_t *string, int64 index, uint32 *rune,
         *consumed = 1;
         return 0;
     }
-
+#else
     return -EILSEQ;
+#endif
 }
 
 static int32
@@ -2342,23 +2344,22 @@ format_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
     parts->negative = false;
     parts->zero = false;
 
-    if (FLT_RADIX != 2) {
-        return -ENOSYS;
-    }
-    if (LDBL_MANT_DIG == DBL_MANT_DIG && LDBL_MAX_EXP == DBL_MAX_EXP) {
+#if FLT_RADIX != 2
+    return -ENOSYS;
+#elif LDBL_MANT_DIG == DBL_MANT_DIG && LDBL_MAX_EXP == DBL_MAX_EXP
+    {
         if (SIZEOF(ldouble) != SIZEOF(double)) {
             return -ENOSYS;
         }
         return format_decode_binary64_long_double(value, parts);
     }
-    if (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384) {
-        return format_decode_x87_long_double(value, parts);
-    }
-    if (LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384) {
-        return format_decode_binary128_long_double(value, parts);
-    }
-
+#elif LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384
+    return format_decode_x87_long_double(value, parts);
+#elif LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384
+    return format_decode_binary128_long_double(value, parts);
+#else
     return -ENOSYS;
+#endif
 }
 
 static bool
@@ -4545,22 +4546,23 @@ test_format_parser_valid_specs(void) {
     spec = format_test_parse_one("%%");
     ASSERT_EQUAL(spec.conversion, '%');
     ASSERT_EQUAL(spec.flags, 0);
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_NONE);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_NONE);
 
     spec = format_test_parse_one("%08.3d");
     ASSERT_EQUAL(spec.conversion, 'd');
     ASSERT_EQUAL(spec.flags, FORMAT_FLAG_ZERO);
-    ASSERT_EQUAL(spec.width_kind, FORMAT_WIDTH_LITERAL);
+    ASSERT_EQUAL((int32)spec.width_kind, (int32)FORMAT_WIDTH_LITERAL);
     ASSERT_EQUAL(spec.width, 8);
-    ASSERT_EQUAL(spec.precision_kind, FORMAT_PRECISION_LITERAL);
+    ASSERT_EQUAL((int32)spec.precision_kind,
+                 (int32)FORMAT_PRECISION_LITERAL);
     ASSERT_EQUAL(spec.precision, 3);
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_NONE);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_NONE);
 
     spec = format_test_parse_one("%*.*f");
     ASSERT_EQUAL(spec.conversion, 'f');
-    ASSERT_EQUAL(spec.width_kind, FORMAT_WIDTH_ARG);
-    ASSERT_EQUAL(spec.precision_kind, FORMAT_PRECISION_ARG);
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_NONE);
+    ASSERT_EQUAL((int32)spec.width_kind, (int32)FORMAT_WIDTH_ARG);
+    ASSERT_EQUAL((int32)spec.precision_kind, (int32)FORMAT_PRECISION_ARG);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_NONE);
 
     spec = format_test_parse_one("%-+ #0w32x");
     ASSERT_EQUAL(spec.conversion, 'x');
@@ -4569,37 +4571,38 @@ test_format_parser_valid_specs(void) {
                              |FORMAT_FLAG_SPACE
                              |FORMAT_FLAG_ALTERNATE
                              |FORMAT_FLAG_ZERO);
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_W32);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_W32);
 
     spec = format_test_parse_one("%hhd");
     ASSERT_EQUAL(spec.conversion, 'd');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_HH);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_HH);
 
     spec = format_test_parse_one("%llu");
     ASSERT_EQUAL(spec.conversion, 'u');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_LL);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_LL);
 
     spec = format_test_parse_one("%w64B");
     ASSERT_EQUAL(spec.conversion, 'B');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_W64);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_W64);
 
     spec = format_test_parse_one("%lc");
     ASSERT_EQUAL(spec.conversion, 'c');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_L);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_L);
 
     spec = format_test_parse_one("%.5ls");
     ASSERT_EQUAL(spec.conversion, 's');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_L);
-    ASSERT_EQUAL(spec.precision_kind, FORMAT_PRECISION_LITERAL);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_L);
+    ASSERT_EQUAL((int32)spec.precision_kind,
+                 (int32)FORMAT_PRECISION_LITERAL);
     ASSERT_EQUAL(spec.precision, 5);
 
     spec = format_test_parse_one("%La");
     ASSERT_EQUAL(spec.conversion, 'a');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_BIG_L);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_BIG_L);
 
     spec = format_test_parse_one("%w16n");
     ASSERT_EQUAL(spec.conversion, 'n');
-    ASSERT_EQUAL(spec.length, FORMAT_LENGTH_W16);
+    ASSERT_EQUAL((int32)spec.length, (int32)FORMAT_LENGTH_W16);
 
     ASSERT_EQUAL(format_test_validate("a %% b %08d %*.*s"), 0);
     return;
@@ -4908,12 +4911,12 @@ test_format_wide_char_string_outputs(void) {
     {
         wchar_t wide_emoji[3] = {0};
 
-        if (SIZEOF(wchar_t) == 2) {
-            wide_emoji[0] = (wchar_t)0xD83D;
-            wide_emoji[1] = (wchar_t)0xDE00;
-        } else {
-            wide_emoji[0] = (wchar_t)0x1F600;
-        }
+#if WCHAR_MAX <= 0xffff
+        wide_emoji[0] = (wchar_t)0xD83D;
+        wide_emoji[1] = (wchar_t)0xDE00;
+#else
+        wide_emoji[0] = (wchar_t)0x1F600;
+#endif
         test_format_bytes_capacity(emoji, 4, "%ls", wide_emoji);
     }
 
@@ -5071,13 +5074,13 @@ test_format_printf_float_outputs(void) {
     test_format_bytes_capacity("1.25E+00", 8, "%.2E", 1.25);
     test_format_bytes_capacity("+001.25e+00", 11, "%+011.2e", 1.25);
 
-    test_format_bytes_capacity("inf", 3, "%f", INFINITY);
-    test_format_bytes_capacity("-inf", 4, "%f", -INFINITY);
-    test_format_bytes_capacity("+inf", 4, "%+f", INFINITY);
-    test_format_bytes_capacity(" inf", 4, "% f", INFINITY);
-    test_format_bytes_capacity("00000inf", 8, "%08f", INFINITY);
-    test_format_bytes_capacity("INF", 3, "%F", INFINITY);
-    test_format_bytes_capacity("INF", 3, "%E", INFINITY);
+    test_format_bytes_capacity("inf", 3, "%f", HUGE_VAL);
+    test_format_bytes_capacity("-inf", 4, "%f", -HUGE_VAL);
+    test_format_bytes_capacity("+inf", 4, "%+f", HUGE_VAL);
+    test_format_bytes_capacity(" inf", 4, "% f", HUGE_VAL);
+    test_format_bytes_capacity("00000inf", 8, "%08f", HUGE_VAL);
+    test_format_bytes_capacity("INF", 3, "%F", HUGE_VAL);
+    test_format_bytes_capacity("INF", 3, "%E", HUGE_VAL);
     test_format_bytes_capacity("nan", 3, "%f", pos_nan);
     test_format_bytes_capacity("-nan", 4, "%f", neg_nan);
     test_format_bytes_capacity("NAN", 3, "%F", pos_nan);
@@ -5118,7 +5121,7 @@ test_format_printf_general_outputs(void) {
     test_format_bytes_capacity("1.25      ", 10, "%-10.4g", 1.25);
     test_format_bytes_capacity("1.23457E+06", 11, "%G", 1234567.0);
     test_format_bytes_capacity("9.99990E-05", 11, "%#.6G", 0.000099999);
-    test_format_bytes_capacity("INF", 3, "%G", INFINITY);
+    test_format_bytes_capacity("INF", 3, "%G", HUGE_VAL);
     test_format_bytes_capacity("NAN", 3, "%G", format_test_positive_nan());
     test_format_bytes_capacity("-NAN", 4, "%G", format_test_negative_nan());
     test_format_bytes_capacity("nan", 3, "%g", format_test_positive_nan());
@@ -5182,7 +5185,7 @@ test_format_printf_hex_float_outputs(void) {
     test_format_bytes_capacity("0x1.0p-1022", 11, "%.1a",
                                largest_subnormal);
 
-    test_format_bytes_capacity("INF", 3, "%A", INFINITY);
+    test_format_bytes_capacity("INF", 3, "%A", HUGE_VAL);
     test_format_bytes_capacity("NAN", 3, "%A", format_test_positive_nan());
     test_format_bytes_capacity("-NAN", 4, "%A", format_test_negative_nan());
     test_format_bytes_capacity("nan", 3, "%a", format_test_positive_nan());
@@ -5253,7 +5256,7 @@ test_format_long_double_scaled(ldouble value, int32 decimal_places,
     ASSERT_EQUAL(format_decompose_long_double(value, &parts), 0);
     ASSERT_EQUAL(format_binary_float_scaled_decimal(&parts, decimal_places,
                                                     &integer, &remainder), 0);
-    ASSERT_EQUAL(remainder, expected_rem);
+    ASSERT_EQUAL((int32)remainder, (int32)expected_rem);
     len = format_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
     ASSERT_EQUAL(len, strlen32(expected));
     ASSERT_EQUAL(buffer, expected);
@@ -5271,7 +5274,8 @@ test_format_long_double_decomposition(void) {
         return;
     }
 
-    ASSERT_EQUAL(format_decompose_long_double(INFINITY, &parts), -EINVAL);
+    ASSERT_EQUAL(format_decompose_long_double((ldouble)INFINITY, &parts),
+                 -EINVAL);
     ASSERT_EQUAL(format_decompose_long_double(NAN, &parts), -EINVAL);
 
     test_format_long_double_parts(0.0L, false, 0, 0);
