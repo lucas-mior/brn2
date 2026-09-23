@@ -2847,9 +2847,34 @@ test_format_pointer_count_outputs(void) {
     return;
 }
 
+static double
+format_test_positive_nan(void) {
+    uint64 bits;
+    double value;
+
+    bits = UINT64_C(0x7ff8000000000000);
+    memcpy(&value, &bits, (size_t)SIZEOF(value));
+    return value;
+}
+
+static double
+format_test_negative_nan(void) {
+    uint64 bits;
+    double value;
+
+    bits = UINT64_C(0xfff8000000000000);
+    memcpy(&value, &bits, (size_t)SIZEOF(value));
+    return value;
+}
+
 static void
 test_format_printf_float_outputs(void) {
     char buffer[64];
+    double pos_nan;
+    double neg_nan;
+
+    pos_nan = format_test_positive_nan();
+    neg_nan = format_test_negative_nan();
 
     test_format_bytes_capacity("1.250000", 8, "%f", 1.25);
     test_format_bytes_capacity("1.25", 4, "%.2f", 1.25);
@@ -2877,8 +2902,10 @@ test_format_printf_float_outputs(void) {
     test_format_bytes_capacity("00000inf", 8, "%08f", INFINITY);
     test_format_bytes_capacity("INF", 3, "%F", INFINITY);
     test_format_bytes_capacity("INF", 3, "%E", INFINITY);
-    test_format_bytes_capacity("nan", 3, "%f", NAN);
-    test_format_bytes_capacity("NAN", 3, "%F", NAN);
+    test_format_bytes_capacity("nan", 3, "%f", pos_nan);
+    test_format_bytes_capacity("-nan", 4, "%f", neg_nan);
+    test_format_bytes_capacity("NAN", 3, "%F", pos_nan);
+    test_format_bytes_capacity("-NAN", 4, "%F", neg_nan);
 
     ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%.*f",
                                       -1, 1.25), 8);
@@ -2918,8 +2945,10 @@ test_format_printf_general_outputs(void) {
     test_format_bytes_capacity("1.23457E+06", 11, "%G", 1234567.0);
     test_format_bytes_capacity("9.99990E-05", 11, "%#.6G", 0.000099999);
     test_format_bytes_capacity("INF", 3, "%G", INFINITY);
-    test_format_bytes_capacity("NAN", 3, "%G", NAN);
-    test_format_bytes_capacity("nan", 3, "%g", NAN);
+    test_format_bytes_capacity("NAN", 3, "%G", format_test_positive_nan());
+    test_format_bytes_capacity("-NAN", 4, "%G", format_test_negative_nan());
+    test_format_bytes_capacity("nan", 3, "%g", format_test_positive_nan());
+    test_format_bytes_capacity("-nan", 4, "%g", format_test_negative_nan());
 
     ASSERT_EQUAL(format_test_snprintf(buffer, SIZEOF(buffer), "%.*g",
                                       -1, 1.25), 4);
