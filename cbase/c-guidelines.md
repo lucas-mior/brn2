@@ -992,23 +992,8 @@ static struct TestCase tests[] = {
         return mask;
     }
 
-    // better (this makes it clear how the variable works)
-    // prefer this only when there are many variables, which can confuse the
-    // reader. When there are fewer variables, use the // even better version
-    static uint32
-    function(void *params) {
-        uint32 mask;
-        double other_var;
-
-        mask = 0;
-        for (uint32 i = 0; i < N; i += 1) {
-            mask |= some_function(params, i);
-        }
-        return mask;
-    }
-
-    // even better (now the important variable is initialized near the loop,
-                    while also keeping conciseness)
+    // better (now the important variable is initialized near the loop,
+               while also keeping conciseness)
     static uint32
     function(void *params) {
         double other_var;
