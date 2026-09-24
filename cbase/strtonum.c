@@ -164,22 +164,6 @@ atoi2sat(char *str, int32 str_len) {
     return -value;
 }
 
-int32
-util_string_int32(int32 *number, char *string) {
-    char *endptr;
-    long x;
-    errno = 0;
-    x = strtol(string, &endptr, 10);
-    if ((errno != 0) || (string == endptr) || (*endptr != 0)) {
-        return -1;
-    } else if ((x > INT32_MAX) || (x < INT32_MIN)) {
-        return -1;
-    } else {
-        *number = (int32)x;
-        return 0;
-    }
-}
-
 bool
 util_is_integer(char *string) {
     char c;
@@ -201,7 +185,6 @@ strtonum_functions_sink(void) {
     (void)parse_integer;
     (void)atoi2;
     (void)atoi2sat;
-    (void)util_string_int32;
     (void)util_is_integer;
     return;
 }

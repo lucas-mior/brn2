@@ -198,7 +198,6 @@ int32 itoa2(char *buffer, int32 size, llong num);
 int32 parse_integer(char *str, int32 str_len, llong *result);
 llong atoi2(char *str, int32 str_len);
 llong atoi2sat(char *str, int32 str_len);
-int32 util_string_int32(int32 *number, char *string);
 bool util_is_integer(char *string);
 char *basename2(char *path, int32 *full_length, int32 *base_len);
 char *begins_with(char *string, int32 string_len, char *prefix,
