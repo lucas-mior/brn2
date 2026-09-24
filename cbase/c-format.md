@@ -305,15 +305,15 @@ if (condition1 || condition2) {
 }
 ```
 
-If the subconditions are chained together using `&&` and `||`, group them
-and add extra parenthesis and new lines as needed:
-```
+### Confusing precedence
+If the subconditions are chained together using `&&` and `||`, try to make
+intent clear by adding parenthesis:
 // bad
-if (!condition1 || confusing_precedence || (x > 0)) {
+if (!condition1 && confusing_precedence || x > 0) {
 }
 
 // good
-if (!(condition1) || confusing_precedence || (x > 0)) {
+if (!(condition1 && confusing_precedence) || (x > 0)) {
 }
 ```
 
