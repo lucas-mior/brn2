@@ -5462,7 +5462,6 @@ test_fmt_float64_scientific(double value, int32 precision, char *expected) {
 static uint32
 test_fmt_float32_bits(float value) {
     uint32 bits;
-
     memcpy64(&bits, &value, SIZEOF(bits));
     return bits;
 }
@@ -5470,7 +5469,6 @@ test_fmt_float32_bits(float value) {
 static uint64
 test_fmt_float64_bits(double value) {
     uint64 bits;
-
     memcpy64(&bits, &value, SIZEOF(bits));
     return bits;
 }
