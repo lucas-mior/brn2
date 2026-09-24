@@ -238,11 +238,18 @@ Most functions don't need to have an extra declaration, only the definition will
 suffice. Properly order the functions in a file so that extra declarations
 aren't needed. For functions that do need an extra pre declaration, put the
 declaration in a project-wide header file or in the header file associated with
-the C file itself. Avoid declaring functions defined in a C file, in another C
-file. If a C function for whatever reason needs to define a function that is
-only used for tests in itself and tests in another file, put it inside an #if
-TESTING block, to avoid unused function warnings when compiling the main
-program.
+the C file itself.
+
+Exception: a `static` function may be forward-declared in the C file where it is
+defined when reordering definitions cannot reasonably avoid the declaration,
+such as with mutual recursion or when a static callback/operations table must
+refer to the function before its definition. Keep such declarations internal to
+the C file; do not put them in a header.
+
+Avoid declaring functions defined in a C file, in another C file. If a C
+function for whatever reason needs to define a function that is only used for
+tests in itself and tests in another file, put it inside an #if TESTING block,
+to avoid unused function warnings when compiling the main program.
 - Never use `#if TESTING_module` block in `.h` files.
 - Never use more than one `#if TESTING_module` block in a C file.
 - Never use more than one `#if TESTING` block in a C file and use it only if
