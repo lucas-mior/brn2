@@ -211,7 +211,6 @@ typeof(var)  // good
       NcmDirectory directory;
       NcmPlaylist playlist;
   };
-
   typedef struct NcmMpdItem {
       enum NcmMpdItemKind kind;
       union NcmItem value;
