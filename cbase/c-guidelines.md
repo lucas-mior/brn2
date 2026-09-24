@@ -427,7 +427,23 @@ but NEVER create helper like those.
   * Also useful for strings that are part of a larger struct and are not
     expected to grow, only be set and reset as the application runs. In this
     case, allocation is ad-hoc: it can be part of arena, malloced, whatever.
-- Never create other string types: those 3 above are all ever needed.
+- `char *string` without length: Avoid it at all costs:
+  * literals can use `STRLIT("literal")` to pass themselves and their length
+    cost-free;
+  * the 3 types above already know their length;
+  * the only semi-justifiable reasons for using `char *string` without length
+    are:
+    1. Interfacing with dumb API (get length with `strnlen32`/`strlen32`
+       immediately and store it using one of the 3 types above).
+    2. Sometimes, we only want to pass a "label"/"id" around, for
+       debugging/logging purposes. This is very very very rare, but it is valid
+       to use `char *string` without length in this case. In this case, the
+       string *must* be created as a literal, be set by assignment (never
+       memcpy or friends), and never freed/copied. If the string is being
+       freed/copied around, then it is no longer a valid use of `char *string`
+       without length, and it must be converted in its inception to one of the 3
+       types above.
+- Never create other string types: those 4 above are all ever needed.
 
 ## Comparing strings:
 In general, avoid `strcmp()`, use the alternatives below instead:
