@@ -28,6 +28,7 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Space is forbidden around `*` used for multiplication.
 - Space is optional around `/` used for division (keep as is).
 - Space is optional around module operator (`%`)
+- Space is optional around bitwise xor (`^`)
 - Space is optional around bitwise or (`|`)
 - Space is mandatory around bitwise and (`&`)
 - Space is forbidden after bitwise not (`~`)
