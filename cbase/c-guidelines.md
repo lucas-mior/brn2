@@ -78,6 +78,7 @@ preconditions; assert those instead.
           error("Too large value\n");
           fatal(EXIT_FAILURE);
       }
+      // Note: MINOF uses _Generic, it does not really run the function below.
       if (value <= MINOF(function_that_returns_int32())) {
           error("Invalid value.\n");
           fatal(EXIT_FAILURE);
