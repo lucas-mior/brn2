@@ -347,8 +347,7 @@ typedef struct MyStruct {
 
 That means to also avoid calling `strlen32`:
 
-- `strlen32` shall be viewed as an interface for code that we do not control or
-  for C string literals.
+- `strlen32` shall be viewed as an interface for code that we do not control.
 - `STRLIT_LEN("literal")` is for getting the length of a literal at compile time
   (it uses `SIZEOF`). Only use it if you need to pass the length of a string
   literal, but not the string literal itself (which is very rare). It is also in
