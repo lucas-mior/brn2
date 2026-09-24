@@ -385,22 +385,22 @@ That means to also avoid calling `strlen32`:
     ```c
     // bad
     static void
-    function(int32 m) {
+    function(int32 x, int32 y) {
         int32 n;
         char buffer[256];
 
-        SNPRINTF(buffer, "%d", m);
+        SNPRINTF(buffer, "%dx%d", x, y);
         n = strlen32(buffer);
         return;
     }
 
     // good
     static void
-    function(int32 m) {
+    function(int32 x, int32 y) {
         int32 n;
         char buffer[256];
 
-        n = SNPRINTF(buffer, "%d", m);
+        SNPRINTF(buffer, "%dx%d", x, y);
         return;
     }
     ```
