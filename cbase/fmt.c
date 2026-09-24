@@ -4900,10 +4900,8 @@ test_fmt_long_double_decomposition(void) {
         return;
     }
 
-    ASSERT_EQUAL(fmt_decompose_long_double((ldouble)INFINITY, &parts),
-                 -EINVAL);
-    ASSERT_EQUAL(fmt_decompose_long_double((ldouble)NAN, &parts),
-                 -EINVAL);
+    ASSERT_EQUAL(fmt_decompose_long_double((ldouble)INFINITY, &parts), -EINVAL);
+    ASSERT_EQUAL(fmt_decompose_long_double((ldouble)NAN, &parts), -EINVAL);
 
     test_fmt_long_double_parts(0.0L, false, 0, 0);
     test_fmt_long_double_parts(-0.0L, true, 0, 0);
