@@ -5492,10 +5492,7 @@ static void
 test_fmt_float32_shortest(float value, char *expected) {
     char buffer[FMT_FLOAT_RYU_BUFFER_SIZE];
     int32 len = fmt_float32_shortest(buffer, SIZEOF(buffer), value);
-
-    ASSERT_EQUAL(len, strlen32(expected));
-    ASSERT_EQUAL(buffer, expected);
-
+    ASSERT_EQUAL(buffer, len, expected);
     return;
 }
 
@@ -5503,10 +5500,7 @@ static void
 test_fmt_float64_shortest(double value, char *expected) {
     char buffer[FMT_FLOAT_RYU_BUFFER_SIZE];
     int32 len = fmt_float64_shortest(buffer, SIZEOF(buffer), value);
-
-    ASSERT_EQUAL(len, strlen32(expected));
-    ASSERT_EQUAL(buffer, expected);
-
+    ASSERT_EQUAL(buffer, len, expected);
     return;
 }
 
