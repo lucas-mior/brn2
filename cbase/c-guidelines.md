@@ -408,8 +408,8 @@ That means to also avoid calling `strlen32`:
 Considering all that, most `string.h` functions from the C standard library are
 to be avoided. `strcpy`, `strcat`, `strstr`, and `strtok` are always the wrong
 choice once you have the habit of always knowing the length of your strings.
-Prefer `memcpy64`, `memmem64`, or custom functions that operate on string with
-known length.
+Prefer `memcpy64`, `memmem64`, or specific struct APIs that operate on strings
+with known length.
 
 Also, never create stupid string helpers like
 `<module>_string_copy`,
