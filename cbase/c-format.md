@@ -256,7 +256,8 @@ default:
 ## Parenthesis
 
 ## If expressions
-If there are subconditions that are binary operations, put parenthesis around:
+when an operand of `&&` or `||` is itself a binary expression,
+parenthesize that operand:
 ```c
 // bad
 if (x < 0 && y > 1) {
