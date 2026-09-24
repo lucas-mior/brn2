@@ -380,6 +380,7 @@ That means to also avoid calling `strlen32`:
 
         SNPRINTF(buffer, "%d", m);
         n = strlen32(buffer);
+        return;
     }
 
     // good
@@ -389,6 +390,7 @@ That means to also avoid calling `strlen32`:
         char buffer[256];
 
         n = SNPRINTF(buffer, "%d", m);
+        return;
     }
     ```
 
@@ -514,6 +516,7 @@ void my_function(char *path) {
     if (!file) {
         fatal(EXIT_FAILURE);
     }
+    return;
 }
 
 // better
@@ -526,6 +529,7 @@ void my_function(char *path) {
     if (file == NULL) {
         fatal(EXIT_FAILURE);
     }
+    return;
 }
 
 // even better
@@ -537,6 +541,7 @@ void my_function(char *path) {
     if ((file = XFOPEN(path, "r")) == NULL) {
         fatal(EXIT_FAILURE);
     }
+    return;
 }
 ```
 
@@ -549,6 +554,7 @@ void function(void) {
     if (result) {
         // do something with result
     }
+    return;
 }
 
 // good
@@ -558,6 +564,7 @@ void function(void) {
     if ((result = get_result())) {
         // do something with result
     }
+    return;
 }
 
 // also good
@@ -570,6 +577,8 @@ void function(void) {
     }
 
     // do something with result
+
+    return;
 }
 ```
 
