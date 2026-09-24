@@ -4967,48 +4967,48 @@ test_fmt_pointer_count_outputs(void) {
     ASSERT_EQUAL(buffer[2], (char)0x7f);
 
     count8 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%hhn",
-                                   &count8), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%hhn", &count8), 3);
     ASSERT_EQUAL(count8, 3);
 
     count16 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%hn",
-                                   &count16), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%hn", &count16), 3);
     ASSERT_EQUAL(count16, 3);
 
     count64 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%lln",
-                                   &count64), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%lln", &count64), 3);
     ASSERT_EQUAL(count64, 3);
 
     count8 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w8n",
-                                   &count8), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%w8n", &count8), 3);
     ASSERT_EQUAL(count8, 3);
 
     count16 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w16n",
-                                   &count16), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%w16n", &count16), 3);
     ASSERT_EQUAL(count16, 3);
 
     count32 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w32n",
-                                   &count32), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%w32n", &count32), 3);
     ASSERT_EQUAL(count32, 3);
 
     count64 = -1;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w64n",
-                                   &count64), 3);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%w64n", &count64), 3);
     ASSERT_EQUAL(count64, 3);
 
     count8 = -7;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%128d%hhn", 0,
-                                   &count8), -EOVERFLOW);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "%128d%hhn", 0, &count8), -EOVERFLOW);
     ASSERT_EQUAL(count8, -7);
 
     count16 = -7;
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%32768d%hn", 0,
-                                   &count16), -EOVERFLOW);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "%32768d%hn", 0, &count16), -EOVERFLOW);
     ASSERT_EQUAL(count16, -7);
 
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
