@@ -708,11 +708,9 @@ int32 command_stdin_buffer_set(Command *command, char *data, int64 data_len);
 void command_stdin_buffer_clear(Command *);
 void command_reset(Command *);
 void command_result_append(StrBuilder *output,
-                           StrBuilder *stdout_output,
-                           StrBuilder *stderr_output,
+                           StrBuilder *stdout_output, StrBuilder *stderr_output,
                            bool is_stderr,
-                           char *data,
-                           int32 data_len);
+                           char *data, int32 data_len);
 void command_result_file_descriptors_close(CommandResult *);
 void command_result_free(CommandResult *);
 void command_result_init(CommandResult *);
