@@ -185,10 +185,8 @@ typeof(var)  // good
 - Always typedef structs:
   ```c
   typedef struct MyStruct {
-      int32 number;
-      int32 stuff;
-      char *string;
-      int32 string_len;
+      int64 number;
+      double value;
   } MyStruct;
   ```
 - Never typedef enums and unions, except for the automatic
