@@ -2279,7 +2279,7 @@ fmt_hex_digit_char(int32 digit, bool upper) {
     char lower_digits[] = "0123456789abcdef";
     char upper_digits[] = "0123456789ABCDEF";
 
-    ASSERT_MORE_EQUAL(digit, 0);
+    ASSERT_NON_NEGATIVE(digit);
     ASSERT_LESS_EQUAL(digit, 15);
 
     if (upper) {
@@ -2306,7 +2306,7 @@ fmt_float_hex_fraction_digits(uint64 fraction, char *digits, bool upper) {
 static bool
 fmt_float_hex_has_nonzero_tail(char *digits, int32 start) {
     ASSERT(digits != NULL);
-    ASSERT_MORE_EQUAL(start, 0);
+    ASSERT_NON_NEGATIVE(start);
     ASSERT_LESS_EQUAL(start, FORMAT_DOUBLE_HEX_DIGITS);
 
     for (int32 i = start; i < FORMAT_DOUBLE_HEX_DIGITS; i += 1) {
@@ -2324,7 +2324,7 @@ fmt_float_hex_should_round(char first_digit, char *digits,
     int32 even_digit;
 
     ASSERT(digits != NULL);
-    ASSERT_MORE_EQUAL(precision, 0);
+    ASSERT_NON_NEGATIVE(precision);
     ASSERT_LESS(precision, FORMAT_DOUBLE_HEX_DIGITS);
 
     round_digit = fmt_hex_digit_value(digits[precision]);
@@ -2351,7 +2351,7 @@ fmt_float_hex_round(char *first_digit, char *digits, int32 precision,
                     bool upper) {
     ASSERT(first_digit != NULL);
     ASSERT(digits != NULL);
-    ASSERT_MORE_EQUAL(precision, 0);
+    ASSERT_NON_NEGATIVE(precision);
     ASSERT_LESS(precision, FORMAT_DOUBLE_HEX_DIGITS);
 
     if (!fmt_float_hex_should_round(*first_digit, digits, precision)) {
@@ -2706,7 +2706,7 @@ static bool
 fmt_decimal_digits_have_nonzero_tail(char *digits, int32 start,
                                      int32 len) {
     ASSERT(digits != NULL);
-    ASSERT_MORE_EQUAL(start, 0);
+    ASSERT_NON_NEGATIVE(start);
     ASSERT_LESS_EQUAL(start, len);
 
     for (int32 i = start; i < len; i += 1) {
@@ -3265,7 +3265,7 @@ static bool
 fmt_long_double_hex_has_nonzero_tail(char *digits, int32 start,
                                      int32 digit_len) {
     ASSERT(digits != NULL);
-    ASSERT_MORE_EQUAL(start, 0);
+    ASSERT_NON_NEGATIVE(start);
     ASSERT_LESS_EQUAL(start, digit_len);
 
     for (int32 i = start; i < digit_len; i += 1) {
@@ -3284,7 +3284,7 @@ fmt_long_double_hex_should_round(char first_digit, char *digits,
 
     ASSERT(digits != NULL);
     ASSERT_NON_NEGATIVE(digit_len);
-    ASSERT_MORE_EQUAL(precision, 0);
+    ASSERT_NON_NEGATIVE(precision);
     ASSERT_LESS(precision, digit_len);
 
     round_digit = fmt_hex_digit_value(digits[precision]);
@@ -3315,7 +3315,7 @@ fmt_long_double_hex_round(char *first_digit, char *digits,
     ASSERT(first_digit != NULL);
     ASSERT(digits != NULL);
     ASSERT_NON_NEGATIVE(digit_len);
-    ASSERT_MORE_EQUAL(precision, 0);
+    ASSERT_NON_NEGATIVE(precision);
     ASSERT_LESS(precision, digit_len);
 
     if (!fmt_long_double_hex_should_round(*first_digit, digits,
