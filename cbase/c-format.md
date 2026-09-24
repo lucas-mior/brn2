@@ -318,7 +318,7 @@ if ((!condition1 && confusing_precedence) || (x > 0)) {
 }
 ```
 
-If there are 3 or more `&&` and `||` chained together, add new lines:
+If there are 3 or more `&&` or `||` operators chained together, add new lines:
 ```c
 // bad
 if (this_condition && x < 0 && y > 1 && this_other_condition) {
