@@ -944,6 +944,7 @@ static struct TestCase tests[] = {
             x = a;
             // some code
         }
+        return;
     }
 
     // good
@@ -953,6 +954,7 @@ static struct TestCase tests[] = {
             int32 x = a;
             // some code
         }
+        return;
     }
     ```
 
@@ -1017,6 +1019,8 @@ static struct TestCase tests[] = {
       char *name;
 
       name = options->name;
+
+      return;
   }
 
   // good
@@ -1038,6 +1042,8 @@ static struct TestCase tests[] = {
       x = 0
 
       // do something with x
+
+      return;
   }
 
   // good: (it is pretty clear what we are doing here:
@@ -1046,7 +1052,10 @@ static struct TestCase tests[] = {
   static void
   function(void *data) {
       int x = 0
+
       // do something with x 
+
+      return;
   }
   ```
 
