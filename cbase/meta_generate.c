@@ -223,7 +223,7 @@ emit_u64_array_init(String *out, char *field, uint64 *values,
         if (i) {
             SB_APPEND(out, ", ");
         }
-        sb_printf(out, "UINT64_C(0x%" PRIx64 ")", values[i]);
+        sb_printf(out, "UINT64_C(0x%w64x)", values[i]);
     }
 
     SB_APPEND(out, " },\n");
