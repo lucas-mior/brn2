@@ -356,7 +356,7 @@ That means to also avoid calling `strlen32`:
   (it uses `SIZEOF`). Only use it if you need to pass the length of a string
   literal, but not the string literal itself (which is very rare). It is also in
   the `STRLIT` definition.
-  * Never to stupid shit like: `my_function("literal", STRLIT_LEN("literal")`
+  * Never do stupid shit like: `my_function("literal", STRLIT_LEN("literal")`
     + Instead, to `my_function(STRLIT("literal"))`
 - `STRLIT("literal")` can be used to pass the string literal and its length
   in an "don't repeat yourself" way, that also does not depend on the compiler
@@ -366,10 +366,6 @@ That means to also avoid calling `strlen32`:
 ## Important pattern:
 - Macros `ENDS_WITH` and `BEGINS_WITH`: they use a macro trick to allow passing
   only the string, or also passing the string length. See `cbase.h`.
-- Functions that in general only operate on short literals are allowed to
-  receive only the `char *pointer` without the length. In this case it is
-  ok to let the function call `strlen32` inside. But try to avoid it, prefer to
-  pass the `char *string` and `int32 string_len` via `STRLIT("literal")`.
 - `String`: use this struct and its functions to build long, dynamic
   strings. Do not use it where a single
   `SNPRINTF(stack_array, "format_%s_string", args);` would be enough.
@@ -882,10 +878,9 @@ if (enum & ENUM_BITFLAG) {
   instead of `ASSERT_NON_NEGATIVE(value); ASSERT_LESS(value, min, SIZE):`
 
 ## Modules
-
 - In general, use unity builds for programs.
   * Use `#include "file.c"` to include other files.
-  * Define all functions as `static`.
+  * Define internal functions as `static`.
 
 ## Magic numbers and magic literals
 
@@ -905,30 +900,6 @@ static struct TestCase tests[] = {
     XX(test_compile_and_run_generated_valid_system),
 };
 #undef XX
-```
-
-## Switch and fork style
-
-Always add explicit `break`, unless the case exits the program.
-
-Use the following pattern:
-
-```c
-pid_t child;  // only if the pid of the child is actually needed.
-
-switch (child = fork()) {
-case -1:
-    error("Error forking: %s.\n", strerror(errno));
-    fatal(EXIT_FAILURE);
-case 0:
-    // code for child
-    break;
-default:
-    // code for parent
-    // (only related stuff,
-    //  like handling file descriptors, or waiting for the child).
-    break;
-}
 ```
 
 ## Declaration and initialization
