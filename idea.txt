@@ -1,0 +1,32 @@
+I want to make tests reutilize a pre-compiled version of cbase/, instead of
+always recompiling the full cbase via
+#define CBASE_IMPLEMENT
+#include "cbase.h"
+
+Key aspects to consider when elaborating a solution:
+1) The goal is to reduce compilation time for tests: current timings are on
+   timings.txt
+2) If each .c file being tested reincludes implementation, then linking may
+fail because of duplicate definitions. Should we use a libcbase.a file instead
+of cbase.o?
+3) ryu is not very special: treat ryu.c and ryu.h as normal building blocks of
+cbase.
+4) One strategy worth considering is making each .c file in cbase/ be compiled
+to an object file, and then put everything in libcbase.a. ryu.o would also be
+one of those objects (although it may be built of multiple .c files under ryu/).
+5) I still want to build the main.c as a single translation unit, at least in
+non-debug mode and profiling modes like callgrind. In debug mode, it doesn't
+matter, do whichever is easy.
+6) Prefer to change .c and .h files, instead of changing build.sh. Prefer
+changes in common/common.sh instead of build.sh as well.
+7) Maybe function declarations (static/extern) will have to also change
+depending on the build configuration (incremental/single translation unit).
+Remember that, without static/extern, functions default to extern. Functions
+internal to a module must always be static. Functions that are the API of a
+module can be static if we are doing a single-translation unit build, while they
+must be extern in a header + linking usage, but I don't know if there are any
+advantages by declaring them static in the single TU case, analyse.
+
+Considering all that, discuss and elaborate a solution for this idea. List key
+implementation aspects, which files will have to change and how, in a high
+level.

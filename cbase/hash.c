@@ -15,7 +15,6 @@
 #include "libc.h"
 #include "base_macros.h"
 #include "primitives.h"
-#include "rapidhash.h"
 
 #define HASH_SLOT_USED     1
 #define HASH_SLOT_FREE     0
