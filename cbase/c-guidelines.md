@@ -325,6 +325,12 @@ If the string is not expected to be appended to:
 ```c
 // bad
 typedef struct MyStruct {
+    String string;
+    String other;
+} MyStruct;
+
+// bad
+typedef struct MyStruct {
     char *string;
     int32 string_len;
 
