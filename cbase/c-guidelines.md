@@ -21,10 +21,10 @@ baseline for its development.
 ### APIs and error handling
 User-facing APIs must do explicit input validation and error handling and return
 an error in case of invalid input, except functions whose contract explicitly
-makes invalid input a programmer error, such as bool predicates described
-below. Internal functions must do error handling, but not input validation:
-they simply assert (with the assertions of `cbase/assertions.h`) that the input
-is within the conditions that they expect.
+makes invalid input a programmer error, such as bool predicates described below.
+Internal functions must handle errors that remain possible under their contract
+and calling context, but should not validate programmer-controlled
+preconditions; assert those instead.
 
 ## Naming style
 
