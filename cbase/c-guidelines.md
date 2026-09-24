@@ -70,7 +70,8 @@ preconditions; assert those instead.
   `xenums.c` for related flags that occupy 1 bit each.
 - When casting to a smaller integer type, or when casting double to integer, or
   double to float, and we are not sure if it fits, check first using the `MAXOF`
-  and `MINOF` macros. Be conservative, disallowing values at the extreme because
+  and `MINOF` macros. `MINOF` is usually not needed because we know that the
+  number is positive. Be conservative, disallowing values at the extreme because
   they can introduce edge case bugs (use <= instead of < and >= instead of >):
   ```c
   int32 function_that_returns_int32(void *param) {
