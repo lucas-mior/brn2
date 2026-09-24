@@ -440,8 +440,6 @@ if (STREQUAL(string, string_len, other, other_len)) {
 In the pattern above, if it is not possible to put string and string_len side by
 side withtout going over 80 columns, put them in separate lines.
 
-In standalone declarations, if one is needed at all, put all in one line. Break
-long lines so the 80-character limit rule is followed.
 Functions declarations: add parameter names only when there are two or more
 parameters of that type:
 ```c
