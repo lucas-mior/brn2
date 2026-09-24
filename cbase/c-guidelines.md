@@ -422,7 +422,6 @@ but NEVER create helper like those.
   of a struct definition. They can be useful for low memory usage and good cache
   locality.
 - `char *string` + `int32 string_len`:
-  * Note:  (`int16 string_len` is also valid depending on the application)
   * For read-only strings: this is most functions API:
     They do not change strings, only read them.
   * Also useful for strings that are part of a larger struct and are not
@@ -432,10 +431,11 @@ but NEVER create helper like those.
     ```c
     typedef struct StructOfArrays {
         char **strings;
-        int16 *strings_lens;
+        int32 *strings_lens;
         Arena *arena;
     } StructOfArrays;
     ```
+  * Note:  (`int16 string_len` is also valid depending on the application)
 - `char *string` without length: Avoid it at all costs:
   * literals can use `STRLIT("literal")` to pass themselves and their length
     cost-free;
