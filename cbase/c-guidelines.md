@@ -45,8 +45,8 @@ not input validation: they simply assert (with the assertions of
 ## Types
 
 - `const` keyword:
-  * Never use it in function declarations nor definitions
-  * You can use it for static constant global data
+  * Never use const qualifiers in function signatures.
+  * You can use it for static constant global data.
   * You can use it for casts needed to interface with the C standard library or
     other stupid libraries.
 - Avoid using `size_t`, `ptrdiff_t`, and `ssize_t`.
