@@ -84,7 +84,8 @@ not input validation: they simply assert (with the assertions of
 - unsigned integers: avoid, prefer signed integers
   * use unsigned integers for bit flags and other bit-wise operated values.
   * use unsigned for converting integers to and from enums.
-  * use unsigned for intentional wrapping, like when needed while hashing
+  * use unsigned for intentional wrapping, like when needed while hashing.
+  * use unsigned for iterating enum ranges.
   * when interfacing a stupid library that receives unsigned integers where a
     signed integer is used on our side of the code, write a wrapper. The
     wrapper checks if the signed value is less than zero before converting.
