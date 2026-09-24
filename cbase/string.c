@@ -468,6 +468,7 @@ sb_itoa(StrBuilder *str, llong num) {
     sb_reserve(str, 21);
     len = itoa2(str->data + str->len, str->cap - str->len, num);
     str->len += len;
+
     return;
 }
 
