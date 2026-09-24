@@ -462,7 +462,7 @@ but NEVER create helper like those.
 ## Comparing strings:
 In general, avoid `strcmp()`, use the alternatives below instead:
 - For strings that are both null terminated and we don't know the length of
-  either one:
+  either one (which is very rare):
   * use `strequal(s1, s2)`
 - For strings that we know the length of the one (it might be null terminated
   but not necessarly), but we don't know the length of the other (the other must
