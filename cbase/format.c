@@ -3859,10 +3859,10 @@ format_float_generate_body(FormatSpec *spec, double value,
     }
 
     if (format_float_is_fixed(spec->conversion)) {
-        body_len = d2fixed_buffered_n(value, (uint32_t)spec->precision,
+        body_len = d2fixed_buffered_n(value, (uint32)spec->precision,
                                       buffer);
     } else {
-        body_len = d2exp_buffered_n(value, (uint32_t)spec->precision,
+        body_len = d2exp_buffered_n(value, (uint32)spec->precision,
                                     buffer);
     }
     if (body_len <= 0 || body_len >= capacity) {
@@ -4152,7 +4152,7 @@ format_float64_fixed(char *buffer, int64 capacity, double value,
         return status;
     }
 
-    len = (int32)d2fixed_buffered_n(value, (uint32_t)precision, temp);
+    len = (int32)d2fixed_buffered_n(value, (uint32)precision, temp);
     return format_float_copy(buffer, capacity, temp, len);
 }
 
@@ -4170,7 +4170,7 @@ format_float64_scientific(char *buffer, int64 capacity, double value,
         return status;
     }
 
-    len = (int32)d2exp_buffered_n(value, (uint32_t)precision, temp);
+    len = (int32)d2exp_buffered_n(value, (uint32)precision, temp);
     return format_float_copy(buffer, capacity, temp, len);
 }
 
@@ -4196,7 +4196,7 @@ sb_float64_fixed(StrBuilder *sb, double value, int32 precision) {
     }
 
     sb_reserve(sb, FORMAT_FLOAT_RYU_BUFFER_SIZE);
-    len = d2fixed_buffered_n(value, (uint32_t)precision, sb->data + sb->len);
+    len = d2fixed_buffered_n(value, (uint32)precision, sb->data + sb->len);
     sb->len += len;
     sb->data[sb->len] = '\0';
     return;
