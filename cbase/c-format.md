@@ -182,7 +182,7 @@ function(void) {
 
     // also good
     fprintf(file, "this is a");
-    fprintf(file, " huge huge huge huge huge huge huge huge huge huge"
+    fprintf(file, " huge huge huge huge huge huge huge huge huge huge");
     fprintf(file, " format string = %d", x);
 
     return;
