@@ -680,6 +680,10 @@ s = (StructType){0};
   optional or absent, such as lookup/find functions. Do not use `NULL` for
   general failure when the caller may need to know why the operation failed.
 
+- Functions that operate on multiple pieces of data/structs, can use out
+  parameters for "returning" their result. Then, they can either return `void`,
+  if they never fail, or int32, if they can fail.
+
 - Use `bool` only for predicates. Names like `is_*`, `has_*`, `can_*`,
   `contains_*`, and `matches_*` should return boolean answers. Failure to answer
   the question should be impossible or asserted.
@@ -697,10 +701,6 @@ s = (StructType){0};
 - Project/domain errors should also be negative values. Define positive error
   constants and return their negation, so callers can pass `-err` to an error
   string function.
-
-- Use out-parameters when the natural return value is data. For operations that
-  need to return a pointer, string, struct, or multiple outputs, return the
-  status/result code and write the data through out-parameters.
 
 - Do not return `bool` from fallible action functions just because the caller
   currently ignores the reason for failure. Return a signed status/result and let
