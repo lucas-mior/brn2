@@ -472,10 +472,6 @@ first argument fits in the first line:
                    old_cap, new_cap, SIZEOF(*array->items));
 ```
 
-```c
-static int32 function(int32 arg);
-```
-
 ## Preprocessor directives
 Don't use `#ifdef` and `#ifndef`, use `#if defined()` and `#if !defined()`
 instead. Prefer explicitly setting the macro to 0 or 1 and checking its value
