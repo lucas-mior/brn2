@@ -3028,8 +3028,9 @@ fmt_ldouble_generate_scientific_body(FormatSpec *spec, ldouble value,
                                                digits, digit_cap, &digit_len,
                                                &decimal_exponent);
     if (status == 0) {
-        status = fmt_ldouble_write_scientific_digits(
-            buffer, capacity, digits, digit_len, (int32)spec->precision,
+        status = fmt_ldouble_write_scientific_digits(buffer, capacity,
+                                                     digits, digit_len,
+                                                     (int32)spec->precision,
             decimal_exponent, (spec->flags & FMT_FLAG_ALTERNATE) != 0,
             fmt_float_is_upper(spec->conversion));
     }
@@ -3047,7 +3048,7 @@ fmt_ldouble_generate_body(FormatSpec *spec, ldouble value,
 
 static int32
 fmt_ldouble_parse_decimal_exponent(char *body, int32 body_len,
-                                       int32 *exponent) {
+                                   int32 *exponent) {
     int32 index;
     int64 value;
     int32 sign;
