@@ -2814,7 +2814,7 @@ fmt_ldouble_scientific_exponent(FormatBinaryFloat *parts,
 
     ASSERT(parts != NULL);
     ASSERT(exponent != NULL);
-    ASSERT(value >= 0.0L);
+    ASSERT_NON_NEGATIVE(value);
 
     if (parts->zero) {
         *exponent = 0;
