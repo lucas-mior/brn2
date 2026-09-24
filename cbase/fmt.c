@@ -5163,16 +5163,13 @@ test_fmt_printf_hex_float_outputs(void) {
     test_fmt_bytes_capacity("0x2p-1", 6, "%.0a", before_one);
     test_fmt_bytes_capacity("0x2.0p-1", 8, "%.1a", before_one);
 
-    test_fmt_bytes_capacity("0x1.0000000000001p+0", 20, "%a",
-                            lsb_after_one);
-    test_fmt_bytes_capacity("0x0.0000000000001p-1022", 23, "%a",
-                            true_min);
+    test_fmt_bytes_capacity("0x1.0000000000001p+0", 20, "%a", lsb_after_one);
+    test_fmt_bytes_capacity("0x0.0000000000001p-1022", 23, "%a", true_min);
     test_fmt_bytes_capacity("0x1p-1022", 9, "%a", normal_min);
     test_fmt_bytes_capacity("0x0.fffffffffffffp-1022", 23, "%a",
                             largest_subnormal);
     test_fmt_bytes_capacity("0x1p-1022", 9, "%.0a", largest_subnormal);
-    test_fmt_bytes_capacity("0x1.0p-1022", 11, "%.1a",
-                            largest_subnormal);
+    test_fmt_bytes_capacity("0x1.0p-1022", 11, "%.1a", largest_subnormal);
 
     test_fmt_bytes_capacity("INF", 3, "%A", HUGE_VAL);
     test_fmt_bytes_capacity("NAN", 3, "%A", fmt_test_positive_nan());
