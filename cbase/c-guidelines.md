@@ -507,7 +507,7 @@ Avoid initializing if you are not sure that the result is valid. Examples:
 
 ```c
 // bad
-void my_function(char *path) {
+void my_function(char *path, int32 path_len) {
     FILE *file = XFOPEN(path, "w");  // might fail and we only check it later
     int32 x = 0;
     int32 y = 0;
