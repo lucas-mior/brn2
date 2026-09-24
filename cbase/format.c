@@ -41,6 +41,15 @@ enum {
     FORMAT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS = 16383,
 };
 
+#if FLT_RADIX == 2 \
+    && ((LDBL_MANT_DIG == DBL_MANT_DIG && LDBL_MAX_EXP == DBL_MAX_EXP) \
+        || (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384) \
+        || (LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384))
+#define FORMAT_LONG_DOUBLE_SUPPORTED 1
+#else
+#define FORMAT_LONG_DOUBLE_SUPPORTED 0
+#endif
+
 _Static_assert(FORMAT_FLOAT_MAX_FIXED_PREFIX
                + FORMAT_FLOAT_MAX_PRECISION < FORMAT_FLOAT_RYU_BUFFER_SIZE,
                "format fixed temporary buffer is too small");
@@ -1371,7 +1380,7 @@ format_big_uint_ensure_word(FormatBigUInt *value, int32 index) {
     return 0;
 }
 
-static int32
+static int32 UNUSED
 format_big_uint_set_bit(FormatBigUInt *value, int32 bit_index) {
     int32 word_index;
     int32 bit_offset;
@@ -1390,7 +1399,7 @@ format_big_uint_set_bit(FormatBigUInt *value, int32 bit_index) {
     return 0;
 }
 
-static int32
+static int32 UNUSED
 format_big_uint_from_uint64(FormatBigUInt *value, uint64 source) {
     ASSERT(value != NULL);
 
@@ -1406,7 +1415,7 @@ format_big_uint_from_uint64(FormatBigUInt *value, uint64 source) {
     return 0;
 }
 
-static int32
+static int32 UNUSED
 format_big_uint_from_uint128_parts(FormatBigUInt *value, uint64 low,
                                    uint64 high) {
     ASSERT(value != NULL);
@@ -1421,7 +1430,7 @@ format_big_uint_from_uint128_parts(FormatBigUInt *value, uint64 low,
     return 0;
 }
 
-static int32
+static int32 UNUSED
 format_big_uint_add_one(FormatBigUInt *value) {
     uint64 carry;
 
@@ -1451,7 +1460,7 @@ format_big_uint_add_one(FormatBigUInt *value) {
     return 0;
 }
 
-static uint64
+static uint64 UNUSED
 format_read_le_uint64(uchar *bytes) {
     uint64 value;
 
@@ -1465,7 +1474,7 @@ format_read_le_uint64(uchar *bytes) {
     return value;
 }
 
-static uint64
+static uint64 UNUSED
 format_read_be_uint64(uchar *bytes) {
     uint64 value;
 
@@ -1479,7 +1488,7 @@ format_read_be_uint64(uchar *bytes) {
     return value;
 }
 
-static bool
+static bool UNUSED
 format_host_is_little_endian(void) {
     uint32 one;
     uchar bytes[SIZEOF(one)];
@@ -1834,7 +1843,7 @@ format_binary_float_scaled_decimal(FormatBinaryFloat *parts,
     return 0;
 }
 
-static int32
+static int32 UNUSED
 format_binary_float_set_zero(FormatBinaryFloat *parts, bool negative,
                              int32 precision_bits) {
     ASSERT(parts != NULL);
@@ -1847,6 +1856,8 @@ format_binary_float_set_zero(FormatBinaryFloat *parts, bool negative,
     parts->zero = true;
     return 0;
 }
+
+#if FORMAT_LONG_DOUBLE_SUPPORTED
 
 static int32
 format_decode_binary64_long_double(ldouble value,
@@ -2033,6 +2044,8 @@ format_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
     return -ENOSYS;
 #endif
 }
+
+#endif
 
 static bool
 format_float_is_upper(char conversion) {
@@ -2411,7 +2424,7 @@ format_float_hex_append_exponent(char *buffer, int32 capacity, int32 len,
     return format_buffer_write(buffer, capacity, len, digits, digit_len);
 }
 
-static int32
+static int32 UNUSED
 format_float_decimal_append_exponent(char *buffer, int32 capacity,
                                      int32 len, int32 exponent,
                                      bool upper) {
@@ -2459,7 +2472,7 @@ format_float_decimal_append_exponent(char *buffer, int32 capacity,
     return format_buffer_write(buffer, capacity, len, digits, digit_len);
 }
 
-static bool
+static bool UNUSED
 format_remainder_should_round(enum FormatRemainderHalf remainder,
                               bool odd) {
     if (remainder == FORMAT_REMAINDER_MORE_HALF) {
@@ -2471,12 +2484,14 @@ format_remainder_should_round(enum FormatRemainderHalf remainder,
     return false;
 }
 
-static bool
+static bool UNUSED
 format_big_uint_is_odd(FormatBigUInt *value) {
     ASSERT(value != NULL);
 
     return value->len > 0 && (value->words[0] & 1) != 0;
 }
+
+#if FORMAT_LONG_DOUBLE_SUPPORTED
 
 static int32
 format_big_uint_round_half_even(FormatBigUInt *value,
@@ -2497,6 +2512,10 @@ format_long_double_special_body(ldouble value, FormatSpec *spec,
     ASSERT(body != NULL);
     ASSERT(body_len != NULL);
 
+#if !FORMAT_LONG_DOUBLE_SUPPORTED
+    (void)value;
+    return -ENOSYS;
+#else
     if (isnan(value)) {
         if (format_float_is_upper(spec->conversion)) {
             memcpy(body, "NAN", 3);
@@ -2517,15 +2536,20 @@ format_long_double_special_body(ldouble value, FormatSpec *spec,
     }
 
     return -EINVAL;
+#endif
 }
 
 static char
 format_long_double_sign(ldouble value, FormatSpec *spec) {
     ASSERT(spec != NULL);
 
+#if !FORMAT_LONG_DOUBLE_SUPPORTED
+    (void)value;
+#else
     if (signbit(value)) {
         return '-';
     }
+#endif
     if ((spec->flags & FORMAT_FLAG_SIGN) != 0) {
         return '+';
     }
@@ -2719,8 +2743,8 @@ format_long_double_scientific_exponent_small(FormatBinaryFloat *parts,
     char digits[16];
 
     ASSERT(parts != NULL);
-    ASSERT(value > 0.0L && value < 1.0L);
     ASSERT(exponent != NULL);
+    ASSERT(value > 0.0L && value < 1.0L);
 
     estimate_float = floorl(log10l(value));
     if (estimate_float < INT32_MIN || estimate_float > INT32_MAX) {
@@ -2765,8 +2789,8 @@ format_long_double_scientific_exponent(FormatBinaryFloat *parts,
     int32 status;
 
     ASSERT(parts != NULL);
-    ASSERT(value >= 0.0L);
     ASSERT(exponent != NULL);
+    ASSERT(value >= 0.0L);
 
     if (parts->zero) {
         *exponent = 0;
@@ -3479,6 +3503,43 @@ format_long_double_generate_body(FormatSpec *spec, ldouble value,
 
     return -ENOSYS;
 }
+
+#else
+
+static int32 UNUSED
+format_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
+    ASSERT(parts != NULL);
+
+    (void)value;
+    return -ENOSYS;
+}
+
+static char
+format_long_double_sign(ldouble value, FormatSpec *spec) {
+    ASSERT(spec != NULL);
+
+    (void)value;
+    if ((spec->flags & FORMAT_FLAG_SIGN) != 0) {
+        return '+';
+    }
+    if ((spec->flags & FORMAT_FLAG_SPACE) != 0) {
+        return ' ';
+    }
+    return '\0';
+}
+
+static int32
+format_long_double_generate_body(FormatSpec *spec, ldouble value,
+                                 char *buffer, int32 capacity) {
+    ASSERT(spec != NULL);
+    ASSERT(buffer != NULL);
+    ASSERT_POSITIVE(capacity);
+
+    (void)value;
+    return -ENOSYS;
+}
+
+#endif
 
 static void
 format_write_float_sign(FormatSink *sink, FormatSpec *spec, char sign,
