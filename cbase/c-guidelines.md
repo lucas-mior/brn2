@@ -19,10 +19,12 @@ besides the "common denominator header" itself. This forms a nice `common.h` and
 baseline for its development.
 
 ### APIs and error handling
-User facing APIs must do explicit input validation and error handling and return
-error in case of invalid input. Internal functions must do error handling, but
-not input validation: they simply assert (with the assertions of
-`cbase/assertions.h`) that the input is within the conditions that they expect.
+User-facing APIs must do explicit input validation and error handling and return
+an error in case of invalid input, except functions whose contract explicitly
+makes invalid input a programmer error, such as bool predicates described
+below. Internal functions must do error handling, but not input validation:
+they simply assert (with the assertions of `cbase/assertions.h`) that the input
+is within the conditions that they expect.
 
 ## Naming style
 
