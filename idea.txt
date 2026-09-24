@@ -26,6 +26,9 @@ internal to a module must always be static. Functions that are the API of a
 module can be static if we are doing a single-translation unit build, while they
 must be extern in a header + linking usage, but I don't know if there are any
 advantages by declaring them static in the single TU case, analyse.
+8) Some .c files are include-based templates like hash.c, sort.c and xenums.c.
+   They have standalone main() tests, but they are not needed for linking the
+   other tests. How should we deal with them?
 
 Considering all that, discuss and elaborate a solution for this idea. List key
 implementation aspects, which files will have to change and how, in a high
