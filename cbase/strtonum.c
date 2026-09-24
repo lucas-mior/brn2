@@ -28,7 +28,8 @@ integer_digit_value(char c) {
     return -1;
 }
 
-// High level, returns negative on failure.
+// High level, returns the number of parsed bytes or negative on failure.
+// str_len is the maximum number of bytes that may be read.
 // Non-decimal integers use 0b, 0o, or 0x prefixes.
 int32
 parse_integer(char *str, int32 str_len, llong *result) {
@@ -99,22 +100,12 @@ parse_integer(char *str, int32 str_len, llong *result) {
         return -EINVAL;
     }
 
-    while ((i < str_len)
-           && ((str[i] == ' ') || (str[i] == '\f') || (str[i] == '\n')
-               || (str[i] == '\r') || (str[i] == '\t')
-               || (str[i] == '\v'))) {
-        i += 1;
-    }
-    if (i < str_len) {
-        return -EINVAL;
-    }
-
     if (negative) {
         *result = value;
     } else {
         *result = -value;
     }
-    return 0;
+    return i;
 }
 
 // low level without error checking, returns 0 on invalid input.
@@ -240,47 +231,50 @@ int
 main(void) {
     llong result;
 
-    ASSERT_ZERO(parse_integer(STRLIT("0"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0"), &result), 1);
     ASSERT_EQUAL(result, 0);
-    ASSERT_ZERO(parse_integer(STRLIT("  +123  "), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("  +123  "), &result), 6);
     ASSERT_EQUAL(result, 123);
-    ASSERT_ZERO(parse_integer(STRLIT("0b101010"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0b101010"), &result), 8);
     ASSERT_EQUAL(result, 42);
-    ASSERT_ZERO(parse_integer(STRLIT("-0B101010"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("-0B101010"), &result), 9);
     ASSERT_EQUAL(result, -42);
-    ASSERT_ZERO(parse_integer(STRLIT("0o755"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0o755"), &result), 5);
     ASSERT_EQUAL(result, 493);
-    ASSERT_ZERO(parse_integer(STRLIT("+0O17"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("+0O17"), &result), 5);
     ASSERT_EQUAL(result, 15);
-    ASSERT_ZERO(parse_integer(STRLIT("0x7f"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0x7f"), &result), 4);
     ASSERT_EQUAL(result, 127);
-    ASSERT_ZERO(parse_integer(STRLIT("-0X7F"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("-0X7F"), &result), 5);
     ASSERT_EQUAL(result, -127);
-    ASSERT_ZERO(parse_integer(STRLIT("0123"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0123"), &result), 4);
     ASSERT_EQUAL(result, 123);
-    ASSERT_ZERO(parse_integer(
-        STRLIT("0b1111111111111111111111111111111"
-               "11111111111111111111111111111111"),
-        &result));
+    ASSERT_EQUAL(parse_integer(
+                     STRLIT("0b1111111111111111111111111111111"
+                            "11111111111111111111111111111111"),
+                     &result),
+                 65);
     ASSERT_EQUAL(result, LLONG_MAX);
-    ASSERT_ZERO(parse_integer(
-        STRLIT("-0b1000000000000000000000000000000"
-               "000000000000000000000000000000000"),
-        &result));
+    ASSERT_EQUAL(parse_integer(
+                     STRLIT("-0b1000000000000000000000000000000"
+                            "000000000000000000000000000000000"),
+                     &result),
+                 67);
     ASSERT_EQUAL(result, LLONG_MIN);
-    ASSERT_ZERO(parse_integer(STRLIT("0o777777777777777777777"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0o777777777777777777777"), &result),
+                 23);
     ASSERT_EQUAL(result, LLONG_MAX);
-    ASSERT_ZERO(parse_integer(STRLIT("-0o1000000000000000000000"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("-0o1000000000000000000000"), &result),
+                 25);
     ASSERT_EQUAL(result, LLONG_MIN);
-    ASSERT_ZERO(parse_integer(STRLIT("0x7fffffffffffffff"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("0x7fffffffffffffff"), &result), 18);
     ASSERT_EQUAL(result, LLONG_MAX);
-    ASSERT_ZERO(parse_integer(STRLIT("-0x8000000000000000"), &result));
+    ASSERT_EQUAL(parse_integer(STRLIT("-0x8000000000000000"), &result), 19);
     ASSERT_EQUAL(result, LLONG_MIN);
+
     ASSERT_EQUAL(parse_integer(STRLIT(""), &result), -EINVAL);
-    ASSERT_EQUAL(parse_integer(STRLIT("12x"), &result), -EINVAL);
-    ASSERT_EQUAL(parse_integer(STRLIT("0b102"), &result), -EINVAL);
-    ASSERT_EQUAL(parse_integer(STRLIT("0o8"), &result), -EINVAL);
     ASSERT_EQUAL(parse_integer(STRLIT("0x"), &result), -EINVAL);
+    ASSERT_EQUAL(parse_integer(STRLIT("0o8"), &result), -EINVAL);
     ASSERT_EQUAL(parse_integer(STRLIT("9223372036854775808"), &result),
                  -ERANGE);
     ASSERT_EQUAL(parse_integer(STRLIT("-9223372036854775809"), &result),
@@ -296,6 +290,23 @@ main(void) {
                  -ERANGE);
     ASSERT_EQUAL(parse_integer(STRLIT("-0x8000000000000001"), &result),
                  -ERANGE);
+
+    ASSERT_EQUAL(parse_integer("123xyz", 6, &result), 3);
+    ASSERT_EQUAL(result, 123);
+    ASSERT_EQUAL(parse_integer("12345", 3, &result), 3);
+    ASSERT_EQUAL(result, 123);
+    ASSERT_EQUAL(parse_integer("123", 100, &result), 3);
+    ASSERT_EQUAL(result, 123);
+    ASSERT_EQUAL(parse_integer("0x7fZZ", 6, &result), 4);
+    ASSERT_EQUAL(result, 127);
+    ASSERT_EQUAL(parse_integer("0b102", 5, &result), 4);
+    ASSERT_EQUAL(result, 2);
+    ASSERT_EQUAL(parse_integer("0x7f", 1, &result), 1);
+    ASSERT_EQUAL(result, 0);
+    ASSERT_EQUAL(parse_integer("0x7f", 2, &result), -EINVAL);
+    ASSERT_EQUAL(parse_integer("  -42 rest", 10, &result), 5);
+    ASSERT_EQUAL(result, -42);
+    ASSERT_EQUAL(parse_integer("123", 0, &result), -EINVAL);
 
     ASSERT_EQUAL(atoi2("-123x", 4), -123);
     ASSERT_EQUAL(atoi2("42", 0), 0);
