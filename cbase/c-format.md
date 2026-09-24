@@ -305,8 +305,9 @@ if (condition1 || condition2) {
 }
 ```
 
-If the subconditions are chained together, add 
-
+If the subconditions are chained together using `&&` and `||`, group them
+and add extra parenthesis and new lines as needed:
+```
 // bad
 if (!condition1 || confusing_precedence || (x > 0)) {
 }
