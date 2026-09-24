@@ -25,7 +25,7 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
     i +=1;  // bad
     ```
 - Space or newline (if at end of line) is mandatory after comma.
-- Space is mandatory around assignments (`=`, `*=`, `^=`, `+=`, etc).
+- Space is mandatory around all assignment operators (`=`, `*=`, `+=`, etc).
 - Space is forbidden around `*` used for multiplication.
 - Space is optional around `/` used for division (keep as is).
 - Space is optional around module operator (`%`)
