@@ -2132,7 +2132,7 @@ fmt_load_float_width_precision(FormatSpec *spec, FormatArgs *args) {
 
 
 static int32
-fmt_float_temp_capacity(FormatSpec *spec, int64 *capacity) {
+fmt_float_temp_cap(FormatSpec *spec, int64 *capacity) {
     int64 prefix;
 
     ASSERT(spec != NULL);
@@ -2657,7 +2657,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
     FormatBigUInt integer;
     char *digits;
     char stack_digits[FORMAT_FLOAT_PRINTF_STACK_BUFFER_SIZE];
-    int32 digit_capacity;
+    int32 digit_cap;
     int32 digit_len;
     int32 status;
 
@@ -2680,14 +2680,14 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
         return status;
     }
 
-    digit_capacity = capacity;
-    if (digit_capacity <= SIZEOF(stack_digits)) {
+    digit_cap = capacity;
+    if (digit_cap <= SIZEOF(stack_digits)) {
         digits = stack_digits;
     } else {
-        digits = malloc2(digit_capacity);
+        digits = malloc2(digit_cap);
     }
 
-    digit_len = fmt_big_uint_to_decimal(&integer, digits, digit_capacity);
+    digit_len = fmt_big_uint_to_decimal(&integer, digits, digit_cap);
     if (digit_len >= 0) {
         status = fmt_long_double_write_fixed_digits(
             buffer, capacity, digits, digit_len, (int32)spec->precision,
@@ -2697,7 +2697,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
     }
 
     if (digits != stack_digits) {
-        free2(digits, digit_capacity);
+        free2(digits, digit_cap);
     }
     return status;
 }
@@ -3009,7 +3009,7 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
     char stack_digits[FORMAT_FLOAT_PRINTF_STACK_BUFFER_SIZE];
     int32 significant_len;
     int32 decimal_exponent;
-    int32 digit_capacity;
+    int32 digit_cap;
     int32 exponent;
     int32 digit_len;
     int32 status;
@@ -3030,22 +3030,22 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
     }
 
     significant_len = (int32)spec->precision + 1;
-    digit_capacity = FORMAT_LONG_DOUBLE_MAX_FIXED_PREFIX + significant_len;
-    if (digit_capacity < SIZEOF(stack_digits)) {
-        digit_capacity = SIZEOF(stack_digits);
+    digit_cap = FORMAT_LONG_DOUBLE_MAX_FIXED_PREFIX + significant_len;
+    if (digit_cap < SIZEOF(stack_digits)) {
+        digit_cap = SIZEOF(stack_digits);
     }
-    if (digit_capacity > FORMAT_FLOAT_PRINTF_MAX_TEMP_SIZE) {
+    if (digit_cap > FORMAT_FLOAT_PRINTF_MAX_TEMP_SIZE) {
         return -EOVERFLOW;
     }
-    if (digit_capacity <= SIZEOF(stack_digits)) {
+    if (digit_cap <= SIZEOF(stack_digits)) {
         digits = stack_digits;
     } else {
-        digits = malloc2(digit_capacity);
+        digits = malloc2(digit_cap);
     }
 
     status = fmt_long_double_scientific_digits(&parts, fabsl(value),
                                                exponent, significant_len,
-                                               digits, digit_capacity,
+                                               digits, digit_cap,
                                                &digit_len,
                                                &decimal_exponent);
     if (status == 0) {
@@ -3056,7 +3056,7 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
     }
 
     if (digits != stack_digits) {
-        free2(digits, digit_capacity);
+        free2(digits, digit_cap);
     }
     return status;
 }
@@ -3413,7 +3413,7 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
     char *digits;
     char first_digit;
     int32 available_digits;
-    int32 digit_capacity;
+    int32 digit_cap;
     int32 digit_len;
     int32 exponent;
     int32 status;
@@ -3430,23 +3430,23 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
     }
 
     available_digits = fmt_long_double_hex_digit_count(&parts);
-    digit_capacity = available_digits;
-    if (spec->precision > digit_capacity) {
-        digit_capacity = (int32)spec->precision;
+    digit_cap = available_digits;
+    if (spec->precision > digit_cap) {
+        digit_cap = (int32)spec->precision;
     }
-    if (digit_capacity < 1) {
-        digit_capacity = 1;
+    if (digit_cap < 1) {
+        digit_cap = 1;
     }
-    if (digit_capacity > FORMAT_FLOAT_PRINTF_MAX_TEMP_SIZE) {
+    if (digit_cap > FORMAT_FLOAT_PRINTF_MAX_TEMP_SIZE) {
         return -EOVERFLOW;
     }
 
-    if (digit_capacity <= SIZEOF(stack_digits)) {
+    if (digit_cap <= SIZEOF(stack_digits)) {
         digits = stack_digits;
     } else {
-        digits = malloc2(digit_capacity);
+        digits = malloc2(digit_cap);
     }
-    memset64(digits, '0', digit_capacity);
+    memset64(digits, '0', digit_cap);
 
     if (parts.zero) {
         first_digit = '0';
@@ -3482,7 +3482,7 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
                                             first_digit, digits,
                                             digit_len, exponent);
     if (digits != stack_digits) {
-        free2(digits, digit_capacity);
+        free2(digits, digit_cap);
     }
     return status;
 }
@@ -3960,7 +3960,7 @@ fmt_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     if (fmt_float_is_general(spec->conversion) && spec->precision == 0) {
         spec->precision = 1;
     }
-    if ((status = fmt_float_temp_capacity(spec, &capacity64)) < 0) {
+    if ((status = fmt_float_temp_cap(spec, &capacity64)) < 0) {
         return status;
     }
     ASSERT(capacity64 <= INT32_MAX);
@@ -4238,7 +4238,7 @@ fmt_vsnprintf_estimate(char *format, va_list args) {
             if (fmt_float_is_general(spec.conversion) && spec.precision == 0) {
                 spec.precision = 1;
             }
-            if ((status = fmt_float_temp_capacity(&spec, &capacity64)) < 0) {
+            if ((status = fmt_float_temp_cap(&spec, &capacity64)) < 0) {
                 result = status;
                 goto done;
             }
@@ -4723,7 +4723,7 @@ test_fmt_parser_invalid_specs(void) {
 }
 
 static void
-test_fmt_sink_capacity(char *format, char *expected) {
+test_fmt_sink_cap(char *format, char *expected) {
     char buffer[128];
     int32 expected_len;
 
@@ -4753,7 +4753,7 @@ test_fmt_sink_capacity(char *format, char *expected) {
 }
 
 static void
-test_fmt_integer_capacity(char *expected, char *format, ...) {
+test_fmt_integer_cap(char *expected, char *format, ...) {
     char buffer[256];
     int32 expected_len;
 
@@ -4786,7 +4786,7 @@ test_fmt_integer_capacity(char *expected, char *format, ...) {
 }
 
 static void
-test_fmt_bytes_capacity(char *expected, int32 expected_len,
+test_fmt_bytes_cap(char *expected, int32 expected_len,
                         char *format, ...) {
     char buffer[256];
 
@@ -4820,66 +4820,66 @@ test_fmt_bytes_capacity(char *expected, int32 expected_len,
 
 static void
 test_fmt_integer_outputs(void) {
-    test_fmt_integer_capacity("0", "%d", 0);
-    test_fmt_integer_capacity("-123", "%i", -123);
-    test_fmt_integer_capacity("-2147483648", "%d", INT32_MIN);
-    test_fmt_integer_capacity("4294967295", "%u", (uint32)UINT32_MAX);
-    test_fmt_integer_capacity("12", "%o", (uint32)10);
-    test_fmt_integer_capacity("abc", "%x", (uint32)0xabc);
-    test_fmt_integer_capacity("ABC", "%X", (uint32)0xabc);
-    test_fmt_integer_capacity("1010", "%b", (uint32)10);
-    test_fmt_integer_capacity("1010", "%B", (uint32)10);
+    test_fmt_integer_cap("0", "%d", 0);
+    test_fmt_integer_cap("-123", "%i", -123);
+    test_fmt_integer_cap("-2147483648", "%d", INT32_MIN);
+    test_fmt_integer_cap("4294967295", "%u", (uint32)UINT32_MAX);
+    test_fmt_integer_cap("12", "%o", (uint32)10);
+    test_fmt_integer_cap("abc", "%x", (uint32)0xabc);
+    test_fmt_integer_cap("ABC", "%X", (uint32)0xabc);
+    test_fmt_integer_cap("1010", "%b", (uint32)10);
+    test_fmt_integer_cap("1010", "%B", (uint32)10);
 
-    test_fmt_integer_capacity("+42", "%+d", 42);
-    test_fmt_integer_capacity(" 42", "% d", 42);
-    test_fmt_integer_capacity("+42", "%+ d", 42);
-    test_fmt_integer_capacity("-0000042", "%08d", -42);
-    test_fmt_integer_capacity("42    ", "%-6d", 42);
-    test_fmt_integer_capacity("   00042", "%8.5d", 42);
-    test_fmt_integer_capacity("   00042", "%08.5d", 42);
-    test_fmt_integer_capacity("00042   ", "%-8.5d", 42);
-    test_fmt_integer_capacity("", "%.0d", 0);
-    test_fmt_integer_capacity("     ", "%5.0d", 0);
+    test_fmt_integer_cap("+42", "%+d", 42);
+    test_fmt_integer_cap(" 42", "% d", 42);
+    test_fmt_integer_cap("+42", "%+ d", 42);
+    test_fmt_integer_cap("-0000042", "%08d", -42);
+    test_fmt_integer_cap("42    ", "%-6d", 42);
+    test_fmt_integer_cap("   00042", "%8.5d", 42);
+    test_fmt_integer_cap("   00042", "%08.5d", 42);
+    test_fmt_integer_cap("00042   ", "%-8.5d", 42);
+    test_fmt_integer_cap("", "%.0d", 0);
+    test_fmt_integer_cap("     ", "%5.0d", 0);
 
-    test_fmt_integer_capacity("012", "%#o", (uint32)10);
-    test_fmt_integer_capacity("0", "%#.0o", (uint32)0);
-    test_fmt_integer_capacity("    0", "%#5.0o", (uint32)0);
-    test_fmt_integer_capacity("012", "%#.3o", (uint32)10);
-    test_fmt_integer_capacity("00012", "%#.5o", (uint32)10);
-    test_fmt_integer_capacity("0x2a", "%#x", (uint32)42);
-    test_fmt_integer_capacity("0X2A", "%#X", (uint32)42);
-    test_fmt_integer_capacity("0b101", "%#b", (uint32)5);
-    test_fmt_integer_capacity("0B101", "%#B", (uint32)5);
-    test_fmt_integer_capacity(" 0x0a", "%#5.2x", (uint32)10);
-    test_fmt_integer_capacity("00000012", "%#08o", (uint32)10);
+    test_fmt_integer_cap("012", "%#o", (uint32)10);
+    test_fmt_integer_cap("0", "%#.0o", (uint32)0);
+    test_fmt_integer_cap("    0", "%#5.0o", (uint32)0);
+    test_fmt_integer_cap("012", "%#.3o", (uint32)10);
+    test_fmt_integer_cap("00012", "%#.5o", (uint32)10);
+    test_fmt_integer_cap("0x2a", "%#x", (uint32)42);
+    test_fmt_integer_cap("0X2A", "%#X", (uint32)42);
+    test_fmt_integer_cap("0b101", "%#b", (uint32)5);
+    test_fmt_integer_cap("0B101", "%#B", (uint32)5);
+    test_fmt_integer_cap(" 0x0a", "%#5.2x", (uint32)10);
+    test_fmt_integer_cap("00000012", "%#08o", (uint32)10);
 
-    test_fmt_integer_capacity("42    ", "%*d", -6, 42);
-    test_fmt_integer_capacity("00042", "%0*d", 5, 42);
-    test_fmt_integer_capacity("42", "%.*d", -1, 42);
-    test_fmt_integer_capacity("00042", "%.*d", 5, 42);
-    test_fmt_integer_capacity("   00042", "%*.*d", 8, 5, 42);
+    test_fmt_integer_cap("42    ", "%*d", -6, 42);
+    test_fmt_integer_cap("00042", "%0*d", 5, 42);
+    test_fmt_integer_cap("42", "%.*d", -1, 42);
+    test_fmt_integer_cap("00042", "%.*d", 5, 42);
+    test_fmt_integer_cap("   00042", "%*.*d", 8, 5, 42);
 
-    test_fmt_integer_capacity("-1 2a 3", "%d %x %u", -1,
+    test_fmt_integer_cap("-1 2a 3", "%d %x %u", -1,
                               (uint32)0x2a, (uint32)3);
 
-    test_fmt_integer_capacity("18", "%hhd", 0x12);
-    test_fmt_integer_capacity("44", "%hhu", 300);
-    test_fmt_integer_capacity("-1234", "%hd", -1234);
-    test_fmt_integer_capacity("65535", "%hu", 65535);
-    test_fmt_integer_capacity("-9223372036854775808", "%lld",
+    test_fmt_integer_cap("18", "%hhd", 0x12);
+    test_fmt_integer_cap("44", "%hhu", 300);
+    test_fmt_integer_cap("-1234", "%hd", -1234);
+    test_fmt_integer_cap("65535", "%hu", 65535);
+    test_fmt_integer_cap("-9223372036854775808", "%lld",
                               (int64)INT64_MIN);
-    test_fmt_integer_capacity("18446744073709551615", "%llu",
+    test_fmt_integer_cap("18446744073709551615", "%llu",
                               (uint64)UINT64_MAX);
 
-    test_fmt_integer_capacity("-128", "%w8d", -128);
-    test_fmt_integer_capacity("255", "%w8u", 255);
-    test_fmt_integer_capacity("65535", "%w16u", 65535);
-    test_fmt_integer_capacity("-2147483648", "%w32d", INT32_MIN);
-    test_fmt_integer_capacity("4294967295", "%w32u",
+    test_fmt_integer_cap("-128", "%w8d", -128);
+    test_fmt_integer_cap("255", "%w8u", 255);
+    test_fmt_integer_cap("65535", "%w16u", 65535);
+    test_fmt_integer_cap("-2147483648", "%w32d", INT32_MIN);
+    test_fmt_integer_cap("4294967295", "%w32u",
                               (uint32)UINT32_MAX);
-    test_fmt_integer_capacity("-9223372036854775808", "%w64d",
+    test_fmt_integer_cap("-9223372036854775808", "%w64d",
                               (int64)INT64_MIN);
-    test_fmt_integer_capacity("18446744073709551615", "%w64u",
+    test_fmt_integer_cap("18446744073709551615", "%w64u",
                               (uint64)UINT64_MAX);
 
     return;
@@ -4896,28 +4896,28 @@ test_fmt_char_string_outputs(void) {
     char spaces[] = {' ', ' ', ' '};
     char buffer[16];
 
-    test_fmt_bytes_capacity("A", 1, "%c", 'A');
-    test_fmt_bytes_capacity("  A", 3, "%3c", 'A');
-    test_fmt_bytes_capacity("A  ", 3, "%-3c", 'A');
-    test_fmt_bytes_capacity(nul_char_expected, 1, "%c", 0);
+    test_fmt_bytes_cap("A", 1, "%c", 'A');
+    test_fmt_bytes_cap("  A", 3, "%3c", 'A');
+    test_fmt_bytes_cap("A  ", 3, "%-3c", 'A');
+    test_fmt_bytes_cap(nul_char_expected, 1, "%c", 0);
 
-    test_fmt_bytes_capacity("abc", 3, "%s", "abc");
-    test_fmt_bytes_capacity("  abc", 5, "%5s", "abc");
-    test_fmt_bytes_capacity("abc  ", 5, "%-5s", "abc");
-    test_fmt_bytes_capacity("ab", 2, "%.2s", "abc");
-    test_fmt_bytes_capacity("   ab", 5, "%5.2s", "abc");
-    test_fmt_bytes_capacity("(null)", 6, "%s", (char *)NULL);
-    test_fmt_bytes_capacity("(nu", 3, "%.3s", (char *)NULL);
-    test_fmt_bytes_capacity("     (nu", 8, "%8.3s", (char *)NULL);
+    test_fmt_bytes_cap("abc", 3, "%s", "abc");
+    test_fmt_bytes_cap("  abc", 5, "%5s", "abc");
+    test_fmt_bytes_cap("abc  ", 5, "%-5s", "abc");
+    test_fmt_bytes_cap("ab", 2, "%.2s", "abc");
+    test_fmt_bytes_cap("   ab", 5, "%5.2s", "abc");
+    test_fmt_bytes_cap("(null)", 6, "%s", (char *)NULL);
+    test_fmt_bytes_cap("(nu", 3, "%.3s", (char *)NULL);
+    test_fmt_bytes_cap("     (nu", 8, "%8.3s", (char *)NULL);
 
-    test_fmt_bytes_capacity(span_expected, 4, "%.*s", 4, span);
-    test_fmt_bytes_capacity(span_width_expected, 5, "%5.*s", 3, span);
-    test_fmt_bytes_capacity(span_left_expected, 5, "%-5.*s", 3, span);
-    test_fmt_bytes_capacity(plain_precision_expected, 1, "%.4s", span);
-    test_fmt_bytes_capacity("", 0, "%.*s", 0, (char *)NULL);
-    test_fmt_bytes_capacity(spaces, 3, "%3.*s", 0, (char *)NULL);
+    test_fmt_bytes_cap(span_expected, 4, "%.*s", 4, span);
+    test_fmt_bytes_cap(span_width_expected, 5, "%5.*s", 3, span);
+    test_fmt_bytes_cap(span_left_expected, 5, "%-5.*s", 3, span);
+    test_fmt_bytes_cap(plain_precision_expected, 1, "%.4s", span);
+    test_fmt_bytes_cap("", 0, "%.*s", 0, (char *)NULL);
+    test_fmt_bytes_cap(spaces, 3, "%3.*s", 0, (char *)NULL);
 
-    test_fmt_bytes_capacity("x=abc n=7 c=Z", 13, "x=%s n=%d c=%c",
+    test_fmt_bytes_cap("x=abc n=7 c=Z", 13, "x=%s n=%d c=%c",
                             "abc", 7, 'Z');
 
     memset64(buffer, 0x7f, SIZEOF(buffer));
@@ -4946,16 +4946,16 @@ test_fmt_pointer_count_outputs(void) {
     int64 count64;
 
     pointer = (void *)(uintptr)0x1234;
-    test_fmt_bytes_capacity("0x0", 3, "%p", (void *)NULL);
-    test_fmt_bytes_capacity("   0x0", 6, "%6p", (void *)NULL);
-    test_fmt_bytes_capacity("0x0   ", 6, "%-6p", (void *)NULL);
-    test_fmt_bytes_capacity("0x1234", 6, "%p", pointer);
-    test_fmt_bytes_capacity("p=0x1234.", 9, "p=%p.", pointer);
-    test_fmt_bytes_capacity("   0x0", 6, "%*p", 6, (void *)NULL);
-    test_fmt_bytes_capacity("0x0   ", 6, "%*p", -6, (void *)NULL);
+    test_fmt_bytes_cap("0x0", 3, "%p", (void *)NULL);
+    test_fmt_bytes_cap("   0x0", 6, "%6p", (void *)NULL);
+    test_fmt_bytes_cap("0x0   ", 6, "%-6p", (void *)NULL);
+    test_fmt_bytes_cap("0x1234", 6, "%p", pointer);
+    test_fmt_bytes_cap("p=0x1234.", 9, "p=%p.", pointer);
+    test_fmt_bytes_cap("   0x0", 6, "%*p", 6, (void *)NULL);
+    test_fmt_bytes_cap("0x0   ", 6, "%*p", -6, (void *)NULL);
 
     count32 = -1;
-    test_fmt_bytes_capacity("abcd", 4, "ab%ncd", &count32);
+    test_fmt_bytes_cap("abcd", 4, "ab%ncd", &count32);
     ASSERT_EQUAL(count32, 2);
 
     memset64(buffer, 0x7f, SIZEOF(buffer));
@@ -5044,36 +5044,36 @@ test_fmt_printf_float_outputs(void) {
     pos_nan = fmt_test_positive_nan();
     neg_nan = fmt_test_negative_nan();
 
-    test_fmt_bytes_capacity("1.250000", 8, "%f", 1.25);
-    test_fmt_bytes_capacity("1.25", 4, "%.2f", 1.25);
-    test_fmt_bytes_capacity("1", 1, "%.0f", 1.25);
-    test_fmt_bytes_capacity("1.", 2, "%#.0f", 1.25);
-    test_fmt_bytes_capacity("  1.25", 6, "%6.2f", 1.25);
-    test_fmt_bytes_capacity("1.25  ", 6, "%-6.2f", 1.25);
-    test_fmt_bytes_capacity("0000001.25", 10, "%010.2f", 1.25);
-    test_fmt_bytes_capacity("+000001.25", 10, "%+010.2f", 1.25);
-    test_fmt_bytes_capacity("-000001.25", 10, "%010.2f", -1.25);
-    test_fmt_bytes_capacity(" 1.25", 5, "% .2f", 1.25);
-    test_fmt_bytes_capacity("-0.000", 6, "%.3f", -0.0);
+    test_fmt_bytes_cap("1.250000", 8, "%f", 1.25);
+    test_fmt_bytes_cap("1.25", 4, "%.2f", 1.25);
+    test_fmt_bytes_cap("1", 1, "%.0f", 1.25);
+    test_fmt_bytes_cap("1.", 2, "%#.0f", 1.25);
+    test_fmt_bytes_cap("  1.25", 6, "%6.2f", 1.25);
+    test_fmt_bytes_cap("1.25  ", 6, "%-6.2f", 1.25);
+    test_fmt_bytes_cap("0000001.25", 10, "%010.2f", 1.25);
+    test_fmt_bytes_cap("+000001.25", 10, "%+010.2f", 1.25);
+    test_fmt_bytes_cap("-000001.25", 10, "%010.2f", -1.25);
+    test_fmt_bytes_cap(" 1.25", 5, "% .2f", 1.25);
+    test_fmt_bytes_cap("-0.000", 6, "%.3f", -0.0);
 
-    test_fmt_bytes_capacity("1.250000e+00", 12, "%e", 1.25);
-    test_fmt_bytes_capacity("1.25e+00", 8, "%.2e", 1.25);
-    test_fmt_bytes_capacity("1e+00", 5, "%.0e", 1.25);
-    test_fmt_bytes_capacity("1.e+00", 6, "%#.0e", 1.25);
-    test_fmt_bytes_capacity("1.25E+00", 8, "%.2E", 1.25);
-    test_fmt_bytes_capacity("+001.25e+00", 11, "%+011.2e", 1.25);
+    test_fmt_bytes_cap("1.250000e+00", 12, "%e", 1.25);
+    test_fmt_bytes_cap("1.25e+00", 8, "%.2e", 1.25);
+    test_fmt_bytes_cap("1e+00", 5, "%.0e", 1.25);
+    test_fmt_bytes_cap("1.e+00", 6, "%#.0e", 1.25);
+    test_fmt_bytes_cap("1.25E+00", 8, "%.2E", 1.25);
+    test_fmt_bytes_cap("+001.25e+00", 11, "%+011.2e", 1.25);
 
-    test_fmt_bytes_capacity("inf", 3, "%f", HUGE_VAL);
-    test_fmt_bytes_capacity("-inf", 4, "%f", -HUGE_VAL);
-    test_fmt_bytes_capacity("+inf", 4, "%+f", HUGE_VAL);
-    test_fmt_bytes_capacity(" inf", 4, "% f", HUGE_VAL);
-    test_fmt_bytes_capacity("00000inf", 8, "%08f", HUGE_VAL);
-    test_fmt_bytes_capacity("INF", 3, "%F", HUGE_VAL);
-    test_fmt_bytes_capacity("INF", 3, "%E", HUGE_VAL);
-    test_fmt_bytes_capacity("nan", 3, "%f", pos_nan);
-    test_fmt_bytes_capacity("-nan", 4, "%f", neg_nan);
-    test_fmt_bytes_capacity("NAN", 3, "%F", pos_nan);
-    test_fmt_bytes_capacity("-NAN", 4, "%F", neg_nan);
+    test_fmt_bytes_cap("inf", 3, "%f", HUGE_VAL);
+    test_fmt_bytes_cap("-inf", 4, "%f", -HUGE_VAL);
+    test_fmt_bytes_cap("+inf", 4, "%+f", HUGE_VAL);
+    test_fmt_bytes_cap(" inf", 4, "% f", HUGE_VAL);
+    test_fmt_bytes_cap("00000inf", 8, "%08f", HUGE_VAL);
+    test_fmt_bytes_cap("INF", 3, "%F", HUGE_VAL);
+    test_fmt_bytes_cap("INF", 3, "%E", HUGE_VAL);
+    test_fmt_bytes_cap("nan", 3, "%f", pos_nan);
+    test_fmt_bytes_cap("-nan", 4, "%f", neg_nan);
+    test_fmt_bytes_cap("NAN", 3, "%F", pos_nan);
+    test_fmt_bytes_cap("-NAN", 4, "%F", neg_nan);
 
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                    "%.*f", -1, 1.25), 8);
@@ -5088,33 +5088,33 @@ static void
 test_fmt_printf_general_outputs(void) {
     char buffer[64];
 
-    test_fmt_bytes_capacity("1.25", 4, "%g", 1.25);
-    test_fmt_bytes_capacity("123456", 6, "%g", 123456.0);
-    test_fmt_bytes_capacity("1.23457e+06", 11, "%g", 1234567.0);
-    test_fmt_bytes_capacity("0.0001", 6, "%g", 0.0001);
-    test_fmt_bytes_capacity("9.9999e-05", 10, "%g", 0.000099999);
-    test_fmt_bytes_capacity("1e-05", 5, "%g", 0.00001);
-    test_fmt_bytes_capacity("99999.9", 7, "%g", 99999.9);
-    test_fmt_bytes_capacity("1e+05", 5, "%.5g", 99999.9);
-    test_fmt_bytes_capacity("1e+05", 5, "%.4g", 99999.0);
-    test_fmt_bytes_capacity("0.0001", 6, "%.4g", 0.000099999);
-    test_fmt_bytes_capacity("1", 1, "%.0g", 1.25);
-    test_fmt_bytes_capacity("1.", 2, "%#.0g", 1.25);
-    test_fmt_bytes_capacity("0.0000", 6, "%#.5g", 0.0);
-    test_fmt_bytes_capacity("1.2500", 6, "%#.5g", 1.25);
-    test_fmt_bytes_capacity("100.00", 6, "%#.5g", 100.0);
-    test_fmt_bytes_capacity("9.9999e-05", 10, "%#.5g", 0.000099999);
-    test_fmt_bytes_capacity("      1.25", 10, "%10.4g", 1.25);
-    test_fmt_bytes_capacity("0000001.25", 10, "%010.4g", 1.25);
-    test_fmt_bytes_capacity("-000000000", 10, "%010.4g", -0.0);
-    test_fmt_bytes_capacity("1.25      ", 10, "%-10.4g", 1.25);
-    test_fmt_bytes_capacity("1.23457E+06", 11, "%G", 1234567.0);
-    test_fmt_bytes_capacity("9.99990E-05", 11, "%#.6G", 0.000099999);
-    test_fmt_bytes_capacity("INF", 3, "%G", HUGE_VAL);
-    test_fmt_bytes_capacity("NAN", 3, "%G", fmt_test_positive_nan());
-    test_fmt_bytes_capacity("-NAN", 4, "%G", fmt_test_negative_nan());
-    test_fmt_bytes_capacity("nan", 3, "%g", fmt_test_positive_nan());
-    test_fmt_bytes_capacity("-nan", 4, "%g", fmt_test_negative_nan());
+    test_fmt_bytes_cap("1.25", 4, "%g", 1.25);
+    test_fmt_bytes_cap("123456", 6, "%g", 123456.0);
+    test_fmt_bytes_cap("1.23457e+06", 11, "%g", 1234567.0);
+    test_fmt_bytes_cap("0.0001", 6, "%g", 0.0001);
+    test_fmt_bytes_cap("9.9999e-05", 10, "%g", 0.000099999);
+    test_fmt_bytes_cap("1e-05", 5, "%g", 0.00001);
+    test_fmt_bytes_cap("99999.9", 7, "%g", 99999.9);
+    test_fmt_bytes_cap("1e+05", 5, "%.5g", 99999.9);
+    test_fmt_bytes_cap("1e+05", 5, "%.4g", 99999.0);
+    test_fmt_bytes_cap("0.0001", 6, "%.4g", 0.000099999);
+    test_fmt_bytes_cap("1", 1, "%.0g", 1.25);
+    test_fmt_bytes_cap("1.", 2, "%#.0g", 1.25);
+    test_fmt_bytes_cap("0.0000", 6, "%#.5g", 0.0);
+    test_fmt_bytes_cap("1.2500", 6, "%#.5g", 1.25);
+    test_fmt_bytes_cap("100.00", 6, "%#.5g", 100.0);
+    test_fmt_bytes_cap("9.9999e-05", 10, "%#.5g", 0.000099999);
+    test_fmt_bytes_cap("      1.25", 10, "%10.4g", 1.25);
+    test_fmt_bytes_cap("0000001.25", 10, "%010.4g", 1.25);
+    test_fmt_bytes_cap("-000000000", 10, "%010.4g", -0.0);
+    test_fmt_bytes_cap("1.25      ", 10, "%-10.4g", 1.25);
+    test_fmt_bytes_cap("1.23457E+06", 11, "%G", 1234567.0);
+    test_fmt_bytes_cap("9.99990E-05", 11, "%#.6G", 0.000099999);
+    test_fmt_bytes_cap("INF", 3, "%G", HUGE_VAL);
+    test_fmt_bytes_cap("NAN", 3, "%G", fmt_test_positive_nan());
+    test_fmt_bytes_cap("-NAN", 4, "%G", fmt_test_negative_nan());
+    test_fmt_bytes_cap("nan", 3, "%g", fmt_test_positive_nan());
+    test_fmt_bytes_cap("-nan", 4, "%g", fmt_test_negative_nan());
 
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                    "%.*g", -1, 1.25), 4);
@@ -5142,39 +5142,39 @@ test_fmt_printf_hex_float_outputs(void) {
     largest_subnormal = fmt_test_double_from_bits(UINT64_C(0x000fffffffffffff));
     before_one = fmt_test_double_from_bits(UINT64_C(0x3fefffffffffffff));
 
-    test_fmt_bytes_capacity("0x0p+0", 6, "%a", 0.0);
-    test_fmt_bytes_capacity("-0x0p+0", 7, "%a", -0.0);
-    test_fmt_bytes_capacity("0x1p+0", 6, "%a", 1.0);
-    test_fmt_bytes_capacity("0x1.8p+0", 8, "%a", 1.5);
-    test_fmt_bytes_capacity("0X1.8P+0", 8, "%A", 1.5);
-    test_fmt_bytes_capacity("+0x1.8p+0", 9, "%+a", 1.5);
-    test_fmt_bytes_capacity(" 0x1.8p+0", 9, "% a", 1.5);
-    test_fmt_bytes_capacity("   0x1.8p+0", 11, "%11a", 1.5);
-    test_fmt_bytes_capacity("0x1.8p+0   ", 11, "%-11a", 1.5);
-    test_fmt_bytes_capacity("0x0000001.8p+0", 14, "%014a", 1.5);
-    test_fmt_bytes_capacity("+0x000001.8p+0", 14, "%+014a", 1.5);
+    test_fmt_bytes_cap("0x0p+0", 6, "%a", 0.0);
+    test_fmt_bytes_cap("-0x0p+0", 7, "%a", -0.0);
+    test_fmt_bytes_cap("0x1p+0", 6, "%a", 1.0);
+    test_fmt_bytes_cap("0x1.8p+0", 8, "%a", 1.5);
+    test_fmt_bytes_cap("0X1.8P+0", 8, "%A", 1.5);
+    test_fmt_bytes_cap("+0x1.8p+0", 9, "%+a", 1.5);
+    test_fmt_bytes_cap(" 0x1.8p+0", 9, "% a", 1.5);
+    test_fmt_bytes_cap("   0x1.8p+0", 11, "%11a", 1.5);
+    test_fmt_bytes_cap("0x1.8p+0   ", 11, "%-11a", 1.5);
+    test_fmt_bytes_cap("0x0000001.8p+0", 14, "%014a", 1.5);
+    test_fmt_bytes_cap("+0x000001.8p+0", 14, "%+014a", 1.5);
 
-    test_fmt_bytes_capacity("0x1.0000000000000p+0", 20, "%.13a", 1.0);
-    test_fmt_bytes_capacity("0x1.p+0", 7, "%#.0a", 1.0);
-    test_fmt_bytes_capacity("0x1.0p+0", 8, "%.1a", 1.0);
-    test_fmt_bytes_capacity("0x2p+0", 6, "%.0a", 1.5);
-    test_fmt_bytes_capacity("0x1p+0", 6, "%.0a", 1.25);
-    test_fmt_bytes_capacity("0x2p-1", 6, "%.0a", before_one);
-    test_fmt_bytes_capacity("0x2.0p-1", 8, "%.1a", before_one);
+    test_fmt_bytes_cap("0x1.0000000000000p+0", 20, "%.13a", 1.0);
+    test_fmt_bytes_cap("0x1.p+0", 7, "%#.0a", 1.0);
+    test_fmt_bytes_cap("0x1.0p+0", 8, "%.1a", 1.0);
+    test_fmt_bytes_cap("0x2p+0", 6, "%.0a", 1.5);
+    test_fmt_bytes_cap("0x1p+0", 6, "%.0a", 1.25);
+    test_fmt_bytes_cap("0x2p-1", 6, "%.0a", before_one);
+    test_fmt_bytes_cap("0x2.0p-1", 8, "%.1a", before_one);
 
-    test_fmt_bytes_capacity("0x1.0000000000001p+0", 20, "%a", lsb_after_one);
-    test_fmt_bytes_capacity("0x0.0000000000001p-1022", 23, "%a", true_min);
-    test_fmt_bytes_capacity("0x1p-1022", 9, "%a", normal_min);
-    test_fmt_bytes_capacity("0x0.fffffffffffffp-1022", 23, "%a",
+    test_fmt_bytes_cap("0x1.0000000000001p+0", 20, "%a", lsb_after_one);
+    test_fmt_bytes_cap("0x0.0000000000001p-1022", 23, "%a", true_min);
+    test_fmt_bytes_cap("0x1p-1022", 9, "%a", normal_min);
+    test_fmt_bytes_cap("0x0.fffffffffffffp-1022", 23, "%a",
                             largest_subnormal);
-    test_fmt_bytes_capacity("0x1p-1022", 9, "%.0a", largest_subnormal);
-    test_fmt_bytes_capacity("0x1.0p-1022", 11, "%.1a", largest_subnormal);
+    test_fmt_bytes_cap("0x1p-1022", 9, "%.0a", largest_subnormal);
+    test_fmt_bytes_cap("0x1.0p-1022", 11, "%.1a", largest_subnormal);
 
-    test_fmt_bytes_capacity("INF", 3, "%A", HUGE_VAL);
-    test_fmt_bytes_capacity("NAN", 3, "%A", fmt_test_positive_nan());
-    test_fmt_bytes_capacity("-NAN", 4, "%A", fmt_test_negative_nan());
-    test_fmt_bytes_capacity("nan", 3, "%a", fmt_test_positive_nan());
-    test_fmt_bytes_capacity("-nan", 4, "%a", fmt_test_negative_nan());
+    test_fmt_bytes_cap("INF", 3, "%A", HUGE_VAL);
+    test_fmt_bytes_cap("NAN", 3, "%A", fmt_test_positive_nan());
+    test_fmt_bytes_cap("-NAN", 4, "%A", fmt_test_negative_nan());
+    test_fmt_bytes_cap("nan", 3, "%a", fmt_test_positive_nan());
+    test_fmt_bytes_cap("-nan", 4, "%a", fmt_test_negative_nan());
 
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*a",
                                    -1, 1.5), 8);
@@ -5318,66 +5318,66 @@ test_fmt_printf_long_double_outputs(void) {
     char buffer[128];
     ldouble precise;
 
-    test_fmt_bytes_capacity("1.250000", 8, "%Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.25", 4, "%.2Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("1", 1, "%.0Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.", 2, "%#.0Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("  1.25", 6, "%6.2Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.25  ", 6, "%-6.2Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("0000001.25", 10, "%010.2Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("+000001.25", 10, "%+010.2Lf", (ldouble)1.25);
-    test_fmt_bytes_capacity("-000001.25", 10, "%010.2Lf", (ldouble)-1.25);
-    test_fmt_bytes_capacity("-0.000", 6, "%.3Lf", (ldouble)-0.0L);
-    test_fmt_bytes_capacity("0.125", 5, "%.3Lf", (ldouble)0.125L);
-    test_fmt_bytes_capacity("2", 1, "%.0Lf", (ldouble)1.5L);
-    test_fmt_bytes_capacity("2", 1, "%.0Lf", (ldouble)2.5L);
+    test_fmt_bytes_cap("1.250000", 8, "%Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("1.25", 4, "%.2Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("1", 1, "%.0Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("1.", 2, "%#.0Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("  1.25", 6, "%6.2Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("1.25  ", 6, "%-6.2Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("0000001.25", 10, "%010.2Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("+000001.25", 10, "%+010.2Lf", (ldouble)1.25);
+    test_fmt_bytes_cap("-000001.25", 10, "%010.2Lf", (ldouble)-1.25);
+    test_fmt_bytes_cap("-0.000", 6, "%.3Lf", (ldouble)-0.0L);
+    test_fmt_bytes_cap("0.125", 5, "%.3Lf", (ldouble)0.125L);
+    test_fmt_bytes_cap("2", 1, "%.0Lf", (ldouble)1.5L);
+    test_fmt_bytes_cap("2", 1, "%.0Lf", (ldouble)2.5L);
 
-    test_fmt_bytes_capacity("1.250000e+00", 12, "%Le", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.25e+00", 8, "%.2Le", (ldouble)1.25);
-    test_fmt_bytes_capacity("1e+00", 5, "%.0Le", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.e+00", 6, "%#.0Le", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.25E+00", 8, "%.2LE", (ldouble)1.25);
-    test_fmt_bytes_capacity("+001.25e+00", 11, "%+011.2Le", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.250e-03", 9, "%.3Le", (ldouble)0.00125L);
-    test_fmt_bytes_capacity("1.00e+03", 8, "%.2Le", (ldouble)999.9L);
+    test_fmt_bytes_cap("1.250000e+00", 12, "%Le", (ldouble)1.25);
+    test_fmt_bytes_cap("1.25e+00", 8, "%.2Le", (ldouble)1.25);
+    test_fmt_bytes_cap("1e+00", 5, "%.0Le", (ldouble)1.25);
+    test_fmt_bytes_cap("1.e+00", 6, "%#.0Le", (ldouble)1.25);
+    test_fmt_bytes_cap("1.25E+00", 8, "%.2LE", (ldouble)1.25);
+    test_fmt_bytes_cap("+001.25e+00", 11, "%+011.2Le", (ldouble)1.25);
+    test_fmt_bytes_cap("1.250e-03", 9, "%.3Le", (ldouble)0.00125L);
+    test_fmt_bytes_cap("1.00e+03", 8, "%.2Le", (ldouble)999.9L);
 
-    test_fmt_bytes_capacity("inf", 3, "%Lf", (ldouble)INFINITY);
-    test_fmt_bytes_capacity("-inf", 4, "%Lf", (ldouble)-INFINITY);
-    test_fmt_bytes_capacity("INF", 3, "%LF", (ldouble)INFINITY);
-    test_fmt_bytes_capacity("INF", 3, "%LE", (ldouble)INFINITY);
+    test_fmt_bytes_cap("inf", 3, "%Lf", (ldouble)INFINITY);
+    test_fmt_bytes_cap("-inf", 4, "%Lf", (ldouble)-INFINITY);
+    test_fmt_bytes_cap("INF", 3, "%LF", (ldouble)INFINITY);
+    test_fmt_bytes_cap("INF", 3, "%LE", (ldouble)INFINITY);
 
     if (fmt_test_long_double_supported() && LDBL_MANT_DIG > DBL_MANT_DIG) {
         precise = ldexpl(1.0L, 63) + 1.0L;
-        test_fmt_bytes_capacity("9223372036854775809", 19, "%.0Lf",
+        test_fmt_bytes_cap("9223372036854775809", 19, "%.0Lf",
                                 precise);
     }
 
-    test_fmt_bytes_capacity("1", 1, "%Lg", (ldouble)1.0);
-    test_fmt_bytes_capacity("1.25", 4, "%Lg", (ldouble)1.25);
-    test_fmt_bytes_capacity("1.23457e+06", 11, "%Lg", (ldouble)1234567.0L);
-    test_fmt_bytes_capacity("0.0001", 6, "%Lg", (ldouble)0.0001L);
-    test_fmt_bytes_capacity("1e-05", 5, "%Lg", (ldouble)0.00001L);
-    test_fmt_bytes_capacity("1.", 2, "%#.0Lg", (ldouble)1.25L);
-    test_fmt_bytes_capacity("1.2500", 6, "%#.5Lg", (ldouble)1.25L);
-    test_fmt_bytes_capacity("      1.25", 10, "%10.4Lg", (ldouble)1.25L);
-    test_fmt_bytes_capacity("0000001.25", 10, "%010.4Lg", (ldouble)1.25L);
-    test_fmt_bytes_capacity("1.250E+00", 9, "%.3LE", (ldouble)1.25L);
-    test_fmt_bytes_capacity("1.25", 4, "%.3LG", (ldouble)1.25L);
-    test_fmt_bytes_capacity("INF", 3, "%LG", (ldouble)INFINITY);
-    test_fmt_bytes_capacity("inf", 3, "%Lg", (ldouble)INFINITY);
+    test_fmt_bytes_cap("1", 1, "%Lg", (ldouble)1.0);
+    test_fmt_bytes_cap("1.25", 4, "%Lg", (ldouble)1.25);
+    test_fmt_bytes_cap("1.23457e+06", 11, "%Lg", (ldouble)1234567.0L);
+    test_fmt_bytes_cap("0.0001", 6, "%Lg", (ldouble)0.0001L);
+    test_fmt_bytes_cap("1e-05", 5, "%Lg", (ldouble)0.00001L);
+    test_fmt_bytes_cap("1.", 2, "%#.0Lg", (ldouble)1.25L);
+    test_fmt_bytes_cap("1.2500", 6, "%#.5Lg", (ldouble)1.25L);
+    test_fmt_bytes_cap("      1.25", 10, "%10.4Lg", (ldouble)1.25L);
+    test_fmt_bytes_cap("0000001.25", 10, "%010.4Lg", (ldouble)1.25L);
+    test_fmt_bytes_cap("1.250E+00", 9, "%.3LE", (ldouble)1.25L);
+    test_fmt_bytes_cap("1.25", 4, "%.3LG", (ldouble)1.25L);
+    test_fmt_bytes_cap("INF", 3, "%LG", (ldouble)INFINITY);
+    test_fmt_bytes_cap("inf", 3, "%Lg", (ldouble)INFINITY);
 
-    test_fmt_bytes_capacity("0x0p+0", 6, "%La", (ldouble)0.0L);
-    test_fmt_bytes_capacity("-0x0p+0", 7, "%La", (ldouble)-0.0L);
-    test_fmt_bytes_capacity("0x1p+0", 6, "%La", (ldouble)1.0L);
-    test_fmt_bytes_capacity("0x1.8p+0", 8, "%La", (ldouble)1.5L);
-    test_fmt_bytes_capacity("0X1.8P+0", 8, "%LA", (ldouble)1.5L);
-    test_fmt_bytes_capacity("+0x1.8p+0", 9, "%+La", (ldouble)1.5L);
-    test_fmt_bytes_capacity("0x0000001.8p+0", 14, "%014La", (ldouble)1.5L);
-    test_fmt_bytes_capacity("0x1.0000p+0", 11, "%.4La", (ldouble)1.0L);
-    test_fmt_bytes_capacity("0x1.p+0", 7, "%#.0La", (ldouble)1.0L);
-    test_fmt_bytes_capacity("0x2p+0", 6, "%.0La", (ldouble)1.5L);
-    test_fmt_bytes_capacity("INF", 3, "%LA", (ldouble)INFINITY);
-    test_fmt_bytes_capacity("inf", 3, "%La", (ldouble)INFINITY);
+    test_fmt_bytes_cap("0x0p+0", 6, "%La", (ldouble)0.0L);
+    test_fmt_bytes_cap("-0x0p+0", 7, "%La", (ldouble)-0.0L);
+    test_fmt_bytes_cap("0x1p+0", 6, "%La", (ldouble)1.0L);
+    test_fmt_bytes_cap("0x1.8p+0", 8, "%La", (ldouble)1.5L);
+    test_fmt_bytes_cap("0X1.8P+0", 8, "%LA", (ldouble)1.5L);
+    test_fmt_bytes_cap("+0x1.8p+0", 9, "%+La", (ldouble)1.5L);
+    test_fmt_bytes_cap("0x0000001.8p+0", 14, "%014La", (ldouble)1.5L);
+    test_fmt_bytes_cap("0x1.0000p+0", 11, "%.4La", (ldouble)1.0L);
+    test_fmt_bytes_cap("0x1.p+0", 7, "%#.0La", (ldouble)1.0L);
+    test_fmt_bytes_cap("0x2p+0", 6, "%.0La", (ldouble)1.5L);
+    test_fmt_bytes_cap("INF", 3, "%LA", (ldouble)INFINITY);
+    test_fmt_bytes_cap("inf", 3, "%La", (ldouble)INFINITY);
 
     ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*Lf",
                                    -1, (ldouble)1.25), 8);
@@ -5632,11 +5632,11 @@ int
 main(void) {
     char buffer[16];
 
-    test_fmt_sink_capacity("", "");
-    test_fmt_sink_capacity("abc", "abc");
-    test_fmt_sink_capacity("%%", "%");
-    test_fmt_sink_capacity("a%%b%%c", "a%b%c");
-    test_fmt_sink_capacity("abc%%def", "abc%def");
+    test_fmt_sink_cap("", "");
+    test_fmt_sink_cap("abc", "abc");
+    test_fmt_sink_cap("%%", "%");
+    test_fmt_sink_cap("a%%b%%c", "a%b%c");
+    test_fmt_sink_cap("abc%%def", "abc%def");
     test_fmt_parser_valid_specs();
     test_fmt_parser_invalid_specs();
     test_fmt_integer_outputs();
