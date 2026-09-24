@@ -14,16 +14,6 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Keep line length at maximum 80 characters.
 
 ## Operators
-- Space is forbidden around unary plus and minus (`a = -1;`)
-- Space is mandatory around binary plus and minus (`a + b` and `a - b`).
-  * But not when using `+=` or `-=`:
-    ```c
-    i += 1; // good
-
-    i+=1;   // bad
-    i+= 1;  // bad
-    i +=1;  // bad
-    ```
 - Space or newline (if at end of line) is mandatory after comma.
 - Space is mandatory around all assignment operators (`=`, `*=`, `+=`, etc).
 - Space is forbidden around `*` used for multiplication.
