@@ -698,8 +698,7 @@ enum CommandFlag command_flags_normalized(enum CommandFlag);
 void command_free(Command *);
 void command_print(Command *);
 void command_printf(Command *command, char *fmt, ...);
-void command_push_length(Command *command, char *argument,
-                         int32 argument_len);
+void command_push_length(Command *command, char *argument, int32 argument_len);
 void command_push_array(Command *command, int32 argc, char **argv);
 void command_push_owned_length(
     char ***items,
