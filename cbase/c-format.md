@@ -308,6 +308,7 @@ if (condition1 || condition2) {
 ### Confusing precedence
 If the subconditions are chained together using `&&` and `||`, try to make
 intent clear by adding parenthesis:
+```c
 // bad
 if (!condition1 && confusing_precedence || x > 0) {
 }
@@ -317,6 +318,18 @@ if (!(condition1 && confusing_precedence) || (x > 0)) {
 }
 ```
 
+If there are 3 or more `&&` and `||` chained together, add new lines:
+```c
+// bad
+if (this_condition && x < 0 && y > 1 && this_other_condition) {
+}
+
+// good
+if (this_condition
+    && (x < 0)
+    && (y > 1)
+    && this_other_condition) {
+}
 ```
 
 ## Function declaration and definition
