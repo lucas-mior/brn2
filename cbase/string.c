@@ -502,7 +502,7 @@ sb_printf(StrBuilder *str, char *fmt, ...) {
 
     sb_reserve(str, estimate);
 
-    len = fmt_vsnprintf(str->data + str->len, (int64)estimate + 1, fmt, ap2);
+    len = fmt_vsnprintf(str->data + str->len, estimate + 1, fmt, ap2);
     va_end(ap2);
 
     if (len < 0) {
