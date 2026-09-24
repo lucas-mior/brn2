@@ -153,18 +153,23 @@ static inline uint32_t uint128_mod1e9(const uint64_t vHi, const uint64_t vLo) {
 
 static inline uint32_t mulShift_mod1e9(const uint64_t m, const uint64_t* const mul, const int32_t j) {
   uint64_t high0;                                   // 64
-  const uint64_t low0 = umul128(m, mul[0], &high0); // 0
   uint64_t high1;                                   // 128
-  const uint64_t low1 = umul128(m, mul[1], &high1); // 64
   uint64_t high2;                                   // 192
+  uint64_t s0high;
+  uint32_t c1;
+  uint64_t s1low;
+  uint32_t c2;
+  uint64_t s1high;
+  const uint64_t low0 = umul128(m, mul[0], &high0); // 0
+  const uint64_t low1 = umul128(m, mul[1], &high1); // 64
   const uint64_t low2 = umul128(m, mul[2], &high2); // 128
   const uint64_t s0low = low0;              // 0
   (void) s0low; // unused
-  const uint64_t s0high = low1 + high0;     // 64
-  const uint32_t c1 = s0high < low1;
-  const uint64_t s1low = low2 + high1 + c1; // 128
-  const uint32_t c2 = s1low < low2; // high1 + c1 can't overflow, so compare against low2
-  const uint64_t s1high = high2 + c2;       // 192
+  s0high = low1 + high0;     // 64
+  c1 = s0high < low1;
+  s1low = low2 + high1 + c1; // 128
+  c2 = s1low < low2; // high1 + c1 can't overflow, so compare against low2
+  s1high = high2 + c2;       // 192
 #ifdef RYU_DEBUG
   if (j < 128 || j > 180) {
     printf("%d\n", j);
