@@ -586,24 +586,24 @@ But do initialize if the initialization is clear and never fails:
 ```c
 // bad
 for (int32 i = 0; i < LENGTH(some_array); i += 1) {
-    char *string;
+    int32 *num;
     
-    string = some_array[i];
+    num = some_array[i];
 }
 
 // good
 for (int32 i = 0; i < LENGTH(some_array); i += 1) {
-    char *string = some_array[i];
+    int32 *num = some_array[i];
 }
 ```
 
 When getting a pointer that may return NULL:
 ```c
 // bad
-char *alias = function();
+MyStruct *alias = function();
 
 // good
-char *alias;
+MyStruct *alias;
 
 if ((alias = function()) == NULL) {
     ·// handle that case
