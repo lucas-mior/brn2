@@ -870,7 +870,7 @@ if (enum & ENUM_BITFLAG) {
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT(value < 0)`.
 - Prefer `ASSERT_NON_POSITIVE(value);` instead of `ASSERT(value <= 0)`.
 - Prefer `ASSERT_NON_NEGATIVE(value);` instead of `ASSERT(value >= 0)`.
-- Prefer `ASSERT_EQUAL(a, b);` instead of `ASSERT(a == b)`
+- Prefer `ASSERT_EQUAL(a, b);` instead of `ASSERT(a == b)` (except for enums).
 - Prefer `ASSERT_ZERO(value);` instead of `ASSERT_EQUAL(a, 0)`
 - Prefer `ASSERT_POSITIVE(value);` instead of `ASSERT_MORE(a, 0)`
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT_LESS(a, 0)`
