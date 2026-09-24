@@ -4199,6 +4199,7 @@ sb_float64_fixed(StrBuilder *sb, double value, int32 precision) {
     len = d2fixed_buffered_n(value, (uint32)precision, sb->data + sb->len);
     sb->len += len;
     sb->data[sb->len] = '\0';
+
     return;
 }
 
