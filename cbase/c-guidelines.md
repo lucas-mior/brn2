@@ -520,7 +520,7 @@ void my_function(char *path, int32 path_len) {
 }
 
 // better
-void my_function(char *path) {
+void my_function(char *path, int32 path_len) {
     FILE *file;
     int32 x = 0;
     int32 y = 0;
