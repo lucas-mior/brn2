@@ -2256,7 +2256,7 @@ fmt_float_force_decimal_point(char *body, int32 body_len,
     }
 
     memmove64(body + exponent_index + 1, body + exponent_index,
-            (body_len - exponent_index));
+              (body_len - exponent_index));
     body[exponent_index] = '.';
     return body_len + 1;
 }
@@ -2318,8 +2318,7 @@ fmt_float_hex_has_nonzero_tail(char *digits, int32 start) {
 }
 
 static bool
-fmt_float_hex_should_round(char first_digit, char *digits,
-                           int32 precision) {
+fmt_float_hex_should_round(char first_digit, char *digits, int32 precision) {
     int32 round_digit;
     int32 even_digit;
 
@@ -2458,8 +2457,7 @@ fmt_float_hex_append_exponent(char *buffer, int32 capacity, int32 len,
 
 static int32 UNUSED
 fmt_float_decimal_append_exponent(char *buffer, int32 capacity,
-                                  int32 len, int32 exponent,
-                                  bool upper) {
+                                  int32 len, int32 exponent, bool upper) {
     char digits[16];
     uint64 magnitude;
     int32 digit_len;
@@ -2505,8 +2503,7 @@ fmt_float_decimal_append_exponent(char *buffer, int32 capacity,
 }
 
 static bool UNUSED
-fmt_remainder_should_round(enum FormatRemainderHalf remainder,
-                           bool odd) {
+fmt_remainder_should_round(enum FormatRemainderHalf remainder, bool odd) {
     if (remainder == FORMAT_REMAINDER_MORE_HALF) {
         return true;
     }
@@ -2530,8 +2527,7 @@ fmt_big_uint_round_half_even(FormatBigUInt *value,
                              enum FormatRemainderHalf remainder) {
     ASSERT(value != NULL);
 
-    if (fmt_remainder_should_round(remainder,
-                                   fmt_big_uint_is_odd(value))) {
+    if (fmt_remainder_should_round(remainder, fmt_big_uint_is_odd(value))) {
         return fmt_big_uint_add_one(value);
     }
     return 0;
@@ -2645,8 +2641,7 @@ fmt_long_double_write_fixed_digits(char *buffer, int32 capacity,
         return fmt_buffer_write(buffer, capacity, len, digits, digit_len);
     }
     return fmt_buffer_write(buffer, capacity, len,
-                            digits + integer_len,
-                            digit_len - integer_len);
+                            digits + integer_len, digit_len - integer_len);
 }
 
 static int32
@@ -2672,8 +2667,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
     }
     if ((status = fmt_binary_float_scaled_decimal(&parts,
                                                   (int32)spec->precision,
-                                                  &integer,
-                                                  &remainder)) < 0) {
+                                                  &integer, &remainder)) < 0) {
         return status;
     }
     if ((status = fmt_big_uint_round_half_even(&integer, remainder)) < 0) {
@@ -2703,8 +2697,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
 }
 
 static bool
-fmt_decimal_digits_have_nonzero_tail(char *digits, int32 start,
-                                     int32 len) {
+fmt_decimal_digits_have_nonzero_tail(char *digits, int32 start, int32 len) {
     ASSERT(digits != NULL);
     ASSERT_NON_NEGATIVE(start);
     ASSERT_LESS_EQUAL(start, len);
