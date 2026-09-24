@@ -195,22 +195,22 @@ If does not fit, use good(2);
 if still does not fit, use good(3).
 ```c
 // good(1)
-pointer = realloc2(pointer, old_capacity, new_capacity, SIZEOF(*pointer);
+pointer = realloc2(pointer, old_capacity, new_capacity, SIZEOF(*pointer));
 
 // good(2)
 pointer_name = realloc2(pointer_name,
-                        old_capacity, new_capacity, SIZEOF(*pointer_name);
+                        old_capacity, new_capacity, SIZEOF(*pointer_name));
 // good(3)
 pointer_name_long = realloc2(pointer_name_long,
                              old_capacity, new_capacity,
-                             SIZEOF(*pointer_name_long);
+                             SIZEOF(*pointer_name_long));
 
 // bad
 pointer_name = realloc2(pointer_name, old_capacity,
-                        new_capacity, SIZEOF(*pointer_name);
+                        new_capacity, SIZEOF(*pointer_name));
 // bad
 pointer_name_long = realloc2(pointer_name_long, old_capacity, new_capacity,
-                             SIZEOF(*pointer_name_long);
+                             SIZEOF(*pointer_name_long));
 ```
 
 ## Switch formatting
