@@ -473,6 +473,8 @@ first argument fits in the first line:
 ```
 
 ## Preprocessor directives
+- Macro continuation line: indent using 0, 2 or 4 spaces (feel free to decide at
+  each case).
 Don't use `#ifdef` and `#ifndef`, use `#if defined()` and `#if !defined()`
 instead. Prefer explicitly setting the macro to 0 or 1 and checking its value
 directly instead of checking if it is defined:
