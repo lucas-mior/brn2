@@ -212,8 +212,7 @@ emit_int_array_init(String *out, char *field, int32 *values,
 }
 
 void
-emit_u64_array_init(String *out, char *field, uint64 *values,
-                           int32 count) {
+emit_u64_array_init(String *out, char *field, uint64 *values, int32 count) {
     if (count <= 0) {
         return;
     }
