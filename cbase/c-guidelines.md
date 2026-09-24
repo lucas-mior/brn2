@@ -286,9 +286,6 @@ In general, we must always know the lengths of our strings:
   - `read_entire_file`
   - lots of other functions in cbase/.
 - Use `strlen32`:
-  - for getting the length of a `char *`, when a function is used both with
-    literals and with variables and for some reason it does not receive the
-    length of the `char *`.
   - for strings coming from code that we don't control but have a upper limit
     * This is very very very rare. The only case I can even conceive is a file
       with null terminated strings in it, and we know the size of the file, so
