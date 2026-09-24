@@ -3971,9 +3971,8 @@ format_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     return status;
 }
 
-static int32
-format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
-                      va_list args) {
+int32 ATTR_PRINTF(3, 0)
+format_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
     FormatArgs format_args;
     FormatSink sink;
     char *literal;
@@ -4056,11 +4055,6 @@ format_vsnprintf_impl(char *buffer, int64 capacity, char *format,
 done:
     va_end(format_args.args);
     return result;
-}
-
-int32 ATTR_PRINTF(3, 0)
-format_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
-    return format_vsnprintf_impl(buffer, capacity, format, args);
 }
 
 int32 ATTR_PRINTF(3, 4)
@@ -4219,7 +4213,7 @@ format_test_snprintf(char *buffer, int64 capacity, char *format, ...) {
     int32 len;
 
     va_start(args, format);
-    len = format_vsnprintf_impl(buffer, capacity, format, args);
+    len = format_vsnprintf(buffer, capacity, format, args);
     va_end(args);
     return len;
 }
@@ -4409,7 +4403,7 @@ test_format_integer_capacity(char *expected, char *format, ...) {
 
         memset(buffer, 0x7f, SIZEOF(buffer));
         va_start(args, format);
-        len = format_vsnprintf_impl(buffer, capacity, format, args);
+        len = format_vsnprintf(buffer, capacity, format, args);
         va_end(args);
         ASSERT_EQUAL(len, expected_len);
 
@@ -4442,7 +4436,7 @@ test_format_bytes_capacity(char *expected, int32 expected_len,
 
         memset(buffer, 0x7f, SIZEOF(buffer));
         va_start(args, format);
-        len = format_vsnprintf_impl(buffer, capacity, format, args);
+        len = format_vsnprintf(buffer, capacity, format, args);
         va_end(args);
         ASSERT_EQUAL(len, expected_len);
 
