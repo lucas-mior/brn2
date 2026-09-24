@@ -373,7 +373,7 @@ That means to also avoid calling `strlen32`:
   strings. Do not use it where a single
   `SNPRINTF(stack_array, "format_%s_string", args);` would be enough.
   * Use `STR_APPEND` for appending literals or strings of known length, and
-    `sb_printf` for formatting. `sb_append` is internal code, not external API.
+    `str_printf` for formatting. `sb_append` is internal code, not external API.
     Use `STR_APPEND` instead.
   * `SNPRINTF` returns the number of bytes written (excluding the
     terminating null byte). No need to call `strlen32` on the buffer:
