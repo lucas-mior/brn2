@@ -52,7 +52,7 @@ not input validation: they simply assert (with the assertions of
   * Prefer `int64` or `int32` depending on context.
   * The only reason to use `size_t`, `ptrdiff_t`, and `ssize_t` is for casting
     so that we conform to C standard library functions that expect those types.
-- Never use `_t` integer types.
+- Never use `_t` standard fixed width integer types.
   * Include `primitives.h` and use the better aliases typedefed there.
 - Avoid using legacy C integers: `short`, `int`, `long`, and `long long`.
   * Prefer using `int16`, `int32`, and `int64` instead.
