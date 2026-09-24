@@ -1055,21 +1055,6 @@ fmt_handle_integer(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     return sink->status;
 }
 
-static int64
-fmt_string_len_limited(char *string, int64 limit) {
-    int64 len;
-
-    ASSERT(string != NULL);
-    ASSERT_NON_NEGATIVE(limit);
-
-    len = 0;
-    while (len < limit && string[len] != '\0') {
-        len += 1;
-    }
-
-    return len;
-}
-
 static void
 fmt_write_padded_bytes(FormatSink *sink, FormatSpec *spec,
                        char *data, int64 len) {
@@ -1165,9 +1150,9 @@ fmt_handle_string(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
             string = "(null)";
         }
         if (fmt_has_precision(spec)) {
-            len = fmt_string_len_limited(string, spec->precision);
+            len = strnlen32(string, spec->precision);
         } else {
-            len = fmt_string_len_limited(string, INT64_MAX);
+            len = strlen32(string);
         }
     }
 
@@ -4159,7 +4144,7 @@ fmt_vsnprintf_estimate(char *format, va_list args) {
             } else if (string == NULL) {
                 estimate = 6;
             } else {
-                estimate = fmt_string_len_limited(string, INT64_MAX);
+                estimate = strlen32(string);
             }
             estimate = fmt_estimate_apply_width(&spec, estimate);
         } else if (spec.conversion == 'p') {
