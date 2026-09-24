@@ -5417,9 +5417,8 @@ test_fmt_sink_validation(void) {
 static void
 test_fmt_float32_shortest(float value, char *expected) {
     char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
-    int32 len;
+    int32 len = fmt_float32_shortest(buffer, SIZEOF(buffer), value);
 
-    len = fmt_float32_shortest(buffer, SIZEOF(buffer), value);
     ASSERT_EQUAL(len, strlen32(expected));
     ASSERT_EQUAL(buffer, expected);
 
