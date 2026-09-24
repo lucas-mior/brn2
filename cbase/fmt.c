@@ -3971,6 +3971,265 @@ fmt_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
     return status;
 }
 
+static int32
+fmt_estimate_add(int64 *total, int64 len) {
+    ASSERT(total != NULL);
+    ASSERT_NON_NEGATIVE(len);
+
+    if (len > INT64_MAX - *total) {
+        return -EOVERFLOW;
+    }
+    *total += len;
+    if (*total > INT32_MAX) {
+        return -EOVERFLOW;
+    }
+    return 0;
+}
+
+static int64
+fmt_estimate_apply_width(FormatSpec *spec, int64 len) {
+    ASSERT(spec != NULL);
+    ASSERT_NON_NEGATIVE(len);
+
+    return MAX(len, spec->width);
+}
+
+int32 ATTR_PRINTF(1, 0)
+fmt_vsnprintf_estimate(char *format, va_list args) {
+    FormatArgs fmt_args;
+    char *literal;
+    char *cursor;
+    int64 total;
+    int32 result;
+    int32 status;
+
+    if (format == NULL) {
+        return -EINVAL;
+    }
+
+    va_copy(fmt_args.args, args);
+    total = 0;
+    literal = format;
+    cursor = format;
+    while (*cursor != '\0') {
+        FormatSpec spec;
+        int64 estimate;
+
+        if (*cursor != '%') {
+            cursor += 1;
+            continue;
+        }
+
+        if ((status = fmt_estimate_add(&total, cursor - literal)) < 0) {
+            result = status;
+            goto done;
+        }
+
+        cursor += 1;
+        if ((status = fmt_parse_spec(cursor, &cursor, &spec)) < 0) {
+            result = status;
+            goto done;
+        }
+
+        estimate = 0;
+        if (fmt_is_integer_conversion(spec.conversion)) {
+            int32 bits;
+            int64 digits;
+            int64 prefix_len;
+
+            if ((status = fmt_load_dynamic_width_precision(&spec,
+                                                           &fmt_args)) < 0) {
+                result = status;
+                goto done;
+            }
+
+            if (spec.length == FORMAT_LENGTH_HH
+                || spec.length == FORMAT_LENGTH_W8) {
+                bits = 8;
+            } else if (spec.length == FORMAT_LENGTH_H
+                       || spec.length == FORMAT_LENGTH_W16) {
+                bits = 16;
+            } else if (spec.length == FORMAT_LENGTH_LL
+                       || spec.length == FORMAT_LENGTH_W64) {
+                bits = 64;
+            } else {
+                ASSERT(spec.length == FORMAT_LENGTH_NONE
+                       || spec.length == FORMAT_LENGTH_W32);
+                bits = 32;
+            }
+
+            prefix_len = 0;
+            if (fmt_is_signed_integer_conversion(spec.conversion)) {
+                prefix_len = 1;
+                if (bits == 8) {
+                    digits = 3;
+                } else if (bits == 16) {
+                    digits = 5;
+                } else if (bits == 64) {
+                    digits = 19;
+                } else {
+                    digits = 10;
+                }
+            } else if (spec.conversion == 'u') {
+                if (bits == 8) {
+                    digits = 3;
+                } else if (bits == 16) {
+                    digits = 5;
+                } else if (bits == 64) {
+                    digits = 20;
+                } else {
+                    digits = 10;
+                }
+            } else if (spec.conversion == 'o') {
+                digits = (bits + 2)/3;
+                if ((spec.flags & FORMAT_FLAG_ALTERNATE) != 0) {
+                    prefix_len = 1;
+                }
+            } else if (spec.conversion == 'x' || spec.conversion == 'X') {
+                digits = (bits + 3)/4;
+                if ((spec.flags & FORMAT_FLAG_ALTERNATE) != 0) {
+                    prefix_len = 2;
+                }
+            } else {
+                ASSERT(spec.conversion == 'b' || spec.conversion == 'B');
+                digits = bits;
+                if ((spec.flags & FORMAT_FLAG_ALTERNATE) != 0) {
+                    prefix_len = 2;
+                }
+            }
+
+            if (fmt_has_precision(&spec) && spec.precision > digits) {
+                digits = spec.precision;
+            }
+            estimate = fmt_estimate_apply_width(&spec, prefix_len + digits);
+        } else if (spec.conversion == 'c') {
+            if ((status = fmt_load_dynamic_width(&spec, &fmt_args)) < 0) {
+                result = status;
+                goto done;
+            }
+            (void)va_arg(fmt_args.args, int32);
+            estimate = fmt_estimate_apply_width(&spec, 1);
+        } else if (spec.conversion == 's') {
+            char *string;
+            bool exact_span;
+
+            if ((status = fmt_load_dynamic_width(&spec, &fmt_args)) < 0) {
+                result = status;
+                goto done;
+            }
+            exact_span = false;
+            if (spec.precision_kind == FORMAT_PRECISION_ARG) {
+                int32 precision = va_arg(fmt_args.args, int32);
+
+                if (precision < 0) {
+                    result = -EINVAL;
+                    goto done;
+                }
+                exact_span = true;
+                spec.precision = precision;
+                spec.precision_kind = FORMAT_PRECISION_LITERAL;
+            }
+
+            string = va_arg(fmt_args.args, char *);
+            if (exact_span) {
+                estimate = spec.precision;
+                if (string == NULL && estimate > 0) {
+                    result = -EINVAL;
+                    goto done;
+                }
+            } else if (fmt_has_precision(&spec)) {
+                estimate = spec.precision;
+            } else if (string == NULL) {
+                estimate = 6;
+            } else {
+                estimate = fmt_string_len_limited(string, INT64_MAX);
+            }
+            estimate = fmt_estimate_apply_width(&spec, estimate);
+        } else if (spec.conversion == 'p') {
+            if ((status = fmt_load_dynamic_width(&spec, &fmt_args)) < 0) {
+                result = status;
+                goto done;
+            }
+            (void)va_arg(fmt_args.args, void *);
+            estimate = 2 + 2*SIZEOF(uintptr);
+            estimate = fmt_estimate_apply_width(&spec, estimate);
+        } else if (spec.conversion == 'n') {
+            void *pointer;
+
+            if (spec.length == FORMAT_LENGTH_HH
+                || spec.length == FORMAT_LENGTH_W8) {
+                pointer = va_arg(fmt_args.args, int8 *);
+            } else if (spec.length == FORMAT_LENGTH_H
+                       || spec.length == FORMAT_LENGTH_W16) {
+                pointer = va_arg(fmt_args.args, int16 *);
+            } else if (spec.length == FORMAT_LENGTH_LL
+                       || spec.length == FORMAT_LENGTH_W64) {
+                pointer = va_arg(fmt_args.args, int64 *);
+            } else {
+                ASSERT(spec.length == FORMAT_LENGTH_NONE
+                       || spec.length == FORMAT_LENGTH_W32);
+                pointer = va_arg(fmt_args.args, int32 *);
+            }
+            if (pointer == NULL) {
+                result = -EINVAL;
+                goto done;
+            }
+            estimate = 0;
+        } else if (fmt_is_float_conversion(spec.conversion)) {
+            int64 capacity64;
+
+            if ((status = fmt_load_float_width_precision(&spec,
+                                                         &fmt_args)) < 0) {
+                result = status;
+                goto done;
+            }
+            if (fmt_float_is_general(spec.conversion) && spec.precision == 0) {
+                spec.precision = 1;
+            }
+            if ((status = fmt_float_temp_capacity(&spec, &capacity64)) < 0) {
+                result = status;
+                goto done;
+            }
+            if (spec.length == FORMAT_LENGTH_BIG_L) {
+                (void)va_arg(fmt_args.args, ldouble);
+            } else {
+                (void)va_arg(fmt_args.args, double);
+            }
+            estimate = fmt_estimate_apply_width(&spec, capacity64 + 1);
+        } else {
+            ASSERT(spec.conversion == '%');
+            estimate = 1;
+        }
+
+        if ((status = fmt_estimate_add(&total, estimate)) < 0) {
+            result = status;
+            goto done;
+        }
+        literal = cursor;
+    }
+
+    if ((status = fmt_estimate_add(&total, cursor - literal)) < 0) {
+        result = status;
+        goto done;
+    }
+    result = (int32)total;
+
+done:
+    va_end(fmt_args.args);
+    return result;
+}
+
+int32 ATTR_PRINTF(1, 2)
+fmt_snprintf_estimate(char *format, ...) {
+    va_list args;
+    int32 estimate;
+
+    va_start(args, format);
+    estimate = fmt_vsnprintf_estimate(format, args);
+    va_end(args);
+    return estimate;
+}
+
 int32 ATTR_PRINTF(3, 0)
 fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
     FormatArgs fmt_args;
@@ -5089,6 +5348,48 @@ test_fmt_public_api(void) {
 }
 
 static void
+test_fmt_estimate(void) {
+    char span[] = {'a', '\0', 'b', 'c'};
+    char buffer[64];
+    int32 estimate;
+    int32 exact;
+    int32 count;
+
+    ASSERT_EQUAL(fmt_snprintf_estimate("abc"), 3);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%d", 0), 11);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%lld", (int64)0), 20);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%#b", (uint32)0), 34);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%100d", 0), 100);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%p", (void *)NULL),
+                 (int32)(2 + 2*SIZEOF(uintptr)));
+
+    ASSERT_EQUAL(fmt_snprintf_estimate("%s", "abc"), 3);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%s", (char *)NULL), 6);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%.10s", "abc"), 10);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%.*s", 4, span), 4);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%5.*s", 3, span), 5);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%.*s", -1, "abc"), -EINVAL);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%.*s", 1, (char *)NULL), -EINVAL);
+
+    ASSERT_EQUAL(fmt_snprintf_estimate("%f", 1.0),
+                 FORMAT_FLOAT_MAX_FIXED_PREFIX + 6 + 8 + 1);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%20.2f", 1.0),
+                 FORMAT_FLOAT_MAX_FIXED_PREFIX + 2 + 8 + 1);
+
+    count = -1;
+    ASSERT_EQUAL(fmt_snprintf_estimate("ab%ncd", &count), 4);
+    ASSERT_EQUAL(count, -1);
+    ASSERT_EQUAL(fmt_snprintf_estimate("abc%n", (int32 *)NULL), -EINVAL);
+
+    estimate = fmt_snprintf_estimate("x=%d s=%.*s f=%g", 7, 4, span, 1.25);
+    exact = fmt_test_snprintf(buffer, SIZEOF(buffer), "x=%d s=%.*s f=%g",
+                              7, 4, span, 1.25);
+    ASSERT_MORE_EQUAL(estimate, exact);
+
+    return;
+}
+
+static void
 test_fmt_sink_validation(void) {
     char buffer[8];
     FormatSink sink;
@@ -5236,6 +5537,7 @@ main(void) {
     test_fmt_long_double_decomposition();
     test_fmt_long_double_decimal_helpers();
     test_fmt_public_api();
+    test_fmt_estimate();
     test_fmt_sink_validation();
 
     test_fmt_float64_shortest(0.0, "0E0");
