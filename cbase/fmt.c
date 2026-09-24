@@ -5358,7 +5358,7 @@ test_fmt_estimate(void) {
     ASSERT_EQUAL(fmt_snprintf_estimate("abc"), 3);
     ASSERT_EQUAL(fmt_snprintf_estimate("%d", 0), 11);
     ASSERT_EQUAL(fmt_snprintf_estimate("%lld", (int64)0), 20);
-    ASSERT_EQUAL(fmt_snprintf_estimate("%#b", (uint32)0), 34);
+    ASSERT_EQUAL(fmt_snprintf_estimate("%#b", 0), 34);
     ASSERT_EQUAL(fmt_snprintf_estimate("%100d", 0), 100);
     ASSERT_EQUAL(fmt_snprintf_estimate("%p", (void *)NULL),
                  (int32)(2 + 2*SIZEOF(uintptr)));
