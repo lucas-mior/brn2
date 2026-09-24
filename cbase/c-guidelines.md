@@ -1103,6 +1103,7 @@ Every .c file (except the main program) must have a testing block:
 
 int main(void) {
     // tests most of the file
+    exit(EXIT_SUCCESS);
 }
 #endif /* TESTING_file_prefix */
 ```
