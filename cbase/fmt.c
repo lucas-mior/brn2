@@ -116,9 +116,9 @@ fmt_digit_value(char byte) {
 }
 
 static int32
-fmt_parse_uint(char **cursor, int64 *value) {
+fmt_parse_uint(char **cursor, int32 *value) {
     char *scan;
-    int64 result;
+    int32 result;
     bool found_digit;
 
     ASSERT(cursor != NULL);
@@ -131,7 +131,7 @@ fmt_parse_uint(char **cursor, int64 *value) {
     while (fmt_is_digit(*scan)) {
         int32 digit = fmt_digit_value(*scan);
 
-        if (result > (INT64_MAX - digit)/10) {
+        if (result > (INT32_MAX - digit)/10) {
             return -EOVERFLOW;
         }
 
@@ -218,7 +218,7 @@ fmt_parse_flags(char **cursor, FormatSpec *spec) {
 
 static int32
 fmt_parse_width(char **cursor, FormatSpec *spec) {
-    int64 width;
+    int32 width;
     int32 status;
 
     ASSERT(cursor != NULL);
@@ -239,10 +239,7 @@ fmt_parse_width(char **cursor, FormatSpec *spec) {
         if ((status = fmt_parse_uint(cursor, &width)) < 0) {
             return status;
         }
-        if (width > INT32_MAX) {
-            return -EOVERFLOW;
-        }
-        spec->width = (int32)width;
+        spec->width = width;
     }
 
     return 0;
@@ -250,7 +247,7 @@ fmt_parse_width(char **cursor, FormatSpec *spec) {
 
 static int32
 fmt_parse_precision(char **cursor, FormatSpec *spec) {
-    int64 precision;
+    int32 precision;
     int32 status;
 
     ASSERT(cursor != NULL);
@@ -286,10 +283,7 @@ fmt_parse_precision(char **cursor, FormatSpec *spec) {
         if ((status = fmt_parse_uint(cursor, &precision)) < 0) {
             return status;
         }
-        if (precision > INT32_MAX) {
-            return -EOVERFLOW;
-        }
-        spec->precision = (int32)precision;
+        spec->precision = precision;
     }
 
     return 0;
@@ -297,7 +291,7 @@ fmt_parse_precision(char **cursor, FormatSpec *spec) {
 
 static int32
 fmt_parse_w_length(char **cursor, FormatSpec *spec) {
-    int64 width;
+    int32 width;
     int32 status;
 
     ASSERT(cursor != NULL);
