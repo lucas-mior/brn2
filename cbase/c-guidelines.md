@@ -186,7 +186,9 @@ typeof(var)  // good
   ```c
   typedef struct MyStruct {
       int32 number;
+      int32 stuff;
       char *string;
+      int32 string_len;
   } MyStruct;
   ```
 - Never typedef enums and unions, except for the automatic
