@@ -479,6 +479,7 @@ sb_bytes_pretty(StrBuilder *str, llong size) {
     sb_reserve(str, 16);
     len = bytes_pretty(str->data + str->len, size);
     str->len += len;
+
     return;
 }
 
