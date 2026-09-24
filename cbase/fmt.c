@@ -4615,14 +4615,12 @@ static FormatSpec
 fmt_test_parse_one(char *format) {
     FormatSpec spec;
     char *next;
-    int32 status;
 
     ASSERT(format != NULL);
     ASSERT_EQUAL(format[0], '%');
 
     next = NULL;
-    status = fmt_parse_spec(format + 1, &next, &spec);
-    ASSERT_EQUAL(status, 0);
+    ASSERT(!fmt_parse_spec(format + 1, &next, &spec));
     ASSERT_EQUAL(*next, '\0');
     return spec;
 }
@@ -4633,7 +4631,7 @@ test_fmt_parser_valid_specs(void) {
 
     spec = fmt_test_parse_one("%%");
     ASSERT_EQUAL(spec.conversion, '%');
-    ASSERT_EQUAL(spec.flags, 0);
+    ASSERT_ZERO(spec.flags);
     ASSERT(spec.length == FORMAT_LENGTH_NONE);
 
     spec = fmt_test_parse_one("%08.3d");
@@ -4680,7 +4678,7 @@ test_fmt_parser_valid_specs(void) {
     ASSERT_EQUAL(spec.conversion, 'n');
     ASSERT(spec.length == FORMAT_LENGTH_W16);
 
-    ASSERT_EQUAL(fmt_test_validate("a %% b %08d %*.*s"), 0);
+    ASSERT(!fmt_test_validate("a %% b %08d %*.*s"));
     return;
 }
 
@@ -5201,7 +5199,7 @@ fmt_test_long_double_supported(void) {
     if (status == -ENOSYS) {
         return false;
     }
-    ASSERT_EQUAL(status, 0);
+    ASSERT_ZERO(status);
     return true;
 }
 
@@ -5210,7 +5208,7 @@ test_fmt_long_double_parts(ldouble value, bool negative,
                            int32 bit_len, int32 binary_exponent) {
     FormatBinaryFloat parts;
 
-    ASSERT_EQUAL(fmt_decompose_long_double(value, &parts), 0);
+    ASSERT(!fmt_decompose_long_double(value, &parts));
     ASSERT(parts.negative == negative);
     ASSERT(parts.zero == (bit_len == 0));
     ASSERT_EQUAL(parts.precision_bits, LDBL_MANT_DIG);
@@ -5226,8 +5224,8 @@ test_fmt_long_double_exact_integer(ldouble value, char *expected) {
     FormatBigUInt integer;
     int32 len;
 
-    ASSERT_EQUAL(fmt_decompose_long_double(value, &parts), 0);
-    ASSERT_EQUAL(fmt_binary_float_to_exact_integer(&parts, &integer), 0);
+    ASSERT(!fmt_decompose_long_double(value, &parts));
+    ASSERT(!fmt_binary_float_to_exact_integer(&parts, &integer));
     len = fmt_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
     ASSERT_EQUAL(len, strlen32(expected));
     ASSERT_EQUAL(buffer, expected);
@@ -5244,9 +5242,9 @@ test_fmt_long_double_scaled(ldouble value, int32 decimal_places,
     enum FormatRemainderHalf remainder;
     int32 len;
 
-    ASSERT_EQUAL(fmt_decompose_long_double(value, &parts), 0);
-    ASSERT_EQUAL(fmt_binary_float_scaled_decimal(&parts, decimal_places,
-                                                 &integer, &remainder), 0);
+    ASSERT(!fmt_decompose_long_double(value, &parts));
+    ASSERT(!fmt_binary_float_scaled_decimal(&parts, decimal_places,
+                                            &integer, &remainder));
     ASSERT(remainder == expected_rem);
     len = fmt_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
     ASSERT_EQUAL(len, strlen32(expected));
@@ -5286,8 +5284,8 @@ test_fmt_long_double_decomposition(void) {
     expected_exp = LDBL_MAX_EXP - LDBL_MANT_DIG;
     test_fmt_long_double_parts(LDBL_MAX, false, LDBL_MANT_DIG,
                                expected_exp);
-    ASSERT_EQUAL(fmt_decompose_long_double(LDBL_MAX, &parts), 0);
-    ASSERT_EQUAL(fmt_binary_float_to_exact_integer(&parts, &integer), 0);
+    ASSERT(!fmt_decompose_long_double(LDBL_MAX, &parts));
+    ASSERT(!fmt_binary_float_to_exact_integer(&parts, &integer));
     ASSERT_EQUAL(fmt_big_uint_bit_len(&integer), LDBL_MAX_EXP);
 
     true_min = ldexpl(1.0L, LDBL_MIN_EXP - LDBL_MANT_DIG);
@@ -5314,20 +5312,14 @@ test_fmt_long_double_decimal_helpers(void) {
     test_fmt_long_double_exact_integer(ldexpl(1.0L, 64),
                                        "18446744073709551616");
 
-    ASSERT_EQUAL(fmt_decompose_long_double(0.5L, &parts), 0);
-    ASSERT_EQUAL(fmt_binary_float_to_exact_integer(&parts, &integer),
-                 -ERANGE);
+    ASSERT(!fmt_decompose_long_double(0.5L, &parts));
+    ASSERT_EQUAL(fmt_binary_float_to_exact_integer(&parts, &integer), -ERANGE);
 
-    test_fmt_long_double_scaled(0.125L, 3, "125",
-                                FORMAT_REMAINDER_ZERO);
-    test_fmt_long_double_scaled(0.25L, 0, "0",
-                                FORMAT_REMAINDER_LESS_HALF);
-    test_fmt_long_double_scaled(0.5L, 0, "0",
-                                FORMAT_REMAINDER_HALF);
-    test_fmt_long_double_scaled(0.75L, 0, "0",
-                                FORMAT_REMAINDER_MORE_HALF);
-    test_fmt_long_double_scaled(1.25L, 1, "12",
-                                FORMAT_REMAINDER_HALF);
+    test_fmt_long_double_scaled(0.125L, 3, "125", FORMAT_REMAINDER_ZERO);
+    test_fmt_long_double_scaled(0.25L, 0, "0", FORMAT_REMAINDER_LESS_HALF);
+    test_fmt_long_double_scaled(0.5L, 0, "0", FORMAT_REMAINDER_HALF);
+    test_fmt_long_double_scaled(0.75L, 0, "0", FORMAT_REMAINDER_MORE_HALF);
+    test_fmt_long_double_scaled(1.25L, 1, "12", FORMAT_REMAINDER_HALF);
     return;
 }
 
@@ -5544,7 +5536,7 @@ test_fmt_sink_validation(void) {
     ASSERT_EQUAL(buffer[0], '\0');
     ASSERT_EQUAL(buffer[1], (char)0x7f);
 
-    ASSERT_EQUAL(fmt_sink_init(&sink, buffer, SIZEOF(buffer)), 0);
+    ASSERT(!fmt_sink_init(&sink, buffer, SIZEOF(buffer)));
     sink.total = (int64)INT32_MAX + 1;
     ASSERT_EQUAL(fmt_sink_finish(&sink), -EOVERFLOW);
 
