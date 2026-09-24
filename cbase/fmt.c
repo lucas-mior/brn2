@@ -534,6 +534,7 @@ typedef struct FormatSink {
     int64 written;
     int64 total;
     int32 status;
+    bool unchecked;
 } FormatSink;
 
 static int32
@@ -552,6 +553,7 @@ fmt_sink_init(FormatSink *sink, char *buffer, int64 capacity) {
     sink->written = 0;
     sink->total = 0;
     sink->status = 0;
+    sink->unchecked = false;
 
     if (capacity > 0) {
         buffer[0] = '\0';
@@ -587,6 +589,21 @@ fmt_sink_write(FormatSink *sink, char *data, int64 len) {
     ASSERT_NON_NEGATIVE(len);
 
     if (sink->status < 0) {
+        return;
+    }
+
+    if (sink->unchecked) {
+        fmt_sink_add_total(sink, len);
+        if (sink->status < 0) {
+            return;
+        }
+        if (DEBUGGING) {
+            ASSERT(sink->buffer != NULL);
+            ASSERT_LESS(sink->written + len, sink->capacity);
+        }
+        memcpy64(sink->buffer + sink->written, data, len);
+        sink->written += len;
+        sink->buffer[sink->written] = '\0';
         return;
     }
 
@@ -642,6 +659,21 @@ fmt_sink_write_repeat(FormatSink *sink, char byte, int64 len) {
     ASSERT_NON_NEGATIVE(len);
 
     if (sink->status < 0) {
+        return;
+    }
+
+    if (sink->unchecked) {
+        fmt_sink_add_total(sink, len);
+        if (sink->status < 0) {
+            return;
+        }
+        if (DEBUGGING) {
+            ASSERT(sink->buffer != NULL);
+            ASSERT_LESS(sink->written + len, sink->capacity);
+        }
+        memset64(sink->buffer + sink->written, byte, len);
+        sink->written += len;
+        sink->buffer[sink->written] = '\0';
         return;
     }
 
@@ -4101,6 +4133,26 @@ fmt_vsnprintf_estimate(char *format, va_list args) {
             if (fmt_has_precision(&spec) && spec.precision > digits) {
                 digits = spec.precision;
             }
+            if (fmt_is_signed_integer_conversion(spec.conversion)) {
+                if (spec.length == FORMAT_LENGTH_LL
+                    || spec.length == FORMAT_LENGTH_W64) {
+                    (void)va_arg(fmt_args.args, int64);
+                } else {
+                    (void)va_arg(fmt_args.args, int32);
+                }
+            } else if (spec.length == FORMAT_LENGTH_HH
+                       || spec.length == FORMAT_LENGTH_H
+                       || spec.length == FORMAT_LENGTH_W8
+                       || spec.length == FORMAT_LENGTH_W16) {
+                (void)va_arg(fmt_args.args, int32);
+            } else if (spec.length == FORMAT_LENGTH_LL
+                       || spec.length == FORMAT_LENGTH_W64) {
+                (void)va_arg(fmt_args.args, uint64);
+            } else {
+                ASSERT(spec.length == FORMAT_LENGTH_NONE
+                       || spec.length == FORMAT_LENGTH_W32);
+                (void)va_arg(fmt_args.args, uint32);
+            }
             estimate = fmt_estimate_apply_width(&spec, prefix_len + digits);
         } else if (spec.conversion == 'c') {
             if ((status = fmt_load_dynamic_width(&spec, &fmt_args)) < 0) {
@@ -4230,20 +4282,18 @@ fmt_snprintf_estimate(char *format, ...) {
     return estimate;
 }
 
-int32 ATTR_PRINTF(3, 0)
-fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
+static int32
+fmt_vsnprintf_sink(FormatSink *sink, char *format, va_list args) {
     FormatArgs fmt_args;
-    FormatSink sink;
     char *literal;
     char *cursor;
     int32 result;
     int32 status;
 
+    ASSERT(sink != NULL);
+
     if (format == NULL) {
         return -EINVAL;
-    }
-    if ((status = fmt_sink_init(&sink, buffer, capacity)) < 0) {
-        return status;
     }
 
     va_copy(fmt_args.args, args);
@@ -4257,9 +4307,9 @@ fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
             continue;
         }
 
-        fmt_sink_write(&sink, literal, cursor - literal);
-        if (sink.status < 0) {
-            result = fmt_sink_finish(&sink);
+        fmt_sink_write(sink, literal, cursor - literal);
+        if (sink->status < 0) {
+            result = fmt_sink_finish(sink);
             goto done;
         }
 
@@ -4269,37 +4319,37 @@ fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
             goto done;
         }
         if (fmt_is_integer_conversion(spec.conversion)) {
-            status = fmt_handle_integer(&sink, &spec, &fmt_args);
+            status = fmt_handle_integer(sink, &spec, &fmt_args);
             if (status < 0) {
                 result = status;
                 goto done;
             }
         } else if (spec.conversion == 'c' || spec.conversion == 's') {
-            status = fmt_handle_char_string(&sink, &spec, &fmt_args);
+            status = fmt_handle_char_string(sink, &spec, &fmt_args);
             if (status < 0) {
                 result = status;
                 goto done;
             }
         } else if (spec.conversion == 'p') {
-            status = fmt_handle_pointer(&sink, &spec, &fmt_args);
+            status = fmt_handle_pointer(sink, &spec, &fmt_args);
             if (status < 0) {
                 result = status;
                 goto done;
             }
         } else if (spec.conversion == 'n') {
-            status = fmt_handle_count(&sink, &spec, &fmt_args);
+            status = fmt_handle_count(sink, &spec, &fmt_args);
             if (status < 0) {
                 result = status;
                 goto done;
             }
         } else if (fmt_is_float_conversion(spec.conversion)) {
-            status = fmt_handle_float(&sink, &spec, &fmt_args);
+            status = fmt_handle_float(sink, &spec, &fmt_args);
             if (status < 0) {
                 result = status;
                 goto done;
             }
         } else if (spec.conversion == '%') {
-            fmt_sink_write_byte(&sink, '%');
+            fmt_sink_write_byte(sink, '%');
         } else {
             result = -ENOSYS;
             goto done;
@@ -4308,12 +4358,23 @@ fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
         literal = cursor;
     }
 
-    fmt_sink_write(&sink, literal, cursor - literal);
-    result = fmt_sink_finish(&sink);
+    fmt_sink_write(sink, literal, cursor - literal);
+    result = fmt_sink_finish(sink);
 
 done:
     va_end(fmt_args.args);
     return result;
+}
+
+int32 ATTR_PRINTF(3, 0)
+fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args) {
+    FormatSink sink;
+    int32 status;
+
+    if ((status = fmt_sink_init(&sink, buffer, capacity)) < 0) {
+        return status;
+    }
+    return fmt_vsnprintf_sink(&sink, format, args);
 }
 
 int32 ATTR_PRINTF(3, 4)
@@ -4323,6 +4384,51 @@ fmt_snprintf(char *buffer, int64 capacity, char *format, ...) {
 
     va_start(args, format);
     len = fmt_vsnprintf(buffer, capacity, format, args);
+    va_end(args);
+    return len;
+}
+
+int32 ATTR_PRINTF(3, 0)
+fmt_vsprintf(char *buffer, int64 capacity, char *format, va_list args) {
+    FormatSink sink;
+    int32 status;
+
+    if (buffer == NULL) {
+        return -EINVAL;
+    }
+    if (capacity <= 0) {
+        return -EINVAL;
+    }
+
+    if (DEBUGGING) {
+        va_list check_args;
+        int32 estimate_len;
+
+        va_copy(check_args, args);
+        estimate_len = fmt_vsnprintf_estimate(format, check_args);
+        va_end(check_args);
+        if (estimate_len < 0) {
+            return estimate_len;
+        }
+        if ((int64)estimate_len >= capacity) {
+            return -ENOSPC;
+        }
+    }
+
+    if ((status = fmt_sink_init(&sink, buffer, capacity)) < 0) {
+        return status;
+    }
+    sink.unchecked = true;
+    return fmt_vsnprintf_sink(&sink, format, args);
+}
+
+int32 ATTR_PRINTF(3, 4)
+fmt_sprintf(char *buffer, int64 capacity, char *format, ...) {
+    va_list args;
+    int32 len;
+
+    va_start(args, format);
+    len = fmt_vsprintf(buffer, capacity, format, args);
     va_end(args);
     return len;
 }
@@ -5315,6 +5421,17 @@ fmt_test_public_vsnprintf(char *buffer, int64 capacity, char *format, ...) {
     return len;
 }
 
+static int32
+fmt_test_public_vsprintf(char *buffer, int64 capacity, char *format, ...) {
+    va_list args;
+    int32 len;
+
+    va_start(args, format);
+    len = fmt_vsprintf(buffer, capacity, format, args);
+    va_end(args);
+    return len;
+}
+
 static void
 test_fmt_public_api(void) {
     char buffer[32];
@@ -5344,6 +5461,26 @@ test_fmt_public_api(void) {
     ASSERT_EQUAL(len, 4);
     ASSERT_EQUAL(count, 4);
     ASSERT_EQUAL(tiny, SIZEOF(tiny), "abc", 4);
+
+    len = fmt_sprintf(buffer, SIZEOF(buffer), "fast:%d:%s", 42, "ok");
+    ASSERT_EQUAL(len, 10);
+    ASSERT_EQUAL(buffer, len + 1, "fast:42:ok", 11);
+
+    len = fmt_test_public_vsprintf(buffer, SIZEOF(buffer), "%s:%.*s",
+                                   NULL, 3, "a\0b");
+    ASSERT_EQUAL(len, 10);
+    ASSERT_EQUAL(buffer, len + 1, "(null):a\0b", 11);
+
+    count = -1;
+    len = fmt_sprintf(buffer, SIZEOF(buffer), "abcd%n", &count);
+    ASSERT_EQUAL(len, 4);
+    ASSERT_EQUAL(count, 4);
+    ASSERT_EQUAL(buffer, "abcd");
+
+    ASSERT_EQUAL(fmt_sprintf(tiny, SIZEOF(tiny), "abcdef"), -ENOSPC);
+    ASSERT_EQUAL(fmt_test_public_vsprintf(tiny, SIZEOF(tiny), "abcdef"),
+                 -ENOSPC);
+
     return;
 }
 
