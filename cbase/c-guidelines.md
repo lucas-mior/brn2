@@ -394,8 +394,6 @@ That means to also avoid calling `strlen32`:
         n = SNPRINTF(buffer, "%d", m);
     }
     ```
-- If the string is a literal passed just for printing purposes, very common in
-  test suites, then it is okay to simply pass the `char *` without the length.
 
 Considering all that, most `string.h` functions from the C standard library are
 to be avoided. `strcpy`, `strcat`, `strstr`, and `strtok` are always the wrong
@@ -441,9 +439,9 @@ but NEVER create helper like those.
     1. Interfacing with dumb API (get length with `strnlen32`/`strlen32`
        immediately and store it using one of the 3 types above).
     2. Sometimes, we only want to pass a "label"/"id" around, for
-       debugging/logging purposes. This is very very very rare, but it is valid
-       to use `char *string` without length in this case. In this case, the
-       string *must* be created as a literal, be set by assignment (never
+       debugging/logging/testing purposes. This is very very very rare, but it
+       is valid to use `char *string` without length in this case. In this case,
+       the string *must* be created as a literal, be set by assignment (never
        memcpy or friends), and never freed/copied. If the string is being
        freed/copied around, then it is no longer a valid use of `char *string`
        without length, and it must be converted in its inception to one of the 3
