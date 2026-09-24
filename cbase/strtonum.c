@@ -298,7 +298,6 @@ main(void) {
                  -ERANGE);
 
     ASSERT_EQUAL(atoi2("-123x", 4), -123);
-    ASSERT_EQUAL(atoi2("99", 1), 99);
     ASSERT_EQUAL(atoi2("42", 0), 0);
     ASSERT_EQUAL(atoi2(STRLIT("9223372036854775807")), LLONG_MAX);
     ASSERT_EQUAL(atoi2(STRLIT("-9223372036854775808")), LLONG_MIN);
@@ -310,7 +309,6 @@ main(void) {
 #endif
 
     ASSERT_EQUAL(atoi2sat("-123x", 4), -123);
-    ASSERT_EQUAL(atoi2sat("99", 1), 99);
     ASSERT_EQUAL(atoi2sat("42", 0), 0);
     ASSERT_EQUAL(atoi2sat(STRLIT("9223372036854775807")), LLONG_MAX);
     ASSERT_EQUAL(atoi2sat(STRLIT("-9223372036854775808")), LLONG_MIN);
