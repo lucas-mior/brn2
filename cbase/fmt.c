@@ -91,8 +91,8 @@ enum FormatLength {
 
 typedef struct FormatSpec {
     int32 flags;
-    int64 width;
-    int64 precision;
+    int32 width;
+    int32 precision;
     enum FormatWidthKind width_kind;
     enum FormatPrecisionKind precision_kind;
     enum FormatLength length;
@@ -214,6 +214,7 @@ fmt_parse_flags(char **cursor, FormatSpec *spec) {
 
 static int32
 fmt_parse_width(char **cursor, FormatSpec *spec) {
+    int64 width;
     int32 status;
 
     ASSERT(cursor != NULL);
@@ -231,9 +232,13 @@ fmt_parse_width(char **cursor, FormatSpec *spec) {
 
     if (fmt_is_digit(**cursor)) {
         spec->width_kind = FMT_WIDTH_LITERAL;
-        if ((status = fmt_parse_uint(cursor, &spec->width)) < 0) {
+        if ((status = fmt_parse_uint(cursor, &width)) < 0) {
             return status;
         }
+        if (width > INT32_MAX) {
+            return -EOVERFLOW;
+        }
+        spec->width = (int32)width;
     }
 
     return 0;
@@ -241,6 +246,7 @@ fmt_parse_width(char **cursor, FormatSpec *spec) {
 
 static int32
 fmt_parse_precision(char **cursor, FormatSpec *spec) {
+    int64 precision;
     int32 status;
 
     ASSERT(cursor != NULL);
@@ -273,9 +279,13 @@ fmt_parse_precision(char **cursor, FormatSpec *spec) {
             return -EINVAL;
         }
 
-        if ((status = fmt_parse_uint(cursor, &spec->precision)) < 0) {
+        if ((status = fmt_parse_uint(cursor, &precision)) < 0) {
             return status;
         }
+        if (precision > INT32_MAX) {
+            return -EOVERFLOW;
+        }
+        spec->precision = (int32)precision;
     }
 
     return 0;
@@ -718,8 +728,11 @@ fmt_load_dynamic_width(FormatSpec *spec, FormatArgs *args) {
         int32 width = va_arg(args->args, int32);
 
         if (width < 0) {
+            if (width == INT32_MIN) {
+                return -EOVERFLOW;
+            }
             spec->flags |= FMT_FLAG_LEFT;
-            spec->width = -(int64)width;
+            spec->width = -width;
         } else {
             spec->width = width;
         }
@@ -4664,6 +4677,9 @@ test_fmt_parser_invalid_specs(void) {
     ASSERT_EQUAL(fmt_test_validate("%ln"), -EINVAL);
     ASSERT_EQUAL(fmt_test_validate("%5%"), -EINVAL);
     ASSERT_EQUAL(fmt_test_validate("%.0%"), -EINVAL);
+
+    ASSERT_EQUAL(fmt_test_validate("%2147483648d"), -EOVERFLOW);
+    ASSERT_EQUAL(fmt_test_validate("%.2147483648d"), -EOVERFLOW);
 
     return;
 }
