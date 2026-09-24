@@ -504,6 +504,7 @@ sb_printf(StrBuilder *str, char *fmt, ...) {
 
     len = fmt_vsnprintf(str->data + str->len, (int64)estimate + 1, fmt, ap2);
     va_end(ap2);
+
     if (len < 0) {
         error("Error formatting \"%s\".", fmt);
         fatal(EXIT_FAILURE);
