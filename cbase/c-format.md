@@ -314,7 +314,7 @@ if (!condition1 && confusing_precedence || x > 0) {
 }
 
 // good
-if (!(condition1 && confusing_precedence) || (x > 0)) {
+if ((!condition1 && confusing_precedence) || (x > 0)) {
 }
 ```
 
