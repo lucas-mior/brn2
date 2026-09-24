@@ -1012,6 +1012,7 @@ common_test_compile_and_run_source () {
     test_tail_ldflags="$LDFLAGS"
     test_run_after_compile=1
     test_msvc_compiler=
+    test_use_cbase_archive=0
 
     mkdir -p "$(dirname "$test_exe")"
 
@@ -1031,6 +1032,10 @@ common_test_compile_and_run_source () {
         test_tail_ldflags=${TEST_WINDOWS_LDFLAGS:-}
         test_run_after_compile=${TEST_WINDOWS_RUN:-1}
     else
+        if [ -n "${test_cbase_archive:-}" ]; then
+            test_use_cbase_archive=1
+        fi
+
         case "$test_cc" in
         clang-cl|*/clang-cl)
             test_msvc_compiler=clang-cl
@@ -1073,6 +1078,10 @@ common_test_compile_and_run_source () {
         test_added_flags="$test_added_flags -DTESTING=1"
     fi
 
+    if [ "$test_use_cbase_archive" != 0 ]; then
+        test_added_flags="$test_added_flags -DCBASE_SEPARATE_COMPILATION=1"
+    fi
+
     test_added_flags="$test_added_flags $TEST_EXTRA_DEFS"
     if [ -n "$test_msvc_compiler" ]; then
         test_added_flags=$(common_gcc_flags_to_msvc \
@@ -1085,6 +1094,9 @@ common_test_compile_and_run_source () {
         test_cmdline="$test_cmdline /Fe$test_exe $test_src"
     else
         test_cmdline="$test_cmdline -o $test_exe $test_src"
+    fi
+    if [ "$test_use_cbase_archive" != 0 ]; then
+        test_cmdline="$test_cmdline $test_cbase_archive"
     fi
     test_cmdline="$test_cmdline $test_tail_ldflags"
 

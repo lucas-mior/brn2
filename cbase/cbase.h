@@ -829,7 +829,8 @@ void throw_away_function();
 #endif /* CBASE_H */
 
 #if defined(CBASE_IMPLEMENT) && defined(CBASE_DECLARATIONS_COMPLETE) \
-        && !defined(CBASE_IMPLEMENTED)
+        && !defined(CBASE_IMPLEMENTED) \
+        && !defined(CBASE_SEPARATE_COMPILATION)
 #define CBASE_IMPLEMENTED 1
 
 #include "arena.c"
