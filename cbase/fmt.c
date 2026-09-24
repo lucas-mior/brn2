@@ -129,9 +129,8 @@ fmt_parse_uint(char **cursor, int64 *value) {
     result = 0;
     found_digit = false;
     while (fmt_is_digit(*scan)) {
-        int32 digit;
+        int32 digit = fmt_digit_value(*scan);
 
-        digit = fmt_digit_value(*scan);
         if (result > (INT64_MAX - digit)/10) {
             return -EOVERFLOW;
         }
