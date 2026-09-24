@@ -414,6 +414,21 @@ Also, never create stupid string helpers like
 `<module>_string_free`, etc. Use String, memcpy64, xstrndup, whatever,
 but NEVER create helper like those.
 
+## String types
+- `String`: for dynamic, appendable strings. Avoid it if the string is not
+  expected to grow
+- `StrFlex`: use for groups of strings that never grow within a specific
+  lifetime of the application. Use StrFlexList or use StrFlex as the last member
+  of a struct definition. They can be useful for low memory usage and good cache
+  locality.
+- `char *string` + `int32 string_len`:
+  * For read-only strings: this is most functions API:
+    They do not change strings, only read them.
+  * Also useful for strings that are part of a larger struct and are not
+    expected to grow, only be set and reset as the application runs. In this
+    case, allocation is ad-hoc: it can be part of arena, malloced, whatever.
+- Never create other string types: those 3 above are all ever needed.
+
 ## Comparing strings:
 In general, avoid `strcmp()`, use the alternatives below instead:
 - For strings that are both null terminated and we don't know the length of
