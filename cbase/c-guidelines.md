@@ -65,11 +65,10 @@ preconditions; assert those instead.
 - If a boolean variable is used in a very hot loop, `int32` may be preferable.
 - Do not confuse booleans with bits in bit flags. Use `#define BITFLAGS 1` in
   `xenums.c` for related flags that occupy 1 bit each.
-- When cheking ranges, prefer to be conservative and use `<=` and `>=` instead
-  of `<` and `>`. This makes it easier to not fall into edge case traps.
 - When casting to a smaller integer type, or when casting double to integer, or
   double to float, and we are not sure if it fits, check first using the `MAXOF`
-  macro:
+  and `MINOF` macros. Be conservative, disallowing values at the extreme because
+  they can introduce edge case bugs (use <= instead of < and >= instead of >):
   ```c
   int32 function_that_returns_int32(void *param) {
       int64 value = function_that_returns_int64(param);
