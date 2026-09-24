@@ -5268,14 +5268,10 @@ test_fmt_long_double_decomposition(void) {
 
     test_fmt_long_double_parts(0.0L, false, 0, 0);
     test_fmt_long_double_parts(-0.0L, true, 0, 0);
-    test_fmt_long_double_parts(1.0L, false, LDBL_MANT_DIG,
-                               1 - LDBL_MANT_DIG);
-    test_fmt_long_double_parts(-1.0L, true, LDBL_MANT_DIG,
-                               1 - LDBL_MANT_DIG);
-    test_fmt_long_double_parts(0.5L, false, LDBL_MANT_DIG,
-                               -LDBL_MANT_DIG);
-    test_fmt_long_double_parts(2.0L, false, LDBL_MANT_DIG,
-                               2 - LDBL_MANT_DIG);
+    test_fmt_long_double_parts(1.0L, false, LDBL_MANT_DIG, 1 - LDBL_MANT_DIG);
+    test_fmt_long_double_parts(-1.0L, true, LDBL_MANT_DIG, 1 - LDBL_MANT_DIG);
+    test_fmt_long_double_parts(0.5L, false, LDBL_MANT_DIG, -LDBL_MANT_DIG);
+    test_fmt_long_double_parts(2.0L, false, LDBL_MANT_DIG, 2 - LDBL_MANT_DIG);
 
     expected_exp = LDBL_MIN_EXP - LDBL_MANT_DIG;
     test_fmt_long_double_parts(LDBL_MIN, false, LDBL_MANT_DIG,
