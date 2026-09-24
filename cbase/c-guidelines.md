@@ -422,11 +422,20 @@ but NEVER create helper like those.
   of a struct definition. They can be useful for low memory usage and good cache
   locality.
 - `char *string` + `int32 string_len`:
+  * Note:  (`int16 string_len` is also valid depending on the application)
   * For read-only strings: this is most functions API:
     They do not change strings, only read them.
   * Also useful for strings that are part of a larger struct and are not
     expected to grow, only be set and reset as the application runs. In this
     case, allocation is ad-hoc: it can be part of arena, malloced, whatever.
+  * This type can also be composed in parallel for a struct-of-arrays design:
+    ```c
+    typedef struct StructOfArrays {
+        char **strings;
+        int16 *strings_lens;
+        Arena *arena;
+    } StructOfArrays;
+    ```
 - `char *string` without length: Avoid it at all costs:
   * literals can use `STRLIT("literal")` to pass themselves and their length
     cost-free;
