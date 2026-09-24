@@ -1028,6 +1028,7 @@ static struct TestCase tests[] = {
   void
   my_function(ProgramOptions *options) {
       char *name = options->name;
+      return;
   }
   ```
 - Note: If initialization itself is appropriate according to the rules above,
