@@ -261,9 +261,9 @@ default:
       do_only_one_thing();
   ```
 
-## Parentheses
+## Parenthesis
 
-Complex `if` conditions must have parentheses around each subexpression:
+Complex `if` conditions must have parenthesis around each subexpression:
 
 ```c
 // bad
@@ -275,7 +275,7 @@ if ((x < 0) && (y > 1)) {
 }
 ```
 
-But do not add parentheses for the not operator if precedence is not confusing:
+But do not add parenthesis for the not operator if precedence is not confusing:
 
 ```c
 // bad
