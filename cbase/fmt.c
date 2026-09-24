@@ -5431,8 +5431,7 @@ test_fmt_public_api(void) {
     int32 len;
     int32 count;
 
-    len = fmt_snprintf(buffer, SIZEOF(buffer), "public:%d:%s",
-                       42, "ok");
+    len = fmt_snprintf(buffer, SIZEOF(buffer), "public:%d:%s", 42, "ok");
     ASSERT_EQUAL(len, 12);
     ASSERT_EQUAL(buffer, len + 1, "public:42:ok", 13);
 
@@ -5443,8 +5442,8 @@ test_fmt_public_api(void) {
     len = fmt_snprintf(NULL, 0, "abcdef");
     ASSERT_EQUAL(len, 6);
 
-    len = fmt_test_public_vsnprintf(buffer, SIZEOF(buffer), "%s:%.*s",
-                                    NULL, 3, "a\0b");
+    len = fmt_test_public_vsnprintf(buffer, SIZEOF(buffer),
+                                    "%s:%.*s", NULL, 3, "a\0b");
     ASSERT_EQUAL(len, 10);
     ASSERT_EQUAL(buffer, len + 1, "(null):a\0b", 11);
 
@@ -5615,8 +5614,7 @@ test_fmt_float32_round_trip(float value) {
     end = NULL;
     parsed = strtof(buffer, &end);
     ASSERT(end == buffer + len);
-    ASSERT_EQUAL(test_fmt_float32_bits(parsed),
-                 test_fmt_float32_bits(value));
+    ASSERT_EQUAL(test_fmt_float32_bits(parsed), test_fmt_float32_bits(value));
 
     return;
 }
