@@ -1037,7 +1037,7 @@ static struct TestCase tests[] = {
   //      variable is being declared)
   static void
   function(void *data) {
-      int x;
+      int32 x;
 
       x = 0
 
@@ -1051,7 +1051,7 @@ static struct TestCase tests[] = {
   //        if it wasn't we would not initalize it at all)
   static void
   function(void *data) {
-      int x = 0
+      int32 x = 0
 
       // do something with x 
 
