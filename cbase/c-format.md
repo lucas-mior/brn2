@@ -10,6 +10,7 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - For indentation, never use tabs.
   * Use spaces for indentation.
   * Use 4 spaces for each indentation level.
+    + Macros are more free: use 0, 2, or 4 spaces for continuation lines.
 - Trim trailing whitespace.
 - Keep line length at maximum 80 characters.
 
