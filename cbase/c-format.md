@@ -278,7 +278,7 @@ if ((x < 0) && (y > 1)) {
 }
 ```
 
-Conditions that are unary operations don't need parenthesis:
+Conditions that are unary operations in general don't need parenthesis:
 ```c
 // bad
 if ((!condition1) || (!condition2)) {
@@ -297,6 +297,17 @@ if (!condition1 || (x > 0)) {
 }
 
 // bad
+if ((condition1) || (condition2)) {
+}
+
+// good
+if (condition1 || condition2) {
+}
+```
+
+If the subconditions are chained together, add 
+
+// bad
 if (!condition1 || confusing_precedence || (x > 0)) {
 }
 
@@ -305,15 +316,6 @@ if (!(condition1) || confusing_precedence || (x > 0)) {
 }
 ```
 
-Don't use extra parenthesis if the condition is a simple variable:
-```c
-// bad
-if ((condition1) || (condition2)) {
-}
-
-// good
-if (condition1 || condition2) {
-}
 ```
 
 ## Function declaration and definition
