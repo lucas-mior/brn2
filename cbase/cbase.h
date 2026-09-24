@@ -153,6 +153,9 @@ int32 ascii_normalize_camel_compact(char *out, char *string,
 #define MAX_FILES_COPY 256
 #endif
 
+// owned and dynamic string type.
+// avoid using it for strings that never grow
+
 typedef struct String {
     char *data;
     int32 len;
@@ -164,6 +167,11 @@ typedef struct StringArray {
     int32 len;
     int32 cap;
 } StringArray;
+
+// Use StrFlex and StrFlexList for groups of strings that never grow within a
+// specific lifetime of the application. This allows both low memory usage and
+// good cache locality. StrFlex can also be used as trailing member of a struct
+// and then a Struct **items can be built with the same logic.
 
 typedef struct StrFlex {
     int32 len;
