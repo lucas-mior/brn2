@@ -734,7 +734,7 @@ if (number_of_stuff <= 0) {
     // there isn't any stuff
 }
 
-// also good (let the for automaticaly handle empty case):
+// also good (let the `for` automaticaly handle empty case):
 for (int32 i = 0; i < number_of_stuff; i += 1) {
     // do stuff
 }
