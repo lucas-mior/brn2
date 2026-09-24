@@ -69,7 +69,7 @@ not input validation: they simply assert (with the assertions of
   int32 function_that_returns_int32(void *param) {
       int64 value = function_that_returns_int64(param);
 
-      // Note: MAXOF uses _Generic, it does not really runs the function below.
+      // Note: MAXOF uses _Generic, it does not really run the function below.
       if (value >= MAXOF(function_that_returns_int32())) {
           error("Too large value\n");
           fatal(EXIT_FAILURE);
