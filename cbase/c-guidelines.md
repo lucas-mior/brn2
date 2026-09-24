@@ -34,6 +34,7 @@ not input validation: they simply assert (with the assertions of
   proportional to scope. Do not give `too_much_descriptive_name` to a variable
   that is only used inside a short loop.
 - Use `i`, `j`, and `k` for `for` loop counters.
+  * Exception: enum iterating, you can use other names in that case.
 - Don't use `error` for names of variables, it is already used to print error
   messages. Use something like `${some_prefix}_error`.
 
