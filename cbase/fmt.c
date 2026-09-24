@@ -5439,9 +5439,8 @@ test_fmt_float64_shortest(double value, char *expected) {
 static void
 test_fmt_float64_fixed(double value, int32 precision, char *expected) {
     char buffer[FORMAT_FLOAT_RYU_BUFFER_SIZE];
-    int32 len;
+    int32 len = fmt_float64_fixed(buffer, SIZEOF(buffer), value, precision);
 
-    len = fmt_float64_fixed(buffer, SIZEOF(buffer), value, precision);
     ASSERT_EQUAL(len, strlen32(expected));
     ASSERT_EQUAL(buffer, expected);
 
