@@ -3323,7 +3323,7 @@ fmt_ldouble_hex_should_round(char first_digit,
     } else {
         even_digit = fmt_hex_digit_value(first_digit);
     }
-    return (even_digit & 1) != 0;
+    return (even_digit & 1);
 }
 
 static void
@@ -3590,8 +3590,8 @@ fmt_write_float_sign(FormatSink *sink, FormatSpec *spec,
     }
 
     zero_pad = 0;
-    if ((spec->flags & FMT_FLAG_ZERO) != 0
-        && (spec->flags & FMT_FLAG_LEFT) == 0) {
+    if ((spec->flags & FMT_FLAG_ZERO)
+        && !(spec->flags & FMT_FLAG_LEFT)) {
         zero_pad = fmt_pad_len(spec->width, inner_len);
     }
 
@@ -3613,7 +3613,7 @@ fmt_write_float_sign(FormatSink *sink, FormatSpec *spec,
     }
     fmt_sink_write_repeat(sink, '0', zero_pad);
     fmt_sink_write(sink, body + prefix_len, body_len - prefix_len);
-    if ((spec->flags & FMT_FLAG_LEFT) != 0) {
+    if (spec->flags & FMT_FLAG_LEFT) {
         fmt_sink_write_repeat(sink, ' ', spaces);
     }
     return;
@@ -3685,7 +3685,7 @@ fmt_float_generate_hex_body(FormatSpec *spec, double value,
     }
     len = status;
 
-    if (digit_len > 0 || (spec->flags & FMT_FLAG_ALTERNATE) != 0) {
+    if ((digit_len > 0) || (spec->flags & FMT_FLAG_ALTERNATE)) {
         if ((status = fmt_buffer_put(buffer, capacity, len, '.')) < 0) {
             return status;
         }
@@ -3901,7 +3901,7 @@ fmt_float_generate_body(FormatSpec *spec, double value,
         memmove64(buffer, buffer + 1, (body_len - 1));
         body_len -= 1;
     }
-    if ((spec->flags & FMT_FLAG_ALTERNATE) != 0) {
+    if (spec->flags & FMT_FLAG_ALTERNATE) {
         body_len = fmt_float_force_decimal_point(buffer, body_len, capacity);
         if (body_len < 0) {
             return body_len;
@@ -4108,18 +4108,18 @@ fmt_vsnprintf_estimate(char *format, va_list args) {
                 }
             } else if (spec.conversion == 'o') {
                 digits = (bits + 2)/3;
-                if ((spec.flags & FMT_FLAG_ALTERNATE) != 0) {
+                if (spec.flags & FMT_FLAG_ALTERNATE) {
                     prefix_len = 1;
                 }
             } else if (spec.conversion == 'x' || spec.conversion == 'X') {
                 digits = (bits + 3)/4;
-                if ((spec.flags & FMT_FLAG_ALTERNATE) != 0) {
+                if (spec.flags & FMT_FLAG_ALTERNATE) {
                     prefix_len = 2;
                 }
             } else {
                 ASSERT(spec.conversion == 'b' || spec.conversion == 'B');
                 digits = bits;
-                if ((spec.flags & FMT_FLAG_ALTERNATE) != 0) {
+                if (spec.flags & FMT_FLAG_ALTERNATE) {
                     prefix_len = 2;
                 }
             }
