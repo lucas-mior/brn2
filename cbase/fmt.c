@@ -4397,6 +4397,7 @@ fmt_sprintf(char *buffer, int64 capacity, char *format, ...) {
     va_start(args, format);
     len = fmt_vsprintf(buffer, capacity, format, args);
     va_end(args);
+
     return len;
 }
 
