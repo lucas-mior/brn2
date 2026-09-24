@@ -1381,7 +1381,7 @@ fmt_big_uint_zero(FormatBigUInt *value) {
 static void
 fmt_big_uint_normalize(FormatBigUInt *value) {
     ASSERT(value != NULL);
-    ASSERT_MORE_EQUAL(value->len, 0);
+    ASSERT_NON_NEGATIVE(value->len);
     ASSERT_LESS_EQUAL(value->len, FORMAT_BIG_UINT_MAX_WORDS);
 
     while (value->len > 0 && value->words[value->len - 1] == 0) {
@@ -2665,7 +2665,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
     ASSERT(buffer != NULL);
     ASSERT_POSITIVE(capacity);
     ASSERT(fmt_float_is_fixed(spec->conversion));
-    ASSERT(spec->precision >= 0);
+    ASSERT_NON_NEGATIVE(spec->precision);
 
     if ((status = fmt_decompose_long_double(value, &parts)) < 0) {
         return status;
@@ -3018,7 +3018,7 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
     ASSERT(buffer != NULL);
     ASSERT_POSITIVE(capacity);
     ASSERT(fmt_float_is_scientific(spec->conversion));
-    ASSERT(spec->precision >= 0);
+    ASSERT_NON_NEGATIVE(spec->precision);
 
     if ((status = fmt_decompose_long_double(value, &parts)) < 0) {
         return status;
