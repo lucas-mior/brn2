@@ -894,9 +894,9 @@ _regcomp1(_Reprog *pp, _Parser *par, const char *s, int cflags)
         return NULL;
     }
     pp->allocsize = new_allocsize;
-    pp->flags.icase = (cflags & CREG_ICASE) != 0;
-    pp->flags.dotall = (cflags & CREG_DOTALL) != 0;
-    pp->flags.multln = (cflags & CREG_MULTILINE) != 0;
+    pp->flags.icase = (cflags & CREG_ICASE);
+    pp->flags.dotall = (cflags & CREG_DOTALL);
+    pp->flags.multln = (cflags & CREG_MULTILINE);
     par->instcap = instcap;
     par->freep = pp->firstinst;
     par->classp = pp->cclass;

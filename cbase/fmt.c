@@ -1598,7 +1598,7 @@ fmt_big_uint_test_bit(FormatBigUInt *value, int32 bit_index) {
     if (word_index >= value->len) {
         return false;
     }
-    return (value->words[word_index] & (UINT32_C(1) << bit_offset)) != 0;
+    return (value->words[word_index] & (UINT32_C(1) << bit_offset));
 }
 
 static int32
@@ -1991,7 +1991,7 @@ fmt_decode_x87_ldouble(ldouble value, FormatBinaryFloat *parts) {
     memcpy64(bytes, &value, SIZEOF(bytes));
     significand = fmt_read_le_uint64(bytes);
     sign_exp = (uint32)bytes[8] | ((uint32)bytes[9] << 8);
-    negative = (sign_exp & UINT32_C(0x8000)) != 0;
+    negative = (sign_exp & UINT32_C(0x8000));
     exponent_bits = sign_exp & FMT_LDOUBLE_X87_EXPONENT_MASK;
 
     if (exponent_bits == 0 && significand == 0) {
@@ -3400,7 +3400,7 @@ fmt_ldouble_write_hex_body(FormatSpec *spec, char *buffer,
     }
     len = status;
 
-    if (digit_len > 0 || (spec->flags & FMT_FLAG_ALTERNATE) != 0) {
+    if ((digit_len > 0) || (spec->flags & FMT_FLAG_ALTERNATE)) {
         if ((status = fmt_buffer_put(buffer, capacity, len, '.')) < 0) {
             return status;
         }
@@ -3549,10 +3549,10 @@ fmt_ldouble_sign(ldouble value, FormatSpec *spec) {
     ASSERT(spec != NULL);
 
     (void)value;
-    if ((spec->flags & FMT_FLAG_SIGN) != 0) {
+    if (spec->flags & FMT_FLAG_SIGN) {
         return '+';
     }
-    if ((spec->flags & FMT_FLAG_SPACE) != 0) {
+    if (spec->flags & FMT_FLAG_SPACE) {
         return ' ';
     }
     return '\0';
