@@ -109,7 +109,7 @@ not input validation: they simply assert (with the assertions of
 ## `sizeof`
 
 The `SIZEOF` macro casts the result of `sizeof` to `int64`. Signed sizes are way
-better than unsigned.
+better than unsigned. Never use `sizeof`, always use `SIZEOF`.
 Use the `SIZEOF` macro like this:
 
 ```c
@@ -631,7 +631,7 @@ Initialize it directly:
 StructType s = {0};
 
 // If it needs to be allocated
-StructType *s = malloc2(sizeof(*s));
+StructType *s = malloc2(SIZEOF(*s));
 *s = (StructType){0};
 
 // If it is on the stack, but after the declaration:
