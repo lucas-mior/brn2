@@ -888,8 +888,8 @@ if (enum & ENUM_BITFLAG) {
 - Prefer `ASSERT_NON_NEGATIVE(value);` instead of `ASSERT_MORE_EQUAL(a, 0)`
 - Prefer `ASSERT_BETWEEN(value, 0, max);`
   instead of `ASSERT_MORE_EQUAL(value, 0); ASSERT_LESS_EQUAL(value, max);`
-- Prefer `ASSERT_BETWEEM(value, 0, SIZE - 1);`
-  instead of `ASSERT_NON_NEGATIVE(value); ASSERT_LESS(value, min, SIZE):`
+- Prefer `ASSERT_BETWEEN(value, 0, SIZE - 1);`
+  instead of `ASSERT_NON_NEGATIVE(value); ASSERT_LESS(value, SIZE):`
 
 ## Modules
 - In general, use unity builds for programs.
