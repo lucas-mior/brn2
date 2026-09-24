@@ -5116,11 +5116,11 @@ test_fmt_printf_general_outputs(void) {
     test_fmt_bytes_capacity("nan", 3, "%g", fmt_test_positive_nan());
     test_fmt_bytes_capacity("-nan", 4, "%g", fmt_test_negative_nan());
 
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*g",
-                                   -1, 1.25), 4);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "%.*g", -1, 1.25), 4);
     ASSERT_EQUAL(buffer, "1.25");
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*g",
-                                   0, 123.0), 5);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "%.*g", 0, 123.0), 5);
     ASSERT_EQUAL(buffer, "1e+02");
 
     return;
