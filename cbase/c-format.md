@@ -22,7 +22,6 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Space is optional around bitwise xor (`^`)
 - Space is optional around bitwise or (`|`)
 - Space is mandatory around bitwise and (`&`)
-- Space is forbidden after bitwise not (`~`)
 - Space is mandatory before bitwise not (`~`)
 - Space is mandatory around bitshifts (`<<` and `>>`)
 - Space is forbidden around dot and arrow (`.` and `->`) for acessing struct and
@@ -30,7 +29,6 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Space is forbidden after dot used for initializing struct fields (but space
   before the dot is fine).
 - Space is mandatory around boolean or and boolean and (`&&`, and `||`).
-- Space is forbidden around boolean negation (`!`).
 - Space is mandatory around all comparison operators.
 - Space is forbidden between a unary operator and its operand.
 - In general, prefer `+= 1` instead of `++`.
