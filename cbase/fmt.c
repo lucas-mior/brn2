@@ -4,11 +4,11 @@
 #if !defined(FORMAT_C)
 #define FORMAT_C
 
-#if !defined(TESTING_format)
+#if !defined(TESTING_fmt)
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
-#define TESTING_format 1
+#define TESTING_fmt 1
 #else
-#define TESTING_format 0
+#define TESTING_fmt 0
 #endif
 #endif
 
@@ -4203,7 +4203,7 @@ sb_float64_fixed(StrBuilder *sb, double value, int32 precision) {
     return;
 }
 
-#if TESTING_format
+#if TESTING_fmt
 #define CBASE_IMPLEMENT
 #include "cbase.h"
 #include "ryu.h"
