@@ -66,7 +66,7 @@ preconditions; assert those instead.
 - Boolean flags that are not used in hot loops should use the
   `bool` type and the `true` and `false` keywords to communicate intent.
 - If a boolean variable is used in a very hot loop, `int32` may be preferable.
-- Do not confuse booleans with bits in bit flags. Use `#define BITFLAGS 1` in
+- Do not confuse booleans with bits in bit flags. Use `#define ENUM_BITFLAGS 1` in
   `xenums.c` for related flags that occupy 1 bit each.
 - When casting to a smaller integer type, or when casting double to integer, or
   double to float, and we are not sure if it fits, check first using the `MAXOF`
