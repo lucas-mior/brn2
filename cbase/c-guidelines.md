@@ -193,7 +193,7 @@ typeof(var)  // good
         printf("x = %s.\n", MY_ENUM_str(x));
     }
     ```
-  * Bit flag enums still use automatic `_LAST` value.
+  * Bit flag enums have the automatic `_LAST` value.
 - The moment that you find that an existing enum ends up needing `_str`, or
   `_parse`, then it is time to define it using `xenums.c`.
 - Always typedef structs:
