@@ -690,9 +690,9 @@ s = (StructType){0};
   parameters for "returning" their result. Then, they can either return `void`,
   if they never fail, or int32, if they can fail.
 
-- Use `bool` only for predicates. Names like `is_*`, `has_*`, `can_*`,
-  `contains_*`, and `matches_*` should return boolean answers. Failure to answer
-  the question should be impossible or asserted.
+- Use bool as a function return type only for predicates.. Names like `is_*`,
+  `has_*`, `can_*`, `contains_*`, and `matches_*` should return boolean answers.
+  Failure to answer the question should be impossible or asserted.
   * Functions returning `bool` must have a contract that forbids invalid input.
     Invalid input is therefore a programmer error and should be asserted, not
     returned as an error condition.
