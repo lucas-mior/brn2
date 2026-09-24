@@ -266,8 +266,8 @@ default:
 
 ## Parenthesis
 
-Complex `if` conditions must have parenthesis around each subexpression:
-
+## If expressions
+If there are subconditions that are binary operations, put parenthesis around:
 ```c
 // bad
 if (x < 0 && y > 1) {
@@ -278,8 +278,7 @@ if ((x < 0) && (y > 1)) {
 }
 ```
 
-But do not add parenthesis for the not operator if precedence is not confusing:
-
+Conditions that are unary operations don't need parenthesis:
 ```c
 // bad
 if ((!condition1) || (!condition2)) {
