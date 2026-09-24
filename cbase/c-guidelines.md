@@ -58,7 +58,8 @@ preconditions; assert those instead.
   * The only reason to use `size_t`, `ptrdiff_t`, and `ssize_t` is for casting
     so that we conform to C standard library functions that expect those types.
 - Never use `_t` standard fixed width integer types.
-  * Include `primitives.h` and use the better aliases typedefed there.
+  * Use the better aliases typedefed in `primitives.h` (`cbase.h` already
+    includes `primitives.h`)
 - Avoid using legacy C integers: `short`, `int`, `long`, and `long long`.
   * Prefer using `int16`, `int32`, and `int64` instead.
     + See `cbase/primitives.h` to see how they are defined.
