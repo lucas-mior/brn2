@@ -57,13 +57,18 @@ _Static_assert(FMT_FLOAT_MAX_EXP_PREFIX
                + FMT_FLOAT_MAX_PRECISION < FMT_FLOAT_RYU_BUFFER_SIZE,
                "format scientific temporary buffer is too small");
 
-enum {
-    FMT_FLAG_LEFT = 1 << 0,
-    FMT_FLAG_SIGN = 1 << 1,
-    FMT_FLAG_SPACE = 1 << 2,
-    FMT_FLAG_ALTERNATE = 1 << 3,
-    FMT_FLAG_ZERO = 1 << 4,
-};
+#define ENUM_NAME FmtFlags
+#define ENUM_BITFLAGS 1
+#define ENUM_PREFIX_ FMT_FLAG_
+#define ENUM_FIELDS                                                            \
+    XX(FMT_FLAG_LEFT)                                                          \
+    XX(FMT_FLAG_SIGN)                                                          \
+    XX(FMT_FLAG_SPACE)                                                         \
+    XX(FMT_FLAG_ALTERNATE)                                                     \
+    XX(FMT_FLAG_ZERO)
+#define XENUMS_NO_TESTS 1
+#include "xenums.c"
+#undef XENUMS_NO_TESTS
 
 enum FormatWidthKind {
     FMT_WIDTH_NONE,
@@ -90,7 +95,7 @@ enum FormatLength {
 };
 
 typedef struct FormatSpec {
-    int32 flags;
+    enum FmtFlags flags;
     int32 width;
     int32 precision;
     enum FormatWidthKind width_kind;
@@ -416,7 +421,7 @@ fmt_has_precision(FormatSpec *spec) {
 }
 
 static int32
-fmt_validate_flags(FormatSpec *spec, int32 allowed_flags) {
+fmt_validate_flags(FormatSpec *spec, enum FmtFlags allowed_flags) {
     ASSERT(spec != NULL);
 
     if ((spec->flags & ~allowed_flags) != 0) {
@@ -4602,7 +4607,7 @@ test_fmt_parser_valid_specs(void) {
 
     spec = fmt_test_parse_one("%08.3d");
     ASSERT_EQUAL(spec.conversion, 'd');
-    ASSERT_EQUAL(spec.flags, FMT_FLAG_ZERO);
+    ASSERT(spec.flags == FMT_FLAG_ZERO);
     ASSERT(spec.width_kind == FMT_WIDTH_LITERAL);
     ASSERT_EQUAL(spec.width, 8);
     ASSERT(spec.precision_kind == FMT_PRECISION_LITERAL);
@@ -4617,11 +4622,11 @@ test_fmt_parser_valid_specs(void) {
 
     spec = fmt_test_parse_one("%-+ #0w32x");
     ASSERT_EQUAL(spec.conversion, 'x');
-    ASSERT_EQUAL(spec.flags, FMT_FLAG_LEFT
-                             |FMT_FLAG_SIGN
-                             |FMT_FLAG_SPACE
-                             |FMT_FLAG_ALTERNATE
-                             |FMT_FLAG_ZERO);
+    ASSERT(spec.flags == (FMT_FLAG_LEFT
+                          |FMT_FLAG_SIGN
+                          |FMT_FLAG_SPACE
+                          |FMT_FLAG_ALTERNATE
+                          |FMT_FLAG_ZERO));
     ASSERT(spec.length == FMT_LENGTH_W32);
 
     spec = fmt_test_parse_one("%hhd");
