@@ -5075,11 +5075,11 @@ test_fmt_printf_float_outputs(void) {
     test_fmt_bytes_capacity("NAN", 3, "%F", pos_nan);
     test_fmt_bytes_capacity("-NAN", 4, "%F", neg_nan);
 
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*f",
-                                   -1, 1.25), 8);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "%.*f", -1, 1.25), 8);
     ASSERT_EQUAL(buffer, "1.250000");
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.1048576f",
-                                   1.0), -EOVERFLOW);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "%.1048576f", 1.0), -EOVERFLOW);
 
     return;
 }
