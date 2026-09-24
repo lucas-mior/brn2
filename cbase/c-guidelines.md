@@ -761,7 +761,7 @@ if (nitems != 0) {
 }
 
 // good
-if (nitems) {
+if (nitems > 0) {
     // there are items
 }
 
