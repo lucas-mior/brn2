@@ -5011,8 +5011,8 @@ test_fmt_pointer_count_outputs(void) {
                                    &count16), -EOVERFLOW);
     ASSERT_EQUAL(count16, -7);
 
-    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%n",
-                                   (int32 *)NULL), -EINVAL);
+    ASSERT_EQUAL(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                   "abc%n", (int32 *)NULL), -EINVAL);
 
     return;
 }
