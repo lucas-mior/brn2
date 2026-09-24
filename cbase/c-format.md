@@ -228,7 +228,8 @@ default:
   int32 x;
   int32 y;
   ```
-- Always use trailing commas for arrays (except when initializing to zero):
+- Always use trailing commas for arrays and structs (except when initializing to
+  zero):
   ```c
   int32 array[] = {
       1,
