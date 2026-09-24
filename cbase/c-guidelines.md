@@ -1115,11 +1115,6 @@ appropriate cbase/ C file.
   do_function(my_struct);
   ```
 
-## Algorithms reutilization
-Don't reimplement root finding, minimization and integrating algorithms.
-When you need one of those, make use of the algorithms implemented in
-`cy_roots.c`, `cy_minimize.c` and `cy_methods.c`.
-
 ## Testing
 Every .c file (except the main program) must have a testing block:
 ```c
