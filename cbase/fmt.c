@@ -5509,8 +5509,7 @@ test_fmt_float64_fixed(double value, int32 precision, char *expected) {
     char buffer[FMT_FLOAT_RYU_BUFFER_SIZE];
     int32 len = fmt_float64_fixed(buffer, SIZEOF(buffer), value, precision);
 
-    ASSERT_EQUAL(len, strlen32(expected));
-    ASSERT_EQUAL(buffer, expected);
+    ASSERT_EQUAL(buffer, len, expected);
 
     return;
 }
@@ -5521,8 +5520,7 @@ test_fmt_float64_scientific(double value, int32 precision, char *expected) {
     int32 len = fmt_float64_scientific(buffer, SIZEOF(buffer),
                                        value, precision);
 
-    ASSERT_EQUAL(len, strlen32(expected));
-    ASSERT_EQUAL(buffer, expected);
+    ASSERT_EQUAL(buffer, len, expected);
 
     return;
 }
