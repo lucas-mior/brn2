@@ -63,6 +63,8 @@ not input validation: they simply assert (with the assertions of
 - If a boolean variable is used in a very hot loop, `int32` may be preferable.
 - Do not confuse booleans with bits in bit flags. Use `#define BITFLAGS 1` in
   `xenums.c` for related flags that occupy 1 bit each.
+- When cheking ranges, prefer to be conservative and use `<=` and `>=` instead
+  of `<` and `>`. This makes it easier to not fall into edge case traps.
 - When casting to a smaller integer type, or when casting double to integer, or
   double to float, and we are not sure if it fits, check first using the `MAXOF`
   macro:
