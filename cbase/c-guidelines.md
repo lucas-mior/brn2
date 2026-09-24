@@ -75,6 +75,10 @@ not input validation: they simply assert (with the assertions of
           error("Too large value\n");
           fatal(EXIT_FAILURE);
       }
+      if (value <= MINOF(function_that_returns_int32())) {
+          error("Invalid value.\n");
+          fatal(EXIT_FAILURE);
+      }
 
       // Note: (int32) cast is hardcoded,
       // but we will be warned by the compiler if the return type ever changes
