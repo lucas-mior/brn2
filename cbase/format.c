@@ -2512,10 +2512,6 @@ format_long_double_special_body(ldouble value, FormatSpec *spec,
     ASSERT(body != NULL);
     ASSERT(body_len != NULL);
 
-#if !FORMAT_LONG_DOUBLE_SUPPORTED
-    (void)value;
-    return -ENOSYS;
-#else
     if (isnan(value)) {
         if (format_float_is_upper(spec->conversion)) {
             memcpy(body, "NAN", 3);
@@ -2536,20 +2532,15 @@ format_long_double_special_body(ldouble value, FormatSpec *spec,
     }
 
     return -EINVAL;
-#endif
 }
 
 static char
 format_long_double_sign(ldouble value, FormatSpec *spec) {
     ASSERT(spec != NULL);
 
-#if !FORMAT_LONG_DOUBLE_SUPPORTED
-    (void)value;
-#else
     if (signbit(value)) {
         return '-';
     }
-#endif
     if ((spec->flags & FORMAT_FLAG_SIGN) != 0) {
         return '+';
     }
