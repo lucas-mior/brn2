@@ -5457,8 +5457,8 @@ test_fmt_public_api(void) {
     ASSERT_EQUAL(len, 10);
     ASSERT_EQUAL(buffer, len + 1, "fast:42:ok", 11);
 
-    len = fmt_test_public_vsprintf(buffer, SIZEOF(buffer), "%s:%.*s",
-                                   NULL, 3, "a\0b");
+    len = fmt_test_public_vsprintf(buffer, SIZEOF(buffer),
+                                   "%s:%.*s", NULL, 3, "a\0b");
     ASSERT_EQUAL(len, 10);
     ASSERT_EQUAL(buffer, len + 1, "(null):a\0b", 11);
 
