@@ -5656,9 +5656,9 @@ main(void) {
     {
         String builder = {0};
 
-        SB_APPEND(&builder, "x=");
+        STR_APPEND(&builder, "x=");
         sb_float64(&builder, 0.1);
-        SB_APPEND(&builder, " y=");
+        STR_APPEND(&builder, " y=");
         sb_float64_fixed(&builder, 1.25, 2);
         ASSERT_EQUAL(builder.data, "x=1E-1 y=1.25");
         sb_free(&builder);
