@@ -25,29 +25,29 @@ enum {
     FMT_FLOAT_MAX_PRECISION = 1024,
     FMT_FLOAT_MAX_FIXED_PREFIX = 312,
     FMT_FLOAT_MAX_EXP_PREFIX = 8,
-    FMT_LONG_DOUBLE_MAX_FIXED_PREFIX = LDBL_MAX_10_EXP + 8,
+    FMT_LDOUBLE_MAX_FIXED_PREFIX = LDBL_MAX_10_EXP + 8,
     FMT_DOUBLE_HEX_DIGITS = 13,
     FMT_DOUBLE_FRACTION_BITS = 52,
     FMT_DOUBLE_EXPONENT_BIAS = 1023,
     FMT_DOUBLE_SUBNORMAL_EXPONENT = -1022,
     FMT_BIG_UINT_WORD_BITS = 32,
     FMT_BIG_UINT_MAX_WORDS = 640,
-    FMT_LONG_DOUBLE_DOUBLE_FRACTION_BITS = 52,
-    FMT_LONG_DOUBLE_DOUBLE_EXPONENT_BIAS = 1023,
-    FMT_LONG_DOUBLE_X87_FRACTION_BITS = 63,
-    FMT_LONG_DOUBLE_X87_EXPONENT_BIAS = 16383,
-    FMT_LONG_DOUBLE_X87_EXPONENT_MASK = 0x7fff,
-    FMT_LONG_DOUBLE_BINARY128_FRACTION_BITS = 112,
-    FMT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS = 16383,
+    FMT_LDOUBLE_DOUBLE_FRACTION_BITS = 52,
+    FMT_LDOUBLE_DOUBLE_EXPONENT_BIAS = 1023,
+    FMT_LDOUBLE_X87_FRACTION_BITS = 63,
+    FMT_LDOUBLE_X87_EXPONENT_BIAS = 16383,
+    FMT_LDOUBLE_X87_EXPONENT_MASK = 0x7fff,
+    FMT_LDOUBLE_BINARY128_FRACTION_BITS = 112,
+    FMT_LDOUBLE_BINARY128_EXPONENT_BIAS = 16383,
 };
 
 #if FLT_RADIX == 2 \
     && ((LDBL_MANT_DIG == DBL_MANT_DIG && LDBL_MAX_EXP == DBL_MAX_EXP) \
         || (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384) \
         || (LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384))
-#define FMT_LONG_DOUBLE_SUPPORTED 1
+#define FMT_LDOUBLE_SUPPORTED 1
 #else
-#define FMT_LONG_DOUBLE_SUPPORTED 0
+#define FMT_LDOUBLE_SUPPORTED 0
 #endif
 
 _Static_assert(FMT_FLOAT_MAX_FIXED_PREFIX
@@ -1448,8 +1448,7 @@ fmt_big_uint_from_uint64(FormatBigUInt *value, uint64 source) {
 }
 
 static int32 UNUSED
-fmt_big_uint_from_uint128_parts(FormatBigUInt *value, uint64 low,
-                                uint64 high) {
+fmt_big_uint_from_uint128_parts(FormatBigUInt *value, uint64 low, uint64 high) {
     ASSERT(value != NULL);
 
     fmt_big_uint_zero(value);
@@ -1759,8 +1758,7 @@ fmt_big_uint_div_small(FormatBigUInt *value, uint32 divisor) {
 }
 
 static int32 UNUSED
-fmt_big_uint_to_decimal(FormatBigUInt *value, char *buffer,
-                        int32 capacity) {
+fmt_big_uint_to_decimal(FormatBigUInt *value, char *buffer, int32 capacity) {
     enum { GROUP_BASE = 1000000000, GROUP_DIGITS = 9 };
     uint32 groups[FMT_BIG_UINT_MAX_WORDS*2];
     FormatBigUInt work;
@@ -1889,11 +1887,10 @@ fmt_binary_float_set_zero(FormatBinaryFloat *parts, bool negative,
     return 0;
 }
 
-#if FMT_LONG_DOUBLE_SUPPORTED
+#if FMT_LDOUBLE_SUPPORTED
 
 static int32
-fmt_decode_binary64_long_double(ldouble value,
-                                FormatBinaryFloat *parts) {
+fmt_decode_binary64_ldouble(ldouble value, FormatBinaryFloat *parts) {
     uint64 fraction_mask;
     uint64 exponent_bits;
     uint64 fraction;
@@ -1906,8 +1903,8 @@ fmt_decode_binary64_long_double(ldouble value,
     memcpy64(&bits, &value, SIZEOF(bits));
     negative = (bits >> 63) != 0;
     fraction_mask = (UINT64_C(1)
-                     << FMT_LONG_DOUBLE_DOUBLE_FRACTION_BITS) - 1;
-    exponent_bits = (bits >> FMT_LONG_DOUBLE_DOUBLE_FRACTION_BITS)
+                     << FMT_LDOUBLE_DOUBLE_FRACTION_BITS) - 1;
+    exponent_bits = (bits >> FMT_LDOUBLE_DOUBLE_FRACTION_BITS)
                     & 0x7ff;
     fraction = bits & fraction_mask;
 
@@ -1921,16 +1918,16 @@ fmt_decode_binary64_long_double(ldouble value,
     fmt_big_uint_zero(&parts->significand);
     if (exponent_bits == 0) {
         fmt_big_uint_from_uint64(&parts->significand, fraction);
-        parts->binary_exponent = 1 - FMT_LONG_DOUBLE_DOUBLE_EXPONENT_BIAS
-                                 - FMT_LONG_DOUBLE_DOUBLE_FRACTION_BITS;
+        parts->binary_exponent = 1 - FMT_LDOUBLE_DOUBLE_EXPONENT_BIAS
+                                 - FMT_LDOUBLE_DOUBLE_FRACTION_BITS;
     } else {
         fmt_big_uint_from_uint64(&parts->significand,
                                  (UINT64_C(1)
-                                  << FMT_LONG_DOUBLE_DOUBLE_FRACTION_BITS)
+                                  << FMT_LDOUBLE_DOUBLE_FRACTION_BITS)
                                  |fraction);
         parts->binary_exponent = (int32)exponent_bits
-                                 - FMT_LONG_DOUBLE_DOUBLE_EXPONENT_BIAS
-                                 - FMT_LONG_DOUBLE_DOUBLE_FRACTION_BITS;
+                                 - FMT_LDOUBLE_DOUBLE_EXPONENT_BIAS
+                                 - FMT_LDOUBLE_DOUBLE_FRACTION_BITS;
     }
     parts->precision_bits = DBL_MANT_DIG;
     parts->negative = negative;
@@ -1939,7 +1936,7 @@ fmt_decode_binary64_long_double(ldouble value,
 }
 
 static int32
-fmt_decode_x87_long_double(ldouble value, FormatBinaryFloat *parts) {
+fmt_decode_x87_ldouble(ldouble value, FormatBinaryFloat *parts) {
     uchar bytes[SIZEOF(ldouble)];
     uint64 significand;
     uint32 sign_exp;
@@ -1956,28 +1953,28 @@ fmt_decode_x87_long_double(ldouble value, FormatBinaryFloat *parts) {
     significand = fmt_read_le_uint64(bytes);
     sign_exp = (uint32)bytes[8] | ((uint32)bytes[9] << 8);
     negative = (sign_exp & UINT32_C(0x8000)) != 0;
-    exponent_bits = sign_exp & FMT_LONG_DOUBLE_X87_EXPONENT_MASK;
+    exponent_bits = sign_exp & FMT_LDOUBLE_X87_EXPONENT_MASK;
 
     if (exponent_bits == 0 && significand == 0) {
         return fmt_binary_float_set_zero(parts, negative, LDBL_MANT_DIG);
     }
-    if (exponent_bits == FMT_LONG_DOUBLE_X87_EXPONENT_MASK) {
+    if (exponent_bits == FMT_LDOUBLE_X87_EXPONENT_MASK) {
         return -EINVAL;
     }
     if (exponent_bits != 0
         && (significand & (UINT64_C(1)
-                           << FMT_LONG_DOUBLE_X87_FRACTION_BITS)) == 0) {
+                           << FMT_LDOUBLE_X87_FRACTION_BITS)) == 0) {
         return -EINVAL;
     }
 
     fmt_big_uint_from_uint64(&parts->significand, significand);
     if (exponent_bits == 0) {
-        parts->binary_exponent = 1 - FMT_LONG_DOUBLE_X87_EXPONENT_BIAS
-                                 - FMT_LONG_DOUBLE_X87_FRACTION_BITS;
+        parts->binary_exponent = 1 - FMT_LDOUBLE_X87_EXPONENT_BIAS
+                                 - FMT_LDOUBLE_X87_FRACTION_BITS;
     } else {
         parts->binary_exponent = (int32)exponent_bits
-                                 - FMT_LONG_DOUBLE_X87_EXPONENT_BIAS
-                                 - FMT_LONG_DOUBLE_X87_FRACTION_BITS;
+                                 - FMT_LDOUBLE_X87_EXPONENT_BIAS
+                                 - FMT_LDOUBLE_X87_FRACTION_BITS;
     }
     parts->precision_bits = LDBL_MANT_DIG;
     parts->negative = negative;
@@ -1986,8 +1983,7 @@ fmt_decode_x87_long_double(ldouble value, FormatBinaryFloat *parts) {
 }
 
 static int32
-fmt_decode_binary128_long_double(ldouble value,
-                                 FormatBinaryFloat *parts) {
+fmt_decode_binary128_ldouble(ldouble value, FormatBinaryFloat *parts) {
     uchar bytes[SIZEOF(ldouble)];
     uint64 fraction_high;
     uint64 exponent_bits;
@@ -2021,24 +2017,22 @@ fmt_decode_binary128_long_double(ldouble value,
         return -EINVAL;
     }
 
-    fmt_big_uint_from_uint128_parts(&parts->significand, low,
-                                    fraction_high);
+    fmt_big_uint_from_uint128_parts(&parts->significand, low, fraction_high);
     if (exponent_bits != 0) {
         int32 status;
 
-        status = fmt_big_uint_set_bit(
-            &parts->significand,
-            FMT_LONG_DOUBLE_BINARY128_FRACTION_BITS);
+        status = fmt_big_uint_set_bit(&parts->significand,
+                                      FMT_LDOUBLE_BINARY128_FRACTION_BITS);
         if (status < 0) {
             return status;
         }
         parts->binary_exponent = (int32)exponent_bits
-            - FMT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS
-            - FMT_LONG_DOUBLE_BINARY128_FRACTION_BITS;
+            - FMT_LDOUBLE_BINARY128_EXPONENT_BIAS
+            - FMT_LDOUBLE_BINARY128_FRACTION_BITS;
     } else {
         parts->binary_exponent = 1
-            - FMT_LONG_DOUBLE_BINARY128_EXPONENT_BIAS
-            - FMT_LONG_DOUBLE_BINARY128_FRACTION_BITS;
+            - FMT_LDOUBLE_BINARY128_EXPONENT_BIAS
+            - FMT_LDOUBLE_BINARY128_FRACTION_BITS;
     }
     parts->precision_bits = LDBL_MANT_DIG;
     parts->negative = negative;
@@ -2047,7 +2041,7 @@ fmt_decode_binary128_long_double(ldouble value,
 }
 
 static int32 UNUSED
-fmt_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
+fmt_decompose_ldouble(ldouble value, FormatBinaryFloat *parts) {
     ASSERT(parts != NULL);
 
     if (!isfinite(value)) {
@@ -2066,12 +2060,12 @@ fmt_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
         if (SIZEOF(ldouble) != SIZEOF(double)) {
             return -ENOSYS;
         }
-        return fmt_decode_binary64_long_double(value, parts);
+        return fmt_decode_binary64_ldouble(value, parts);
     }
 #elif LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384
-    return fmt_decode_x87_long_double(value, parts);
+    return fmt_decode_x87_ldouble(value, parts);
 #elif LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384
-    return fmt_decode_binary128_long_double(value, parts);
+    return fmt_decode_binary128_ldouble(value, parts);
 #else
     return -ENOSYS;
 #endif
@@ -2140,7 +2134,7 @@ fmt_float_temp_cap(FormatSpec *spec, int64 *capacity) {
 
     if (fmt_float_is_fixed(spec->conversion)) {
         if (spec->length == FMT_LENGTH_BIG_L) {
-            prefix = FMT_LONG_DOUBLE_MAX_FIXED_PREFIX;
+            prefix = FMT_LDOUBLE_MAX_FIXED_PREFIX;
         } else {
             prefix = FMT_FLOAT_MAX_FIXED_PREFIX;
         }
@@ -2229,8 +2223,7 @@ fmt_float_uppercase_body(char *body, int32 body_len) {
 }
 
 static int32
-fmt_float_force_decimal_point(char *body, int32 body_len,
-                              int32 capacity) {
+fmt_float_force_decimal_point(char *body, int32 body_len, int32 capacity) {
     int32 exponent_index;
     bool found_point;
 
@@ -2520,7 +2513,7 @@ fmt_big_uint_is_odd(FormatBigUInt *value) {
     return value->len > 0 && (value->words[0] & 1) != 0;
 }
 
-#if FMT_LONG_DOUBLE_SUPPORTED
+#if FMT_LDOUBLE_SUPPORTED
 
 static int32
 fmt_big_uint_round_half_even(FormatBigUInt *value,
@@ -2534,7 +2527,7 @@ fmt_big_uint_round_half_even(FormatBigUInt *value,
 }
 
 static int32
-fmt_long_double_special_body(ldouble value, FormatSpec *spec,
+fmt_ldouble_special_body(ldouble value, FormatSpec *spec,
                              char *body, int32 *body_len) {
     ASSERT(spec != NULL);
     ASSERT(body != NULL);
@@ -2563,7 +2556,7 @@ fmt_long_double_special_body(ldouble value, FormatSpec *spec,
 }
 
 static char
-fmt_long_double_sign(ldouble value, FormatSpec *spec) {
+fmt_ldouble_sign(ldouble value, FormatSpec *spec) {
     ASSERT(spec != NULL);
 
     if (signbit(value)) {
@@ -2580,7 +2573,7 @@ fmt_long_double_sign(ldouble value, FormatSpec *spec) {
 }
 
 static int32
-fmt_long_double_write_fixed_digits(char *buffer, int32 capacity,
+fmt_ldouble_write_fixed_digits(char *buffer, int32 capacity,
                                    char *digits, int32 digit_len,
                                    int32 precision, bool alternate) {
     int32 integer_len;
@@ -2645,7 +2638,7 @@ fmt_long_double_write_fixed_digits(char *buffer, int32 capacity,
 }
 
 static int32
-fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_fixed_body(FormatSpec *spec, ldouble value,
                                     char *buffer, int32 capacity) {
     enum FormatRemainderHalf remainder;
     FormatBinaryFloat parts;
@@ -2662,7 +2655,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
     ASSERT(fmt_float_is_fixed(spec->conversion));
     ASSERT_NON_NEGATIVE(spec->precision);
 
-    if ((status = fmt_decompose_long_double(value, &parts)) < 0) {
+    if ((status = fmt_decompose_ldouble(value, &parts)) < 0) {
         return status;
     }
     if ((status = fmt_binary_float_scaled_decimal(&parts,
@@ -2683,7 +2676,7 @@ fmt_long_double_generate_fixed_body(FormatSpec *spec, ldouble value,
 
     digit_len = fmt_big_uint_to_decimal(&integer, digits, digit_cap);
     if (digit_len >= 0) {
-        status = fmt_long_double_write_fixed_digits(
+        status = fmt_ldouble_write_fixed_digits(
             buffer, capacity, digits, digit_len, (int32)spec->precision,
             (spec->flags & FMT_FLAG_ALTERNATE) != 0);
     } else {
@@ -2746,7 +2739,7 @@ fmt_decimal_round_digits(char *digits, int32 *len, int32 keep, bool round_up) {
 }
 
 static int32
-fmt_long_double_scientific_exponent_small(FormatBinaryFloat *parts,
+fmt_ldouble_scientific_exponent_small(FormatBinaryFloat *parts,
                                           ldouble value, int32 *exponent) {
     FormatBigUInt integer;
     enum FormatRemainderHalf remainder;
@@ -2792,11 +2785,11 @@ fmt_long_double_scientific_exponent_small(FormatBinaryFloat *parts,
 }
 
 static int32
-fmt_long_double_scientific_exponent(FormatBinaryFloat *parts,
+fmt_ldouble_scientific_exponent(FormatBinaryFloat *parts,
                                     ldouble value, int32 *exponent) {
     FormatBigUInt integer;
     enum FormatRemainderHalf remainder;
-    char digits[FMT_LONG_DOUBLE_MAX_FIXED_PREFIX];
+    char digits[FMT_LDOUBLE_MAX_FIXED_PREFIX];
     int32 digit_len;
     int32 status;
 
@@ -2809,12 +2802,12 @@ fmt_long_double_scientific_exponent(FormatBinaryFloat *parts,
         return 0;
     }
     if (value < 1.0L) {
-        return fmt_long_double_scientific_exponent_small(parts, value,
+        return fmt_ldouble_scientific_exponent_small(parts, value,
                                                          exponent);
     }
 
-    if ((status = fmt_binary_float_scaled_decimal(parts, 0, &integer,
-                                                  &remainder)) < 0) {
+    if ((status = fmt_binary_float_scaled_decimal(parts, 0,
+                                                  &integer, &remainder)) < 0) {
         return status;
     }
     digit_len = fmt_big_uint_to_decimal(&integer, digits, SIZEOF(digits));
@@ -2826,7 +2819,7 @@ fmt_long_double_scientific_exponent(FormatBinaryFloat *parts,
 }
 
 static int32
-fmt_long_double_scientific_digits(FormatBinaryFloat *parts, ldouble value,
+fmt_ldouble_scientific_digits(FormatBinaryFloat *parts, ldouble value,
                                   int32 exponent, int32 significant_len,
                                   char *digits, int32 capacity,
                                   int32 *digits_len,
@@ -2857,8 +2850,7 @@ fmt_long_double_scientific_digits(FormatBinaryFloat *parts, ldouble value,
                                                       &remainder)) < 0) {
             return status;
         }
-        integer_digit_len = fmt_big_uint_to_decimal(&integer, digits,
-                                                    capacity);
+        integer_digit_len = fmt_big_uint_to_decimal(&integer, digits, capacity);
         if (integer_digit_len < 0) {
             return integer_digit_len;
         }
@@ -2946,7 +2938,7 @@ fmt_long_double_scientific_digits(FormatBinaryFloat *parts, ldouble value,
 }
 
 static int32
-fmt_long_double_write_scientific_digits(char *buffer, int32 capacity,
+fmt_ldouble_write_scientific_digits(char *buffer, int32 capacity,
                                         char *digits, int32 digit_len,
                                         int32 precision, int32 exponent,
                                         bool alternate, bool upper) {
@@ -2990,7 +2982,7 @@ fmt_long_double_write_scientific_digits(char *buffer, int32 capacity,
 }
 
 static int32
-fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_scientific_body(FormatSpec *spec, ldouble value,
                                          char *buffer, int32 capacity) {
     FormatBinaryFloat parts;
     char *digits;
@@ -3008,17 +3000,17 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
     ASSERT(fmt_float_is_scientific(spec->conversion));
     ASSERT_NON_NEGATIVE(spec->precision);
 
-    if ((status = fmt_decompose_long_double(value, &parts)) < 0) {
+    if ((status = fmt_decompose_ldouble(value, &parts)) < 0) {
         return status;
     }
-    if ((status = fmt_long_double_scientific_exponent(&parts,
+    if ((status = fmt_ldouble_scientific_exponent(&parts,
                                                       fabsl(value),
                                                       &exponent)) < 0) {
         return status;
     }
 
     significant_len = (int32)spec->precision + 1;
-    digit_cap = FMT_LONG_DOUBLE_MAX_FIXED_PREFIX + significant_len;
+    digit_cap = FMT_LDOUBLE_MAX_FIXED_PREFIX + significant_len;
     if (digit_cap < SIZEOF(stack_digits)) {
         digit_cap = SIZEOF(stack_digits);
     }
@@ -3031,13 +3023,12 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
         digits = malloc2(digit_cap);
     }
 
-    status = fmt_long_double_scientific_digits(&parts, fabsl(value),
+    status = fmt_ldouble_scientific_digits(&parts, fabsl(value),
                                                exponent, significant_len,
-                                               digits, digit_cap,
-                                               &digit_len,
+                                               digits, digit_cap, &digit_len,
                                                &decimal_exponent);
     if (status == 0) {
-        status = fmt_long_double_write_scientific_digits(
+        status = fmt_ldouble_write_scientific_digits(
             buffer, capacity, digits, digit_len, (int32)spec->precision,
             decimal_exponent, (spec->flags & FMT_FLAG_ALTERNATE) != 0,
             fmt_float_is_upper(spec->conversion));
@@ -3051,11 +3042,11 @@ fmt_long_double_generate_scientific_body(FormatSpec *spec, ldouble value,
 
 
 static int32
-fmt_long_double_generate_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_body(FormatSpec *spec, ldouble value,
                               char *buffer, int32 capacity);
 
 static int32
-fmt_long_double_parse_decimal_exponent(char *body, int32 body_len,
+fmt_ldouble_parse_decimal_exponent(char *body, int32 body_len,
                                        int32 *exponent) {
     int32 index;
     int64 value;
@@ -3113,7 +3104,7 @@ fmt_long_double_parse_decimal_exponent(char *body, int32 body_len,
 }
 
 static int32
-fmt_long_double_strip_trailing_zeros(char *body, int32 body_len) {
+fmt_ldouble_strip_trailing_zeros(char *body, int32 body_len) {
     int32 exponent_index;
     int32 point_index;
     int32 end;
@@ -3153,7 +3144,7 @@ fmt_long_double_strip_trailing_zeros(char *body, int32 body_len) {
 }
 
 static int32
-fmt_long_double_generate_general_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_general_body(FormatSpec *spec, ldouble value,
                                       char *buffer, int32 capacity) {
     FormatSpec work_spec;
     int32 exponent;
@@ -3173,13 +3164,13 @@ fmt_long_double_generate_general_body(FormatSpec *spec, ldouble value,
         work_spec.conversion = 'e';
     }
     work_spec.precision = spec->precision - 1;
-    body_len = fmt_long_double_generate_body(&work_spec, value, buffer,
+    body_len = fmt_ldouble_generate_body(&work_spec, value, buffer,
                                              capacity);
     if (body_len < 0) {
         return body_len;
     }
 
-    if ((status = fmt_long_double_parse_decimal_exponent(buffer,
+    if ((status = fmt_ldouble_parse_decimal_exponent(buffer,
                                                          body_len,
                                                          &exponent)) < 0) {
         return status;
@@ -3193,7 +3184,7 @@ fmt_long_double_generate_general_body(FormatSpec *spec, ldouble value,
             work_spec.conversion = 'f';
         }
         work_spec.precision = spec->precision - (exponent + 1);
-        body_len = fmt_long_double_generate_body(&work_spec, value,
+        body_len = fmt_ldouble_generate_body(&work_spec, value,
                                                  buffer, capacity);
         if (body_len < 0) {
             return body_len;
@@ -3201,14 +3192,14 @@ fmt_long_double_generate_general_body(FormatSpec *spec, ldouble value,
     }
 
     if ((spec->flags & FMT_FLAG_ALTERNATE) == 0) {
-        body_len = fmt_long_double_strip_trailing_zeros(buffer, body_len);
+        body_len = fmt_ldouble_strip_trailing_zeros(buffer, body_len);
     }
 
     return body_len;
 }
 
 static int32
-fmt_long_double_hex_digit_count(FormatBinaryFloat *parts) {
+fmt_ldouble_hex_digit_count(FormatBinaryFloat *parts) {
     int32 fraction_bits;
 
     ASSERT(parts != NULL);
@@ -3219,7 +3210,7 @@ fmt_long_double_hex_digit_count(FormatBinaryFloat *parts) {
 }
 
 static void
-fmt_long_double_hex_fraction_digits(FormatBinaryFloat *parts,
+fmt_ldouble_hex_fraction_digits(FormatBinaryFloat *parts,
                                     char *digits, int32 digit_len, bool upper) {
     int32 fraction_bits;
 
@@ -3247,7 +3238,7 @@ fmt_long_double_hex_fraction_digits(FormatBinaryFloat *parts,
 }
 
 static bool
-fmt_long_double_hex_has_nonzero_tail(char *digits, int32 start,
+fmt_ldouble_hex_has_nonzero_tail(char *digits, int32 start,
                                      int32 digit_len) {
     ASSERT(digits != NULL);
     ASSERT_NON_NEGATIVE(start);
@@ -3262,7 +3253,7 @@ fmt_long_double_hex_has_nonzero_tail(char *digits, int32 start,
 }
 
 static bool
-fmt_long_double_hex_should_round(char first_digit, char *digits,
+fmt_ldouble_hex_should_round(char first_digit, char *digits,
                                  int32 digit_len, int32 precision) {
     int32 round_digit;
     int32 even_digit;
@@ -3279,7 +3270,7 @@ fmt_long_double_hex_should_round(char first_digit, char *digits,
     if (round_digit < 8) {
         return false;
     }
-    if (fmt_long_double_hex_has_nonzero_tail(digits,
+    if (fmt_ldouble_hex_has_nonzero_tail(digits,
                                              precision + 1,
                                              digit_len)) {
         return true;
@@ -3294,7 +3285,7 @@ fmt_long_double_hex_should_round(char first_digit, char *digits,
 }
 
 static void
-fmt_long_double_hex_round(char *first_digit, char *digits,
+fmt_ldouble_hex_round(char *first_digit, char *digits,
                           int32 digit_len, int32 precision,
                           bool upper) {
     ASSERT(first_digit != NULL);
@@ -3303,7 +3294,7 @@ fmt_long_double_hex_round(char *first_digit, char *digits,
     ASSERT_NON_NEGATIVE(precision);
     ASSERT_LESS(precision, digit_len);
 
-    if (!fmt_long_double_hex_should_round(*first_digit,
+    if (!fmt_ldouble_hex_should_round(*first_digit,
                                           digits, digit_len, precision)) {
         return;
     }
@@ -3325,7 +3316,7 @@ fmt_long_double_hex_round(char *first_digit, char *digits,
 }
 
 static int32
-fmt_long_double_hex_trim_digits(char *digits, int32 digit_len) {
+fmt_ldouble_hex_trim_digits(char *digits, int32 digit_len) {
     ASSERT(digits != NULL);
     ASSERT_NON_NEGATIVE(digit_len);
 
@@ -3336,7 +3327,7 @@ fmt_long_double_hex_trim_digits(char *digits, int32 digit_len) {
 }
 
 static int32
-fmt_long_double_write_hex_body(FormatSpec *spec, char *buffer,
+fmt_ldouble_write_hex_body(FormatSpec *spec, char *buffer,
                                int32 capacity, char first_digit,
                                char *digits, int32 digit_len,
                                int32 exponent) {
@@ -3387,7 +3378,7 @@ fmt_long_double_write_hex_body(FormatSpec *spec, char *buffer,
 }
 
 static int32
-fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_hex_body(FormatSpec *spec, ldouble value,
                                   char *buffer, int32 capacity) {
     FormatBinaryFloat parts;
     char stack_digits[64];
@@ -3406,11 +3397,11 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
     ASSERT(fmt_float_is_hex(spec->conversion));
 
     upper = fmt_float_is_upper(spec->conversion);
-    if ((status = fmt_decompose_long_double(value, &parts)) < 0) {
+    if ((status = fmt_decompose_ldouble(value, &parts)) < 0) {
         return status;
     }
 
-    available_digits = fmt_long_double_hex_digit_count(&parts);
+    available_digits = fmt_ldouble_hex_digit_count(&parts);
     digit_cap = available_digits;
     if (spec->precision > digit_cap) {
         digit_cap = (int32)spec->precision;
@@ -3440,15 +3431,15 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
         } else {
             first_digit = '0';
         }
-        fmt_long_double_hex_fraction_digits(&parts,
+        fmt_ldouble_hex_fraction_digits(&parts,
                                             digits, available_digits, upper);
     }
 
     if (spec->precision < 0) {
-        digit_len = fmt_long_double_hex_trim_digits(digits, available_digits);
+        digit_len = fmt_ldouble_hex_trim_digits(digits, available_digits);
     } else {
         if (spec->precision < available_digits) {
-            fmt_long_double_hex_round(&first_digit, digits, available_digits,
+            fmt_ldouble_hex_round(&first_digit, digits, available_digits,
                                       (int32)spec->precision, upper);
         }
         for (int32 i = available_digits; i < spec->precision; i += 1) {
@@ -3457,7 +3448,7 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
         digit_len = (int32)spec->precision;
     }
 
-    status = fmt_long_double_write_hex_body(spec, buffer, capacity,
+    status = fmt_ldouble_write_hex_body(spec, buffer, capacity,
                                             first_digit, digits, digit_len,
                                             exponent);
     if (digits != stack_digits) {
@@ -3467,7 +3458,7 @@ fmt_long_double_generate_hex_body(FormatSpec *spec, ldouble value,
 }
 
 static int32
-fmt_long_double_generate_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_body(FormatSpec *spec, ldouble value,
                               char *buffer, int32 capacity) {
     int32 body_len;
     int32 status;
@@ -3477,7 +3468,7 @@ fmt_long_double_generate_body(FormatSpec *spec, ldouble value,
     ASSERT_POSITIVE(capacity);
 
     if (isnan(value) || isinf(value)) {
-        status = fmt_long_double_special_body(value, spec, buffer, &body_len);
+        status = fmt_ldouble_special_body(value, spec, buffer, &body_len);
         if (status < 0) {
             return status;
         }
@@ -3485,19 +3476,19 @@ fmt_long_double_generate_body(FormatSpec *spec, ldouble value,
     }
 
     if (fmt_float_is_general(spec->conversion)) {
-        return fmt_long_double_generate_general_body(spec, value,
+        return fmt_ldouble_generate_general_body(spec, value,
                                                      buffer, capacity);
     }
     if (fmt_float_is_hex(spec->conversion)) {
-        return fmt_long_double_generate_hex_body(spec, value,
+        return fmt_ldouble_generate_hex_body(spec, value,
                                                  buffer, capacity);
     }
     if (fmt_float_is_fixed(spec->conversion)) {
-        return fmt_long_double_generate_fixed_body(spec, value,
+        return fmt_ldouble_generate_fixed_body(spec, value,
                                                    buffer, capacity);
     }
     if (fmt_float_is_scientific(spec->conversion)) {
-        return fmt_long_double_generate_scientific_body(spec, value,
+        return fmt_ldouble_generate_scientific_body(spec, value,
                                                         buffer, capacity);
     }
 
@@ -3507,7 +3498,7 @@ fmt_long_double_generate_body(FormatSpec *spec, ldouble value,
 #else
 
 static int32 UNUSED
-fmt_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
+fmt_decompose_ldouble(ldouble value, FormatBinaryFloat *parts) {
     ASSERT(parts != NULL);
 
     (void)value;
@@ -3515,7 +3506,7 @@ fmt_decompose_long_double(ldouble value, FormatBinaryFloat *parts) {
 }
 
 static char
-fmt_long_double_sign(ldouble value, FormatSpec *spec) {
+fmt_ldouble_sign(ldouble value, FormatSpec *spec) {
     ASSERT(spec != NULL);
 
     (void)value;
@@ -3529,7 +3520,7 @@ fmt_long_double_sign(ldouble value, FormatSpec *spec) {
 }
 
 static int32
-fmt_long_double_generate_body(FormatSpec *spec, ldouble value,
+fmt_ldouble_generate_body(FormatSpec *spec, ldouble value,
                               char *buffer, int32 capacity) {
     ASSERT(spec != NULL);
     ASSERT(buffer != NULL);
@@ -3942,11 +3933,11 @@ fmt_handle_float(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
         ldouble long_value;
 
         long_value = va_arg(args->args, ldouble);
-        body_len = fmt_long_double_generate_body(spec, long_value, body,
+        body_len = fmt_ldouble_generate_body(spec, long_value, body,
                                                  capacity);
         if (body_len >= 0) {
             fmt_write_float_sign(
-                sink, spec, fmt_long_double_sign(long_value, spec),
+                sink, spec, fmt_ldouble_sign(long_value, spec),
                 body, body_len);
             status = sink->status;
         } else {
@@ -5142,11 +5133,11 @@ test_fmt_printf_hex_float_outputs(void) {
 
 
 static bool
-fmt_test_long_double_supported(void) {
+fmt_test_ldouble_supported(void) {
     FormatBinaryFloat parts;
     int32 status;
 
-    status = fmt_decompose_long_double(1.0L, &parts);
+    status = fmt_decompose_ldouble(1.0L, &parts);
     if (status == -ENOSYS) {
         return false;
     }
@@ -5155,11 +5146,11 @@ fmt_test_long_double_supported(void) {
 }
 
 static void
-test_fmt_long_double_parts(ldouble value, bool negative,
+test_fmt_ldouble_parts(ldouble value, bool negative,
                            int32 bit_len, int32 binary_exponent) {
     FormatBinaryFloat parts;
 
-    ASSERT(!fmt_decompose_long_double(value, &parts));
+    ASSERT(!fmt_decompose_ldouble(value, &parts));
     ASSERT(parts.negative == negative);
     ASSERT(parts.zero == (bit_len == 0));
     ASSERT_EQUAL(parts.precision_bits, LDBL_MANT_DIG);
@@ -5169,13 +5160,13 @@ test_fmt_long_double_parts(ldouble value, bool negative,
 }
 
 static void
-test_fmt_long_double_exact_integer(ldouble value, char *expected) {
+test_fmt_ldouble_exact_integer(ldouble value, char *expected) {
     char buffer[128];
     FormatBinaryFloat parts;
     FormatBigUInt integer;
     int32 len;
 
-    ASSERT(!fmt_decompose_long_double(value, &parts));
+    ASSERT(!fmt_decompose_ldouble(value, &parts));
     ASSERT(!fmt_binary_float_to_exact_integer(&parts, &integer));
     len = fmt_big_uint_to_decimal(&integer, buffer, SIZEOF(buffer));
     ASSERT_EQUAL(len, strlen32(expected));
@@ -5184,7 +5175,7 @@ test_fmt_long_double_exact_integer(ldouble value, char *expected) {
 }
 
 static void
-test_fmt_long_double_scaled(ldouble value, int32 decimal_places,
+test_fmt_ldouble_scaled(ldouble value, int32 decimal_places,
                             char *expected,
                             enum FormatRemainderHalf expected_rem) {
     char buffer[128];
@@ -5193,7 +5184,7 @@ test_fmt_long_double_scaled(ldouble value, int32 decimal_places,
     enum FormatRemainderHalf remainder;
     int32 len;
 
-    ASSERT(!fmt_decompose_long_double(value, &parts));
+    ASSERT(!fmt_decompose_ldouble(value, &parts));
     ASSERT(!fmt_binary_float_scaled_decimal(&parts, decimal_places,
                                             &integer, &remainder));
     ASSERT(remainder == expected_rem);
@@ -5204,38 +5195,38 @@ test_fmt_long_double_scaled(ldouble value, int32 decimal_places,
 }
 
 static void
-test_fmt_long_double_decomposition(void) {
+test_fmt_ldouble_decomposition(void) {
     FormatBinaryFloat parts;
     FormatBigUInt integer;
     ldouble true_min;
     int32 expected_exp;
 
-    if (!fmt_test_long_double_supported()) {
+    if (!fmt_test_ldouble_supported()) {
         return;
     }
 
-    ASSERT_EQUAL(fmt_decompose_long_double((ldouble)INFINITY, &parts), -EINVAL);
-    ASSERT_EQUAL(fmt_decompose_long_double((ldouble)NAN, &parts), -EINVAL);
+    ASSERT_EQUAL(fmt_decompose_ldouble((ldouble)INFINITY, &parts), -EINVAL);
+    ASSERT_EQUAL(fmt_decompose_ldouble((ldouble)NAN, &parts), -EINVAL);
 
-    test_fmt_long_double_parts(0.0L, false, 0, 0);
-    test_fmt_long_double_parts(-0.0L, true, 0, 0);
-    test_fmt_long_double_parts(1.0L, false, LDBL_MANT_DIG, 1 - LDBL_MANT_DIG);
-    test_fmt_long_double_parts(-1.0L, true, LDBL_MANT_DIG, 1 - LDBL_MANT_DIG);
-    test_fmt_long_double_parts(0.5L, false, LDBL_MANT_DIG, -LDBL_MANT_DIG);
-    test_fmt_long_double_parts(2.0L, false, LDBL_MANT_DIG, 2 - LDBL_MANT_DIG);
+    test_fmt_ldouble_parts(0.0L, false, 0, 0);
+    test_fmt_ldouble_parts(-0.0L, true, 0, 0);
+    test_fmt_ldouble_parts(1.0L, false, LDBL_MANT_DIG, 1 - LDBL_MANT_DIG);
+    test_fmt_ldouble_parts(-1.0L, true, LDBL_MANT_DIG, 1 - LDBL_MANT_DIG);
+    test_fmt_ldouble_parts(0.5L, false, LDBL_MANT_DIG, -LDBL_MANT_DIG);
+    test_fmt_ldouble_parts(2.0L, false, LDBL_MANT_DIG, 2 - LDBL_MANT_DIG);
 
     expected_exp = LDBL_MIN_EXP - LDBL_MANT_DIG;
-    test_fmt_long_double_parts(LDBL_MIN, false, LDBL_MANT_DIG, expected_exp);
+    test_fmt_ldouble_parts(LDBL_MIN, false, LDBL_MANT_DIG, expected_exp);
 
     expected_exp = LDBL_MAX_EXP - LDBL_MANT_DIG;
-    test_fmt_long_double_parts(LDBL_MAX, false, LDBL_MANT_DIG, expected_exp);
-    ASSERT(!fmt_decompose_long_double(LDBL_MAX, &parts));
+    test_fmt_ldouble_parts(LDBL_MAX, false, LDBL_MANT_DIG, expected_exp);
+    ASSERT(!fmt_decompose_ldouble(LDBL_MAX, &parts));
     ASSERT(!fmt_binary_float_to_exact_integer(&parts, &integer));
     ASSERT_EQUAL(fmt_big_uint_bit_len(&integer), LDBL_MAX_EXP);
 
     true_min = ldexpl(1.0L, LDBL_MIN_EXP - LDBL_MANT_DIG);
     if (true_min != 0.0L) {
-        test_fmt_long_double_parts(true_min, false, 1,
+        test_fmt_ldouble_parts(true_min, false, 1,
                                    LDBL_MIN_EXP - LDBL_MANT_DIG);
     }
 
@@ -5243,33 +5234,33 @@ test_fmt_long_double_decomposition(void) {
 }
 
 static void
-test_fmt_long_double_decimal_helpers(void) {
+test_fmt_ldouble_decimal_helpers(void) {
     FormatBinaryFloat parts;
     FormatBigUInt integer;
 
-    if (!fmt_test_long_double_supported()) {
+    if (!fmt_test_ldouble_supported()) {
         return;
     }
 
-    test_fmt_long_double_exact_integer(0.0L, "0");
-    test_fmt_long_double_exact_integer(1.0L, "1");
-    test_fmt_long_double_exact_integer(2.0L, "2");
-    test_fmt_long_double_exact_integer(ldexpl(1.0L, 64),
+    test_fmt_ldouble_exact_integer(0.0L, "0");
+    test_fmt_ldouble_exact_integer(1.0L, "1");
+    test_fmt_ldouble_exact_integer(2.0L, "2");
+    test_fmt_ldouble_exact_integer(ldexpl(1.0L, 64),
                                        "18446744073709551616");
 
-    ASSERT(!fmt_decompose_long_double(0.5L, &parts));
+    ASSERT(!fmt_decompose_ldouble(0.5L, &parts));
     ASSERT_EQUAL(fmt_binary_float_to_exact_integer(&parts, &integer), -ERANGE);
 
-    test_fmt_long_double_scaled(0.125L, 3, "125", FMT_REMAINDER_ZERO);
-    test_fmt_long_double_scaled(0.25L, 0, "0", FMT_REMAINDER_LESS_HALF);
-    test_fmt_long_double_scaled(0.5L, 0, "0", FMT_REMAINDER_HALF);
-    test_fmt_long_double_scaled(0.75L, 0, "0", FMT_REMAINDER_MORE_HALF);
-    test_fmt_long_double_scaled(1.25L, 1, "12", FMT_REMAINDER_HALF);
+    test_fmt_ldouble_scaled(0.125L, 3, "125", FMT_REMAINDER_ZERO);
+    test_fmt_ldouble_scaled(0.25L, 0, "0", FMT_REMAINDER_LESS_HALF);
+    test_fmt_ldouble_scaled(0.5L, 0, "0", FMT_REMAINDER_HALF);
+    test_fmt_ldouble_scaled(0.75L, 0, "0", FMT_REMAINDER_MORE_HALF);
+    test_fmt_ldouble_scaled(1.25L, 1, "12", FMT_REMAINDER_HALF);
     return;
 }
 
 static void
-test_fmt_printf_long_double_outputs(void) {
+test_fmt_printf_ldouble_outputs(void) {
     char buffer[128];
     ldouble precise;
 
@@ -5301,7 +5292,7 @@ test_fmt_printf_long_double_outputs(void) {
     test_fmt_bytes_cap("INF", 3, "%LF", (ldouble)INFINITY);
     test_fmt_bytes_cap("INF", 3, "%LE", (ldouble)INFINITY);
 
-    if (fmt_test_long_double_supported() && LDBL_MANT_DIG > DBL_MANT_DIG) {
+    if (fmt_test_ldouble_supported() && LDBL_MANT_DIG > DBL_MANT_DIG) {
         precise = ldexpl(1.0L, 63) + 1.0L;
         test_fmt_bytes_cap("9223372036854775809", 19, "%.0Lf", precise);
     }
@@ -5598,9 +5589,9 @@ main(void) {
     test_fmt_printf_float_outputs();
     test_fmt_printf_general_outputs();
     test_fmt_printf_hex_float_outputs();
-    test_fmt_printf_long_double_outputs();
-    test_fmt_long_double_decomposition();
-    test_fmt_long_double_decimal_helpers();
+    test_fmt_printf_ldouble_outputs();
+    test_fmt_ldouble_decomposition();
+    test_fmt_ldouble_decimal_helpers();
     test_fmt_public_api();
     test_fmt_estimate();
     test_fmt_sink_validation();
