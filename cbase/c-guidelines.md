@@ -1086,11 +1086,15 @@ appropriate cbase/ C file.
   * Add empty lines before and after a group of 2 or more assertions.
   * Another good practice is group assignments to the same struct together:
   ```c
-  char *some_string = "abc";
+  int32 x = 0;
+  int64 s = blabla();
 
   my_struct->field = 0;
   my_struct->other = 1;
   my_struct->n = 2;
+
+  other_struct->x = 0;
+  other_struct->y = 1;
 
   do_function(my_struct);
   ```
