@@ -5274,12 +5274,10 @@ test_fmt_long_double_decomposition(void) {
     test_fmt_long_double_parts(2.0L, false, LDBL_MANT_DIG, 2 - LDBL_MANT_DIG);
 
     expected_exp = LDBL_MIN_EXP - LDBL_MANT_DIG;
-    test_fmt_long_double_parts(LDBL_MIN, false, LDBL_MANT_DIG,
-                               expected_exp);
+    test_fmt_long_double_parts(LDBL_MIN, false, LDBL_MANT_DIG, expected_exp);
 
     expected_exp = LDBL_MAX_EXP - LDBL_MANT_DIG;
-    test_fmt_long_double_parts(LDBL_MAX, false, LDBL_MANT_DIG,
-                               expected_exp);
+    test_fmt_long_double_parts(LDBL_MAX, false, LDBL_MANT_DIG, expected_exp);
     ASSERT(!fmt_decompose_long_double(LDBL_MAX, &parts));
     ASSERT(!fmt_binary_float_to_exact_integer(&parts, &integer));
     ASSERT_EQUAL(fmt_big_uint_bit_len(&integer), LDBL_MAX_EXP);
