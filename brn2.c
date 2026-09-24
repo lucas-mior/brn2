@@ -5,10 +5,12 @@
 #if !defined(BRN2_C)
 #define BRN2_C
 
+#if !defined(TESTING_brn2)
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_brn2 1
-#elif !defined(TESTING_brn2)
+#else
 #define TESTING_brn2 0
+#endif
 #endif
 
 #include "cbase.h"

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: AGPL
 // Copyright (c) 2026 Lucas Mior
 
+#if !defined(TESTING_cbase)
 #if defined(__INCLUDE_LEVEL__) && (__INCLUDE_LEVEL__ == 0)
 #define TESTING_cbase 1
-#elif !defined(TESTING_cbase)
+#else
 #define TESTING_cbase 0
+#endif
 #endif
 
 // usage: cc -std=c11 -c cbase.c -o cbase.o
