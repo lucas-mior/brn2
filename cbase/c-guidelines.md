@@ -1017,8 +1017,9 @@ static struct TestCase tests[] = {
       char *name = options->name;
   }
   ```
-- Note: it is always ok to initialize with the declaration if the variable is
-  the only one declared in that scope:
+- Note: If initialization itself is appropriate according to the rules above,
+  prefer initializing with the declaration when it is the only variable declared
+  in that scope:
   ```c
   // bad (no reason to separate initialization from declaration when only one
   //      variable is being declared)
