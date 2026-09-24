@@ -5139,8 +5139,7 @@ test_fmt_printf_hex_float_outputs(void) {
     lsb_after_one = fmt_test_double_from_bits(UINT64_C(0x3ff0000000000001));
     true_min = fmt_test_double_from_bits(UINT64_C(0x0000000000000001));
     normal_min = fmt_test_double_from_bits(UINT64_C(0x0010000000000000));
-    largest_subnormal = fmt_test_double_from_bits(
-        UINT64_C(0x000fffffffffffff));
+    largest_subnormal = fmt_test_double_from_bits(UINT64_C(0x000fffffffffffff));
     before_one = fmt_test_double_from_bits(UINT64_C(0x3fefffffffffffff));
 
     test_fmt_bytes_capacity("0x0p+0", 6, "%a", 0.0);
