@@ -19,6 +19,7 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Space is mandatory around all assignment operators (`=`, `*=`, `+=`, etc).
 - Space is forbidden around `*` used for multiplication.
 - Space is optional around `/` used for division (keep as is).
+- Space is mandatory around `+` and `-` used for binary operation.
 - Space is optional around modulo operator (`%`)
 - Space is optional around bitwise xor (`^`)
 - Space is optional around bitwise or (`|`)

@@ -52,6 +52,7 @@ preconditions; assert those instead.
 
 - `const` keyword:
   * Never use const qualifiers in function signatures.
+    + exact externally imposed ABI signatures are exceptions
   * You can use it for static constant global data.
   * You can use it for casts needed to interface with the C standard library or
     other stupid libraries.
@@ -147,8 +148,7 @@ typeof(var)  // good
     + `malloc2(size)`
     + `free2(pointer, size)`
     + `realloc2(pointer, old_array_capacity, new_array_capacity, obj_size)`
-    + `malloc2` + `memset64` instead of `calloc`, or
-    + `realloc2` + `memset64` instead of `calloc`.
+    + `malloc2` + `memset64` instead of `calloc`
   * The wrappers above never fail: if out of memory, they exit the program. No
     need to check if they succeded or not.
   * `free2` already checks if the passed pointer is NULL. Never guard a call to
@@ -716,6 +716,7 @@ s = (StructType){0};
   `resolve_*`, and `normalize_*` should return a signed status/result. `0`
   means success when there is no payload; non-negative values may be successful
   counts, indices, lengths, or other results; negative values are errors.
+  + Exceptions: `ENUM_parse()` functions from `xenums.c`.
 
 - Convert libc `errno` to the project convention at the boundary. For example,
   after a failing libc call, capture `errno` immediately and return `-errno`
@@ -842,6 +843,7 @@ if (enum & ENUM_BITFLAG) {
   - `ASSERT_MORE(number expr 1, number expr 2)`
   - `ASSERT_LESS_EQUAL(number expr 1, number expr 2)`
   - `ASSERT_MORE_EQUAL(number expr 1, number expr 2)`
+  - `ASSERT_BETWEEN(number, min_inclusive, max_inclusive)`
   - `ASSERT_CONTAINS(haystack, haystack_len, needle)`
   - `ASSERT_NOT_CONTAINS(haystack, haystack_len, needle)`
   - `ASSERT_FILE_CONTAINS(path, needle)`
