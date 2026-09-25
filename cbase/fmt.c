@@ -585,7 +585,7 @@ fmt_sink_add_total(FormatSink *sink, int64 len) {
     if (sink->status < 0) {
         return;
     }
-    if (len > INT32_MAX - sink->total) {
+    if (len > (INT32_MAX - sink->total)) {
         sink->status = -EOVERFLOW;
         return;
     }
