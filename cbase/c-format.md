@@ -97,52 +97,52 @@ the format string below it. See the examples below:
 ```c
 static void
 function(void) {
-    FILE *file = fopen("blabla", "w");
+    String str = {0};
     int32 x = 1;
     int32 y = 2;
 
     // good (all arguments fit in a single line)
-    fprintf(file, "this fits in one line: %d\n", x);
+    str_printf(&str, "this fits in one line: %d\n", x);
 
     // bad (unnecessarly breaking lines)
-    fprintf(file,
+    str_printf(&str,
             "this fits in one line: %d\n",
             x);
 
     // bad (format arguments are split across lines)
-    fprintf(file, "this does not fit in a single line because of: %d, %d\n", x,
-                  y);
+    str_printf(&str, "this does not fit in a single line because of: %d, %d\n", x,
+               y);
 
     // good (format arguments are on the same line)
-    fprintf(file, "this does not fit in a single line because of: %d, %d\n",
-                  x, y);
+    str_printf(&str, "this does not fit in a single line because of: %d, %d\n",
+               x, y);
 
     // also good (format string is separate; format arguments stay together)
-    fprintf(file,
+    str_printf(&str,
             "this does not fit in a single line because of: %d, %d\n", x, y);
 
     // bad (passes the 80 column limit)
-    fprintf(file, "this is a format string for writing the numbers %d and %d.", x, y);
+    str_printf(&str, "this is a format string for writing the numbers %d and %d.", x, y);
 
     // also bad (format string is with some format arguments, but not all)
-    fprintf(file, "this is a format string for writing the numbers %d and %d.",
-            x, y);
+    str_printf(&str, "this is a format string for writing the numbers %d and %d.",
+               x, y);
 
     // good (format string and all format arguments fit on the same line)
-    fprintf(file,
+    str_printf(&str,
             "this is a format string for writing the numbers %d and %d.", x, y);
 
     // also good (format string is separate; format arguments stay together)
-    fprintf(file,
+    str_printf(&str,
             "this is a format string for writing the numbers %d and %d.",
             x, y);
 
     // also good (format arguments are aligned with the format string)
-    fprintf(file, "this is a format string for writing the numbers %d and %d.",
-                  x, y);
+    str_printf(&str, "this is a format string for writing the numbers %d and %d.",
+               x, y);
 
     // bad (one format argument is left on the format-string line)
-    printf("%s = %g\n", states[i],
+    printf("%str = %g\n", states[i],
            X[final_step*nstates + i]);
 
     // good (format string is separate; format arguments stay together)
@@ -158,25 +158,25 @@ multiple lines or maybe break the printing into multiple calls:
 ```c
 static void
 function(void) {
-    FILE *file = fopen("blabla", "w");
+    String str = {0};
     int32 x = 1;
     int32 y = 2;
 
     // bad
-    fprintf(file,
-            "this is a huge huge huge huge huge huge huge huge huge huge format string = %d",
-            x);
+    str_printf(&str,
+               "this is a huge huge huge huge huge huge huge huge huge huge format string = %d",
+               x);
 
     // good
-    fprintf(file,
-            "this is a"
-            " huge huge huge huge huge huge huge huge huge huge"
-            " format string = %d", x);
+    str_printf(&str,
+               "this is a"
+               " huge huge huge huge huge huge huge huge huge huge"
+               " format string = %d", x);
 
     // also good
-    fprintf(file, "this is a");
-    fprintf(file, " huge huge huge huge huge huge huge huge huge huge");
-    fprintf(file, " format string = %d", x);
+    STR_APPEND(&str, "this is a");
+    STR_APPEND(&str, " huge huge huge huge huge huge huge huge huge huge");
+    str_printf(&str, " format string = %d", x);
 
     return;
 }

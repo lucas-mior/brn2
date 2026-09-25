@@ -39,6 +39,7 @@ enum {
     FMT_LDOUBLE_X87_EXPONENT_MASK = 0x7fff,
     FMT_LDOUBLE_BINARY128_FRACTION_BITS = 112,
     FMT_LDOUBLE_BINARY128_EXPONENT_BIAS = 16383,
+    FMT_MAX_FORMAT_LEN = 160,
 };
 
 #if FLT_RADIX == 2 \
@@ -358,7 +359,6 @@ fmt_parse_length(char **cursor, FormatSpec *spec) {
 static bool
 fmt_is_integer_conversion(char conversion) {
     return conversion == 'd'
-           || conversion == 'i'
            || conversion == 'u'
            || conversion == 'o'
            || conversion == 'x'
@@ -714,7 +714,7 @@ fmt_sink_write_repeat(FormatSink *sink, char byte, int64 len) {
 
 static bool
 fmt_is_signed_integer_conversion(char conversion) {
-    return conversion == 'd' || conversion == 'i';
+    return conversion == 'd';
 }
 
 typedef struct FormatArgs {
@@ -4026,6 +4026,7 @@ fmt_vsnprintf_estimate(char *format, va_list args) {
     if (format == NULL) {
         return -EINVAL;
     }
+    ASSERT_LESS(strlen32(format), FMT_MAX_FORMAT_LEN);
 
     va_copy(fmt_args.args, args);
     total = 0;
@@ -4283,6 +4284,7 @@ fmt_vsnprintf_sink(FormatSink *sink, char *format, va_list args) {
     if (format == NULL) {
         return -EINVAL;
     }
+    ASSERT_LESS(strlen32(format), FMT_MAX_FORMAT_LEN);
 
     va_copy(fmt_args.args, args);
     literal = format;
@@ -4577,6 +4579,7 @@ test_fmt_parser_invalid_specs(void) {
     ASSERT_EQUAL(fmt_test_validate("%.*2$s"), -EINVAL);
     ASSERT_EQUAL(fmt_test_validate("%m"), -EINVAL);
     ASSERT_EQUAL(fmt_test_validate("%q"), -EINVAL);
+    ASSERT_EQUAL(fmt_test_validate("%i"), -EINVAL);
 
     ASSERT_EQUAL(fmt_test_validate("%ld"), -EINVAL);
     ASSERT_EQUAL(fmt_test_validate("%lc"), -EINVAL);
@@ -4710,7 +4713,7 @@ test_fmt_bytes_cap(char *expected, int32 expected_len, char *format, ...) {
 static void
 test_fmt_integer_outputs(void) {
     test_fmt_integer_cap("0", "%d", 0);
-    test_fmt_integer_cap("-123", "%i", -123);
+    test_fmt_integer_cap("-123", "%d", -123);
     test_fmt_integer_cap("-2147483648", "%d", INT32_MIN);
     test_fmt_integer_cap("4294967295", "%u", (uint32)UINT32_MAX);
     test_fmt_integer_cap("12", "%o", (uint32)10);
