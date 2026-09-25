@@ -4426,118 +4426,15 @@ fmt_sprintf(char *buffer, int64 capacity, char *format, ...) {
     return len;
 }
 
-static int32
-fmt_float_validate_buffer(char *buffer, int64 capacity) {
-    if (buffer == NULL) {
-        return -EINVAL;
-    }
-    if (capacity <= 0) {
-        return -EINVAL;
-    }
-
-    return 0;
-}
-
-static int32
-fmt_float_validate_precision(int32 precision) {
-    if (precision < 0) {
-        return -EINVAL;
-    }
-    if (precision > FMT_FLOAT_MAX_PRECISION) {
-        return -ERANGE;
-    }
-
-    return 0;
-}
-
-static int32
-fmt_float_copy(char *buffer, int64 capacity, char *source, int32 source_len) {
-    ASSERT(buffer != NULL);
-    ASSERT_POSITIVE(capacity);
-    ASSERT(source != NULL);
-    ASSERT_NON_NEGATIVE(source_len);
-    ASSERT_LESS(source_len, FMT_FLOAT_RYU_BUFFER_SIZE);
-
-    if ((int64)source_len >= capacity) {
-        return -ENOSPC;
-    }
-
-    memcpy64(buffer, source, source_len);
-    buffer[source_len] = '\0';
-    return source_len;
-}
-
-int32
-fmt_float32_shortest(char *buffer, int64 capacity, float value) {
-    int32 status;
-    int32 len;
-    char temp[FMT_FLOAT_RYU_BUFFER_SIZE];
-
-    if ((status = fmt_float_validate_buffer(buffer, capacity)) < 0) {
-        return status;
-    }
-
-    len = f2s_buffered_n(value, temp);
-    return fmt_float_copy(buffer, capacity, temp, len);
-}
-
-int32
-fmt_float64_shortest(char *buffer, int64 capacity, double value) {
-    int32 status;
-    int32 len;
-    char temp[FMT_FLOAT_RYU_BUFFER_SIZE];
-
-    if ((status = fmt_float_validate_buffer(buffer, capacity)) < 0) {
-        return status;
-    }
-
-    len = d2s_buffered_n(value, temp);
-    return fmt_float_copy(buffer, capacity, temp, len);
-}
-
-int32
-fmt_float64_fixed(char *buffer, int64 capacity, double value, int32 precision) {
-    int32 status;
-    int32 len;
-    char temp[FMT_FLOAT_RYU_BUFFER_SIZE];
-
-    if ((status = fmt_float_validate_buffer(buffer, capacity)) < 0) {
-        return status;
-    }
-    if ((status = fmt_float_validate_precision(precision)) < 0) {
-        return status;
-    }
-
-    len = d2fixed_buffered_n(value, (uint32)precision, temp);
-    return fmt_float_copy(buffer, capacity, temp, len);
-}
-
-int32
-fmt_float64_scientific(char *buffer, int64 capacity,
-                       double value, int32 precision) {
-    int32 status;
-    int32 len;
-    char temp[FMT_FLOAT_RYU_BUFFER_SIZE];
-
-    if ((status = fmt_float_validate_buffer(buffer, capacity)) < 0) {
-        return status;
-    }
-    if ((status = fmt_float_validate_precision(precision)) < 0) {
-        return status;
-    }
-
-    len = d2exp_buffered_n(value, (uint32)precision, temp);
-    return fmt_float_copy(buffer, capacity, temp, len);
-}
-
 void
 str_float64(String *string, double value) {
     int32 len;
 
     str_reserve(string, FMT_FLOAT_RYU_BUFFER_SIZE);
-    len = d2s_buffered_n(value, string->data + string->len);
+    len = fmt_float64_shortest(string->data + string->len,
+                               string->cap - string->len, value);
+    ASSERT_NON_NEGATIVE(len);
     string->len += len;
-    string->data[string->len] = '\0';
     return;
 }
 
@@ -4545,15 +4442,14 @@ void
 str_float64_fixed(String *sb, double value, int32 precision) {
     int32 len;
 
-    if (fmt_float_validate_precision(precision) < 0) {
+    str_reserve(sb, FMT_FLOAT_RYU_BUFFER_SIZE);
+    len = fmt_float64_fixed(sb->data + sb->len, sb->cap - sb->len,
+                            value, precision);
+    if (len < 0) {
         error("Invalid float precision %d.\n", precision);
         fatal(EXIT_FAILURE);
     }
-
-    str_reserve(sb, FMT_FLOAT_RYU_BUFFER_SIZE);
-    len = d2fixed_buffered_n(value, (uint32)precision, sb->data + sb->len);
     sb->len += len;
-    sb->data[sb->len] = '\0';
 
     return;
 }
