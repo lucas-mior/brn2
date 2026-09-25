@@ -3996,7 +3996,7 @@ fmt_estimate_add(int64 *total, int64 len) {
     ASSERT(total != NULL);
     ASSERT_NON_NEGATIVE(len);
 
-    if (len > INT64_MAX - *total) {
+    if (len > (INT32_MAX - *total)) {
         return -EOVERFLOW;
     }
     *total += len;
