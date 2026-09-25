@@ -6,7 +6,16 @@ When a rule says "prefer", avoid changing already-readable code unless the
 specific form is listed as bad. Exceptions listed under a "prefer" rule should
 be preserved.
 
+## Note
+exact externally imposed API/ABI signatures override the project's
+type/signature rules
+
 For formatting-only style rules, see `c-format.md`.
+
+## Standard
+Use ISO C11. gcc/clang extensions can be used for avoiding their own warnings
+when implementing macro tricks (for example, see `minmax.c`). Code must be
+compilable by tcc without modifications.
 
 ## Files and code high level organization
 Every project must have a common-denominator file (which acts analogous to
@@ -52,7 +61,6 @@ preconditions; assert those instead.
 
 - `const` keyword:
   * Never use const qualifiers in function signatures.
-    + exact externally imposed ABI signatures are exceptions
   * You can use it for static constant global data.
   * You can use it for casts needed to interface with the C standard library or
     other stupid libraries.
@@ -151,6 +159,7 @@ typeof(var)  // good
     + `malloc2` + `memset64` instead of `calloc`
   * The wrappers above never fail: if out of memory, they exit the program. No
     need to check if they succeded or not.
+  * `realloc2` does overflow check internally.
   * `free2` already checks if the passed pointer is NULL. Never guard a call to
     free2 solely with a NULL check.
 - Choose what is best in each situation:
@@ -1119,7 +1128,7 @@ appropriate cbase/ C file.
 ## Testing
 Every .c file (except the main program) must have a testing block:
 ```c
-#if TESTING_file_prefix`
+#if TESTING_file_prefix
 #define CBASE_IMPLEMENT 1
 #include "cbase.h"
 

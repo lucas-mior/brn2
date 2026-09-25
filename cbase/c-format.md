@@ -43,25 +43,6 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
   int32 x = (int32) y; // bad
   ```
 
-## Braces
-Always add braces around `if`, `else`, `do`, and `while` blocks:
-```c
-if (condition) {
-    do_this();
-    do_xyz();
-} else {
-    do_that();
-}
-
-do {
-    stuff();
-} while (condition);
-
-while (condition) {
-    do_stuff();
-}
-```
-
 ## Pointers
 
 - For pointers, use space after the type and no space before the name:
@@ -108,8 +89,11 @@ if ((flags & MY_FLAG_EXAMPLE1)
 ```
 
 When formatting printf-like function calls, try to fit the entire call in a
-single line. If it does not fit, the beggining of the first argument for the
-format string must be aligned with the beggining of the format string:
+single line; If it does not fit, try to fit the format string and the arguments
+in the same line; if it still does not fit, try to align the beggining of the
+first argument for the format string with the beggining of the format string; if
+it still does not fit; put the format string on a new line and the arguments for
+the format string below it. See the examples below:
 ```c
 static void
 function(void) {
