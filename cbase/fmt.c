@@ -2187,7 +2187,7 @@ fmt_float_temp_cap(FormatSpec *spec, int64 *capacity) {
         return 0;
     }
 
-    if (spec->precision > INT64_MAX - prefix - 8) {
+    if (spec->precision > (INT32_MAX - prefix - 8)) {
         return -EOVERFLOW;
     }
 
