@@ -23,7 +23,6 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 - Space is optional around bitwise xor (`^`)
 - Space is optional around bitwise or (`|`)
 - Space is mandatory around bitwise and (`&`)
-- Space is mandatory before bitwise not (`~`)
 - Space is mandatory around bitshifts (`<<` and `>>`)
 - Space is forbidden around dot and arrow (`.` and `->`) for acessing struct and
   union fields.
@@ -42,6 +41,25 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
   int32 x = (int32)y;  // good
   int32 x = (int32) y; // bad
   ```
+
+## Braces
+Always add braces around `if`, `else`, `do`, and `while` blocks:
+```c
+if (condition) {
+    do_this();
+    do_xyz();
+} else {
+    do_that();
+}
+
+do {
+    stuff();
+} while (condition);
+
+while (condition) {
+    do_stuff();
+}
+```
 
 ## Pointers
 

@@ -45,6 +45,8 @@ preconditions; assert those instead.
 ## for loops
 - Use the pattern `for (int32 i = 0; i < N; i += 1)` for loops.
   * Use `for (uint32 i = 0; i < N; i += 1)` if N is an enum value.
+- Use the pattern `for (int64 i = 0; i < N; i += 1)` for loops that need the
+  64-bit range.
 
 ## Types
 
@@ -145,8 +147,8 @@ typeof(var)  // good
     + `malloc2(size)`
     + `free2(pointer, size)`
     + `realloc2(pointer, old_array_capacity, new_array_capacity, obj_size)`
-    + `malloc2(size) + memset64(pointer, 0, size)` instead of `calloc`, or
-    + `realloc2(size) + memset64(pointer, 0, size)` instead of `calloc`.
+    + `malloc2` + `memset64` instead of `calloc`, or
+    + `realloc2` + `memset64` instead of `calloc`.
   * The wrappers above never fail: if out of memory, they exit the program. No
     need to check if they succeded or not.
   * `free2` already checks if the passed pointer is NULL. Never guard a call to
@@ -407,7 +409,7 @@ That means to also avoid calling `strlen32`:
         int32 n;
         char buffer[256];
 
-        SNPRINTF(buffer, "%dx%d", x, y);
+        n = SNPRINTF(buffer, "%dx%d", x, y);
         return;
     }
     ```
@@ -773,16 +775,6 @@ if (nitems > 0) {
 }
 
 // bad
-while (nitems-- != 0) {
-    // there are items
-}
-
-// good
-while (nitems--) {
-    // there are items
-}
-
-// bad
 if (point.x) {
     // point is not at x == 0
 }
@@ -1139,8 +1131,8 @@ int main(void) {
 ```
 
 ## File organization
-- Add include guards for every C file, except the ones uses as include templates
-  like `cbase/hash.c` and `cbase/xenums.c`.
+- Add include guards for every .c and .h file, except the ones uses as include
+  templates like `cbase/hash.c` and `cbase/xenums.c`.
 - The first file to be included is always `cbase.h`, or the build will break.
   * Exceptions: Some files in `cbase/` are not allowed to include `cbase.h`
     because `cbase.h` itself depends on them.
