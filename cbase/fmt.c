@@ -4266,6 +4266,7 @@ fmt_snprintf_estimate(char *format, ...) {
     va_start(args, format);
     estimate = fmt_vsnprintf_estimate(format, args);
     va_end(args);
+
     return estimate;
 }
 
