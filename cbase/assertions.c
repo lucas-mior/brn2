@@ -701,20 +701,20 @@ assert_outside(char *file, int32 line, char *func,
     }
 }
 
-#define GENERATE_ASSERT_SIGNED(MODE, SYMBOL, EXPECTED)                         \
-void                                                                           \
-a_sign_integer_##MODE(char *file, int32 line, char *func,                      \
-                      char *name, llong var) {                                 \
-    if (!(var SYMBOL 0)) {                                                     \
-        if (DEBUGGING) {                                                       \
-            assert_error(file, line, func,                                     \
-                         "%s = %lld " EXPECTED "\n", name, var);               \
-            TRAP();                                                            \
-        } else {                                                               \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-    }                                                                          \
-    return;                                                                    \
+#define GENERATE_ASSERT_SIGNED(MODE, SYMBOL, EXPECTED)                  \
+void                                                                    \
+a_sign_integer_##MODE(char *file, int32 line, char *func,               \
+                      char *name, llong var) {                          \
+    if (!(var SYMBOL 0)) {                                              \
+        if (DEBUGGING) {                                                \
+            assert_error(file, line, func,                              \
+                         "%s = %lld " EXPECTED "\n", name, var);        \
+            TRAP();                                                     \
+        } else {                                                        \
+            UNREACHABLE();                                              \
+        }                                                               \
+    }                                                                   \
+    return;                                                             \
 }
 
 GENERATE_ASSERT_SIGNED(positive, >, "> 0")
@@ -724,20 +724,20 @@ GENERATE_ASSERT_SIGNED(non_negative, >=, ">= 0")
 
 #undef GENERATE_ASSERT_SIGNED
 
-#define GENERATE_ASSERT_DOUBLE_SIGN(MODE, SYMBOL, EXPECTED)                    \
-void                                                                           \
-a_sign_double_##MODE(char *file, int32 line, char *func,                       \
-                     char *name, double var) {                                 \
-    if (!(var SYMBOL (double)0)) {                                             \
-        if (DEBUGGING) {                                                       \
-            assert_error(file, line, func, "%s = %.17g " EXPECTED "\n",        \
-                         name, var);                                           \
-            TRAP();                                                            \
-        } else {                                                               \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-    }                                                                          \
-    return;                                                                    \
+#define GENERATE_ASSERT_DOUBLE_SIGN(MODE, SYMBOL, EXPECTED)             \
+void                                                                    \
+a_sign_double_##MODE(char *file, int32 line, char *func,                \
+                     char *name, double var) {                          \
+    if (!(var SYMBOL (double)0)) {                                      \
+        if (DEBUGGING) {                                                \
+            assert_error(file, line, func, "%s = %.17g " EXPECTED "\n", \
+                         name, var);                                    \
+            TRAP();                                                     \
+        } else {                                                        \
+            UNREACHABLE();                                              \
+        }                                                               \
+    }                                                                   \
+    return;                                                             \
 }
 
 GENERATE_ASSERT_DOUBLE_SIGN(positive, >, "> 0")
