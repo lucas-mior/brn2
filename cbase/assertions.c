@@ -753,8 +753,8 @@ a_sign_ldouble_##MODE(char *file, int32 line, char *func,               \
                       char *name, ldouble var) {                        \
     if (!(var SYMBOL (ldouble)0)) {                                     \
         if (DEBUGGING) {                                                \
-            assert_error(file, line, func, "%s = %Lf " EXPECTED "\n",   \
-                         name, var);                                    \
+            assert_error(file, line, func,                              \
+                         "%s = %Lf " EXPECTED "\n", name, var);         \
             TRAP();                                                     \
         } else {                                                        \
             UNREACHABLE();                                              \
