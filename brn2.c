@@ -1360,7 +1360,7 @@ brn2_print_list(FileList *list) {
         FileName *file = list->files[i];
         if (file) {
             int32 name_length = strlen32(file->name);
-            ASSERT_EQUAL_VAR(file->length, name_length);
+            ASSERT_EQ_VAR(file->length, name_length);
             error("[%d] = %s\n", i, file->name);
         } else {
             error("[%d]", i);
@@ -1441,7 +1441,7 @@ main(void) {
         brn2_list_from_dir(list1, ".");
         brn2_list_from_file(list2, filelist, true);
 
-        ASSERT_EQUAL_VAR(list1->length, list2->length);
+        ASSERT_EQ_VAR(list1->length, list2->length);
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1499,7 +1499,7 @@ main(void) {
         brn2_list_from_file(list1, filelist, true);
         brn2_list_from_lines(list2, filelist, true);
 
-        ASSERT_EQUAL_VAR(list1->length, list2->length);
+        ASSERT_EQ_VAR(list1->length, list2->length);
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
@@ -1527,10 +1527,10 @@ main(void) {
             int32 name_length;
 
             name_length = strlen32(file->name);
-            ASSERT_EQUAL_VAR(file->length, name_length);
+            ASSERT_EQ_VAR(file->length, name_length);
             hash = hash_function(file->name, file->length);
-            ASSERT_EQUAL_VAR(file->hash, hash);
-            ASSERT_EQUAL_VAR(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQ_VAR(file->hash, hash);
+            ASSERT_EQ_VAR(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_insert_pre_calc_map(map,
                                             file->name, file->length,
@@ -1542,10 +1542,10 @@ main(void) {
             int32 name_length;
 
             name_length = strlen32(file->name);
-            ASSERT_EQUAL_VAR(file->length, name_length);
+            ASSERT_EQ_VAR(file->length, name_length);
             hash = hash_function(file->name, file->length);
-            ASSERT_EQUAL_VAR(file->hash, hash);
-            ASSERT_EQUAL_VAR(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQ_VAR(file->hash, hash);
+            ASSERT_EQ_VAR(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
                                              hash, list1->indexes[i]));
@@ -1660,10 +1660,10 @@ main(void) {
             int32 name_length;
 
             name_length = strlen32(file->name);
-            ASSERT_EQUAL_VAR(file->length, name_length);
+            ASSERT_EQ_VAR(file->length, name_length);
             hash = hash_function(file->name, file->length);
-            ASSERT_EQUAL_VAR(file->hash, hash);
-            ASSERT_EQUAL_VAR(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQ_VAR(file->hash, hash);
+            ASSERT_EQ_VAR(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_insert_pre_calc_map(map,
                                             file->name, file->length,
@@ -1675,10 +1675,10 @@ main(void) {
             int32 name_length;
 
             name_length = strlen32(file->name);
-            ASSERT_EQUAL_VAR(file->length, name_length);
+            ASSERT_EQ_VAR(file->length, name_length);
             hash = hash_function(file->name, file->length);
-            ASSERT_EQUAL_VAR(file->hash, hash);
-            ASSERT_EQUAL_VAR(file->hash % capacity_set, hash & map->bitmask);
+            ASSERT_EQ_VAR(file->hash, hash);
+            ASSERT_EQ_VAR(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
                                              hash, list1->indexes[i]));
@@ -1816,14 +1816,14 @@ main(void) {
         }
 
         number_changes = brn2_get_number_changes(old, new);
-        ASSERT_EQUAL_VAR(number_changes, number_changed_hard);
+        ASSERT_EQ_VAR(number_changes, number_changed_hard);
 
         names_renamed = hash_create_set((uint32)old->length, "names_renamed");
 
         brn2_execute(old, new, oldlist_map, names_renamed,
                      &number_renames);
 
-        ASSERT_EQUAL_VAR(number_renames, number_changes);
+        ASSERT_EQ_VAR(number_renames, number_changes);
         for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
             char path[512];
             char renamed_buffer[512];
@@ -1839,7 +1839,7 @@ main(void) {
                 error("Error in fgets from %s: %s.\n", path, strerror(errno));
                 fatal(EXIT_FAILURE);
             }
-            ASSERT_EQUAL_VAR(renamed_buffer, files[i].renamed);
+            ASSERT_EQ_VAR(renamed_buffer, files[i].renamed);
 
             if (fclose(file) != 0) {
                 error("Error closing %s: %s.\n", path, strerror(errno));
@@ -1919,7 +1919,7 @@ main(void) {
 
         brn2_normalize_names(old, NULL);
         for (int32 i = 0; i < (int32)LENGTH(files2); i += 1) {
-            ASSERT_EQUAL_VAR(files2[i].renamed, (char *)old->files[i]->name);
+            ASSERT_EQ_VAR(files2[i].renamed, (char *)old->files[i]->name);
         }
         brn2_free_list(old);
         arenas_destroy(old->arenas, nthreads);
