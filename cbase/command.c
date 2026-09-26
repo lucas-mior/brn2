@@ -781,7 +781,7 @@ command_result_process_io(Command *command, enum CommandFlag flags) {
 
     if (command_flags_capture(flags)) {
         command->result.output = str_steal(&output,
-                                           &command->result.output_len);
+                                                &command->result.output_len);
     } else {
         str_free(&output);
     }
@@ -1184,34 +1184,55 @@ command_str(Command *command, int32 *len) {
     return str_steal(&string, len);
 }
 
-void
-command_vector_reserve(char ***items, int32 **item_lens,
-                       int32 *cap, int32 len, int32 extra) {
+static void
+command_array_reserve(Command *command, bool environment, int32 extra) {
+    int32 *capacity;
+    int32 len;
     int32 needed;
 
+    if (environment) {
+        capacity = &command->env_cap;
+        len = command->env_len;
+    } else {
+        capacity = &command->cap;
+        len = command->argc;
+    }
+
     needed = len + extra + 1;
-    if ((needed < len) || (needed >= MAXOF(*cap))) {
+    if ((needed < len) || (needed >= MAXOF(*capacity))) {
         error("Command has too many items.\n");
         fatal(EXIT_FAILURE);
     }
-    if (*cap > needed) {
+    if (*capacity > needed) {
         return;
     }
 
     do {
-        int32 oldcap = *cap;
+        int32 old_capacity = *capacity;
 
-        *cap += 16;
-        *items = realloc2(*items, oldcap, *cap, SIZEOF(**items));
-        *item_lens = realloc2(*item_lens, oldcap, *cap, SIZEOF(**item_lens));
-    } while (*cap <= needed);
+        *capacity += 16;
+        if (environment) {
+            command->env = realloc2(command->env,
+                                    old_capacity, *capacity,
+                                    SIZEOF(*command->env));
+            command->env_lens = realloc2(command->env_lens,
+                                         old_capacity, *capacity,
+                                         SIZEOF(*command->env_lens));
+        } else {
+            command->argv = realloc2(command->argv,
+                                     old_capacity, *capacity,
+                                     SIZEOF(*command->argv));
+            command->argvs_lens = realloc2(command->argvs_lens,
+                                           old_capacity, *capacity,
+                                           SIZEOF(*command->argvs_lens));
+        }
+    } while (*capacity <= needed);
 
     return;
 }
 
 void
-command_push_owned_length(char ***items, int32 **item_lens,
-                          int32 *len, int32 *cap,
+command_push_owned_length(Command *command,
                           char *argument, int32 argument_len) {
     char *copy;
 
@@ -1220,27 +1241,22 @@ command_push_owned_length(char ***items, int32 **item_lens,
         fatal(EXIT_FAILURE);
     }
 
-    command_vector_reserve(items, item_lens, cap, *len, 1);
+    command_array_reserve(command, false, 1);
     copy = malloc2(argument_len + 1);
     memcpy64(copy, argument, argument_len);
     copy[argument_len] = '\0';
 
-    (*items)[*len] = copy;
-    (*item_lens)[*len] = argument_len;
-    *len += 1;
-    (*items)[*len] = NULL;
-    (*item_lens)[*len] = 0;
+    command->argv[command->argc] = copy;
+    command->argvs_lens[command->argc] = argument_len;
+    command->argc += 1;
+    command->argv[command->argc] = NULL;
+    command->argvs_lens[command->argc] = 0;
     return;
 }
 
 void
 command_push_length(Command *command, char *argument, int32 argument_len) {
-    command_push_owned_length(&command->argv,
-                              &command->argvs_lens,
-                              &command->argc,
-                              &command->cap,
-                              argument,
-                              argument_len);
+    command_push_owned_length(command, argument, argument_len);
     return;
 }
 
@@ -1294,12 +1310,23 @@ command_stdin_buffer_clear(Command *command) {
 void
 command_env_push_length(Command *command,
                         char *assignment, int32 assignment_len) {
-    command_push_owned_length(&command->env,
-                              &command->env_lens,
-                              &command->env_len,
-                              &command->env_cap,
-                              assignment,
-                              assignment_len);
+    char *copy;
+
+    if (assignment_len < 0) {
+        error("Command environment assignment has invalid length.\n");
+        fatal(EXIT_FAILURE);
+    }
+
+    command_array_reserve(command, true, 1);
+    copy = malloc2(assignment_len + 1);
+    memcpy64(copy, assignment, assignment_len);
+    copy[assignment_len] = '\0';
+
+    command->env[command->env_len] = copy;
+    command->env_lens[command->env_len] = assignment_len;
+    command->env_len += 1;
+    command->env[command->env_len] = NULL;
+    command->env_lens[command->env_len] = 0;
     return;
 }
 
