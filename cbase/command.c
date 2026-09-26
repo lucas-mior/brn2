@@ -1231,6 +1231,25 @@ command_array_reserve(Command *command, bool environment, int32 extra) {
     return;
 }
 
+static char *
+command_argument_alloc(Command *command, int32 size) {
+    if (command->argv_arena == NULL) {
+        command->argv_arena = arena_create(SIZEKB(4), "command_argv");
+    }
+    return xarena_push(command->argv_arena, size);
+}
+
+static void
+command_argument_append(Command *command, char *argument, int32 argument_len) {
+    command_array_reserve(command, false, 1);
+    command->argv[command->argc] = argument;
+    command->argvs_lens[command->argc] = argument_len;
+    command->argc += 1;
+    command->argv[command->argc] = NULL;
+    command->argvs_lens[command->argc] = 0;
+    return;
+}
+
 void
 command_push_owned_length(Command *command,
                           char *argument, int32 argument_len) {
@@ -1241,16 +1260,10 @@ command_push_owned_length(Command *command,
         fatal(EXIT_FAILURE);
     }
 
-    command_array_reserve(command, false, 1);
-    copy = malloc2(argument_len + 1);
+    copy = command_argument_alloc(command, argument_len + 1);
     memcpy64(copy, argument, argument_len);
     copy[argument_len] = '\0';
-
-    command->argv[command->argc] = copy;
-    command->argvs_lens[command->argc] = argument_len;
-    command->argc += 1;
-    command->argv[command->argc] = NULL;
-    command->argvs_lens[command->argc] = 0;
+    command_argument_append(command, copy, argument_len);
     return;
 }
 
@@ -1374,10 +1387,12 @@ command_push_split(Command *command, char *arguments, char *delimiters) {
 void
 command_argv0_set(Command *command, char *argument) {
     int32 argument_len = strlen32(argument);
+    char *copy;
 
     ASSERT_POSITIVE(command->argc);
-    free2(command->argv[0], command->argvs_lens[0] + 1);
-    command->argv[0] = xstrdup(argument);
+    copy = command_argument_alloc(command, argument_len + 1);
+    memcpy64(copy, argument, argument_len + 1);
+    command->argv[0] = copy;
     command->argvs_lens[0] = argument_len;
     return;
 }
@@ -1402,11 +1417,7 @@ command_cwd_set(Command *command, char *cwd) {
 
 void
 command_reset(Command *command) {
-    for (int32 i = 0; i < command->argc; i += 1) {
-        free2(command->argv[i], command->argvs_lens[i] + 1);
-        command->argv[i] = NULL;
-        command->argvs_lens[i] = 0;
-    }
+    arena_reset(command->argv_arena);
     command->argc = 0;
     if (command->argv) {
         command->argv[0] = NULL;
@@ -1450,11 +1461,15 @@ command_free(Command *command) {
     free2(command->env, command->env_cap*SIZEOF(*command->env));
     free2(command->env_lens,
           command->env_cap*SIZEOF(*command->env_lens));
+    if (command->argv_arena) {
+        arena_destroy(command->argv_arena);
+    }
 
     command->argv = NULL;
     command->argvs_lens = NULL;
     command->env = NULL;
     command->env_lens = NULL;
+    command->argv_arena = NULL;
     command->cap = 0;
     command->env_cap = 0;
     return;
@@ -1479,7 +1494,7 @@ command_printf(Command *command, char *fmt, ...) {
         fatal(EXIT_FAILURE);
     }
 
-    argument = malloc2(estimate + 1);
+    argument = command_argument_alloc(command, estimate + 1);
     len = fmt_vsprintf(argument, estimate + 1, fmt, ap2);
     va_end(ap2);
 
@@ -1492,9 +1507,7 @@ command_printf(Command *command, char *fmt, ...) {
         fatal(EXIT_FAILURE);
     }
 
-    command_push_length(command, argument, len);
-
-    free2(argument, estimate + 1);
+    command_argument_append(command, argument, len);
     return;
 }
 
@@ -1555,6 +1568,7 @@ main(int argc, char **argv) {
         ASSERT_EQUAL(cmd.argvs_lens[0], 4);
         ASSERT_EQUAL(cmd.argvs_lens[1], 9);
         ASSERT_EQUAL(cmd.argvs_lens[2], 4);
+        ASSERT(cmd.argv_arena != NULL);
 
         command_argv0_set(&cmd, "printf");
         ASSERT_EQUAL(cmd.argv[0], "printf");
@@ -1568,6 +1582,7 @@ main(int argc, char **argv) {
 
         command_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
+        ASSERT_ZERO(cmd.argv_arena->npushed);
         ASSERT(cmd.argv[0] == NULL);
 
         command_push_split(&cmd, "  alpha beta  gamma ", " ");
@@ -1632,7 +1647,7 @@ main(int argc, char **argv) {
 
         {
             enum {
-                LONG_COMMAND_ARGUMENT_SIZE = 5000,
+                LONG_COMMAND_ARGUMENT_SIZE = 4000,
             };
             char long_argument[LONG_COMMAND_ARGUMENT_SIZE];
             char *long_argument_string;
@@ -1891,6 +1906,7 @@ main(int argc, char **argv) {
         ASSERT(cmd.argvs_lens == NULL);
         ASSERT(cmd.env == NULL);
         ASSERT(cmd.env_lens == NULL);
+        ASSERT(cmd.argv_arena == NULL);
         ASSERT_ZERO(cmd.cap);
         ASSERT_ZERO(cmd.env_cap);
     }

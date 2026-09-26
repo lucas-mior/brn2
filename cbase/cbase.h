@@ -693,6 +693,7 @@ typedef struct Command {
     char **env;
     char *cwd;
     char *stdin_buffer;
+    Arena *argv_arena;
 
     int32 *argvs_lens;
     int32 *env_lens;
