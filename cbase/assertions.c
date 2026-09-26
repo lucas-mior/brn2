@@ -1261,14 +1261,13 @@ assert_double_failure(char *file, int32 line, char *func,
                       char *type1, char *type2,
                       int32 bits1, int32 bits2,
                       double var1, double var2,
-                      char *symbol, double diff, double tolerance,
+                      char *sym, double diff, double tolerance,
                       ullong ulps, ullong max_ulps,
                       bool use_tol) {
     if (DEBUGGING) {
         assert_error(file, line, func,
                      "[%s%d]%s = %.17g %s %.17g = %s[%s%d]\n",
-                     type1, bits1, name1, var1, symbol, var2, name2, type2,
-                     bits2);
+                     type1, bits1, name1, var1, sym, var2, name2, type2, bits2);
         if (use_tol) {
             fprintf(stderr,
                     "floating diff = %.17g, tolerance = %.17g\n",
