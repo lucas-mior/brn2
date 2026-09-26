@@ -187,6 +187,7 @@ assert_compare_mode_symbol(enum AssertCompareMode mode) {
         return ">=";
     default:
         UNREACHABLE();
+        fatal(EXIT_FAILURE);
     }
 }
 
@@ -206,8 +207,10 @@ assert_compare_mode_symbol(enum AssertCompareMode mode) {
         return (VAR1) >= (VAR2);                       \
     default:                                           \
         UNREACHABLE();                                 \
+        fatal(EXIT_FAILURE);                           \
     }                                                  \
-    UNREACHABLE()
+    UNREACHABLE();                                     \
+    fatal(EXIT_FAILURE)
 
 static bool
 assert_compare_constant_integer(enum AssertCompareMode mode,
@@ -259,6 +262,7 @@ assert_compare_constant_bool(enum AssertCompareMode mode,
         return false;
     default:
         UNREACHABLE();
+        fatal(EXIT_FAILURE);
     }
 }
 
@@ -279,6 +283,7 @@ assert_compare_value_kind_name(enum AssertCompareValueKind kind) {
         return "floating-point";
     default:
         UNREACHABLE();
+        fatal(EXIT_FAILURE);
     }
 }
 
@@ -295,6 +300,7 @@ assert_compare_constant_unsupported(char *file, int32 line, char *func,
         TRAP();
     } else {
         UNREACHABLE();
+        fatal(EXIT_FAILURE);
     }
 }
 
