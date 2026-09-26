@@ -258,6 +258,35 @@ char *str_opt_cstr(String *);
 char *signal_name(int32 signum);
 void send_signal(char *executable, int32 signal_number);
 
+// Caller-owned parsed-format storage. Treat all fields as implementation
+// details. A successful fmt_vsnprintf_estimate_cached() makes the plan
+// self-contained and read-only for fmt_vsprintf_cached().
+enum {
+    FMT_PLAN_MAX_FORMAT_LEN = 200,
+    FMT_PLAN_MAX_SPECS = FMT_PLAN_MAX_FORMAT_LEN/2,
+};
+
+typedef struct FmtPlanSpec {
+    int32 width;
+    int32 precision;
+    uint8 literal_offset;
+    uint8 literal_len;
+    uint8 flags;
+    uint8 width_kind;
+    uint8 precision_kind;
+    uint8 length;
+    char conversion;
+} FmtPlanSpec;
+
+typedef struct FmtPlan {
+    char format[FMT_PLAN_MAX_FORMAT_LEN];
+    FmtPlanSpec specs[FMT_PLAN_MAX_SPECS];
+    uint8 spec_count;
+    uint8 tail_offset;
+    uint8 tail_len;
+    bool valid;
+} FmtPlan;
+
 // cbase printf-compatible formatter. It returns the byte count that would
 // have been written, excluding the terminating '\0'. It writes a terminating
 // '\0' when capacity is positive. buffer may be NULL only when capacity is
@@ -275,6 +304,10 @@ int32 fmt_sprintf(char *buffer, int64 capacity, char *format, ...)
     ATTR_PRINTF(3, 4);
 int32 fmt_vsnprintf_estimate(char *format, va_list args) ATTR_PRINTF(1, 0);
 int32 fmt_snprintf_estimate(char *format, ...) ATTR_PRINTF(1, 2);
+int32 fmt_vsnprintf_estimate_cached(FmtPlan *plan, char *format, va_list args)
+    ATTR_PRINTF(2, 0);
+int32 fmt_vsprintf_cached(const FmtPlan *plan, char *buffer, int64 capacity,
+                          va_list args);
 
 String *string_array_append(StringArray *);
 int32 string_array_append_copy(StringArray *array, String *item);
