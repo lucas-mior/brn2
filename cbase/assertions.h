@@ -139,7 +139,7 @@ ASSERT_DECLARE_POINTERS(greater_equal)
 #define ASSERT_DECLARE_INTEGERS(SIGN, MODE)                   \
 void a_both_##SIGN##_##MODE(char *, int32, char *,            \
                             char *, char *, char *, char *,   \
-                            llong, llong,                     \
+                            int32, int32,                     \
                             SIGN long long, SIGN long long);
 
 ASSERT_DECLARE_INTEGERS(signed, less)
@@ -160,7 +160,7 @@ ASSERT_DECLARE_INTEGERS(unsigned, greater_equal)
 #define ASSERT_DECLARE_SIGN_UNSIGN(MODE)                      \
 void a_signed_unsigned##MODE(char *, int32, char *,           \
                              char *, char *, char *, char *,  \
-                             llong, llong, llong, ullong);
+                             int32, int32, llong, ullong);
 
 ASSERT_DECLARE_SIGN_UNSIGN(less)
 ASSERT_DECLARE_SIGN_UNSIGN(less_equal)
@@ -174,7 +174,7 @@ ASSERT_DECLARE_SIGN_UNSIGN(greater_equal)
 #define ASSERT_DECLARE_UNSIGN_SIGN(MODE)                      \
 void a_unsigned_signed_##MODE(char *, int32, char *,          \
                               char *, char *, char *, char *, \
-                              llong, llong, ullong, llong);
+                              int32, int32, ullong, llong);
 
 ASSERT_DECLARE_UNSIGN_SIGN(less)
 ASSERT_DECLARE_UNSIGN_SIGN(less_equal)
@@ -188,7 +188,7 @@ ASSERT_DECLARE_UNSIGN_SIGN(greater_equal)
 #define ASSERT_DECLARE_DOUBLE(MODE)                           \
 void a_double_##MODE(char *, int32, char *,                   \
                      char *, char *, char *, char *,          \
-                     llong, llong, double, double);
+                     int32, int32, double, double);
 
 ASSERT_DECLARE_DOUBLE(less)
 ASSERT_DECLARE_DOUBLE(less_equal)
@@ -202,7 +202,7 @@ ASSERT_DECLARE_DOUBLE(greater_equal)
 #define ASSERT_DECLARE_DOUBLE_CLOSE(MODE)                     \
 void a_double_##MODE(char *, int32, char *,                   \
                      char *, char *, char *, char *,          \
-                     llong, llong, int, int, double, double);
+                     int32, int32, int, int, double, double);
 
 ASSERT_DECLARE_DOUBLE_CLOSE(close)
 ASSERT_DECLARE_DOUBLE_CLOSE(not_close)
@@ -212,7 +212,7 @@ ASSERT_DECLARE_DOUBLE_CLOSE(not_close)
 #define ASSERT_DECLARE_DOUBLE_CLOSE_TOL(MODE)                 \
 void a_double_##MODE(char *, int32, char *,                   \
                      char *, char *, char *, char *,          \
-                     llong, llong, double, double, double);
+                     int32, int32, double, double, double);
 
 ASSERT_DECLARE_DOUBLE_CLOSE_TOL(close_tol)
 ASSERT_DECLARE_DOUBLE_CLOSE_TOL(not_close_tol)
@@ -222,7 +222,7 @@ ASSERT_DECLARE_DOUBLE_CLOSE_TOL(not_close_tol)
 #define ASSERT_DECLARE_BOOL(MODE)                             \
 void a_bool_##MODE(char *, int32, char *,                     \
                    char *, char *, char *, char *,            \
-                   llong, llong, bool, bool);
+                   int32, int32, bool, bool);
 
 ASSERT_DECLARE_BOOL(equal)
 ASSERT_DECLARE_BOOL(not_equal)
@@ -385,7 +385,7 @@ void assert_traps_restore(char *, int32, char *);
     if (((X) < (MIN_LIMIT)) || ((X) > (MAX_LIMIT))) {                          \
         if (DEBUGGING) {                                                       \
             assert_error(__FILE__, __LINE__, FUNC__,                           \
-                         "[%s%lld]%s = %s between [%lld, %lld]\n",             \
+                         "[%s%d]%s = %s between [%lld, %lld]\n",             \
                          typename(type), typebits(type), #X, S_(X),            \
                          (llong)(MIN_LIMIT), (llong)(MAX_LIMIT));              \
             TRAP();                                                            \

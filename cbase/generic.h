@@ -76,7 +76,7 @@ double double_from_ulong(ulong);
 double double_from_ullong(ullong);
 double double_from_float(float);
 double double_from_double(double);
-llong typebits(enum Type);
+int32 typebits(enum Type);
 char *typename(enum Type);
 double double_get(union Primitive, enum Type);
 void UNSUPPORTED_TYPE_FOR_DOUBLE_GET_GENERIC(void);
@@ -227,19 +227,19 @@ _Generic((x),                                                   \
 #endif
 
 #define PRINT_SIGNED(VAR, TYPE) \
-  fprintf(stderr, "["GREEN("%s%lld")"]%s = %lld ", \
+  fprintf(stderr, "["GREEN("%s%d")"]%s = %lld ", \
                   typename(TYPE), typebits(TYPE), #VAR, (llong)(VAR))
 
 #define PRINT_UNSIGNED(VAR, TYPE) \
-  fprintf(stderr, "["GREEN("%s%lld")"]%s = %llu ", \
+  fprintf(stderr, "["GREEN("%s%d")"]%s = %llu ", \
                   typename(TYPE), typebits(TYPE), #VAR, (ullong)(VAR))
 
 #define PRINT_DOUBLE(VAR, TYPE) \
-  fprintf(stderr, "["GREEN("%s%lld")"]%s = %f ", \
+  fprintf(stderr, "["GREEN("%s%d")"]%s = %f ", \
                   typename(TYPE), typebits(TYPE), #VAR, DOUBLE_GET(VAR, TYPE))
 
 #define PRINT_OTHER(VAR, TYPE, FORMAT, CAST) \
-  fprintf(stderr, "["GREEN("%s%lld")"]%s = "FORMAT" ", \
+  fprintf(stderr, "["GREEN("%s%d")"]%s = "FORMAT" ", \
                   typename(TYPE), typebits(TYPE), #VAR, (CAST)(uintptr)(VAR))
 
 #define PRINT_(VAR) \

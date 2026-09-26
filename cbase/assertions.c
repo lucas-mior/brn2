@@ -848,26 +848,25 @@ GENERATE_ASSERT_POINTERS(greater_equal, >=)
 
 #undef GENERATE_ASSERT_POINTERS
 
-#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(SIGN, FMT, SYMBOL, MODE)            \
-void                                                                           \
-a_both_##SIGN##_##MODE(char *file, int32 line, char *func,                     \
-                       char *name1, char *name2,                               \
-                       char *type1, char *type2,                               \
-                       llong bits1, llong bits2,                               \
-                       SIGN long long var1, SIGN long long var2) {             \
-    if (!(var1 SYMBOL var2)) {                                                 \
-        if (DEBUGGING) {                                                       \
-            assert_error(file, line, func,                                     \
-                         "[%s%lld]%s = "FMT" " #SYMBOL " "FMT" = "             \
-                         "%s[%s%lld]\n",                                       \
-                         type1, bits1, name1, var1, var2, name2, type2,        \
-                         bits2);                                               \
-            TRAP();                                                            \
-        } else {                                                               \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-    }                                                                          \
-    return;                                                                    \
+#define GENERATE_ASSERT_INTEGERS_SAME_SIGN(SIGN, FMT, SYMBOL, MODE)           \
+void                                                                          \
+a_both_##SIGN##_##MODE(char *file, int32 line, char *func,                    \
+                       char *name1, char *name2,                              \
+                       char *type1, char *type2,                              \
+                       int32 bits1, int32 bits2,                              \
+                       SIGN long long var1, SIGN long long var2) {            \
+    if (!(var1 SYMBOL var2)) {                                                \
+        if (DEBUGGING) {                                                      \
+            assert_error(file, line, func,                                    \
+                         "[%s%d]%s = "FMT" " #SYMBOL " "FMT" = %s[%s%d]\n",   \
+                         type1, bits1, name1, var1, var2, name2, type2,       \
+                         bits2);                                              \
+            TRAP();                                                           \
+        } else {                                                              \
+            UNREACHABLE();                                                    \
+        }                                                                     \
+    }                                                                         \
+    return;                                                                   \
 }
 
 GENERATE_ASSERT_INTEGERS_SAME_SIGN(signed,   "%lld", ==, equal)
@@ -906,15 +905,13 @@ void                                                                           \
 a_signed_unsigned##MODE(char *file, int32 line, char *func,                    \
                         char *name1, char *name2,                              \
                         char *type1, char *type2,                              \
-                        llong bits1, llong bits2,                              \
+                        int32 bits1, int32 bits2,                              \
                         llong var1, ullong var2) {                             \
     if (!(compare_sign_with_unsign(var1, var2) SYMBOL 0)) {                    \
         if (DEBUGGING) {                                                       \
             assert_error(file, line, func,                                     \
-                         "[%s%lld]%s = %lld " #SYMBOL " %llu = "               \
-                         "%s[%s%lld]\n",                                       \
-                         type1, bits1, name1, var1, var2, name2, type2,        \
-                         bits2);                                               \
+                         "[%s%d]%s = %lld " #SYMBOL " %llu = %s[%s%d]\n",      \
+                         type1, bits1, name1, var1, var2, name2, type2, bits2);\
             TRAP();                                                            \
         } else {                                                               \
             UNREACHABLE();                                                     \
@@ -937,13 +934,12 @@ void                                                                           \
 a_unsigned_signed_##MODE(char *file, int32 line, char *func,                   \
                          char *name1, char *name2,                             \
                          char *type1, char *type2,                             \
-                         llong bits1, llong bits2,                             \
+                         int32 bits1, int32 bits2,                             \
                          ullong var1, llong var2) {                            \
     if (!((-compare_sign_with_unsign(var2, var1)) SYMBOL 0)) {                 \
         if (DEBUGGING) {                                                       \
             assert_error(file, line, func,                                     \
-                         "[%s%lld]%s = %llu " #SYMBOL " %lld = "               \
-                         "%s[%s%lld]\n",                                       \
+                         "[%s%d]%s = %llu " #SYMBOL " %lld = %s[%s%d]\n",      \
                          type1, bits1, name1, var1, var2, name2, type2,        \
                          bits2);                                               \
             TRAP();                                                            \
@@ -968,14 +964,13 @@ void                                                                           \
 a_double_##MODE(char *file, int32 line, char *func,                            \
                 char *name1, char *name2,                                      \
                 char *type1, char *type2,                                      \
-                llong bits1, llong bits2,                                      \
+                int32 bits1, int32 bits2,                                      \
                 double var1, double var2) {                                    \
     if (!(var1 SYMBOL var2)) {                                                 \
         if (DEBUGGING) {                                                       \
             assert_error(file, line, func,                                     \
-                         "[%s%lld]%s = %f " #SYMBOL " %f = %s[%s%lld]\n",      \
-                         type1, bits1, name1, var1, var2, name2, type2,        \
-                         bits2);                                               \
+                         "[%s%d]%s = %f " #SYMBOL " %f = %s[%s%d]\n",          \
+                         type1, bits1, name1, var1, var2, name2, type2, bits2);\
             TRAP();                                                            \
         } else {                                                               \
             UNREACHABLE();                                                     \
@@ -1290,7 +1285,7 @@ void                                                                           \
 a_double_##MODE(char *file, int32 line, char *func,                            \
                 char *name1, char *name2,                                      \
                 char *type1, char *type2,                                      \
-                llong bits1, llong bits2,                                      \
+                int32 bits1, int32 bits2,                                      \
                 int kind1, int kind2,                                          \
                 double var1, double var2) {                                    \
     double diff;                                                               \
@@ -1317,7 +1312,7 @@ void                                                                           \
 a_double_##MODE(char *file, int32 line, char *func,                            \
                 char *name1, char *name2,                                      \
                 char *type1, char *type2,                                      \
-                llong bits1, llong bits2,                                      \
+                int32 bits1, int32 bits2,                                      \
                 double var1, double var2,                                      \
                 double tolerance) {                                            \
     double diff;                                                               \
@@ -1343,7 +1338,7 @@ void                                                                           \
 a_bool_##MODE(char *file, int32 line, char *func,                              \
               char *name1, char *name2,                                        \
               char *type1, char *type2,                                        \
-              llong bits1, llong bits2,                                        \
+              int32 bits1, int32 bits2,                                        \
               bool var1, bool var2) {                                          \
     if (!(var1 SYMBOL var2)) {                                                 \
         if (DEBUGGING) {                                                       \
@@ -1356,7 +1351,7 @@ a_bool_##MODE(char *file, int32 line, char *func,                              \
                 s2 = "true";                                                   \
             }                                                                  \
             assert_error(file, line, func,                                     \
-                         "[%s%lld]%s = %s " #SYMBOL " %s = %s[%s%lld]\n",      \
+                         "[%s%d]%s = %s " #SYMBOL " %s = %s[%s%d]\n",          \
                          type1, bits1, name1, s1, s2, name2, type2, bits2);    \
             TRAP();                                                            \
         } else {                                                               \
