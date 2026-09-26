@@ -380,7 +380,7 @@ void assert_traps_restore(char *, int32, char *);
                            STRING, STRING_LEN,                     \
                            GLOB, strlen32(GLOB),                   \
                            false)
-#define ASSERT_GLOB_NO_MATCH(...)                                              \
+#define ASSERT_GLOB_NO_MATCH(...)                                  \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_NO_MATCH_, __VA_ARGS__)
 
 #define ASSERT_OUTSIDE(POINTER, BEGIN, END) do {                               \
