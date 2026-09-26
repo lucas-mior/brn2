@@ -1529,7 +1529,7 @@ main(void) {
             name_length = strlen32(file->name);
             ASSERT_EQ(file->length, name_length);
             hash = hash_function(file->name, file->length);
-            ASSERT_EQ(file->hash, hash);
+            ASSERT(file->hash == hash);
             ASSERT_EQ(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_insert_pre_calc_map(map,
@@ -1544,7 +1544,7 @@ main(void) {
             name_length = strlen32(file->name);
             ASSERT_EQ(file->length, name_length);
             hash = hash_function(file->name, file->length);
-            ASSERT_EQ(file->hash, hash);
+            ASSERT(file->hash == hash);
             ASSERT_EQ(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,

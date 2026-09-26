@@ -374,7 +374,8 @@ void assert_traps_restore(char *, int32, char *);
     void *ASSERT_OUTSIDE_POINTER = (void *)(uintptr)(POINTER);                 \
     void *ASSERT_OUTSIDE_BEGIN = (void *)(uintptr)(BEGIN);                     \
     void *ASSERT_OUTSIDE_END = (void *)(uintptr)(END);                         \
-    assert_outside(__FILE__, __LINE__, FUNC__, #POINTER, #BEGIN, #END,         \
+    assert_outside(__FILE__, __LINE__, FUNC__,                                 \
+                   #POINTER, #BEGIN, #END,                                     \
                    ASSERT_OUTSIDE_POINTER, ASSERT_OUTSIDE_BEGIN,               \
                    ASSERT_OUTSIDE_END);                                        \
 } while (0)
