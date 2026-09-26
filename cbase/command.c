@@ -1254,10 +1254,7 @@ void
 command_push_length(Command *command, char *argument, int32 argument_len) {
     char *copy;
 
-    if (argument_len < 0) {
-        error("Command argument has invalid length.\n");
-        fatal(EXIT_FAILURE);
-    }
+    ASSERT_BETWEEN(argument_len, 0, 4000);
 
     copy = command_argument_alloc(command, argument_len + 1);
     memcpy64(copy, argument, argument_len);
