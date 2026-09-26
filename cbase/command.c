@@ -1469,6 +1469,8 @@ void
 command_printf(Command *command, char *fmt, ...) {
     va_list ap;
     va_list ap2;
+    Arena *argument_arena;
+    int64 waste;
     int32 estimate;
     int32 len;
     char *argument;
@@ -1496,6 +1498,10 @@ command_printf(Command *command, char *fmt, ...) {
         error("Error: Format estimate was too small for \"%s\".", fmt);
         fatal(EXIT_FAILURE);
     }
+
+    argument_arena = arena_of(command->argv_arena, argument);
+    waste = ALIGN(estimate + 1) - ALIGN(len + 1);
+    arena_back(argument_arena, waste);
 
     command_argument_append(command, argument, len);
     return;
@@ -1574,6 +1580,12 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
         ASSERT_ZERO(cmd.argv_arena->npushed);
         ASSERT(cmd.argv[0] == NULL);
+
+        command_printf(&cmd, "%f", 1.0);
+        ASSERT_EQUAL(cmd.argv[0], "1.000000");
+        ASSERT(cmd.argv_arena->pos
+               == cmd.argv_arena->begin + ALIGN(cmd.argvs_lens[0] + 1));
+        command_reset(&cmd);
 
         command_push_split(&cmd, "  alpha beta  gamma ", " ");
         ASSERT_EQUAL(cmd.argc, 3);
