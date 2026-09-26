@@ -106,7 +106,8 @@ AssertCompareValue assert_compare_value_float(char *, int32, char *,
                                               char *, float);
 AssertCompareValue assert_compare_value_double(char *, int32, char *,
                                                char *, double);
-void assert_compare_constant(char *, int32, char *, enum AssertCompareMode,
+void assert_compare_constant(char *, int32, char *,
+                             enum AssertCompareMode,
                              char *, char *, AssertCompareValue,
                              AssertCompareValue);
 
@@ -267,7 +268,8 @@ _Generic((VAR1),                                                   \
     double:  a_sign_double_##MODE,                                 \
     ldouble: a_sign_ldouble_##MODE,                                \
     default: a_sign_integer_##MODE                                 \
-)(__FILE__, __LINE__, FUNC__, #VAR1, VAR1)
+)(__FILE__, __LINE__, FUNC__,                                  \
+  #VAR1, VAR1)
 
 #define ASSERT(...) do {                                           \
     if (!(__VA_ARGS__)) {                                          \
@@ -352,10 +354,12 @@ void assert_traps_restore(char *, int32, char *);
                         HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
 #define ASSERT_GLOB_MATCH_2(STRING, GLOB)                                      \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
+                           #STRING, #GLOB,                                     \
                            STRING, strlen32(STRING), GLOB, strlen32(GLOB), true)
 #define ASSERT_GLOB_MATCH_3(STRING, STRING_LEN, GLOB)                          \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
+                           #STRING, #GLOB,                                     \
                            STRING, STRING_LEN, GLOB, strlen32(GLOB), true)
 #define ASSERT_GLOB_MATCH(...)                                                 \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_MATCH_, __VA_ARGS__)
@@ -366,7 +370,8 @@ void assert_traps_restore(char *, int32, char *);
                            STRING, strlen32(STRING), GLOB, strlen32(GLOB),     \
                            false)
 #define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB)                       \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
+                           #STRING, #GLOB,                                     \
                            STRING, STRING_LEN, GLOB, strlen32(GLOB), false)
 #define ASSERT_GLOB_NO_MATCH(...)                                              \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_NO_MATCH_, __VA_ARGS__)
@@ -574,7 +579,8 @@ _Generic((VAR),                                                               \
     float:  assert_compare_value_float,                                       \
     double: assert_compare_value_double,                                      \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CONSTANT             \
-)(__FILE__, __LINE__, FUNC__, #VAR, (VAR))
+)(__FILE__, __LINE__, FUNC__,                                                \
+  #VAR, (VAR))
 
 #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) do {                       \
     assert_compare_constant(__FILE__, __LINE__, FUNC__,                        \
@@ -656,7 +662,8 @@ _Generic((VAR),                                                               \
     char *ASSERT_EQ1 = VAR1;                                              \
     int32 ASSERT_EQ1_LEN = VAR1_LEN;                                      \
     char *ASSERT_EQ2 = VAR2;                                              \
-    assert_equal_3(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,                   \
+    assert_equal_3(__FILE__, __LINE__, FUNC__,                                 \
+                   #VAR1, #VAR2,                                              \
                    ASSERT_EQ1, ASSERT_EQ1_LEN,                         \
                    ASSERT_EQ2);                                           \
 } while (0)
@@ -666,7 +673,8 @@ _Generic((VAR),                                                               \
     int32 ASSERT_EQ1_LEN = VAR1_LEN;                                      \
     char *ASSERT_EQ2 = VAR2;                                              \
     int32 ASSERT_EQ2_LEN = VAR2_LEN;                                      \
-    assert_equal_4(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,                   \
+    assert_equal_4(__FILE__, __LINE__, FUNC__,                                 \
+                   #VAR1, #VAR2,                                              \
                    ASSERT_EQ1, ASSERT_EQ1_LEN,                         \
                    ASSERT_EQ2, ASSERT_EQ2_LEN);                        \
 } while (0)
@@ -679,7 +687,8 @@ _Generic((VAR),                                                               \
     char *ASSERT_NE1 = VAR1;                                        \
     int32 ASSERT_NE1_LEN = VAR1_LEN;                                \
     char *ASSERT_NE2 = VAR2;                                        \
-    assert_not_equal_3(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,               \
+    assert_not_equal_3(__FILE__, __LINE__, FUNC__,                             \
+                       #VAR1, #VAR2,                                          \
                        ASSERT_NE1, ASSERT_NE1_LEN,       \
                        ASSERT_NE2);                                 \
 } while (0)
@@ -689,7 +698,8 @@ _Generic((VAR),                                                               \
     int32 ASSERT_NE1_LEN = VAR1_LEN;                                \
     char *ASSERT_NE2 = VAR2;                                        \
     int32 ASSERT_NE2_LEN = VAR2_LEN;                                \
-    assert_not_equal_4(__FILE__, __LINE__, FUNC__, #VAR1, #VAR2,               \
+    assert_not_equal_4(__FILE__, __LINE__, FUNC__,                             \
+                       #VAR1, #VAR2,                                          \
                        ASSERT_NE1, ASSERT_NE1_LEN,       \
                        ASSERT_NE2, ASSERT_NE2_LEN);      \
 } while (0)

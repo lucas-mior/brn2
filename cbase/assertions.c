@@ -66,7 +66,8 @@ assert_traps_restore(char *file, int32 line, char *func) {
 #endif
 
 void
-assert_error(char *file, int32 line, char *func, char *format, ...) {
+assert_error(char *file, int32 line, char *func,
+             char *format, ...) {
     va_list ap;
 
     fflush(stdout);
@@ -399,7 +400,8 @@ assert_compare_constant(char *file, int32 line, char *func,
                          name1, var1.boolean, symbol, var2.boolean, name2);
         }
     } else {
-        assert_compare_constant_unsupported(file, line, func, name1, name2,
+        assert_compare_constant_unsupported(file, line, func,
+                                            name1, name2,
                                             var1, var2);
     }
 
@@ -484,7 +486,8 @@ assert_equal_3(char *file, int32 line, char *func,
 
     if (var1 == NULL) {
         if (DEBUGGING) {
-            assert_error(file, line, func, "%s is NULL.\n", name1);
+            assert_error(file, line, func,
+                         "%s is NULL.\n", name1);
             TRAP();
         } else {
             UNREACHABLE();
@@ -492,7 +495,8 @@ assert_equal_3(char *file, int32 line, char *func,
     }
     if (var2 == NULL) {
         if (DEBUGGING) {
-            assert_error(file, line, func, "%s is NULL.\n", name2);
+            assert_error(file, line, func,
+                         "%s is NULL.\n", name2);
             TRAP();
         } else {
             UNREACHABLE();
@@ -1294,7 +1298,8 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
                                                                                \
     if (assert_double_close_ulps(var1, var2, kind1, kind2,                     \
                                  &diff, &ulps, &max_ulps) != EXPECT_CLOSE) {   \
-        assert_double_failure(file, line, func, name1, name2,                  \
+        assert_double_failure(file, line, func,                                \
+                              name1, name2,                                    \
                               type1, type2, bits1, bits2,                      \
                               var1, var2, SYMBOL, diff, (double)0,             \
                               ulps, max_ulps, false);                          \
@@ -1320,7 +1325,8 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
                                                                                \
     if (assert_double_close_tol(var1, var2, tolerance,                         \
                                 &diff, &tolerance_abs) != EXPECT_CLOSE) {      \
-        assert_double_failure(file, line, func, name1, name2,                  \
+        assert_double_failure(file, line, func,                                \
+                              name1, name2,                                    \
                               type1, type2, bits1, bits2,                      \
                               var1, var2, SYMBOL, diff, tolerance_abs,         \
                               0, 0, true);                                     \
