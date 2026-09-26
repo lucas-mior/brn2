@@ -398,7 +398,7 @@ void assert_traps_restore(char *, int32, char *);
     if (((X) < (MIN_LIMIT)) || ((X) > (MAX_LIMIT))) {                          \
         if (DEBUGGING) {                                                       \
             assert_error(__FILE__, __LINE__, FUNC__,                           \
-                         "[%s%d]%s = %s between [%lld, %lld]\n",             \
+                         "[%s%d]%s = %s between [%lld, %lld]\n",               \
                          typename(type), typebits(type), #X, S_(X),            \
                          (llong)(MIN_LIMIT), (llong)(MAX_LIMIT));              \
             TRAP();                                                            \
