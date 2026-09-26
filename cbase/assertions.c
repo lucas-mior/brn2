@@ -1260,8 +1260,8 @@ assert_double_failure(char *file, int32 line, char *func,
                       char *name1, char *name2,
                       char *type1, char *type2,
                       int32 bits1, int32 bits2,
-                      double var1, double var2, char *symbol,
-                      double diff, double tolerance,
+                      double var1, double var2,
+                      char *symbol, double diff, double tolerance,
                       ullong ulps, ullong max_ulps,
                       bool use_tol) {
     if (DEBUGGING) {
