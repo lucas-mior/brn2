@@ -380,11 +380,12 @@ void assert_traps_restore(char *, int32, char *);
 } while (0)
 
 #define ASSERT_BETWEEN(X, MIN_LIMIT, MAX_LIMIT) do {                           \
+    enum Type type = TYPEID(X);                                                \
     if (((X) < (MIN_LIMIT)) || ((X) > (MAX_LIMIT))) {                          \
         if (DEBUGGING) {                                                       \
             assert_error(__FILE__, __LINE__, FUNC__,                           \
                          "[%s%lld]%s = %s between [%lld, %lld]\n",             \
-                         TYPENAME(X), TYPEBITS(X), #X, S_(X),                  \
+                         typename(type), typebits(type), #X, S_(X),            \
                          (llong)(MIN_LIMIT), (llong)(MAX_LIMIT));              \
             TRAP();                                                            \
         } else {                                                               \
