@@ -185,8 +185,9 @@ assert_compare_mode_symbol(enum AssertCompareMode mode) {
         return ">";
     case ASSERT_COMPARE_MODE_MORE_EQUAL:
         return ">=";
+    default:
+        UNREACHABLE();
     }
-    UNREACHABLE();
 }
 
 #define ASSERT_COMPARE_MODE_SWITCH(VAR1, VAR2)         \
