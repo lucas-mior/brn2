@@ -730,8 +730,8 @@ a_sign_double_##MODE(char *file, int32 line, char *func,                \
                      char *name, double var) {                          \
     if (!(var SYMBOL (double)0)) {                                      \
         if (DEBUGGING) {                                                \
-            assert_error(file, line, func, "%s = %.17g " EXPECTED "\n", \
-                         name, var);                                    \
+            assert_error(file, line, func,                              \
+                         "%s = %.17g " EXPECTED "\n", name, var);       \
             TRAP();                                                     \
         } else {                                                        \
             UNREACHABLE();                                              \
