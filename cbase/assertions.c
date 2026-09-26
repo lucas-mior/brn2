@@ -747,20 +747,20 @@ GENERATE_ASSERT_DOUBLE_SIGN(non_negative, >=, ">= 0")
 
 #undef GENERATE_ASSERT_DOUBLE_SIGN
 
-#define GENERATE_ASSERT_LDOUBLE_SIGN(MODE, SYMBOL, EXPECTED)                   \
-void                                                                           \
-a_sign_ldouble_##MODE(char *file, int32 line, char *func,                      \
-                      char *name, ldouble var) {                               \
-    if (!(var SYMBOL (ldouble)0)) {                                            \
-        if (DEBUGGING) {                                                       \
-            assert_error(file, line, func, "%s = %Lf " EXPECTED "\n",          \
-                         name, var);                                           \
-            TRAP();                                                            \
-        } else {                                                               \
-            UNREACHABLE();                                                     \
-        }                                                                      \
-    }                                                                          \
-    return;                                                                    \
+#define GENERATE_ASSERT_LDOUBLE_SIGN(MODE, SYMBOL, EXPECTED)            \
+void                                                                    \
+a_sign_ldouble_##MODE(char *file, int32 line, char *func,               \
+                      char *name, ldouble var) {                        \
+    if (!(var SYMBOL (ldouble)0)) {                                     \
+        if (DEBUGGING) {                                                \
+            assert_error(file, line, func, "%s = %Lf " EXPECTED "\n",   \
+                         name, var);                                    \
+            TRAP();                                                     \
+        } else {                                                        \
+            UNREACHABLE();                                              \
+        }                                                               \
+    }                                                                   \
+    return;                                                             \
 }
 
 GENERATE_ASSERT_LDOUBLE_SIGN(positive, >, "> 0")
