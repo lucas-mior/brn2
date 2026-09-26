@@ -1476,27 +1476,37 @@ void
 command_printf(Command *command, char *fmt, ...) {
     va_list ap;
     va_list ap2;
-    int32 n;
+    int32 estimate;
+    int32 len;
     char *argument;
 
     va_start(ap, fmt);
     va_copy(ap2, ap);
-    n = vsnprintf(NULL, 0, fmt, ap);
+    estimate = fmt_vsnprintf_estimate(fmt, ap);
     va_end(ap);
 
-    if (n < 0) {
+    if (estimate < 0) {
         va_end(ap2);
         error("Error formatting \"%s\".", fmt);
         fatal(EXIT_FAILURE);
     }
 
-    argument = malloc2(n + 1);
-    n = vsnprintf(argument, (size_t)n + 1, fmt, ap2);
+    argument = malloc2(estimate + 1);
+    len = fmt_vsprintf(argument, estimate + 1, fmt, ap2);
     va_end(ap2);
 
-    command_push_length(command, argument, n);
+    if (len < 0) {
+        error("Error formatting \"%s\".", fmt);
+        fatal(EXIT_FAILURE);
+    }
+    if (len > estimate) {
+        error("Error: Format estimate was too small for \"%s\".", fmt);
+        fatal(EXIT_FAILURE);
+    }
 
-    free2(argument, n + 1);
+    command_push_length(command, argument, len);
+
+    free2(argument, estimate + 1);
     return;
 }
 
