@@ -1328,8 +1328,10 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
                                 &diff, &tolerance_abs) != EXPECT_CLOSE) {      \
         assert_double_failure(file, line, func,                                \
                               name1, name2,                                    \
-                              type1, type2, bits1, bits2,                      \
-                              var1, var2, SYMBOL, diff, tolerance_abs,         \
+                              type1, type2,                                    \
+                              bits1, bits2,                                    \
+                              var1, var2,                                      \
+                              SYMBOL, diff, tolerance_abs,                     \
                               0, 0, true);                                     \
     }                                                                          \
     return;                                                                    \
