@@ -781,7 +781,7 @@ command_result_process_io(Command *command, enum CommandFlag flags) {
 
     if (command_flags_capture(flags)) {
         command->result.output = str_steal(&output,
-                                                &command->result.output_len);
+                                           &command->result.output_len);
     } else {
         str_free(&output);
     }
