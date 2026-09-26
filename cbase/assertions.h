@@ -361,7 +361,8 @@ void assert_traps_restore(char *, int32, char *);
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_MATCH_, __VA_ARGS__)
 
 #define ASSERT_GLOB_NO_MATCH_2(STRING, GLOB)                                   \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__, #STRING, #GLOB,         \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
+                           #STRING, #GLOB,                                     \
                            STRING, strlen32(STRING), GLOB, strlen32(GLOB),     \
                            false)
 #define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB)                       \
