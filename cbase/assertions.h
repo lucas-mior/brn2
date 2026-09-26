@@ -700,41 +700,41 @@ _Generic((VAR),                                                       \
                        ASSERT_NE2);                                      \
 } while (0)
 
-#define ASSERT_NE_CALL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {           \
-    char *ASSERT_NE1 = VAR1;                                        \
-    int32 ASSERT_NE1_LEN = VAR1_LEN;                                \
-    char *ASSERT_NE2 = VAR2;                                        \
-    int32 ASSERT_NE2_LEN = VAR2_LEN;                                \
-    assert_not_equal_4(__FILE__, __LINE__, FUNC__,                             \
-                       #VAR1, #VAR2,                                          \
-                       ASSERT_NE1, ASSERT_NE1_LEN,       \
-                       ASSERT_NE2, ASSERT_NE2_LEN);      \
+#define ASSERT_NE_CALL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {            \
+    char *ASSERT_NE1 = VAR1;                                             \
+    int32 ASSERT_NE1_LEN = VAR1_LEN;                                     \
+    char *ASSERT_NE2 = VAR2;                                             \
+    int32 ASSERT_NE2_LEN = VAR2_LEN;                                     \
+    assert_not_equal_4(__FILE__, __LINE__, FUNC__,                       \
+                       #VAR1, #VAR2,                                     \
+                       ASSERT_NE1, ASSERT_NE1_LEN,                       \
+                       ASSERT_NE2, ASSERT_NE2_LEN);                      \
 } while (0)
 
-#define ASSERT_NE(...)                                                  \
+#define ASSERT_NE(...)                                                   \
     SELECT_ON_NUM_ARGS(ASSERT_NE_CALL_, __VA_ARGS__)
 
-#define A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE2)                    \
-    a_double_##MODE(__FILE__, __LINE__, FUNC__,                                \
-                    #VAR1, #VAR2,                                              \
-                    typename(TYPE1), typename(TYPE2),                          \
-                    typebits(TYPE1), typebits(TYPE2),                          \
-                    ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2),      \
+#define A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE2)               \
+    a_double_##MODE(__FILE__, __LINE__, FUNC__,                           \
+                    #VAR1, #VAR2,                                         \
+                    typename(TYPE1), typename(TYPE2),                     \
+                    typebits(TYPE1), typebits(TYPE2),                     \
+                    ASSERT_FP_KIND_EXPR(VAR1), ASSERT_FP_KIND_EXPR(VAR2), \
                     DOUBLE_GET(VAR1, TYPE1), DOUBLE_GET(VAR2, TYPE2))
 
-#define A_BOTH_DOUBLE_CLOSE_TOL(MODE, VAR1, VAR2, TOL, TYPE1, TYPE2)           \
-    a_double_##MODE(__FILE__, __LINE__, FUNC__,                                \
-                    #VAR1, #VAR2,                                              \
-                    typename(TYPE1), typename(TYPE2),                          \
-                    typebits(TYPE1), typebits(TYPE2),                          \
-                    DOUBLE_GET(VAR1, TYPE1), DOUBLE_GET(VAR2, TYPE2),          \
+#define A_BOTH_DOUBLE_CLOSE_TOL(MODE, VAR1, VAR2, TOL, TYPE1, TYPE2)      \
+    a_double_##MODE(__FILE__, __LINE__, FUNC__,                           \
+                    #VAR1, #VAR2,                                         \
+                    typename(TYPE1), typename(TYPE2),                     \
+                    typebits(TYPE1), typebits(TYPE2),                     \
+                    DOUBLE_GET(VAR1, TYPE1), DOUBLE_GET(VAR2, TYPE2),     \
                     (double)(TOL))
 
-#define A_FIRST_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1)                          \
-_Generic((VAR2),                                                               \
-  float:  A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT),            \
-  double: A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE),           \
-  default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND()                  \
+#define A_FIRST_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1)                     \
+_Generic((VAR2),                                                          \
+  float:  A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT),       \
+  double: A_BOTH_DOUBLE_CLOSE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE),      \
+  default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_CLOSE_SECOND()             \
 )
 
 #define A_FIRST_DOUBLE_CLOSE_TOL(MODE, VAR1, VAR2, TOL, TYPE1)                 \
