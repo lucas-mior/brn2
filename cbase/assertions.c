@@ -915,7 +915,8 @@ a_signed_unsigned##MODE(char *file, int32 line, char *func,                    \
         if (DEBUGGING) {                                                       \
             assert_error(file, line, func,                                     \
                          "[%s%d]%s = %lld " #SYMBOL " %llu = %s[%s%d]\n",      \
-                         type1, bits1, name1, var1, var2, name2, type2, bits2);\
+                         type1, bits1, name1, var1,                            \
+                         var2, name2, type2, bits2);                           \
             TRAP();                                                            \
         } else {                                                               \
             UNREACHABLE();                                                     \
