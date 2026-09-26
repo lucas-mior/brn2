@@ -95,6 +95,11 @@ extension semantics:
   silently narrowed to `double`.
 - `%a` and `%La` are tied to the binary representation and are generated from
   the decoded floating-point bits.
+- floating-point precision is bounded by the exact fixed-decimal limit of the
+  argument type: `DBL_MANT_DIG - DBL_MIN_EXP` for ordinary variadic floating
+  conversions and `LDBL_MANT_DIG - LDBL_MIN_EXP` for `L` conversions. A larger
+  explicit precision returns `-ERANGE`. Field width remains unrestricted by
+  this precision limit.
 
 The variadic declarations use the compiler's printf format attribute. That
 still catches ordinary type mistakes, but the compiler only checks the printf

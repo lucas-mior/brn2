@@ -35,3 +35,4 @@ cbase/glibc_functions.txt
 static-analyzers-warnings.txt
 *.bin
 cbase/CuSb9Ofs
+*.log

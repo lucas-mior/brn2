@@ -261,8 +261,10 @@ void send_signal(char *executable, int32 signal_number);
 // cbase printf-compatible formatter. It returns the byte count that would
 // have been written, excluding the terminating '\0'. It writes a terminating
 // '\0' when capacity is positive. buffer may be NULL only when capacity is
-// zero. Negative returns are errno-style failures. See cbase/README.md for
-// the exact supported grammar and deliberate differences from libc printf.
+// zero. Negative returns are errno-style failures. Floating precision is
+// bounded by the exact fixed-decimal limit of the argument type; larger
+// explicit precisions return -ERANGE. See cbase/README.md for the exact
+// supported grammar and deliberate differences from libc printf.
 int32 fmt_vsnprintf(char *buffer, int64 capacity, char *format, va_list args)
     ATTR_PRINTF(3, 0);
 int32 fmt_snprintf(char *buffer, int64 capacity, char *format, ...)
@@ -290,7 +292,8 @@ StrFlex *strflex_list_at(StrFlexList *, int32);
 // Float formatting functions return the formatted byte count, excluding the
 // terminating '\0'. Negative return values are errno-style failures:
 // -EINVAL for invalid input, -ENOSPC when capacity is insufficient, and
-// -ERANGE when the requested precision is unsupported.
+// -ERANGE when the requested precision is unsupported. Fixed/scientific
+// double precision is capped at DBL_MANT_DIG - DBL_MIN_EXP.
 //
 // This layer exposes shortest round-trip, fixed precision, and scientific
 // precision formatting. It intentionally does not expose a %g/general format
