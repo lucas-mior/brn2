@@ -901,12 +901,30 @@ if (enum & ENUM_BITFLAG) {
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT(value < 0)`.
 - Prefer `ASSERT_NON_POSITIVE(value);` instead of `ASSERT(value <= 0)`.
 - Prefer `ASSERT_NON_NEGATIVE(value);` instead of `ASSERT(value >= 0)`.
-- Prefer `ASSERT_EQUAL(a, constant);` instead of `ASSERT(a == constant)`
-  (except for enums). If the right side is not a compiler-known constant, use
-  `ASSERT_EQUAL_VAR(a, b)`. The same rule applies to the other two-argument
-  comparison assertions.
-- Constant-RHS integer comparisons normalize integer values to `llong`. Values
-  from unsigned integer types above `LLONG_MAX` are invalid.
+- Two-argument comparison assertions are optimized for the common case where
+  the right side is a compiler-known constant. Prefer:
+  ```c
+  ASSERT_EQUAL(value, 3);
+  ASSERT_NOT_EQUAL(value, -1);
+  ASSERT_LESS(value, 100);
+  ASSERT_LESS_EQUAL(value, 100);
+  ASSERT_MORE(value, 3);
+  ASSERT_MORE_EQUAL(value, 3);
+  ```
+  instead of writing the equivalent expressions with `ASSERT(...)` (except for
+  enums). The right side of these forms must satisfy `__builtin_constant_p()`;
+  passing a variable is a compile-time error.
+- If the right side is not a compiler-known constant, use the explicit variable
+  forms: `ASSERT_EQUAL_VAR`, `ASSERT_NOT_EQUAL_VAR`, `ASSERT_LESS_VAR`,
+  `ASSERT_LESS_EQUAL_VAR`, `ASSERT_MORE_VAR`, or `ASSERT_MORE_EQUAL_VAR`.
+  These use the heavier variable-vs-variable generic dispatch, so use them only
+  when the constant-RHS forms cannot be used.
+- Keep the constant on the right side. If necessary, reverse the comparison so
+  the variable remains on the left and the constant remains on the right.
+- Constant-RHS integer comparisons normalize integer operands to `llong`.
+  Unsigned integer values above `LLONG_MAX` are not supported by these forms.
+  The three- and four-argument string comparison forms are unaffected by the
+  constant-RHS rule.
 - Prefer `ASSERT_ZERO(value);` instead of `ASSERT_EQUAL(a, 0)`
 - Prefer `ASSERT_POSITIVE(value);` instead of `ASSERT_MORE(a, 0)`
 - Prefer `ASSERT_NEGATIVE(value);` instead of `ASSERT_LESS(a, 0)`
