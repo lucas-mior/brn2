@@ -357,12 +357,14 @@ void assert_traps_restore(char *, int32, char *);
     assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
                            #STRING, #GLOB,                                     \
                            STRING, strlen32(STRING),                           \
-                           GLOB, strlen32(GLOB), true)
+                           GLOB, strlen32(GLOB),                               \
+                           true)
 #define ASSERT_GLOB_MATCH_3(STRING, STRING_LEN, GLOB)                          \
     assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
                            #STRING, #GLOB,                                     \
                            STRING, STRING_LEN,                                 \
-                           GLOB, strlen32(GLOB), true)
+                           GLOB, strlen32(GLOB),                               \
+                           true)
 #define ASSERT_GLOB_MATCH(...)                                                 \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_MATCH_, __VA_ARGS__)
 
