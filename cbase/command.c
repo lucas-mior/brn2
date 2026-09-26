@@ -1251,8 +1251,7 @@ command_argument_append(Command *command, char *argument, int32 argument_len) {
 }
 
 void
-command_push_owned_length(Command *command,
-                          char *argument, int32 argument_len) {
+command_push_length(Command *command, char *argument, int32 argument_len) {
     char *copy;
 
     if (argument_len < 0) {
@@ -1264,12 +1263,6 @@ command_push_owned_length(Command *command,
     memcpy64(copy, argument, argument_len);
     copy[argument_len] = '\0';
     command_argument_append(command, copy, argument_len);
-    return;
-}
-
-void
-command_push_length(Command *command, char *argument, int32 argument_len) {
-    command_push_owned_length(command, argument, argument_len);
     return;
 }
 
