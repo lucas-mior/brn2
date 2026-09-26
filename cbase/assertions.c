@@ -1313,28 +1313,28 @@ GENERATE_A_DOUBLE_CLOSE(not_close, "!~=", false)
 
 #undef GENERATE_A_DOUBLE_CLOSE
 
-#define GENERATE_A_DOUBLE_CLOSE_TOL(MODE, SYMBOL, EXPECT_CLOSE)                \
-void                                                                           \
-a_double_##MODE(char *file, int32 line, char *func,                            \
-                char *name1, char *name2,                                      \
-                char *type1, char *type2,                                      \
-                int32 bits1, int32 bits2,                                      \
-                double var1, double var2,                                      \
-                double tolerance) {                                            \
-    double diff;                                                               \
-    double tolerance_abs;                                                      \
-                                                                               \
-    if (assert_double_close_tol(var1, var2, tolerance,                         \
-                                &diff, &tolerance_abs) != EXPECT_CLOSE) {      \
-        assert_double_failure(file, line, func,                                \
-                              name1, name2,                                    \
-                              type1, type2,                                    \
-                              bits1, bits2,                                    \
-                              var1, var2,                                      \
-                              SYMBOL, diff, tolerance_abs,                     \
-                              0, 0, true);                                     \
-    }                                                                          \
-    return;                                                                    \
+#define GENERATE_A_DOUBLE_CLOSE_TOL(MODE, SYMBOL, EXPECT_CLOSE)           \
+void                                                                      \
+a_double_##MODE(char *file, int32 line, char *func,                       \
+                char *name1, char *name2,                                 \
+                char *type1, char *type2,                                 \
+                int32 bits1, int32 bits2,                                 \
+                double var1, double var2,                                 \
+                double tolerance) {                                       \
+    double diff;                                                          \
+    double tolerance_abs;                                                 \
+                                                                          \
+    if (assert_double_close_tol(var1, var2, tolerance,                    \
+                                &diff, &tolerance_abs) != EXPECT_CLOSE) { \
+        assert_double_failure(file, line, func,                           \
+                              name1, name2,                               \
+                              type1, type2,                               \
+                              bits1, bits2,                               \
+                              var1, var2,                                 \
+                              SYMBOL, diff, tolerance_abs,                \
+                              0, 0, true);                                \
+    }                                                                     \
+    return;                                                               \
 }
 
 GENERATE_A_DOUBLE_CLOSE_TOL(close_tol, "~=", true)
