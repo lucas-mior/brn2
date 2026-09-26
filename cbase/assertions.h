@@ -353,32 +353,32 @@ void assert_traps_restore(char *, int32, char *);
     assert_not_contains(__FILE__, __LINE__, FUNC__,                \
                         HAYSTACK, HAYSTACK_LEN, NEEDLE)
 
-#define ASSERT_GLOB_MATCH_2(STRING, GLOB)                                      \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
-                           #STRING, #GLOB,                                     \
-                           STRING, strlen32(STRING),                           \
-                           GLOB, strlen32(GLOB),                               \
+#define ASSERT_GLOB_MATCH_2(STRING, GLOB)                          \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,             \
+                           #STRING, #GLOB,                         \
+                           STRING, strlen32(STRING),               \
+                           GLOB, strlen32(GLOB),                   \
                            true)
-#define ASSERT_GLOB_MATCH_3(STRING, STRING_LEN, GLOB)                          \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
-                           #STRING, #GLOB,                                     \
-                           STRING, STRING_LEN,                                 \
-                           GLOB, strlen32(GLOB),                               \
+#define ASSERT_GLOB_MATCH_3(STRING, STRING_LEN, GLOB)              \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,             \
+                           #STRING, #GLOB,                         \
+                           STRING, STRING_LEN,                     \
+                           GLOB, strlen32(GLOB),                   \
                            true)
-#define ASSERT_GLOB_MATCH(...)                                                 \
+#define ASSERT_GLOB_MATCH(...)                                     \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_MATCH_, __VA_ARGS__)
 
-#define ASSERT_GLOB_NO_MATCH_2(STRING, GLOB)                                   \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
-                           #STRING, #GLOB,                                     \
-                           STRING, strlen32(STRING),                           \
-                           GLOB, strlen32(GLOB),                               \
+#define ASSERT_GLOB_NO_MATCH_2(STRING, GLOB)                       \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,             \
+                           #STRING, #GLOB,                         \
+                           STRING, strlen32(STRING),               \
+                           GLOB, strlen32(GLOB),                   \
                            false)
-#define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB)                       \
-    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
-                           #STRING, #GLOB,                                     \
-                           STRING, STRING_LEN,                                 \
-                           GLOB, strlen32(GLOB),                               \
+#define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB)           \
+    assert_glob_match_impl(__FILE__, __LINE__, FUNC__,             \
+                           #STRING, #GLOB,                         \
+                           STRING, STRING_LEN,                     \
+                           GLOB, strlen32(GLOB),                   \
                            false)
 #define ASSERT_GLOB_NO_MATCH(...)                                              \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_NO_MATCH_, __VA_ARGS__)
