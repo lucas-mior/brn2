@@ -268,7 +268,7 @@ _Generic((VAR1),                                                   \
     double:  a_sign_double_##MODE,                                 \
     ldouble: a_sign_ldouble_##MODE,                                \
     default: a_sign_integer_##MODE                                 \
-)(__FILE__, __LINE__, FUNC__,                                  \
+)(__FILE__, __LINE__, FUNC__,                                      \
   #VAR1, VAR1)
 
 #define ASSERT(...) do {                                           \
@@ -369,12 +369,15 @@ void assert_traps_restore(char *, int32, char *);
 #define ASSERT_GLOB_NO_MATCH_2(STRING, GLOB)                                   \
     assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
                            #STRING, #GLOB,                                     \
-                           STRING, strlen32(STRING), GLOB, strlen32(GLOB),     \
+                           STRING, strlen32(STRING),                           \
+                           GLOB, strlen32(GLOB),                               \
                            false)
 #define ASSERT_GLOB_NO_MATCH_3(STRING, STRING_LEN, GLOB)                       \
     assert_glob_match_impl(__FILE__, __LINE__, FUNC__,                         \
                            #STRING, #GLOB,                                     \
-                           STRING, STRING_LEN, GLOB, strlen32(GLOB), false)
+                           STRING, STRING_LEN,                                 \
+                           GLOB, strlen32(GLOB),                               \
+                           false)
 #define ASSERT_GLOB_NO_MATCH(...)                                              \
     SELECT_ON_NUM_ARGS(ASSERT_GLOB_NO_MATCH_, __VA_ARGS__)
 
