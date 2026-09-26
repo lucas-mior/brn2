@@ -514,19 +514,19 @@ _Generic((VAR2),                                                      \
     double:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),    \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()            \
 )
-#define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                                  \
-_Generic((VAR2),                                                               \
-    bool: a_bool_##MODE(__FILE__, __LINE__, FUNC__,                            \
-                        #VAR1, #VAR2,                                          \
-                        typename(TYPE1), typename(TYPE_BOOL),                  \
-                        typebits(TYPE1), typebits(TYPE_BOOL),                  \
-                        (VAR1), (VAR2)),                                       \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL()                       \
+#define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                         \
+_Generic((VAR2),                                                      \
+    bool: a_bool_##MODE(__FILE__, __LINE__, FUNC__,                   \
+                        #VAR1, #VAR2,                                 \
+                        typename(TYPE1), typename(TYPE_BOOL),         \
+                        typebits(TYPE1), typebits(TYPE_BOOL),         \
+                        (VAR1), (VAR2)),                              \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_BOOL()              \
 )
-#define A_POINTERS(MODE, VAR1, VAR2)                                           \
-    a_pointers_##MODE(__FILE__, __LINE__, FUNC__,                              \
-                      #VAR1, #VAR2,                                            \
-                      (void *)(uintptr)(VAR1),                                 \
+#define A_POINTERS(MODE, VAR1, VAR2)                                  \
+    a_pointers_##MODE(__FILE__, __LINE__, FUNC__,                     \
+                      #VAR1, #VAR2,                                   \
+                      (void *)(uintptr)(VAR1),                        \
                       (void *)(uintptr)(VAR2))
 
 #define ASSERT_COMPARE(MODE, VAR1, VAR2)                                       \
