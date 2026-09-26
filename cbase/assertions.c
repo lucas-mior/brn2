@@ -1299,8 +1299,10 @@ a_double_##MODE(char *file, int32 line, char *func,                            \
                                  &diff, &ulps, &max_ulps) != EXPECT_CLOSE) {   \
         assert_double_failure(file, line, func,                                \
                               name1, name2,                                    \
-                              type1, type2, bits1, bits2,                      \
-                              var1, var2, SYMBOL, diff, (double)0,             \
+                              type1, type2,                                    \
+                              bits1, bits2,                                    \
+                              var1, var2,                                      \
+                              SYMBOL, diff, (double)0,                         \
                               ulps, max_ulps, false);                          \
     }                                                                          \
     return;                                                                    \
