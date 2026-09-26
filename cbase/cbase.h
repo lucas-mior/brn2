@@ -703,6 +703,7 @@ typedef struct Command {
     int32 env_cap;
     int32 error_status;
     int64 stdin_buffer_len;
+    int64 run_elapsed_ns;
 
     CommandResult result;
 } Command;
