@@ -490,29 +490,29 @@ _Generic((VAR2),                                                     \
     double:  A_BOTH_DOUBLE(MODE,   VAR1, VAR2, TYPE1, TYPE_DOUBLE ), \
     default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_UNSIGN()           \
 )
-#define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                          \
-    a_double_##MODE(__FILE__, __LINE__, FUNC__,                                \
-                    #VAR1, #VAR2,                                              \
-                    typename(TYPE1), typename(TYPE2),                          \
-                    typebits(TYPE1), typebits(TYPE2),                          \
+#define A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE2)                 \
+    a_double_##MODE(__FILE__, __LINE__, FUNC__,                       \
+                    #VAR1, #VAR2,                                     \
+                    typename(TYPE1), typename(TYPE2),                 \
+                    typebits(TYPE1), typebits(TYPE2),                 \
                     DOUBLE_GET(VAR1, TYPE1), DOUBLE_GET(VAR2, TYPE2))
 
-#define A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE1)                                \
-_Generic((VAR2),                                                               \
-    char:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR   ),             \
-    schar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ),             \
-    short:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ),             \
-    int:     A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ),             \
-    long:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ),             \
-    llong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ),             \
-    uchar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ),             \
-    ushort:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ),             \
-    uint:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ),             \
-    ulong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ),             \
-    ullong:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),             \
-    float:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ),             \
-    double:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),             \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()                     \
+#define A_FIRST_DOUBLE(MODE, VAR1, VAR2, TYPE1)                       \
+_Generic((VAR2),                                                      \
+    char:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_CHAR   ),    \
+    schar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SCHAR  ),    \
+    short:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_SHORT  ),    \
+    int:     A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_INT    ),    \
+    long:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LONG   ),    \
+    llong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_LLONG  ),    \
+    uchar:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UCHAR  ),    \
+    ushort:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_USHORT ),    \
+    uint:    A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_UINT   ),    \
+    ulong:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULONG  ),    \
+    ullong:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_ULLONG ),    \
+    float:   A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_FLOAT  ),    \
+    double:  A_BOTH_DOUBLE(MODE, VAR1, VAR2, TYPE1, TYPE_DOUBLE ),    \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_A_FIRST_DOUBLE()            \
 )
 #define A_FIRST_BOOL(MODE, VAR1, VAR2, TYPE1)                                  \
 _Generic((VAR2),                                                               \
