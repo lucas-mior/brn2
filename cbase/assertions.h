@@ -690,14 +690,14 @@ _Generic((VAR),                                                       \
 
 #define ASSERT_NE_CALL_2(VAR1, VAR2) ASSERT_NE_2(VAR1, VAR2)
 
-#define ASSERT_NE_CALL_3(VAR1, VAR1_LEN, VAR2) do {                     \
-    char *ASSERT_NE1 = VAR1;                                        \
-    int32 ASSERT_NE1_LEN = VAR1_LEN;                                \
-    char *ASSERT_NE2 = VAR2;                                        \
-    assert_not_equal_3(__FILE__, __LINE__, FUNC__,                             \
-                       #VAR1, #VAR2,                                          \
-                       ASSERT_NE1, ASSERT_NE1_LEN,       \
-                       ASSERT_NE2);                                 \
+#define ASSERT_NE_CALL_3(VAR1, VAR1_LEN, VAR2) do {                      \
+    char *ASSERT_NE1 = VAR1;                                             \
+    int32 ASSERT_NE1_LEN = VAR1_LEN;                                     \
+    char *ASSERT_NE2 = VAR2;                                             \
+    assert_not_equal_3(__FILE__, __LINE__, FUNC__,                       \
+                       #VAR1, #VAR2,                                     \
+                       ASSERT_NE1, ASSERT_NE1_LEN,                       \
+                       ASSERT_NE2);                                      \
 } while (0)
 
 #define ASSERT_NE_CALL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {           \
