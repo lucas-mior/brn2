@@ -589,55 +589,55 @@ _Generic((VAR),                                                       \
 )(__FILE__, __LINE__, FUNC__,                                         \
   #VAR, (VAR))
 
-#define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) do {                       \
-    assert_compare_constant(__FILE__, __LINE__, FUNC__,                        \
-                            ASSERT_COMPARE_MODE_##MODE, #VAR1, #VAR2,          \
-                            ASSERT_COMPARE_VALUE(VAR1),                        \
-                            ASSERT_COMPARE_VALUE(VAR2));                       \
+#define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) do {                 \
+    assert_compare_constant(__FILE__, __LINE__, FUNC__,                  \
+                            ASSERT_COMPARE_MODE_##MODE, #VAR1, #VAR2,    \
+                            ASSERT_COMPARE_VALUE(VAR1),                  \
+                            ASSERT_COMPARE_VALUE(VAR2));                 \
 } while (0)
 
 #if CC_GCC || CC_CLANG || CC_TCC
-#define ASSERT_COMPARE_CONSTANT(MODE, VAR1, VAR2) do {                         \
-    _Static_assert(__builtin_constant_p(VAR2),                                 \
-                   "assertion RHS must be constant; use the _VAR form");       \
-    ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+#define ASSERT_COMPARE_CONSTANT(MODE, VAR1, VAR2) do {                   \
+    _Static_assert(__builtin_constant_p(VAR2),                           \
+                   "assertion RHS must be constant; use the _VAR form"); \
+    ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                         \
 } while (0)
 #else
-#define ASSERT_COMPARE_CONSTANT(MODE, VAR1, VAR2)                              \
+#define ASSERT_COMPARE_CONSTANT(MODE, VAR1, VAR2)                        \
     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2)
 #endif
 
 #if CC_GCC || CC_CLANG
-  #define ASSERT_DIAGNOSTIC_PUSH() do {                                        \
-      _Pragma("GCC diagnostic push")                                           \
-      _Pragma("GCC diagnostic ignored \"-Waddress\"")                          \
-      _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                         \
+  #define ASSERT_DIAGNOSTIC_PUSH() do {                                  \
+      _Pragma("GCC diagnostic push")                                     \
+      _Pragma("GCC diagnostic ignored \"-Waddress\"")                    \
+      _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                   \
   } while (0)
-  #define ASSERT_DIAGNOSTIC_POP() do {                                         \
-      _Pragma("GCC diagnostic pop")                                            \
+  #define ASSERT_DIAGNOSTIC_POP() do {                                   \
+      _Pragma("GCC diagnostic pop")                                      \
   } while (0)
-  #define ASSERT_COMPARE_VAR_DIAGNOSTIC(MODE, VAR1, VAR2) do {                 \
-      ASSERT_DIAGNOSTIC_PUSH();                                                \
-      ASSERT_COMPARE(MODE, VAR1, VAR2);                                        \
-      ASSERT_DIAGNOSTIC_POP();                                                 \
+  #define ASSERT_COMPARE_VAR_DIAGNOSTIC(MODE, VAR1, VAR2) do {           \
+      ASSERT_DIAGNOSTIC_PUSH();                                          \
+      ASSERT_COMPARE(MODE, VAR1, VAR2);                                  \
+      ASSERT_DIAGNOSTIC_POP();                                           \
   } while (0)
-  #define ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(MODE, VAR1, VAR2) do {           \
-      ASSERT_DIAGNOSTIC_PUSH();                                                \
-      ASSERT_DOUBLE_CLOSE_ULPS(MODE, VAR1, VAR2);                              \
-      ASSERT_DIAGNOSTIC_POP();                                                 \
+  #define ASSERT_DOUBLE_CLOSE_ULPS_DIAGNOSTIC(MODE, VAR1, VAR2) do {     \
+      ASSERT_DIAGNOSTIC_PUSH();                                          \
+      ASSERT_DOUBLE_CLOSE_ULPS(MODE, VAR1, VAR2);                        \
+      ASSERT_DIAGNOSTIC_POP();                                           \
   } while (0)
-  #define ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(MODE, VAR1, VAR2, TOL) do {       \
-      ASSERT_DIAGNOSTIC_PUSH();                                                \
-      ASSERT_DOUBLE_CLOSE_TOL(MODE, VAR1, VAR2, TOL);                          \
-      ASSERT_DIAGNOSTIC_POP();                                                 \
+  #define ASSERT_DOUBLE_CLOSE_TOL_DIAGNOSTIC(MODE, VAR1, VAR2, TOL) do { \
+      ASSERT_DIAGNOSTIC_PUSH();                                          \
+      ASSERT_DOUBLE_CLOSE_TOL(MODE, VAR1, VAR2, TOL);                    \
+      ASSERT_DIAGNOSTIC_POP();                                           \
   } while (0)
-  #define ASSERT_LT_VAR(VAR1, VAR2)                                           \
+  #define ASSERT_LT_VAR(VAR1, VAR2)                                      \
       ASSERT_COMPARE_VAR_DIAGNOSTIC(less, VAR1, VAR2)
-  #define ASSERT_LE_VAR(VAR1, VAR2)                                           \
+  #define ASSERT_LE_VAR(VAR1, VAR2)                                      \
       ASSERT_COMPARE_VAR_DIAGNOSTIC(less_equal, VAR1, VAR2)
-  #define ASSERT_GT_VAR(VAR1, VAR2)                                           \
+  #define ASSERT_GT_VAR(VAR1, VAR2)                                      \
       ASSERT_COMPARE_VAR_DIAGNOSTIC(greater, VAR1, VAR2)
-  #define ASSERT_GE_VAR(VAR1, VAR2)                                           \
+  #define ASSERT_GE_VAR(VAR1, VAR2)                                      \
       ASSERT_COMPARE_VAR_DIAGNOSTIC(greater_equal, VAR1, VAR2)
 #else
   #define ASSERT_LT_VAR(VAR1, VAR2) \
@@ -650,40 +650,40 @@ _Generic((VAR),                                                       \
       ASSERT_COMPARE(greater_equal, VAR1, VAR2)
 #endif
 
-#define ASSERT_EQ_2(VAR1, VAR2)                                               \
+#define ASSERT_EQ_2(VAR1, VAR2)                                          \
     ASSERT_COMPARE_NORMALIZED(EQUAL, VAR1, VAR2)
-#define ASSERT_NE_2(VAR1, VAR2)                                         \
+#define ASSERT_NE_2(VAR1, VAR2)                                          \
     ASSERT_COMPARE_NORMALIZED(NOT_EQUAL, VAR1, VAR2)
-#define ASSERT_LT(VAR1, VAR2)                                                 \
+#define ASSERT_LT(VAR1, VAR2)                                            \
     ASSERT_COMPARE_CONSTANT(LESS, VAR1, VAR2)
-#define ASSERT_LE(VAR1, VAR2)                                                 \
+#define ASSERT_LE(VAR1, VAR2)                                            \
     ASSERT_COMPARE_CONSTANT(LESS_EQUAL, VAR1, VAR2)
-#define ASSERT_GT(VAR1, VAR2)                                                 \
+#define ASSERT_GT(VAR1, VAR2)                                            \
     ASSERT_COMPARE_CONSTANT(GREATER, VAR1, VAR2)
-#define ASSERT_GE(VAR1, VAR2)                                                 \
+#define ASSERT_GE(VAR1, VAR2)                                            \
     ASSERT_COMPARE_CONSTANT(GREATER_EQUAL, VAR1, VAR2)
 
 #define ASSERT_EQ_CALL_2(VAR1, VAR2) ASSERT_EQ_2(VAR1, VAR2)
 
-#define ASSERT_EQ_CALL_3(VAR1, VAR1_LEN, VAR2) do {                           \
-    char *ASSERT_EQ1 = VAR1;                                              \
-    int32 ASSERT_EQ1_LEN = VAR1_LEN;                                      \
-    char *ASSERT_EQ2 = VAR2;                                              \
-    assert_equal_3(__FILE__, __LINE__, FUNC__,                                 \
-                   #VAR1, #VAR2,                                              \
-                   ASSERT_EQ1, ASSERT_EQ1_LEN,                         \
-                   ASSERT_EQ2);                                           \
+#define ASSERT_EQ_CALL_3(VAR1, VAR1_LEN, VAR2) do {                      \
+    char *ASSERT_EQ1 = VAR1;                                             \
+    int32 ASSERT_EQ1_LEN = VAR1_LEN;                                     \
+    char *ASSERT_EQ2 = VAR2;                                             \
+    assert_equal_3(__FILE__, __LINE__, FUNC__,                           \
+                   #VAR1, #VAR2,                                         \
+                   ASSERT_EQ1, ASSERT_EQ1_LEN,                           \
+                   ASSERT_EQ2);                                          \
 } while (0)
 
-#define ASSERT_EQ_CALL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {                 \
-    char *ASSERT_EQ1 = VAR1;                                              \
-    int32 ASSERT_EQ1_LEN = VAR1_LEN;                                      \
-    char *ASSERT_EQ2 = VAR2;                                              \
-    int32 ASSERT_EQ2_LEN = VAR2_LEN;                                      \
-    assert_equal_4(__FILE__, __LINE__, FUNC__,                                 \
-                   #VAR1, #VAR2,                                              \
-                   ASSERT_EQ1, ASSERT_EQ1_LEN,                         \
-                   ASSERT_EQ2, ASSERT_EQ2_LEN);                        \
+#define ASSERT_EQ_CALL_4(VAR1, VAR1_LEN, VAR2, VAR2_LEN) do {            \
+    char *ASSERT_EQ1 = VAR1;                                             \
+    int32 ASSERT_EQ1_LEN = VAR1_LEN;                                     \
+    char *ASSERT_EQ2 = VAR2;                                             \
+    int32 ASSERT_EQ2_LEN = VAR2_LEN;                                     \
+    assert_equal_4(__FILE__, __LINE__, FUNC__,                           \
+                   #VAR1, #VAR2,                                         \
+                   ASSERT_EQ1, ASSERT_EQ1_LEN,                           \
+                   ASSERT_EQ2, ASSERT_EQ2_LEN);                          \
 } while (0)
 
 #define ASSERT_EQ(...) SELECT_ON_NUM_ARGS(ASSERT_EQ_CALL_, __VA_ARGS__)
