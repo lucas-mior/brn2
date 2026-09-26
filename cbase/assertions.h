@@ -599,7 +599,7 @@ _Generic((VAR),                                                       \
 #if CC_GCC || CC_CLANG || CC_TCC
 #define ASSERT_COMPARE_CONSTANT(MODE, VAR1, VAR2) do {                         \
     _Static_assert(__builtin_constant_p(VAR2),                                 \
-                   "assertion RHS must be constant; use the _VAR form");      \
+                   "assertion RHS must be constant; use the _VAR form");       \
     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
 } while (0)
 #else
