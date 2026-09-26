@@ -204,6 +204,8 @@ assert_compare_mode_symbol(enum AssertCompareMode mode) {
         return (VAR1) > (VAR2);                        \
     case ASSERT_COMPARE_MODE_MORE_EQUAL:               \
         return (VAR1) >= (VAR2);                       \
+    default:                                           \
+        UNREACHABLE();                                 \
     }                                                  \
     UNREACHABLE()
 
@@ -255,8 +257,9 @@ assert_compare_constant_bool(enum AssertCompareMode mode,
     case ASSERT_COMPARE_MODE_MORE:
     case ASSERT_COMPARE_MODE_MORE_EQUAL:
         return false;
+    default:
+        UNREACHABLE();
     }
-    UNREACHABLE();
 }
 
 #undef ASSERT_COMPARE_MODE_SWITCH
@@ -274,8 +277,9 @@ assert_compare_value_kind_name(enum AssertCompareValueKind kind) {
         return "integer";
     case ASSERT_COMPARE_VALUE_DOUBLE:
         return "floating-point";
+    default:
+        UNREACHABLE();
     }
-    UNREACHABLE();
 }
 
 static noreturn void
@@ -681,7 +685,6 @@ assert_outside(char *file, int32 line, char *func,
     } else {
         UNREACHABLE();
     }
-    return;
 }
 
 #define GENERATE_ASSERT_SIGNED(MODE, SYMBOL, EXPECTED)                         \
