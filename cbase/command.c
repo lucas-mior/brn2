@@ -133,14 +133,10 @@ command_result_free(CommandResult *result) {
 }
 
 void
-command_result_append(
-    String *output,
-    String *stdout_output,
-    String *stderr_output,
-    bool is_stderr,
-    char *data,
-    int32 data_len
-) {
+command_result_append(String *output,
+                      String *stdout_output, String *stderr_output,
+                      bool is_stderr,
+                      char *data, int32 data_len) {
     if (data_len <= 0) {
         return;
     }
@@ -177,11 +173,9 @@ command_windows_error_set(Command *command, DWORD error_code) {
 }
 
 static bool
-command_windows_capture_file_open(
-    Command *command,
-    CommandWindowsCaptureFile *capture,
-    char *prefix
-) {
+command_windows_capture_file_open(Command *command,
+                                  CommandWindowsCaptureFile *capture,
+                                  char *prefix) {
     char temp_dir[PATH_MAX];
     SECURITY_ATTRIBUTES security_attributes = {0};
     DWORD temp_dir_len;
@@ -268,12 +262,10 @@ command_windows_capture_file_read(Command *command,
 }
 
 static bool
-command_windows_result_read_captured(
-    Command *command,
-    enum CommandFlag flags,
-    CommandWindowsCaptureFile *stdout_capture,
-    CommandWindowsCaptureFile *stderr_capture
-) {
+command_windows_result_read_captured(Command *command,
+                                     enum CommandFlag flags,
+                                     CommandWindowsCaptureFile *stdout_capture,
+                                     CommandWindowsCaptureFile *stderr_capture) {
     String output = {0};
     char *stdout_output = NULL;
     char *stderr_output = NULL;
@@ -332,11 +324,8 @@ command_windows_result_read_captured(
 }
 
 char *
-command_windows_argv0(
-    Command *command,
-    char *argv0_windows,
-    int32 *argv0_len
-) {
+command_windows_argv0(Command *command,
+                      char *argv0_windows, int32 *argv0_len) {
     char *exe = ".exe";
     int64 exe_len = strlen32(exe);
     int64 len0 = strlen32(command->argv[0]);
@@ -362,11 +351,8 @@ command_windows_argv0(
 }
 
 void
-command_windows_command_line(
-    Command *command,
-    char *cmdline,
-    int64 cmdline_len
-) {
+command_windows_command_line(Command *command,
+                             char *cmdline, int64 cmdline_len) {
     char argv0_windows[BUFSIZ];
     int64 j = 0;
 
@@ -586,12 +572,9 @@ command_result_close_poll_fd(struct pollfd *pipe, int32 *fd, int32 *left) {
 }
 
 static void
-command_result_process_stdin_event(
-    Command *command,
-    struct pollfd *pipe,
-    int32 *left,
-    int64 *stdin_offset
-) {
+command_result_process_stdin_event(Command *command,
+                                   struct pollfd *pipe,
+                                   int32 *left, int64 *stdin_offset) {
     int64 bytes_written;
     int64 chunk_len;
     int64 left_to_write;
@@ -652,16 +635,13 @@ command_result_process_stdin_event(
 }
 
 static void
-command_result_process_output_event(
-    Command *command,
-    struct pollfd *pipe,
-    int32 *fd,
-    int32 *left,
-    String *output,
-    String *stdout_output,
-    String *stderr_output,
-    bool is_stderr
-) {
+command_result_process_output_event(Command *command,
+                                    struct pollfd *pipe,
+                                    int32 *fd, int32 *left,
+                                    String *output,
+                                    String *stdout_output,
+                                    String *stderr_output,
+                                    bool is_stderr) {
     char buffer[4096];
     int64 read_bytes;
 
@@ -806,16 +786,14 @@ command_result_process_io(Command *command, enum CommandFlag flags) {
         str_free(&output);
     }
     if (flags & COMMAND_CAPTURE_STDOUT) {
-        command->result.stdout_output = str_steal(
-            &stdout_output,
-            &command->result.stdout_len);
+        command->result.stdout_output = str_steal(&stdout_output,
+                                                  &command->result.stdout_len);
     } else {
         str_free(&stdout_output);
     }
     if (flags & COMMAND_CAPTURE_STDERR) {
-        command->result.stderr_output = str_steal(
-            &stderr_output,
-            &command->result.stderr_len);
+        command->result.stderr_output = str_steal(&stderr_output,
+                                                  &command->result.stderr_len);
     } else {
         str_free(&stderr_output);
     }
@@ -839,13 +817,9 @@ command_child_env_apply(Command *command) {
 }
 
 void
-command_child_exec(
-    Command *command,
-    enum CommandFlag flags,
-    int stdin_pipe[2],
-    int stdout_pipe[2],
-    int stderr_pipe[2]
-) {
+command_child_exec(Command *command,
+                   enum CommandFlag flags,
+                   int stdin_pipe[2], int stdout_pipe[2], int stderr_pipe[2]) {
     if (command->cwd) {
         if (chdir(command->cwd) < 0) {
             error("Error changing directory to %s: %s.\n",
@@ -1211,13 +1185,8 @@ command_str(Command *command, int32 *len) {
 }
 
 void
-command_vector_reserve(
-    char ***items,
-    int32 **item_lens,
-    int32 *cap,
-    int32 len,
-    int32 extra
-) {
+command_vector_reserve(char ***items, int32 **item_lens,
+                       int32 *cap, int32 len, int32 extra) {
     int32 needed;
 
     needed = len + extra + 1;
@@ -1241,14 +1210,9 @@ command_vector_reserve(
 }
 
 void
-command_push_owned_length(
-    char ***items,
-    int32 **item_lens,
-    int32 *len,
-    int32 *cap,
-    char *argument,
-    int32 argument_len
-) {
+command_push_owned_length(char ***items, int32 **item_lens,
+                          int32 *len, int32 *cap,
+                          char *argument, int32 argument_len) {
     char *copy;
 
     if (argument_len < 0) {
@@ -1328,11 +1292,8 @@ command_stdin_buffer_clear(Command *command) {
 }
 
 void
-command_env_push_length(
-    Command *command,
-    char *assignment,
-    int32 assignment_len
-) {
+command_env_push_length(Command *command,
+                        char *assignment, int32 assignment_len) {
     command_push_owned_length(&command->env,
                               &command->env_lens,
                               &command->env_len,
