@@ -567,26 +567,26 @@ _Generic((VAR1),                                                      \
 #define ASSERT_COMPARE_VALUE_CHAR assert_compare_value_unsigned
 #endif
 
-#define ASSERT_COMPARE_VALUE(VAR)                                             \
-_Generic((VAR),                                                               \
-    void *: assert_compare_value_pointer,                                     \
-    char *: assert_compare_value_string,                                      \
-    bool:   assert_compare_value_bool,                                        \
-    char:   ASSERT_COMPARE_VALUE_CHAR,                                        \
-    schar:  assert_compare_value_signed,                                      \
-    short:  assert_compare_value_signed,                                      \
-    int:    assert_compare_value_signed,                                      \
-    long:   assert_compare_value_signed,                                      \
-    llong:  assert_compare_value_signed,                                      \
-    uchar:  assert_compare_value_unsigned,                                    \
-    ushort: assert_compare_value_unsigned,                                    \
-    uint:   assert_compare_value_unsigned,                                    \
-    ulong:  assert_compare_value_unsigned,                                    \
-    ullong: assert_compare_value_unsigned,                                    \
-    float:  assert_compare_value_float,                                       \
-    double: assert_compare_value_double,                                      \
-    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CONSTANT             \
-)(__FILE__, __LINE__, FUNC__,                                                \
+#define ASSERT_COMPARE_VALUE(VAR)                                     \
+_Generic((VAR),                                                       \
+    void *: assert_compare_value_pointer,                             \
+    char *: assert_compare_value_string,                              \
+    bool:   assert_compare_value_bool,                                \
+    char:   ASSERT_COMPARE_VALUE_CHAR,                                \
+    schar:  assert_compare_value_signed,                              \
+    short:  assert_compare_value_signed,                              \
+    int:    assert_compare_value_signed,                              \
+    long:   assert_compare_value_signed,                              \
+    llong:  assert_compare_value_signed,                              \
+    uchar:  assert_compare_value_unsigned,                            \
+    ushort: assert_compare_value_unsigned,                            \
+    uint:   assert_compare_value_unsigned,                            \
+    ulong:  assert_compare_value_unsigned,                            \
+    ullong: assert_compare_value_unsigned,                            \
+    float:  assert_compare_value_float,                               \
+    double: assert_compare_value_double,                              \
+    default: UNSUPPORTED_TYPE_FOR_GENERIC_ASSERT_COMPARE_CONSTANT     \
+)(__FILE__, __LINE__, FUNC__,                                         \
   #VAR, (VAR))
 
 #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) do {                       \
