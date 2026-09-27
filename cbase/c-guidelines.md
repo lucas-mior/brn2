@@ -510,6 +510,10 @@ but NEVER create helper like those.
        freed/copied around, then it is no longer a valid use of `char *string`
        without length, and it must be converted in its inception to one of the 3
        representations above.
+- `char **string` without length: sometimes, we have a trusted string which we
+  want to parse and advance without worrying about length. This is very very
+  very rare. In this case, we pass the string as double pointer. As of now, only
+  allowed in `cbase/fmt.c` and `cbase/xenums.c`.
 - Never create other string representations: those 4 above are all ever needed.
 
 ## Comparing strings:
