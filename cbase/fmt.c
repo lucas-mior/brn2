@@ -269,7 +269,7 @@ fmt_parse_spec(char *cursor, char **next, FormatSpec *spec) {
         }
     }
 
-    spec->flags = FMT_FLAG_chars(&cursor);
+    spec->flags = FMT_FLAG_parse_chars(&cursor);
 
     if (*cursor == '*') {
         cursor += 1;

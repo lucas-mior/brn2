@@ -165,7 +165,7 @@ XENUMS_LINKAGE int32 CAT(ENUM_PREFIX_, alias_len)(enum ENUM_NAME, char **);
 XENUMS_LINKAGE char *CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME);
 XENUMS_LINKAGE enum ENUM_NAME CAT(ENUM_PREFIX_, parse)(char *, int32);
 #if ENUM_CHAR_REPR && ENUM_BITFLAGS
-XENUMS_LINKAGE enum ENUM_NAME CAT(ENUM_PREFIX_, chars)(char **);
+XENUMS_LINKAGE enum ENUM_NAME CAT(ENUM_PREFIX_, parse_chars)(char **);
 #endif
 
 #if XENUMS_DECLARE_ONLY == 0
@@ -447,7 +447,7 @@ CAT(ENUM_PREFIX_, parse_name_equals)(char *string, int32 string_len,
 #if ENUM_CHAR_REPR
 #if ENUM_BITFLAGS
 XENUMS_LINKAGE enum ENUM_NAME
-CAT(ENUM_PREFIX_, chars)(char **cursor) {
+CAT(ENUM_PREFIX_, parse_chars)(char **cursor) {
     ENUM_UNDERLYING_TYPE result = 0;
 
     if ((cursor == NULL) || (*cursor == NULL)) {
@@ -651,7 +651,7 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
     (void)CAT(ENUM_PREFIX_, alias_free);
     (void)CAT(ENUM_PREFIX_, parse);
 #if ENUM_CHAR_REPR && ENUM_BITFLAGS
-    (void)CAT(ENUM_PREFIX_, chars);
+    (void)CAT(ENUM_PREFIX_, parse_chars);
 #endif
     return;
 }
@@ -894,12 +894,12 @@ main(void) {
            == TEST_CHAR_FLAGS_NONE);
 
     cursor = "rw-width";
-    ASSERT(TEST_CHAR_FLAGS_chars(&cursor)
+    ASSERT(TEST_CHAR_FLAGS_parse_chars(&cursor)
            == (TEST_CHAR_FLAGS_READ | TEST_CHAR_FLAGS_WRITE));
     ASSERT_EQ(cursor, "-width");
 
     cursor = "z";
-    ASSERT(TEST_CHAR_FLAGS_chars(&cursor) == TEST_CHAR_FLAGS_NONE);
+    ASSERT(TEST_CHAR_FLAGS_parse_chars(&cursor) == TEST_CHAR_FLAGS_NONE);
     ASSERT_EQ(cursor, "z");
 
     printf("xenums.c: All tests passed successfully.\n");
