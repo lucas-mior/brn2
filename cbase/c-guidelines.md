@@ -473,8 +473,11 @@ but NEVER create helper like those.
     typedef struct MyStructType {
         char *name;
         char *path;
+        char *other;
+
         int32 name_len;
-        int32 path_len
+        int32 path_len;
+        int32 other_len;
     } MyStructType;
     ```
     This pattern naturally exposes the data and the length, and also offers
