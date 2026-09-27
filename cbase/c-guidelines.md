@@ -467,6 +467,16 @@ but NEVER create helper like those.
         Arena *arena;
     } StructOfArrays;
     ```
+  * This representation can also be composed in parallel for strings inside a
+    struct type:
+    ```c
+    typedef struct MyStructType {
+        char *name;
+        char *path;
+        int32 name_len;
+        int32 path_len
+    } MyStructType;
+    ```
   * Note:  (`int16 string_len` is also valid depending on the application)
 - `char *string` without length: Avoid it at all costs:
   * literals can use `STRLIT("literal")` to pass themselves and their length
