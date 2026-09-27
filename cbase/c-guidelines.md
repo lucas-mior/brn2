@@ -477,6 +477,8 @@ but NEVER create helper like those.
         int32 path_len
     } MyStructType;
     ```
+    This pattern naturally exposes the data and the length, and also offers
+    good struct layout without padding.
   * Note:  (`int16 string_len` is also valid depending on the application)
 - `char *string` without length: Avoid it at all costs:
   * literals can use `STRLIT("literal")` to pass themselves and their length
