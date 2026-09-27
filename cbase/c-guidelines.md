@@ -392,36 +392,30 @@ That means to also avoid calling `strlen32`:
 ## Important pattern:
 - Macros `ENDS_WITH` and `BEGINS_WITH`: they use a macro trick to allow passing
   only the string, or also passing the string length. See `cbase.h`.
-- `String`: use this struct and its functions to build long, dynamic
-  strings. Do not use it where a single
-  `SNPRINTF(stack_array, "format_%s_string", args);` would be enough.
-  * Use `STR_APPEND` for appending literals or strings of known length, and
-    `str_printf` for formatting. `str_append` is internal code, not external
-    API.  Use `STR_APPEND` instead.
-  * `SNPRINTF` returns the number of bytes written (excluding the
-    terminating null byte). No need to call `strlen32` on the buffer:
-    ```c
-    // bad
-    static void
-    function(int32 x, int32 y) {
-        int32 n;
-        char buffer[256];
+* `SNPRINTF` returns the number of bytes written (excluding the terminating
+  null byte). No need to call `strlen32` on the buffer:
+  ```c
+  // bad
+  static void
+  function(int32 x, int32 y) {
+      int32 n;
+      char buffer[256];
 
-        SNPRINTF(buffer, "%dx%d", x, y);
-        n = strlen32(buffer);
-        return;
-    }
+      SNPRINTF(buffer, "%dx%d", x, y);
+      n = strlen32(buffer);
+      return;
+  }
 
-    // good
-    static void
-    function(int32 x, int32 y) {
-        int32 n;
-        char buffer[256];
+  // good
+  static void
+  function(int32 x, int32 y) {
+      int32 n;
+      char buffer[256];
 
-        n = SNPRINTF(buffer, "%dx%d", x, y);
-        return;
-    }
-    ```
+      n = SNPRINTF(buffer, "%dx%d", x, y);
+      return;
+  }
+  ```
 
 Considering all that, most `string.h` functions from the C standard library are
 to be avoided. `strcpy`, `strcat`, `strstr`, and `strtok` are always the wrong
