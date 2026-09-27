@@ -564,6 +564,7 @@ fmt_plan_load_spec(FormatSpec *spec, const FmtPlanSpec *plan_spec) {
     spec->precision_kind = (enum FormatPrecisionKind)plan_spec->precision_kind;
     spec->length = (enum FormatLength)plan_spec->length;
     spec->conversion = plan_spec->conversion;
+
     return;
 }
 
@@ -4638,8 +4639,7 @@ fmt_vsprintf(char *buffer, int64 capacity, char *format, va_list args) {
 }
 
 int32
-fmt_vsprintf_cached(const FmtPlan *plan, char *buffer, int64 capacity,
-                    va_list args) {
+fmt_vsprintf_cached(FmtPlan *plan, char *buffer, int64 capacity, va_list args) {
     FormatSink sink;
     int32 status;
 
@@ -5548,14 +5548,18 @@ test_fmt_printf_ldouble_outputs(void) {
     test_fmt_bytes_cap("INF", 3, "%LA", (ldouble)INFINITY);
     test_fmt_bytes_cap("inf", 3, "%La", (ldouble)INFINITY);
 
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*Lf",
-                                   -1, (ldouble)1.25), 8);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                "%.*Lf", -1, (ldouble)1.25),
+                                8);
     ASSERT_EQ(buffer, "1.250000");
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*Lg",
-                                   -1, (ldouble)1.25), 4);
+
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                "%.*Lg", -1, (ldouble)1.25),
+                                4);
     ASSERT_EQ(buffer, "1.25");
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*La",
-                                -1, (ldouble)1.5), 8);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
+                                "%.*La", -1, (ldouble)1.5),
+                                8);
     ASSERT_EQ(buffer, "0x1.8p+0");
 
     if (fmt_test_ldouble_supported()) {
@@ -5585,21 +5589,18 @@ test_fmt_printf_ldouble_outputs(void) {
                       NULL, 0, "%.*La",
                       FMT_LDOUBLE_MAX_DECIMAL_PRECISION, (ldouble)0.0L),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 7);
-        ASSERT_EQ(fmt_test_snprintf(
-                      NULL, 0, "%.*Lf",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                      (ldouble)1.0L),
-                  -ERANGE);
-        ASSERT_EQ(fmt_test_snprintf(
-                      NULL, 0, "%.*Le",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                      (ldouble)1.0L),
-                  -ERANGE);
-        ASSERT_EQ(fmt_test_snprintf(
-                      NULL, 0, "%.*Lg",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                      (ldouble)1.0L),
-                  -ERANGE);
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lf",
+                                    FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
+                                    (ldouble)1.0L),
+                                    -ERANGE);
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Le",
+                                    FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
+                                    (ldouble)1.0L),
+                                    -ERANGE);
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lg",
+                                    FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
+                                    (ldouble)1.0L),
+                                    -ERANGE);
         ASSERT_EQ(fmt_test_snprintf(
                       NULL, 0, "%.*La",
                       FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
@@ -5629,6 +5630,7 @@ fmt_test_public_vsprintf(char *buffer, int64 capacity, char *format, ...) {
     va_start(args, format);
     len = fmt_vsprintf(buffer, capacity, format, args);
     va_end(args);
+
     return len;
 }
 
@@ -5640,12 +5642,12 @@ fmt_test_cached_estimate(FmtPlan *plan, char *format, ...) {
     va_start(args, format);
     estimate = fmt_vsnprintf_estimate_cached(plan, format, args);
     va_end(args);
+
     return estimate;
 }
 
 static int32
-fmt_test_cached_sprintf(const FmtPlan *plan, char *buffer, int64 capacity,
-                        ...) {
+fmt_test_cached_sprintf(FmtPlan *plan, char *buffer, int64 capacity, ...) {
     va_list args;
     int32 len;
 
@@ -5756,8 +5758,7 @@ test_fmt_public_api(void) {
     ASSERT_EQ(buffer, "abcd");
 
     ASSERT_EQ(fmt_sprintf(tiny, SIZEOF(tiny), "abcdef"), -ENOSPC);
-    ASSERT_EQ(fmt_test_public_vsprintf(tiny, SIZEOF(tiny), "abcdef"),
-                 -ENOSPC);
+    ASSERT_EQ(fmt_test_public_vsprintf(tiny, SIZEOF(tiny), "abcdef"), -ENOSPC);
 
     return;
 }

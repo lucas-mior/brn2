@@ -303,12 +303,13 @@ int32 fmt_vsprintf(char *buffer, int64 capacity, char *format, va_list args)
     ATTR_PRINTF(3, 0);
 int32 fmt_sprintf(char *buffer, int64 capacity, char *format, ...)
     ATTR_PRINTF(3, 4);
-int32 fmt_vsnprintf_estimate(char *format, va_list args) ATTR_PRINTF(1, 0);
-int32 fmt_snprintf_estimate(char *format, ...) ATTR_PRINTF(1, 2);
+int32 fmt_vsnprintf_estimate(char *format, va_list args)
+    ATTR_PRINTF(1, 0);
+int32 fmt_snprintf_estimate(char *format, ...)
+    ATTR_PRINTF(1, 2);
 int32 fmt_vsnprintf_estimate_cached(FmtPlan *plan, char *format, va_list args)
     ATTR_PRINTF(2, 0);
-int32 fmt_vsprintf_cached(const FmtPlan *plan, char *buffer, int64 capacity,
-                          va_list args);
+int32 fmt_vsprintf_cached(FmtPlan *plan, char *buffer, int64 cap, va_list args);
 
 String *string_array_append(StringArray *);
 int32 string_array_append_copy(StringArray *array, String *item);
