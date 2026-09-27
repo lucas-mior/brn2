@@ -320,6 +320,7 @@ void strflex_list_destroy(StrFlexList *);
 void strflex_list_clear(StrFlexList *);
 int32 strflex_list_len(StrFlexList *);
 StrFlex *strflex_list_at(StrFlexList *, int32);
+
 // Float formatting functions return the formatted byte count, excluding the
 // terminating '\0'. Negative return values are errno-style failures:
 // -EINVAL for invalid input, -ENOSPC when capacity is insufficient, and
