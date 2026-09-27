@@ -4924,17 +4924,17 @@ test_fmt_printf_float_outputs(void) {
     test_fmt_bytes_cap("1.25E+00", 8, "%.2E", 1.25);
     test_fmt_bytes_cap("+001.25e+00", 11, "%+011.2e", 1.25);
 
-    test_fmt_bytes_cap("inf",      3, "%f",   HUGE_VAL);
-    test_fmt_bytes_cap("-inf",     4, "%f",   -HUGE_VAL);
-    test_fmt_bytes_cap("+inf",     4, "%+f",  HUGE_VAL);
-    test_fmt_bytes_cap(" inf",     4, "% f",  HUGE_VAL);
-    test_fmt_bytes_cap("00000inf", 8, "%08f", HUGE_VAL);
-    test_fmt_bytes_cap("INF",      3, "%F",   HUGE_VAL);
-    test_fmt_bytes_cap("INF",      3, "%E",   HUGE_VAL);
-    test_fmt_bytes_cap("nan",      3, "%f",   pos_nan);
-    test_fmt_bytes_cap("-nan",     4, "%f",   neg_nan);
-    test_fmt_bytes_cap("NAN",      3, "%F",   pos_nan);
-    test_fmt_bytes_cap("-NAN",     4, "%F",   neg_nan);
+    test_fmt_bytes_cap(STRLIT("inf"),      "%f",   HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT("-inf"),     "%f",   -HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT("+inf"),     "%+f",  HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT(" inf"),     "% f",  HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT("00000inf"), "%08f", HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT("INF"),      "%F",   HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT("INF"),      "%E",   HUGE_VAL);
+    test_fmt_bytes_cap(STRLIT("nan"),      "%f",   pos_nan);
+    test_fmt_bytes_cap(STRLIT("-nan"),     "%f",   neg_nan);
+    test_fmt_bytes_cap(STRLIT("NAN"),      "%F",   pos_nan);
+    test_fmt_bytes_cap(STRLIT("-NAN"),     "%F",   neg_nan);
 
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                    "%.*f", -1, 1.25), 8);
