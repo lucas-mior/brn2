@@ -429,9 +429,9 @@ Also, never create stupid string helpers like
 but NEVER create helper like those.
 
 ## String representations
-- `String`: for dynamic, appendable strings. Avoid it if the string is not
-  expected to grow. For passing it as read-only data for functions, don't pass
-  it directly, use:
+- `String`: owned type for dynamic, appendable strings. Avoid it if the string
+  is not expected to grow. For passing it as read-only data for functions,
+  don't pass it directly, use:
   ```c
   function(string.data, string.len);
   ```
