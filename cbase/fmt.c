@@ -79,11 +79,11 @@ _Static_assert(FMT_FLOAT_MAX_EXP_PREFIX
 #define ENUM_PREFIX_ FMT_FLAG_
 #define ENUM_CHAR_REPR 1
 #define ENUM_FIELDS             \
-    XX(FMT_FLAG_LEFT, '-')      \
-    XX(FMT_FLAG_SIGN, '+')      \
-    XX(FMT_FLAG_SPACE, ' ')     \
+    XX(FMT_FLAG_LEFT,      '-') \
+    XX(FMT_FLAG_SIGN,      '+') \
+    XX(FMT_FLAG_SPACE,     ' ') \
     XX(FMT_FLAG_ALTERNATE, '#') \
-    XX(FMT_FLAG_ZERO, '0')
+    XX(FMT_FLAG_ZERO,      '0')
 #define XENUMS_NO_TESTS 1
 #include "xenums.c"
 #undef XENUMS_NO_TESTS
