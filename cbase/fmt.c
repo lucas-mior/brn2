@@ -5945,8 +5945,7 @@ test_fmt_float32_round_trip(float value) {
     end = NULL;
     parsed = strtof(buffer, &end);
     ASSERT(end == buffer + len);
-    ASSERT_EQ(test_fmt_float32_bits(parsed),
-                     test_fmt_float32_bits(value));
+    ASSERT_EQ(test_fmt_float32_bits(parsed), test_fmt_float32_bits(value));
 
     return;
 }
