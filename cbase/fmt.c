@@ -512,7 +512,7 @@ fmt_parse_spec(char *cursor, char **next, FormatSpec *spec) {
     ASSERT(next != NULL);
     ASSERT(spec != NULL);
 
-    memset64(spec, 0, SIZEOF(*spec));
+    *spec = (FormatSpec){0};
 
     if (*cursor == '\0') {
         return -EINVAL;
