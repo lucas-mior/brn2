@@ -444,6 +444,10 @@ but NEVER create helper like those.
   function(string.data, string.len);
   ```
   * To create a `StrFlex *` from literal: use `SFLIT("literal")`.
+  * StrFlex strings are always built as a single shot, not incrementally like
+    `String`. Possibilities are:
+    + Copy existing string using `strflex_list_push()`
+    + Format in a singles shot using `strflex_list_printf()`
 - `char *string` + `int32 string_len`:
   * For read-only strings: this is most functions API:
     They do not change strings, only read them.
