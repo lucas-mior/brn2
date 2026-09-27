@@ -437,7 +437,7 @@ but NEVER create helper like those.
   ```
   * `String` is the correct type if at the moment of the string creation, there
     is complicated logic that demands multiple `STR_APPEND`, `str_printf`, or
-    oother `String` API function calls, even if the string might not get
+    other `String` API function calls, even if the string might not get
     appended to later. This is uncommon. Most strings are simple.
 - `StrFlex`: owned compact type that uses flexible array member. Use for groups
   of strings that never grow within a specific lifetime of the application. Use
