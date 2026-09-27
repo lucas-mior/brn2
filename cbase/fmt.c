@@ -4936,8 +4936,7 @@ test_fmt_printf_float_outputs(void) {
     test_fmt_bytes_cap(STRLIT("NAN"),      "%F",   pos_nan);
     test_fmt_bytes_cap(STRLIT("-NAN"),     "%F",   neg_nan);
 
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "%.*f", -1, 1.25), 8);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*f", -1, 1.25), 8);
     ASSERT_EQ(buffer, "1.250000");
     ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*f",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION, true_min),
