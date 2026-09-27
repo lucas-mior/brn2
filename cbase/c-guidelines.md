@@ -457,7 +457,8 @@ but NEVER create helper like those.
     They do not change strings, only read them.
   * Also useful for strings that are part of a larger struct and are not
     expected to grow, only be set and reset as the application runs. In this
-    case, allocation is ad-hoc: it can be part of arena, malloced, whatever.
+    case, allocation is ad-hoc: it can be a literal, part of arena, malloced,
+    whatever.
   * This representation can also be composed in parallel for a struct-of-arrays
     design:
     ```c
