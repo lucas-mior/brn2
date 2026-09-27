@@ -617,6 +617,34 @@ void function(void) {
 
     return;
 }
+
+// bad
+void function(void) {
+    int32 len = function_returns_len_or_negative_on_error();
+
+    if (len < 0) {
+        // early return
+        return;
+    }
+
+    // do something with result
+
+    return;
+}
+
+// good
+void function(void) {
+    int32 len;
+
+    if ((len = function_that_returns_negative_on_error()) < 0) {
+        // early return
+        return;
+    }
+
+    // do something with result
+
+    return;
+}
 ```
 
 But do initialize if the initialization is clear and never fails:
