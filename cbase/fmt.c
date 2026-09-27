@@ -5568,8 +5568,8 @@ test_fmt_estimate(void) {
     ASSERT_EQ(fmt_snprintf_estimate("abc%n", (int32 *)NULL), -EINVAL);
 
     estimate = fmt_snprintf_estimate("x=%d s=%.*s f=%g", 7, 4, span, 1.25);
-    exact = fmt_test_snprintf(buffer, SIZEOF(buffer), "x=%d s=%.*s f=%g",
-                              7, 4, span, 1.25);
+    exact = fmt_test_snprintf(buffer, SIZEOF(buffer),
+                              "x=%d s=%.*s f=%g", 7, 4, span, 1.25);
     ASSERT_GE_VAR(estimate, exact);
 
     return;
