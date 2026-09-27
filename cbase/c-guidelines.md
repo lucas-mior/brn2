@@ -435,6 +435,10 @@ but NEVER create helper like those.
   ```c
   function(string.data, string.len);
   ```
+  * `String` is the correct type if at the moment of the string creation, there
+    is complicated logic that demands multiple `STR_APPEND`, `str_printf`, or
+    oother `String` API function calls, even if the string might not get
+    appended to later. This is uncommon. Most strings are simple.
 - `StrFlex`: owned compact type that uses flexible array member. Use for groups
   of strings that never grow within a specific lifetime of the application. Use
   StrFlexList or use StrFlex as the last member of a struct definition. They
