@@ -454,7 +454,7 @@ CAT(ENUM_PREFIX_, parse_chars)(char **cursor) {
         return XENUM_INVALID_PARSE_RESULT;
     }
 
-    for (;;) {
+    while (true) {
         switch (**cursor) {
             #define XX_1(e)
             #define XX_2(e, alias) case alias:                               \
