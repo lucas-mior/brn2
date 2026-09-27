@@ -157,18 +157,23 @@ typedef enum ENUM_NAME ENUM_PREFIX_;
 
 #endif
 
+#if ENUM_BITFLAGS
+XENUMS_LINKAGE void CAT(ENUM_PREFIX_, alias_free)(char *);
 XENUMS_LINKAGE void CAT(ENUM_PREFIX_, str_free)(char *);
+#endif
+
 XENUMS_LINKAGE int32 CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME, char **);
 XENUMS_LINKAGE char *CAT(ENUM_PREFIX_, str)(enum ENUM_NAME);
-XENUMS_LINKAGE void CAT(ENUM_PREFIX_, alias_free)(char *);
 XENUMS_LINKAGE int32 CAT(ENUM_PREFIX_, alias_len)(enum ENUM_NAME, char **);
 XENUMS_LINKAGE char *CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME);
 XENUMS_LINKAGE enum ENUM_NAME CAT(ENUM_PREFIX_, parse)(char *, int32);
+
 #if ENUM_CHAR_REPR && ENUM_BITFLAGS
 XENUMS_LINKAGE enum ENUM_NAME CAT(ENUM_PREFIX_, parse_chars)(char **);
 #endif
 
 #if XENUMS_DECLARE_ONLY == 0
+#if ENUM_BITFLAGS
 XENUMS_LINKAGE void
 CAT(ENUM_PREFIX_, str_free)(char *str) {
     (void)str;
@@ -183,6 +188,7 @@ CAT(ENUM_PREFIX_, alias_free)(char *str) {
     CAT(ENUM_PREFIX_, str_free)(str);
     return;
 }
+#endif
 
 XENUMS_LINKAGE int32
 CAT(ENUM_PREFIX_, str_len)(enum ENUM_NAME val, char **out) {
@@ -646,9 +652,11 @@ static inline void
 CAT(ENUM_PREFIX_, functions_sink)(void) {
     (void)CAT(ENUM_PREFIX_, functions_sink);
     (void)CAT(ENUM_PREFIX_, str);
-    (void)CAT(ENUM_PREFIX_, str_free);
     (void)CAT(ENUM_PREFIX_, alias);
+#if ENUM_BITFLAGS
+    (void)CAT(ENUM_PREFIX_, str_free);
     (void)CAT(ENUM_PREFIX_, alias_free);
+#endif
     (void)CAT(ENUM_PREFIX_, parse);
 #if ENUM_CHAR_REPR && ENUM_BITFLAGS
     (void)CAT(ENUM_PREFIX_, parse_chars);
@@ -777,27 +785,21 @@ main(void) {
 
     s = TEST_NORMAL_str(TEST_NORMAL_APPLE);
     ASSERT_EQ(s, "TEST_NORMAL_APPLE");
-    TEST_NORMAL_str_free(s);
 
     s = TEST_NORMAL_alias(TEST_NORMAL_APPLE);
     ASSERT_EQ(s, "TEST_NORMAL_APPLE");
-    TEST_NORMAL_alias_free(s);
 
     s = TEST_NORMAL_str(TEST_NORMAL_BANANA);
     ASSERT_EQ(s, "TEST_NORMAL_BANANA");
-    TEST_NORMAL_str_free(s);
 
     s = TEST_NORMAL_alias(TEST_NORMAL_BANANA);
     ASSERT_EQ(s, "banana");
-    TEST_NORMAL_alias_free(s);
 
     s = TEST_NORMAL_str(TEST_NORMAL_CHERRY);
     ASSERT_EQ(s, "TEST_NORMAL_CHERRY");
-    TEST_NORMAL_str_free(s);
 
     s = TEST_NORMAL_alias(TEST_NORMAL_CHERRY);
     ASSERT_EQ(s, "cherry");
-    TEST_NORMAL_alias_free(s);
 
     ASSERT(TEST_NORMAL_parse(STRLIT("TEST_NORMAL_APPLE")) == TEST_NORMAL_APPLE);
     ASSERT(TEST_NORMAL_parse(STRLIT("BANANA")) == TEST_NORMAL_BANANA);
@@ -831,15 +833,12 @@ main(void) {
 
     s = TEST_NORMAL_str(TEST_NORMAL_COUNT);
     ASSERT_EQ(s, "TEST_NORMAL_COUNT");
-    TEST_NORMAL_str_free(s);
 
     s = TEST_NORMAL_alias(TEST_NORMAL_COUNT);
     ASSERT_EQ(s, "TEST_NORMAL_COUNT");
-    TEST_NORMAL_alias_free(s);
 
     s = TEST_NORMAL_str(999);
     ASSERT_EQ(s, "Invalid enum value");
-    TEST_NORMAL_str_free(s);
 
     ASSERT_ZERO(TEST_CHAR_REPR_IDENTIFIER);
     ASSERT_EQ(TEST_CHAR_REPR_PLUS, 1);
@@ -847,11 +846,9 @@ main(void) {
 
     s = TEST_CHAR_REPR_alias(TEST_CHAR_REPR_PLUS);
     ASSERT_EQ(s, "+");
-    TEST_CHAR_REPR_alias_free(s);
 
     s = TEST_CHAR_REPR_alias(TEST_CHAR_REPR_IDENTIFIER);
     ASSERT_EQ(s, "TEST_CHAR_REPR_IDENTIFIER");
-    TEST_CHAR_REPR_alias_free(s);
 
     ASSERT(TEST_CHAR_REPR_parse(STRLIT("+")) == TEST_CHAR_REPR_PLUS);
     ASSERT(TEST_CHAR_REPR_parse(STRLIT("-")) == TEST_CHAR_REPR_MINUS);
