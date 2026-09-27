@@ -4786,8 +4786,8 @@ test_fmt_char_string_outputs(void) {
 
     memset64(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "%.*s", 1, (char *)NULL),
-                                   -EINVAL);
+                                "%.*s", 1, (char *)NULL),
+                                -EINVAL);
     ASSERT_EQ(buffer[0], '\0');
     ASSERT_EQ(buffer[1], (char)0x7f);
 
