@@ -493,7 +493,7 @@ but NEVER create helper like those.
     ```
     This is bad for 2 reaons: first, it has 4 bytes of padding. Second, it does
     not offer any capability that explicit `char *string` + `int32 string_len`
-    didn't have, while adding mental/type overhead to the program.
+    didn't have, while adding unnecessary mental/type overhead to the program.
 - `char *string` without length: Avoid it at all costs:
   * literals can use `STRLIT("literal")` to pass themselves and their length
     cost-free;
