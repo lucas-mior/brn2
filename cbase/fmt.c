@@ -4917,12 +4917,12 @@ test_fmt_printf_float_outputs(void) {
     test_fmt_bytes_cap(STRLIT(" 1.25"),      "% .2f",    1.25);
     test_fmt_bytes_cap(STRLIT("-0.000"),     "%.3f",    -0.0);
 
-    test_fmt_bytes_cap(STRLIT("1.250000e+00"), "%e", 1.25);
-    test_fmt_bytes_cap(STRLIT("1.25e+00"), "%.2e", 1.25);
-    test_fmt_bytes_cap(STRLIT("1e+00"), "%.0e", 1.25);
-    test_fmt_bytes_cap(STRLIT("1.e+00"), "%#.0e", 1.25);
-    test_fmt_bytes_cap(STRLIT("1.25E+00"), "%.2E", 1.25);
-    test_fmt_bytes_cap(STRLIT("+001.25e+00"), "%+011.2e", 1.25);
+    test_fmt_bytes_cap(STRLIT("1.250000e+00"), "%e",       1.25);
+    test_fmt_bytes_cap(STRLIT("1.25e+00"),     "%.2e",     1.25);
+    test_fmt_bytes_cap(STRLIT("1e+00"),        "%.0e",     1.25);
+    test_fmt_bytes_cap(STRLIT("1.e+00"),       "%#.0e",    1.25);
+    test_fmt_bytes_cap(STRLIT("1.25E+00"),     "%.2E",     1.25);
+    test_fmt_bytes_cap(STRLIT("+001.25e+00"),  "%+011.2e", 1.25);
 
     test_fmt_bytes_cap(STRLIT("inf"),      "%f",   HUGE_VAL);
     test_fmt_bytes_cap(STRLIT("-inf"),     "%f",   -HUGE_VAL);
