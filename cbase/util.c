@@ -67,6 +67,15 @@ signal_name(int32 signum) {
     return NULL;
 }
 
+char *
+bool_str(bool x) {
+    if (x) {
+        return "true";
+    } else {
+        return "false";
+    }
+}
+
 void
 here_impl(char *file, int32 line, char *func) {
     static llong here_counter = 0;
