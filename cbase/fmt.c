@@ -4645,7 +4645,7 @@ fmt_vsprintf(char *buffer, int64 capacity, char *format, va_list args) {
 }
 
 int32
-fmt_vsprintf_cached(FmtPlan *plan, char *buffer, int64 capacity, va_list args) {
+fmt_vsnprintf_planned(FmtPlan *plan, char *buffer, int64 capacity, va_list args) {
     FormatSink sink;
     int32 status;
 
@@ -5670,7 +5670,7 @@ fmt_test_cached_sprintf(FmtPlan *plan, char *buffer, int64 capacity, ...) {
     int32 len;
 
     va_start(args, capacity);
-    len = fmt_vsprintf_cached(plan, buffer, capacity, args);
+    len = fmt_vsnprintf_planned(plan, buffer, capacity, args);
     va_end(args);
     return len;
 }
