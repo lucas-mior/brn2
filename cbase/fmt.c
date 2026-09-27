@@ -280,9 +280,8 @@ fmt_parse_precision(char **cursor, FormatSpec *spec) {
 
     spec->precision_kind = FMT_PRECISION_LITERAL;
     if (fmt_is_digit(**cursor)) {
-        char *scan;
+        char *scan = *cursor;
 
-        scan = *cursor;
         while (fmt_is_digit(*scan)) {
             scan += 1;
         }
