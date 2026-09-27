@@ -4755,19 +4755,19 @@ test_fmt_char_string_outputs(void) {
     char spaces[] = {' ', ' ', ' '};
     char buffer[16];
 
-    test_fmt_bytes_cap("A", 1, "%c", 'A');
-    test_fmt_bytes_cap("  A", 3, "%3c", 'A');
-    test_fmt_bytes_cap("A  ", 3, "%-3c", 'A');
+    test_fmt_bytes_cap(STRLIT("A"), "%c", 'A');
+    test_fmt_bytes_cap(STRLIT("  A"), "%3c", 'A');
+    test_fmt_bytes_cap(STRLIT("A  "), "%-3c", 'A');
     test_fmt_bytes_cap(nul_char_expected, 1, "%c", 0);
 
-    test_fmt_bytes_cap("abc", 3, "%s", "abc");
-    test_fmt_bytes_cap("  abc", 5, "%5s", "abc");
-    test_fmt_bytes_cap("abc  ", 5, "%-5s", "abc");
-    test_fmt_bytes_cap("ab", 2, "%.2s", "abc");
-    test_fmt_bytes_cap("   ab", 5, "%5.2s", "abc");
-    test_fmt_bytes_cap("null", 4, "%s", (char *)NULL);
-    test_fmt_bytes_cap("nu", 2, "%.2s", (char *)NULL);
-    test_fmt_bytes_cap("     nul", 8, "%8.3s", (char *)NULL);
+    test_fmt_bytes_cap(STRLIT("abc"), "%s", "abc");
+    test_fmt_bytes_cap(STRLIT("  abc"), "%5s", "abc");
+    test_fmt_bytes_cap(STRLIT("abc  "), "%-5s", "abc");
+    test_fmt_bytes_cap(STRLIT("ab"), "%.2s", "abc");
+    test_fmt_bytes_cap(STRLIT("   ab"), "%5.2s", "abc");
+    test_fmt_bytes_cap(STRLIT("null"), "%s", (char *)NULL);
+    test_fmt_bytes_cap(STRLIT("nu"), "%.2s", (char *)NULL);
+    test_fmt_bytes_cap(STRLIT("     nul"), "%8.3s", (char *)NULL);
 
     test_fmt_bytes_cap(span_expected, 4, "%.*s", 4, span);
     test_fmt_bytes_cap(span_width_expected, 5, "%5.*s", 3, span);
@@ -4776,7 +4776,7 @@ test_fmt_char_string_outputs(void) {
     test_fmt_bytes_cap("", 0, "%.*s", 0, (char *)NULL);
     test_fmt_bytes_cap(spaces, 3, "%3.*s", 0, (char *)NULL);
 
-    test_fmt_bytes_cap("x=abc n=7 c=Z", 13, "x=%s n=%d c=%c", "abc", 7, 'Z');
+    test_fmt_bytes_cap(STRLIT("x=abc n=7 c=Z"), "x=%s n=%d c=%c", "abc", 7, 'Z');
 
     memset64(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*s", -1, "abc"),
