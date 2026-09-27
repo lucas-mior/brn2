@@ -574,8 +574,6 @@ typedef struct FormatSink {
 
 static int32
 fmt_sink_init(FormatSink *sink, char *buffer, int64 capacity) {
-    ASSERT(sink != NULL);
-
     if (capacity < 0) {
         return -EINVAL;
     }
