@@ -1199,7 +1199,7 @@ fmt_handle_string(FormatSink *sink, FormatSpec *spec, FormatArgs *args) {
         }
     } else {
         if (string == NULL) {
-            string = "(null)";
+            string = "null";
         }
         if (fmt_has_precision(spec)) {
             len = strnlen32(string, spec->precision);
@@ -5054,9 +5054,9 @@ test_fmt_char_string_outputs(void) {
     test_fmt_bytes_cap("abc  ", 5, "%-5s", "abc");
     test_fmt_bytes_cap("ab", 2, "%.2s", "abc");
     test_fmt_bytes_cap("   ab", 5, "%5.2s", "abc");
-    test_fmt_bytes_cap("(null)", 6, "%s", (char *)NULL);
-    test_fmt_bytes_cap("(nu", 3, "%.3s", (char *)NULL);
-    test_fmt_bytes_cap("     (nu", 8, "%8.3s", (char *)NULL);
+    test_fmt_bytes_cap("null", 4, "%s", (char *)NULL);
+    test_fmt_bytes_cap("nu", 2, "%.2s", (char *)NULL);
+    test_fmt_bytes_cap("     nul", 8, "%8.3s", (char *)NULL);
 
     test_fmt_bytes_cap(span_expected, 4, "%.*s", 4, span);
     test_fmt_bytes_cap(span_width_expected, 5, "%5.*s", 3, span);
@@ -5731,8 +5731,8 @@ test_fmt_public_api(void) {
 
     len = fmt_test_public_vsnprintf(buffer, SIZEOF(buffer),
                                     "%s:%.*s", NULL, 3, "a\0b");
-    ASSERT_EQ(len, 10);
-    ASSERT_EQ(buffer, len + 1, "(null):a\0b", 11);
+    ASSERT_EQ(len, 8);
+    ASSERT_EQ(buffer, len + 1, "null:a\0b", 9);
 
     count = -1;
     len = fmt_snprintf(tiny, SIZEOF(tiny), "abcd%n", &count);
@@ -5746,8 +5746,8 @@ test_fmt_public_api(void) {
 
     len = fmt_test_public_vsprintf(buffer, SIZEOF(buffer),
                                    "%s:%.*s", NULL, 3, "a\0b");
-    ASSERT_EQ(len, 10);
-    ASSERT_EQ(buffer, len + 1, "(null):a\0b", 11);
+    ASSERT_EQ(len, 8);
+    ASSERT_EQ(buffer, len + 1, "null:a\0b", 9);
 
     count = -1;
     len = fmt_sprintf(buffer, SIZEOF(buffer), "abcd%n", &count);
