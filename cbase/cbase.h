@@ -260,11 +260,14 @@ char *signal_name(int32 signum);
 void send_signal(char *executable, int32 signal_number);
 
 // Caller-owned parsed-format storage. Treat all fields as implementation
-// details. A successful fmt_vsnprintf_estimate_cached() makes the plan
-// self-contained and read-only for fmt_vsprintf_cached().
+// details. Normal format strings include at most 255 bytes plus the null
+// terminator. Cached plans keep a pointer to at most 127 format bytes plus the
+// null terminator; the caller must keep that string alive and unmodified while
+// the plan is in use.
 enum {
-    FMT_PLAN_MAX_FORMAT_LEN = 200,
-    FMT_PLAN_MAX_SPECS = FMT_PLAN_MAX_FORMAT_LEN/2,
+    FMT_MAX_FORMAT_LEN = 256,
+    FMT_PLAN_MAX_FORMAT_LEN = 128,
+    FMT_PLAN_MAX_SPECS = (FMT_PLAN_MAX_FORMAT_LEN - 1)/2,
 };
 
 typedef struct FmtPlanSpec {
@@ -280,7 +283,7 @@ typedef struct FmtPlanSpec {
 } FmtPlanSpec;
 
 typedef struct FmtPlan {
-    char format[FMT_PLAN_MAX_FORMAT_LEN];
+    char *format;
     FmtPlanSpec specs[FMT_PLAN_MAX_SPECS];
     uint8 spec_count;
     uint8 tail_offset;
