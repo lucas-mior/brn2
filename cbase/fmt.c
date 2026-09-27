@@ -1678,8 +1678,8 @@ fmt_big_uint_test_bit(FormatBigUInt *value, int32 bit_index) {
     ASSERT(value != NULL);
     ASSERT_NON_NEGATIVE(bit_index);
 
-    word_index = bit_index/FMT_BIG_UINT_WORD_BITS;
-    bit_offset = bit_index%FMT_BIG_UINT_WORD_BITS;
+    word_index = bit_index / FMT_BIG_UINT_WORD_BITS;
+    bit_offset = bit_index % FMT_BIG_UINT_WORD_BITS;
     if (word_index >= value->len) {
         return false;
     }
@@ -1701,8 +1701,8 @@ fmt_big_uint_shift_left(FormatBigUInt *value, int32 shift) {
     }
 
     original_len = value->len;
-    word_shift = shift/FMT_BIG_UINT_WORD_BITS;
-    bit_shift = shift%FMT_BIG_UINT_WORD_BITS;
+    word_shift = shift / FMT_BIG_UINT_WORD_BITS;
+    bit_shift = shift % FMT_BIG_UINT_WORD_BITS;
     max_new_len = original_len + word_shift;
     if (bit_shift != 0) {
         max_new_len += 1;
@@ -1752,8 +1752,8 @@ fmt_big_uint_shift_right(FormatBigUInt *value, int32 shift) {
         return;
     }
 
-    word_shift = shift/FMT_BIG_UINT_WORD_BITS;
-    bit_shift = shift%FMT_BIG_UINT_WORD_BITS;
+    word_shift = shift / FMT_BIG_UINT_WORD_BITS;
+    bit_shift = shift % FMT_BIG_UINT_WORD_BITS;
     if (word_shift >= value->len) {
         fmt_big_uint_zero(value);
         return;
@@ -1793,8 +1793,8 @@ fmt_big_uint_has_low_bits(FormatBigUInt *value, int32 bits) {
         return false;
     }
 
-    full_words = bits/FMT_BIG_UINT_WORD_BITS;
-    partial_bits = bits%FMT_BIG_UINT_WORD_BITS;
+    full_words = bits / FMT_BIG_UINT_WORD_BITS;
+    partial_bits = bits % FMT_BIG_UINT_WORD_BITS;
     for (int32 i = 0; i < full_words && i < value->len; i += 1) {
         if (value->words[i] != 0) {
             return true;
@@ -1875,12 +1875,9 @@ fmt_big_uint_div_small(FormatBigUInt *value, uint32 divisor) {
 
     remainder = 0;
     for (int32 i = value->len - 1; i >= 0; i -= 1) {
-        uint64 current;
-        uint64 quotient;
-
-        current = (remainder << 32) | value->words[i];
-        quotient = current/divisor;
-        remainder = current%divisor;
+        uint64 current = (remainder << 32) | value->words[i];
+        uint64 quotient = current / divisor;
+        remainder = current % divisor;
         value->words[i] = (uint32)quotient;
     }
     fmt_big_uint_normalize(value);
@@ -5579,38 +5576,38 @@ test_fmt_printf_ldouble_outputs(void) {
                 NULL, 0, "%.*Le", FMT_LDOUBLE_MAX_DECIMAL_PRECISION,
                 true_min));
         }
-        ASSERT_EQ(fmt_test_snprintf(
-                      NULL, 0, "%.*Lf",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION, LDBL_MAX),
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                    "%.*Lf",
+                                    FMT_LDOUBLE_MAX_DECIMAL_PRECISION,
+                                    LDBL_MAX),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + LDBL_MAX_10_EXP + 2);
-        ASSERT_EQ(fmt_test_snprintf(
-                      NULL, 0, "%.*Le",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION, (ldouble)0.0L),
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Le",
+                                    FMT_LDOUBLE_MAX_DECIMAL_PRECISION, 0.0L),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 6);
         ASSERT_EQ(fmt_test_snprintf(
                       NULL, 0, "%#.*Lg",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION, (ldouble)0.0L),
+                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION, 0.0L),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1);
         ASSERT_EQ(fmt_test_snprintf(
                       NULL, 0, "%.*La",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION, (ldouble)0.0L),
+                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION, 0.0L),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 7);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lf",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                                    (ldouble)1.0L),
+                                    1.0L),
                                     -ERANGE);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Le",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                                    (ldouble)1.0L),
+                                    1.0L),
                                     -ERANGE);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lg",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                                    (ldouble)1.0L),
+                                    1.0L),
                                     -ERANGE);
-        ASSERT_EQ(fmt_test_snprintf(
-                      NULL, 0, "%.*La",
-                      FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
-                      (ldouble)1.0L),
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                    "%.*La",
+                                    FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
+                                    1.0L),
                   -ERANGE);
     }
 
@@ -5839,7 +5836,7 @@ test_fmt_estimate(void) {
     ASSERT_EQ(fmt_snprintf_estimate("%#b", 0), 34);
     ASSERT_EQ(fmt_snprintf_estimate("%100d", 0), 100);
     ASSERT_EQ(fmt_snprintf_estimate("%p", (void *)NULL),
-                 (2 + 2*SIZEOF(uintptr)));
+              (2 + 2*SIZEOF(uintptr)));
 
     ASSERT_EQ(fmt_snprintf_estimate("%s", "abc"), 3);
     ASSERT_EQ(fmt_snprintf_estimate("%s", (char *)NULL), 6);
@@ -5850,11 +5847,11 @@ test_fmt_estimate(void) {
     ASSERT_EQ(fmt_snprintf_estimate("%.*s", 1, (char *)NULL), -EINVAL);
 
     ASSERT_EQ(fmt_snprintf_estimate("%f", 1.0),
-                 FMT_FLOAT_MAX_FIXED_PREFIX + 6 + 8 + 1);
+              FMT_FLOAT_MAX_FIXED_PREFIX + 6 + 8 + 1);
     ASSERT_EQ(fmt_snprintf_estimate("%20.2f", 1.0),
-                 FMT_FLOAT_MAX_FIXED_PREFIX + 2 + 8 + 1);
-    ASSERT_EQ(fmt_snprintf_estimate(
-                  "%.*e", FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1, 1.0),
+              FMT_FLOAT_MAX_FIXED_PREFIX + 2 + 8 + 1);
+    ASSERT_EQ(fmt_snprintf_estimate("%.*e",
+                                    FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1, 1.0),
               -ERANGE);
 
     count = -1;
