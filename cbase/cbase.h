@@ -298,12 +298,12 @@ typedef struct FmtPlan {
 // bounded by the exact fixed-decimal limit of the argument type; larger
 // explicit precisions return -ERANGE. See cbase/README.md for the exact
 // supported grammar and deliberate differences from libc printf.
-int32 fmt_vsnprintf(char *, int64, char *, va_list) ATTR_PRINTF(3, 0);
-int32 fmt_snprintf(char *, int64, char *, ...)      ATTR_PRINTF(3, 4);
-int32 fmt_vsprintf(char *, int64, char *, va_list)  ATTR_PRINTF(3, 0);
-int32 fmt_sprintf(char *, int64, char *, ...)       ATTR_PRINTF(3, 4);
-int32 fmt_vsnprintf_estimate(char *, va_list)       ATTR_PRINTF(1, 0);
-int32 fmt_snprintf_estimate(char *, ...)            ATTR_PRINTF(1, 2);
+int32 fmt_vsnprintf(char *, int64, char *, va_list)           ATTR_PRINTF(3, 0);
+int32 fmt_snprintf(char *, int64, char *, ...)                ATTR_PRINTF(3, 4);
+int32 fmt_vsprintf(char *, int64, char *, va_list)            ATTR_PRINTF(3, 0);
+int32 fmt_sprintf(char *, int64, char *, ...)                 ATTR_PRINTF(3, 4);
+int32 fmt_vsnprintf_estimate(char *, va_list)                 ATTR_PRINTF(1, 0);
+int32 fmt_snprintf_estimate(char *, ...)                      ATTR_PRINTF(1, 2);
 int32 fmt_vsnprintf_estimate_plan(FmtPlan *, char *, va_list) ATTR_PRINTF(2, 0);
 int32 fmt_vsnprintf_planned(FmtPlan *, char *, int64, va_list);
 
