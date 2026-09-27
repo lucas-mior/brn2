@@ -660,7 +660,7 @@ fmt_sink_write(FormatSink *sink, char *data, int64 len) {
         return;
     }
 
-    copy_len = (int32)MIN(len, (int64)available);
+    copy_len = (int32)MIN(len, available);
     memcpy64(sink->buffer + sink->written, (void *)data, copy_len);
     sink->written += copy_len;
     sink->buffer[sink->written] = '\0';
