@@ -4987,16 +4987,16 @@ test_fmt_integer_outputs(void) {
     test_fmt_integer_cap("1010", "%b", (uint32)10);
     test_fmt_integer_cap("1010", "%B", (uint32)10);
 
-    test_fmt_integer_cap("+42", "%+d", 42);
-    test_fmt_integer_cap(" 42", "% d", 42);
-    test_fmt_integer_cap("+42", "%+ d", 42);
-    test_fmt_integer_cap("-0000042", "%08d", -42);
-    test_fmt_integer_cap("42    ", "%-6d", 42);
-    test_fmt_integer_cap("   00042", "%8.5d", 42);
+    test_fmt_integer_cap("+42",      "%+d",    42);
+    test_fmt_integer_cap(" 42",      "% d",    42);
+    test_fmt_integer_cap("+42",      "%+ d",   42);
+    test_fmt_integer_cap("-0000042", "%08d",   -42);
+    test_fmt_integer_cap("42    ",   "%-6d",   42);
+    test_fmt_integer_cap("   00042", "%8.5d",  42);
     test_fmt_integer_cap("   00042", "%08.5d", 42);
     test_fmt_integer_cap("00042   ", "%-8.5d", 42);
-    test_fmt_integer_cap("", "%.0d", 0);
-    test_fmt_integer_cap("     ", "%5.0d", 0);
+    test_fmt_integer_cap("",         "%.0d",    0);
+    test_fmt_integer_cap("     ",    "%5.0d",   0);
 
     test_fmt_integer_cap("012",      "%#o",    (uint32)10);
     test_fmt_integer_cap("0",        "%#.0o",  (uint32)0);
