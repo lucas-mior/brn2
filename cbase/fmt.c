@@ -4977,15 +4977,15 @@ test_fmt_bytes_cap(char *expected, int32 expected_len, char *format, ...) {
 
 static void
 test_fmt_integer_outputs(void) {
-    test_fmt_integer_cap("0", "%d", 0);
-    test_fmt_integer_cap("-123", "%d", -123);
+    test_fmt_integer_cap("0",           "%d", 0);
+    test_fmt_integer_cap("-123",        "%d", -123);
     test_fmt_integer_cap("-2147483648", "%d", INT32_MIN);
-    test_fmt_integer_cap("4294967295", "%u", (uint32)UINT32_MAX);
-    test_fmt_integer_cap("12", "%o", (uint32)10);
-    test_fmt_integer_cap("abc", "%x", (uint32)0xabc);
-    test_fmt_integer_cap("ABC", "%X", (uint32)0xabc);
-    test_fmt_integer_cap("1010", "%b", (uint32)10);
-    test_fmt_integer_cap("1010", "%B", (uint32)10);
+    test_fmt_integer_cap("4294967295",  "%u", (uint32)UINT32_MAX);
+    test_fmt_integer_cap("12",          "%o", (uint32)10);
+    test_fmt_integer_cap("abc",         "%x", (uint32)0xabc);
+    test_fmt_integer_cap("ABC",         "%X", (uint32)0xabc);
+    test_fmt_integer_cap("1010",        "%b", (uint32)10);
+    test_fmt_integer_cap("1010",        "%B", (uint32)10);
 
     test_fmt_integer_cap("+42",      "%+d",    42);
     test_fmt_integer_cap(" 42",      "% d",    42);
