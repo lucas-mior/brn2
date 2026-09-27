@@ -23,7 +23,7 @@
 #if !defined(CBASE_H)
   #if defined(ENUM_NAME) || defined(ENUM_PREFIX_)                              \
       || defined(ENUM_FIELDS) || defined(ENUM_BITFLAGS)                        \
-      || defined(ENUM_UNDERLYING_TYPE)
+      || defined(ENUM_UNDERLYING_TYPE) || defined(ENUM_CHAR_REPR)
     #error "include cbase.h before configuring xenums.c"
   #endif
 #include "cbase.h"
@@ -31,6 +31,10 @@
 
 #if !defined(ENUM_UNDERLYING_TYPE)
   #define ENUM_UNDERLYING_TYPE uint32
+#endif
+
+#if !defined(ENUM_CHAR_REPR)
+  #define ENUM_CHAR_REPR 0
 #endif
 
 #if CC_CLANG
@@ -63,6 +67,9 @@
   #endif
   #if !defined(ENUM_BITFLAGS)
     #error "ENUM_BITFLAGS is not defined"
+  #endif
+  #if ENUM_CHAR_REPR && ENUM_BITFLAGS
+    #error "ENUM_CHAR_REPR is only supported for non-bitflag enums"
   #endif
 #endif
 
@@ -112,6 +119,7 @@ _Static_assert((ENUM_UNDERLYING_TYPE)-1 > 0,
 // Only use compositions of previous enum values there, not numeric values.
 // For non-bit flag enums, the optional second X macro parameter is a parse
 // alias token. Custom numeric values are not supported for non-bit flag enums.
+// If ENUM_CHAR_REPR is 1, non-bit flag enum aliases are char literals instead.
 //
 // Passing multiple ENUM names for the same value will break compilation.
 enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
@@ -276,13 +284,34 @@ CAT(ENUM_PREFIX_, str)(enum ENUM_NAME val) {
 XENUMS_LINKAGE int32
 CAT(ENUM_PREFIX_, alias_len)(enum ENUM_NAME val, char **out) {
 #if ENUM_BITFLAGS == 0
+#if ENUM_CHAR_REPR
+    #define XX_1(e)
+    #define XX_2(e, alias) static char CAT(e, _alias)[] = {alias, '\0'};
+    #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
+
+    ENUM_FIELDS
+
+    #undef XX
+    #undef XX_1
+    #undef XX_2
+#endif
+
     switch (val) {
+#if ENUM_CHAR_REPR
+        #define XX_1(e)        case e:                                         \
+                                   *out = #e;                                  \
+                                   return STRLIT_LEN(#e);
+        #define XX_2(e, alias) case e:                                         \
+                                   *out = CAT(e, _alias);                      \
+                                   return 1;
+#else
         #define XX_1(e)        case e:                                         \
                                    *out = #e;                                  \
                                    return STRLIT_LEN(#e);
         #define XX_2(e, alias) case e:                                         \
                                    *out = #alias;                              \
                                    return STRLIT_LEN(#alias);
+#endif
         #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
         ENUM_FIELDS
@@ -312,6 +341,7 @@ CAT(ENUM_PREFIX_, alias)(enum ENUM_NAME val) {
 }
 
 #if XENUMS_DECLARE_ONLY == 0
+#if ENUM_CHAR_REPR == 0
 static inline bool32
 CAT(ENUM_PREFIX_, parse_name_equals)(char *string, int32 string_len,
                                      char *name, int32 name_len) {
@@ -343,7 +373,9 @@ CAT(ENUM_PREFIX_, parse_name_equals)(char *string, int32 string_len,
     return 1;
 }
 #endif
+#endif
 
+#if ENUM_CHAR_REPR == 0
 #define XENUM_TOKEN_EQUALS_N(token, token_len, name, name_len)             \
     CAT(ENUM_PREFIX_, parse_name_equals)(token, token_len, name, name_len)
 
@@ -358,6 +390,7 @@ CAT(ENUM_PREFIX_, parse_name_equals)(char *string, int32 string_len,
                                  &(name)[STRLIT_LEN(QUOTE(ENUM_PREFIX_))], \
                                  STRLIT_LEN(name)                          \
                                  - STRLIT_LEN(QUOTE(ENUM_PREFIX_)))))
+#endif
 
 #if ENUM_BITFLAGS
   #define XENUM_INVALID_PARSE_RESULT ((enum ENUM_NAME)0)
@@ -365,6 +398,28 @@ CAT(ENUM_PREFIX_, parse_name_equals)(char *string, int32 string_len,
   #define XENUM_INVALID_PARSE_RESULT ((enum ENUM_NAME)CAT(ENUM_PREFIX_, COUNT))
 #endif
 
+#if ENUM_CHAR_REPR
+XENUMS_LINKAGE enum ENUM_NAME
+CAT(ENUM_PREFIX_, parse)(char *string, int32 string_len) {
+    if ((string == NULL) || (string_len != 1)) {
+        return XENUM_INVALID_PARSE_RESULT;
+    }
+
+    switch (string[0]) {
+        #define XX_1(e)
+        #define XX_2(e, alias) case alias: return e;
+        #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
+
+        ENUM_FIELDS
+
+        #undef XX
+        #undef XX_1
+        #undef XX_2
+    default:
+        return XENUM_INVALID_PARSE_RESULT;
+    }
+}
+#else
 XENUMS_LINKAGE enum ENUM_NAME
 CAT(ENUM_PREFIX_, parse)(char *string, int32 string_len) {
     ENUM_UNDERLYING_TYPE result = 0;
@@ -470,10 +525,13 @@ CAT(ENUM_PREFIX_, parse)(char *string, int32 string_len) {
 
     return (enum ENUM_NAME)result;
 }
+#endif
 
+#if ENUM_CHAR_REPR == 0
 #undef XENUM_TOKEN_EQUALS
 #undef XENUM_TOKEN_EQUALS_N
 #undef XENUM_TOKEN_EQUALS_ENUM_NAME
+#endif
 #undef XENUM_INVALID_PARSE_RESULT
 
 #if 0 == TESTING_xenums
@@ -498,6 +556,7 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
 #undef ENUM_PREFIX_
 #undef ENUM_FIELDS
 #undef ENUM_BITFLAGS
+#undef ENUM_CHAR_REPR
 #undef ENUM_UNDERLYING_TYPE
 #undef ENUM_UNDERLYING_TYPE_SPEC
 
@@ -514,6 +573,18 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
     XX(TEST_NORMAL_BANANA, banana)                \
     XX(TEST_NORMAL_CHERRY, cherry)                \
     XX(TEST_NORMAL_PEANUT_BUTTER, peanut butter)
+#include "xenums.c"
+
+#define ENUM_NAME TestCharRepr
+#define ENUM_PREFIX_ TEST_CHAR_REPR_
+#define ENUM_BITFLAGS 0
+#define ENUM_CHAR_REPR 1
+#define ENUM_FIELDS                               \
+    XX(TEST_CHAR_REPR_IDENTIFIER)                 \
+    XX(TEST_CHAR_REPR_PLUS, '+')                  \
+    XX(TEST_CHAR_REPR_MINUS, '-')                 \
+    XX(TEST_CHAR_REPR_PIPE, '|')                  \
+    XX(TEST_CHAR_REPR_CLOSE_PAREN, ')')
 #include "xenums.c"
 
 int
@@ -648,6 +719,28 @@ main(void) {
     s = TEST_NORMAL_str(999);
     ASSERT_EQ(s, "Invalid enum value");
     TEST_NORMAL_str_free(s);
+
+    ASSERT_ZERO(TEST_CHAR_REPR_IDENTIFIER);
+    ASSERT_EQ(TEST_CHAR_REPR_PLUS, 1);
+    ASSERT_EQ(TEST_CHAR_REPR_COUNT, 5);
+
+    s = TEST_CHAR_REPR_alias(TEST_CHAR_REPR_PLUS);
+    ASSERT_EQ(s, "+");
+    TEST_CHAR_REPR_alias_free(s);
+
+    s = TEST_CHAR_REPR_alias(TEST_CHAR_REPR_IDENTIFIER);
+    ASSERT_EQ(s, "TEST_CHAR_REPR_IDENTIFIER");
+    TEST_CHAR_REPR_alias_free(s);
+
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT("+")) == TEST_CHAR_REPR_PLUS);
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT("-")) == TEST_CHAR_REPR_MINUS);
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT("|")) == TEST_CHAR_REPR_PIPE);
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT(")"))
+           == TEST_CHAR_REPR_CLOSE_PAREN);
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT("TEST_CHAR_REPR_PLUS"))
+           == TEST_CHAR_REPR_COUNT);
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT("")) == TEST_CHAR_REPR_COUNT);
+    ASSERT(TEST_CHAR_REPR_parse(STRLIT(" + ")) == TEST_CHAR_REPR_COUNT);
 
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
