@@ -326,7 +326,7 @@ StrFlex *strflex_list_at(StrFlexList *, int32);
 // -EINVAL for invalid input, -ENOSPC when capacity is insufficient, and
 // -ERANGE when the requested precision is unsupported. Fixed/scientific
 // double precision is capped at DBL_MANT_DIG - DBL_MIN_EXP.
-//
+
 // This layer exposes shortest round-trip, fixed precision, and scientific
 // precision formatting. It intentionally does not expose a %g/general format
 // helper: exact %g behavior needs a separate policy layer to choose between
