@@ -490,6 +490,8 @@ In general, avoid `strcmp()`, use the alternatives below instead:
 - For strings that we know the length of the one (it might be null terminated
   but not necessarly), and the other is a literal:
   * use `STREQUAL(s1, s1_len, "literal")`
+    + Note: `STREQUAL` already uses `STRLIT_LEN("literal")` internally to
+      simplify the interface. Pass "literal" directly.
 - For strings that we know the length of both (they might be null terminated,
   but not necessarly):
   * use `STREQUAL(s1, s1_len, s2, s2_len)`
