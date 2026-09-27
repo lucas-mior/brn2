@@ -252,10 +252,6 @@ strflex_list_printf(StrFlexList *list, char *fmt, ...) {
         error("Error formatting \"%s\".", fmt);
         fatal(EXIT_FAILURE);
     }
-    if (len > estimate) {
-        error("Error: Format estimate was too small for \"%s\".", fmt);
-        fatal(EXIT_FAILURE);
-    }
 
     string->len = len;
     ARRAY_PUSH(list->items, string);
