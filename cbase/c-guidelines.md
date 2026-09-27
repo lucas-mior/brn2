@@ -467,8 +467,7 @@ but NEVER create helper like those.
         Arena *arena;
     } StructOfArrays;
     ```
-  * This representation can also be composed in parallel for strings inside a
-    struct type:
+  * This representation can also be used for strings inside a struct type:
     ```c
     typedef struct MyStructType {
         char *name;
