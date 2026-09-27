@@ -797,17 +797,6 @@ typedef struct FormatIntegerValue {
     bool negative;
 } FormatIntegerValue;
 
-static uint64
-fmt_signed_magnitude(int64 value, bool *negative) {
-    if (value < 0) {
-        *negative = true;
-        return (uint64)(-(value + 1)) + 1;
-    }
-
-    *negative = false;
-    return (uint64)value;
-}
-
 static FormatIntegerValue
 fmt_read_signed_integer(FormatSpec *spec, FormatArgs *args) {
     FormatIntegerValue value;
@@ -835,7 +824,13 @@ fmt_read_signed_integer(FormatSpec *spec, FormatArgs *args) {
         signed_value = va_arg(args->args, int32);
     }
 
-    value.magnitude = fmt_signed_magnitude(signed_value, &value.negative);
+    if (signed_value < 0) {
+        value.negative = true;
+        value.magnitude = (uint64)(-(signed_value + 1)) + 1;
+    } else {
+        value.negative = false;
+        value.magnitude = (uint64)signed_value;
+    }
     return value;
 }
 
