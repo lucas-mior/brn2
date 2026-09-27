@@ -4787,7 +4787,7 @@ test_fmt_char_string_outputs(void) {
     memset64(buffer, 0x7f, SIZEOF(buffer));
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                 "%.*s", 1, (char *)NULL),
-                                -EINVAL);
+              -EINVAL);
     ASSERT_EQ(buffer[0], '\0');
     ASSERT_EQ(buffer[1], (char)0x7f);
 
@@ -5261,16 +5261,16 @@ test_fmt_printf_ldouble_outputs(void) {
 
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                 "%.*Lf", -1, (ldouble)1.25),
-                                8);
+              8);
     ASSERT_EQ(buffer, "1.250000");
 
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                 "%.*Lg", -1, (ldouble)1.25),
-                                4);
+              4);
     ASSERT_EQ(buffer, "1.25");
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                 "%.*La", -1, (ldouble)1.5),
-                                8);
+              8);
     ASSERT_EQ(buffer, "0x1.8p+0");
 
     if (fmt_test_ldouble_supported()) {
@@ -5303,15 +5303,15 @@ test_fmt_printf_ldouble_outputs(void) {
         ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lf",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
                                     1.0L),
-                                    -ERANGE);
+                  -ERANGE);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Le",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
                                     1.0L),
-                                    -ERANGE);
+                  -ERANGE);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lg",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
                                     1.0L),
-                                    -ERANGE);
+                  -ERANGE);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0,
                                     "%.*La",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
