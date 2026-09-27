@@ -799,8 +799,6 @@ typedef struct FormatIntegerValue {
 
 static uint64
 fmt_signed_magnitude(int64 value, bool *negative) {
-    ASSERT(negative != NULL);
-
     if (value < 0) {
         *negative = true;
         return (uint64)(-(value + 1)) + 1;
