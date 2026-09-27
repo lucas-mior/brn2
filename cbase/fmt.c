@@ -4998,17 +4998,17 @@ test_fmt_integer_outputs(void) {
     test_fmt_integer_cap("", "%.0d", 0);
     test_fmt_integer_cap("     ", "%5.0d", 0);
 
-    test_fmt_integer_cap("012", "%#o", (uint32)10);
-    test_fmt_integer_cap("0", "%#.0o", (uint32)0);
-    test_fmt_integer_cap("    0", "%#5.0o", (uint32)0);
-    test_fmt_integer_cap("012", "%#.3o", (uint32)10);
-    test_fmt_integer_cap("00012", "%#.5o", (uint32)10);
-    test_fmt_integer_cap("0x2a", "%#x", (uint32)42);
-    test_fmt_integer_cap("0X2A", "%#X", (uint32)42);
-    test_fmt_integer_cap("0b101", "%#b", (uint32)5);
-    test_fmt_integer_cap("0B101", "%#B", (uint32)5);
-    test_fmt_integer_cap(" 0x0a", "%#5.2x", (uint32)10);
-    test_fmt_integer_cap("00000012", "%#08o", (uint32)10);
+    test_fmt_integer_cap("012",      "%#o",    (uint32)10);
+    test_fmt_integer_cap("0",        "%#.0o",  (uint32)0);
+    test_fmt_integer_cap("    0",    "%#5.0o", (uint32)0);
+    test_fmt_integer_cap("012",      "%#.3o",  (uint32)10);
+    test_fmt_integer_cap("00012",    "%#.5o",  (uint32)10);
+    test_fmt_integer_cap("0x2a",     "%#x",    (uint32)42);
+    test_fmt_integer_cap("0X2A",     "%#X",    (uint32)42);
+    test_fmt_integer_cap("0b101",    "%#b",    (uint32)5);
+    test_fmt_integer_cap("0B101",    "%#B",    (uint32)5);
+    test_fmt_integer_cap(" 0x0a",    "%#5.2x", (uint32)10);
+    test_fmt_integer_cap("00000012", "%#08o",  (uint32)10);
 
     test_fmt_integer_cap("42    ",   "%*d",  -6, 42);
     test_fmt_integer_cap("00042",    "%0*d",  5, 42);
