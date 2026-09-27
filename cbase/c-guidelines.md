@@ -409,10 +409,8 @@ That means to also avoid calling `strlen32`:
   // good
   static void
   function(int32 x, int32 y) {
-      int32 n;
       char buffer[256];
-
-      n = SNPRINTF(buffer, "%dx%d", x, y);
+      int32 n = SNPRINTF(buffer, "%dx%d", x, y);
       return;
   }
   ```
