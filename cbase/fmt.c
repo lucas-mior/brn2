@@ -5408,9 +5408,9 @@ test_fmt_planned_plan(void) {
     len = fmt_test_planned_sprintf(&plan, buffer, SIZEOF(buffer), 0, 1, 1.26);
     ASSERT_EQ(len, 3);
     ASSERT_EQ(buffer, "1.3");
-    ASSERT_EQ(fmt_test_planned_sprintf(
-                  &plan, buffer, SIZEOF(buffer), 0,
-                  FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1, 1.0),
+    ASSERT_EQ(fmt_test_planned_sprintf(&plan, buffer, SIZEOF(buffer), 0,
+                                       FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1,
+                                       1.0),
               -ERANGE);
 
     count = -1;
