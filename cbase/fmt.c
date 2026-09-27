@@ -134,17 +134,10 @@ fmt_digit_value(char byte) {
 
 static int32
 fmt_parse_uint(char **cursor, int32 *value) {
-    char *scan;
-    int32 result;
-    bool found_digit;
+    char *scan = *cursor;
+    int32 result = 0;
+    bool found_digit = false;
 
-    ASSERT(cursor != NULL);
-    ASSERT(*cursor != NULL);
-    ASSERT(value != NULL);
-
-    scan = *cursor;
-    result = 0;
-    found_digit = false;
     while (fmt_is_digit(*scan)) {
         int32 digit = fmt_digit_value(*scan);
 
