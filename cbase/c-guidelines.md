@@ -396,22 +396,22 @@ That means to also avoid calling `strlen32`:
   null byte). No need to call `strlen32` on the buffer:
   ```c
   // bad
-  static void
+  static int32
   function(int32 x, int32 y) {
       int32 n;
       char buffer[256];
 
       SNPRINTF(buffer, "%dx%d", x, y);
       n = strlen32(buffer);
-      return;
+      return n;
   }
 
   // good
-  static void
+  static int32
   function(int32 x, int32 y) {
       char buffer[256];
       int32 n = SNPRINTF(buffer, "%dx%d", x, y);
-      return;
+      return n;
   }
   ```
 
