@@ -5964,8 +5964,7 @@ test_fmt_float64_round_trip(double value) {
     end = NULL;
     parsed = strtod(buffer, &end);
     ASSERT(end == buffer + len);
-    ASSERT_EQ(test_fmt_float64_bits(parsed),
-                     test_fmt_float64_bits(value));
+    ASSERT_EQ(test_fmt_float64_bits(parsed), test_fmt_float64_bits(value));
 
     return;
 }
