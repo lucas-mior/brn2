@@ -5023,15 +5023,15 @@ test_fmt_integer_outputs(void) {
     test_fmt_integer_cap("-1234",                "%hd",  -1234);
     test_fmt_integer_cap("65535",                "%hu",  65535);
     test_fmt_integer_cap("-9223372036854775808", "%lld", INT64_MIN);
-    test_fmt_integer_cap("18446744073709551615", "%llu", (uint64)UINT64_MAX);
+    test_fmt_integer_cap("18446744073709551615", "%llu", UINT64_MAX);
 
     test_fmt_integer_cap("-128",                 "%w8d",  -128);
     test_fmt_integer_cap("255",                  "%w8u",  255);
     test_fmt_integer_cap("65535",                "%w16u", 65535);
     test_fmt_integer_cap("-2147483648",          "%w32d", INT32_MIN);
-    test_fmt_integer_cap("4294967295",           "%w32u", (uint32)UINT32_MAX);
-    test_fmt_integer_cap("-9223372036854775808", "%w64d", (int64)INT64_MIN);
-    test_fmt_integer_cap("18446744073709551615", "%w64u", (uint64)UINT64_MAX);
+    test_fmt_integer_cap("4294967295",           "%w32u", UINT32_MAX);
+    test_fmt_integer_cap("-9223372036854775808", "%w64d", INT64_MIN);
+    test_fmt_integer_cap("18446744073709551615", "%w64u", UINT64_MAX);
 
     return;
 }
