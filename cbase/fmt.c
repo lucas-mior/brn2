@@ -5010,10 +5010,10 @@ test_fmt_integer_outputs(void) {
     test_fmt_integer_cap(" 0x0a", "%#5.2x", (uint32)10);
     test_fmt_integer_cap("00000012", "%#08o", (uint32)10);
 
-    test_fmt_integer_cap("42    ", "%*d", -6, 42);
-    test_fmt_integer_cap("00042", "%0*d", 5, 42);
-    test_fmt_integer_cap("42", "%.*d", -1, 42);
-    test_fmt_integer_cap("00042", "%.*d", 5, 42);
+    test_fmt_integer_cap("42    ",   "%*d",  -6, 42);
+    test_fmt_integer_cap("00042",    "%0*d",  5, 42);
+    test_fmt_integer_cap("42",       "%.*d", -1, 42);
+    test_fmt_integer_cap("00042",    "%.*d",  5, 42);
     test_fmt_integer_cap("   00042", "%*.*d", 8, 5, 42);
 
     test_fmt_integer_cap("-1 2a 3", "%d %x %u", -1, (uint32)0x2a, (uint32)3);
