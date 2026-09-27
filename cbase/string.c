@@ -211,6 +211,7 @@ strflex_list_push(StrFlexList *list, char *value, int32 value_len) {
     string->len = value_len;
     memcpy64(string->data, value, value_len);
     string->data[value_len] = '\0';
+
     ARRAY_PUSH(list->items, string);
     return string;
 }
