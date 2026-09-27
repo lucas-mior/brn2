@@ -435,11 +435,11 @@ but NEVER create helper like those.
   ```c
   function(string.data, string.len);
   ```
-- `StrFlex`: use for groups of strings that never grow within a specific
-  lifetime of the application. Use StrFlexList or use StrFlex as the last member
-  of a struct definition. They can be useful for low memory usage and good cache
-  locality. For passing it as read-only data for functions, don't pass
-  it directly, use:
+- `StrFlex`: owned compact type that uses flexible array member. Use for groups
+  of strings that never grow within a specific lifetime of the application. Use
+  StrFlexList or use StrFlex as the last member of a struct definition. They
+  can be useful for low memory usage and good cache locality. For passing it as
+  read-only data for functions, don't pass it directly, use:
   ```c
   function(string.data, string.len);
   ```
