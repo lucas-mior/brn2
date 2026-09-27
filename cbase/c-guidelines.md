@@ -443,6 +443,7 @@ but NEVER create helper like those.
   ```c
   function(string.data, string.len);
   ```
+  * To create a `StrFlex *` from literal: use `SFLIT("literal")`.
 - `char *string` + `int32 string_len`:
   * For read-only strings: this is most functions API:
     They do not change strings, only read them.
