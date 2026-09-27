@@ -68,9 +68,6 @@
   #if !defined(ENUM_BITFLAGS)
     #error "ENUM_BITFLAGS is not defined"
   #endif
-  #if ENUM_CHAR_REPR && ENUM_BITFLAGS
-    #error "ENUM_CHAR_REPR is only supported for non-bitflag enums"
-  #endif
 #endif
 
 #if !defined(XENUMS_DECLARE_ONLY)
@@ -91,8 +88,12 @@
 
 #if ENUM_BITFLAGS
 enum CAT(ENUM_NAME, _BitIndices) ENUM_UNDERLYING_TYPE_SPEC {
-    #define XX_1(e)    CAT(e, _BIT_INDEX),
+    #define XX_1(e) CAT(e, _BIT_INDEX),
+  #if ENUM_CHAR_REPR
+    #define XX_2(e, v) CAT(e, _BIT_INDEX),
+  #else
     #define XX_2(e, v)
+  #endif
     #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
     ENUM_FIELDS
@@ -115,11 +116,12 @@ _Static_assert((ENUM_UNDERLYING_TYPE)-1 > 0,
 #pragma clang diagnostic ignored "-Wduplicate-enum"
 #endif
 
-// For bit flag enums, the optional second X macro parameter is a value.
-// Only use compositions of previous enum values there, not numeric values.
+// For bit flag enums, the optional second X macro parameter is a value unless
+// ENUM_CHAR_REPR is 1. Only use compositions of previous enum values there, not
+// numeric values.
 // For non-bit flag enums, the optional second X macro parameter is a parse
 // alias token. Custom numeric values are not supported for non-bit flag enums.
-// If ENUM_CHAR_REPR is 1, non-bit flag enum aliases are char literals instead.
+// If ENUM_CHAR_REPR is 1, enum aliases are char literals instead.
 //
 // Passing multiple ENUM names for the same value will break compilation.
 enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
@@ -130,6 +132,9 @@ enum ENUM_NAME ENUM_UNDERLYING_TYPE_SPEC {
 #if ENUM_BITFLAGS == 0
     #define XX_1(e)        e,
     #define XX_2(e, alias) e,
+#elif ENUM_CHAR_REPR
+    #define XX_1(e)        e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_INDEX),
+    #define XX_2(e, alias) e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_INDEX),
 #else
     #define XX_1(e)        e = (ENUM_UNDERLYING_TYPE)1 << CAT(e, _BIT_INDEX),
     #define XX_2(e, v)     e = v,
@@ -327,6 +332,44 @@ CAT(ENUM_PREFIX_, alias_len)(enum ENUM_NAME val, char **out) {
             *out = "Invalid enum value";
             return STRLIT_LEN("Invalid enum value");
     }
+#elif ENUM_CHAR_REPR
+    char *buffer = NULL;
+    int32 buffer_len = 0;
+    int32 buffer_cap = 0;
+
+    if (val == 0) {
+        *out = xstrndup(STRLIT(""));
+        return 0;
+    }
+
+    #define XX_BITCHECK(e, alias)                                             \
+        if (val && ((val & e) == e)) {                                         \
+            buffer = realloc2(buffer, buffer_cap, buffer_len + 2,              \
+                              SIZEOF(*buffer));                               \
+            buffer_cap = buffer_len + 2;                                       \
+            buffer[buffer_len] = alias;                                        \
+            buffer_len += 1;                                                   \
+            val &= (ENUM_UNDERLYING_TYPE)~e;                                   \
+        }
+    #define XX_1(e)
+    #define XX_2(e, alias) XX_BITCHECK(e, alias)
+    #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
+
+    ENUM_FIELDS
+
+    #undef XX
+    #undef XX_1
+    #undef XX_2
+    #undef XX_BITCHECK
+
+    if (val) {
+        error2("Error: bit flags enum contains invalid bit set.\n");
+        TRAP();
+    }
+
+    buffer[buffer_len] = '\0';
+    *out = buffer;
+    return buffer_len;
 #else
     return CAT(ENUM_PREFIX_, str_len)(val, out);
 #endif
@@ -401,6 +444,40 @@ CAT(ENUM_PREFIX_, parse_name_equals)(char *string, int32 string_len,
 #if ENUM_CHAR_REPR
 XENUMS_LINKAGE enum ENUM_NAME
 CAT(ENUM_PREFIX_, parse)(char *string, int32 string_len) {
+#if ENUM_BITFLAGS
+    ENUM_UNDERLYING_TYPE result = 0;
+    char *end;
+
+    if ((string == NULL) || (string_len <= 0)) {
+        return XENUM_INVALID_PARSE_RESULT;
+    }
+
+    end = string + string_len;
+    for (char *p = string; p < end; p += 1) {
+        if ((*p == ' ') || (*p == '\t') || (*p == '\n') || (*p == '\r')
+            || (*p == '|') || (*p == '(') || (*p == ')')) {
+            continue;
+        }
+
+        switch (*p) {
+            #define XX_1(e)
+            #define XX_2(e, alias) case alias:                               \
+                                       result |= (ENUM_UNDERLYING_TYPE)e;      \
+                                       break;
+            #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
+
+            ENUM_FIELDS
+
+            #undef XX
+            #undef XX_1
+            #undef XX_2
+        default:
+            return XENUM_INVALID_PARSE_RESULT;
+        }
+    }
+
+    return (enum ENUM_NAME)result;
+#else
     if ((string == NULL) || (string_len != 1)) {
         return XENUM_INVALID_PARSE_RESULT;
     }
@@ -418,6 +495,7 @@ CAT(ENUM_PREFIX_, parse)(char *string, int32 string_len) {
     default:
         return XENUM_INVALID_PARSE_RESULT;
     }
+#endif
 }
 #else
 XENUMS_LINKAGE enum ENUM_NAME
@@ -587,6 +665,16 @@ CAT(ENUM_PREFIX_, functions_sink)(void) {
     XX(TEST_CHAR_REPR_CLOSE_PAREN, ')')
 #include "xenums.c"
 
+#define ENUM_NAME TestCharFlags
+#define ENUM_PREFIX_ TEST_CHAR_FLAGS_
+#define ENUM_BITFLAGS 1
+#define ENUM_CHAR_REPR 1
+#define ENUM_FIELDS                               \
+    XX(TEST_CHAR_FLAGS_READ, 'r')                 \
+    XX(TEST_CHAR_FLAGS_WRITE, 'w')                \
+    XX(TEST_CHAR_FLAGS_EXEC, 'x')
+#include "xenums.c"
+
 int
 main(void) {
     char *s;
@@ -741,6 +829,38 @@ main(void) {
            == TEST_CHAR_REPR_COUNT);
     ASSERT(TEST_CHAR_REPR_parse(STRLIT("")) == TEST_CHAR_REPR_COUNT);
     ASSERT(TEST_CHAR_REPR_parse(STRLIT(" + ")) == TEST_CHAR_REPR_COUNT);
+
+    ASSERT_ZERO(TEST_CHAR_FLAGS_READ_BIT_INDEX);
+    ASSERT_EQ(TEST_CHAR_FLAGS_BIT_COUNT, 3);
+    ASSERT_EQ(TEST_CHAR_FLAGS_READ, 1 << 0);
+    ASSERT_EQ(TEST_CHAR_FLAGS_WRITE, 1 << 1);
+    ASSERT_EQ(TEST_CHAR_FLAGS_EXEC, 1 << 2);
+
+    s = TEST_CHAR_FLAGS_alias(TEST_CHAR_FLAGS_READ);
+    ASSERT_EQ(s, "r");
+    TEST_CHAR_FLAGS_alias_free(s);
+
+    s = TEST_CHAR_FLAGS_alias(TEST_CHAR_FLAGS_READ | TEST_CHAR_FLAGS_EXEC);
+    ASSERT_EQ(s, "rx");
+    TEST_CHAR_FLAGS_alias_free(s);
+
+    s = TEST_CHAR_FLAGS_alias(TEST_CHAR_FLAGS_NONE);
+    ASSERT_EQ(s, "");
+    TEST_CHAR_FLAGS_alias_free(s);
+
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT("r")) == TEST_CHAR_FLAGS_READ);
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT("rw"))
+           == (TEST_CHAR_FLAGS_READ | TEST_CHAR_FLAGS_WRITE));
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT("r|x"))
+           == (TEST_CHAR_FLAGS_READ | TEST_CHAR_FLAGS_EXEC));
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT("( r x )"))
+           == (TEST_CHAR_FLAGS_READ | TEST_CHAR_FLAGS_EXEC));
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT(""))
+           == TEST_CHAR_FLAGS_NONE);
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT("TEST_CHAR_FLAGS_READ"))
+           == TEST_CHAR_FLAGS_NONE);
+    ASSERT(TEST_CHAR_FLAGS_parse(STRLIT("z"))
+           == TEST_CHAR_FLAGS_NONE);
 
     printf("xenums.c: All tests passed successfully.\n");
     return EXIT_SUCCESS;
