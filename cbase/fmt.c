@@ -4905,24 +4905,24 @@ test_fmt_printf_float_outputs(void) {
     neg_nan = fmt_test_negative_nan();
     true_min = fmt_test_double_from_bits(UINT64_C(1));
 
-    test_fmt_bytes_cap("1.250000", 8, "%f", 1.25);
-    test_fmt_bytes_cap("1.25", 4, "%.2f", 1.25);
-    test_fmt_bytes_cap("1", 1, "%.0f", 1.25);
-    test_fmt_bytes_cap("1.", 2, "%#.0f", 1.25);
-    test_fmt_bytes_cap("  1.25", 6, "%6.2f", 1.25);
-    test_fmt_bytes_cap("1.25  ", 6, "%-6.2f", 1.25);
-    test_fmt_bytes_cap("0000001.25", 10, "%010.2f", 1.25);
-    test_fmt_bytes_cap("+000001.25", 10, "%+010.2f", 1.25);
-    test_fmt_bytes_cap("-000001.25", 10, "%010.2f", -1.25);
-    test_fmt_bytes_cap(" 1.25", 5, "% .2f", 1.25);
-    test_fmt_bytes_cap("-0.000", 6, "%.3f", -0.0);
+    test_fmt_bytes_cap(STRLIT("1.250000"),   "%f",       1.25);
+    test_fmt_bytes_cap(STRLIT("1.25"),       "%.2f",     1.25);
+    test_fmt_bytes_cap(STRLIT("1"),          "%.0f",     1.25);
+    test_fmt_bytes_cap(STRLIT("1."),         "%#.0f",    1.25);
+    test_fmt_bytes_cap(STRLIT("  1.25"),     "%6.2f",    1.25);
+    test_fmt_bytes_cap(STRLIT("1.25  "),     "%-6.2f",   1.25);
+    test_fmt_bytes_cap(STRLIT("0000001.25"), "%010.2f",  1.25);
+    test_fmt_bytes_cap(STRLIT("+000001.25"), "%+010.2f", 1.25);
+    test_fmt_bytes_cap(STRLIT("-000001.25"), "%010.2f", -1.25);
+    test_fmt_bytes_cap(STRLIT(" 1.25"),      "% .2f",    1.25);
+    test_fmt_bytes_cap(STRLIT("-0.000"),     "%.3f",    -0.0);
 
-    test_fmt_bytes_cap("1.250000e+00", 12, "%e", 1.25);
-    test_fmt_bytes_cap("1.25e+00", 8, "%.2e", 1.25);
-    test_fmt_bytes_cap("1e+00", 5, "%.0e", 1.25);
-    test_fmt_bytes_cap("1.e+00", 6, "%#.0e", 1.25);
-    test_fmt_bytes_cap("1.25E+00", 8, "%.2E", 1.25);
-    test_fmt_bytes_cap("+001.25e+00", 11, "%+011.2e", 1.25);
+    test_fmt_bytes_cap(STRLIT("1.250000e+00"), "%e", 1.25);
+    test_fmt_bytes_cap(STRLIT("1.25e+00"), "%.2e", 1.25);
+    test_fmt_bytes_cap(STRLIT("1e+00"), "%.0e", 1.25);
+    test_fmt_bytes_cap(STRLIT("1.e+00"), "%#.0e", 1.25);
+    test_fmt_bytes_cap(STRLIT("1.25E+00"), "%.2E", 1.25);
+    test_fmt_bytes_cap(STRLIT("+001.25e+00"), "%+011.2e", 1.25);
 
     test_fmt_bytes_cap(STRLIT("inf"),      "%f",   HUGE_VAL);
     test_fmt_bytes_cap(STRLIT("-inf"),     "%f",   -HUGE_VAL);
