@@ -5091,6 +5091,7 @@ test_fmt_ldouble_parts(ldouble value, bool negative,
     ASSERT_EQ(parts.precision_bits, LDBL_MANT_DIG);
     ASSERT_EQ(fmt_binary_float_significand_bit_len(&parts), bit_len);
     ASSERT_EQ(parts.binary_exponent, binary_exponent);
+
     return;
 }
 
