@@ -457,8 +457,8 @@ CAT(ENUM_PREFIX_, parse_chars)(char **cursor) {
     while (true) {
         switch (**cursor) {
             #define XX_1(e)
-            #define XX_2(e, alias) case alias:                               \
-                                       result |= (ENUM_UNDERLYING_TYPE)e;      \
+            #define XX_2(e, alias) case alias:                            \
+                                       result |= (ENUM_UNDERLYING_TYPE)e; \
                                        break;
             #define XX(...) SELECT_ON_NUM_ARGS(XX_, __VA_ARGS__)
 
