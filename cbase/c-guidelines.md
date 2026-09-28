@@ -14,8 +14,10 @@ For formatting-only style rules, see `c-format.md`.
 
 ## Standard
 Use ISO C11. gcc/clang extensions can be used for avoiding their own warnings
-when implementing macro tricks (for example, see `minmax.c`). Code must be
-compilable by tcc without modifications.
+when implementing macro tricks (for example, see `minmax.c`). Some gcc/clang
+extensions are also used for optimizations (see `INLINE`/`UNREACHABLE`), but
+they are always used behind macros, so that there is a portable version for
+other compilers. Code must be compilable by tcc without modifications.
 
 ## Files and code high level organization
 Every project must have a common-denominator file (which acts analogous to
