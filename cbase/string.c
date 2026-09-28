@@ -407,6 +407,7 @@ str_reserve(String *str, int64 extra) {
     if (UNLIKELY(extra <= 0)) {
         return;
     }
+    ASSERT(str != NULL);
 
     if (UNLIKELY(extra >= MAXOF(str->cap))) {
         error("String only supports strings shorter than 2GB.\n");
