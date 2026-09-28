@@ -272,8 +272,6 @@ default:
       do_only_one_thing();
   ```
 
-## Parenthesis
-
 ## If expressions
 when an operand of `&&` or `||` is itself a binary expression,
 parenthesize that operand:
@@ -413,15 +411,14 @@ the same line of the object it refers to:
 ```c
 // bad
 static void
-function_with_long_name_and_multiple_arguments_x(MyStruct *handle, char *string,
-                                                 int32 string_len);
+function_with_long_name_and_multiple_arguments_x(MyStruct *, char *,
+                                                 int32);
 function_with_long_name_and_multiple_arguments_x(handle, string_name,
                                                  string_name_len);
 
 // good
 static void
-function_with_long_name_and_multiple_arguments(MyStruct *handle,
-                                               char *string, int32 string_len);
+function_with_long_name_and_multiple_arguments(MyStruct *, char *, int32);
 function_with_long_name_and_multiple_arguments(handle,
                                                string_name, string_name_len);
 

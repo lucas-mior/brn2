@@ -38,15 +38,17 @@ serve different purposes:
   * Code that is scared of enums being in an invalid state can put some
     assertions for piece of mind. This is very very rarely justifiable.
     ```c
-    ASSERT_BETWEEN(enum_val, 0, ENUM_COUNT - 1);
+    ASSERT_BETWEEN(enum_val, 1, ENUM_COUNT - 1);
     ```
 - `_COUNT` is the exclusive upper bound and can be named explicitly in a
   `switch`, which keeps exhaustive-enum warnings useful.
 - valid values are strictly greater than zero and strictly less than `_COUNT`.
-  * In practice, `_COUNT` will never happen. Never check for it. When
-    validating enum values, or dispatching code based on enum value:
+  * In practice, `_COUNT` will almost never happen. The only case were this
+    could happen is for external API's that receive enum values. Checking for
+    `_COUNT` in `switch` is also valid in internal code, just to avoid compiler
+    warnings.
     ```c
-    // bad (_COUNT *never* happens, no need to check fo it)
+    // use only for validating/disptaching at external API boundary.
     static void
     function(enum EnumType enum_val)  {
         if ((enum_val <= 0) || (enum_val >= ENUM_TYPE_COUNT)) {
@@ -84,8 +86,8 @@ serve different purposes:
     }
 
     // good (switch case for dispatching auto handles zero and _COUNT)
-    // (note that we only put _COUNT
-    //  to silence "missing enum values" compiler  warning)
+    // note that we put `case _COUNT` to silence "missing enum values" compiler
+    // warning and to handle invalid input in the case of external APIs.
     static void
     function(enum EnumType enum_val)  {
         switch (enum_val) {
