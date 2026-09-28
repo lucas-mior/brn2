@@ -571,12 +571,8 @@ void xdup2(int fd1, int fd2);
 void xkill(pid_t pid, int signum);
 void xpipe(int array[2]);
 void xpthread_cond_destroy(pthread_cond_t *);
-void xpthread_create(
-    pthread_t *thread,
-    pthread_attr_t *attr,
-    void *(*function)(void *arg),
-    void *arg
-);
+void xpthread_create(pthread_t *thread, pthread_attr_t *attr,
+                     void *(*function)(void *arg), void *arg);
 void xpthread_join(pthread_t *thread, void **thread_return);
 void xpthread_mutex_destroy(pthread_mutex_t *);
 void xpthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *attr);
