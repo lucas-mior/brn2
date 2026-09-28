@@ -257,6 +257,20 @@ char *str_opt_cstr(String *);
 char *signal_name(int32 signum);
 void send_signal(char *executable, int32 signal_number);
 
+bool32 is_ascii(uint8 c);
+bool32 is_cntrl(uint8 c);
+bool32 is_blank(uint8 c);
+bool32 is_space(uint8 c);
+bool32 is_digit(uint8 c);
+bool32 is_upper(uint8 c);
+bool32 is_lower(uint8 c);
+bool32 is_alpha(uint8 c);
+bool32 is_alnum(uint8 c);
+bool32 is_xdigit(uint8 c);
+bool32 is_print(uint8 c);
+bool32 is_graph(uint8 c);
+bool32 is_punct(uint8 c);
+
 // Caller-owned parsed-format storage. Treat all fields as implementation
 // details. Normal format strings include at most 255 bytes plus the null
 // terminator. Cached plans keep a pointer to at most 127 format bytes plus the
