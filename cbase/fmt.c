@@ -4825,52 +4825,54 @@ test_fmt_pointer_count_outputs(void) {
     ASSERT_EQ(buffer[2], (char)0x7f);
 
     count8 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%hhn", &count8), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%hhn", &count8),
+              3);
     ASSERT_EQ(count8, 3);
 
     count16 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%hn", &count16), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%hn", &count16),
+              3);
     ASSERT_EQ(count16, 3);
 
     count64 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%lln", &count64), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%lln", &count64),
+              3);
     ASSERT_EQ(count64, 3);
 
     count8 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%w8n", &count8), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w8n", &count8),
+              3);
     ASSERT_EQ(count8, 3);
 
     count16 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%w16n", &count16), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w16n", &count16),
+              3);
     ASSERT_EQ(count16, 3);
 
     count32 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%w32n", &count32), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w32n", &count32),
+              3);
     ASSERT_EQ(count32, 3);
 
     count64 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%w64n", &count64), 3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w64n", &count64),
+              3);
     ASSERT_EQ(count64, 3);
 
     count8 = -7;
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "%128d%hhn", 0, &count8), -EOVERFLOW);
+                                "%128d%hhn", 0, &count8),
+              -EOVERFLOW);
     ASSERT_EQ(count8, -7);
 
     count16 = -7;
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "%32768d%hn", 0, &count16), -EOVERFLOW);
+                                "%32768d%hn", 0, &count16),
+              -EOVERFLOW);
     ASSERT_EQ(count16, -7);
 
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "abc%n", (int32 *)NULL), -EINVAL);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%n", (int32 *)NULL),
+              -EINVAL);
 
     return;
 }
@@ -4986,11 +4988,9 @@ test_fmt_printf_general_outputs(void) {
     test_fmt_bytes_cap(STRLIT("nan"), "%g", fmt_test_positive_nan());
     test_fmt_bytes_cap(STRLIT("-nan"), "%g", fmt_test_negative_nan());
 
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                   "%.*g", -1, 1.25), 4);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*g", -1, 1.25), 4);
     ASSERT_EQ(buffer, "1.25");
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
-                                "%.*g", 0, 123.0), 5);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*g", 0, 123.0), 5);
     ASSERT_EQ(buffer, "1e+02");
     ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%#.*g",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION, 1.0),
