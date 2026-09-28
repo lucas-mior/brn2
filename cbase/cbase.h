@@ -143,19 +143,6 @@ int32 utf8_suffix_width_position(char *string, int32 string_len,
                                  int32 max_width);
 int32 utf8_validate(uint32 *u, int32 i);
 int32 utf8_width(char *string, int32 string_len);
-bool32 is_alnum(uint8 c);
-bool32 is_alpha(uint8 c);
-bool32 is_ascii(uint8 c);
-bool32 is_blank(uint8 c);
-bool32 is_cntrl(uint8 c);
-bool32 is_digit(uint8 c);
-bool32 is_graph(uint8 c);
-bool32 is_lower(uint8 c);
-bool32 is_print(uint8 c);
-bool32 is_punct(uint8 c);
-bool32 is_space(uint8 c);
-bool32 is_upper(uint8 c);
-bool32 is_xdigit(uint8 c);
 int32 ascii_normalize_lower_snake(char *out, char *string, int32 string_len);
 int32 ascii_normalize_upper_snake(char *out, char *string, int32 string_len);
 int32 ascii_normalize_upper_compact(char *out, char *string,
@@ -311,6 +298,11 @@ typedef struct FmtPlan {
 // bounded by the exact fixed-decimal limit of the argument type; larger
 // explicit precisions return -ERANGE. See cbase/README.md for the exact
 // supported grammar and deliberate differences from libc printf.
+// The runtime NULL-string representation is process configuration. Call this
+// only during single-threaded initialization, before any formatter use. Passing
+// NULL is a programmer error. The selected string is not copied and must remain
+// alive and unmodified for the rest of the process.
+void fmt_set_null_string(char *string);
 int32 fmt_vsnprintf(char *, int64, char *, va_list)           ATTR_PRINTF(3, 0);
 int32 fmt_snprintf(char *, int64, char *, ...)                ATTR_PRINTF(3, 4);
 int32 fmt_vsprintf(char *, int64, char *, va_list)            ATTR_PRINTF(3, 0);
@@ -923,7 +915,6 @@ void throw_away_function();
 #include "assertions.c"
 #include "array.c"
 #include "utf8.c"
-#include "ascii.c"
 #include "ascii_normalization.c"
 #include "util.c"
 #include "strtonum.c"

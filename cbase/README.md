@@ -310,6 +310,20 @@ upper bound for the formatted byte count, excluding the terminating `'\0'`.
 They consume and validate the same format grammar, but `%n` is only checked and
 does not write the count.
 
+A NULL `char *` passed to ordinary `%s` uses `FMT_NULL_STRING`, which defaults
+to `"null"`. Define `FMT_NULL_STRING` to a string literal when compiling the
+cbase implementation to select a different compile-time default. Programs
+linking a prebuilt cbase may instead call `fmt_set_null_string` during
+single-threaded initialization, before any formatter use. Passing NULL is a
+programmer error. The selected string is not copied and must remain alive and
+unmodified for the rest of the process. Calling the setter after formatting has
+begun, or concurrently with formatting, is outside the API contract. Once
+initialization is complete, formatting only reads this process-wide setting.
+
+This initialization rule is also required by estimate-then-format code: changing
+the NULL representation between estimation and output could make a previously
+computed bound too small.
+
 Normal formatter and estimator format strings are limited to 255 bytes plus the
 terminating `\0`. Cached plans use a smaller limit of 127 bytes plus the
 terminating `\0`.
@@ -357,7 +371,10 @@ extension semantics:
 - `%n` stores the logical byte count that would have been produced, not the
   number of bytes physically copied into the destination buffer. It supports the
   same length modifiers as cbase integers.
-- `%s` formats a NULL `char *` as `(null)`.
+- `%s` formats a NULL `char *` using the configured NULL-string
+  representation. The default is `"null"`; an empty string or another
+  nul-terminated string may be configured as described above. Ordinary
+  precision such as `%.Ns` truncates this representation normally.
 - `%.*s` is a cbase byte-span formatter. It consumes an `int32` byte length and
   a `char *`, writes exactly that many bytes, and ignores embedded `'\0'`
   bytes. `NULL` is accepted only when the length is zero.
