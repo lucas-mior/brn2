@@ -306,7 +306,7 @@ util_is_integer(char *string) {
     char c;
 
     while ((c = *string)) {
-        if (!is_digit((uint8)c)) {
+        if (!is_digit(c)) {
             return false;
         }
         string += 1;

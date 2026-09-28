@@ -257,19 +257,19 @@ char *str_opt_cstr(String *);
 char *signal_name(int32 signum);
 void send_signal(char *executable, int32 signal_number);
 
-bool32 is_ascii(uint8 c);
-bool32 is_cntrl(uint8 c);
-bool32 is_blank(uint8 c);
-bool32 is_space(uint8 c);
-bool32 is_digit(uint8 c);
-bool32 is_upper(uint8 c);
-bool32 is_lower(uint8 c);
-bool32 is_alpha(uint8 c);
-bool32 is_alnum(uint8 c);
-bool32 is_xdigit(uint8 c);
-bool32 is_print(uint8 c);
-bool32 is_graph(uint8 c);
-bool32 is_punct(uint8 c);
+bool32 is_ascii(int32 c);
+bool32 is_cntrl(int32 c);
+bool32 is_blank(int32 c);
+bool32 is_space(int32 c);
+bool32 is_digit(int32 c);
+bool32 is_upper(int32 c);
+bool32 is_lower(int32 c);
+bool32 is_alpha(int32 c);
+bool32 is_alnum(int32 c);
+bool32 is_xdigit(int32 c);
+bool32 is_print(int32 c);
+bool32 is_graph(int32 c);
+bool32 is_punct(int32 c);
 
 // Caller-owned parsed-format storage. Treat all fields as implementation
 // details. Normal format strings include at most 255 bytes plus the null
