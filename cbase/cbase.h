@@ -913,6 +913,7 @@ void throw_away_function();
 #include "assertions.c"
 #include "array.c"
 #include "utf8.c"
+#include "ascii.c"
 #include "ascii_normalization.c"
 #include "util.c"
 #include "strtonum.c"
