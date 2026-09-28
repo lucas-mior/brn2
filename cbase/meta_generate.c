@@ -86,7 +86,7 @@ c_identifier(char *value, int32 value_len) {
 
     for (int32 i = 0; i < value_len; i += 1) {
         char c;
-        if (isalnum((uint8)value[i]) || value[i] == '_') {
+        if (is_alnum((uint8)value[i]) || value[i] == '_') {
             c = value[i];
         } else {
             c = '_';
@@ -99,7 +99,7 @@ c_identifier(char *value, int32 value_len) {
 
         if (!out.len) {
             needs_prefix = true;
-        } else if (isdigit((uint8)out.data[0])) {
+        } else if (is_digit((uint8)out.data[0])) {
             needs_prefix = true;
         } else if (out.data[0] == '_') {
             needs_prefix = true;
