@@ -4424,18 +4424,62 @@ str_float64(String *string, double value) {
 }
 
 void
-str_float64_fixed(String *sb, double value, int32 precision) {
+str_float64_fixed(String *str, double value, int32 precision) {
     int32 len;
 
-    str_reserve(sb, FMT_FLOAT_RYU_BUFFER_SIZE);
-    len = fmt_float64_fixed(sb->data + sb->len, sb->cap - sb->len,
+    str_reserve(str, FMT_FLOAT_RYU_BUFFER_SIZE);
+    len = fmt_float64_fixed(str->data + str->len, str->cap - str->len,
                             value, precision);
     if (len < 0) {
         error("Invalid float precision %d.\n", precision);
         fatal(EXIT_FAILURE);
     }
-    sb->len += len;
+    str->len += len;
 
+    return;
+}
+
+void ATTR_PRINTF(1, 2)
+fmt_printf(char *format, ...) {
+    char buffer[4096];
+    char *big_buffer = NULL;
+    char *pbuffer = buffer;
+    int64 capacity = SIZEOF(buffer);
+    va_list args;
+    va_list args_copy;
+    int32 n;
+
+    va_start(args, format);
+    va_copy(args_copy, args);
+    n = fmt_vsnprintf(pbuffer, capacity, format, args);
+    va_end(args);
+
+    if (n < 0) {
+        va_end(args_copy);
+        error2("Error formatting stdout output (n = %d).\n", n);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (n >= capacity) {
+        int32 retry_n;
+
+        capacity = n + 1;
+        big_buffer = malloc2(capacity);
+        pbuffer = big_buffer;
+        retry_n = fmt_vsnprintf(pbuffer, capacity, format, args_copy);
+        va_end(args_copy);
+        if ((retry_n < 0) || (retry_n != n)) {
+            error2("Error formatting stdout output (n = %d).\n", retry_n);
+            fatal(EXIT_FAILURE);
+        }
+        n = retry_n;
+    } else {
+        va_end(args_copy);
+    }
+
+    fflush(stdout);
+    write_all(STDOUT_FILENO, pbuffer, n);
+    free2(big_buffer, capacity);
     return;
 }
 

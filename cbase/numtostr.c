@@ -210,8 +210,8 @@ bytes_pretty(char *buffer, int64 raw) {
 
     suffix = suffixes[i];
     suffix_len = strlen32(suffix);
-    n = fmt_float64_fixed(buffer, 16 - suffix_len, aux_pretty, precision);
-    if ((n < 0) || (n + suffix_len >= 16)) {
+    n = d2fixed_buffered_n(aux_pretty, (uint32)precision, buffer);
+    if (n + suffix_len >= 16) {
         error("Error formatting bytes: %d\n", n);
         fatal(EXIT_FAILURE);
     }

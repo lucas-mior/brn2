@@ -380,6 +380,7 @@ int32 fmt_vsnprintf(char *, int64, char *, va_list)           ATTR_PRINTF(3, 0);
 int32 fmt_snprintf(char *, int64, char *, ...)                ATTR_PRINTF(3, 4);
 int32 fmt_vsprintf(char *, int64, char *, va_list)            ATTR_PRINTF(3, 0);
 int32 fmt_sprintf(char *, int64, char *, ...)                 ATTR_PRINTF(3, 4);
+void fmt_printf(char *, ...)                                  ATTR_PRINTF(1, 2);
 int32 fmt_vsnprintf_estimate(char *, va_list)                 ATTR_PRINTF(1, 0);
 int32 fmt_snprintf_estimate(char *, ...)                      ATTR_PRINTF(1, 2);
 int32 fmt_vsnprintf_estimate_plan(FmtPlan *, char *, va_list) ATTR_PRINTF(2, 0);
@@ -506,8 +507,7 @@ optional_strequal(char *a, int32 a_len, char *b, int32 b_len) {
 
 bool32 striqual(char *s1, char *s2);
 bool32 striqual2(char *a, int32 a_len, char *b, int32 b_len);
-int64 strftime2(char *buffer, int64 size, char *format,
-                struct tm *time_info);
+int32 strftime2(char *buffer, int64 size, char *format, struct tm *time_info);
 void time_localtime(time_t unix_timestamp, struct tm *time_info);
 int strncmp32(char *left, char *right, int64 size);
 void sleep_ms(int64 milliseconds);
