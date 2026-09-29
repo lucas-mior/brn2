@@ -404,19 +404,17 @@ StrFlex *strflex_list_at(StrFlexList *, int32);
 // Float formatting functions return the formatted byte count, excluding the
 // terminating '\0'. Negative return values are errno-style failures:
 // -EINVAL for invalid input, -ENOSPC when capacity is insufficient, and
-// -ERANGE when the requested precision is unsupported. Fixed/scientific
+// -ERANGE when the requested precision is unsupported. Fixed/exp
 // double precision is capped at DBL_MANT_DIG - DBL_MIN_EXP.
 
-// This layer exposes shortest round-trip, fixed precision, and scientific
+// This layer exposes shortest round-trip, fixed precision, and exp
 // precision formatting. It intentionally does not expose a %g/general format
 // helper: exact %g behavior needs a separate policy layer to choose between
-// fixed and scientific output and to handle trailing-zero rules.
+// fixed and exp output and to handle trailing-zero rules.
 int32 fmt_float32_shortest(char *buffer, int64 capacity, float value);
 int32 fmt_float64_shortest(char *buffer, int64 capacity, double value);
-int32 fmt_float64_fixed(char *buffer, int64 capacity, double value,
-                        int32 precision);
-int32 fmt_float64_scientific(char *buffer, int64 capacity, double value,
-                             int32 precision);
+int32 fmt_float64_fixed(char *, int64, double, int32);
+int32 fmt_float64_exp(char *, int64, double, int32);
 
 int32 string_from_strings(char *buffer, int32 size, char *separator,
                           char **array, int32 length);

@@ -151,8 +151,7 @@ fmt_float64_fixed(char *buffer, int64 capacity, double value, int32 precision) {
 }
 
 int32
-fmt_float64_scientific(char *buffer, int64 capacity,
-                       double value, int32 precision) {
+fmt_float64_exp(char *buffer, int64 capacity, double value, int32 precision) {
     int32 status;
     int32 len;
     char temp[NUMTOSTR_FLOAT_RYU_BUFFER_SIZE];
@@ -230,7 +229,7 @@ numtostr_functions_sink(void) {
     (void)fmt_float32_shortest;
     (void)fmt_float64_shortest;
     (void)fmt_float64_fixed;
-    (void)fmt_float64_scientific;
+    (void)fmt_float64_exp;
     return;
 }
 #endif
@@ -294,23 +293,23 @@ test_numtostr_float_buffers(void) {
     ASSERT_EQ(len, 4);
     ASSERT_EQ((char *)buffer, "1.25");
 
-    len = fmt_float64_scientific(buffer, SIZEOF(buffer), 1234.0, 2);
+    len = fmt_float64_exp(buffer, SIZEOF(buffer), 1234.0, 2);
     ASSERT_EQ(len, 8);
     ASSERT_EQ((char *)buffer, "1.23e+03");
 
     len = fmt_float64_fixed(large_buffer, SIZEOF(large_buffer), 0.0,
                             NUMTOSTR_FLOAT_MAX_PRECISION);
     ASSERT_EQ(len, NUMTOSTR_FLOAT_MAX_PRECISION + 2);
-    len = fmt_float64_scientific(large_buffer, SIZEOF(large_buffer), 0.0,
-                                 NUMTOSTR_FLOAT_MAX_PRECISION);
+    len = fmt_float64_exp(large_buffer, SIZEOF(large_buffer), 0.0,
+                          NUMTOSTR_FLOAT_MAX_PRECISION);
     ASSERT_EQ(len, NUMTOSTR_FLOAT_MAX_PRECISION + 6);
 
     ASSERT_EQ(fmt_float64_shortest(NULL, 64, 1.0), -EINVAL);
     ASSERT_EQ(fmt_float64_shortest(buffer, 0, 1.0), -EINVAL);
-    ASSERT_EQ(fmt_float64_fixed(buffer, SIZEOF(buffer), 1.0, -1),
-                 -EINVAL);
+    ASSERT_EQ(fmt_float64_fixed(buffer, SIZEOF(buffer), 1.0, -1), -EINVAL);
     ASSERT_EQ(fmt_float64_fixed(buffer, SIZEOF(buffer), 1.0,
-                                NUMTOSTR_FLOAT_MAX_PRECISION + 1), -ERANGE);
+                                NUMTOSTR_FLOAT_MAX_PRECISION + 1),
+              -ERANGE);
     ASSERT_EQ(fmt_float64_fixed(buffer, 4, 1.25, 2), -ENOSPC);
     return;
 }
