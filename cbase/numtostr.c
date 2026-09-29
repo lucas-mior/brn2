@@ -213,10 +213,7 @@ bytes_pretty(char *buffer, int64 raw) {
     suffix = suffixes[i];
     suffix_len = strlen32(suffix);
     n = d2fixed_buffered_n(aux_pretty, (uint32)precision, buffer);
-    if (n + suffix_len >= 16) {
-        error("Error formatting bytes: %d\n", n);
-        fatal(EXIT_FAILURE);
-    }
+    ASSERT_LT(n + suffix_len, 16);
 
     memcpy64(buffer + n, suffix, suffix_len);
     n += suffix_len;
