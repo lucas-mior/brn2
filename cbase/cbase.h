@@ -187,6 +187,24 @@ typedef struct StrFlexList {
     char data[sizeof(literal)];                \
 }){ sizeof(literal) - 1, literal })
 
+// Macro trick to pass the int32 len and char *data for "%.*s" formatters.
+// Note: the single argument version is just for exploration purposes,
+// don't use it. The two argument version is allowed.
+#define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
+#define SP_1(STR_REPR)                      \
+    _Generic((STR_REPR),                    \
+            String *:        string_ptr,    \
+            StrFlex *:       strflex_ptr,   \
+            String:          string_val     \
+            )(STR_REPR).len,                \
+    _Generic((STR_REPR),                    \
+            String *:        string_ptr,    \
+            StrFlex *:       strflex_ptr,   \
+            String:          string_val     \
+            )(STR_REPR).data
+
+#define SP(...) SELECT_ON_NUM_ARGS(SP_, __VA_ARGS__)
+
 static String
 string_ptr(String *string) {
     return *string;
@@ -205,24 +223,6 @@ strflex_ptr(StrFlex *string) {
         .cap = string->len,
     };
 }
-
-// Macro trick to pass the int32 len and char *data for "%.*s" formatters.
-// Note: the single argument version is just for exploration purposes,
-// don't use it. The two argument version is allowed.
-#define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
-#define SP_1(STR_REPR)                      \
-    _Generic((STR_REPR),                    \
-            String *:        string_ptr,    \
-            StrFlex *:       strflex_ptr,   \
-            String:          string_val     \
-            )(STR_REPR).len,                \
-    _Generic((STR_REPR),                    \
-            String *:        string_ptr,    \
-            StrFlex *:       strflex_ptr,   \
-            String:          string_val     \
-            )(STR_REPR).data
-
-#define SP(...) SELECT_ON_NUM_ARGS(SP_, __VA_ARGS__)
 
 #if OS_UNIX
 typedef struct UtilCopyFilesAsync {
