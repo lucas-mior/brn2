@@ -208,15 +208,6 @@ strflex_ptr(StrFlex *string) {
 
 // Note: the single argument version is just for exploration purposes,
 // don't use it. The two argument version is allowed.
-// String *pointer;
-// String stack;
-// StrFlex *flex;
-//
-// str_printf("name: %.*s\n", string_len, string);
-// str_printf("name: %.*s\n", SP(pointer));
-// str_printf("name: %.*s\n", SP(stack));
-// str_printf("name: %.*s\n", SP(flex));
-
 #define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
 #define SP_1(STR_REPR)                      \
     _Generic((STR_REPR),                    \
