@@ -206,6 +206,7 @@ strflex_ptr(StrFlex *string) {
     };
 }
 
+// Macro trick to pass the int32 len and char *data for "%.*s" formatters.
 // Note: the single argument version is just for exploration purposes,
 // don't use it. The two argument version is allowed.
 #define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
