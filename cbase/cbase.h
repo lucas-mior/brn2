@@ -197,9 +197,13 @@ string_val(String string) {
     return string;
 }
 
-static StrFlex
+static String
 strflex_ptr(StrFlex *string) {
-    return *string;
+    return (String){
+        .data = string->data,
+        .len = string->len,
+        .cap = string->len,
+    };
 }
 
 // how to make the SP macro work to pass length and char * to "%.*s"?
