@@ -1214,6 +1214,14 @@ main(int argc, char **argv) {
     (void)util_segv_handler;
 #endif
 
+    {
+        String out = {0};
+        String *ptr = &out;
+        str_printf(&out, "this is string is awesome: %d\n", 5);
+        str_printf(ptr, "this is string pointer is awesome: %d\n", 5);
+        printf("at the end, both are:\n %.*s == %.*s", SP(out), SP(ptr));
+    }
+
     (void)malloc_debug;
     (void)realloc_debug;
     (void)free_debug;

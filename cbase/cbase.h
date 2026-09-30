@@ -187,6 +187,37 @@ typedef struct StrFlexList {
     char data[sizeof(literal)];                \
 }){ sizeof(literal) - 1, literal })
 
+static String
+string_ptr(String *string) {
+    return *string;
+}
+
+static String
+string_val(String string) {
+    return string;
+}
+
+// how to make the SP macro work to pass length and char * to "%.*s"?
+// goal: make below work:
+// str_printf("name: %.*s\n", string_len, string);
+// String *pointer;
+// String stack;
+// StrFlex *flex;  // later
+// str_printf("name: %.*s\n", SP(pointer));
+// str_printf("name: %.*s\n", SP(stack));
+#define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
+#define SP_1(STR_REPR)                \
+    _Generic((STR_REPR),              \
+            String *: string_ptr,     \
+            String:   string_val      \
+            )(STR_REPR).len,          \
+    _Generic((STR_REPR),              \
+            String *: string_ptr,     \
+            String:   string_val      \
+            )(STR_REPR).data
+
+#define SP(...) SELECT_ON_NUM_ARGS(SP_, __VA_ARGS__)
+
 #if OS_UNIX
 typedef struct UtilCopyFilesAsync {
     struct pollfd pipes[MAX_FILES_COPY];
