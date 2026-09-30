@@ -189,7 +189,7 @@ typedef struct StrFlexList {
 
 // Macro trick to pass the int32 len and char *data for "%.*s" formatters.
 // Note: the single argument version is just for exploration purposes,
-// don't use it. The two argument version is allowed.
+// don't use it. The two argument version is allowed and useful for SOA design.
 #define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
 #define SP_1(STR_REPR)                      \
     _Generic((STR_REPR),                    \
