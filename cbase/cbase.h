@@ -215,16 +215,16 @@ strflex_ptr(StrFlex *string) {
 // str_printf("name: %.*s\n", SP(pointer));
 // str_printf("name: %.*s\n", SP(stack));
 #define SP_2(ARRAY, INDEX) ARRAY##lens[INDEX], STR_REPR[INDEX]
-#define SP_1(STR_REPR)                \
-    _Generic((STR_REPR),              \
-            String *: string_ptr,     \
-            StrFlex *: strflex_ptr,   \
-            String:   string_val      \
-            )(STR_REPR).len,          \
-    _Generic((STR_REPR),              \
-            String *: string_ptr,     \
-            StrFlex *: strflex_ptr,   \
-            String:   string_val      \
+#define SP_1(STR_REPR)                      \
+    _Generic((STR_REPR),                    \
+            String *:        string_ptr,    \
+            StrFlex *:       strflex_ptr,   \
+            String:          string_val     \
+            )(STR_REPR).len,                \
+    _Generic((STR_REPR),                    \
+            String *:        string_ptr,    \
+            StrFlex *:       strflex_ptr,   \
+            String:          string_val     \
             )(STR_REPR).data
 
 #define SP(...) SELECT_ON_NUM_ARGS(SP_, __VA_ARGS__)
