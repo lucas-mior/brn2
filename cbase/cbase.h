@@ -197,6 +197,11 @@ string_val(String string) {
     return string;
 }
 
+static StrFlex
+strflex_ptr(StrFlex *string) {
+    return *string;
+}
+
 // how to make the SP macro work to pass length and char * to "%.*s"?
 // goal: make below work:
 // str_printf("name: %.*s\n", string_len, string);
@@ -209,10 +214,12 @@ string_val(String string) {
 #define SP_1(STR_REPR)                \
     _Generic((STR_REPR),              \
             String *: string_ptr,     \
+            StrFlex *: strflex_ptr,   \
             String:   string_val      \
             )(STR_REPR).len,          \
     _Generic((STR_REPR),              \
             String *: string_ptr,     \
+            StrFlex *: strflex_ptr,   \
             String:   string_val      \
             )(STR_REPR).data
 
