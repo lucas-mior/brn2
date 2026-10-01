@@ -121,21 +121,18 @@ c_unary_op_from_text(char *text, int32 text_len) {
     if (STREQUAL(text, text_len, "--")) {
         return C_UNARY_OP_PRE_DECREMENT;
     }
-    return C_UNARY_OP_INVALID;
+    return 0;
 }
 
 enum CUnaryOp
 c_token_unary_op(Token *token) {
-    if (token->kind != TOKEN_OPERATOR) {
-        return C_UNARY_OP_INVALID;
-    }
     return c_unary_op_from_text(token->text, token->len);
 }
 
 enum CUnaryOp
 c_token_postfix_unary_op(Token *token) {
     if (token->kind != TOKEN_OPERATOR) {
-        return C_UNARY_OP_INVALID;
+        return 0;
     }
     if (STREQUAL(token->text, token->len, "++")) {
         return C_UNARY_OP_POST_INCREMENT;
@@ -143,7 +140,7 @@ c_token_postfix_unary_op(Token *token) {
     if (STREQUAL(token->text, token->len, "--")) {
         return C_UNARY_OP_POST_DECREMENT;
     }
-    return C_UNARY_OP_INVALID;
+    return 0;
 }
 
 enum CMemberOp
