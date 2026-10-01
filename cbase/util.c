@@ -1080,9 +1080,13 @@ util_test_mem_literal_short(void) {
 
     ASSERT_MEM_LITERAL("zzabcdefghijklmnopqq", "abcdefghijklmnop", 2);
     ASSERT_MEM_LITERAL("zzabcdefghijklmnoxqq", "abcdefghijklmnop", -1);
-    ASSERT_MEM_LITERAL_OFFSET("zzabcdefghijklmno",
-                              STRLIT_LEN("zzabcdefghijklmno"),
-                              "abcdefghijklmnop", -1);
+    {
+        char *haystack = "zzabcdefghijklmno";
+        int32 haystack_len = strlen32(haystack);
+
+        ASSERT_MEM_LITERAL_OFFSET(haystack, haystack_len,
+                                  "abcdefghijklmnop", -1);
+    }
 
     return;
 }

@@ -246,7 +246,7 @@ enum TokenizeFlags {
 };
 
 enum CUnaryOp {
-    C_UNARY_OP_PLUS,
+    C_UNARY_OP_PLUS = 1,
     C_UNARY_OP_MINUS,
     C_UNARY_OP_LOGICAL_NOT,
     C_UNARY_OP_BIT_NOT,
