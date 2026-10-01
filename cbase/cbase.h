@@ -246,8 +246,8 @@ llong atoi2sat(char *str, int32 str_len);
 llong atoi_base_sat(char *str, int32 str_len);
 bool util_is_integer(char *string);
 char *basename2(char *path, int32 *full_length, int32 *base_len);
-char *begins_with(char *string, int32 string_len, char *prefix,
-                  int32 prefix_len);
+char *begins_with(char *string, int32 string_len,
+                  char *prefix, int32 prefix_len);
 bool byte_matches_any(char byte, void *memory, int64 memory_len);
 int32 bytes_pretty(char *buffer, int64 raw);
 int32 fmt_time_elapsed(char *buffer, double elapsed);
