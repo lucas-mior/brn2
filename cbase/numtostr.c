@@ -220,6 +220,20 @@ bytes_pretty(char *buffer, int64 raw) {
     return n;
 }
 
+int32
+fmt_time_elapsed(char *buffer, double elapsed) {
+    bool negative = false;
+    int32 days;
+    int32 mins;
+    int32 secs;
+
+    if (elapsed < 0) {
+        negative = true;
+        elapsed = -elapsed;
+    }
+    return 0;
+}
+
 #if 0 == TESTING_numtostr
 static inline void
 numtostr_functions_sink(void) {
