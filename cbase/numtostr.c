@@ -246,8 +246,7 @@ fmt_time_elapsed(char *buffer, double elapsed) {
     milliseconds = total_milliseconds%1000;
 
     if (negative) {
-        raw_seconds[raw_len] = '-';
-        raw_len += 1;
+        raw_seconds[raw_len++] = '-';
     }
     number_len = itoa2(number, SIZEOF(number), total_seconds);
     memcpy64(raw_seconds + raw_len, number, number_len);
@@ -265,8 +264,7 @@ fmt_time_elapsed(char *buffer, double elapsed) {
     }
 
     if (negative) {
-        buffer[n] = '-';
-        n += 1;
+        buffer[n++] = '-';
     }
 
     if (elapsed <= 3600.0) {
@@ -281,8 +279,8 @@ fmt_time_elapsed(char *buffer, double elapsed) {
         number_len = itoa2(number, SIZEOF(number), seconds);
         memcpy64(buffer + n, number, number_len);
         n += number_len;
-        buffer[n] = 's';
-        n += 1;
+
+        buffer[n++] = 's';
     } else if (elapsed <= 3600.0*60.0) {
         hours = total_seconds/3600;
         minutes = (total_seconds%3600)/60;
@@ -290,8 +288,9 @@ fmt_time_elapsed(char *buffer, double elapsed) {
         number_len = itoa2(number, SIZEOF(number), hours);
         memcpy64(buffer + n, number, number_len);
         n += number_len;
-        buffer[n] = 'h';
-        n += 1;
+
+        buffer[n++] = 'h';
+
         number_len = itoa2(number, SIZEOF(number), minutes);
         memcpy64(buffer + n, number, number_len);
         n += number_len;
@@ -305,13 +304,15 @@ fmt_time_elapsed(char *buffer, double elapsed) {
         number_len = itoa2(number, SIZEOF(number), days);
         memcpy64(buffer + n, number, number_len);
         n += number_len;
-        buffer[n] = 'd';
-        n += 1;
+
+        buffer[n++] = 'd';
+
         number_len = itoa2(number, SIZEOF(number), hours);
         memcpy64(buffer + n, number, number_len);
         n += number_len;
-        buffer[n] = 'h';
-        n += 1;
+
+        buffer[n++] = 'h';
+
         number_len = itoa2(number, SIZEOF(number), minutes);
         memcpy64(buffer + n, number, number_len);
         n += number_len;
