@@ -325,6 +325,7 @@ fmt_time_elapsed(char *buffer, double elapsed) {
     n += raw_len;
     buffer[n] = ')';
     n += 1;
+
     buffer[n] = '\0';
     return n;
 }
