@@ -252,17 +252,12 @@ fmt_time_elapsed(char *buffer, double elapsed) {
     number_len = itoa2(number, SIZEOF(number), total_seconds);
     memcpy64(raw_seconds + raw_len, number, number_len);
     raw_len += number_len;
-    raw_seconds[raw_len] = '.';
-    raw_len += 1;
-    raw_seconds[raw_len] = (char)('0' + milliseconds/100);
-    raw_len += 1;
-    raw_seconds[raw_len] = (char)('0' + (milliseconds/10)%10);
-    raw_len += 1;
-    raw_seconds[raw_len] = (char)('0' + milliseconds%10);
-    raw_len += 1;
-    raw_seconds[raw_len] = 's';
-    raw_len += 1;
-    raw_seconds[raw_len] = '\0';
+    raw_seconds[raw_len++] = '.';
+    raw_seconds[raw_len++] = (char)('0' + milliseconds/100);
+    raw_seconds[raw_len++] = (char)('0' + (milliseconds/10)%10);
+    raw_seconds[raw_len++] = (char)('0' + milliseconds%10);
+    raw_seconds[raw_len++] = 's';
+    raw_seconds[raw_len++] = '\0';
 
     if (elapsed <= 60.0) {
         memcpy64(buffer, raw_seconds, raw_len + 1);
