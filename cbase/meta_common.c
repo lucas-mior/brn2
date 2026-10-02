@@ -466,8 +466,8 @@ static void
 test_c_member_ops(void) {
     Token token = test_token(TOKEN_OPERATOR, "->");
 
-    ASSERT(c_member_op_from_text(STRLIT(".")) == C_MEMBER_OP_DOT);
-    ASSERT_ZERO(c_member_op_from_text(STRLIT("ARROW")));
+    ASSERT(C_MEMBER_OP_parse_strict(STRLIT(".")) == C_MEMBER_OP_DOT);
+    ASSERT_ZERO(C_MEMBER_OP_parse_strict(STRLIT("ARROW")));
     ASSERT(c_token_member_op(&token) == C_MEMBER_OP_ARROW);
 
     token = test_token(TOKEN_PUNCT, ".");
