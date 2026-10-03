@@ -71,10 +71,10 @@ delete_brn2_buffer(void) {
 }
 
 static int32
-main_command_run(Command *command) {
+main_cmd_run(Command *command) {
     int32 status = -1;
 
-    if (command_run(command, COMMAND_STDIN_TTY) == 0) {
+    if (cmd_run(command, CMD_STDIN_TTY) == 0) {
         status = command->result.status;
         if (!command->result.exited) {
             status = -1;
@@ -118,7 +118,7 @@ main_edit_buffer(FileList *new, char *editor) {
     }
 
     if (brn2_options_vim_split) {
-        COMMAND_PUSH(
+        CMD_PUSH(
             &command,
             "vim",
             "-O", brn2_buffer_old.path, brn2_buffer.path,
@@ -130,22 +130,22 @@ main_edit_buffer(FileList *new, char *editor) {
             " | au QuitPre */brn2.* quitall"
         );
     } else {
-        COMMAND_PUSH(&command, editor, brn2_buffer.path);
+        CMD_PUSH(&command, editor, brn2_buffer.path);
     }
 
-    status = main_command_run(&command);
-    command_free(&command);
+    status = main_cmd_run(&command);
+    cmd_free(&command);
 
     if (status != 0) {
         if (OS_WINDOWS) {
-            Command command_windows = {0};
+            Command cmd_windows = {0};
 
-            COMMAND_PUSH(&command_windows, "Notepad.exe", brn2_buffer.path);
-            if (main_command_run(&command_windows) < 0) {
-                command_free(&command_windows);
+            CMD_PUSH(&cmd_windows, "Notepad.exe", brn2_buffer.path);
+            if (main_cmd_run(&cmd_windows) < 0) {
+                cmd_free(&cmd_windows);
                 fatal(EXIT_FAILURE);
             }
-            command_free(&command_windows);
+            cmd_free(&cmd_windows);
         } else {
             fatal(EXIT_FAILURE);
         }
@@ -477,11 +477,11 @@ main(int argc, char **argv) {
         {
             Command command = {0};
 
-            COMMAND_PUSH(&command, "shuf", brn2_buffer.path);
-            COMMAND_PUSH(&command, "-o", brn2_buffer.path);
+            CMD_PUSH(&command, "shuf", brn2_buffer.path);
+            CMD_PUSH(&command, "-o", brn2_buffer.path);
 
-            main_command_run(&command);
-            command_free(&command);
+            main_cmd_run(&command);
+            cmd_free(&command);
             brn2_list_from_file(new, brn2_buffer.path, false);
 
             for (int32 i = 0; i < new->length; i += 1) {

@@ -1706,7 +1706,7 @@ main(void) {
         int32 number_changed_hard = 0;
 
         char *directory = "/tmp/brn2_abcd";
-        char command_rmdir[128];
+        char cmd_rmdir[128];
 
         error("brn2.c: test 3 (linux only)...\n");
 
@@ -1717,9 +1717,9 @@ main(void) {
         }
         qsort64(files, LENGTH(files), SIZEOF(*files), files_compare);
 
-        SNPRINTF(command_rmdir, "rm -rf %s", directory);
-        if (system(command_rmdir)) {
-            error("error executing %s.\n", command_rmdir);
+        SNPRINTF(cmd_rmdir, "rm -rf %s", directory);
+        if (system(cmd_rmdir)) {
+            error("error executing %s.\n", cmd_rmdir);
             fatal(EXIT_FAILURE);
         }
         if (BRN2_MKDIR(directory, 0777) < 0) {
@@ -1864,7 +1864,7 @@ main(void) {
         char *directory = "/tmp/brn2_abcd";
         char *filelist = "/tmp/brn2list.txt";
 #if !OS_WINDOWS
-        char command_rmdir[128];
+        char cmd_rmdir[128];
 #endif
         FILE *args;
 
@@ -1881,8 +1881,8 @@ main(void) {
         (void)filelist_buffer;
 #endif
 #if !OS_WINDOWS
-        SNPRINTF(command_rmdir, "rm -rf %s", directory);
-        ASSERT_ZERO(system(command_rmdir));
+        SNPRINTF(cmd_rmdir, "rm -rf %s", directory);
+        ASSERT_ZERO(system(cmd_rmdir));
         if (BRN2_MKDIR(directory, 0777) < 0) {
             error("Error creating directory %s: %s.\n",
                   directory, strerror(errno));
