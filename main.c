@@ -328,7 +328,8 @@ main(int argc, char **argv) {
         for (int32 i = 0; i < old->length; i += 1) {
             FileName *filename = old->files[i];
             if (filename->type == TYPE_ERR) {
-                error2("Removing '%s' from list.\n", filename->name);
+                error2("Removing '%.*s' from list.\n",
+                       filename->length, filename->name);
                 continue;
             }
             if (j != i) {
@@ -416,9 +417,11 @@ main(int argc, char **argv) {
                                              file->name, file->length,
                                              file->hash, index, j)) {
                 if (contains_newline) {
-                    error2(RED("'%s'") " contains new line.", file->name);
+                    error2(RED("'%.*s'") " contains new line.",
+                           file->length, file->name);
                 } else {
-                    error2(RED("'%s'") " repeated in the buffer.", file->name);
+                    error2(RED("'%.*s'") " repeated in the buffer.",
+                           file->length, file->name);
                 }
                 if (brn2_options_fatal) {
                     error2("\n");

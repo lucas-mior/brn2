@@ -48,7 +48,7 @@ static int32 brn2_threads(
 static void *brn2_threads_work_hashes(Work *);
 static void *brn2_threads_work_normalization(Work *);
 static void *brn2_threads_work_changes(Work *);
-static inline bool brn2_is_invalid_name(char *);
+static inline bool brn2_is_invalid_name(char *, int32);
 #if !BRN2_NORMALIZE_NAMES_BENCHMARK
 static void brn2_slash_add(FileName *);
 #endif
@@ -111,7 +111,7 @@ brn2_list_from_args(FileList *list, int32 argc, char **argv) {
             continue;
         }
 
-        if (brn2_is_invalid_name(name)) {
+        if (brn2_is_invalid_name(name, name_length)) {
             continue;
         }
 
@@ -163,7 +163,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
         int32 name_length = directory_list[i].name_len;
         int64 size;
 
-        if (brn2_is_invalid_name(name)) {
+        if (brn2_is_invalid_name(name, name_length)) {
             continue;
         }
         if ((name_length + 1 + directory_length) >= MAXOF(file->length)) {
@@ -304,7 +304,7 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
             memcpy64(file->name, begin, name_length + 1);
             file->name[name_length] = '\0';
 
-            if (is_old && brn2_is_invalid_name(file->name)) {
+            if (is_old && brn2_is_invalid_name(file->name, file->length)) {
                 begin = pointer + 1;
                 left -= (name_length + 1);
                 pointer += 1;
@@ -391,7 +391,7 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 
         name_length -= 1;
         buffer[name_length] = '\0';
-        if (is_old && brn2_is_invalid_name(buffer)) {
+        if (is_old && brn2_is_invalid_name(buffer, name_length)) {
             continue;
         }
 
@@ -447,12 +447,11 @@ brn2_list_from_lines(FileList *list, char *filename, bool is_old) {
 }
 
 static inline bool
-brn2_is_invalid_name(char *filename) {
-    while (*filename) {
-        if ((*filename != '.') && (*filename != '/')) {
+brn2_is_invalid_name(char *filename, int32 filename_len) {
+    for (int32 i = 0; i < filename_len; i += 1) {
+        if ((filename[i] != '.') && (filename[i] != '/')) {
             return false;
         }
-        filename += 1;
     }
     return true;
 }
@@ -581,8 +580,8 @@ brn2_threads_work_normalization(Work *arg) {
             struct stat file_stat;
             if (lstat(name, &file_stat) < 0) {
                 if (errno != ENOENT) {
-                    error("Error in lstat('%s'): %s.\n",
-                          name, strerror(errno));
+                    error("Error in lstat('%.*s'): %s.\n",
+                          file->length, name, strerror(errno));
                 }
                 work->old_list->files[i]->type = TYPE_ERR;
                 continue;
@@ -774,9 +773,12 @@ brn2_sort(FileList *old) {
         for (int32 i = 0; i < old->length; i += 1) {
             char *name1 = old->files[i]->name;
             char *name2 = copy.files[i]->name;
-            if (!strequal(name1, name2)) {
+            if ((old->files[i]->length != copy.files[i]->length)
+                || memcmp64(name1, name2, old->files[i]->length)) {
                 error("Error in sorting:");
-                error(" [%d] = %s != %s\n", i, name1, name2);
+                error(" [%d] = %.*s != %.*s\n",
+                      i, old->files[i]->length, name1,
+                      copy.files[i]->length, name2);
                 sort_wrong = true;
             }
         }
@@ -855,8 +857,8 @@ brn2_verify(
             continue;
         }
 
-        error("Error: " RED("'%s'") " repeats on line %d. ",
-              newfile->name, i + 1);
+        error("Error: " RED("'%.*s'") " repeats on line %d. ",
+              newfile->length, newfile->name, i + 1);
 
         if (claimant_count == 2) {
             int32 owner_index;
@@ -869,7 +871,9 @@ brn2_verify(
                 FileName *owner_oldfile = old->files[owner_index];
                 FileName *owner_newfile = new->files[owner_index];
 
-                if (strequal(owner_oldfile->name, owner_newfile->name)) {
+                if ((owner_oldfile->length == owner_newfile->length)
+                    && !memcmp64(owner_oldfile->name, owner_newfile->name,
+                                 owner_oldfile->length)) {
                     if (owner_index == first_claimant) {
                         mover_index = i;
                     } else {
@@ -878,9 +882,11 @@ brn2_verify(
 
                     if (util_equal_files(old->files[mover_index]->name,
                                          owner_oldfile->name)) {
-                        error("Old files (%s) and (%s) "
+                        error("Old files (%.*s) and (%.*s) "
                               "have exactly the same content.\n",
+                              old->files[mover_index]->length,
                               old->files[mover_index]->name,
+                              owner_oldfile->length,
                               owner_oldfile->name);
                         if (brn2_options_autosolve) {
                             Brn2RenamePlan *mover_plan
@@ -919,15 +925,16 @@ noop(const char *unused, ...) {
 }
 
 static bool
-brn2_regular_file_stat(char *filename, struct stat *file_stat) {
+brn2_regular_file_stat(char *filename, int32 filename_len,
+                       struct stat *file_stat) {
     if (lstat(filename, file_stat) < 0) {
-        error("Error checking " RED("'%s'") ": %s.\n",
-              filename, strerror(errno));
+        error("Error checking " RED("'%.*s'") ": %s.\n",
+              filename_len, filename, strerror(errno));
         return false;
     }
     if (!S_ISREG(file_stat->st_mode)) {
-        error("Error checking " RED("'%s'") ": Not a regular file.\n",
-              filename);
+        error("Error checking " RED("'%.*s'") ": Not a regular file.\n",
+              filename_len, filename);
         return false;
     }
     return true;
@@ -952,8 +959,8 @@ brn2_validate_replace_equal_target(
 
     if ((owner_index < 0) || (owner_index >= old->length)
         || (owner_index == i)) {
-        error("Error replacing equal file " RED("'%s'") ":"
-              " Invalid conflict plan.\n", oldfile->name);
+        error("Error replacing equal file " RED("'%.*s'") ":"
+              " Invalid conflict plan.\n", oldfile->length, oldfile->name);
         return false;
     }
 
@@ -962,15 +969,20 @@ brn2_validate_replace_equal_target(
     if ((new->rename_plans[owner_index].execution_mode
          != BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER)
         || (new->rename_plans[owner_index].conflicting_owner_index != i)) {
-        error("Error replacing equal file " RED("'%s'") ":"
-              " Invalid owner conflict plan.\n", oldfile->name);
+        error("Error replacing equal file " RED("'%.*s'") ":"
+              " Invalid owner conflict plan.\n",
+              oldfile->length, oldfile->name);
         return false;
     }
-    if (!strequal(newfile->name, owner_oldfile->name)
-        || !strequal(owner_oldfile->name, owner_newfile->name)) {
-        error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
+    if ((newfile->length != owner_oldfile->length)
+        || memcmp64(newfile->name, owner_oldfile->name, newfile->length)
+        || (owner_oldfile->length != owner_newfile->length)
+        || memcmp64(owner_oldfile->name, owner_newfile->name,
+                    owner_oldfile->length)) {
+        error("Error replacing " RED("'%.*s'") " with " RED("'%.*s'") ":"
               " Conflict plan no longer matches the rename lists.\n",
-              owner_oldfile->name, oldfile->name);
+              owner_oldfile->length, owner_oldfile->name,
+              oldfile->length, oldfile->name);
         return false;
     }
 
@@ -983,20 +995,23 @@ brn2_validate_replace_equal_target(
                             newfile->name, newfile->length,
                             &mapped_index)
         || (mapped_index != owner_index)) {
-        error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
+        error("Error replacing " RED("'%.*s'") " with " RED("'%.*s'") ":"
               " Rename state changed before execution.\n",
-              newfile->name, oldfile->name);
+              newfile->length, newfile->name,
+              oldfile->length, oldfile->name);
         return false;
     }
 
-    if (!brn2_regular_file_stat(oldfile->name, old_stat)
-        || !brn2_regular_file_stat(newfile->name, new_stat)) {
+    if (!brn2_regular_file_stat(oldfile->name, oldfile->length, old_stat)
+        || !brn2_regular_file_stat(newfile->name, newfile->length,
+                                   new_stat)) {
         return false;
     }
     if (!util_equal_files(oldfile->name, newfile->name)) {
-        error("Error replacing " RED("'%s'") " with " RED("'%s'") ":"
+        error("Error replacing " RED("'%.*s'") " with " RED("'%.*s'") ":"
               " Files are no longer equal.\n",
-              newfile->name, oldfile->name);
+              newfile->length, newfile->name,
+              oldfile->length, oldfile->name);
         return false;
     }
 
@@ -1010,19 +1025,23 @@ brn2_validate_equal_target_owner(FileList *old, FileList *new, int32 i) {
 
     if ((mover_index < 0) || (mover_index >= old->length)
         || (mover_index == i)) {
-        error("Error skipping equal-file owner " RED("'%s'") ":"
-              " Invalid conflict plan.\n", old->files[i]->name);
+        error("Error skipping equal-file owner " RED("'%.*s'") ":"
+              " Invalid conflict plan.\n",
+              old->files[i]->length, old->files[i]->name);
         return false;
     }
     if ((new->rename_plans[mover_index].execution_mode
          != BRN2_RENAME_REPLACE_EQUAL_TARGET)
         || (new->rename_plans[mover_index].conflicting_owner_index != i)
-        || !strequal(old->files[i]->name, new->files[i]->name)
-        || !strequal(new->files[mover_index]->name,
-                     new->files[i]->name)) {
-        error("Error skipping equal-file owner " RED("'%s'") ":"
+        || (old->files[i]->length != new->files[i]->length)
+        || memcmp64(old->files[i]->name, new->files[i]->name,
+                    old->files[i]->length)
+        || (new->files[mover_index]->length != new->files[i]->length)
+        || memcmp64(new->files[mover_index]->name, new->files[i]->name,
+                    new->files[mover_index]->length)) {
+        error("Error skipping equal-file owner " RED("'%.*s'") ":"
               " Conflict plan no longer matches the rename lists.\n",
-              old->files[i]->name);
+              old->files[i]->length, old->files[i]->name);
         return false;
     }
 
@@ -1108,8 +1127,10 @@ brn2_execute_replace_equal_target(
     }
 
     if (renamed < 0) {
-        error("Error replacing " RED("'%s'") " with " RED("'%s'") ": %s.\n",
-              newfile->name, oldfile->name, strerror(errno));
+        error("Error replacing " RED("'%.*s'") " with "
+              RED("'%.*s'") ": %s.\n",
+              newfile->length, newfile->name,
+              oldfile->length, oldfile->name, strerror(errno));
         fatal(EXIT_FAILURE);
     }
 
@@ -1121,8 +1142,8 @@ brn2_execute_replace_equal_target(
                                  oldfile->hash, old->indexes[i])) {
         *number_renames += 1;
     }
-    print("%s -> " GREEN("%s") " (replaced equal file)\n",
-               oldfile->name, newfile->name);
+    print("%.*s -> " GREEN("%.*s") " (replaced equal file)\n",
+          oldfile->length, oldfile->name, newfile->length, newfile->name);
     return;
 }
 
@@ -1165,7 +1186,7 @@ brn2_execute2(
     }
 
     if (newhash == oldhash) {
-        if (strequal(oldname, newname)) {
+        if ((oldlen == newlen) && !memcmp64(oldname, newname, oldlen)) {
             return;
         }
     }
@@ -1176,12 +1197,12 @@ brn2_execute2(
 
 #if OS_LINUX
     if (newname_exists && !found && !brn2_options_implicit) {
-        error("Error renaming " RED("'%s'") " to " RED("'%s'") ":\n",
-              oldname, newname);
-        error(RED("'%s'") " already exists,"
+        error("Error renaming " RED("'%.*s'") " to " RED("'%.*s'") ":\n",
+              oldlen, oldname, newlen, newname);
+        error(RED("'%.*s'") " already exists,"
               " but it was not given in the list of files to rename,"
               " and --implicit option is off.\n",
-              newname);
+              newlen, newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
         }
@@ -1199,7 +1220,8 @@ brn2_execute2(
                 // supplied and --implicit option is on
                 *number_renames += 1;
             }
-            print(GREEN("%s") " <-> " GREEN("%s") "\n", oldname, newname);
+            print(GREEN("%.*s") " <-> " GREEN("%.*s") "\n",
+                  oldlen, oldname, newlen, newname);
 
             if (found) {
                 int32 next = next_on_oldlist;
@@ -1219,9 +1241,9 @@ brn2_execute2(
                 SWAP(*file_j, *oldfile);
                 SWAP(old->indexes[i], old->indexes[next]);
             } else {
-                error("Warning: '%s' was swapped with '%s', even though"
-                      " '%s' was not in the list of files to rename.\n",
-                      newname, oldname, newname);
+                error("Warning: '%.*s' was swapped with '%.*s', even though"
+                      " '%.*s' was not in the list of files to rename.\n",
+                      newlen, newname, oldlen, oldname, newlen, newname);
                 error("To disable this behaviour,"
                       " don't pass the --implicit option.\n");
                 hash_insert_pre_calc_map(oldlist_map,
@@ -1229,8 +1251,9 @@ brn2_execute2(
             }
             return;
         } else {
-            error("Error swapping " RED("'%s'") " and " RED("'%s'") ": %s.\n",
-                  oldname, newname, strerror(errno));
+            error("Error swapping " RED("'%.*s'") " and "
+                  RED("'%.*s'") ": %s.\n",
+                  oldlen, oldname, newlen, newname, strerror(errno));
             if (brn2_options_fatal) {
                 fatal(EXIT_FAILURE);
             }
@@ -1241,11 +1264,10 @@ brn2_execute2(
     (void)found;
     (void)next_on_oldlist;
     (void)oldfile;
-    (void)newlen;
     if (newname_exists) {
-        error("Error renaming " RED("'%s'")
-              " to '%s': File already exists.\n",
-              oldname, newname);
+        error("Error renaming " RED("'%.*s'")
+              " to '%.*s': File already exists.\n",
+              oldlen, oldname, newlen, newname);
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
         }
@@ -1253,8 +1275,8 @@ brn2_execute2(
     }
 #endif
     if (rename(oldname, newname) < 0) {
-        error("Error renaming " RED("'%s'") " to " RED("'%s'") ": %s.\n",
-              oldname, newname, strerror(errno));
+        error("Error renaming " RED("'%.*s'") " to " RED("'%.*s'") ": %s.\n",
+              oldlen, oldname, newlen, newname, strerror(errno));
         if (brn2_options_fatal) {
             fatal(EXIT_FAILURE);
         }
@@ -1264,7 +1286,8 @@ brn2_execute2(
                                      oldname, oldlen, oldhash, oldindex)) {
             *number_renames += 1;
         }
-        print("%s -> " GREEN("%s") "\n", oldname, newname);
+        print("%.*s -> " GREEN("%.*s") "\n",
+              oldlen, oldname, newlen, newname);
     }
     return;
 }
@@ -1361,7 +1384,7 @@ brn2_print_list(FileList *list) {
         if (file) {
             int32 name_length = strlen32(file->name);
             ASSERT_EQ(file->length, name_length);
-            error("[%d] = %s\n", i, file->name);
+            error("[%d] = %.*s\n", i, file->length, file->name);
         } else {
             error("[%d]", i);
             while (file == NULL) {
@@ -1383,7 +1406,9 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             continue;
         }
         if (!memcmp64(list->files[i]->name, file->name, (int64)file->length)) {
-            printf(GREEN("%s == %s") "\n", file->name, list->files[i]->name);
+            printf(GREEN("%.*s == %.*s") "\n",
+                   file->length, file->name,
+                   list->files[i]->length, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
@@ -1392,11 +1417,12 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             return;
         }
         if (verbose) {
-            printf("%d / %d | %s != %s \n", i + 1, list->length,
-                   list->files[i]->name, file->name);
+            printf("%d / %d | %.*s != %.*s \n", i + 1, list->length,
+                   list->files[i]->length, list->files[i]->name,
+                   file->length, file->name);
         }
     }
-    error("List does not contain '%s'\n", file->name);
+    error("List does not contain '%.*s'\n", file->length, file->name);
     fatal(EXIT_FAILURE);
 }
 
