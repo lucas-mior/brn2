@@ -202,10 +202,10 @@ sub report_single_arg_format_string {
     }
 
     my $format_arg = substr($source, $format_start,
-                            $format_end - $format_start);
+                            $format_end - $format_start + 1);
     my $format_spec = qr{
         %[-+ \#0]*
-        (?:\*|[0-9]*)?
+        [0-9]*
         (?:\.(?:\*|[0-9]+))?
         (?:hh|h|ll|l|j|z|t|L)?
         [A-Za-z]

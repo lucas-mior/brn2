@@ -565,13 +565,13 @@ Do not use a format string that only formats a single argument without any
 literal content:
 ```c
 // bad
-str_printf(&str, "%s", string);
+str_printf(&str, "%s", "string");
 str_printf(&str, "%.*s", string_len, string);
 str_printf(&str, "%d", number);
 str_printf(&str, "%lld", number);
 
 // good
-STR_APPEND(&str, string);
+STR_APPEND(&str, "string");
 STR_APPEND(&str, string, string_len);
 str_itoa(&str, number);
 ```
