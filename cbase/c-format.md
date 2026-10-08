@@ -86,7 +86,7 @@ The list below explains what to do:
                                       x, y, width, height);
   ```
     + Note: if aligning subsequent arguments would overflow the 80 column limit,
-      then try doing alternatives 3, 4, 5, and 6 below, then go back to 2.
+      then try doing alternatives 3, 4, 5, 6 and 7, below, then go back to 2.
 
 3. If it still does not fit, but it is an assignment, try to break after the
    `=`:
@@ -114,6 +114,12 @@ The list below explains what to do:
 5. If it still does not fit, change the name of the arguments to the function to
    be shorter.
 6. If it still does not fit, change the name of the function to be shorter.
+7. If it still does not fit, and the function is from an external library that
+   we can't change, create a wrapper for it with a shorter name.
+
+Important: only try 2 if 1 does not work, only try 3 if 2 and 1 do not work,
+only try 4 if 1, 2, and 3 do not work, and so on. Remember to do a final pass,
+do the alignment, as explained in 2.
 
 ## Identation
 When breaking long lines that are long expressions, try to make them readable
