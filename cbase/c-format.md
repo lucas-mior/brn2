@@ -53,14 +53,21 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
 ## Function calls
 
 - Never use space before parenthesis of function calls.
-- Try to never break function calls before the first argument:
+
+### Never break function calls before the first argument:
+The list below explains what to do:
+
+1. First, try to fit the entire call in a single line:
   ```c
   // bad
   this_function_call(
       argument, other, many, arguments, x, y, width, height);
   // good
   this_function_call(argument, other, many, arguments, x, y, width, height);
+  ```
 
+2. If it doesn't fit, try to break after the first argument and align argument:
+  ```c
   // bad
   this_function_call_is_very_long_but(
       argument, other, many, arguments, x, y, width, height);
@@ -68,28 +75,33 @@ For non-formatting coding guidelines, see `c-guidelines.md`.
   this_function_call_is_very_long_but(argument, other, many, arguments,
                                       x, y, width, height);
   ```
-- If the function is assigning to a varible, it may help to break after the `=`
-  to avoid having to break before the first argument:
+
+3. If it still does not fit, but it is an assignment, try to break after the
+   `=`:
   ```c
   // bad
   int32 assignment = this_function_call_is_even_more_long_but(
       argument_very_long, other, many, arguments, width, height);
-
-  // bad
-  int32 assignment
-      = this_function_call_is_even_more_long_but(argument_very_long, other,
-                                                 many, arguments,
-                                                 width, height);
-
   // good
   int32 assignment =
       this_function_call_is_even_more_long_but(argument_very_long, other, many,
                                                arguments,
                                                width, height);
   ```
-  * If the first argument would not fit in 80 columns, even after trying to
-    break after the `=` in case of assignment, then it is okay to break before
-    the first arg. But always try to fit it first.
+4. If it still does not fit, try creating aliases for the arguments as needed:
+  ```c
+  // bad
+  this_function_call_is_even_more_longer_still(
+      &this_is_array_to_use_right_here[i], 0);
+
+  // good
+  int32 *item = &this_is_array_to_use_right_here[i];
+  this_function_call_is_even_more_longer_still(item, 0);
+  );
+  ```
+5. If it still does not fit, change the name of the arguments to the function to
+   be shorter.
+6. If it still does not fit, change the name of the function to be shorter.
 
 ## Identation
 When breaking long lines that are long expressions, try to make them readable

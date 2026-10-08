@@ -118,17 +118,15 @@ main_edit_buffer(FileList *new, char *editor) {
     }
 
     if (brn2_options_vim_split) {
-        CMD_PUSH(
-            &command,
-            "vim",
-            "-O", brn2_buffer_old.path, brn2_buffer.path,
-            "-c",
-            "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
-            "-c",
-            "wincmd l | set scrollbind cursorbind",
-            "-c",
-            " | au QuitPre */brn2.* quitall"
-        );
+        CMD_PUSH(&command,
+                 "vim",
+                 "-O", brn2_buffer_old.path, brn2_buffer.path,
+                 "-c",
+                 "wincmd h | set nomodifiable scrollbind cursorbind cursorline",
+                 "-c",
+                 "wincmd l | set scrollbind cursorbind",
+                 "-c",
+                 " | au QuitPre */brn2.* quitall");
     } else {
         CMD_PUSH(&command, editor, brn2_buffer.path);
     }
