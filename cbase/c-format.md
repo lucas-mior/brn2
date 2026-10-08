@@ -66,7 +66,7 @@ The list below explains what to do:
   this_function_call(argument, other, many, arguments, x, y, width, height);
   ```
 
-2. If it doesn't fit, try to break after the first argument and align argument:
+2. If it doesn't fit, try to break after the first argument:
   ```c
   // bad
   this_function_call_is_very_long_but(
@@ -75,6 +75,18 @@ The list below explains what to do:
   this_function_call_is_very_long_but(argument, other, many, arguments,
                                       x, y, width, height);
   ```
+  * Note: remember to align subsequent lines so that they align correctly:
+  ```c
+  // bad
+  this_function_call_is_very_long_but(argument, other, many, arguments,
+                          x, y, width, height);
+
+  // good
+  this_function_call_is_very_long_but(argument, other, many, arguments,
+                                      x, y, width, height);
+  ```
+    + Note: if aligning subsequent arguments would overflow the 80 column limit,
+      then try doing alternatives 3, 4, 5, and 6 below.
 
 3. If it still does not fit, but it is an assignment, try to break after the
    `=`:
