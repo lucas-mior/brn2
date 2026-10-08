@@ -86,7 +86,7 @@ The list below explains what to do:
                                       x, y, width, height);
   ```
     + Note: if aligning subsequent arguments would overflow the 80 column limit,
-      then try doing alternatives 3, 4, 5, and 6 below.
+      then try doing alternatives 3, 4, 5, and 6 below, then go back to 2.
 
 3. If it still does not fit, but it is an assignment, try to break after the
    `=`:
