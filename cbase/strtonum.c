@@ -464,14 +464,11 @@ main(void) {
     ASSERT_EQ(atoi_base_sat(STRLIT("0x7f")), 127);
     ASSERT_EQ(atoi_base_sat(STRLIT("-0X7F")), -127);
     ASSERT_EQ(atoi_base_sat(STRLIT("0x7fffffffffffffff")), LLONG_MAX);
-    ASSERT_EQ(atoi_base_sat(STRLIT("-0x8000000000000000")),
-              LLONG_MIN);
+    ASSERT_EQ(atoi_base_sat(STRLIT("-0x8000000000000000")), LLONG_MIN);
     ASSERT_EQ(atoi_base_sat(STRLIT("0x8000000000000000")), LLONG_MAX);
-    ASSERT_EQ(atoi_base_sat(STRLIT("-0x8000000000000001")),
-              LLONG_MIN);
+    ASSERT_EQ(atoi_base_sat(STRLIT("-0x8000000000000001")), LLONG_MIN);
     ASSERT_EQ(atoi_base_sat(STRLIT("0xffffffffffffffff")), LLONG_MAX);
-    ASSERT_EQ(atoi_base_sat(STRLIT("-0xffffffffffffffff")),
-              LLONG_MIN);
+    ASSERT_EQ(atoi_base_sat(STRLIT("-0xffffffffffffffff")), LLONG_MIN);
 
     ASSERT(util_is_integer(""));
     ASSERT(util_is_integer("0123456789"));
