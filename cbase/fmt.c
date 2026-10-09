@@ -4409,23 +4409,30 @@ fmt_sprintf(char *buffer, int64 capacity, char *format, ...) {
     return len;
 }
 
-static char *fmt_strftime_weekdays_abbrev[] = {
-    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
-};
-
-static char *fmt_strftime_weekdays[] = {
-    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-    "Saturday",
-};
-
-static char *fmt_strftime_months_abbrev[] = {
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-};
-
-static char *fmt_strftime_months[] = {
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+const FmtLocale fmt_locale_c = {
+    .weekday_abbr = {
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
+    },
+    .weekday = {
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+        "Saturday",
+    },
+    .month_abbr = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    },
+    .month = {
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
+    },
+    .am = "AM",
+    .pm = "PM",
+    .am_lower = "am",
+    .pm_lower = "pm",
+    .date_time_fmt = "%a %b %e %H:%M:%S %Y",
+    .date_fmt = "%m/%d/%y",
+    .time_fmt = "%H:%M:%S",
+    .time_12_fmt = "%I:%M:%S %p",
 };
 
 static void
@@ -4491,27 +4498,37 @@ fmt_strftime_iso_week(struct tm *time_info,
 }
 
 static void
-fmt_strftime_write_name(FormatSink *sink, char **names, int32 names_len,
-                        int32 index) {
-    char *name;
+fmt_strftime_write_string(FormatSink *sink, const char *string) {
+    ASSERT(string != NULL);
 
-    if ((index < 0) || (index >= names_len)) {
-        fmt_sink_write_byte(sink, '?');
-        return;
-    }
-
-    name = names[index];
-    while (*name != '\0') {
-        fmt_sink_write_byte(sink, *name);
-        name += 1;
+    while (*string != '\0') {
+        fmt_sink_write_byte(sink, *string);
+        string += 1;
     }
     return;
 }
 
 static void
-fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
-    char *cursor = format;
+fmt_strftime_write_name(FormatSink *sink, const char *const *names,
+                        int32 names_len, int32 index) {
+    if ((index < 0) || (index >= names_len)) {
+        fmt_sink_write_byte(sink, '?');
+        return;
+    }
 
+    fmt_strftime_write_string(sink, names[index]);
+    return;
+}
+
+static void
+fmt_strftime_format(FormatSink *sink, const char *format,
+                    struct tm *time_info, const FmtLocale *locale) {
+    const char *cursor;
+
+    ASSERT(format != NULL);
+    ASSERT(locale != NULL);
+
+    cursor = format;
     while (*cursor != '\0') {
         char modifier = '\0';
         char conversion;
@@ -4574,28 +4591,28 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
 
         switch (conversion) {
         case 'a':
-            fmt_strftime_write_name(sink, fmt_strftime_weekdays_abbrev,
-                                    LENGTH(fmt_strftime_weekdays_abbrev),
+            fmt_strftime_write_name(sink, locale->weekday_abbr,
+                                    LENGTH(locale->weekday_abbr),
                                     time_info->tm_wday);
             break;
         case 'A':
-            fmt_strftime_write_name(sink, fmt_strftime_weekdays,
-                                    LENGTH(fmt_strftime_weekdays),
+            fmt_strftime_write_name(sink, locale->weekday,
+                                    LENGTH(locale->weekday),
                                     time_info->tm_wday);
             break;
         case 'b':
         case 'h':
-            fmt_strftime_write_name(sink, fmt_strftime_months_abbrev,
-                                    LENGTH(fmt_strftime_months_abbrev),
+            fmt_strftime_write_name(sink, locale->month_abbr,
+                                    LENGTH(locale->month_abbr),
                                     time_info->tm_mon);
             break;
         case 'B':
-            fmt_strftime_write_name(sink, fmt_strftime_months,
-                                    LENGTH(fmt_strftime_months),
+            fmt_strftime_write_name(sink, locale->month,
+                                    LENGTH(locale->month),
                                     time_info->tm_mon);
             break;
         case 'c':
-            fmt_strftime_format(sink, "%a %b %e %H:%M:%S %Y", time_info);
+            fmt_strftime_format(sink, locale->date_time_fmt, time_info, locale);
             break;
         case 'C': {
             int64 century = year/100;
@@ -4611,13 +4628,13 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
             fmt_strftime_write_number(sink, time_info->tm_mday, 2, '0');
             break;
         case 'D':
-            fmt_strftime_format(sink, "%m/%d/%y", time_info);
+            fmt_strftime_format(sink, "%m/%d/%y", time_info, locale);
             break;
         case 'e':
             fmt_strftime_write_number(sink, time_info->tm_mday, 2, ' ');
             break;
         case 'F':
-            fmt_strftime_format(sink, "%Y-%m-%d", time_info);
+            fmt_strftime_format(sink, "%Y-%m-%d", time_info, locale);
             break;
         case 'g':
         case 'G': {
@@ -4675,23 +4692,23 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
             break;
         case 'p':
             if (time_info->tm_hour < 12) {
-                fmt_sink_write(sink, STRLIT("AM"));
+                fmt_strftime_write_string(sink, locale->am);
             } else {
-                fmt_sink_write(sink, STRLIT("PM"));
+                fmt_strftime_write_string(sink, locale->pm);
             }
             break;
         case 'P':
             if (time_info->tm_hour < 12) {
-                fmt_sink_write(sink, STRLIT("am"));
+                fmt_strftime_write_string(sink, locale->am_lower);
             } else {
-                fmt_sink_write(sink, STRLIT("pm"));
+                fmt_strftime_write_string(sink, locale->pm_lower);
             }
             break;
         case 'r':
-            fmt_strftime_format(sink, "%I:%M:%S %p", time_info);
+            fmt_strftime_format(sink, locale->time_12_fmt, time_info, locale);
             break;
         case 'R':
-            fmt_strftime_format(sink, "%H:%M", time_info);
+            fmt_strftime_format(sink, "%H:%M", time_info, locale);
             break;
         case 's': {
             int64 epoch_year = year;
@@ -4739,7 +4756,7 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
             fmt_sink_write_byte(sink, '\t');
             break;
         case 'T':
-            fmt_strftime_format(sink, "%H:%M:%S", time_info);
+            fmt_strftime_format(sink, "%H:%M:%S", time_info, locale);
             break;
         case 'u': {
             int32 weekday = time_info->tm_wday;
@@ -4777,10 +4794,10 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
             break;
         }
         case 'x':
-            fmt_strftime_format(sink, "%m/%d/%y", time_info);
+            fmt_strftime_format(sink, locale->date_fmt, time_info, locale);
             break;
         case 'X':
-            fmt_strftime_format(sink, "%H:%M:%S", time_info);
+            fmt_strftime_format(sink, locale->time_fmt, time_info, locale);
             break;
         case 'y': {
             int64 year_in_century = year%100;
@@ -4817,12 +4834,7 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
         case 'Z':
 #if OS_UNIX
             if (time_info->tm_zone != NULL) {
-                char *zone = (char *)time_info->tm_zone;
-
-                while (*zone != '\0') {
-                    fmt_sink_write_byte(sink, *zone);
-                    zone += 1;
-                }
+                fmt_strftime_write_string(sink, time_info->tm_zone);
             }
 #endif
             break;
@@ -4842,12 +4854,14 @@ fmt_strftime_format(FormatSink *sink, char *format, struct tm *time_info) {
 }
 
 int32
-fmt_strftime(char *buffer, int64 capacity,
-             char *format, struct tm *time_info) {
+fmt_strftime_l(char *buffer, int64 capacity, char *format,
+               struct tm *time_info, const FmtLocale *locale) {
     FormatSink sink;
     int32 len;
 
-    if ((format == NULL) || (time_info == NULL)) {
+    ASSERT(locale != NULL);
+
+    if ((format == NULL) || (time_info == NULL) || (locale == NULL)) {
         if ((buffer != NULL) && (capacity > 0)) {
             buffer[0] = '\0';
         }
@@ -4863,7 +4877,7 @@ fmt_strftime(char *buffer, int64 capacity,
         return 0;
     }
 
-    fmt_strftime_format(&sink, format, time_info);
+    fmt_strftime_format(&sink, format, time_info, locale);
     len = fmt_sink_finish(&sink);
     if ((len < 0) || (len >= capacity)) {
         if (capacity > 0) {
@@ -4872,6 +4886,12 @@ fmt_strftime(char *buffer, int64 capacity,
         return 0;
     }
     return len;
+}
+
+int32
+fmt_strftime(char *buffer, int64 capacity,
+             char *format, struct tm *time_info) {
+    return fmt_strftime_l(buffer, capacity, format, time_info, &fmt_locale_c);
 }
 
 void
@@ -6095,6 +6115,71 @@ test_fmt_strftime(void) {
 }
 
 static void
+test_fmt_strftime_locale(void) {
+    static const FmtLocale locale = {
+        .weekday_abbr = {
+            "d0", "d1", "d2", "d3", "d4", "d5", "d6",
+        },
+        .weekday = {
+            "day0", "day1", "day2", "day3", "day4", "day5", "day6",
+        },
+        .month_abbr = {
+            "m01", "m02", "m03", "m04", "m05", "m06",
+            "m07", "m08", "m09", "m10", "m11", "m12",
+        },
+        .month = {
+            "month01", "month02", "month03", "month04", "month05",
+            "month06", "month07", "month08", "month09", "month10",
+            "month11", "month12",
+        },
+        .am = "before-noon",
+        .pm = "after-noon",
+        .am_lower = "before-noon-lower",
+        .pm_lower = "after-noon-lower",
+        .date_time_fmt = "%A/%B/%e/%Y/%X",
+        .date_fmt = "%Y.%m.%d",
+        .time_fmt = "%Hh%Mm%Ss",
+        .time_12_fmt = "%Ih%Mm%Ss %p",
+    };
+    char buffer[512];
+    struct tm time_info = {0};
+    int32 len;
+
+    time_info.tm_year = 122;
+    time_info.tm_mon = 0;
+    time_info.tm_mday = 2;
+    time_info.tm_hour = 15;
+    time_info.tm_min = 4;
+    time_info.tm_sec = 5;
+    time_info.tm_wday = 0;
+    time_info.tm_yday = 1;
+    time_info.tm_isdst = 0;
+
+    len = fmt_strftime_l(buffer, SIZEOF(buffer),
+                         "%a|%A|%b|%B|%p|%P|%c|%x|%X|%r",
+                         &time_info, &locale);
+    ASSERT_EQ(buffer,
+              "d0|day0|m01|month01|after-noon|after-noon-lower|"
+              "day0/month01/ 2/2022/15h04m05s|2022.01.02|15h04m05s|"
+              "03h04m05s after-noon");
+    ASSERT_EQ(len, strlen32(buffer));
+
+    len = fmt_strftime_l(buffer, SIZEOF(buffer),
+                         "%Ec|%Ex|%EX",
+                         &time_info, &locale);
+    ASSERT_EQ(buffer, "day0/month01/ 2/2022/15h04m05s|2022.01.02|15h04m05s");
+    ASSERT_EQ(len, strlen32(buffer));
+
+    len = fmt_strftime_l(buffer, SIZEOF(buffer),
+                         "%A|%B|%p|%P|%x|%X",
+                         &time_info, &fmt_locale_c);
+    ASSERT_EQ(buffer, "Sunday|January|PM|pm|01/02/22|15:04:05");
+    ASSERT_EQ(len, strlen32(buffer));
+
+    return;
+}
+
+static void
 test_fmt_public_api(void) {
     char buffer[32];
     char tiny[4];
@@ -6343,6 +6428,7 @@ main(void) {
     test_fmt_ldouble_decomposition();
     test_fmt_ldouble_decimal_helpers();
     test_fmt_strftime();
+    test_fmt_strftime_locale();
     test_fmt_public_api();
     test_fmt_planned_plan();
     test_fmt_estimate();
