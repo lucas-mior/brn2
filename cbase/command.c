@@ -603,9 +603,7 @@ cmd_result_process_stdin_event(Command *command,
     if (bytes_written > 0) {
         *stdin_offset += bytes_written;
         if (*stdin_offset >= command->stdin_buffer_len) {
-            cmd_result_close_poll_fd(pipe,
-                                     &command->result.stdin_fd,
-                                     left);
+            cmd_result_close_poll_fd(pipe, &command->result.stdin_fd, left);
         } else {
             pipe->revents = 0;
         }
