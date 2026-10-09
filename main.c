@@ -599,7 +599,7 @@ main(int argc, char **argv) {
             fatal(EXIT_FAILURE);
         } else {
             print("%d file%.*s renamed.\n",
-                       number_renames, number_renames != 1, "s");
+                  number_renames, number_renames != 1, "s");
         }
     }
 
