@@ -5001,16 +5001,19 @@ test_fmt_printf_float_outputs(void) {
 
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*f", -1, 1.25), 8);
     ASSERT_EQ(buffer, "1.250000");
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*f",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%.*f",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION, true_min),
               FMT_DOUBLE_MAX_DECIMAL_PRECISION + 2);
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*e",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%.*e",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION, 1.0),
               FMT_DOUBLE_MAX_DECIMAL_PRECISION + 6);
     ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%100000f", 1.0), 100000);
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer),
                                 "%.1048576f", 1.0), -ERANGE);
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*e",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%.*e",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1, 1.0),
               -ERANGE);
     ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.100000e", 1.0), -ERANGE);
@@ -5054,10 +5057,12 @@ test_fmt_printf_general_outputs(void) {
     ASSERT_EQ(buffer, "1.25");
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*g", 0, 123.0), 5);
     ASSERT_EQ(buffer, "1e+02");
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%#.*g",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%#.*g",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION, 1.0),
               FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1);
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*g",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%.*g",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1, 1.0),
               -ERANGE);
 
@@ -5115,12 +5120,14 @@ test_fmt_printf_hex_float_outputs(void) {
 
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.*a", -1, 1.5), 8);
     ASSERT_EQ(buffer, "0x1.8p+0");
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*a",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%.*a",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION, 1.0),
               FMT_DOUBLE_MAX_DECIMAL_PRECISION + 7);
     ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "%.1048576a", 1.0),
               -ERANGE);
-    ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*a",
+    ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                "%.*a",
                                 FMT_DOUBLE_MAX_DECIMAL_PRECISION + 1, 1.0),
               -ERANGE);
 
@@ -5349,7 +5356,8 @@ test_fmt_printf_ldouble_outputs(void) {
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION,
                                     LDBL_MAX),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + LDBL_MAX_10_EXP + 2);
-        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Le",
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                    "%.*Le",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION, 0.0L),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 6);
         ASSERT_EQ(fmt_test_snprintf(NULL, 0,
@@ -5360,15 +5368,18 @@ test_fmt_printf_ldouble_outputs(void) {
                                     "%.*La",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION, 0.0L),
                   FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 7);
-        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lf",
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                    "%.*Lf",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
                                     1.0L),
                   -ERANGE);
-        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Le",
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                    "%.*Le",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
                                     1.0L),
                   -ERANGE);
-        ASSERT_EQ(fmt_test_snprintf(NULL, 0, "%.*Lg",
+        ASSERT_EQ(fmt_test_snprintf(NULL, 0,
+                                    "%.*Lg",
                                     FMT_LDOUBLE_MAX_DECIMAL_PRECISION + 1,
                                     1.0L),
                   -ERANGE);
@@ -5456,7 +5467,7 @@ test_fmt_planned_plan(void) {
     ASSERT(plan.format == format);
 
     len = fmt_test_planned_sprintf(&plan, buffer, SIZEOF(buffer),
-                                  7, 4, span, 1.25);
+                                   7, 4, span, 1.25);
     ASSERT_EQ(len, 17);
     ASSERT_EQ(buffer, len + 1, "x=7 s=a\0bc f=1.25", 18);
 

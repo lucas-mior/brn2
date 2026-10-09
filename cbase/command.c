@@ -1148,17 +1148,15 @@ cmd_run_capture(Command *command, enum CommandFlag flags) {
 
 int32
 cmd_run_capture_all(Command *command) {
-    return cmd_run(command,
-                       CMD_CAPTURE_STDOUT
-                       |CMD_CAPTURE_STDERR);
+    return cmd_run(command, CMD_CAPTURE_STDOUT
+                            |CMD_CAPTURE_STDERR);
 }
 
 int32
 cmd_run_capture_combined(Command *command) {
-    return cmd_run(command,
-                       CMD_CAPTURE_STDOUT
-                       |CMD_CAPTURE_STDERR
-                       |CMD_MERGE_STDERR);
+    return cmd_run(command, CMD_CAPTURE_STDOUT
+                            |CMD_CAPTURE_STDERR
+                            |CMD_MERGE_STDERR);
 }
 
 void
@@ -1702,10 +1700,8 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
         ASSERT_ZERO(cmd.run_elapsed_ns);
 
-        CMD_PUSH(&cmd,
-                     "sh",
-                     "-c",
-                     "printf stdout; printf stderr >&2; exit 7");
+        CMD_PUSH(&cmd, "sh", "-c",
+                 "printf stdout; printf stderr >&2; exit 7");
         ASSERT_ZERO((cmd_run_capture_combined(&cmd)));
         ASSERT_EQ(cmd.result.output, "stdoutstderr");
         ASSERT_EQ(cmd.result.stdout_output, "stdoutstderr");
@@ -1716,10 +1712,8 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd,
-                     "sh",
-                     "-c",
-                     "printf stdout; printf stderr >&2; exit 6");
+        CMD_PUSH(&cmd, "sh", "-c",
+                 "printf stdout; printf stderr >&2; exit 6");
         ASSERT_ZERO((cmd_run_capture_all(&cmd)));
         ASSERT_EQ(cmd.result.stdout_output, "stdout");
         ASSERT_EQ(cmd.result.stderr_output, "stderr");
@@ -1749,13 +1743,9 @@ main(int argc, char **argv) {
 
             stdin_data = malloc2(CMD_STDIN_TEST_LEN);
             memset64(stdin_data, 'x', CMD_STDIN_TEST_LEN);
-            CMD_PUSH(&cmd,
-                         "sh",
-                         "-c",
-                         "cat >/dev/null; printf done");
-            ASSERT(!cmd_stdin_buffer_set(&cmd,
-                                             stdin_data,
-                                             CMD_STDIN_TEST_LEN));
+            CMD_PUSH(&cmd, "sh", "-c", "cat >/dev/null; printf done");
+            ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data,
+                                         CMD_STDIN_TEST_LEN));
             ASSERT(!cmd_run_capture_all(&cmd));
             ASSERT_EQ(cmd.result.stdout_output, "done");
             ASSERT_ZERO(cmd.result.status);
@@ -1774,9 +1764,8 @@ main(int argc, char **argv) {
             stdin_data = malloc2(CMD_EPIPE_TEST_LEN);
             memset64(stdin_data, 'x', CMD_EPIPE_TEST_LEN);
             CMD_PUSH(&cmd, "sh", "-c", "exit 3");
-            ASSERT(!cmd_stdin_buffer_set(&cmd,
-                                             stdin_data,
-                                             CMD_EPIPE_TEST_LEN));
+            ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data,
+                                         CMD_EPIPE_TEST_LEN));
             ASSERT_ZERO((cmd_run_capture_all(&cmd)));
             ASSERT_EQ(cmd.result.status, 3);
             free2(stdin_data, CMD_EPIPE_TEST_LEN);
@@ -1849,10 +1838,8 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
         ASSERT_ZERO(cmd.run_elapsed_ns);
 
-        CMD_PUSH(&cmd,
-                     "cmd",
-                     "/C",
-                     "echo stdout&echo stderr>&2&exit /B 7");
+        CMD_PUSH(&cmd, "cmd", "/C",
+                 "echo stdout&echo stderr>&2&exit /B 7");
         ASSERT_ZERO((cmd_run_capture_combined(&cmd)));
         ASSERT_EQ(cmd.result.output, "stdout\r\nstderr\r\n");
         ASSERT_EQ(cmd.result.stdout_output, "stdout\r\nstderr\r\n");
@@ -1863,10 +1850,8 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd,
-                     "cmd",
-                     "/C",
-                     "echo stdout&echo stderr>&2&exit /B 6");
+        CMD_PUSH(&cmd, "cmd", "/C",
+                 "echo stdout&echo stderr>&2&exit /B 6");
         ASSERT_ZERO((cmd_run_capture_all(&cmd)));
         ASSERT_EQ(cmd.result.stdout_output, "stdout\r\n");
         ASSERT_EQ(cmd.result.stderr_output, "stderr\r\n");
@@ -1900,13 +1885,10 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd,
-                     "sh",
-                     "-c",
-                     "printf asyncout; printf asyncerr >&2");
-        ASSERT(!cmd_run_async(&cmd,
-                                  CMD_CAPTURE_STDOUT
-                                  |CMD_CAPTURE_STDERR));
+        CMD_PUSH(&cmd, "sh", "-c",
+                 "printf asyncout; printf asyncerr >&2");
+        ASSERT(!cmd_run_async(&cmd, CMD_CAPTURE_STDOUT
+                                   |CMD_CAPTURE_STDERR));
         ASSERT_GT(cmd.result.pid, 0);
         cmd_result_read_captured(&cmd);
         ASSERT_ZERO(cmd_wait(&cmd));

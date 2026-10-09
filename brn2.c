@@ -831,9 +831,9 @@ brn2_verify(
             int32 first_claimant;
 
             ASSERT(hash_lookup_pre_calc_map(claimants_map,
-                                             newfile->name, newfile->length,
-                                             newfile->hash, hashes_new[i],
-                                             &first_claimant));
+                                            newfile->name, newfile->length,
+                                            newfile->hash, hashes_new[i],
+                                            &first_claimant));
             new->rename_plans[first_claimant].claimant_count += 1;
         } else {
             new->rename_plans[i].claimant_count = 1;
@@ -847,9 +847,9 @@ brn2_verify(
         int32 claimant_count;
 
         ASSERT(hash_lookup_pre_calc_map(claimants_map,
-                                         newfile->name, newfile->length,
-                                         newfile->hash, hashes_new[i],
-                                         &first_claimant));
+                                        newfile->name, newfile->length,
+                                        newfile->hash, hashes_new[i],
+                                        &first_claimant));
         claimant_count = new->rename_plans[first_claimant].claimant_count;
         rename_plan->claimant_count = claimant_count;
 
@@ -1067,7 +1067,7 @@ brn2_validate_execution_plan(
             struct stat new_stat;
 
             if (!brn2_validate_replace_equal_target(old, new, oldlist_map,
-                                                     i, &old_stat, &new_stat)) {
+                                                    i, &old_stat, &new_stat)) {
                 return false;
             }
             break;
@@ -1102,7 +1102,7 @@ brn2_execute_replace_equal_target(
     int32 renamed;
 
     if (!brn2_validate_replace_equal_target(old, new, oldlist_map, i,
-                                             &old_stat, &new_stat)) {
+                                            &old_stat, &new_stat)) {
         fatal(EXIT_FAILURE);
     }
 
@@ -1417,9 +1417,9 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             return;
         }
         if (verbose) {
-            printf("%d / %d | %.*s != %.*s \n", i + 1, list->length,
-                   list->files[i]->length, list->files[i]->name,
-                   file->length, file->name);
+            printf("%d / %d | %.*s != %.*s \n",
+                   i + 1, list->length, list->files[i]->length,
+                   list->files[i]->name, file->length, file->name);
         }
     }
     error("List does not contain '%.*s'\n", file->length, file->name);
@@ -1574,7 +1574,7 @@ main(void) {
             ASSERT_EQ(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
-                                             hash, list1->indexes[i]));
+                                            hash, list1->indexes[i]));
         }
 
         brn2_free_list(list1);
@@ -1707,7 +1707,7 @@ main(void) {
             ASSERT_EQ(file->hash % capacity_set, hash & map->bitmask);
 
             ASSERT(hash_remove_pre_calc_map(map, file->name, file->length,
-                                             hash, list1->indexes[i]));
+                                            hash, list1->indexes[i]));
         }
 
         hash_destroy_map(map);
