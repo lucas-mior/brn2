@@ -5480,8 +5480,7 @@ test_fmt_planned_plan(void) {
 
     estimate = fmt_test_planned_estimate(&plan, "[%s]", (char *)NULL);
     ASSERT_EQ(estimate, 7);
-    len = fmt_test_planned_sprintf(&plan, buffer, SIZEOF(buffer),
-                                   (char *)NULL);
+    len = fmt_test_planned_sprintf(&plan, buffer, SIZEOF(buffer), (char *)NULL);
     ASSERT_EQ(len, 7);
     ASSERT_EQ(buffer, "[<nil>]");
 
