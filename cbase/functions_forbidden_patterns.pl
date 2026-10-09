@@ -306,6 +306,140 @@ sub related_argument_kind {
     return '';
 }
 
+# Identify comments without mistaking comment markers inside literals for
+# actual comments.
+sub range_has_comment {
+    my ($source, $start, $end) = @_;
+    my $text = substr($source, $start, $end - $start);
+
+    while ($text =~ / "(?:\\.|[^"\\])*"
+                    | '(?:\\.|[^'\\])*'
+                    | (\/\/[^\n]* | \/\*.*?\*\/)
+                  /gxs) {
+        return 1 if defined $1;
+    }
+    return 0;
+}
+
+# A short call can be wrapped deliberately to match a neighboring, longer
+# call. Only reject unnecessary wrapping when every call in a consecutive
+# (same-indentation, no intervening lines) group fits on one line.
+sub report_unnecessary_call_wraps {
+    my ($path, $source, $code) = @_;
+    my @calls;
+    my $previous_end = -1;
+
+    return if $path =~ /\.meta\.h\z/;
+
+    pos($code) = 0;
+    while ($code =~ /(?<![A-Za-z0-9_])
+                     ([A-Za-z_][A-Za-z0-9_]*)/gx) {
+        my $name = $1;
+        my $name_idx = $-[1];
+        my $line_start;
+        my $prefix;
+        my $paren_idx;
+        my $end_idx;
+        my $line_end;
+        my $tail;
+        my $call_text;
+        my $flat_text;
+        my $fits;
+        my $has_newline;
+        my $start_line;
+        my $end_line;
+        my $indent;
+
+        next if $name_idx < $previous_end;
+        next if $name =~ /^(?:if|for|while|switch|sizeof|_Alignof
+                            |_Generic|_Static_assert)$/x;
+        $line_start = rindex($source, "\n", $name_idx - 1) + 1;
+        $prefix = substr($code, $line_start, $name_idx - $line_start);
+        next unless $prefix =~ /\A([ ]+)/;
+        $indent = length($1);
+        # Only inspect complete call statements and simple assignment or
+        # return statements. In particular, a nested call or one following
+        # an operator on a previous line is not an independent call.
+        next unless $prefix =~ /\A[ ]+(?:return[ \t]+
+                                    |[^(){};=\n]+(?<![=!<>])=[ \t]*
+                                    )?\z/x;
+        if ($prefix =~ /\A[ ]+\z/ && $line_start > 0) {
+            my $prev_start = rindex($code, "\n", $line_start - 2) + 1;
+            my $prev_line = substr($code, $prev_start,
+                                   $line_start - $prev_start - 1);
+            next if $prev_line =~ /(?:[=,(:?+\-*\/|&]|
+                                      \breturn)[ \t]*\z/x;
+        }
+
+        $paren_idx = skip_space_comments($source, $name_idx + length($name));
+        next unless substr($code, $paren_idx, 1) eq '(';
+        $end_idx = call_end($code, $paren_idx + 1);
+        next if $end_idx < 0;
+
+        $line_end = index($source, "\n", $end_idx);
+        $line_end = length($source) if $line_end < 0;
+        $tail = substr($code, $end_idx + 1, $line_end - $end_idx - 1);
+        next unless $tail =~ /\A[ \t]*;[ \t]*\r?\z/;
+
+        # Retain only one complete call statement, not nested calls.
+        $previous_end = $end_idx + 1;
+        $call_text = substr($source, $line_start,
+                            $line_end - $line_start);
+        $has_newline = $call_text =~ /\n/ ? 1 : 0;
+        $flat_text = $call_text;
+        # Joining before a closing delimiter needs no intervening space.
+        $flat_text =~ s/[ \t]*\r?\n[ \t]*(?=[)\],;])//g;
+        $flat_text =~ s/[ \t]*\r?\n[ \t]*/ /g;
+        $fits = length($flat_text) <= 80;
+
+        # These constructs require their original physical layout or are
+        # not safely reducible to a single C source line.
+        my $call_code = substr($code, $line_start,
+                               $end_idx - $line_start);
+        $fits = 0 if $call_text =~ /\\\r?\n|\n[ \t]*#/
+                     || $call_code =~ /[{};]/
+                     || range_has_comment($source, $line_start, $line_end);
+
+        $start_line = line_number($source, $line_start);
+        $end_line = line_number($source, $line_end);
+        push @calls, {
+            name => $name,
+            start_line => $start_line,
+            end_line => $end_line,
+            indent => $indent,
+            fits => $fits,
+            wrapped => $has_newline,
+        };
+    }
+
+    # A group is a maximal sequence of complete call statements at the
+    # same indentation, with no other code or blank line between them.
+    for (my $start = 0; $start < @calls;) {
+        my $end = $start + 1;
+        my $all_fit = $calls[$start]{fits};
+
+        while ($end < @calls
+               && $calls[$end]{start_line}
+                  == $calls[$end - 1]{end_line} + 1
+               && $calls[$end]{indent} == $calls[$start]{indent}) {
+            $all_fit &&= $calls[$end]{fits};
+            $end += 1;
+        }
+
+        if ($all_fit) {
+            for (my $idx = $start; $idx < $end; $idx += 1) {
+                next unless $calls[$idx]{wrapped};
+                print "$path:$calls[$idx]{start_line}:";
+                print "$calls[$idx]{name} call fits on one line ";
+                print "but is split across multiple lines\n";
+            }
+        }
+        $start = $end;
+    }
+
+    return;
+}
+
 for my $path (@paths) {
     open my $fh, '<', $path or die "$path: $!\n";
     local $/;
@@ -558,6 +692,8 @@ for my $path (@paths) {
             }
         }
     }
+
+    report_unnecessary_call_wraps($path, $source, $code);
 
     pos($code) = 0;
     while ($code =~ /(?<![A-Za-z0-9_])STRLIT_LEN(?![A-Za-z0-9_])/g) {
