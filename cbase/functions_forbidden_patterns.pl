@@ -286,6 +286,26 @@ sub report_single_arg_format_string {
     return;
 }
 
+# Related consecutive arguments should share a line, except when each
+# argument occupies its own line.
+sub related_argument_kind {
+    my ($first, $second) = @_;
+
+    return '_len' if $second eq $first . '_len';
+
+    if ($first =~ /\A([A-Za-z_][A-Za-z0-9_]*_)?(x|width)\z/) {
+        my $prefix = defined($1) ? $1 : '';
+        my $base = $2;
+        my $partner = $base eq 'x' ? 'y' : 'height';
+
+        if ($second eq $prefix . $partner) {
+            return $base eq 'x' ? 'x/y' : 'width/height';
+        }
+    }
+
+    return '';
+}
+
 for my $path (@paths) {
     open my $fh, '<', $path or die "$path: $!\n";
     local $/;
@@ -516,11 +536,13 @@ for my $path (@paths) {
                      $arg_idx + 1 < scalar(@arg_starts); $arg_idx += 1) {
                     my $first_line;
                     my $second_line;
+                    my $kind;
 
                     next unless defined $arg_names[$arg_idx]
                             && defined $arg_names[$arg_idx + 1];
-                    next unless $arg_names[$arg_idx + 1]
-                                eq $arg_names[$arg_idx] . '_len';
+                    $kind = related_argument_kind($arg_names[$arg_idx],
+                                                  $arg_names[$arg_idx + 1]);
+                    next unless $kind;
 
                     $first_line = $arg_lines[$arg_idx];
                     $second_line = $arg_lines[$arg_idx + 1];
@@ -528,7 +550,7 @@ for my $path (@paths) {
                     next if $args_per_line{$first_line} == 1
                             && $args_per_line{$second_line} == 1;
 
-                    print "$path:$second_line:$name related _len "
+                    print "$path:$second_line:$name related $kind "
                           . "arguments must be the only arguments on their "
                           . "lines\n";
                     last;
