@@ -1068,8 +1068,7 @@ read_entire_file(char *path, char **file_bytes) {
 
     if ((file = fopen(path, "rb")) == NULL) {
         err = errno;
-        error("Error opening "RED("%s")" for reading: %s",
-              path, strerror(err));
+        error("Error opening "RED("%s")" for reading: %s", path, strerror(err));
         ASSERT_GT(err, 0);
         return -err;
     }
