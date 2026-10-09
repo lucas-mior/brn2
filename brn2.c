@@ -1841,8 +1841,7 @@ main(void) {
 
         names_renamed = hash_create_set((uint32)old->length, "names_renamed");
 
-        brn2_execute(old, new, oldlist_map, names_renamed,
-                     &number_renames);
+        brn2_execute(old, new, oldlist_map, names_renamed, &number_renames);
 
         ASSERT_EQ(number_renames, number_changes);
         for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
