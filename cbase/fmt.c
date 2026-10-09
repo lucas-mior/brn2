@@ -3341,8 +3341,7 @@ fmt_float_generate_hex_body(FormatSpec *spec, double value,
     } else {
         ASSERT(spec->precision <= INT32_MAX);
         if (spec->precision < FMT_DOUBLE_HEX_DIGITS) {
-            fmt_float_hex_round(&first_digit, digits,
-                                spec->precision, upper);
+            fmt_float_hex_round(&first_digit, digits, spec->precision, upper);
         }
         digit_len = spec->precision;
     }
