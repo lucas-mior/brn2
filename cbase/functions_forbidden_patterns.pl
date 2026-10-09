@@ -50,8 +50,13 @@ sub skip_space_comments {
     while ($idx < length($text)) {
         my $ch = substr($text, $idx, 1);
         my $two = substr($text, $idx, 2);
+        my $three = substr($text, $idx, 3);
 
-        if ($ch =~ /\s/) {
+        if ($three eq "\\\r\n") {
+            $idx += 3;
+        } elsif ($two eq "\\\n") {
+            $idx += 2;
+        } elsif ($ch =~ /\s/) {
             $idx += 1;
         } elsif ($two eq '//') {
             $idx += 2;
