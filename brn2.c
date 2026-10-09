@@ -1286,8 +1286,7 @@ brn2_execute2(
                                      oldname, oldlen, oldhash, oldindex)) {
             *number_renames += 1;
         }
-        print("%.*s -> " GREEN("%.*s") "\n",
-              oldlen, oldname, newlen, newname);
+        print("%.*s -> " GREEN("%.*s") "\n", oldlen, oldname, newlen, newname);
     }
     return;
 }
