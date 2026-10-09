@@ -362,9 +362,7 @@ cmd_windows_cmd_line(Command *command,
         bool needs_quotes;
 
         if (i == 0) {
-            argument = cmd_windows_argv0(command,
-                                         argv0_windows,
-                                         &argument_len);
+            argument = cmd_windows_argv0(command, argv0_windows, &argument_len);
         } else {
             argument = command->argv[i];
             argument_len = command->argv_lens[i];
