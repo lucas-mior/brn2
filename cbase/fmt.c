@@ -4137,8 +4137,7 @@ fmt_execute_spec(FormatSink *sink, FormatSpec *spec, FormatArgs *fmt_args) {
         if (sink->status < 0) {
             return sink->status;
         }
-        return fmt_store_count(spec, fmt_args, sink->total,
-                               sink->write_count);
+        return fmt_store_count(spec, fmt_args, sink->total, sink->write_count);
     }
     if (fmt_is_float_conversion(spec->conversion)) {
         if (!fmt_float_is_fixed(spec->conversion)
