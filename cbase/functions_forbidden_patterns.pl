@@ -1,6 +1,14 @@
 use strict;
 use warnings;
+use Cwd qw(abs_path);
+use Digest::SHA;
+use File::Basename qw(dirname);
+use File::Path qw(make_path);
+use File::Temp qw(tempfile);
+use JSON::PP qw(decode_json encode_json);
+use Time::HiRes qw(stat);
 
+my $file_has_problems = 0;
 my @paths = @ARGV;
 
 if (@paths && $paths[0] eq '--file-list') {
@@ -18,6 +26,80 @@ if (@paths && $paths[0] eq '--file-list') {
     }
     @paths = @listed_paths;
 }
+
+# Only successful checks are cached. Compare file metadata before reading:
+# cached files must not be opened at all on subsequent checks. The checker
+# itself is hashed so changes to any rule invalidate all previously clean files.
+sub file_signature {
+    my ($path) = @_;
+    my @info = stat($path);
+
+    return undef unless @info;
+    return join(':', @info[0, 1, 7],
+                sprintf('%.9f', $info[9]), sprintf('%.9f', $info[10]));
+}
+
+sub checker_fingerprint {
+    open my $fh, '<', $0 or die "$0: $!\n";
+    binmode $fh;
+    my $digest = Digest::SHA->new(256);
+    $digest->addfile($fh);
+    close $fh;
+    return $digest->hexdigest;
+}
+
+sub read_cache {
+    my ($path, $fingerprint) = @_;
+    my $data;
+
+    return {} unless open my $fh, '<', $path;
+    local $/;
+    $data = eval { decode_json(<$fh>) };
+    close $fh;
+    return {} unless ref($data) eq 'HASH'
+                     && ($data->{version} // 0) == 1
+                     && ($data->{checker} // '') eq $fingerprint
+                     && ref($data->{clean}) eq 'HASH';
+    return $data->{clean};
+}
+
+# Write atomically so interruptions never leave a partially written cache.
+# Failure to create or update the cache must not break the checks.
+sub write_cache {
+    my ($path, $fingerprint, $clean) = @_;
+    my $dir = dirname($path);
+    my ($fh, $temporary);
+
+    eval { make_path($dir) unless -d $dir; };
+    return if $@ || !-d $dir;
+    eval {
+        ($fh, $temporary) = tempfile('checker-XXXXXXXX', DIR => $dir,
+                                      UNLINK => 0);
+    };
+    return if $@ || !$fh;
+    my $data = encode_json({
+        version => 1,
+        checker => $fingerprint,
+        clean => $clean,
+    });
+    my $written = print {$fh} $data;
+    my $closed = close $fh;
+    if (!$written || !$closed || !rename($temporary, $path)) {
+        unlink $temporary;
+    }
+}
+
+sub report_issue {
+    my ($message) = @_;
+    $file_has_problems = 1;
+    print $message;
+}
+
+my $cache_path = $ENV{CBASE_FORBIDDEN_PATTERNS_CACHE}
+                 // '.cache/functions_forbidden_patterns.json';
+my $checker_hash = checker_fingerprint();
+my $clean_files = read_cache($cache_path, $checker_hash);
+my $cache_dirty = 0;
 
 sub line_number {
     my ($text, $idx) = @_;
@@ -212,7 +294,7 @@ sub report_strequal_strlit_args {
                     && strlit_arg_has_literal($source,
                                               $args_start + $arg_start)) {
                 my $line = line_number($source, $args_start + $arg_start);
-                print "$path:$line:STREQUAL called with STRLIT literal\n";
+                report_issue("$path:$line:STREQUAL called with STRLIT literal\n");
                 return;
             }
 
@@ -279,8 +361,8 @@ sub report_single_arg_format_string {
 
     if ($format_arg =~ / "($format_spec)",/s) {
         my $line = line_number($source, $format_start);
-        print "$path:$line:";
-        print "single-argument format string without literal content\n";
+        report_issue("$path:$line:single-argument format string "
+                     . "without literal content\n");
     }
 
     return;
@@ -429,9 +511,9 @@ sub report_unnecessary_call_wraps {
         if ($all_fit) {
             for (my $idx = $start; $idx < $end; $idx += 1) {
                 next unless $calls[$idx]{wrapped};
-                print "$path:$calls[$idx]{start_line}:";
-                print "$calls[$idx]{name} call fits on one line ";
-                print "but is split across multiple lines\n";
+                report_issue("$path:$calls[$idx]{start_line}:"
+                             . "$calls[$idx]{name} call fits on one line "
+                             . "but is split across multiple lines\n");
             }
         }
         $start = $end;
@@ -441,9 +523,20 @@ sub report_unnecessary_call_wraps {
 }
 
 for my $path (@paths) {
+    my $key = abs_path($path) // $path;
+    my $before = file_signature($path);
+
+    # A prior success is reusable only if this exact file is unchanged.
+    if (defined($before) && defined($clean_files->{$key})
+            && $clean_files->{$key} eq $before) {
+        next;
+    }
+
+    $file_has_problems = 0;
     open my $fh, '<', $path or die "$path: $!\n";
     local $/;
     my $source = <$fh>;
+    close $fh;
     my $code = code_mask($source);
 
     # Indentation distinguishes calls from the project's function headers.
@@ -480,7 +573,8 @@ for my $path (@paths) {
         }
 
         my $line = line_number($source, $paren_idx);
-        print "$path:$line:$name call breaks before the first argument\n";
+        report_issue("$path:$line:$name call breaks before the first "
+                     . "argument\n");
     }
 
     if ($path !~ /\.meta\.h\z/) {
@@ -616,8 +710,8 @@ for my $path (@paths) {
                 next if $current_column == $anchor_column;
 
                 $line = line_number($source, $current_idx);
-                print "$path:$line:$name call argument is not aligned "
-                      . "with its alignment anchor\n";
+                report_issue("$path:$line:$name call argument is not aligned "
+                             . "with its alignment anchor\n");
                 last;
             }
 
@@ -642,8 +736,9 @@ for my $path (@paths) {
                 }
 
                 if ($format_line_has_args && $other_line_has_args) {
-                    print "$path:$format_line:$name format-string line "
-                          . "must contain all format arguments or none\n";
+                    report_issue("$path:$format_line:$name format-string "
+                                 . "line must contain all format arguments "
+                                 . "or none\n");
                 }
             }
 
@@ -684,9 +779,9 @@ for my $path (@paths) {
                     next if $args_per_line{$first_line} == 1
                             && $args_per_line{$second_line} == 1;
 
-                    print "$path:$second_line:$name related $kind "
-                          . "arguments must be the only arguments on their "
-                          . "lines\n";
+                    report_issue("$path:$second_line:$name related $kind "
+                                 . "arguments must be the only arguments on "
+                                 . "their lines\n");
                     last;
                 }
             }
@@ -708,7 +803,7 @@ for my $path (@paths) {
         $literal_idx = skip_space_comments($source, $paren_idx + 1);
         if (substr($source, $literal_idx, 1) eq '"') {
             my $line = line_number($source, $idx);
-            print "$path:$line:STRLIT_LEN called on a literal string\n";
+            report_issue("$path:$line:STRLIT_LEN called on a literal string\n");
         }
     }
 
@@ -749,4 +844,20 @@ for my $path (@paths) {
             pos($code) = $args_end + 1;
         }
     }
+    # Files that failed a check are always rescanned on the next run.
+    # Likewise, do not cache a file that changed while being inspected.
+    my $after = file_signature($path);
+    if (!$file_has_problems && defined($before) && defined($after)
+            && $before eq $after) {
+        if (!defined($clean_files->{$key})
+                || $clean_files->{$key} ne $after) {
+            $clean_files->{$key} = $after;
+            $cache_dirty = 1;
+        }
+    } elsif (exists $clean_files->{$key}) {
+        delete $clean_files->{$key};
+        $cache_dirty = 1;
+    }
 }
+
+write_cache($cache_path, $checker_hash, $clean_files) if $cache_dirty;
