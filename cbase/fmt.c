@@ -4902,8 +4902,7 @@ test_fmt_pointer_count_outputs(void) {
     ASSERT_EQ(count64, 3);
 
     count8 = -1;
-    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w8n", &count8),
-              3);
+    ASSERT_EQ(fmt_test_snprintf(buffer, SIZEOF(buffer), "abc%w8n", &count8), 3);
     ASSERT_EQ(count8, 3);
 
     count16 = -1;
