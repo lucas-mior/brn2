@@ -785,8 +785,7 @@ xmmap_commit(int64 *size) {
 void
 xmunmap(void *p, int64 size) {
     if (munmap(p, (size_t)size) < 0) {
-        error("Error in munmap(%p, %lld): %s.\n",
-              p, size, strerror(errno));
+        error("Error in munmap(%p, %lld): %s.\n", p, size, strerror(errno));
         fatal(EXIT_FAILURE);
     }
     return;
