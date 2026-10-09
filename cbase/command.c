@@ -616,9 +616,7 @@ cmd_result_process_stdin_event(Command *command,
             return;
         }
         if (errno == EPIPE) {
-            cmd_result_close_poll_fd(pipe,
-                                     &command->result.stdin_fd,
-                                     left);
+            cmd_result_close_poll_fd(pipe, &command->result.stdin_fd, left);
             return;
         }
         cmd_error_set(command, errno);
@@ -798,9 +796,7 @@ cmd_result_process_io(Command *command, enum CommandFlag flags) {
 
 void
 cmd_result_read_captured(Command *command) {
-    cmd_result_process_io(command,
-                          CMD_CAPTURE_STDOUT
-                          |CMD_CAPTURE_STDERR);
+    cmd_result_process_io(command, CMD_CAPTURE_STDOUT |CMD_CAPTURE_STDERR);
     return;
 }
 
@@ -1084,8 +1080,7 @@ cmd_run(Command *command, enum CommandFlag flags) {
     if (cmd_flags_capture(flags) || (command->stdin_buffer != NULL)) {
         cmd_result_process_io(command, flags);
         if (command->error_status) {
-            return cmd_run_finish(command, start_ns,
-                                  cmd_error_return(command));
+            return cmd_run_finish(command, start_ns, cmd_error_return(command));
         }
     }
     if ((err = cmd_wait(command)) < 0) {
@@ -1105,8 +1100,7 @@ cmd_run(Command *command, enum CommandFlag flags) {
     }
     command->result.status = cmd_windows_run_process(command, flags);
     if (command->error_status) {
-        return cmd_run_finish(command, start_ns,
-                              cmd_error_return(command));
+        return cmd_run_finish(command, start_ns, cmd_error_return(command));
     }
     command->result.exit_status = command->result.status;
     command->result.exited = true;
@@ -1144,8 +1138,7 @@ cmd_run_capture(Command *command, enum CommandFlag flags) {
 
 int32
 cmd_run_capture_all(Command *command) {
-    return cmd_run(command, CMD_CAPTURE_STDOUT
-                            |CMD_CAPTURE_STDERR);
+    return cmd_run(command, CMD_CAPTURE_STDOUT |CMD_CAPTURE_STDERR);
 }
 
 int32
@@ -1440,11 +1433,9 @@ cmd_free(Command *command) {
     cmd_cwd_clear(command);
 
     free2(command->argv, command->cap*SIZEOF(*command->argv));
-    free2(command->argv_lens,
-          command->cap*SIZEOF(*command->argv_lens));
+    free2(command->argv_lens, command->cap*SIZEOF(*command->argv_lens));
     free2(command->env, command->env_cap*SIZEOF(*command->env));
-    free2(command->env_lens,
-          command->env_cap*SIZEOF(*command->env_lens));
+    free2(command->env_lens, command->env_cap*SIZEOF(*command->env_lens));
     if (command->argv_arena) {
         arena_destroy(command->argv_arena);
     }
@@ -1696,8 +1687,7 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
         ASSERT_ZERO(cmd.run_elapsed_ns);
 
-        CMD_PUSH(&cmd, "sh", "-c",
-                 "printf stdout; printf stderr >&2; exit 7");
+        CMD_PUSH(&cmd, "sh", "-c", "printf stdout; printf stderr >&2; exit 7");
         ASSERT_ZERO((cmd_run_capture_combined(&cmd)));
         ASSERT_EQ(cmd.result.output, "stdoutstderr");
         ASSERT_EQ(cmd.result.stdout_output, "stdoutstderr");
@@ -1708,8 +1698,7 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd, "sh", "-c",
-                 "printf stdout; printf stderr >&2; exit 6");
+        CMD_PUSH(&cmd, "sh", "-c", "printf stdout; printf stderr >&2; exit 6");
         ASSERT_ZERO((cmd_run_capture_all(&cmd)));
         ASSERT_EQ(cmd.result.stdout_output, "stdout");
         ASSERT_EQ(cmd.result.stderr_output, "stderr");
@@ -1740,8 +1729,7 @@ main(int argc, char **argv) {
             stdin_data = malloc2(CMD_STDIN_TEST_LEN);
             memset64(stdin_data, 'x', CMD_STDIN_TEST_LEN);
             CMD_PUSH(&cmd, "sh", "-c", "cat >/dev/null; printf done");
-            ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data,
-                                         CMD_STDIN_TEST_LEN));
+            ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data, CMD_STDIN_TEST_LEN));
             ASSERT(!cmd_run_capture_all(&cmd));
             ASSERT_EQ(cmd.result.stdout_output, "done");
             ASSERT_ZERO(cmd.result.status);
@@ -1760,8 +1748,7 @@ main(int argc, char **argv) {
             stdin_data = malloc2(CMD_EPIPE_TEST_LEN);
             memset64(stdin_data, 'x', CMD_EPIPE_TEST_LEN);
             CMD_PUSH(&cmd, "sh", "-c", "exit 3");
-            ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data,
-                                         CMD_EPIPE_TEST_LEN));
+            ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data, CMD_EPIPE_TEST_LEN));
             ASSERT_ZERO((cmd_run_capture_all(&cmd)));
             ASSERT_EQ(cmd.result.status, 3);
             free2(stdin_data, CMD_EPIPE_TEST_LEN);
@@ -1834,8 +1821,7 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
         ASSERT_ZERO(cmd.run_elapsed_ns);
 
-        CMD_PUSH(&cmd, "cmd", "/C",
-                 "echo stdout&echo stderr>&2&exit /B 7");
+        CMD_PUSH(&cmd, "cmd", "/C", "echo stdout&echo stderr>&2&exit /B 7");
         ASSERT_ZERO((cmd_run_capture_combined(&cmd)));
         ASSERT_EQ(cmd.result.output, "stdout\r\nstderr\r\n");
         ASSERT_EQ(cmd.result.stdout_output, "stdout\r\nstderr\r\n");
@@ -1846,8 +1832,7 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd, "cmd", "/C",
-                 "echo stdout&echo stderr>&2&exit /B 6");
+        CMD_PUSH(&cmd, "cmd", "/C", "echo stdout&echo stderr>&2&exit /B 6");
         ASSERT_ZERO((cmd_run_capture_all(&cmd)));
         ASSERT_EQ(cmd.result.stdout_output, "stdout\r\n");
         ASSERT_EQ(cmd.result.stderr_output, "stderr\r\n");
@@ -1881,10 +1866,8 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd, "sh", "-c",
-                 "printf asyncout; printf asyncerr >&2");
-        ASSERT(!cmd_run_async(&cmd, CMD_CAPTURE_STDOUT
-                                   |CMD_CAPTURE_STDERR));
+        CMD_PUSH(&cmd, "sh", "-c", "printf asyncout; printf asyncerr >&2");
+        ASSERT(!cmd_run_async(&cmd, CMD_CAPTURE_STDOUT |CMD_CAPTURE_STDERR));
         ASSERT_GT(cmd.result.pid, 0);
         cmd_result_read_captured(&cmd);
         ASSERT_ZERO(cmd_wait(&cmd));
