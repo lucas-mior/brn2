@@ -219,8 +219,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
   }
 #ifdef RYU_DEBUG
   printf("e10=%d\n", e10);
-  printf("V+=%s\nV =%s\nV-=%s\n",
-         ryu_s(vp), ryu_s(vr), ryu_s(vm));
+  printf("V+=%s\nV =%s\nV-=%s\n", ryu_s(vp), ryu_s(vr), ryu_s(vm));
   printf("vm is trailing zeros=%s\n", vmIsTrailingZeros ? "true" : "false");
   printf("vr is trailing zeros=%s\n", vrIsTrailingZeros ? "true" : "false");
 #endif
@@ -240,8 +239,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
     ++removed;
   }
 #ifdef RYU_DEBUG
-  printf("V+=%s\nV =%s\nV-=%s\n",
-         ryu_s(vp), ryu_s(vr), ryu_s(vm));
+  printf("V+=%s\nV =%s\nV-=%s\n", ryu_s(vp), ryu_s(vr), ryu_s(vm));
   printf("d-10=%s\n", vmIsTrailingZeros ? "true" : "false");
 #endif
   if (vmIsTrailingZeros) {
