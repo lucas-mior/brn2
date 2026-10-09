@@ -4177,8 +4177,7 @@ fmt_execute_spec(FormatSink *sink, FormatSpec *spec, FormatArgs *fmt_args) {
             int32 body_len;
 
             value = va_arg(fmt_args->args, double);
-            body_len = fmt_float_generate_body(spec, value, body,
-                                               SIZEOF(body));
+            body_len = fmt_float_generate_body(spec, value, body, SIZEOF(body));
             if (body_len < 0) {
                 return body_len;
             }
