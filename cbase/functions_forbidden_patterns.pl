@@ -118,6 +118,67 @@ sub strlit_arg_has_literal {
     return substr($source, $literal_idx, 1) eq '"';
 }
 
+sub range_has_percent_string_literal {
+    my ($source, $start, $end) = @_;
+    my $idx = $start;
+
+    while ($idx < $end) {
+        my $ch = substr($source, $idx, 1);
+        my $two = substr($source, $idx, 2);
+
+        if ($two eq '//') {
+            $idx += 2;
+            while ($idx < $end && substr($source, $idx, 1) ne "\n") {
+                $idx += 1;
+            }
+            next;
+        }
+        if ($two eq '/*') {
+            $idx += 2;
+            while ($idx < $end && substr($source, $idx, 2) ne '*/') {
+                $idx += 1;
+            }
+            if ($idx < $end) {
+                $idx += 2;
+            }
+            next;
+        }
+        if ($ch eq q{'}) {
+            $idx += 1;
+            while ($idx < $end) {
+                $ch = substr($source, $idx, 1);
+                if ($ch eq '\\') {
+                    $idx += 2;
+                    next;
+                }
+                $idx += 1;
+                last if $ch eq q{'};
+            }
+            next;
+        }
+        if ($ch eq '"') {
+            $idx += 1;
+            while ($idx < $end) {
+                $ch = substr($source, $idx, 1);
+                if ($ch eq '\\') {
+                    $idx += 2;
+                    next;
+                }
+                if ($ch eq '%') {
+                    return 1;
+                }
+                $idx += 1;
+                last if $ch eq '"';
+            }
+            next;
+        }
+
+        $idx += 1;
+    }
+
+    return 0;
+}
+
 sub report_strequal_strlit_args {
     my ($path, $source, $code, $args_start, $args_end) = @_;
     my $args = substr($code, $args_start, $args_end - $args_start);
@@ -350,27 +411,17 @@ for my $path (@paths) {
             }
             push @arg_ends, $args_end;
 
-            # printf-like functions align wrapped arguments with their format
-            # string rather than with an output stream or destination buffer.
-            if ($name =~ /^(?:error|error2|fmt_printf|print0|printf|vprintf)$/) {
-                $format_arg_idx = 0;
-            } elsif ($name =~ /^(?:SNPRINTF|cmd_printf|fprint|fprint_0|fprintf
-                                  |sprintf|str_printf|strflex_list_printf
-                                  |vfprintf|vsprintf)$/x) {
-                $format_arg_idx = 1;
-            } elsif ($name =~ /^(?:fmt_snprintf|fmt_sprintf
-                                  |fmt_test_public_vsnprintf
-                                  |fmt_test_public_vsprintf|fmt_test_snprintf
-                                  |fmt_vsnprintf|fmt_vsprintf|snprintf
-                                  |snprint|snprint_0|vsnprintf)$/x) {
-                $format_arg_idx = 2;
-            } elsif ($name eq 'error_impl') {
-                $format_arg_idx = 3;
-            } elsif ($name =~ /^(?:fmt_snprintf_estimate
-                                  |fmt_vsnprintf_estimate)$/x) {
-                $format_arg_idx = 0;
-            } elsif ($name eq 'fmt_vsnprintf_estimate_plan') {
-                $format_arg_idx = 1;
+            # printf-like calls align wrapped arguments with the format
+            # string. Detect that argument by looking for a '%' inside a
+            # string literal, so local wrappers follow the same rule.
+            for (my $arg_idx = 0;
+                 $arg_idx < scalar(@arg_starts); $arg_idx += 1) {
+                if (range_has_percent_string_literal($source,
+                                                     $arg_starts[$arg_idx],
+                                                     $arg_ends[$arg_idx])) {
+                    $format_arg_idx = $arg_idx;
+                    last;
+                }
             }
 
             if ($format_arg_idx >= 0
