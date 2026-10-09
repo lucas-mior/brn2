@@ -424,6 +424,9 @@ int32 fmt_vsnprintf_estimate(char *, va_list)                 ATTR_PRINTF(1, 0);
 int32 fmt_snprintf_estimate(char *, ...)                      ATTR_PRINTF(1, 2);
 int32 fmt_vsnprintf_estimate_plan(FmtPlan *, char *, va_list) ATTR_PRINTF(2, 0);
 int32 fmt_vsnprintf_planned(FmtPlan *, char *, int64, va_list);
+// Async-signal-safe strftime using deterministic C-locale names. On Unix,
+// %z and %Z use only tm_gmtoff/tm_zone already present in struct tm.
+int32 fmt_strftime(char *, int64, char *, struct tm *);
 
 String *string_array_append(StringArray *);
 int32 string_array_append_copy(StringArray *array, String *item);
