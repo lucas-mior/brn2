@@ -403,6 +403,29 @@ sub range_has_comment {
     return 0;
 }
 
+# A multiline string assembled from adjacent literals preserves explicit
+# output line boundaries. Keep that layout when every fragment ends in \n.
+sub has_split_newline_literals {
+    my ($text) = @_;
+    my $literal = qr/(?:u8|[uUL])?"(?:\\.|[^"\\])*"/;
+
+    while ($text =~ /($literal(?:[ \t]*\r?\n[ \t]*$literal)+)/g) {
+        my $run = $1;
+        my @fragments = ($run =~ /$literal/g);
+        my $all_end_in_newline = 1;
+
+        for my $fragment (@fragments) {
+            if ($fragment !~ /(?<!\\)(?:\\\\)*\\n"\z/) {
+                $all_end_in_newline = 0;
+                last;
+            }
+        }
+        return 1 if $all_end_in_newline;
+    }
+
+    return 0;
+}
+
 # A short call can be wrapped deliberately to match a neighboring, longer
 # call. Only reject unnecessary wrapping when every call in a consecutive
 # (same-indentation, no intervening lines) group fits on one line.
@@ -480,7 +503,8 @@ sub report_unnecessary_call_wraps {
                                $end_idx - $line_start);
         $fits = 0 if $call_text =~ /\\\r?\n|\n[ \t]*#/
                      || $call_code =~ /[{};]/
-                     || range_has_comment($source, $line_start, $line_end);
+                     || range_has_comment($source, $line_start, $line_end)
+                     || has_split_newline_literals($call_text);
 
         $start_line = line_number($source, $line_start);
         $end_line = line_number($source, $line_end);
