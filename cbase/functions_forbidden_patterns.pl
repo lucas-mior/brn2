@@ -456,6 +456,9 @@ sub report_unnecessary_call_wraps {
         my $indent;
 
         next if $name_idx < $previous_end;
+        # These diagnostics intentionally keep the format string and values
+        # together on the continuation line, even when the call would fit.
+        next if $name eq 'error_impl' || $name eq 'assert_error';
         next if $name =~ /^(?:if|for|while|switch|sizeof|_Alignof
                             |_Generic|_Static_assert)$/x;
         $line_start = rindex($source, "\n", $name_idx - 1) + 1;
