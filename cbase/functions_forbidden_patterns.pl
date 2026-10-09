@@ -430,7 +430,7 @@ sub has_split_newline_literals {
 # call. Only reject unnecessary wrapping when every call in a consecutive
 # (same-indentation, no intervening lines) group fits on one line.
 sub report_unnecessary_call_wraps {
-    my ($path, $source, $code) = @_;
+    my ($path, $source, $code, $column_limit) = @_;
     my @calls;
     my $previous_end = -1;
 
@@ -498,7 +498,7 @@ sub report_unnecessary_call_wraps {
         # Joining before a closing delimiter needs no intervening space.
         $flat_text =~ s/[ \t]*\r?\n[ \t]*(?=[)\],;])//g;
         $flat_text =~ s/[ \t]*\r?\n[ \t]*/ /g;
-        $fits = length($flat_text) <= 80;
+        $fits = length($flat_text) <= $column_limit;
 
         # These constructs require their original physical layout or are
         # not safely reducible to a single C source line.
@@ -550,9 +550,13 @@ sub report_unnecessary_call_wraps {
 }
 
 for my $path (@paths) {
+    my $absolute_path = abs_path($path) // $path;
+    my $column_limit = $absolute_path =~ m{(?:\A|/)cecup/src/}
+                       ? 100 : 80;
+
     # The displayed path is part of the diagnostic, so distinguish spellings
     # such as "file.c" and "./file.c" even if both resolve to the same file.
-    my $key = join("\0", $path, abs_path($path) // $path);
+    my $key = join("\0", $path, $absolute_path);
     my $before = file_signature($path);
     my $entry = $cached_files->{$key};
 
@@ -822,7 +826,7 @@ for my $path (@paths) {
         }
     }
 
-    report_unnecessary_call_wraps($path, $source, $code);
+    report_unnecessary_call_wraps($path, $source, $code, $column_limit);
 
     pos($code) = 0;
     while ($code =~ /(?<![A-Za-z0-9_])STRLIT_LEN(?![A-Za-z0-9_])/g) {
