@@ -268,8 +268,7 @@ struct floating_decimal_128 generic_binary_to_decimal(
   const int32 exp = e10 + removed;
 
 #ifdef RYU_DEBUG
-  printf("V+=%s\nV =%s\nV-=%s\n",
-         ryu_s(vp), ryu_s(vr), ryu_s(vm));
+  printf("V+=%s\nV =%s\nV-=%s\n", ryu_s(vp), ryu_s(vr), ryu_s(vm));
   printf("O=%s\n", ryu_s(output));
   printf("EXP=%d\n", exp);
 #endif
