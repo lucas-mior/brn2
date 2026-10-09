@@ -585,8 +585,7 @@ main(int argc, char **argv) {
                 print = printf;
             }
 
-            brn2_execute(old, new, oldlist_map, names_renamed,
-                         &number_renames);
+            brn2_execute(old, new, oldlist_map, names_renamed, &number_renames);
             if (DEBUGGING) {
                 hash_destroy_set(names_renamed);
             }
