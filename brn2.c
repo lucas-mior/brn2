@@ -1292,13 +1292,9 @@ brn2_execute2(
 }
 
 void
-brn2_execute(
-    FileList *old,
-    FileList *new,
-    struct Hash_map *oldlist_map,
-    struct Hash_set *names_renamed,
-    int32 *number_renames
-) {
+brn2_execute(FileList *old, FileList *new,
+             struct Hash_map *oldlist_map,
+             struct Hash_set *names_renamed, int32 *number_renames) {
     if (!brn2_validate_execution_plan(old, new, oldlist_map)) {
         fatal(EXIT_FAILURE);
     }
