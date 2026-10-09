@@ -191,15 +191,15 @@ cbase_make_temp_file(
         len = fmt_sprintf(buffer + prefix_len, capacity - prefix_len,
                         "%s_XXXXXX%s", prefix, suffix);
     } else {
-        len = fmt_sprintf(buffer, capacity, "%s/%s_XXXXXX%s",
-                        tmpdir, prefix, suffix);
+        len = fmt_sprintf(buffer, capacity,
+                          "%s/%s_XXXXXX%s", tmpdir, prefix, suffix);
     }
 #else
     if (tmpdir == NULL) {
         tmpdir = "/tmp";
     }
-    len = fmt_sprintf(buffer, capacity, "%s/%s_XXXXXX%s",
-                    tmpdir, prefix, suffix);
+    len = fmt_sprintf(buffer, capacity,
+                      "%s/%s_XXXXXX%s", tmpdir, prefix, suffix);
 #endif
     if ((len <= 0) || (len >= (capacity - prefix_len))) {
         errno = ENAMETOOLONG;
