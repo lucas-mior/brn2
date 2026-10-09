@@ -8,7 +8,7 @@ use File::Temp qw(tempfile);
 use JSON::PP qw(decode_json encode_json);
 use Time::HiRes qw(stat);
 
-my $file_has_problems = 0;
+my $file_diagnostics = '';
 my @paths = @ARGV;
 
 if (@paths && $paths[0] eq '--file-list') {
@@ -27,9 +27,9 @@ if (@paths && $paths[0] eq '--file-list') {
     @paths = @listed_paths;
 }
 
-# Only successful checks are cached. Compare file metadata before reading:
-# cached files must not be opened at all on subsequent checks. The checker
-# itself is hashed so changes to any rule invalidate all previously clean files.
+# Cache diagnostics (including an empty result for clean files). Compare file
+# metadata before reading: unchanged files are not opened again. The checker
+# itself is hashed so changes to any rule invalidate all cached results.
 sub file_signature {
     my ($path) = @_;
     my @info = stat($path);
@@ -57,16 +57,16 @@ sub read_cache {
     $data = eval { decode_json(<$fh>) };
     close $fh;
     return {} unless ref($data) eq 'HASH'
-                     && ($data->{version} // 0) == 1
+                     && ($data->{version} // 0) == 2
                      && ($data->{checker} // '') eq $fingerprint
-                     && ref($data->{clean}) eq 'HASH';
-    return $data->{clean};
+                     && ref($data->{files}) eq 'HASH';
+    return $data->{files};
 }
 
 # Write atomically so interruptions never leave a partially written cache.
 # Failure to create or update the cache must not break the checks.
 sub write_cache {
-    my ($path, $fingerprint, $clean) = @_;
+    my ($path, $fingerprint, $files) = @_;
     my $dir = dirname($path);
     my ($fh, $temporary);
 
@@ -78,9 +78,9 @@ sub write_cache {
     };
     return if $@ || !$fh;
     my $data = encode_json({
-        version => 1,
+        version => 2,
         checker => $fingerprint,
-        clean => $clean,
+        files => $files,
     });
     my $written = print {$fh} $data;
     my $closed = close $fh;
@@ -91,14 +91,14 @@ sub write_cache {
 
 sub report_issue {
     my ($message) = @_;
-    $file_has_problems = 1;
+    $file_diagnostics .= $message;
     print $message;
 }
 
 my $cache_path = $ENV{CBASE_FORBIDDEN_PATTERNS_CACHE}
                  // '.cache/functions_forbidden_patterns.json';
 my $checker_hash = checker_fingerprint();
-my $clean_files = read_cache($cache_path, $checker_hash);
+my $cached_files = read_cache($cache_path, $checker_hash);
 my $cache_dirty = 0;
 
 sub line_number {
@@ -523,16 +523,23 @@ sub report_unnecessary_call_wraps {
 }
 
 for my $path (@paths) {
-    my $key = abs_path($path) // $path;
+    # The displayed path is part of the diagnostic, so distinguish spellings
+    # such as "file.c" and "./file.c" even if both resolve to the same file.
+    my $key = join("\0", $path, abs_path($path) // $path);
     my $before = file_signature($path);
+    my $entry = $cached_files->{$key};
 
-    # A prior success is reusable only if this exact file is unchanged.
-    if (defined($before) && defined($clean_files->{$key})
-            && $clean_files->{$key} eq $before) {
+    if (defined($before) && ref($entry) eq 'HASH'
+            && defined($entry->{signature})
+            && !ref($entry->{signature})
+            && $entry->{signature} eq $before
+            && defined($entry->{diagnostics})
+            && !ref($entry->{diagnostics})) {
+        print $entry->{diagnostics};
         next;
     }
 
-    $file_has_problems = 0;
+    $file_diagnostics = '';
     open my $fh, '<', $path or die "$path: $!\n";
     local $/;
     my $source = <$fh>;
@@ -844,20 +851,26 @@ for my $path (@paths) {
             pos($code) = $args_end + 1;
         }
     }
-    # Files that failed a check are always rescanned on the next run.
-    # Likewise, do not cache a file that changed while being inspected.
+    # Do not cache diagnostics if the file changed during inspection.
     my $after = file_signature($path);
-    if (!$file_has_problems && defined($before) && defined($after)
-            && $before eq $after) {
-        if (!defined($clean_files->{$key})
-                || $clean_files->{$key} ne $after) {
-            $clean_files->{$key} = $after;
+    if (defined($before) && defined($after) && $before eq $after) {
+        if (ref($entry) ne 'HASH'
+                || !defined($entry->{signature})
+                || !defined($entry->{diagnostics})
+                || ref($entry->{signature})
+                || ref($entry->{diagnostics})
+                || $entry->{signature} ne $after
+                || $entry->{diagnostics} ne $file_diagnostics) {
+            $cached_files->{$key} = {
+                signature => $after,
+                diagnostics => $file_diagnostics,
+            };
             $cache_dirty = 1;
         }
-    } elsif (exists $clean_files->{$key}) {
-        delete $clean_files->{$key};
+    } elsif (exists $cached_files->{$key}) {
+        delete $cached_files->{$key};
         $cache_dirty = 1;
     }
 }
 
-write_cache($cache_path, $checker_hash, $clean_files) if $cache_dirty;
+write_cache($cache_path, $checker_hash, $cached_files) if $cache_dirty;
