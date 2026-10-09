@@ -263,6 +263,224 @@ for my $path (@paths) {
         print "$path:$line:$name call breaks before the first argument\n";
     }
 
+    if ($path !~ /\.meta\.h\z/) {
+        pos($code) = 0;
+        while ($code =~ /(?<![A-Za-z0-9_])
+                         ([A-Za-z_][A-Za-z0-9_]*)/gx) {
+            my $name = $1;
+            my $name_idx = $-[1];
+            my $line_start = 0;
+            my $line_prefix;
+            my $paren_idx;
+            my $args_start;
+            my $args_end;
+            my $first_arg_idx;
+            my @arg_starts;
+            my @arg_ends;
+            my @arg_has_newline;
+            my $idx;
+            my $paren_depth = 0;
+            my $bracket_depth = 0;
+            my $brace_depth = 0;
+            my $alignment_arg = 0;
+            my $format_arg_idx = -1;
+            my $anchor_idx;
+            my $anchor_line_start;
+            my $anchor_column;
+
+            if ($name_idx > 0) {
+                $line_start = rindex($source, "\n", $name_idx - 1) + 1;
+            }
+            $line_prefix = substr($source, $line_start,
+                                  $name_idx - $line_start);
+
+            # Function definitions and declarations start at column zero.
+            # Calls in expressions are indented, including calls after
+            # return, assignments, and control-flow keywords.
+            next unless $line_prefix =~ /^[ \t]/;
+            next if $line_prefix =~ /^[ \t]*#/;
+            next if $name =~ /^(?:if|for|while|switch|sizeof|_Alignof
+                                |_Generic|_Static_assert)$/x;
+
+            $paren_idx = skip_space_comments($source,
+                                              $name_idx + length($name));
+            next unless substr($source, $paren_idx, 1) eq '(';
+
+            $args_start = $paren_idx + 1;
+            $args_end = call_end($code, $args_start);
+            next if $args_end < 0;
+
+            $first_arg_idx = skip_space_comments($source, $args_start);
+            next if $first_arg_idx >= $args_end
+                    || substr($source, $first_arg_idx, 1) eq ')';
+
+            push @arg_starts, $first_arg_idx;
+            push @arg_has_newline, 0;
+            $idx = $args_start;
+            while ($idx < $args_end) {
+                my $ch = substr($code, $idx, 1);
+
+                if ($ch eq '(') {
+                    $paren_depth += 1;
+                } elsif ($ch eq ')') {
+                    $paren_depth -= 1;
+                } elsif ($ch eq '[') {
+                    $bracket_depth += 1;
+                } elsif ($ch eq ']') {
+                    $bracket_depth -= 1;
+                } elsif ($ch eq '{') {
+                    $brace_depth += 1;
+                } elsif ($ch eq '}') {
+                    $brace_depth -= 1;
+                } elsif ($ch eq ',' && $paren_depth == 0
+                         && $bracket_depth == 0 && $brace_depth == 0) {
+                    my $next_arg_idx = skip_space_comments($source, $idx + 1);
+
+                    if ($next_arg_idx < $args_end
+                            && substr($source, $next_arg_idx, 1) ne ')') {
+                        push @arg_ends, $idx;
+                        push @arg_starts, $next_arg_idx;
+                        push @arg_has_newline,
+                             substr($source, $idx + 1,
+                                    $next_arg_idx - $idx - 1) =~ /\n/ ? 1 : 0;
+                    }
+                }
+
+                $idx += 1;
+            }
+            push @arg_ends, $args_end;
+
+            # printf-like functions align wrapped arguments with their format
+            # string rather than with an output stream or destination buffer.
+            if ($name =~ /^(?:error|error2|fmt_printf|print0|printf|vprintf)$/) {
+                $format_arg_idx = 0;
+            } elsif ($name =~ /^(?:SNPRINTF|cmd_printf|fprint|fprint_0|fprintf
+                                  |sprintf|str_printf|strflex_list_printf
+                                  |vfprintf|vsprintf)$/x) {
+                $format_arg_idx = 1;
+            } elsif ($name =~ /^(?:fmt_snprintf|fmt_sprintf
+                                  |fmt_test_public_vsnprintf
+                                  |fmt_test_public_vsprintf|fmt_test_snprintf
+                                  |fmt_vsnprintf|fmt_vsprintf|snprintf
+                                  |snprint|snprint_0|vsnprintf)$/x) {
+                $format_arg_idx = 2;
+            } elsif ($name eq 'error_impl') {
+                $format_arg_idx = 3;
+            } elsif ($name =~ /^(?:fmt_snprintf_estimate
+                                  |fmt_vsnprintf_estimate)$/x) {
+                $format_arg_idx = 0;
+            } elsif ($name eq 'fmt_vsnprintf_estimate_plan') {
+                $format_arg_idx = 1;
+            }
+
+            if ($format_arg_idx >= 0
+                    && $format_arg_idx < scalar(@arg_starts)) {
+                $alignment_arg = $format_arg_idx;
+            }
+
+            if ($alignment_arg >= scalar(@arg_starts)) {
+                $alignment_arg = 0;
+            }
+            $anchor_idx = $arg_starts[$alignment_arg];
+            $anchor_line_start = 0;
+            if ($anchor_idx > 0) {
+                $anchor_line_start = rindex($source, "\n", $anchor_idx - 1)
+                                     + 1;
+            }
+            $anchor_column = $anchor_idx - $anchor_line_start;
+
+            for (my $arg_idx = $alignment_arg + 1;
+                 $arg_idx < scalar(@arg_starts); $arg_idx += 1) {
+                my $current_idx;
+                my $current_line_start = 0;
+                my $current_column;
+                my $line;
+
+                next unless $arg_has_newline[$arg_idx];
+                $current_idx = $arg_starts[$arg_idx];
+                if ($current_idx > 0) {
+                    $current_line_start = rindex($source, "\n",
+                                                 $current_idx - 1) + 1;
+                }
+                $current_column = $current_idx - $current_line_start;
+                next if $current_column == $anchor_column;
+
+                $line = line_number($source, $current_idx);
+                print "$path:$line:$name call argument is not aligned "
+                      . "with its alignment anchor\n";
+                last;
+            }
+
+            if ($format_arg_idx >= 0
+                    && $format_arg_idx < scalar(@arg_starts)
+                    && $format_arg_idx + 1 < scalar(@arg_starts)) {
+                my $format_line = line_number(
+                    $source, $arg_ends[$format_arg_idx]);
+                my $format_line_has_args = 0;
+                my $other_line_has_args = 0;
+
+                for (my $arg_idx = $format_arg_idx + 1;
+                     $arg_idx < scalar(@arg_starts); $arg_idx += 1) {
+                    my $line = line_number($source,
+                                           $arg_starts[$arg_idx]);
+
+                    if ($line == $format_line) {
+                        $format_line_has_args = 1;
+                    } else {
+                        $other_line_has_args = 1;
+                    }
+                }
+
+                if ($format_line_has_args && $other_line_has_args) {
+                    print "$path:$format_line:$name format-string line "
+                          . "must contain all format arguments or none\n";
+                }
+            }
+
+            if (scalar(@arg_starts) >= 3) {
+                my @arg_names;
+                my @arg_lines;
+                my %args_per_line;
+
+                for (my $arg_idx = 0;
+                     $arg_idx < scalar(@arg_starts); $arg_idx += 1) {
+                    my $arg = substr($code, $arg_starts[$arg_idx],
+                                     $arg_ends[$arg_idx]
+                                     - $arg_starts[$arg_idx]);
+                    my $line = line_number($source, $arg_starts[$arg_idx]);
+
+                    if ($arg =~ /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*$/s) {
+                        $arg_names[$arg_idx] = $1;
+                    }
+                    $arg_lines[$arg_idx] = $line;
+                    $args_per_line{$line} += 1;
+                }
+
+                for (my $arg_idx = 0;
+                     $arg_idx + 1 < scalar(@arg_starts); $arg_idx += 1) {
+                    my $first_line;
+                    my $second_line;
+
+                    next unless defined $arg_names[$arg_idx]
+                            && defined $arg_names[$arg_idx + 1];
+                    next unless $arg_names[$arg_idx + 1]
+                                eq $arg_names[$arg_idx] . '_len';
+
+                    $first_line = $arg_lines[$arg_idx];
+                    $second_line = $arg_lines[$arg_idx + 1];
+                    next if $first_line == $second_line;
+                    next if $args_per_line{$first_line} == 1
+                            && $args_per_line{$second_line} == 1;
+
+                    print "$path:$second_line:$name related _len "
+                          . "arguments must be the only arguments on their "
+                          . "lines\n";
+                    last;
+                }
+            }
+        }
+    }
+
     pos($code) = 0;
     while ($code =~ /(?<![A-Za-z0-9_])STRLIT_LEN(?![A-Za-z0-9_])/g) {
         my $idx = $-[0];

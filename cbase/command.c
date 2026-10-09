@@ -274,9 +274,9 @@ cmd_windows_result_read_captured(Command *command,
 
     if ((flags & CMD_CAPTURE_STDOUT)
         && !cmd_windows_capture_file_read(command,
-                                             stdout_capture,
-                                             &stdout_output,
-                                             &stdout_len)) {
+                                          stdout_capture,
+                                          &stdout_output,
+                                          &stdout_len)) {
         return false;
     }
 
@@ -285,9 +285,9 @@ cmd_windows_result_read_captured(Command *command,
             stderr_output = xstrndup(STRLIT(""));
             stderr_len = 0;
         } else if (!cmd_windows_capture_file_read(command,
-                                                      stderr_capture,
-                                                      &stderr_output,
-                                                      &stderr_len)) {
+                                                  stderr_capture,
+                                                  &stderr_output,
+                                                  &stderr_len)) {
             free2(stdout_output, stdout_len + 1);
             return false;
         }
@@ -302,7 +302,7 @@ cmd_windows_result_read_captured(Command *command,
             str_append(&output, stderr_output, stderr_len);
         }
         command->result.output = str_steal(&output,
-                                                &command->result.output_len);
+                                           &command->result.output_len);
     }
 
     if (flags & CMD_CAPTURE_STDOUT) {
@@ -363,8 +363,8 @@ cmd_windows_cmd_line(Command *command,
 
         if (i == 0) {
             argument = cmd_windows_argv0(command,
-                                             argv0_windows,
-                                             &argument_len);
+                                         argv0_windows,
+                                         &argument_len);
         } else {
             argument = command->argv[i];
             argument_len = command->argv_lens[i];
@@ -429,15 +429,15 @@ cmd_windows_run_process(Command *command, enum CommandFlag flags) {
 
     if ((flags & CMD_CAPTURE_STDOUT)
         && !cmd_windows_capture_file_open(command,
-                                             &stdout_capture,
-                                             "cos")) {
+                                          &stdout_capture,
+                                          "cos")) {
         return -1;
     }
     if ((flags & CMD_CAPTURE_STDERR)
         && !(flags & CMD_MERGE_STDERR)
         && !cmd_windows_capture_file_open(command,
-                                             &stderr_capture,
-                                             "ces")) {
+                                          &stderr_capture,
+                                          "ces")) {
         cmd_windows_capture_file_cleanup(&stdout_capture);
         return -1;
     }
@@ -529,9 +529,9 @@ cmd_windows_run_process(Command *command, enum CommandFlag flags) {
 
     if (cmd_flags_capture(flags)
         && !cmd_windows_result_read_captured(command,
-                                                flags,
-                                                &stdout_capture,
-                                                &stderr_capture)) {
+                                             flags,
+                                             &stdout_capture,
+                                             &stderr_capture)) {
         cmd_windows_capture_file_cleanup(&stdout_capture);
         cmd_windows_capture_file_cleanup(&stderr_capture);
         return -1;
@@ -606,8 +606,8 @@ cmd_result_process_stdin_event(Command *command,
         *stdin_offset += bytes_written;
         if (*stdin_offset >= command->stdin_buffer_len) {
             cmd_result_close_poll_fd(pipe,
-                                         &command->result.stdin_fd,
-                                         left);
+                                     &command->result.stdin_fd,
+                                     left);
         } else {
             pipe->revents = 0;
         }
@@ -621,8 +621,8 @@ cmd_result_process_stdin_event(Command *command,
         }
         if (errno == EPIPE) {
             cmd_result_close_poll_fd(pipe,
-                                         &command->result.stdin_fd,
-                                         left);
+                                     &command->result.stdin_fd,
+                                     left);
             return;
         }
         cmd_error_set(command, errno);
@@ -653,11 +653,11 @@ cmd_result_process_output_event(Command *command,
             fatal(EXIT_FAILURE);
         }
         cmd_result_append(output,
-                              stdout_output,
-                              stderr_output,
-                              is_stderr,
-                              buffer,
-                              (int32)read_bytes);
+                          stdout_output,
+                          stderr_output,
+                          is_stderr,
+                          buffer,
+                          (int32)read_bytes);
         pipe->revents = 0;
         return;
     }
@@ -747,30 +747,30 @@ cmd_result_process_io(Command *command, enum CommandFlag flags) {
             ready -= 1;
             if (i == CMD_STDIN_PIPE_INDEX) {
                 cmd_result_process_stdin_event(command,
-                                                   &pipes[i],
-                                                   &left,
-                                                   &stdin_offset);
+                                               &pipes[i],
+                                               &left,
+                                               &stdin_offset);
                 continue;
             }
 
             if (i == CMD_STDERR_PIPE_INDEX) {
                 cmd_result_process_output_event(command,
-                                                    &pipes[i],
-                                                    &command->result.stderr_fd,
-                                                    &left,
-                                                    &output,
-                                                    &stdout_output,
-                                                    &stderr_output,
-                                                    true);
+                                                &pipes[i],
+                                                &command->result.stderr_fd,
+                                                &left,
+                                                &output,
+                                                &stdout_output,
+                                                &stderr_output,
+                                                true);
             } else {
                 cmd_result_process_output_event(command,
-                                                    &pipes[i],
-                                                    &command->result.stdout_fd,
-                                                    &left,
-                                                    &output,
-                                                    &stdout_output,
-                                                    &stderr_output,
-                                                    false);
+                                                &pipes[i],
+                                                &command->result.stdout_fd,
+                                                &left,
+                                                &output,
+                                                &stdout_output,
+                                                &stderr_output,
+                                                false);
             }
         }
     }
@@ -781,7 +781,7 @@ cmd_result_process_io(Command *command, enum CommandFlag flags) {
 
     if (cmd_flags_capture(flags)) {
         command->result.output = str_steal(&output,
-                                                &command->result.output_len);
+                                           &command->result.output_len);
     } else {
         str_free(&output);
     }
@@ -803,8 +803,8 @@ cmd_result_process_io(Command *command, enum CommandFlag flags) {
 void
 cmd_result_read_captured(Command *command) {
     cmd_result_process_io(command,
-                              CMD_CAPTURE_STDOUT
-                              |CMD_CAPTURE_STDERR);
+                          CMD_CAPTURE_STDOUT
+                          |CMD_CAPTURE_STDERR);
     return;
 }
 
@@ -966,10 +966,10 @@ cmd_start(Command *command, enum CommandFlag flags) {
         }
         if (command->stdin_buffer != NULL) {
             cmd_child_exec(command,
-                               flags,
-                               stdin_pipe,
-                               stdout_pipe,
-                               stderr_pipe);
+                           flags,
+                           stdin_pipe,
+                           stdout_pipe,
+                           stderr_pipe);
         }
         cmd_child_exec(command, flags, NULL, stdout_pipe, stderr_pipe);
     default:
@@ -1089,7 +1089,7 @@ cmd_run(Command *command, enum CommandFlag flags) {
         cmd_result_process_io(command, flags);
         if (command->error_status) {
             return cmd_run_finish(command, start_ns,
-                                      cmd_error_return(command));
+                                  cmd_error_return(command));
         }
     }
     if ((err = cmd_wait(command)) < 0) {
@@ -1110,7 +1110,7 @@ cmd_run(Command *command, enum CommandFlag flags) {
     command->result.status = cmd_windows_run_process(command, flags);
     if (command->error_status) {
         return cmd_run_finish(command, start_ns,
-                                  cmd_error_return(command));
+                              cmd_error_return(command));
     }
     command->result.exit_status = command->result.status;
     command->result.exited = true;
