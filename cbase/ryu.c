@@ -144,7 +144,8 @@ test_ryu_s2d_range_values(void) {
     ASSERT_EQ(test_ryu_double_bits(value), 0x7ff0000000000000ull);
 
     used = s2d("1.00000000000000000", &value);
-    ASSERT_EQ(used, -INPUT_TOO_LONG);
+    ASSERT_EQ(used, 19);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000000ull);
 
     {
         char input[] = {'1', 'e', '3', '0', '9', 'x'};
@@ -256,6 +257,117 @@ test_ryu_s2d_hex(void) {
     return;
 }
 
+static void
+test_ryu_s2d_long_decimal(void) {
+    static char *inputs[] = {
+        "1757.51723797804425",
+        "1658.93064536183874",
+        "1543.01447896234890",
+        "1414.27642536463622",
+        "1770.56667151757733",
+    };
+    static uint64 expected[] = {
+        0x409b7611a6d51fccull,
+        0x4099ebb8fb190516ull,
+        0x40981c0ed392b713ull,
+        0x4096191b0f403397ull,
+        0x409baa444589ce47ull,
+    };
+    char buffer[2000];
+    double value;
+    int32 used;
+
+    for (int32 i = 0; i < 5; i += 1) {
+        used = s2d(inputs[i], &value);
+        ASSERT_EQ(used, (int32)strlen(inputs[i]));
+        ASSERT_EQ(test_ryu_double_bits(value), expected[i]);
+    }
+
+    // Check exact halfway cases and one decimal unit on either side.
+    used = s2d("1.00000000000000011102230246251565404236316680908203125",
+               &value);
+    ASSERT_EQ(used, 55);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000000ull);
+
+    used = s2d("1.00000000000000011102230246251565404236316680908203126",
+               &value);
+    ASSERT_EQ(used, 55);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000001ull);
+
+    used = s2d("1.00000000000000033306690738754696212708950042724609375",
+               &value);
+    ASSERT_EQ(used, 55);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000002ull);
+
+    used = s2d("1.000000000000000000123rest", &value);
+    ASSERT_EQ(used, 23);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000000ull);
+
+    used = s2d("-1e-99999999999999999999999999", &value);
+    ASSERT_EQ(used, -FLOAT_UNDERFLOW);
+    ASSERT(test_ryu_double_bits(value) == 0x8000000000000000ull);
+
+    // All finite doubles have an exact fixed-point expansion with at most
+    // 1074 fractional digits. Round-trip diverse binary64 bit patterns.
+    {
+        static uint64 cases[] = {
+            0x0000000000000001ull,
+            0x000fffffffffffffull,
+            0x0010000000000000ull,
+            0x3fd5555555555555ull,
+            0x3ff0000000000001ull,
+            0x400921fb54442d18ull,
+            0x7fefffffffffffffull,
+        };
+
+        for (int32 i = 0; i < SIZEOF(cases)/SIZEOF(cases[0]); i += 1) {
+            double original = test_ryu_double_from_bits(cases[i]);
+            int32 len = d2fixed_buffered_n(original, 1074, buffer);
+
+            used = s2d_n(buffer, len, &value);
+            if (cases[i] < 0x0010000000000000ull) {
+                ASSERT_EQ(used, -FLOAT_UNDERFLOW);
+            } else {
+                ASSERT_EQ(used, len);
+            }
+            ASSERT_EQ(test_ryu_double_bits(value), cases[i]);
+        }
+    }
+
+    // Digits after the retained prefix must resolve an exact halfway tie.
+    {
+        char *midpoint =
+            "1.00000000000000011102230246251565404236316680908203125";
+        int32 len = (int32)strlen(midpoint);
+
+        memcpy(buffer, midpoint, len);
+        for (int32 i = len; i < 1000; i += 1) {
+            buffer[i] = '0';
+        }
+        used = s2d_n(buffer, 1000, &value);
+        ASSERT_EQ(used, 1000);
+        ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000000ull);
+
+        buffer[999] = '1';
+        used = s2d_n(buffer, 1000, &value);
+        ASSERT_EQ(used, 1000);
+        ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000001ull);
+    }
+
+    // Very long zero padding and a nonzero digit beyond the retained prefix.
+    buffer[0] = '1';
+    buffer[1] = '.';
+    for (int32 i = 2; i < 1500; i += 1) {
+        buffer[i] = '0';
+    }
+    buffer[1499] = '1';
+    used = s2d_n(buffer, 1500, &value);
+    ASSERT_EQ(used, 1500);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x3ff0000000000000ull);
+
+    return;
+}
+
 int
 main(void) {
     char buffer[2000];
@@ -276,6 +388,7 @@ main(void) {
     test_ryu_s2d_leading_plus();
     test_ryu_s2d_range_values();
     test_ryu_s2d_hex();
+    test_ryu_s2d_long_decimal();
 
     exit(EXIT_SUCCESS);
 }

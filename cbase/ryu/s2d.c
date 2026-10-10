@@ -63,10 +63,290 @@ static inline double int64Bits2Double(uint64 bits) {
   return f;
 }
 
+// Fixed-width exact arithmetic for the uncommon long-decimal parsing path.
+// Every binary64 rounding midpoint has at most 768 significant decimal
+// digits. Retaining 800 digits and a sticky bit therefore suffices even
+// when the input contains arbitrarily many trailing digits.
+#define RYU_DECIMAL_DIGITS 800
+#define RYU_BIG_WORDS 128
+
+typedef struct {
+    uint32 words[RYU_BIG_WORDS];
+    int32 used;
+} RyuBig;
+
+static void
+ryu_big_small(RyuBig *number, uint64 value) {
+    memset(number, 0, SIZEOF(*number));
+    number->words[0] = (uint32)value;
+    number->words[1] = (uint32)(value >> 32);
+    number->used = 1;
+    if (number->words[1] != 0) {
+        number->used = 2;
+    }
+    return;
+}
+
+static void
+ryu_big_multiply(RyuBig *number, uint32 multiplier) {
+    uint64 carry = 0;
+
+    for (int32 i = 0; i < number->used; i += 1) {
+        uint64 product = (uint64)number->words[i]*multiplier + carry;
+
+        number->words[i] = (uint32)product;
+        carry = product >> 32;
+    }
+    if (carry != 0) {
+        assert(number->used < RYU_BIG_WORDS);
+        number->words[number->used] = (uint32)carry;
+        number->used += 1;
+    }
+    return;
+}
+
+static void
+ryu_big_add_digit(RyuBig *number, uint32 digit) {
+    uint64 carry = digit;
+
+    for (int32 i = 0; i < number->used && carry != 0; i += 1) {
+        uint64 sum = (uint64)number->words[i] + carry;
+
+        number->words[i] = (uint32)sum;
+        carry = sum >> 32;
+    }
+    if (carry != 0) {
+        assert(number->used < RYU_BIG_WORDS);
+        number->words[number->used] = (uint32)carry;
+        number->used += 1;
+    }
+    return;
+}
+
+static void
+ryu_big_shift(RyuBig *number, int32 shift) {
+    int32 whole = shift/32;
+    int32 bits = shift%32;
+    uint32 carry = 0;
+
+    if (shift == 0) {
+        return;
+    }
+    assert(shift > 0 && number->used + whole + 1 < RYU_BIG_WORDS);
+    for (int32 i = number->used - 1; i >= 0; i -= 1) {
+        number->words[i + whole] = number->words[i];
+    }
+    for (int32 i = 0; i < whole; i += 1) {
+        number->words[i] = 0;
+    }
+    number->used += whole;
+    if (bits != 0) {
+        for (int32 i = 0; i < number->used; i += 1) {
+            uint64 shifted = ((uint64)number->words[i] << bits) |carry;
+
+            number->words[i] = (uint32)shifted;
+            carry = (uint32)(shifted >> 32);
+        }
+        if (carry != 0) {
+            number->words[number->used] = carry;
+            number->used += 1;
+        }
+    }
+    return;
+}
+
+static int32
+ryu_big_compare(RyuBig *lhs, RyuBig *rhs) {
+    if (lhs->used != rhs->used) {
+        if (lhs->used > rhs->used) {
+            return 1;
+        }
+        return -1;
+    }
+    for (int32 i = lhs->used - 1; i >= 0; i -= 1) {
+        if (lhs->words[i] != rhs->words[i]) {
+            if (lhs->words[i] > rhs->words[i]) {
+                return 1;
+            }
+            return -1;
+        }
+    }
+    return 0;
+}
+
+// Compare decimal prefix * 10^exponent with the exact midpoint separating
+// 'lower_bits' and the following binary64 value (including infinity).
+static int32
+ryu_decimal_midpoint(RyuBig *prefix, int64 exponent, bool sticky,
+                     uint64 lower_bits) {
+    RyuBig lhs = *prefix;
+    RyuBig rhs;
+    uint64 mantissa = lower_bits & ((1ull << 52) - 1);
+    int32 biased = (int32)((lower_bits >> 52) & 0x7ff);
+    int32 binary_exponent;
+    int64 rhs_shift;
+    int64 lhs_shift;
+    int32 comparison;
+
+    if (biased == 0) {
+        binary_exponent = -1074;
+    } else {
+        mantissa |= 1ull << 52;
+        binary_exponent = biased - 1075;
+    }
+    ryu_big_small(&rhs, 2*mantissa + 1);
+    rhs_shift = binary_exponent - 1;
+    lhs_shift = exponent;
+
+    // Cancel powers of ten against powers of two before comparing integers.
+    if (exponent >= 0) {
+        for (int64 i = 0; i < exponent; i += 1) {
+            ryu_big_multiply(&lhs, 5);
+        }
+    } else {
+        for (int64 i = 0; i < -exponent; i += 1) {
+            ryu_big_multiply(&rhs, 5);
+        }
+        rhs_shift -= exponent;
+        lhs_shift = 0;
+    }
+    if (lhs_shift > rhs_shift) {
+        ryu_big_shift(&lhs, (int32)(lhs_shift - rhs_shift));
+    } else if (rhs_shift > lhs_shift) {
+        ryu_big_shift(&rhs, (int32)(rhs_shift - lhs_shift));
+    }
+    comparison = ryu_big_compare(&lhs, &rhs);
+    if (comparison == 0 && sticky) {
+        comparison = 1;
+    }
+    return comparison;
+}
+
+static int32
+ryu_decimal_extended(const char *buffer, int32 parsed_len,
+                     int64 decimal_exponent, int64 significant_digits,
+                     bool negative, double *result) {
+    int64 order = decimal_exponent + significant_digits - 1;
+    uint64 bits = 0;
+    int32 kept = 0;
+    bool started = false;
+    bool sticky = false;
+    RyuBig prefix;
+    char approximate[40];
+    int32 approximate_len = 0;
+    int64 approximate_exponent;
+    double estimate;
+    int32 status;
+
+    if (order >= 309) {
+        bits = 0x7ff0000000000000ull;
+        goto finished;
+    }
+    if (order <= -325) {
+        goto finished;
+    }
+
+    ryu_big_small(&prefix, 0);
+    for (int32 i = 0; i < parsed_len; i += 1) {
+        char c = buffer[i];
+
+        if ((c == 'e') || (c == 'E')) {
+            break;
+        }
+        if ((c < '0') || (c > '9')) {
+            continue;
+        }
+        if (!started && c == '0') {
+            continue;
+        }
+        started = true;
+        if (kept < RYU_DECIMAL_DIGITS) {
+            ryu_big_multiply(&prefix, 10);
+            ryu_big_add_digit(&prefix, (uint32)(c - '0'));
+            if (kept < 17) {
+                approximate[approximate_len] = c;
+                approximate_len += 1;
+            }
+            kept += 1;
+        } else if (c != '0') {
+            sticky = true;
+        }
+    }
+    decimal_exponent += significant_digits - kept;
+
+    // Use Ryu's existing short parser only to locate the nearby binary64
+    // candidate. Exact midpoint comparisons below determine final rounding.
+    approximate_exponent = order - 16;
+    approximate[approximate_len] = 'e';
+    approximate_len += 1;
+    if (approximate_exponent < 0) {
+        approximate[approximate_len] = '-';
+        approximate_len += 1;
+        approximate_exponent = -approximate_exponent;
+    }
+    {
+        char digits[16];
+        int32 count = 0;
+
+        do {
+            digits[count] = (char)('0' + approximate_exponent%10);
+            count += 1;
+            approximate_exponent /= 10;
+        } while (approximate_exponent != 0);
+        for (int32 i = count - 1; i >= 0; i -= 1) {
+            approximate[approximate_len] = digits[i];
+            approximate_len += 1;
+        }
+    }
+    status = s2d_n(approximate, approximate_len, &estimate);
+    assert(status > 0 || status == -FLOAT_UNDERFLOW);
+    memcpy(&bits, &estimate, SIZEOF(bits));
+    if (bits == 0x7ff0000000000000ull) {
+        bits -= 1;
+    }
+
+    // The first 17 significant digits already locate the correct value
+    // within one ULP. Correct it using exact round-to-nearest, ties-to-even.
+    for (;;) {
+        int32 comparison = ryu_decimal_midpoint(&prefix,
+                                                decimal_exponent, sticky, bits);
+
+        if (comparison > 0 || (comparison == 0 && (bits &1) != 0)) {
+            bits += 1;
+            if (bits == 0x7ff0000000000000ull) {
+                break;
+            }
+            continue;
+        }
+        if (bits != 0) {
+            comparison = ryu_decimal_midpoint(&prefix,
+                                              decimal_exponent,
+                                              sticky, bits - 1);
+            if (comparison < 0 || (comparison == 0 && (bits &1) != 0)) {
+                bits -= 1;
+                continue;
+            }
+        }
+        break;
+    }
+
+finished:
+    if (negative) {
+        bits |= 1ull << 63;
+    }
+    *result = int64Bits2Double(bits);
+    if ((bits & 0x7ff0000000000000ull) == 0) {
+        return -FLOAT_UNDERFLOW;
+    }
+    return parsed_len;
+}
+
 int32
 s2d_n(const char *buffer, int32 len, double *result) {
     int32 m10digits = 0;
-    int32 e10digits = 0;
+    int64 significant_digits = 0;
+    int64 parsed_exponent = 0;
+    bool extended = false;
     int32 dot_index = -1;
     int32 e_index = -1;
     uint64 m10 = 0;
@@ -425,7 +705,7 @@ s2d_n(const char *buffer, int32 len, double *result) {
 
     }
 
-    if ((buffer[i] == '-') || (buffer[i] == '+')) {
+    if ((i < len) && ((buffer[i] == '-') || (buffer[i] == '+'))) {
         signed_m = buffer[i] == '-';
         i += 1;
     }
@@ -435,12 +715,16 @@ s2d_n(const char *buffer, int32 len, double *result) {
 
         if ((c >= '0') && (c <= '9')) {
             has_mantissa_digit = true;
-            if (m10digits >= 17) {
-                return -INPUT_TOO_LONG;
+            if (significant_digits != 0 || c != '0') {
+                significant_digits += 1;
             }
-            m10 = 10*m10 + (uint64)(c - '0');
-            if (m10 != 0) {
-                m10digits += 1;
+            if (significant_digits > 17) {
+                extended = true;
+            } else {
+                m10 = 10*m10 + (uint64)(c - '0');
+                if (m10 != 0) {
+                    m10digits += 1;
+                }
             }
             continue;
         }
@@ -480,12 +764,11 @@ s2d_n(const char *buffer, int32 len, double *result) {
                 if ((c < '0') || (c > '9')) {
                     break;
                 }
-                if (e10digits > 3) {
-                    return -INPUT_TOO_LONG;
-                }
-                e10 = 10*e10 + (c - '0');
-                if (e10 != 0) {
-                    e10digits += 1;
+                if (parsed_exponent < 1000000000000ll) {
+                    parsed_exponent = 10*parsed_exponent + (c - '0');
+                    if (parsed_exponent > 1000000000000ll) {
+                        parsed_exponent = 1000000000000ll;
+                    }
                 }
             }
         }
@@ -500,9 +783,20 @@ s2d_n(const char *buffer, int32 len, double *result) {
         dot_index = e_index;
     }
     if (signed_e) {
-        e10 = -e10;
+        parsed_exponent = -parsed_exponent;
     }
-    e10 -= dot_index < e_index ? e_index - dot_index - 1 : 0;
+    parsed_exponent -= dot_index < e_index ? e_index - dot_index - 1 : 0;
+    if (extended && m10 != 0) {
+        return ryu_decimal_extended(buffer, parsed_len, parsed_exponent,
+                                    significant_digits, signed_m, result);
+    }
+    if (parsed_exponent > 1000000000ll) {
+        e10 = 1000000000;
+    } else if (parsed_exponent < -1000000000ll) {
+        e10 = -1000000000;
+    } else {
+        e10 = (int32)parsed_exponent;
+    }
     if (m10 == 0) {
         *result = signed_m ? -0.0 : 0.0;
         return parsed_len;
