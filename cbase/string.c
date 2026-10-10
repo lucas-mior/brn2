@@ -531,7 +531,7 @@ void
 str_float64(String *string, double value) {
     int32 len;
 
-    str_reserve(string, RYU_D2S_BUFFER_SIZE);
+    str_reserve(string, RYU_D2S_BUFFER_SIZE - 1);
     len = d2s_buffered_n(value, string->data + string->len);
     ASSERT_GE(len, 0);
     string->len += len;
@@ -542,13 +542,15 @@ str_float64(String *string, double value) {
 void
 str_float64_fixed(String *str, double value, int32 precision) {
     int32 len;
+    int32 reserve;
 
     if ((precision < 0) || (precision > FMT_DOUBLE_MAX_DECIMAL_PRECISION)) {
         error("Invalid float precision %d.\n", precision);
         fatal(EXIT_FAILURE);
     }
 
-    str_reserve(str, FMT_FLOAT_RYU_BUFFER_SIZE);
+    reserve = FMT_FLOAT_MAX_FIXED_PREFIX + precision;
+    str_reserve(str, reserve);
     len = d2fixed_buffered_n(value, (uint32)precision, str->data + str->len);
     ASSERT_GE(len, 0);
     str->len += len;
@@ -560,13 +562,18 @@ str_float64_fixed(String *str, double value, int32 precision) {
 void
 str_float64_exp(String *str, double value, int32 precision) {
     int32 len;
+    int32 reserve;
 
     if ((precision < 0) || (precision > FMT_DOUBLE_MAX_DECIMAL_PRECISION)) {
         error("Invalid float precision %d.\n", precision);
         fatal(EXIT_FAILURE);
     }
 
-    str_reserve(str, FMT_FLOAT_MAX_EXP_PREFIX + precision);
+    reserve = FMT_FLOAT_MAX_EXP_PREFIX + precision;
+    if (reserve < 10) {
+        reserve = 10;
+    }
+    str_reserve(str, reserve);
     len = d2exp_buffered_n(value, (uint32)precision, str->data + str->len);
     ASSERT_GE(len, 0);
     str->len += len;
@@ -912,6 +919,25 @@ main(void) {
         STR_APPEND(&builder, " z=");
         str_float64_exp(&builder, 1234.0, 2);
         ASSERT_EQ(builder.data, "x=1E-1 y=1.25 z=1.23e+03");
+        str_free(&builder);
+    }
+
+    {
+        String builder = {0};
+
+        STR_APPEND(&builder, "1234567");
+        str_float64_exp(&builder, -HUGE_VAL, 0);
+        ASSERT_EQ(builder.data, "1234567-Infinity");
+        ASSERT_GT_VAR(builder.cap, builder.len);
+        str_free(&builder);
+    }
+
+    {
+        String builder = {0};
+
+        str_float64_fixed(&builder, -0.0, FMT_DOUBLE_MAX_DECIMAL_PRECISION);
+        ASSERT_EQ(builder.len, FMT_DOUBLE_MAX_DECIMAL_PRECISION + 3);
+        ASSERT_GT_VAR(builder.cap, builder.len);
         str_free(&builder);
     }
 
