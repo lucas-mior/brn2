@@ -634,6 +634,210 @@ token_is_trivia(Token *token) {
     }
 }
 
+bool
+token_range_is_valid(Tokenization *tokenization, TokenRange range) {
+    if (tokenization == NULL) {
+        return false;
+    }
+    return (range.first >= 0)
+           && (range.first <= range.end)
+           && (range.end <= tokenization->token_count);
+}
+
+int32
+token_range_first_significant(Tokenization *tokenization, TokenRange range) {
+    if (!token_range_is_valid(tokenization, range)) {
+        return -1;
+    }
+    for (int32 i = range.first; i < range.end; i += 1) {
+        if (!token_is_trivia(&tokenization->tokens[i])) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int32
+token_range_last_significant(Tokenization *tokenization, TokenRange range) {
+    if (!token_range_is_valid(tokenization, range)) {
+        return -1;
+    }
+    for (int32 i = range.end - 1; i >= range.first; i -= 1) {
+        if (!token_is_trivia(&tokenization->tokens[i])) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+bool
+token_range_is_empty(Tokenization *tokenization, TokenRange range) {
+    if (!token_range_is_valid(tokenization, range)) {
+        return false;
+    }
+    return token_range_first_significant(tokenization, range) < 0;
+}
+
+TokenRange
+token_range_trim_trivia(Tokenization *tokenization, TokenRange range) {
+    TokenRange result = {-1, -1};
+    int32 first;
+    int32 last;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return result;
+    }
+    first = token_range_first_significant(tokenization, range);
+    if (first < 0) {
+        result.first = range.end;
+        result.end = range.end;
+        return result;
+    }
+    last = token_range_last_significant(tokenization, range);
+    result.first = first;
+    result.end = last + 1;
+    return result;
+}
+
+SourceRange
+token_range_source_range(Tokenization *tokenization, TokenRange range) {
+    SourceRange result = {-1, -1};
+    Token *first;
+    Token *last;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return result;
+    }
+    if (range.first == range.end) {
+        if (range.first == tokenization->token_count) {
+            result.start = tokenization->text_len;
+        } else {
+            result.start = tokenization->tokens[range.first].offset;
+        }
+        result.end = result.start;
+        return result;
+    }
+
+    first = &tokenization->tokens[range.first];
+    last = &tokenization->tokens[range.end - 1];
+    result.start = first->offset;
+    result.end = last->offset + last->len;
+    return result;
+}
+
+static void
+tokenization_build_line_index(Tokenization *tokenization) {
+    int32 line_count;
+    int32 line_index;
+
+    if (tokenization->line_starts != NULL) {
+        return;
+    }
+
+    line_count = 1;
+    for (int32 i = 0; i < tokenization->text_len; i += 1) {
+        if (tokenization->text[i] == '\n') {
+            line_count += 1;
+        }
+    }
+
+    tokenization->line_starts = malloc2(line_count
+                                        *SIZEOF(*tokenization->line_starts));
+    tokenization->line_count = line_count;
+    tokenization->line_capacity = line_count;
+    tokenization->line_starts[0] = 0;
+
+    line_index = 1;
+    for (int32 i = 0; i < tokenization->text_len; i += 1) {
+        if (tokenization->text[i] == '\n') {
+            tokenization->line_starts[line_index] = i + 1;
+            line_index += 1;
+        }
+    }
+    ASSERT_EQ(line_index, line_count);
+    return;
+}
+
+int32
+tokenization_physical_line_count(Tokenization *tokenization) {
+    if (tokenization == NULL) {
+        return 0;
+    }
+    tokenization_build_line_index(tokenization);
+    return tokenization->line_count;
+}
+
+int32
+tokenization_physical_line_start_offset(Tokenization *tokenization,
+                                          int32 line) {
+    if (tokenization == NULL) {
+        return -1;
+    }
+    tokenization_build_line_index(tokenization);
+    if ((line <= 0) || (line > tokenization->line_count)) {
+        return -1;
+    }
+    return tokenization->line_starts[line - 1];
+}
+
+int32
+tokenization_physical_line_end_offset(Tokenization *tokenization, int32 line) {
+    if (tokenization == NULL) {
+        return -1;
+    }
+    tokenization_build_line_index(tokenization);
+    if ((line <= 0) || (line > tokenization->line_count)) {
+        return -1;
+    }
+    if (line == tokenization->line_count) {
+        return tokenization->text_len;
+    }
+    return tokenization->line_starts[line];
+}
+
+SourceLocation
+tokenization_source_location(Tokenization *tokenization, int32 offset) {
+    SourceLocation result = {.offset = -1};
+    int32 first;
+    int32 end;
+
+    if ((tokenization == NULL) || (offset < 0)
+        || (offset > tokenization->text_len)) {
+        return result;
+    }
+    tokenization_build_line_index(tokenization);
+
+    first = 0;
+    end = tokenization->line_count;
+    while ((first + 1) < end) {
+        int32 middle = first + (end - first)/2;
+
+        if (tokenization->line_starts[middle] <= offset) {
+            first = middle;
+        } else {
+            end = middle;
+        }
+    }
+
+    result.offset = offset;
+    result.line = first + 1;
+    result.column = offset - tokenization->line_starts[first];
+    return result;
+}
+
+SourceLocation
+tokenization_token_location(Tokenization *tokenization, int32 token_index) {
+    SourceLocation result = {.offset = -1};
+    int32 offset;
+
+    if ((tokenization == NULL) || (token_index < 0)
+        || (token_index >= tokenization->token_count)) {
+        return result;
+    }
+    offset = tokenization->tokens[token_index].offset;
+    return tokenization_source_location(tokenization, offset);
+}
+
 int32
 tokenization_significant_at_or_after(Tokenization *tokenization,
                                      int32 token_index) {
@@ -806,12 +1010,17 @@ free_tokenization(Tokenization *tokenization) {
 
     free2(tokenization->tokens,
           tokenization->token_capacity*SIZEOF(*tokenization->tokens));
+    free2(tokenization->line_starts,
+          tokenization->line_capacity*SIZEOF(*tokenization->line_starts));
 
     tokenization->tokens = NULL;
     tokenization->token_count = 0;
     tokenization->token_capacity = 0;
     tokenization->text = NULL;
     tokenization->text_len = 0;
+    tokenization->line_starts = NULL;
+    tokenization->line_count = 0;
+    tokenization->line_capacity = 0;
 
     return;
 }
@@ -822,10 +1031,18 @@ meta_tokenize_sink(void) {
     (void)meta_tokenize_sink;
     (void)free_tokenization;
     (void)token_is_number;
+    (void)token_range_is_empty;
+    (void)token_range_source_range;
+    (void)token_range_trim_trivia;
     (void)tokenization_find_matching;
     (void)tokenization_is_in_preprocessor_define;
     (void)tokenization_next_significant;
+    (void)tokenization_physical_line_count;
+    (void)tokenization_physical_line_end_offset;
+    (void)tokenization_physical_line_start_offset;
     (void)tokenization_previous_significant;
+    (void)tokenization_source_location;
+    (void)tokenization_token_location;
     (void)tokenize;
     (void)tokenize_line;
     (void)tokenize_cstyle_line;
@@ -1138,6 +1355,139 @@ test_tokenization_navigation(void) {
 }
 
 static void
+test_token_ranges(void) {
+    char *text = "  foo /* c */ + bar  ";
+    Tokenization tokenization;
+    TokenRange range;
+    TokenRange trimmed;
+    SourceRange source;
+
+    tokenization = tokenize(text, strlen32(text));
+    range = (TokenRange){0, tokenization.token_count};
+    ASSERT(token_range_is_valid(&tokenization, range));
+    ASSERT(!token_range_is_valid(&tokenization, (TokenRange){-1, 0}));
+    range = (TokenRange){0, tokenization.token_count + 1};
+    ASSERT(!token_range_is_valid(&tokenization, range));
+    range = (TokenRange){0, tokenization.token_count};
+    ASSERT_EQ(token_range_first_significant(&tokenization, range), 1);
+    ASSERT_EQ(token_range_last_significant(&tokenization, range),
+              tokenization.token_count - 2);
+
+    trimmed = token_range_trim_trivia(&tokenization, range);
+    ASSERT_EQ(trimmed.first, 1);
+    ASSERT_EQ(trimmed.end, tokenization.token_count - 1);
+    source = token_range_source_range(&tokenization, trimmed);
+    ASSERT_EQ(source.start, 2);
+    ASSERT_EQ(source.end, strlen32(text) - 2);
+    ASSERT_EQ(source.end - source.start,
+              strlen32("foo /* c */ + bar"));
+    ASSERT_EQ(tokenization.text + source.start, source.end - source.start,
+              "foo /* c */ + bar");
+
+    range = (TokenRange){0, 1};
+    ASSERT(token_range_is_empty(&tokenization, range));
+    trimmed = token_range_trim_trivia(&tokenization, range);
+    ASSERT_EQ(trimmed.first, 1);
+    ASSERT_EQ(trimmed.end, 1);
+    source = token_range_source_range(&tokenization, trimmed);
+    ASSERT_EQ(source.start, 2);
+    ASSERT_EQ(source.end, 2);
+
+    range = (TokenRange){tokenization.token_count,
+                         tokenization.token_count};
+    source = token_range_source_range(&tokenization, range);
+    ASSERT_EQ(source.start, tokenization.text_len);
+    ASSERT_EQ(source.end, tokenization.text_len);
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
+test_tokenization_source_locations(void) {
+    char *text = "abc\ndef\r\nlast\n";
+    Tokenization tokenization;
+    SourceLocation location;
+    int32 def_token;
+    int32 last_token;
+
+    tokenization = tokenize(text, strlen32(text));
+    ASSERT_NULL(tokenization.line_starts);
+    ASSERT_ZERO(tokenization.line_count);
+    ASSERT_EQ(tokenization_physical_line_count(&tokenization), 4);
+    ASSERT(tokenization.line_starts != NULL);
+    ASSERT_EQ(tokenization_physical_line_start_offset(&tokenization, 1), 0);
+    ASSERT_EQ(tokenization_physical_line_end_offset(&tokenization, 1), 4);
+    ASSERT_EQ(tokenization_physical_line_start_offset(&tokenization, 2), 4);
+    ASSERT_EQ(tokenization_physical_line_end_offset(&tokenization, 2), 9);
+    ASSERT_EQ(tokenization_physical_line_start_offset(&tokenization, 4),
+              tokenization.text_len);
+    ASSERT_EQ(tokenization_physical_line_end_offset(&tokenization, 4),
+              tokenization.text_len);
+    ASSERT_EQ(tokenization_physical_line_start_offset(&tokenization, 0), -1);
+    ASSERT_EQ(tokenization_physical_line_end_offset(&tokenization, 5), -1);
+
+    location = tokenization_source_location(&tokenization, 0);
+    ASSERT_ZERO(location.offset);
+    ASSERT_EQ(location.line, 1);
+    ASSERT_ZERO(location.column);
+    location = tokenization_source_location(&tokenization, 3);
+    ASSERT_EQ(location.line, 1);
+    ASSERT_EQ(location.column, 3);
+    location = tokenization_source_location(&tokenization, 4);
+    ASSERT_EQ(location.line, 2);
+    ASSERT_ZERO(location.column);
+    location = tokenization_source_location(&tokenization, 8);
+    ASSERT_EQ(location.line, 2);
+    ASSERT_EQ(location.column, 4);
+    location = tokenization_source_location(&tokenization, 9);
+    ASSERT_EQ(location.line, 3);
+    ASSERT_ZERO(location.column);
+    location = tokenization_source_location(&tokenization,
+                                            tokenization.text_len);
+    ASSERT_EQ(location.line, 4);
+    ASSERT_ZERO(location.column);
+    location = tokenization_source_location(&tokenization, -1);
+    ASSERT_EQ(location.offset, -1);
+    ASSERT_ZERO(location.line);
+    ASSERT_ZERO(location.column);
+
+    def_token = test_find_token(&tokenization, "def");
+    last_token = test_find_token(&tokenization, "last");
+    location = tokenization_token_location(&tokenization, def_token);
+    ASSERT_EQ(location.line, 2);
+    ASSERT_ZERO(location.column);
+    location = tokenization_token_location(&tokenization, last_token);
+    ASSERT_EQ(location.line, 3);
+    ASSERT_ZERO(location.column);
+    location = tokenization_token_location(&tokenization, -1);
+    ASSERT_EQ(location.offset, -1);
+
+    free_tokenization(&tokenization);
+    ASSERT_NULL(tokenization.line_starts);
+    ASSERT_ZERO(tokenization.line_count);
+    ASSERT_ZERO(tokenization.line_capacity);
+    return;
+}
+
+static void
+test_tokenization_empty_source_location(void) {
+    char *text = "";
+    Tokenization tokenization;
+    SourceLocation location;
+
+    tokenization = tokenize(text, 0);
+    ASSERT_EQ(tokenization_physical_line_count(&tokenization), 1);
+    ASSERT_ZERO(tokenization_physical_line_start_offset(&tokenization, 1));
+    ASSERT_ZERO(tokenization_physical_line_end_offset(&tokenization, 1));
+    location = tokenization_source_location(&tokenization, 0);
+    ASSERT_ZERO(location.offset);
+    ASSERT_EQ(location.line, 1);
+    ASSERT_ZERO(location.column);
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
 test_tokenization_preprocessor_define_detection(void) {
     char *text = "#define XX(a) \\\n    ((a) + 1)\nint z;\n";
     Tokenization tokenization;
@@ -1214,6 +1564,9 @@ main(void) {
     test_tokenize_preprocessor_and_skip_whitespace();
     test_tokenize_block_comment_across_lines();
     test_tokenization_navigation();
+    test_token_ranges();
+    test_tokenization_source_locations();
+    test_tokenization_empty_source_location();
     test_tokenization_preprocessor_define_detection();
     test_tokenization_find_matching();
     test_tokenize_with_flags_returns_source_metadata();

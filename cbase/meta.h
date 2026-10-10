@@ -271,6 +271,25 @@ typedef struct Token {
     int32 offset;
 } Token;
 
+/* Half-open token-index range [first, end). */
+typedef struct TokenRange {
+    int32 first;
+    int32 end;
+} TokenRange;
+
+/* Half-open byte-offset range into Tokenization.text. */
+typedef struct SourceRange {
+    int32 start;
+    int32 end;
+} SourceRange;
+
+/* Physical line is 1-based; byte offset and byte column are 0-based. */
+typedef struct SourceLocation {
+    int32 offset;
+    int32 line;
+    int32 column;
+} SourceLocation;
+
 typedef struct Tokenization {
     char *text;
     Token *tokens;
@@ -279,6 +298,11 @@ typedef struct Tokenization {
     int32 token_count;
     int32 token_capacity;
     int32 padding;
+
+    /* Lazily allocated physical-line index owned by this tokenization. */
+    int32 line_count;
+    int32 line_capacity;
+    int32 *line_starts;
 } Tokenization;
 
 typedef struct Line {
@@ -340,13 +364,26 @@ int32 scan_literal_token(char *, int32, int32);
 int32 scan_number_literal(char *, int32, int32);
 bool token_is_number(Token *);
 bool token_is_trivia(Token *);
+/* Empty token ranges contain no significant tokens after trimming trivia. */
+bool token_range_is_empty(Tokenization *, TokenRange);
+bool token_range_is_valid(Tokenization *, TokenRange);
+int32 token_range_first_significant(Tokenization *, TokenRange);
+int32 token_range_last_significant(Tokenization *, TokenRange);
+SourceRange token_range_source_range(Tokenization *, TokenRange);
+TokenRange token_range_trim_trivia(Tokenization *, TokenRange);
 int32 tokenization_find_matching(Tokenization *, int32);
 bool tokenization_is_in_preprocessor_define(Tokenization *, int32);
 int32 tokenization_logical_line_start_offset(Tokenization *, int32);
 int32 tokenization_next_significant(Tokenization *, int32);
+int32 tokenization_physical_line_count(Tokenization *);
+/* Physical line arguments are 1-based; end offsets are exclusive. */
+int32 tokenization_physical_line_end_offset(Tokenization *, int32);
+int32 tokenization_physical_line_start_offset(Tokenization *, int32);
 int32 tokenization_previous_significant(Tokenization *, int32);
+SourceLocation tokenization_source_location(Tokenization *, int32);
 int32 tokenization_significant_at_or_after(Tokenization *, int32);
 int32 tokenization_token_at_or_after_offset(Tokenization *, int32);
+SourceLocation tokenization_token_location(Tokenization *, int32);
 Tokenization tokenize(char *, int32);
 void tokenize_cstyle_line(Line *, bool *);
 void tokenize_line(Line *, bool *);

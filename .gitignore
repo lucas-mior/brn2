@@ -22,7 +22,7 @@ rename.txt
 .SRCINFO
 tags
 *.tags.vim
-*.tar.gz
+*.tar.gz*
 *temp_delete_me*
 test
 test/
