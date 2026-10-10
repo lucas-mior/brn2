@@ -558,6 +558,24 @@ str_float64_fixed(String *str, double value, int32 precision) {
 }
 
 void
+str_float64_exp(String *str, double value, int32 precision) {
+    int32 len;
+
+    if ((precision < 0) || (precision > FMT_DOUBLE_MAX_DECIMAL_PRECISION)) {
+        error("Invalid float precision %d.\n", precision);
+        fatal(EXIT_FAILURE);
+    }
+
+    str_reserve(str, FMT_FLOAT_RYU_BUFFER_SIZE);
+    len = d2exp_buffered_n(value, (uint32)precision, str->data + str->len);
+    ASSERT_GE(len, 0);
+    str->len += len;
+    str->data[str->len] = '\0';
+
+    return;
+}
+
+void
 str_printf(String *str, char *fmt, ...) {
     FmtPlan plan;
     va_list args;
@@ -883,6 +901,20 @@ main(void) {
         ASSERT_EQ(builder.data, "x0 -9223372036854775808 9223372036854775807");
         str_free(&builder);
     }
+
+    {
+        String builder = {0};
+
+        STR_APPEND(&builder, "x=");
+        str_float64(&builder, 0.1);
+        STR_APPEND(&builder, " y=");
+        str_float64_fixed(&builder, 1.25, 2);
+        STR_APPEND(&builder, " z=");
+        str_float64_exp(&builder, 1234.0, 2);
+        ASSERT_EQ(builder.data, "x=1E-1 y=1.25 z=1.23e+03");
+        str_free(&builder);
+    }
+
     {
         String builder = {0};
         int32 count = 0;

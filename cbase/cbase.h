@@ -317,6 +317,7 @@ void str_free(String *);
 void str_itoa(String *string, llong num);
 void str_float64(String *string, double value);
 void str_float64_fixed(String *string, double value, int32 precision);
+void str_float64_exp(String *string, double value, int32 precision);
 void str_bytes_pretty(String *string, llong size);
 void str_move(String *dest, String *source);
 void str_printf(String *string, char *fmt, ...);
