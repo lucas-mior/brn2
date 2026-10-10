@@ -17,19 +17,11 @@
 #include "cbase.h"
 
 bool
-char_is_digit(char c) {
-    if ((c >= '0') && (c <= '9')) {
-        return true;
-    }
-    return false;
-}
-
-bool
 token_is_number(Token *token) {
     if ((token->kind == TOKEN_LITERAL) && (token->len > 0)
-        && (char_is_digit(token->text[0])
+        && (is_digit(token->text[0])
             || ((token->text[0] == '.') && (token->len > 1)
-                && char_is_digit(token->text[1])))) {
+                && is_digit(token->text[1])))) {
         return true;
     }
     return false;
@@ -45,7 +37,7 @@ char_is_identifier_start(char c) {
 
 bool
 char_is_identifier_body(char c) {
-    if (char_is_identifier_start(c) || char_is_digit(c)) {
+    if (char_is_identifier_start(c) || is_digit(c)) {
         return true;
     }
     return false;
@@ -68,7 +60,7 @@ char_is_horizontal_space(char c) {
 bool
 char_is_number_body(char c) {
     if (char_is_identifier_body(c)
-        || char_is_digit(c)
+        || is_digit(c)
         || (c == '.')
         || (c == '\'')) {
         return true;
@@ -82,7 +74,7 @@ scan_number_literal(char *text, int32 text_len, int32 start) {
 
     result = 1;
     if ((text[start] == '.') && ((start + 1) < text_len)
-        && char_is_digit(text[start + 1])) {
+        && is_digit(text[start + 1])) {
         result = 2;
     }
 
@@ -520,9 +512,9 @@ tokenize_with_flags(char *text, int32 text_len, int32 flags) {
             tokenization_add_token(&result, TOKEN_IDENT,
                                    text + i, token_len, i);
             i += token_len;
-        } else if (char_is_digit(text[i])
+        } else if (is_digit(text[i])
                    || ((text[i] == '.') && ((i + 1) < text_len)
-                       && char_is_digit(text[i + 1]))) {
+                       && is_digit(text[i + 1]))) {
             token_len = scan_number_literal(text, text_len, i);
             tokenization_add_token(&result, TOKEN_LITERAL,
                                    text + i, token_len, i);
@@ -1757,9 +1749,9 @@ test_character_classifiers(void) {
     ASSERT(is_alpha('a'));
     ASSERT(is_alpha('Z'));
     ASSERT(!is_alpha('_'));
-    ASSERT(char_is_digit('0'));
-    ASSERT(char_is_digit('9'));
-    ASSERT(!char_is_digit('x'));
+    ASSERT(is_digit('0'));
+    ASSERT(is_digit('9'));
+    ASSERT(!is_digit('x'));
     ASSERT(char_is_identifier_start('_'));
     ASSERT(char_is_identifier_start('A'));
     ASSERT(!char_is_identifier_start('1'));

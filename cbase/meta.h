@@ -386,7 +386,6 @@ bool c_token_is_type_word(Token *);
 bool c_token_is_declaration_prefix(Token *);
 int32 c_binary_op_precedence(enum CBinaryOp);
 
-bool char_is_digit(char);
 bool char_is_horizontal_space(char);
 bool char_is_identifier_body(char);
 bool char_is_identifier_start(char);
