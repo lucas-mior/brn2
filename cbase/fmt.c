@@ -4898,7 +4898,7 @@ void
 str_float64(String *string, double value) {
     int32 len;
 
-    str_reserve(string, FMT_FLOAT_RYU_BUFFER_SIZE);
+    str_reserve(string, RYU_D2S_BUFFER_SIZE);
     len = fmt_float64_shortest(string->data + string->len,
                                string->cap - string->len, value);
     ASSERT_GE(len, 0);
