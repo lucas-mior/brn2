@@ -786,7 +786,7 @@ token_delimiter_stack_push(TokenDelimiterStack *stack,
         enum TokenDelimiterKind *heap;
 
         heap = malloc2(stack->max_capacity*SIZEOF(*heap));
-        memcpy(heap, stack->items, stack->count*SIZEOF(*heap));
+        memcpy64(heap, stack->items, stack->count*SIZEOF(*heap));
         stack->items = heap;
         stack->heap = heap;
         stack->capacity = stack->max_capacity;
