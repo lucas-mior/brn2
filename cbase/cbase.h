@@ -291,7 +291,7 @@ void str_reserve(String *string, int64 extra);
 int32 str_set(String *string, char *data, int32 data_len);
 char *str_steal(String *string, int32 *len);
 char *str_opt_cstr(String *);
-char *signal_name(int32 signum);
+char *signal_get_name(int32 signum);
 void send_signal(char *executable, int32 signal_number);
 
 INLINE bool32
