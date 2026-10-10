@@ -373,12 +373,6 @@ typedef struct Line {
     int32 padding;
 } Line;
 
-typedef struct Document {
-    Line *lines;
-    int32 line_count;
-    int32 capacity;
-} Document;
-
 char *TOKEN_str(enum TokenKind);
 void TOKEN_str_free(char *);
 enum TokenKind TOKEN_parse(char *, int32);
@@ -530,13 +524,7 @@ void tokenize_line(Line *, bool *);
 void tokenize_line_with_flags(Line *, bool *, int32);
 Line tokenize_text_with_flags(char *, int32, int32);
 Tokenization tokenize_with_flags(char *, int32, int32);
-void document_add_line(Document *, char *, int32, bool *, int32);
-void document_reserve_lines(Document *, int32);
-void free_document(Document *);
 void free_line(Line *);
-Document *parse_c_text(char *, int32);
-Document *parse_text(char *, int32);
-Document *parse_text_with_flags(char *, int32, int32);
 void c_emit_wrapped_expr(String *, char *, char *, char *, char *);
 String c_identifier(char *, int32);
 bool c_identifier_is_keyword(char *);
