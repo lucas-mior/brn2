@@ -263,6 +263,22 @@ enum CUnaryOp {
     C_UNARY_OP_POST_DECREMENT,
 };
 
+enum CPreprocessorDirectiveKind {
+    C_PREPROCESSOR_DIRECTIVE_UNKNOWN = 0,
+    C_PREPROCESSOR_DIRECTIVE_DEFINE,
+    C_PREPROCESSOR_DIRECTIVE_UNDEF,
+    C_PREPROCESSOR_DIRECTIVE_INCLUDE,
+    C_PREPROCESSOR_DIRECTIVE_IF,
+    C_PREPROCESSOR_DIRECTIVE_IFDEF,
+    C_PREPROCESSOR_DIRECTIVE_IFNDEF,
+    C_PREPROCESSOR_DIRECTIVE_ELIF,
+    C_PREPROCESSOR_DIRECTIVE_ELSE,
+    C_PREPROCESSOR_DIRECTIVE_ENDIF,
+    C_PREPROCESSOR_DIRECTIVE_ERROR,
+    C_PREPROCESSOR_DIRECTIVE_PRAGMA,
+    C_PREPROCESSOR_DIRECTIVE_LINE,
+};
+
 typedef struct Token {
     char *text; /* Borrowed source span, not necessarily NUL-terminated. */
     enum TokenKind kind;
@@ -296,6 +312,26 @@ typedef struct TokenDelimiterDepth {
     int32 bracket;
     int32 brace;
 } TokenDelimiterDepth;
+
+typedef struct CPreprocessorDirective {
+    SourceRange source;
+    TokenRange tokens;
+    enum CPreprocessorDirectiveKind kind;
+    int32 hash_token;
+    int32 keyword_token;
+} CPreprocessorDirective;
+
+typedef struct CPreprocessorDefine {
+    CPreprocessorDirective directive;
+    SourceRange replacement_source;
+    TokenRange parameter_list;
+    TokenRange parameters;
+    TokenRange replacement;
+    int32 name_token;
+    int32 open_paren_token;
+    int32 close_paren_token;
+    bool function_like;
+} CPreprocessorDefine;
 
 typedef struct Tokenization {
     char *text;
@@ -423,6 +459,22 @@ bool tokenization_comment_between(Tokenization *, int32, int32);
 int32 tokenization_find_matching(Tokenization *, int32);
 bool tokenization_is_in_preprocessor_define(Tokenization *, int32);
 bool tokenization_line_continuation_between(Tokenization *, int32, int32);
+
+/*
+ * Raw preprocessor structure. No directives are expanded. Directive source
+ * ranges include the terminating physical newline when one exists.
+ */
+enum CPreprocessorDirectiveKind c_preprocessor_directive_kind(Token *);
+bool c_preprocessor_directive_at(Tokenization *, int32,
+                                 CPreprocessorDirective *);
+bool c_preprocessor_directive_containing(Tokenization *, int32,
+                                         CPreprocessorDirective *);
+bool c_preprocessor_define_info(Tokenization *, CPreprocessorDirective *,
+                                CPreprocessorDefine *);
+int32 c_preprocessor_define_parameter_count(Tokenization *,
+                                            CPreprocessorDefine *);
+bool c_preprocessor_define_parameter(Tokenization *, CPreprocessorDefine *,
+                                     int32, TokenRange *);
 int32 tokenization_logical_line_start_offset(Tokenization *, int32);
 bool tokenization_newline_between(Tokenization *, int32, int32);
 int32 tokenization_next_significant(Tokenization *, int32);
