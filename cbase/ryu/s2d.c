@@ -222,6 +222,101 @@ ryu_decimal_midpoint(RyuBig *prefix, int64 exponent, bool sticky,
     return comparison;
 }
 
+// For a long significand, the first 17 nonzero significant digits bound
+// the input between two consecutive 17-digit decimal values. If those
+// endpoints round to the same binary64 value, the entire interval does too.
+// No large-integer calculation is needed in that case.
+static bool
+ryu_decimal_interval(const char *buffer, int32 parsed_len, int64 order,
+                     bool negative, double *result) {
+    uint64 prefix = 0;
+    int32 digits = 0;
+    int64 exponent = order - 16;
+    double lower;
+    double upper;
+    char text[40];
+    int32 len;
+    int32 status;
+    uint64 lower_bits;
+    uint64 upper_bits;
+
+    for (int32 i = 0; i < parsed_len; i += 1) {
+        char c = buffer[i];
+
+        if ((c == 'e') || (c == 'E')) {
+            break;
+        }
+        if ((c < '0') || (c > '9')) {
+            continue;
+        }
+        if (digits == 0 && c == '0') {
+            continue;
+        }
+        prefix = prefix*10 + (uint64)(c - '0');
+        digits += 1;
+        if (digits == 17) {
+            break;
+        }
+    }
+    assert(digits == 17);
+
+    // Construct only a short, bounded decimal for the existing Ryu path.
+    // The lower endpoint is inclusive; the upper endpoint is exclusive.
+    for (int32 bound = 0; bound < 2; bound += 1) {
+        uint64 mantissa = prefix + (uint64)bound;
+        int64 e10 = exponent;
+
+        if (mantissa == 100000000000000000ull) {
+            mantissa /= 10;
+            e10 += 1;
+        }
+        for (int32 i = 16; i >= 0; i -= 1) {
+            text[i] = (char)('0' + mantissa%10);
+            mantissa /= 10;
+        }
+        len = 17;
+        text[len] = 'e';
+        len += 1;
+        if (e10 < 0) {
+            text[len] = '-';
+            len += 1;
+            e10 = -e10;
+        }
+        {
+            char exponent_digits[16];
+            int32 count = 0;
+
+            do {
+                exponent_digits[count] = (char)('0' + e10%10);
+                count += 1;
+                e10 /= 10;
+            } while (e10 != 0);
+            for (int32 i = count - 1; i >= 0; i -= 1) {
+                text[len] = exponent_digits[i];
+                len += 1;
+            }
+        }
+        if (bound == 0) {
+            status = s2d_n(text, len, &lower);
+        } else {
+            status = s2d_n(text, len, &upper);
+        }
+        if (status <= 0 && status != -FLOAT_UNDERFLOW) {
+            return false;
+        }
+    }
+    memcpy(&lower_bits, &lower, SIZEOF(lower_bits));
+    memcpy(&upper_bits, &upper, SIZEOF(upper_bits));
+    if (lower_bits != upper_bits) {
+        return false;
+    }
+    if (negative) {
+        lower_bits |= 1ull << 63;
+    }
+    *result = int64Bits2Double(lower_bits);
+    return true;
+}
+
 static int32
 ryu_decimal_extended(const char *buffer, int32 parsed_len,
                      int64 decimal_exponent, int64 significant_digits,
@@ -244,6 +339,15 @@ ryu_decimal_extended(const char *buffer, int32 parsed_len,
     }
     if (order <= -325) {
         goto finished;
+    }
+    if (ryu_decimal_interval(buffer, parsed_len, order, negative, result)) {
+        uint64 rounded_bits;
+
+        memcpy(&rounded_bits, result, SIZEOF(rounded_bits));
+        if ((rounded_bits & 0x7ff0000000000000ull) == 0) {
+            return -FLOAT_UNDERFLOW;
+        }
+        return parsed_len;
     }
 
     ryu_big_small(&prefix, 0);

@@ -566,7 +566,7 @@ str_float64_exp(String *str, double value, int32 precision) {
         fatal(EXIT_FAILURE);
     }
 
-    str_reserve(str, FMT_FLOAT_RYU_BUFFER_SIZE);
+    str_reserve(str, FMT_FLOAT_MAX_EXP_PREFIX + precision);
     len = d2exp_buffered_n(value, (uint32)precision, str->data + str->len);
     ASSERT_GE(len, 0);
     str->len += len;

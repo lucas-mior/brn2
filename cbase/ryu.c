@@ -369,6 +369,50 @@ test_ryu_s2d_long_decimal(void) {
 }
 
 static void
+test_ryu_s2d_decimal_interval(void) {
+    static struct {
+        char *input;
+        uint64 bits;
+    } cases[] = {
+        {"9.999999999999999999999999999e-1", 0x3ff0000000000000ull},
+        {"999999999999999999999999999999999999999e-39",
+         0x3ff0000000000000ull},
+        {"0.99999999999999999999999999999", 0x3ff0000000000000ull},
+        {"1.00000000000000011102230246251565404236316680908203125",
+         0x3ff0000000000000ull},
+        {"1.00000000000000011102230246251565404236316680908203126",
+         0x3ff0000000000001ull},
+        {"2.225073858507201136057409796709131975934819546351645648e-308",
+         0x000fffffffffffffull},
+        {"2.225073858507201383090232717332404064219215980462331830e-308",
+         0x0010000000000000ull},
+        {"4.940656458412465441765687928682213723650598e-324",
+         0x0000000000000001ull},
+        {"1.79769313486231570814527423731704356798070e308",
+         0x7fefffffffffffffull},
+        {"1.79769313486231580814527423731704356798070e308",
+         0x7ff0000000000000ull},
+        {"-1.234567890123456789012345678901e-320",
+         0x80000000000009c3ull},
+    };
+    double value;
+
+    for (int32 i = 0; i < LENGTH(cases); i += 1) {
+        int32 len = strlen32(cases[i].input);
+        int32 expected_status = len;
+
+        if ((cases[i].bits & 0x7ff0000000000000ull) == 0) {
+            expected_status = -FLOAT_UNDERFLOW;
+        }
+        ASSERT_EQ(s2d_fast(cases[i].input, &value), expected_status);
+        ASSERT(test_ryu_double_bits(value) == cases[i].bits);
+        ASSERT_EQ(s2d_n(cases[i].input, len, &value), expected_status);
+        ASSERT(test_ryu_double_bits(value) == cases[i].bits);
+    }
+    return;
+}
+
+static void
 test_ryu_s2d_fast(void) {
     static char *inputs[] = {
         "0", "-0", "0.0", "+1.25rest", "-1e+2,rest",
@@ -436,6 +480,7 @@ main(void) {
     test_ryu_s2d_range_values();
     test_ryu_s2d_hex();
     test_ryu_s2d_long_decimal();
+    test_ryu_s2d_decimal_interval();
     test_ryu_s2d_fast();
 
     exit(EXIT_SUCCESS);
