@@ -634,6 +634,216 @@ token_is_trivia(Token *token) {
     }
 }
 
+enum TokenDelimiterKind {
+    TOKEN_DELIMITER_NONE = 0,
+    TOKEN_DELIMITER_PAREN,
+    TOKEN_DELIMITER_BRACKET,
+    TOKEN_DELIMITER_BRACE,
+};
+
+#define TOKEN_DELIMITER_STACK_LOCAL_CAPACITY 32
+
+typedef struct TokenDelimiterStack {
+    enum TokenDelimiterKind local[TOKEN_DELIMITER_STACK_LOCAL_CAPACITY];
+    enum TokenDelimiterKind *items;
+    enum TokenDelimiterKind *heap;
+    int32 count;
+    int32 capacity;
+    int32 max_capacity;
+} TokenDelimiterStack;
+
+static enum TokenDelimiterKind
+token_open_delimiter_kind(Token *token) {
+    if (token == NULL) {
+        return TOKEN_DELIMITER_NONE;
+    }
+    if (TOKEN_IS(token, "(")) {
+        return TOKEN_DELIMITER_PAREN;
+    }
+    if (TOKEN_IS(token, "[")) {
+        return TOKEN_DELIMITER_BRACKET;
+    }
+    if (TOKEN_IS(token, "{")) {
+        return TOKEN_DELIMITER_BRACE;
+    }
+    return TOKEN_DELIMITER_NONE;
+}
+
+static enum TokenDelimiterKind
+token_close_delimiter_kind(Token *token) {
+    if (token == NULL) {
+        return TOKEN_DELIMITER_NONE;
+    }
+    if (TOKEN_IS(token, ")")) {
+        return TOKEN_DELIMITER_PAREN;
+    }
+    if (TOKEN_IS(token, "]")) {
+        return TOKEN_DELIMITER_BRACKET;
+    }
+    if (TOKEN_IS(token, "}")) {
+        return TOKEN_DELIMITER_BRACE;
+    }
+    return TOKEN_DELIMITER_NONE;
+}
+
+bool
+token_is_open_delimiter(Token *token) {
+    return token_open_delimiter_kind(token) != TOKEN_DELIMITER_NONE;
+}
+
+bool
+token_is_close_delimiter(Token *token) {
+    return token_close_delimiter_kind(token) != TOKEN_DELIMITER_NONE;
+}
+
+bool
+token_delimiter_depth_equal(TokenDelimiterDepth left,
+                            TokenDelimiterDepth right) {
+    return (left.paren == right.paren)
+           && (left.bracket == right.bracket)
+           && (left.brace == right.brace);
+}
+
+bool
+token_delimiter_depth_is_zero(TokenDelimiterDepth depth) {
+    return token_delimiter_depth_equal(depth, (TokenDelimiterDepth){0});
+}
+
+static bool
+token_delimiter_depth_is_valid(TokenDelimiterDepth depth) {
+    return (depth.paren >= 0) && (depth.bracket >= 0) && (depth.brace >= 0);
+}
+
+static void
+token_delimiter_depth_increment(TokenDelimiterDepth *depth,
+                                enum TokenDelimiterKind kind) {
+    switch (kind) {
+    case TOKEN_DELIMITER_PAREN:
+        depth->paren += 1;
+        break;
+    case TOKEN_DELIMITER_BRACKET:
+        depth->bracket += 1;
+        break;
+    case TOKEN_DELIMITER_BRACE:
+        depth->brace += 1;
+        break;
+    case TOKEN_DELIMITER_NONE:
+    default:
+        break;
+    }
+    return;
+}
+
+static void
+token_delimiter_depth_decrement(TokenDelimiterDepth *depth,
+                                enum TokenDelimiterKind kind) {
+    switch (kind) {
+    case TOKEN_DELIMITER_PAREN:
+        depth->paren -= 1;
+        break;
+    case TOKEN_DELIMITER_BRACKET:
+        depth->bracket -= 1;
+        break;
+    case TOKEN_DELIMITER_BRACE:
+        depth->brace -= 1;
+        break;
+    case TOKEN_DELIMITER_NONE:
+    default:
+        break;
+    }
+    return;
+}
+
+static void
+token_delimiter_stack_init(TokenDelimiterStack *stack, int32 max_capacity) {
+    *stack = (TokenDelimiterStack){0};
+    stack->items = stack->local;
+    stack->capacity = TOKEN_DELIMITER_STACK_LOCAL_CAPACITY;
+    stack->max_capacity = max_capacity;
+    return;
+}
+
+static void
+token_delimiter_stack_free(TokenDelimiterStack *stack) {
+    if (stack->heap != NULL) {
+        free2(stack->heap, stack->max_capacity*SIZEOF(*stack->heap));
+    }
+    stack->items = NULL;
+    stack->heap = NULL;
+    stack->count = 0;
+    stack->capacity = 0;
+    stack->max_capacity = 0;
+    return;
+}
+
+static bool
+token_delimiter_stack_push(TokenDelimiterStack *stack,
+                           enum TokenDelimiterKind kind) {
+    if (stack->count >= stack->max_capacity) {
+        return false;
+    }
+    if (stack->count == stack->capacity) {
+        enum TokenDelimiterKind *heap;
+
+        heap = malloc2(stack->max_capacity*SIZEOF(*heap));
+        memcpy(heap, stack->items, stack->count*SIZEOF(*heap));
+        stack->items = heap;
+        stack->heap = heap;
+        stack->capacity = stack->max_capacity;
+    }
+    stack->items[stack->count] = kind;
+    stack->count += 1;
+    return true;
+}
+
+static bool
+token_delimiter_stack_consume_forward(TokenDelimiterStack *stack,
+                                      TokenDelimiterDepth *depth,
+                                      Token *token) {
+    enum TokenDelimiterKind kind;
+
+    kind = token_open_delimiter_kind(token);
+    if (kind != TOKEN_DELIMITER_NONE) {
+        if (!token_delimiter_stack_push(stack, kind)) {
+            return false;
+        }
+        token_delimiter_depth_increment(depth, kind);
+        return true;
+    }
+
+    kind = token_close_delimiter_kind(token);
+    if (kind == TOKEN_DELIMITER_NONE) {
+        return true;
+    }
+    if ((stack->count == 0) || (stack->items[stack->count - 1] != kind)) {
+        return false;
+    }
+    stack->count -= 1;
+    token_delimiter_depth_decrement(depth, kind);
+    return true;
+}
+
+static bool
+token_delimiter_stack_consume_reverse(TokenDelimiterStack *stack,
+                                      Token *token) {
+    enum TokenDelimiterKind kind;
+
+    kind = token_close_delimiter_kind(token);
+    if (kind != TOKEN_DELIMITER_NONE) {
+        return token_delimiter_stack_push(stack, kind);
+    }
+
+    kind = token_open_delimiter_kind(token);
+    if (kind == TOKEN_DELIMITER_NONE) {
+        return true;
+    }
+    if ((stack->count == 0) || (stack->items[stack->count - 1] != kind)) {
+        return false;
+    }
+    stack->count -= 1;
+    return true;
+}
+
 bool
 token_range_is_valid(Tokenization *tokenization, TokenRange range) {
     if (tokenization == NULL) {
@@ -788,6 +998,242 @@ token_range_previous_text(Tokenization *tokenization, TokenRange range,
         i -= 1;
     }
     return i;
+}
+
+bool
+token_range_delimiter_depth_before(Tokenization *tokenization,
+                                   TokenRange range, int32 token_index,
+                                   TokenDelimiterDepth *result) {
+    TokenDelimiterStack stack;
+    TokenDelimiterDepth depth = {0};
+    bool valid = true;
+
+    if (result != NULL) {
+        *result = (TokenDelimiterDepth){0};
+    }
+    if (!token_range_is_valid(tokenization, range) || (result == NULL)
+        || (token_index < range.first) || (token_index > range.end)) {
+        return false;
+    }
+
+    token_delimiter_stack_init(&stack, range.end - range.first);
+    for (int32 i = range.first; i < token_index; i += 1) {
+        if (!token_delimiter_stack_consume_forward(&stack, &depth,
+                                                   &tokenization->tokens[i])) {
+            valid = false;
+            break;
+        }
+    }
+    token_delimiter_stack_free(&stack);
+    if (valid) {
+        *result = depth;
+    }
+    return valid;
+}
+
+bool
+token_range_is_balanced(Tokenization *tokenization, TokenRange range) {
+    TokenDelimiterStack stack;
+    TokenDelimiterDepth depth = {0};
+    bool result = true;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return false;
+    }
+
+    token_delimiter_stack_init(&stack, range.end - range.first);
+    for (int32 i = range.first; i < range.end; i += 1) {
+        if (!token_delimiter_stack_consume_forward(&stack, &depth,
+                                                   &tokenization->tokens[i])) {
+            result = false;
+            break;
+        }
+    }
+    if (stack.count != 0) {
+        result = false;
+    }
+    token_delimiter_stack_free(&stack);
+    return result;
+}
+
+int32
+token_range_matching_delimiter_forward(Tokenization *tokenization,
+                                       TokenRange range, int32 open_index) {
+    TokenDelimiterStack stack;
+    TokenDelimiterDepth depth = {0};
+    int32 result = -1;
+
+    if (!token_range_is_valid(tokenization, range)
+        || (open_index < range.first) || (open_index >= range.end)
+        || !token_is_open_delimiter(&tokenization->tokens[open_index])) {
+        return -1;
+    }
+
+    token_delimiter_stack_init(&stack, range.end - open_index);
+    for (int32 i = open_index; i < range.end; i += 1) {
+        if (!token_delimiter_stack_consume_forward(&stack, &depth,
+                                                   &tokenization->tokens[i])) {
+            break;
+        }
+        if (stack.count == 0) {
+            result = i;
+            break;
+        }
+    }
+    token_delimiter_stack_free(&stack);
+    return result;
+}
+
+int32
+token_range_matching_delimiter_reverse(Tokenization *tokenization,
+                                       TokenRange range, int32 close_index) {
+    TokenDelimiterStack stack;
+    int32 result = -1;
+
+    if (!token_range_is_valid(tokenization, range)
+        || (close_index < range.first) || (close_index >= range.end)
+        || !token_is_close_delimiter(&tokenization->tokens[close_index])) {
+        return -1;
+    }
+
+    token_delimiter_stack_init(&stack, close_index - range.first + 1);
+    for (int32 i = close_index; i >= range.first; i -= 1) {
+        if (!token_delimiter_stack_consume_reverse(&stack,
+                                                   &tokenization->tokens[i])) {
+            break;
+        }
+        if (stack.count == 0) {
+            result = i;
+            break;
+        }
+    }
+    token_delimiter_stack_free(&stack);
+    return result;
+}
+
+static bool
+token_at_depth_matches(Token *token, bool match_text, enum TokenKind kind,
+                       char *text, int32 text_len) {
+    if (match_text) {
+        return TOKEN_IS(token, text, text_len);
+    }
+    return token->kind == kind;
+}
+
+static int32
+token_range_next_at_depth(Tokenization *tokenization, TokenRange range,
+                          int32 token_index, TokenDelimiterDepth target,
+                          bool match_text, enum TokenKind kind, char *text,
+                          int32 text_len) {
+    TokenDelimiterStack stack;
+    TokenDelimiterDepth depth = {0};
+    int32 start;
+    int32 result;
+
+    if (!token_range_is_valid(tokenization, range)
+        || !token_delimiter_depth_is_valid(target)
+        || (match_text && (text_len < 0))) {
+        return -1;
+    }
+
+    start = token_range_next_start(range, token_index);
+    result = range.end;
+    token_delimiter_stack_init(&stack, range.end - range.first);
+    for (int32 i = range.first; i < range.end; i += 1) {
+        Token *token = &tokenization->tokens[i];
+        bool matches;
+
+        matches = (i >= start) && token_delimiter_depth_equal(depth, target)
+                  && token_at_depth_matches(token, match_text, kind,
+                                            text, text_len);
+        if (!token_delimiter_stack_consume_forward(&stack, &depth, token)) {
+            result = -1;
+            break;
+        }
+        if (matches) {
+            result = i;
+            break;
+        }
+    }
+    token_delimiter_stack_free(&stack);
+    return result;
+}
+
+static int32
+token_range_previous_at_depth(Tokenization *tokenization, TokenRange range,
+                              int32 token_index, TokenDelimiterDepth target,
+                              bool match_text, enum TokenKind kind, char *text,
+                              int32 text_len) {
+    TokenDelimiterStack stack;
+    TokenDelimiterDepth depth = {0};
+    int32 limit;
+    int32 result;
+
+    if (!token_range_is_valid(tokenization, range)
+        || !token_delimiter_depth_is_valid(target)
+        || (match_text && (text_len < 0))) {
+        return -1;
+    }
+
+    limit = token_range_previous_start(range, token_index);
+    result = range.first - 1;
+    if (limit < range.first) {
+        return result;
+    }
+
+    token_delimiter_stack_init(&stack, range.end - range.first);
+    for (int32 i = range.first; i <= limit; i += 1) {
+        Token *token = &tokenization->tokens[i];
+        bool matches;
+
+        matches = token_delimiter_depth_equal(depth, target)
+                  && token_at_depth_matches(token, match_text, kind,
+                                            text, text_len);
+        if (!token_delimiter_stack_consume_forward(&stack, &depth, token)) {
+            result = -1;
+            break;
+        }
+        if (matches) {
+            result = i;
+        }
+    }
+    token_delimiter_stack_free(&stack);
+    return result;
+}
+
+int32
+token_range_next_kind_at_depth(Tokenization *tokenization, TokenRange range,
+                               int32 token_index, TokenDelimiterDepth depth,
+                               enum TokenKind kind) {
+    return token_range_next_at_depth(tokenization, range, token_index, depth,
+                                     false, kind, NULL, 0);
+}
+
+int32
+token_range_next_text_at_depth(Tokenization *tokenization, TokenRange range,
+                               int32 token_index, TokenDelimiterDepth depth,
+                               char *text, int32 text_len) {
+    return token_range_next_at_depth(tokenization, range, token_index, depth,
+                                     true, TOKEN_UNKNOWN, text, text_len);
+}
+
+int32
+token_range_previous_kind_at_depth(Tokenization *tokenization,
+                                   TokenRange range, int32 token_index,
+                                   TokenDelimiterDepth depth,
+                                   enum TokenKind kind) {
+    return token_range_previous_at_depth(tokenization, range, token_index,
+                                         depth, false, kind, NULL, 0);
+}
+
+int32
+token_range_previous_text_at_depth(Tokenization *tokenization,
+                                   TokenRange range, int32 token_index,
+                                   TokenDelimiterDepth depth, char *text,
+                                   int32 text_len) {
+    return token_range_previous_at_depth(tokenization, range, token_index,
+                                         depth, true, TOKEN_UNKNOWN,
+                                         text, text_len);
 }
 
 bool
@@ -1292,7 +1738,19 @@ meta_tokenize_sink(void) {
     (void)meta_tokenize_sink;
     (void)free_tokenization;
     (void)token_is_number;
+    (void)token_is_open_delimiter;
+    (void)token_is_close_delimiter;
+    (void)token_delimiter_depth_equal;
+    (void)token_delimiter_depth_is_zero;
+    (void)token_range_delimiter_depth_before;
+    (void)token_range_is_balanced;
     (void)token_range_is_empty;
+    (void)token_range_matching_delimiter_forward;
+    (void)token_range_matching_delimiter_reverse;
+    (void)token_range_next_kind_at_depth;
+    (void)token_range_next_text_at_depth;
+    (void)token_range_previous_kind_at_depth;
+    (void)token_range_previous_text_at_depth;
     (void)token_range_source_range;
     (void)token_range_trim_trivia;
     (void)tokenization_find_matching;
@@ -1957,6 +2415,226 @@ test_tokenization_preprocessor_define_detection(void) {
 }
 
 static void
+test_token_range_balanced_delimiters(void) {
+    char *text = "call(a[2], (b + (C){.x = 1}));";
+    Tokenization tokenization;
+    TokenRange all;
+    TokenRange truncated;
+    int32 outer;
+    int32 bracket;
+    int32 nested;
+    int32 brace;
+    int32 close;
+
+    tokenization = tokenize(text, strlen32(text));
+    all = (TokenRange){0, tokenization.token_count};
+    outer = token_range_next_text(&tokenization, all, -1, STRLIT("("));
+    bracket = token_range_next_text(&tokenization, all, outer, STRLIT("["));
+    nested = token_range_next_text(&tokenization, all, bracket, STRLIT("("));
+    nested = token_range_next_text(&tokenization, all, nested, STRLIT("("));
+    brace = token_range_next_text(&tokenization, all, nested, STRLIT("{"));
+
+    ASSERT(token_is_open_delimiter(&tokenization.tokens[outer]));
+    ASSERT(token_is_open_delimiter(&tokenization.tokens[bracket]));
+    ASSERT(!token_is_open_delimiter(&tokenization.tokens[outer + 1]));
+    close = token_range_matching_delimiter_forward(&tokenization, all, outer);
+    ASSERT_GE(close, 0);
+    ASSERT(TOKEN_IS(&tokenization.tokens[close], ")"));
+    ASSERT_EQ(token_range_matching_delimiter_reverse(&tokenization, all, close),
+              outer);
+
+    close = token_range_matching_delimiter_forward(&tokenization, all,
+                                                   bracket);
+    ASSERT(TOKEN_IS(&tokenization.tokens[close], "]"));
+    ASSERT_EQ(token_range_matching_delimiter_reverse(&tokenization, all, close),
+              bracket);
+    close = token_range_matching_delimiter_forward(&tokenization, all, nested);
+    ASSERT(TOKEN_IS(&tokenization.tokens[close], ")"));
+    close = token_range_matching_delimiter_forward(&tokenization, all, brace);
+    ASSERT(TOKEN_IS(&tokenization.tokens[close], "}"));
+    ASSERT(token_range_is_balanced(&tokenization, all));
+
+    close = token_range_matching_delimiter_forward(&tokenization, all, outer);
+    truncated = (TokenRange){outer, close};
+    ASSERT_EQ(token_range_matching_delimiter_forward(&tokenization, truncated,
+                                                     outer),
+              -1);
+    ASSERT_EQ(token_range_matching_delimiter_forward(&tokenization, all,
+                                                     outer + 1),
+              -1);
+    ASSERT_EQ(token_range_matching_delimiter_reverse(&tokenization, all,
+                                                     outer),
+              -1);
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
+test_token_range_malformed_delimiters(void) {
+    char *text = "([)]";
+    Tokenization tokenization;
+    TokenRange all;
+    TokenDelimiterDepth depth;
+    int32 paren;
+    int32 bracket;
+    int32 close_bracket;
+
+    tokenization = tokenize(text, strlen32(text));
+    all = (TokenRange){0, tokenization.token_count};
+    paren = token_range_next_text(&tokenization, all, -1, STRLIT("("));
+    bracket = token_range_next_text(&tokenization, all, paren, STRLIT("["));
+    close_bracket = token_range_next_text(&tokenization, all, bracket,
+                                          STRLIT("]"));
+    ASSERT(!token_range_is_balanced(&tokenization, all));
+    ASSERT_EQ(token_range_matching_delimiter_forward(&tokenization, all,
+                                                     paren),
+              -1);
+    ASSERT_EQ(token_range_matching_delimiter_forward(&tokenization, all,
+                                                     bracket),
+              -1);
+    ASSERT_EQ(token_range_matching_delimiter_reverse(&tokenization, all,
+                                                     close_bracket),
+              -1);
+    ASSERT(!token_range_delimiter_depth_before(&tokenization, all, all.end,
+                                               &depth));
+    free_tokenization(&tokenization);
+
+    text = "(a[0]) (";
+    tokenization = tokenize(text, strlen32(text));
+    all = (TokenRange){0, tokenization.token_count};
+    paren = token_range_next_text(&tokenization, all, -1, STRLIT("("));
+    ASSERT_GE(token_range_matching_delimiter_forward(&tokenization, all,
+                                                     paren),
+              0);
+    paren = token_range_next_text(&tokenization, all, paren, STRLIT("("));
+    ASSERT_EQ(token_range_matching_delimiter_forward(&tokenization, all,
+                                                     paren),
+              -1);
+    ASSERT(!token_range_is_balanced(&tokenization, all));
+    ASSERT(token_range_delimiter_depth_before(&tokenization, all, all.end,
+                                              &depth));
+    ASSERT_EQ(depth.paren, 1);
+    ASSERT_ZERO(depth.bracket);
+    ASSERT_ZERO(depth.brace);
+    free_tokenization(&tokenization);
+
+    text = ")";
+    tokenization = tokenize(text, strlen32(text));
+    all = (TokenRange){0, tokenization.token_count};
+    ASSERT(!token_range_is_balanced(&tokenization, all));
+    ASSERT(!token_range_delimiter_depth_before(&tokenization, all, all.end,
+                                               &depth));
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
+test_token_range_delimiter_depth(void) {
+    char *text = "a, foo(b, c[1, 2]), d;";
+    Tokenization tokenization;
+    TokenRange all;
+    TokenRange args;
+    TokenDelimiterDepth depth;
+    TokenDelimiterDepth zero = {0};
+    TokenDelimiterDepth paren_depth = {.paren = 1};
+    int32 foo;
+    int32 open;
+    int32 close;
+    int32 b;
+    int32 one;
+    int32 comma1;
+    int32 comma2;
+    int32 inner_comma;
+    int32 a;
+    int32 d;
+
+    tokenization = tokenize(text, strlen32(text));
+    all = (TokenRange){0, tokenization.token_count};
+    foo = token_range_next_text(&tokenization, all, -1, STRLIT("foo"));
+    open = token_range_next_text(&tokenization, all, foo, STRLIT("("));
+    close = token_range_matching_delimiter_forward(&tokenization, all, open);
+    b = token_range_next_text(&tokenization, all, open, STRLIT("b"));
+    one = token_range_next_text(&tokenization, all, b, STRLIT("1"));
+
+    ASSERT(token_range_delimiter_depth_before(&tokenization, all, b, &depth));
+    ASSERT(token_delimiter_depth_equal(depth, paren_depth));
+    ASSERT(token_range_delimiter_depth_before(&tokenization, all, one, &depth));
+    ASSERT_EQ(depth.paren, 1);
+    ASSERT_EQ(depth.bracket, 1);
+    ASSERT_ZERO(depth.brace);
+    ASSERT(token_range_delimiter_depth_before(&tokenization, all, all.end,
+                                              &depth));
+    ASSERT(token_delimiter_depth_is_zero(depth));
+
+    comma1 = token_range_next_text_at_depth(&tokenization, all, -1, zero,
+                                            STRLIT(","));
+    comma2 = token_range_next_text_at_depth(&tokenization, all, comma1, zero,
+                                            STRLIT(","));
+    ASSERT_LT_VAR(comma1, foo);
+    ASSERT_GT_VAR(comma2, close);
+    ASSERT_EQ(token_range_next_text_at_depth(&tokenization, all, comma2, zero,
+                                             STRLIT(",")),
+              all.end);
+    ASSERT_EQ(token_range_previous_text_at_depth(&tokenization, all, all.end,
+                                                 zero, STRLIT(",")),
+              comma2);
+    ASSERT_EQ(token_range_previous_text_at_depth(&tokenization, all, comma2,
+                                                 zero, STRLIT(",")),
+              comma1);
+
+    inner_comma = token_range_next_text_at_depth(&tokenization, all, open,
+                                                 paren_depth, STRLIT(","));
+    ASSERT_GT_VAR(inner_comma, b);
+    ASSERT_LT_VAR(inner_comma, one);
+    ASSERT_EQ(token_range_next_text_at_depth(&tokenization, all, inner_comma,
+                                             paren_depth, STRLIT(",")),
+              all.end);
+
+    a = token_range_next_kind_at_depth(&tokenization, all, -1, zero,
+                                       TOKEN_IDENT);
+    d = token_range_previous_kind_at_depth(&tokenization, all, all.end, zero,
+                                           TOKEN_IDENT);
+    ASSERT(TOKEN_IS(&tokenization.tokens[a], "a"));
+    ASSERT(TOKEN_IS(&tokenization.tokens[d], "d"));
+
+    args = (TokenRange){open + 1, close};
+    ASSERT(token_range_is_balanced(&tokenization, args));
+    inner_comma = token_range_next_text_at_depth(&tokenization, args,
+                                                 args.first - 1, zero,
+                                                 STRLIT(","));
+    ASSERT_GT_VAR(inner_comma, b);
+    ASSERT_LT_VAR(inner_comma, one);
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
+test_token_range_deep_delimiters(void) {
+    enum { DEPTH = TOKEN_DELIMITER_STACK_LOCAL_CAPACITY + 8 };
+    char text[DEPTH*2 + 2];
+    Tokenization tokenization;
+    TokenRange all;
+    int32 close;
+
+    for (int32 i = 0; i < DEPTH; i += 1) {
+        text[i] = '(';
+        text[DEPTH + i] = ')';
+    }
+    text[DEPTH*2] = ';';
+    text[DEPTH*2 + 1] = '\0';
+
+    tokenization = tokenize(text, DEPTH*2 + 1);
+    all = (TokenRange){0, tokenization.token_count};
+    ASSERT(token_range_is_balanced(&tokenization, all));
+    close = token_range_matching_delimiter_forward(&tokenization, all, 0);
+    ASSERT_GE(close, 0);
+    ASSERT_EQ(token_range_matching_delimiter_reverse(&tokenization, all, close),
+              0);
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
 test_tokenization_find_matching(void) {
     char *text = "(a[2] + (b))";
     Tokenization tokenization;
@@ -2018,6 +2696,10 @@ main(void) {
     test_tokenization_source_locations();
     test_tokenization_empty_source_location();
     test_tokenization_preprocessor_define_detection();
+    test_token_range_balanced_delimiters();
+    test_token_range_malformed_delimiters();
+    test_token_range_delimiter_depth();
+    test_token_range_deep_delimiters();
     test_tokenization_find_matching();
     test_tokenize_with_flags_returns_source_metadata();
     return 0;

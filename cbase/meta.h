@@ -290,6 +290,13 @@ typedef struct SourceLocation {
     int32 column;
 } SourceLocation;
 
+/* Delimiter nesting relative to the beginning of a token range. */
+typedef struct TokenDelimiterDepth {
+    int32 paren;
+    int32 bracket;
+    int32 brace;
+} TokenDelimiterDepth;
+
 typedef struct Tokenization {
     char *text;
     Token *tokens;
@@ -364,6 +371,10 @@ int32 scan_literal_token(char *, int32, int32);
 int32 scan_number_literal(char *, int32, int32);
 bool token_is_number(Token *);
 bool token_is_trivia(Token *);
+bool token_is_open_delimiter(Token *);
+bool token_is_close_delimiter(Token *);
+bool token_delimiter_depth_equal(TokenDelimiterDepth, TokenDelimiterDepth);
+bool token_delimiter_depth_is_zero(TokenDelimiterDepth);
 /* Empty token ranges contain no significant tokens after trimming trivia. */
 bool token_range_is_empty(Tokenization *, TokenRange);
 bool token_range_is_valid(Tokenization *, TokenRange);
@@ -383,6 +394,25 @@ int32 token_range_previous_kind(Tokenization *, TokenRange, int32,
 int32 token_range_previous_significant(Tokenization *, TokenRange, int32);
 int32 token_range_previous_text(Tokenization *, TokenRange, int32,
                                 char *, int32);
+/*
+ * Depth is measured before the token at token_index. token_index may equal
+ * range.end, which returns the final depth. False means malformed nesting.
+ */
+bool token_range_delimiter_depth_before(Tokenization *, TokenRange, int32,
+                                        TokenDelimiterDepth *);
+bool token_range_is_balanced(Tokenization *, TokenRange);
+int32 token_range_matching_delimiter_forward(Tokenization *, TokenRange,
+                                             int32);
+int32 token_range_matching_delimiter_reverse(Tokenization *, TokenRange,
+                                             int32);
+int32 token_range_next_kind_at_depth(Tokenization *, TokenRange, int32,
+                                     TokenDelimiterDepth, enum TokenKind);
+int32 token_range_next_text_at_depth(Tokenization *, TokenRange, int32,
+                                     TokenDelimiterDepth, char *, int32);
+int32 token_range_previous_kind_at_depth(Tokenization *, TokenRange, int32,
+                                         TokenDelimiterDepth, enum TokenKind);
+int32 token_range_previous_text_at_depth(Tokenization *, TokenRange, int32,
+                                         TokenDelimiterDepth, char *, int32);
 /* Compares exact token kind/text sequences after ignoring trivia. */
 bool token_range_significant_equal(Tokenization *, TokenRange,
                                    Tokenization *, TokenRange);
