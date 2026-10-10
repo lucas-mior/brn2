@@ -341,6 +341,193 @@ finished:
     return parsed_len;
 }
 
+typedef struct RyuDecimalParts {
+    int32 m10digits;
+    int64 significant_digits;
+    int64 parsed_exponent;
+    int32 dot_index;
+    int32 e_index;
+    uint64 m10;
+    bool signed_m;
+    bool signed_e;
+    bool extended;
+} RyuDecimalParts;
+
+static int32
+ryu_decimal_finish(const char *buffer, int32 parsed_len,
+                   RyuDecimalParts parts, double *result) {
+    int32 m10digits = parts.m10digits;
+    int64 significant_digits = parts.significant_digits;
+    int64 parsed_exponent = parts.parsed_exponent;
+    int32 dot_index = parts.dot_index;
+    int32 e_index = parts.e_index;
+    uint64 m10 = parts.m10;
+    bool signed_m = parts.signed_m;
+    bool signed_e = parts.signed_e;
+    bool extended = parts.extended;
+    int32 e10;
+    if (e_index < 0) {
+        e_index = parsed_len;
+    }
+    if (dot_index < 0) {
+        dot_index = e_index;
+    }
+    if (signed_e) {
+        parsed_exponent = -parsed_exponent;
+    }
+    parsed_exponent -= dot_index < e_index ? e_index - dot_index - 1 : 0;
+    if (extended && m10 != 0) {
+        return ryu_decimal_extended(buffer, parsed_len, parsed_exponent,
+                                    significant_digits, signed_m, result);
+    }
+    if (parsed_exponent > 1000000000ll) {
+        e10 = 1000000000;
+    } else if (parsed_exponent < -1000000000ll) {
+        e10 = -1000000000;
+    } else {
+        e10 = (int32)parsed_exponent;
+    }
+    if (m10 == 0) {
+        *result = signed_m ? -0.0 : 0.0;
+        return parsed_len;
+    }
+
+#ifdef RYU_DEBUG
+  printf("Input=%.*s\n", parsed_len, buffer);
+  printf("m10digits = %d\n", m10digits);
+  printf("e10digits = %d\n", e10digits);
+  printf("m10 * 10^e10 = %" PRIu64 " * 10^%d\n", m10, e10);
+#endif
+
+  if ((m10digits + e10 <= -324) || (m10 == 0)) {
+    // Number is less than 1e-324, which should be rounded down to 0; return +/-0.0.
+    uint64 ieee =
+        ((uint64)signed_m) << (DOUBLE_EXPONENT_BITS + DOUBLE_MANTISSA_BITS);
+    *result = int64Bits2Double(ieee);
+    return -FLOAT_UNDERFLOW;
+  }
+  if (m10digits + e10 >= 310) {
+    // Number is larger than 1e+309, which should be rounded to +/-Infinity.
+    uint64 ieee =
+        (((uint64)signed_m)
+         << (DOUBLE_EXPONENT_BITS + DOUBLE_MANTISSA_BITS))
+        |(0x7ffull << DOUBLE_MANTISSA_BITS);
+    *result = int64Bits2Double(ieee);
+    return parsed_len;
+  }
+
+  // Convert to binary float m2 * 2^e2, while retaining information about whether the conversion
+  // was exact (trailingZeros).
+  int32 e2;
+  uint64 m2;
+  bool trailingZeros;
+  if (e10 >= 0) {
+    // The length of m * 10^e in bits is:
+    //   log2(m10 * 10^e10) = log2(m10) + e10 log2(10) = log2(m10) + e10 + e10 * log2(5)
+    //
+    // We want to compute the DOUBLE_MANTISSA_BITS + 1 top-most bits (+1 for the implicit leading
+    // one in IEEE format). We therefore choose a binary output exponent of
+    //   log2(m10 * 10^e10) - (DOUBLE_MANTISSA_BITS + 1).
+    //
+    // We use floor(log2(5^e10)) so that we get at least this many bits; better to
+    // have an additional bit than to not have enough bits.
+    e2 = floor_log2(m10) + e10 + log2pow5(e10) - (DOUBLE_MANTISSA_BITS + 1);
+
+    // We now compute [m10 * 10^e10 / 2^e2] = [m10 * 5^e10 / 2^(e2-e10)].
+    // To that end, we use the DOUBLE_POW5_SPLIT table.
+    int j = e2 - e10 - ceil_log2pow5(e10) + DOUBLE_POW5_BITCOUNT;
+    assert(j >= 0);
+#if defined(RYU_OPTIMIZE_SIZE)
+    uint64 pow5[2];
+    double_computePow5(e10, pow5);
+    m2 = mulShift64(m10, pow5, j);
+#else
+    assert(e10 < DOUBLE_POW5_TABLE_SIZE);
+    m2 = mulShift64(m10, DOUBLE_POW5_SPLIT[e10], j);
+#endif
+    // We also compute if the result is exact, i.e.,
+    //   [m10 * 10^e10 / 2^e2] == m10 * 10^e10 / 2^e2.
+    // This can only be the case if 2^e2 divides m10 * 10^e10, which in turn requires that the
+    // largest power of 2 that divides m10 + e10 is greater than e2. If e2 is less than e10, then
+    // the result must be exact. Otherwise we use the existing multipleOfPowerOf2 function.
+    trailingZeros = e2 < e10 || (e2 - e10 < 64 && multipleOfPowerOf2(m10, e2 - e10));
+  } else {
+    e2 = floor_log2(m10) + e10 - ceil_log2pow5(-e10) - (DOUBLE_MANTISSA_BITS + 1);
+    int j = e2 - e10 + ceil_log2pow5(-e10) - 1 + DOUBLE_POW5_INV_BITCOUNT;
+#if defined(RYU_OPTIMIZE_SIZE)
+    uint64 pow5[2];
+    double_computeInvPow5(-e10, pow5);
+    m2 = mulShift64(m10, pow5, j);
+#else
+    assert(-e10 < DOUBLE_POW5_INV_TABLE_SIZE);
+    m2 = mulShift64(m10, DOUBLE_POW5_INV_SPLIT[-e10], j);
+#endif
+    trailingZeros = multipleOfPowerOf5(m10, -e10);
+  }
+
+#ifdef RYU_DEBUG
+  printf("m2 * 2^e2 = %" PRIu64 " * 2^%d\n", m2, e2);
+#endif
+
+  // Compute the final IEEE exponent.
+  uint32 ieee_e2 = (uint32) max32(0, e2 + DOUBLE_EXPONENT_BIAS + floor_log2(m2));
+  bool underflow = ieee_e2 == 0;
+
+  if (ieee_e2 > 0x7fe) {
+    // Final IEEE exponent is larger than the maximum representable; return +/-Infinity.
+    uint64 ieee =
+        (((uint64)signed_m)
+         << (DOUBLE_EXPONENT_BITS + DOUBLE_MANTISSA_BITS))
+        |(0x7ffull << DOUBLE_MANTISSA_BITS);
+    *result = int64Bits2Double(ieee);
+    return parsed_len;
+  }
+
+  // We need to figure out how much we need to shift m2. The tricky part is that we need to take
+  // the final IEEE exponent into account, so we need to reverse the bias and also special-case
+  // the value 0.
+  int32 shift = (ieee_e2 == 0 ? 1 : ieee_e2) - e2 - DOUBLE_EXPONENT_BIAS - DOUBLE_MANTISSA_BITS;
+  assert(shift >= 0);
+#ifdef RYU_DEBUG
+  printf("ieee_e2 = %d\n", ieee_e2);
+  printf("shift = %d\n", shift);
+#endif
+
+  // We need to round up if the exact value is more than 0.5 above the value we computed. That's
+  // equivalent to checking if the last removed bit was 1 and either the value was not just
+  // trailing zeros or the result would otherwise be odd.
+  //
+  // We need to update trailingZeros given that we have the exact output exponent ieee_e2 now.
+  trailingZeros &= (m2 & ((1ull << (shift - 1)) - 1)) == 0;
+  uint64 lastRemovedBit = (m2 >> (shift - 1)) & 1;
+  bool roundUp = (lastRemovedBit != 0) && (!trailingZeros || (((m2 >> shift) & 1) != 0));
+
+#ifdef RYU_DEBUG
+  printf("roundUp = %d\n", roundUp);
+  printf("ieee_m2 = %" PRIu64 "\n", (m2 >> shift) + roundUp);
+#endif
+  uint64 ieee_m2 = (m2 >> shift) + roundUp;
+  assert(ieee_m2 <= (1ull << (DOUBLE_MANTISSA_BITS + 1)));
+  ieee_m2 &= (1ull << DOUBLE_MANTISSA_BITS) - 1;
+  if (ieee_m2 == 0 && roundUp) {
+    // Due to how the IEEE represents +/-Infinity, we don't need to check for overflow here.
+    ieee_e2++;
+  }
+
+  uint64 ieee =
+      (((((uint64)signed_m) << DOUBLE_EXPONENT_BITS) |(uint64)ieee_e2)
+       << DOUBLE_MANTISSA_BITS)
+      |ieee_m2;
+  *result = int64Bits2Double(ieee);
+  if (ieee_e2 > 0x7fe) {
+    return parsed_len;
+  }
+  if (underflow) {
+    return -FLOAT_UNDERFLOW;
+  }
+  return parsed_len;
+}
+
 int32
 s2d_n(const char *buffer, int32 len, double *result) {
     int32 m10digits = 0;
@@ -350,7 +537,6 @@ s2d_n(const char *buffer, int32 len, double *result) {
     int32 dot_index = -1;
     int32 e_index = -1;
     uint64 m10 = 0;
-    int32 e10 = 0;
     bool signed_m = false;
     bool signed_e = false;
     bool has_mantissa_digit = false;
@@ -775,167 +961,120 @@ s2d_n(const char *buffer, int32 len, double *result) {
     }
 
     parsed_len = i;
+    RyuDecimalParts parts = {
+        .m10digits = m10digits,
+        .significant_digits = significant_digits,
+        .parsed_exponent = parsed_exponent,
+        .dot_index = dot_index,
+        .e_index = e_index,
+        .m10 = m10,
+        .signed_m = signed_m,
+        .signed_e = signed_e,
+        .extended = extended,
+    };
+    return ryu_decimal_finish(buffer, parsed_len, parts, result);
+}
 
-    if (e_index < 0) {
-        e_index = parsed_len;
+// Parses a nul-terminated floating-point prefix without length checks in
+// the ordinary decimal scanner. Exotic spellings use the bounded parser.
+int32
+s2d_fast(const char *buffer, double *result) {
+    const char *cursor = buffer;
+    RyuDecimalParts parts = {
+        .dot_index = -1,
+        .e_index = -1,
+    };
+    bool has_digit = false;
+
+    if (*cursor == '\0') {
+        return -INPUT_TOO_SHORT;
     }
-    if (dot_index < 0) {
-        dot_index = e_index;
-    }
-    if (signed_e) {
-        parsed_exponent = -parsed_exponent;
-    }
-    parsed_exponent -= dot_index < e_index ? e_index - dot_index - 1 : 0;
-    if (extended && m10 != 0) {
-        return ryu_decimal_extended(buffer, parsed_len, parsed_exponent,
-                                    significant_digits, signed_m, result);
-    }
-    if (parsed_exponent > 1000000000ll) {
-        e10 = 1000000000;
-    } else if (parsed_exponent < -1000000000ll) {
-        e10 = -1000000000;
-    } else {
-        e10 = (int32)parsed_exponent;
-    }
-    if (m10 == 0) {
-        *result = signed_m ? -0.0 : 0.0;
-        return parsed_len;
+    if (*cursor == '-' || *cursor == '+') {
+        parts.signed_m = *cursor == '-';
+        cursor += 1;
     }
 
-#ifdef RYU_DEBUG
-  printf("Input=%.*s\n", parsed_len, buffer);
-  printf("m10digits = %d\n", m10digits);
-  printf("e10digits = %d\n", e10digits);
-  printf("m10 * 10^e10 = %" PRIu64 " * 10^%d\n", m10, e10);
-#endif
+    if ((*cursor == 'i') || (*cursor == 'I') || (*cursor == 'n')
+        || (*cursor == 'N')
+        || (*cursor == '0' && (cursor[1] == 'x' || cursor[1] == 'X'))) {
+        // Determine only the token length. The next byte may be the start
+        // of another TSV cell, so strlen() would scan the entire file tail.
+        const char *end = cursor;
 
-  if ((m10digits + e10 <= -324) || (m10 == 0)) {
-    // Number is less than 1e-324, which should be rounded down to 0; return +/-0.0.
-    uint64 ieee =
-        ((uint64)signed_m) << (DOUBLE_EXPONENT_BITS + DOUBLE_MANTISSA_BITS);
-    *result = int64Bits2Double(ieee);
-    return -FLOAT_UNDERFLOW;
-  }
-  if (m10digits + e10 >= 310) {
-    // Number is larger than 1e+309, which should be rounded to +/-Infinity.
-    uint64 ieee =
-        (((uint64)signed_m)
-         << (DOUBLE_EXPONENT_BITS + DOUBLE_MANTISSA_BITS))
-        |(0x7ffull << DOUBLE_MANTISSA_BITS);
-    *result = int64Bits2Double(ieee);
-    return parsed_len;
-  }
+        while ((*end >= '0' && *end <= '9')
+               || (*end >= 'a' && *end <= 'z')
+               || (*end >= 'A' && *end <= 'Z')
+               || *end == '.' || *end == '+' || *end == '-') {
+            end += 1;
+        }
+        if (end - buffer > INT32_MAX) {
+            return -INPUT_TOO_LONG;
+        }
+        return s2d_n(buffer, (int32)(end - buffer), result);
+    }
 
-  // Convert to binary float m2 * 2^e2, while retaining information about whether the conversion
-  // was exact (trailingZeros).
-  int32 e2;
-  uint64 m2;
-  bool trailingZeros;
-  if (e10 >= 0) {
-    // The length of m * 10^e in bits is:
-    //   log2(m10 * 10^e10) = log2(m10) + e10 log2(10) = log2(m10) + e10 + e10 * log2(5)
-    //
-    // We want to compute the DOUBLE_MANTISSA_BITS + 1 top-most bits (+1 for the implicit leading
-    // one in IEEE format). We therefore choose a binary output exponent of
-    //   log2(m10 * 10^e10) - (DOUBLE_MANTISSA_BITS + 1).
-    //
-    // We use floor(log2(5^e10)) so that we get at least this many bits; better to
-    // have an additional bit than to not have enough bits.
-    e2 = floor_log2(m10) + e10 + log2pow5(e10) - (DOUBLE_MANTISSA_BITS + 1);
+    for (;;) {
+        char c = *cursor;
 
-    // We now compute [m10 * 10^e10 / 2^e2] = [m10 * 5^e10 / 2^(e2-e10)].
-    // To that end, we use the DOUBLE_POW5_SPLIT table.
-    int j = e2 - e10 - ceil_log2pow5(e10) + DOUBLE_POW5_BITCOUNT;
-    assert(j >= 0);
-#if defined(RYU_OPTIMIZE_SIZE)
-    uint64 pow5[2];
-    double_computePow5(e10, pow5);
-    m2 = mulShift64(m10, pow5, j);
-#else
-    assert(e10 < DOUBLE_POW5_TABLE_SIZE);
-    m2 = mulShift64(m10, DOUBLE_POW5_SPLIT[e10], j);
-#endif
-    // We also compute if the result is exact, i.e.,
-    //   [m10 * 10^e10 / 2^e2] == m10 * 10^e10 / 2^e2.
-    // This can only be the case if 2^e2 divides m10 * 10^e10, which in turn requires that the
-    // largest power of 2 that divides m10 + e10 is greater than e2. If e2 is less than e10, then
-    // the result must be exact. Otherwise we use the existing multipleOfPowerOf2 function.
-    trailingZeros = e2 < e10 || (e2 - e10 < 64 && multipleOfPowerOf2(m10, e2 - e10));
-  } else {
-    e2 = floor_log2(m10) + e10 - ceil_log2pow5(-e10) - (DOUBLE_MANTISSA_BITS + 1);
-    int j = e2 - e10 + ceil_log2pow5(-e10) - 1 + DOUBLE_POW5_INV_BITCOUNT;
-#if defined(RYU_OPTIMIZE_SIZE)
-    uint64 pow5[2];
-    double_computeInvPow5(-e10, pow5);
-    m2 = mulShift64(m10, pow5, j);
-#else
-    assert(-e10 < DOUBLE_POW5_INV_TABLE_SIZE);
-    m2 = mulShift64(m10, DOUBLE_POW5_INV_SPLIT[-e10], j);
-#endif
-    trailingZeros = multipleOfPowerOf5(m10, -e10);
-  }
+        if (c >= '0' && c <= '9') {
+            has_digit = true;
+            if (parts.significant_digits != 0 || c != '0') {
+                parts.significant_digits += 1;
+            }
+            if (parts.significant_digits > 17) {
+                parts.extended = true;
+            } else {
+                parts.m10 = 10*parts.m10 + (uint64)(c - '0');
+                if (parts.m10 != 0) {
+                    parts.m10digits += 1;
+                }
+            }
+            cursor += 1;
+            continue;
+        }
+        if (c == '.' && parts.dot_index < 0) {
+            parts.dot_index = (int32)(cursor - buffer);
+            cursor += 1;
+            continue;
+        }
+        break;
+    }
 
-#ifdef RYU_DEBUG
-  printf("m2 * 2^e2 = %" PRIu64 " * 2^%d\n", m2, e2);
-#endif
+    if (!has_digit) {
+        return -MALFORMED_INPUT;
+    }
 
-  // Compute the final IEEE exponent.
-  uint32 ieee_e2 = (uint32) max32(0, e2 + DOUBLE_EXPONENT_BIAS + floor_log2(m2));
-  bool underflow = ieee_e2 == 0;
+    if (*cursor == 'e' || *cursor == 'E') {
+        const char *digits = cursor + 1;
 
-  if (ieee_e2 > 0x7fe) {
-    // Final IEEE exponent is larger than the maximum representable; return +/-Infinity.
-    uint64 ieee =
-        (((uint64)signed_m)
-         << (DOUBLE_EXPONENT_BITS + DOUBLE_MANTISSA_BITS))
-        |(0x7ffull << DOUBLE_MANTISSA_BITS);
-    *result = int64Bits2Double(ieee);
-    return parsed_len;
-  }
+        if (*digits == '-' || *digits == '+') {
+            digits += 1;
+        }
+        if (*digits >= '0' && *digits <= '9') {
+            parts.e_index = (int32)(cursor - buffer);
+            cursor += 1;
+            if (*cursor == '-' || *cursor == '+') {
+                parts.signed_e = *cursor == '-';
+                cursor += 1;
+            }
+            while (*cursor >= '0' && *cursor <= '9') {
+                int32 digit = *cursor - '0';
 
-  // We need to figure out how much we need to shift m2. The tricky part is that we need to take
-  // the final IEEE exponent into account, so we need to reverse the bias and also special-case
-  // the value 0.
-  int32 shift = (ieee_e2 == 0 ? 1 : ieee_e2) - e2 - DOUBLE_EXPONENT_BIAS - DOUBLE_MANTISSA_BITS;
-  assert(shift >= 0);
-#ifdef RYU_DEBUG
-  printf("ieee_e2 = %d\n", ieee_e2);
-  printf("shift = %d\n", shift);
-#endif
-
-  // We need to round up if the exact value is more than 0.5 above the value we computed. That's
-  // equivalent to checking if the last removed bit was 1 and either the value was not just
-  // trailing zeros or the result would otherwise be odd.
-  //
-  // We need to update trailingZeros given that we have the exact output exponent ieee_e2 now.
-  trailingZeros &= (m2 & ((1ull << (shift - 1)) - 1)) == 0;
-  uint64 lastRemovedBit = (m2 >> (shift - 1)) & 1;
-  bool roundUp = (lastRemovedBit != 0) && (!trailingZeros || (((m2 >> shift) & 1) != 0));
-
-#ifdef RYU_DEBUG
-  printf("roundUp = %d\n", roundUp);
-  printf("ieee_m2 = %" PRIu64 "\n", (m2 >> shift) + roundUp);
-#endif
-  uint64 ieee_m2 = (m2 >> shift) + roundUp;
-  assert(ieee_m2 <= (1ull << (DOUBLE_MANTISSA_BITS + 1)));
-  ieee_m2 &= (1ull << DOUBLE_MANTISSA_BITS) - 1;
-  if (ieee_m2 == 0 && roundUp) {
-    // Due to how the IEEE represents +/-Infinity, we don't need to check for overflow here.
-    ieee_e2++;
-  }
-
-  uint64 ieee =
-      (((((uint64)signed_m) << DOUBLE_EXPONENT_BITS) |(uint64)ieee_e2)
-       << DOUBLE_MANTISSA_BITS)
-      |ieee_m2;
-  *result = int64Bits2Double(ieee);
-  if (ieee_e2 > 0x7fe) {
-    return parsed_len;
-  }
-  if (underflow) {
-    return -FLOAT_UNDERFLOW;
-  }
-  return parsed_len;
+                if (parts.parsed_exponent < 1000000000000ll) {
+                    parts.parsed_exponent =
+                        10*parts.parsed_exponent + digit;
+                    if (parts.parsed_exponent > 1000000000000ll) {
+                        parts.parsed_exponent = 1000000000000ll;
+                    }
+                }
+                cursor += 1;
+            }
+        }
+    }
+    if (cursor - buffer > INT32_MAX) {
+        return -INPUT_TOO_LONG;
+    }
+    return ryu_decimal_finish(buffer, (int32)(cursor - buffer), parts, result);
 }
 
 int32

@@ -4899,10 +4899,10 @@ str_float64(String *string, double value) {
     int32 len;
 
     str_reserve(string, RYU_D2S_BUFFER_SIZE);
-    len = fmt_float64_shortest(string->data + string->len,
-                               string->cap - string->len, value);
+    len = d2s_buffered_n(value, string->data + string->len);
     ASSERT_GE(len, 0);
     string->len += len;
+    string->data[string->len] = '\0';
     return;
 }
 
@@ -4910,14 +4910,16 @@ void
 str_float64_fixed(String *str, double value, int32 precision) {
     int32 len;
 
-    str_reserve(str, FMT_FLOAT_RYU_BUFFER_SIZE);
-    len = fmt_float64_fixed(str->data + str->len, str->cap - str->len,
-                            value, precision);
-    if (len < 0) {
+    if ((precision < 0) || (precision > FMT_DOUBLE_MAX_DECIMAL_PRECISION)) {
         error("Invalid float precision %d.\n", precision);
         fatal(EXIT_FAILURE);
     }
+
+    str_reserve(str, FMT_FLOAT_RYU_BUFFER_SIZE);
+    len = d2fixed_buffered_n(value, (uint32)precision, str->data + str->len);
+    ASSERT_GE(len, 0);
     str->len += len;
+    str->data[str->len] = '\0';
 
     return;
 }

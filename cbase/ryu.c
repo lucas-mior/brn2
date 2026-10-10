@@ -368,6 +368,53 @@ test_ryu_s2d_long_decimal(void) {
     return;
 }
 
+static void
+test_ryu_s2d_fast(void) {
+    static char *inputs[] = {
+        "0", "-0", "0.0", "+1.25rest", "-1e+2,rest",
+        "1757.51723797804425\tmore", "-123.456e-15\n",
+        "1.00000000000000011102230246251565404236316680908203125",
+        "0x1.8p+2,", "-0x1.0p-1074!", "nan,", "-infinity\n",
+        "1e-400,", "1e9999,", "1e+", "12.5.6",
+        ".5 ", "2.", ".", "-", "", "abc", "12abc",
+        "3.1415926535897932384626433832795028841971!",
+    };
+    double fast_value;
+    double bounded_value;
+    int32 fast_used;
+    int32 bounded_used;
+
+    for (int32 i = 0; i < LENGTH(inputs); i += 1) {
+        char *input = inputs[i];
+
+        fast_used = s2d_fast(input, &fast_value);
+        bounded_used = s2d_n(input, strlen32(input), &bounded_value);
+        ASSERT_EQ(fast_used, bounded_used);
+        if (fast_used > 0 || fast_used == -FLOAT_UNDERFLOW) {
+            ASSERT(test_ryu_double_bits(fast_value)
+                   == test_ryu_double_bits(bounded_value));
+        }
+    }
+
+    {
+        char buffer[1601];
+
+        buffer[0] = '1';
+        buffer[1] = '.';
+        for (int32 i = 2; i < 1599; i += 1) {
+            buffer[i] = '0';
+        }
+        buffer[1599] = '1';
+        buffer[1600] = '\0';
+        fast_used = s2d_fast(buffer, &fast_value);
+        bounded_used = s2d_n(buffer, 1600, &bounded_value);
+        ASSERT_EQ(fast_used, bounded_used);
+        ASSERT(test_ryu_double_bits(fast_value)
+               == test_ryu_double_bits(bounded_value));
+    }
+    return;
+}
+
 int
 main(void) {
     char buffer[2000];
@@ -389,6 +436,7 @@ main(void) {
     test_ryu_s2d_range_values();
     test_ryu_s2d_hex();
     test_ryu_s2d_long_decimal();
+    test_ryu_s2d_fast();
 
     exit(EXIT_SUCCESS);
 }
