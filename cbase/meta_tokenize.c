@@ -670,6 +670,155 @@ token_range_last_significant(Tokenization *tokenization, TokenRange range) {
     return -1;
 }
 
+/*
+ * Range navigation treats token_index as a cursor. Forward searches begin
+ * after it and return range.end when exhausted. Reverse searches begin before
+ * it and return range.first - 1 when exhausted. Cursors outside the range are
+ * clamped to the corresponding edge.
+ */
+static int32
+token_range_next_start(TokenRange range, int32 token_index) {
+    if (token_index < range.first) {
+        return range.first;
+    }
+    if (token_index >= (range.end - 1)) {
+        return range.end;
+    }
+    return token_index + 1;
+}
+
+static int32
+token_range_previous_start(TokenRange range, int32 token_index) {
+    if (token_index > range.end) {
+        return range.end - 1;
+    }
+    if (token_index <= range.first) {
+        return range.first - 1;
+    }
+    return token_index - 1;
+}
+
+int32
+token_range_next_significant(Tokenization *tokenization, TokenRange range,
+                             int32 token_index) {
+    int32 i;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return -1;
+    }
+    i = token_range_next_start(range, token_index);
+    while ((i < range.end) && token_is_trivia(&tokenization->tokens[i])) {
+        i += 1;
+    }
+    return i;
+}
+
+int32
+token_range_previous_significant(Tokenization *tokenization, TokenRange range,
+                                 int32 token_index) {
+    int32 i;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return -1;
+    }
+    i = token_range_previous_start(range, token_index);
+    while ((i >= range.first) && token_is_trivia(&tokenization->tokens[i])) {
+        i -= 1;
+    }
+    return i;
+}
+
+int32
+token_range_next_kind(Tokenization *tokenization, TokenRange range,
+                      int32 token_index, enum TokenKind kind) {
+    int32 i;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return -1;
+    }
+    i = token_range_next_start(range, token_index);
+    while ((i < range.end) && (tokenization->tokens[i].kind != kind)) {
+        i += 1;
+    }
+    return i;
+}
+
+int32
+token_range_previous_kind(Tokenization *tokenization, TokenRange range,
+                          int32 token_index, enum TokenKind kind) {
+    int32 i;
+
+    if (!token_range_is_valid(tokenization, range)) {
+        return -1;
+    }
+    i = token_range_previous_start(range, token_index);
+    while ((i >= range.first) && (tokenization->tokens[i].kind != kind)) {
+        i -= 1;
+    }
+    return i;
+}
+
+int32
+token_range_next_text(Tokenization *tokenization, TokenRange range,
+                      int32 token_index, char *text, int32 text_len) {
+    int32 i;
+
+    if (!token_range_is_valid(tokenization, range) || (text_len < 0)) {
+        return -1;
+    }
+    i = token_range_next_start(range, token_index);
+    while ((i < range.end)
+           && !TOKEN_IS(&tokenization->tokens[i], text, text_len)) {
+        i += 1;
+    }
+    return i;
+}
+
+int32
+token_range_previous_text(Tokenization *tokenization, TokenRange range,
+                          int32 token_index, char *text, int32 text_len) {
+    int32 i;
+
+    if (!token_range_is_valid(tokenization, range) || (text_len < 0)) {
+        return -1;
+    }
+    i = token_range_previous_start(range, token_index);
+    while ((i >= range.first)
+           && !TOKEN_IS(&tokenization->tokens[i], text, text_len)) {
+        i -= 1;
+    }
+    return i;
+}
+
+bool
+token_range_significant_equal(Tokenization *left, TokenRange left_range,
+                              Tokenization *right, TokenRange right_range) {
+    int32 left_i;
+    int32 right_i;
+
+    if (!token_range_is_valid(left, left_range)
+        || !token_range_is_valid(right, right_range)) {
+        return false;
+    }
+
+    left_i = token_range_next_significant(left, left_range,
+                                          left_range.first - 1);
+    right_i = token_range_next_significant(right, right_range,
+                                           right_range.first - 1);
+    while ((left_i < left_range.end) && (right_i < right_range.end)) {
+        Token *left_token = &left->tokens[left_i];
+        Token *right_token = &right->tokens[right_i];
+
+        if ((left_token->kind != right_token->kind)
+            || !TOKEN_IS(left_token, right_token->text, right_token->len)) {
+            return false;
+        }
+        left_i = token_range_next_significant(left, left_range, left_i);
+        right_i = token_range_next_significant(right, right_range, right_i);
+    }
+    return (left_i == left_range.end) && (right_i == right_range.end);
+}
+
 bool
 token_range_is_empty(Tokenization *tokenization, TokenRange range) {
     if (!token_range_is_valid(tokenization, range)) {
@@ -723,6 +872,118 @@ token_range_source_range(Tokenization *tokenization, TokenRange range) {
     result.start = first->offset;
     result.end = last->offset + last->len;
     return result;
+}
+
+static SourceRange
+tokenization_source_between(Tokenization *tokenization, int32 left_index,
+                            int32 right_index) {
+    SourceRange result = {-1, -1};
+    Token *left;
+    Token *right;
+
+    if ((tokenization == NULL) || (left_index < 0)
+        || (right_index <= left_index)
+        || (right_index >= tokenization->token_count)) {
+        return result;
+    }
+    left = &tokenization->tokens[left_index];
+    right = &tokenization->tokens[right_index];
+    result.start = left->offset + left->len;
+    result.end = right->offset;
+    if (result.start > result.end) {
+        result = (SourceRange){-1, -1};
+    }
+    return result;
+}
+
+bool
+tokenization_newline_between(Tokenization *tokenization, int32 left_index,
+                             int32 right_index) {
+    SourceRange source;
+
+    source = tokenization_source_between(tokenization, left_index, right_index);
+    if (source.start < 0) {
+        return false;
+    }
+    for (int32 i = source.start; i < source.end; i += 1) {
+        if (tokenization->text[i] == '\n') {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
+tokenization_comment_between(Tokenization *tokenization, int32 left_index,
+                             int32 right_index) {
+    if ((tokenization == NULL) || (left_index < 0)
+        || (right_index <= left_index)
+        || (right_index >= tokenization->token_count)) {
+        return false;
+    }
+    for (int32 i = left_index + 1; i < right_index; i += 1) {
+        if (tokenization->tokens[i].kind == TOKEN_COMMENT) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
+tokenization_blank_line_between(Tokenization *tokenization, int32 left_index,
+                                int32 right_index) {
+    SourceRange source;
+    int32 i;
+
+    source = tokenization_source_between(tokenization, left_index, right_index);
+    if (source.start < 0) {
+        return false;
+    }
+
+    i = source.start;
+    while ((i < source.end) && (tokenization->text[i] != '\n')) {
+        i += 1;
+    }
+    while (i < source.end) {
+        bool blank = true;
+
+        i += 1;
+        while ((i < source.end) && (tokenization->text[i] != '\n')) {
+            if (!char_is_horizontal_space(tokenization->text[i])) {
+                blank = false;
+            }
+            i += 1;
+        }
+        if ((i < source.end) && blank) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
+tokenization_line_continuation_between(Tokenization *tokenization,
+                                       int32 left_index,
+                                       int32 right_index) {
+    SourceRange source;
+
+    source = tokenization_source_between(tokenization, left_index, right_index);
+    if (source.start < 0) {
+        return false;
+    }
+    for (int32 i = source.start; (i + 1) < source.end; i += 1) {
+        if ((tokenization->text[i] == '\\')
+            && (tokenization->text[i + 1] == '\n')) {
+            return true;
+        }
+        if ((tokenization->text[i] == '\\')
+            && ((i + 2) < source.end)
+            && (tokenization->text[i + 1] == '\r')
+            && (tokenization->text[i + 2] == '\n')) {
+            return true;
+        }
+    }
+    return false;
 }
 
 static void
@@ -1355,6 +1616,192 @@ test_tokenization_navigation(void) {
 }
 
 static void
+test_token_range_navigation(void) {
+    char *text = "  a /* c */ +\n b ; c  ";
+    Tokenization tokenization;
+    TokenRange range;
+    int32 a;
+    int32 comment;
+    int32 plus;
+    int32 b;
+    int32 semicolon;
+    int32 c;
+
+    tokenization = tokenize(text, strlen32(text));
+    a = test_find_token(&tokenization, "a");
+    comment = test_find_token(&tokenization, "/* c */");
+    plus = test_find_token(&tokenization, "+");
+    b = test_find_token(&tokenization, "b");
+    semicolon = test_find_token(&tokenization, ";");
+    c = test_find_token(&tokenization, "c");
+    range = (TokenRange){a, semicolon + 1};
+
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, -1), a);
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, a), plus);
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, plus), b);
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, b),
+              semicolon);
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, semicolon),
+              range.end);
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, c),
+              range.end);
+
+    ASSERT_EQ(token_range_previous_significant(&tokenization, range,
+                                               range.end),
+              semicolon);
+    ASSERT_EQ(token_range_previous_significant(&tokenization, range,
+                                               semicolon),
+              b);
+    ASSERT_EQ(token_range_previous_significant(&tokenization, range, a),
+              range.first - 1);
+    ASSERT_EQ(token_range_previous_significant(&tokenization, range, -1),
+              range.first - 1);
+
+    ASSERT_EQ(token_range_next_kind(&tokenization, range, a, TOKEN_COMMENT),
+              comment);
+    ASSERT_EQ(token_range_next_kind(&tokenization, range, a, TOKEN_IDENT), b);
+    ASSERT_EQ(token_range_next_kind(&tokenization, range, b, TOKEN_IDENT),
+              range.end);
+    ASSERT_EQ(token_range_previous_kind(&tokenization, range, semicolon,
+                                        TOKEN_COMMENT),
+              comment);
+    ASSERT_EQ(token_range_previous_kind(&tokenization, range, a,
+                                        TOKEN_COMMENT),
+              range.first - 1);
+
+    ASSERT_EQ(token_range_next_text(&tokenization, range, a, STRLIT("b")), b);
+    ASSERT_EQ(token_range_next_text(&tokenization, range, b, STRLIT("c")),
+              range.end);
+    ASSERT_EQ(token_range_previous_text(&tokenization, range, semicolon,
+                                        STRLIT("+")),
+              plus);
+    ASSERT_EQ(token_range_previous_text(&tokenization, range, plus,
+                                        STRLIT("a")),
+              a);
+
+    range = (TokenRange){semicolon, semicolon};
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, -1),
+              range.end);
+    ASSERT_EQ(token_range_previous_significant(&tokenization, range,
+                                               range.end),
+              range.first - 1);
+    ASSERT_EQ(token_range_next_kind(&tokenization, range, -1, TOKEN_IDENT),
+              range.end);
+
+    range = (TokenRange){-1, semicolon};
+    ASSERT_EQ(token_range_next_significant(&tokenization, range, -1), -1);
+    ASSERT_EQ(token_range_previous_significant(&tokenization, range,
+                                               semicolon),
+              -1);
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
+test_token_range_significant_equal(void) {
+    char *left_text = "foo (a, /* comment */ b)";
+    char *right_text = "  foo(a,b)  ";
+    char *different_text = "foo(a,c)";
+    Tokenization left;
+    Tokenization right;
+    Tokenization different;
+    TokenRange left_range;
+    TokenRange right_range;
+    TokenRange different_range;
+
+    left = tokenize(left_text, strlen32(left_text));
+    right = tokenize(right_text, strlen32(right_text));
+    different = tokenize(different_text, strlen32(different_text));
+    left_range = (TokenRange){0, left.token_count};
+    right_range = (TokenRange){0, right.token_count};
+    different_range = (TokenRange){0, different.token_count};
+
+    ASSERT(token_range_significant_equal(&left, left_range,
+                                         &right, right_range));
+    ASSERT(!token_range_significant_equal(&left, left_range,
+                                          &different, different_range));
+    right_range = (TokenRange){0, test_find_token(&right, ")")};
+    ASSERT(!token_range_significant_equal(&left, left_range,
+                                          &right, right_range));
+    ASSERT(!token_range_significant_equal(&left,
+                                          (TokenRange){-1, left.token_count},
+                                          &right, right_range));
+
+    free_tokenization(&left);
+    free_tokenization(&right);
+    free_tokenization(&different);
+    return;
+}
+
+static void
+test_tokenization_between_queries(void) {
+    char *text = "a /* c */ b\n"
+                 "c\n"
+                 "   \n"
+                 "d \\\n"
+                 "  + e\n"
+                 "f \\\r\n"
+                 "  + g";
+    Tokenization tokenization;
+    TokenRange all;
+    int32 a;
+    int32 b;
+    int32 c;
+    int32 d;
+    int32 e;
+    int32 f;
+    int32 g;
+
+    tokenization = tokenize(text, strlen32(text));
+    all = (TokenRange){0, tokenization.token_count};
+    a = token_range_next_text(&tokenization, all, -1, STRLIT("a"));
+    b = token_range_next_text(&tokenization, all, a, STRLIT("b"));
+    c = token_range_next_text(&tokenization, all, b, STRLIT("c"));
+    d = token_range_next_text(&tokenization, all, c, STRLIT("d"));
+    e = token_range_next_text(&tokenization, all, d, STRLIT("e"));
+    f = token_range_next_text(&tokenization, all, e, STRLIT("f"));
+    g = token_range_next_text(&tokenization, all, f, STRLIT("g"));
+
+    ASSERT(tokenization_comment_between(&tokenization, a, b));
+    ASSERT(!tokenization_newline_between(&tokenization, a, b));
+    ASSERT(!tokenization_blank_line_between(&tokenization, a, b));
+    ASSERT(!tokenization_line_continuation_between(&tokenization, a, b));
+
+    ASSERT(tokenization_newline_between(&tokenization, b, c));
+    ASSERT(!tokenization_blank_line_between(&tokenization, b, c));
+    ASSERT(tokenization_blank_line_between(&tokenization, c, d));
+    ASSERT(!tokenization_comment_between(&tokenization, c, d));
+
+    ASSERT(tokenization_newline_between(&tokenization, d, e));
+    ASSERT(tokenization_line_continuation_between(&tokenization, d, e));
+    ASSERT(tokenization_line_continuation_between(&tokenization, f, g));
+    ASSERT(!tokenization_blank_line_between(&tokenization, d, e));
+
+    ASSERT(!tokenization_newline_between(&tokenization, -1, b));
+    ASSERT(!tokenization_comment_between(&tokenization, b, b));
+    ASSERT(!tokenization_blank_line_between(&tokenization, g,
+                                            tokenization.token_count));
+    ASSERT(!tokenization_line_continuation_between(&tokenization, g,
+                                                   tokenization.token_count));
+    free_tokenization(&tokenization);
+
+    tokenization = tokenize_with_flags(text, strlen32(text),
+                                       TOKENIZE_SKIP_WHITESPACE);
+    all = (TokenRange){0, tokenization.token_count};
+    a = token_range_next_text(&tokenization, all, -1, STRLIT("a"));
+    b = token_range_next_text(&tokenization, all, a, STRLIT("b"));
+    c = token_range_next_text(&tokenization, all, b, STRLIT("c"));
+    d = token_range_next_text(&tokenization, all, c, STRLIT("d"));
+    e = token_range_next_text(&tokenization, all, d, STRLIT("e"));
+    ASSERT(tokenization_comment_between(&tokenization, a, b));
+    ASSERT(tokenization_newline_between(&tokenization, b, c));
+    ASSERT(tokenization_blank_line_between(&tokenization, c, d));
+    ASSERT(tokenization_line_continuation_between(&tokenization, d, e));
+    free_tokenization(&tokenization);
+    return;
+}
+
+static void
 test_token_ranges(void) {
     char *text = "  foo /* c */ + bar  ";
     Tokenization tokenization;
@@ -1564,6 +2011,9 @@ main(void) {
     test_tokenize_preprocessor_and_skip_whitespace();
     test_tokenize_block_comment_across_lines();
     test_tokenization_navigation();
+    test_token_range_navigation();
+    test_token_range_significant_equal();
+    test_tokenization_between_queries();
     test_token_ranges();
     test_tokenization_source_locations();
     test_tokenization_empty_source_location();

@@ -369,11 +369,32 @@ bool token_range_is_empty(Tokenization *, TokenRange);
 bool token_range_is_valid(Tokenization *, TokenRange);
 int32 token_range_first_significant(Tokenization *, TokenRange);
 int32 token_range_last_significant(Tokenization *, TokenRange);
+/*
+ * Range navigation is cursor-based. Forward searches return range.end when
+ * exhausted; reverse searches return range.first - 1.
+ */
+int32 token_range_next_kind(Tokenization *, TokenRange, int32,
+                            enum TokenKind);
+int32 token_range_next_significant(Tokenization *, TokenRange, int32);
+int32 token_range_next_text(Tokenization *, TokenRange, int32,
+                            char *, int32);
+int32 token_range_previous_kind(Tokenization *, TokenRange, int32,
+                                enum TokenKind);
+int32 token_range_previous_significant(Tokenization *, TokenRange, int32);
+int32 token_range_previous_text(Tokenization *, TokenRange, int32,
+                                char *, int32);
+/* Compares exact token kind/text sequences after ignoring trivia. */
+bool token_range_significant_equal(Tokenization *, TokenRange,
+                                   Tokenization *, TokenRange);
 SourceRange token_range_source_range(Tokenization *, TokenRange);
 TokenRange token_range_trim_trivia(Tokenization *, TokenRange);
+bool tokenization_blank_line_between(Tokenization *, int32, int32);
+bool tokenization_comment_between(Tokenization *, int32, int32);
 int32 tokenization_find_matching(Tokenization *, int32);
 bool tokenization_is_in_preprocessor_define(Tokenization *, int32);
+bool tokenization_line_continuation_between(Tokenization *, int32, int32);
 int32 tokenization_logical_line_start_offset(Tokenization *, int32);
+bool tokenization_newline_between(Tokenization *, int32, int32);
 int32 tokenization_next_significant(Tokenization *, int32);
 int32 tokenization_physical_line_count(Tokenization *);
 /* Physical line arguments are 1-based; end offsets are exclusive. */
