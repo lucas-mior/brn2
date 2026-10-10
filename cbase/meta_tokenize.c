@@ -17,14 +17,6 @@
 #include "cbase.h"
 
 bool
-char_is_alpha(char c) {
-    if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {
-        return true;
-    }
-    return false;
-}
-
-bool
 char_is_digit(char c) {
     if ((c >= '0') && (c <= '9')) {
         return true;
@@ -45,7 +37,7 @@ token_is_number(Token *token) {
 
 bool
 char_is_identifier_start(char c) {
-    if (char_is_alpha(c) || (c == '_')) {
+    if (is_alpha(c) || (c == '_')) {
         return true;
     }
     return false;
@@ -1762,9 +1754,9 @@ test_token_predicates(void) {
 
 static void
 test_character_classifiers(void) {
-    ASSERT(char_is_alpha('a'));
-    ASSERT(char_is_alpha('Z'));
-    ASSERT(!char_is_alpha('_'));
+    ASSERT(is_alpha('a'));
+    ASSERT(is_alpha('Z'));
+    ASSERT(!is_alpha('_'));
     ASSERT(char_is_digit('0'));
     ASSERT(char_is_digit('9'));
     ASSERT(!char_is_digit('x'));
