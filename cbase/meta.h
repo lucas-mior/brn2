@@ -348,6 +348,21 @@ typedef struct Tokenization {
     int32 *line_starts;
 } Tokenization;
 
+/*
+ * Borrowed top-level token splitter. Returned items refer to the original
+ * Tokenization and contain all trivia. Trim them with token_range_trim_trivia.
+ */
+typedef struct TokenRangeSplit {
+    Tokenization *tokenization;
+    TokenRange range;
+    char *separator;
+    int32 separator_len;
+    int32 cursor;
+    int32 source_cursor;
+    int32 source_end;
+    bool finished;
+} TokenRangeSplit;
+
 typedef struct Line {
     Token *tokens;
     char *text;
@@ -459,6 +474,28 @@ bool tokenization_comment_between(Tokenization *, int32, int32);
 int32 tokenization_find_matching(Tokenization *, int32);
 bool tokenization_is_in_preprocessor_define(Tokenization *, int32);
 bool tokenization_line_continuation_between(Tokenization *, int32, int32);
+
+/*
+ * Split at exact separator tokens outside balanced (), [] and {}.
+ * init checks the entire range for malformed nesting; false means invalid.
+ * An empty or trivia-only range yields zero items. For nonempty ranges,
+ * consecutive/leading/trailing separators yield empty items.
+ * next returns false after exhaustion. Item token ranges retain trivia
+ * tokens, if present. next_spans also returns exact untrimmed source byte
+ * ranges, retaining inter-token whitespace even with SKIP_WHITESPACE.
+ * The input source extent is that of the supplied token range.
+ * The splitter borrows both the tokenization and separator for its lifetime.
+ * collect writes up to capacity items (items may be NULL if capacity is 0),
+ * returns the total number required, or -1 for invalid input. It never
+ * allocates; call with NULL/0 to count before allocating a result array.
+ */
+bool token_range_split_init(TokenRangeSplit *, Tokenization *, TokenRange,
+                            char *, int32);
+bool token_range_split_next(TokenRangeSplit *, TokenRange *);
+bool token_range_split_next_spans(TokenRangeSplit *, TokenRange *,
+                                  SourceRange *);
+int32 token_range_split_collect(Tokenization *, TokenRange, char *, int32,
+                                TokenRange *, int32);
 
 /*
  * Raw preprocessor structure. No directives are expanded. Directive source
