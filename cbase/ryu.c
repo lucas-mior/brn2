@@ -26,10 +26,6 @@
 #define RYU_IMPLEMENT
 #include "ryu.h"
 
-#define floor_log2 tryu_s2f_floor_log2
-#include "ryu/s2f.c"
-#undef floor_log2
-
 static void
 test_ryu_assert(bool condition) {
     if (!condition) {

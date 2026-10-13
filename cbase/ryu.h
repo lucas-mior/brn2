@@ -22,14 +22,7 @@
 
 #include "ryu/d2fixed.c"
 
-#if CC_GCC || CC_CLANG
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-#endif
 #include "ryu/s2d.c"
-#if CC_GCC || CC_CLANG
-#pragma GCC diagnostic pop
-#endif
+#include "ryu/s2f.c"
 
 #endif /* RYU_IMPLEMENT */

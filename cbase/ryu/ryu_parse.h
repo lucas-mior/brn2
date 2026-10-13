@@ -63,7 +63,7 @@ int32 s2d(const char *buffer, double *result);
 // has the same prefix, rounding, and error semantics as s2d_n.
 int32 s2d_fast(const char *buffer, double *result);
 
-enum Status s2f_n(const char *buffer, const int len, float *result);
+enum Status s2f_n(const char *buffer, int32 len, float *result);
 enum Status s2f(const char *buffer, float *result);
 
 #if defined(__cplusplus)
