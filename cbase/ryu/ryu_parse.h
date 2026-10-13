@@ -47,9 +47,9 @@ enum Status {
 // -INPUT_TOO_LONG, -MALFORMED_INPUT, or -FLOAT_UNDERFLOW. Numeric overflow
 // is a successful conversion: it stores signed infinity and returns the number
 // of bytes consumed. Explicit inf/infinity and nan tokens are also successful.
-// Numeric underflow is reported for every nonzero input below the normal double
-// range, including exact subnormals, and stores the resulting signed zero or
-// subnormal value.
+// Numeric underflow is reported when a nonzero input rounds to signed zero or
+// a subnormal double. An input below the normal range that rounds to the
+// smallest normal double is successful.
 //
 // s2d_n reads at most len bytes and does not require a nul terminator. Parsing
 // stops before the first byte that is not part of a valid floating-point

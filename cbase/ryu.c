@@ -256,6 +256,10 @@ test_ryu_s2d_hex(void) {
     ASSERT_EQ(used, -FLOAT_UNDERFLOW);
     ASSERT_EQ(test_ryu_double_bits(value), 0x000fffffffffffffull);
 
+    used = s2d("0x0.fffffffffffff8p-1022", &value);
+    ASSERT_EQ(used, 24);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x0010000000000000ull);
+
     used = s2d("0x1p-1022", &value);
     ASSERT_EQ(used, 9);
     ASSERT_EQ(test_ryu_double_bits(value), 0x0010000000000000ull);

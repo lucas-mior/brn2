@@ -1028,6 +1028,9 @@ ryu_parse_hex_double(const char *buffer, int32 len, int32 index,
                 ieee |= 1ull << 63;
             }
             *result = int64_bits_to_double(ieee);
+            if (significand == (1ull << DOUBLE_MANTISSA_BITS)) {
+                return parsed_hex_len;
+            }
             return -FLOAT_UNDERFLOW;
         }
     }
@@ -1264,19 +1267,6 @@ ryu_fast_scan_exponent(RyuDecimalParts *parts, const char *buffer,
     return;
 }
 
-static int32
-ryu_cstring_len_i32(const char *buffer) {
-    int64 len = 0;
-
-    while (buffer[len] != '\0') {
-        if (len >= INT32_MAX) {
-            return -INPUT_TOO_LONG;
-        }
-        len += 1;
-    }
-    return (int32)len;
-}
-
 // Parses a nul-terminated floating-point prefix without length checks in
 // the ordinary decimal scanner. Exotic spellings use the bounded parser.
 int32
@@ -1317,11 +1307,6 @@ s2d_fast(const char *buffer, double *result) {
 
 int32
 s2d(const char *buffer, double *result) {
-    int32 len = ryu_cstring_len_i32(buffer);
-
-    if (len < 0) {
-        return len;
-    }
-    return s2d_n(buffer, len, result);
+    return s2d_n(buffer, strlen32((char *)buffer), result);
 }
 #endif /* RYU_S2D_C */
