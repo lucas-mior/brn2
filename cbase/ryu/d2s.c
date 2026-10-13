@@ -152,10 +152,10 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
     k = DOUBLE_POW5_INV_BITCOUNT + pow5_bits((int32)q) - 1;
     i = -e2 + (int32)q + k;
 #if defined(RYU_OPTIMIZE_SIZE)
-    double_computeInvPow5(q, pow5);
+    double_compute_inv_pow5(q, pow5);
     vr = mul_shift_all64(m2, pow5, i, &vp, &vm, mmShift);
 #else
-    vr = mul_shift_all64(m2, DOUBLE_POW5_INV_SPLIT[q], i, &vp, &vm, mmShift);
+    vr = mul_shift_all64(m2, double_pow5_inv_split[q], i, &vp, &vm, mmShift);
 #endif
 #ifdef RYU_DEBUG
     printf("%" PRIu64 " * 2^%d / 10^%u\n", mv, e2, q);
@@ -186,10 +186,10 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
     k = pow5_bits(i) - DOUBLE_POW5_BITCOUNT;
     j = (int32)q - k;
 #if defined(RYU_OPTIMIZE_SIZE)
-    double_computePow5(i, pow5);
+    double_compute_pow5(i, pow5);
     vr = mul_shift_all64(m2, pow5, j, &vp, &vm, mmShift);
 #else
-    vr = mul_shift_all64(m2, DOUBLE_POW5_SPLIT[i], j, &vp, &vm, mmShift);
+    vr = mul_shift_all64(m2, double_pow5_split[i], j, &vp, &vm, mmShift);
 #endif
 #ifdef RYU_DEBUG
     printf("%" PRIu64 " * 5^%d / 10^%u\n", mv, -e2, q);
@@ -386,10 +386,10 @@ static inline int to_chars(const floating_decimal_64 v, const bool sign, char* c
     c1 = (c / 100) << 1;
     d0 = (d % 100) << 1;
     d1 = (d / 100) << 1;
-    memcpy(result + index + olength - 1, DIGIT_TABLE + c0, 2);
-    memcpy(result + index + olength - 3, DIGIT_TABLE + c1, 2);
-    memcpy(result + index + olength - 5, DIGIT_TABLE + d0, 2);
-    memcpy(result + index + olength - 7, DIGIT_TABLE + d1, 2);
+    memcpy(result + index + olength - 1, digit_table + c0, 2);
+    memcpy(result + index + olength - 3, digit_table + c1, 2);
+    memcpy(result + index + olength - 5, digit_table + d0, 2);
+    memcpy(result + index + olength - 7, digit_table + d1, 2);
     i += 8;
   }
   output2 = (uint32)output;
@@ -402,21 +402,21 @@ static inline int to_chars(const floating_decimal_64 v, const bool sign, char* c
     output2 /= 10000;
     c0 = (c % 100) << 1;
     c1 = (c / 100) << 1;
-    memcpy(result + index + olength - i - 1, DIGIT_TABLE + c0, 2);
-    memcpy(result + index + olength - i - 3, DIGIT_TABLE + c1, 2);
+    memcpy(result + index + olength - i - 1, digit_table + c0, 2);
+    memcpy(result + index + olength - i - 3, digit_table + c1, 2);
     i += 4;
   }
   if (output2 >= 100) {
     c = (output2 % 100) << 1;
     output2 /= 100;
-    memcpy(result + index + olength - i - 1, DIGIT_TABLE + c, 2);
+    memcpy(result + index + olength - i - 1, digit_table + c, 2);
     i += 2;
   }
   if (output2 >= 10) {
     c = output2 << 1;
     // We can't use memcpy here: the decimal dot goes between these two digits.
-    result[index + olength - i] = DIGIT_TABLE[c + 1];
-    result[index] = DIGIT_TABLE[c];
+    result[index + olength - i] = digit_table[c + 1];
+    result[index] = digit_table[c];
   } else {
     result[index] = (char)('0' + output2);
   }
@@ -441,11 +441,11 @@ static inline int to_chars(const floating_decimal_64 v, const bool sign, char* c
 
   if (exp >= 100) {
     digit = exp % 10;
-    memcpy(result + index, DIGIT_TABLE + 2 * (exp / 10), 2);
+    memcpy(result + index, digit_table + 2 * (exp / 10), 2);
     result[index + 2] = (char)('0' + digit);
     index += 3;
   } else if (exp >= 10) {
-    memcpy(result + index, DIGIT_TABLE + 2 * exp, 2);
+    memcpy(result + index, digit_table + 2 * exp, 2);
     index += 2;
   } else {
     result[index] = (char)('0' + exp);

@@ -538,16 +538,16 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     e2 = floor_log2(m10) + e10 + log2_pow5(e10) - (DOUBLE_MANTISSA_BITS + 1);
 
     // We now compute [m10 * 10^e10 / 2^e2] = [m10 * 5^e10 / 2^(e2-e10)].
-    // To that end, we use the DOUBLE_POW5_SPLIT table.
+    // To that end, we use the double_pow5_split table.
     int j = e2 - e10 - ceil_log2_pow5(e10) + DOUBLE_POW5_BITCOUNT;
     assert(j >= 0);
 #if defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
-    double_computePow5(e10, pow5);
+    double_compute_pow5(e10, pow5);
     m2 = mul_shift64(m10, pow5, j);
 #else
     assert(e10 < DOUBLE_POW5_TABLE_SIZE);
-    m2 = mul_shift64(m10, DOUBLE_POW5_SPLIT[e10], j);
+    m2 = mul_shift64(m10, double_pow5_split[e10], j);
 #endif
     // We also compute if the result is exact, i.e.,
     //   [m10 * 10^e10 / 2^e2] == m10 * 10^e10 / 2^e2.
@@ -562,11 +562,11 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     int j = e2 - e10 + ceil_log2_pow5(-e10) - 1 + DOUBLE_POW5_INV_BITCOUNT;
 #if defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
-    double_computeInvPow5(-e10, pow5);
+    double_compute_inv_pow5(-e10, pow5);
     m2 = mul_shift64(m10, pow5, j);
 #else
     assert(-e10 < DOUBLE_POW5_INV_TABLE_SIZE);
-    m2 = mul_shift64(m10, DOUBLE_POW5_INV_SPLIT[-e10], j);
+    m2 = mul_shift64(m10, double_pow5_inv_split[-e10], j);
 #endif
     trailingZeros = multiple_of_power_of5(m10, -e10);
   }

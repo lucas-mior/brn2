@@ -121,7 +121,7 @@ mul_shift32(uint32 m, uint64 factor, int32 shift) {
 static inline uint32
 mul_pow5_inv_div_pow2(uint32 m, uint32 q, int32 j) {
 #if defined(RYU_FLOAT_FULL_TABLE)
-    return mul_shift32(m, FLOAT_POW5_INV_SPLIT[q], j);
+    return mul_shift32(m, float_pow5_inv_split[q], j);
 #elif defined(RYU_OPTIMIZE_SIZE)
     // The inverse multipliers are defined as [2^x / 5^y] + 1; the upper
     // 64 bits from the double lookup table are the correct bits for [2^x /
@@ -130,24 +130,24 @@ mul_pow5_inv_div_pow2(uint32 m, uint32 q, int32 j) {
     // 64 bits.
     uint64 pow5[2];
 
-    double_computeInvPow5(q, pow5);
+    double_compute_inv_pow5(q, pow5);
     return mul_shift32(m, pow5[1] + 1, j);
 #else
-    return mul_shift32(m, DOUBLE_POW5_INV_SPLIT[q][1] + 1, j);
+    return mul_shift32(m, double_pow5_inv_split[q][1] + 1, j);
 #endif
 }
 
 static inline uint32
 mul_pow5_div_pow2(uint32 m, uint32 i, int32 j) {
 #if defined(RYU_FLOAT_FULL_TABLE)
-    return mul_shift32(m, FLOAT_POW5_SPLIT[i], j);
+    return mul_shift32(m, float_pow5_split[i], j);
 #elif defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
 
-    double_computePow5(i, pow5);
+    double_compute_pow5(i, pow5);
     return mul_shift32(m, pow5[1], j);
 #else
-    return mul_shift32(m, DOUBLE_POW5_SPLIT[i][1], j);
+    return mul_shift32(m, double_pow5_split[i][1], j);
 #endif
 }
 
