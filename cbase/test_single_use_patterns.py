@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Regression tests for single_use_patterns.py (stdlib only)."""
 
+import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -23,14 +25,18 @@ class SingleUseTests(unittest.TestCase):
         path.write_text(contents, encoding="utf-8")
         return path
 
-    def run_check(self, *args):
+    def run_check(self, *args, env=None):
         result = subprocess.run(
             [sys.executable, str(CHECKER), *map(str, args)],
             cwd=self.directory, capture_output=True, text=True,
-            check=False)
+            check=False, env=env)
         self.assertFalse(result.stderr, result.stderr)
         self.assertIn(result.returncode, (0, 1))
         return result.stdout
+
+    def cache_data(self):
+        path = self.directory / ".cache/single_use_patterns.json"
+        return json.loads(path.read_text(encoding="utf-8"))
 
     def test_both_patterns_and_prototype(self):
         self.write("a.c", """
@@ -253,6 +259,104 @@ class SingleUseTests(unittest.TestCase):
         self.assertIn("function helper:", output)
         self.assertNotIn("function other:", output)
         self.assertEqual(self.run_check("--exclude", "a.c", a), "")
+
+    def test_cache_reuses_unchanged_results_without_writing(self):
+        self.write("a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        output = self.run_check(".")
+        path = self.directory / ".cache/single_use_patterns.json"
+        first = self.cache_data()
+        self.assertEqual(first["version"], 2)
+        self.assertEqual(len(first["files"]), 1)
+        self.assertEqual(len(first["runs"]), 1)
+        before = path.stat().st_mtime_ns
+
+        self.assertEqual(self.run_check("."), output)
+        self.assertEqual(path.stat().st_mtime_ns, before)
+        self.assertEqual(self.run_check("--no-cache", "."), output)
+        self.assertEqual(path.stat().st_mtime_ns, before)
+
+    def test_cache_invalidation_for_edited_source_and_header(self):
+        source = self.write("a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.assertIn("function helper:", self.run_check("."))
+
+        # A new header or an edited header can suppress a finding even though
+        # the defining C file did not change.
+        header = self.write("b.h", "#define EXTRA() helper()\n")
+        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check("."), "")
+        header.write_text("/* no reference */\n", encoding="utf-8")
+        self.assertIn("function helper:", self.run_check("."))
+
+        # Also detect an edit with unchanged size and modification time.
+        before = source.stat()
+        code = source.read_text(encoding="utf-8")
+        source.write_text(code.replace("helper();", "other_();"),
+                          encoding="utf-8")
+        os.utime(source, ns=(before.st_atime_ns, before.st_mtime_ns))
+        self.assertEqual(source.stat().st_size, before.st_size)
+        self.assertEqual(source.stat().st_mtime_ns, before.st_mtime_ns)
+        self.assertEqual(self.run_check("."), "")
+
+    def test_cache_respects_options_and_file_set(self):
+        source = self.write("a.c", """
+            int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        header = self.write("other.h", "#define EXTRA() helper()\n")
+        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check("--include-global", "."), "")
+        output = self.run_check("--include-global", "--exclude", "*.h",
+                                ".")
+        self.assertIn("function helper:", output)
+        self.assertEqual(self.run_check("--include-global", source), output)
+        self.assertEqual(self.run_check("--include-global", "."), "")
+
+        header.unlink()
+        self.assertEqual(self.run_check("--include-global", "."), output)
+
+    def test_cache_corruption_and_fingerprint_change(self):
+        self.write("a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        cache_path = self.directory / ".cache/single_use_patterns.json"
+        expected = self.run_check(".")
+
+        cache_path.write_text("{invalid", encoding="utf-8")
+        self.assertEqual(self.run_check("."), expected)
+
+        cache = self.cache_data()
+        cache["checker"] = "not-the-checker-hash"
+        cache_path.write_text(json.dumps(cache), encoding="utf-8")
+        self.assertEqual(self.run_check("."), expected)
+
+        cache = self.cache_data()
+        cache["files"][str(self.directory / "a.c")]["parsed"] = {}
+        next(iter(cache["runs"].values()))["findings"] = ["bad row"]
+        cache_path.write_text(json.dumps(cache), encoding="utf-8")
+        self.assertEqual(self.run_check("."), expected)
+
+    def test_cache_path_override_and_unwritable_destination(self):
+        self.write("a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        env = dict(os.environ)
+        env["CBASE_SINGLE_USE_PATTERNS_CACHE"] = "elsewhere/checker.json"
+        expected = self.run_check(".", env=env)
+        self.assertIn("function helper:", expected)
+        self.assertTrue((self.directory / "elsewhere/checker.json").exists())
+        self.assertFalse((self.directory / ".cache").exists())
+        self.assertEqual(self.run_check(".", env=env), expected)
+
+        env["CBASE_SINGLE_USE_PATTERNS_CACHE"] = "a.c/unavailable.json"
+        self.assertEqual(self.run_check(".", env=env), expected)
 
 
 if __name__ == "__main__":

@@ -468,6 +468,16 @@ newline-delimited paths, and repeated `--exclude GLOB` options. Output uses
 none exist, and 2 for invalid input. Run its regression tests with
 `python3 cbase/test_single_use_patterns.py`.
 
+Analysis is cached by default in `.cache/single_use_patterns.json`, following
+the same metadata-based invalidation and atomic-write approach as
+`functions_forbidden_patterns.pl`. Unchanged C files and headers are not
+reopened or reparsed. Repeated checks of the exact same file set and options
+also reuse the final findings; editing, adding, or removing any scanned file
+forces cross-file analysis again. Changes to the checker script invalidate the
+cache. Set `CBASE_SINGLE_USE_PATTERNS_CACHE` to override the cache path, or
+pass `--no-cache` to disable both cache reads and writes. Cache write errors
+do not prevent analysis.
+
 This is intentionally conservative source analysis rather than a full C
 compiler. It ignores strings and comments, handles ordinary forward declarations,
 checks other source and header files, and suppresses many uncertain cases,

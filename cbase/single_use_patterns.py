@@ -9,10 +9,14 @@ See --help for usage and limitations.
 import argparse
 from collections import defaultdict
 from dataclasses import dataclass
+import hashlib
+import json
+import os
 from fnmatch import fnmatch
 from pathlib import Path
 import re
 import sys
+import tempfile
 
 
 IDENTIFIER = re.compile(r"[A-Za-z_]\w*\Z", re.ASCII)
@@ -27,6 +31,9 @@ INCLUDE_C = re.compile(r'^\s*[<"]([^>"]+\.c)[>"]')
 CONTROL = {"if", "while", "for", "switch", "sizeof", "_Alignof",
            "_Generic", "return", "typedef", "__attribute__"}
 SKIP_DIRS = {".git", ".cache", "__pycache__", "bin", "build"}
+CACHE_VERSION = 2
+CACHE_ENV = "CBASE_SINGLE_USE_PATTERNS_CACHE"
+DEFAULT_CACHE = ".cache/single_use_patterns.json"
 
 
 @dataclass(frozen=True)
@@ -110,7 +117,49 @@ class Source:
         self.functions = []
         self.structs = []
         self.owners = [-1] * len(self.tokens)
+        self.pairs = {}
         self._parse()
+
+    def to_cache(self):
+        """Persist parser results, not final cross-file diagnostics."""
+        return {
+            "tokens": [[token.value, token.line] for token in self.tokens],
+            "included_c": sorted(self.included_c),
+            "prototype_indices": sorted(self.prototype_indices),
+            "directive_uses": sorted(self.directive_uses),
+            "conditional": sorted(self.conditional),
+            "owners": self.owners,
+            "pairs": [[index, match] for index, match in self.pairs.items()],
+            "functions": [
+                [f.name, f.line, f.name_index, f.start, f.end,
+                 f.is_static, f.conditional] for f in self.functions
+            ],
+            "structs": [
+                [s.name, s.line, s.names, s.tag, s.alias, s.start, s.end,
+                 s.conditional] for s in self.structs
+            ],
+        }
+
+    @classmethod
+    def from_cache(cls, path, data):
+        """Reconstitute a source without reopening or parsing its C file."""
+        source = cls.__new__(cls)
+        source.path = path
+        source.tokens = [Token(*values) for values in data["tokens"]]
+        source.included_c = set(data["included_c"])
+        source.prototype_indices = set(data["prototype_indices"])
+        source.directive_uses = set(data["directive_uses"])
+        source.conditional = set(data["conditional"])
+        source.owners = data["owners"]
+        source.pairs = dict(data["pairs"])
+        source.functions = [Function(*values) for values in data["functions"]]
+        source.structs = [
+            Struct(values[0], values[1], tuple(values[2]), *values[3:])
+            for values in data["structs"]
+        ]
+        if len(source.tokens) != len(source.owners):
+            raise ValueError("invalid cached owner list")
+        return source
 
     def _parse(self):
         tokens = self.tokens
@@ -260,6 +309,120 @@ def files_to_check(inputs, exclusions):
                   if not any(fnmatch(path.as_posix(), glob) or
                              fnmatch(path.name, glob) for glob in exclusions))
 
+
+
+def file_signature(path):
+    """Use inode and nanosecond metadata without reading the source file."""
+    info = path.stat()
+    return [info.st_dev, info.st_ino, info.st_size,
+            info.st_mtime_ns, info.st_ctime_ns]
+
+
+def read_cache(path, fingerprint):
+    try:
+        with path.open(encoding="utf-8") as stream:
+            cache = json.load(stream)
+    except (OSError, ValueError, UnicodeError):
+        return {}
+    if (not isinstance(cache, dict) or
+            cache.get("version") != CACHE_VERSION or
+            cache.get("checker") != fingerprint or
+            not isinstance(cache.get("files"), dict) or
+            not isinstance(cache.get("runs"), dict)):
+        return {}
+    return cache
+
+
+def write_cache(path, fingerprint, cache):
+    """Best-effort atomic write; cache failures must not fail the check."""
+    temporary = None
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=path.parent,
+                prefix="single-use-", delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump({"version": CACHE_VERSION, "checker": fingerprint,
+                       "files": cache["files"], "runs": cache["runs"]},
+                      stream, separators=(",", ":"))
+        os.replace(temporary, path)
+    except OSError:
+        pass
+    finally:
+        if temporary is not None:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+
+def cached_findings(paths, global_functions, cache_path):
+    # A cached final result is only valid for this exact file set and option.
+    # All file signatures must match, including headers and unrelated sources:
+    # changing a different file can invalidate a single-use finding.
+    fingerprint = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    cache = read_cache(cache_path, fingerprint)
+    if not cache:
+        cache = {"files": {}, "runs": {}}
+    entries = cache["files"]
+    runs = cache["runs"]
+    signatures = {str(path): file_signature(path) for path in paths}
+    run_options = [list(signatures), global_functions]
+    run_key = hashlib.sha256(json.dumps(run_options).encode()).hexdigest()
+    run = runs.get(run_key)
+    if (isinstance(run, dict) and run.get("signatures") == signatures and
+            isinstance(run.get("findings"), list)):
+        try:
+            findings = []
+            for item in run["findings"]:
+                if (not isinstance(item, list) or len(item) != 5 or
+                        not isinstance(item[0], str) or
+                        not isinstance(item[1], int) or
+                        not all(isinstance(value, str)
+                                for value in item[2:])):
+                    raise ValueError("invalid cached finding")
+                findings.append((Path(item[0]), *item[1:]))
+            return findings
+        except (TypeError, ValueError, IndexError):
+            pass
+
+    dirty = False
+    sources = []
+    for path in paths:
+        key = str(path)
+        before = signatures[key]
+        entry = entries.get(key)
+        source = None
+        if isinstance(entry, dict) and entry.get("signature") == before:
+            try:
+                source = Source.from_cache(path, entry["parsed"])
+            except (KeyError, TypeError, ValueError, IndexError,
+                    AttributeError):
+                pass
+        if source is None:
+            source = Source(path)
+            after = file_signature(path)
+            if before == after:
+                entries[key] = {"signature": after,
+                                "parsed": source.to_cache()}
+                dirty = True
+            elif key in entries:
+                del entries[key]
+                dirty = True
+        sources.append(source)
+
+    findings = analyze(sources, global_functions)
+    # Do not persist results if any input changed while we were checking it.
+    if all(file_signature(path) == signatures[str(path)] for path in paths):
+        runs[run_key] = {
+            "signatures": signatures,
+            "findings": [[str(path), line, kind, name, explanation]
+                         for path, line, kind, name, explanation in findings],
+        }
+        dirty = True
+    if dirty:
+        write_cache(cache_path, fingerprint, cache)
+    return findings
 
 
 def clear_type_use(source, index, struct):
@@ -426,6 +589,9 @@ def main():
     parser.add_argument("--exclude", action="append", default=[],
                         metavar="GLOB",
                         help="exclude matching paths or basenames")
+    parser.add_argument("--no-cache", action="store_true",
+                        help="parse all sources without reading or writing "
+                             "the cache")
     parser.add_argument("--include-global", action="store_true",
                         help="also consider non-static functions (closed-world "
                              "assumption; external consumers may exist)")
@@ -435,10 +601,15 @@ def main():
         if args.file_list:
             paths += Path(args.file_list).read_text().splitlines()
         source_paths = files_to_check(paths or ["."], args.exclude)
-        sources = [Source(path) for path in source_paths]
+        if args.no_cache:
+            sources = [Source(path) for path in source_paths]
+            findings = analyze(sources, args.include_global)
+        else:
+            cache_path = Path(os.environ.get(CACHE_ENV, DEFAULT_CACHE))
+            findings = cached_findings(source_paths, args.include_global,
+                                       cache_path)
     except (OSError, ValueError) as error:
         parser.exit(2, f"{error}\n")
-    findings = analyze(sources, args.include_global)
     for path, line, kind, name, explanation in findings:
         try:
             shown = path.relative_to(Path.cwd())
