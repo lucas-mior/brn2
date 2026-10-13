@@ -585,7 +585,7 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
         //
         // We use floor(log2(5^e10)) so that we get at least this many bits;
         // better to have an additional bit than to not have enough bits.
-        e2 = s2d_floor_log2(m10) + e10 + log2_pow5(e10)
+        e2 = (int32)s2d_floor_log2(m10) + e10 + log2_pow5(e10)
              - (DOUBLE_MANTISSA_BITS + 1);
 
         // We now compute:
@@ -612,11 +612,11 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
         // result must be exact. Otherwise use multiple_of_power_of2.
         trailing_zeros = e2 < e10
                          || ((e2 - e10 < 64)
-                             && multiple_of_power_of2(m10, e2 - e10));
+                             && multiple_of_power_of2(m10, (uint32)(e2 - e10)));
     } else {
         int32 j;
 
-        e2 = s2d_floor_log2(m10) + e10 - ceil_log2_pow5(-e10)
+        e2 = (int32)s2d_floor_log2(m10) + e10 - ceil_log2_pow5(-e10)
              - (DOUBLE_MANTISSA_BITS + 1);
         j = e2 - e10 + ceil_log2_pow5(-e10) - 1
             + DOUBLE_POW5_INV_BITCOUNT;
@@ -631,7 +631,7 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
         assert(-e10 < DOUBLE_POW5_INV_TABLE_SIZE);
         m2 = mul_shift64(m10, double_pow5_inv_split[-e10], j);
 #endif
-        trailing_zeros = multiple_of_power_of5(m10, -e10);
+        trailing_zeros = multiple_of_power_of5(m10, (uint32)(-e10));
     }
 
 #if defined(RYU_DEBUG)

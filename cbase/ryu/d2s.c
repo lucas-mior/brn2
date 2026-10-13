@@ -446,10 +446,10 @@ d2s_to_chars(FloatingDecimal64 value, bool sign, char *result) {
         c1 = (c / 100) << 1;
         d0 = (d % 100) << 1;
         d1 = (d / 100) << 1;
-        memcpy(result + index + output_len - 1, digit_table + c0, 2);
-        memcpy(result + index + output_len - 3, digit_table + c1, 2);
-        memcpy(result + index + output_len - 5, digit_table + d0, 2);
-        memcpy(result + index + output_len - 7, digit_table + d1, 2);
+        memcpy(result + index + output_len - 1, ryu_digit_table + c0, 2);
+        memcpy(result + index + output_len - 3, ryu_digit_table + c1, 2);
+        memcpy(result + index + output_len - 5, ryu_digit_table + d0, 2);
+        memcpy(result + index + output_len - 7, ryu_digit_table + d1, 2);
         i += 8;
     }
 
@@ -464,15 +464,15 @@ d2s_to_chars(FloatingDecimal64 value, bool sign, char *result) {
         output2 /= 10000;
         c0 = (c % 100) << 1;
         c1 = (c / 100) << 1;
-        memcpy(result + index + output_len - i - 1, digit_table + c0, 2);
-        memcpy(result + index + output_len - i - 3, digit_table + c1, 2);
+        memcpy(result + index + output_len - i - 1, ryu_digit_table + c0, 2);
+        memcpy(result + index + output_len - i - 3, ryu_digit_table + c1, 2);
         i += 4;
     }
 
     if (output2 >= 100) {
         c = (output2 % 100) << 1;
         output2 /= 100;
-        memcpy(result + index + output_len - i - 1, digit_table + c, 2);
+        memcpy(result + index + output_len - i - 1, ryu_digit_table + c, 2);
         i += 2;
     }
 
@@ -480,8 +480,8 @@ d2s_to_chars(FloatingDecimal64 value, bool sign, char *result) {
         c = output2 << 1;
         // We can't use memcpy here: the decimal dot goes between these two
         // digits.
-        result[index + output_len - i] = digit_table[c + 1];
-        result[index] = digit_table[c];
+        result[index + output_len - i] = ryu_digit_table[c + 1];
+        result[index] = ryu_digit_table[c];
     } else {
         result[index] = (char)('0' + output2);
     }
@@ -506,11 +506,11 @@ d2s_to_chars(FloatingDecimal64 value, bool sign, char *result) {
 
     if (exp >= 100) {
         digit = exp % 10;
-        memcpy(result + index, digit_table + 2*(exp / 10), 2);
+        memcpy(result + index, ryu_digit_table + 2*(exp / 10), 2);
         result[index + 2] = (char)('0' + digit);
         index += 3;
     } else if (exp >= 10) {
-        memcpy(result + index, digit_table + 2*exp, 2);
+        memcpy(result + index, ryu_digit_table + 2*exp, 2);
         index += 2;
     } else {
         result[index] = (char)('0' + exp);

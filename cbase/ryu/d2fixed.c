@@ -291,19 +291,19 @@ append_n_digits(uint32 olength, uint32 digits, char *result) {
         digits /= 10000;
         c0 = (c % 100) << 1;
         c1 = (c / 100) << 1;
-        memcpy(result + olength - i - 2, digit_table + c0, 2);
-        memcpy(result + olength - i - 4, digit_table + c1, 2);
+        memcpy(result + olength - i - 2, ryu_digit_table + c0, 2);
+        memcpy(result + olength - i - 4, ryu_digit_table + c1, 2);
         i += 4;
     }
     if (digits >= 100) {
         c = (digits % 100) << 1;
         digits /= 100;
-        memcpy(result + olength - i - 2, digit_table + c, 2);
+        memcpy(result + olength - i - 2, ryu_digit_table + c, 2);
         i += 2;
     }
     if (digits >= 10) {
         c = digits << 1;
-        memcpy(result + olength - i - 2, digit_table + c, 2);
+        memcpy(result + olength - i - 2, ryu_digit_table + c, 2);
     } else {
         result[0] = (char)('0' + digits);
     }
@@ -335,20 +335,20 @@ append_d_digits(uint32 olength, uint32 digits, char *result) {
         digits /= 10000;
         c0 = (c % 100) << 1;
         c1 = (c / 100) << 1;
-        memcpy(result + olength + 1 - i - 2, digit_table + c0, 2);
-        memcpy(result + olength + 1 - i - 4, digit_table + c1, 2);
+        memcpy(result + olength + 1 - i - 2, ryu_digit_table + c0, 2);
+        memcpy(result + olength + 1 - i - 4, ryu_digit_table + c1, 2);
         i += 4;
     }
     if (digits >= 100) {
         c = (digits % 100) << 1;
         digits /= 100;
-        memcpy(result + olength + 1 - i - 2, digit_table + c, 2);
+        memcpy(result + olength + 1 - i - 2, ryu_digit_table + c, 2);
     }
     if (digits >= 10) {
         c = digits << 1;
-        result[2] = digit_table[c + 1];
+        result[2] = ryu_digit_table[c + 1];
         result[1] = '.';
-        result[0] = digit_table[c];
+        result[0] = ryu_digit_table[c];
     } else {
         result[1] = '.';
         result[0] = (char)('0' + digits);
@@ -367,13 +367,13 @@ append_c_digits(uint32 count, uint32 digits, char *result) {
     printf("DIGITS=%u\n", digits);
 #endif
 
-    // Copy pairs of digits from digit_table.
+    // Copy pairs of digits from ryu_digit_table.
     for (; i < count - 1; i += 2) {
         uint32 c;
 
         c = (digits % 100) << 1;
         digits /= 100;
-        memcpy(result + count - i - 2, digit_table + c, 2);
+        memcpy(result + count - i - 2, ryu_digit_table + c, 2);
     }
 
     // Generate the last digit if count is odd.
@@ -412,8 +412,8 @@ append_nine_digits(uint32 digits, char *result) {
         digits /= 10000;
         c0 = (c % 100) << 1;
         c1 = (c / 100) << 1;
-        memcpy(result + 7 - i, digit_table + c0, 2);
-        memcpy(result + 5 - i, digit_table + c1, 2);
+        memcpy(result + 7 - i, ryu_digit_table + c0, 2);
+        memcpy(result + 5 - i, ryu_digit_table + c1, 2);
     }
     result[0] = (char)('0' + digits);
     return;
@@ -1052,10 +1052,10 @@ d2exp_buffered_n(double d, uint32 precision, char *result) {
 
         c = exp % 100;
         result[index] = (char)('0' + exp/100);
-        memcpy(result + index + 1, digit_table + 2*c, 2);
+        memcpy(result + index + 1, ryu_digit_table + 2*c, 2);
         index += 3;
     } else {
-        memcpy(result + index, digit_table + 2*exp, 2);
+        memcpy(result + index, ryu_digit_table + 2*exp, 2);
         index += 2;
     }
 

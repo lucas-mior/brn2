@@ -301,15 +301,15 @@ f2s_to_chars(FloatingDecimal32 value, bool sign, char *result) {
         output /= 10000;
         c0 = (c % 100) << 1;
         c1 = (c / 100) << 1;
-        memcpy(result + index + output_len - i - 1, digit_table + c0, 2);
-        memcpy(result + index + output_len - i - 3, digit_table + c1, 2);
+        memcpy(result + index + output_len - i - 1, ryu_digit_table + c0, 2);
+        memcpy(result + index + output_len - i - 3, ryu_digit_table + c1, 2);
         i += 4;
     }
 
     if (output >= 100) {
         c = (output % 100) << 1;
         output /= 100;
-        memcpy(result + index + output_len - i - 1, digit_table + c, 2);
+        memcpy(result + index + output_len - i - 1, ryu_digit_table + c, 2);
         i += 2;
     }
 
@@ -317,8 +317,8 @@ f2s_to_chars(FloatingDecimal32 value, bool sign, char *result) {
         c = output << 1;
         // We can't use memcpy here: the decimal dot goes between these two
         // digits.
-        result[index + output_len - i] = digit_table[c + 1];
-        result[index] = digit_table[c];
+        result[index + output_len - i] = ryu_digit_table[c + 1];
+        result[index] = ryu_digit_table[c];
     } else {
         result[index] = (char)('0' + output);
     }
@@ -342,7 +342,7 @@ f2s_to_chars(FloatingDecimal32 value, bool sign, char *result) {
     }
 
     if (exp >= 10) {
-        memcpy(result + index, digit_table + 2*exp, 2);
+        memcpy(result + index, ryu_digit_table + 2*exp, 2);
         index += 2;
     } else {
         result[index] = (char)('0' + exp);
