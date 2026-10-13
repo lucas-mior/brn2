@@ -43,5 +43,19 @@ and compare multiple runs in the same environment; small fluctuations are not
 regressions on their own. Lookup-table formatting must leave compiled table
 bytes unchanged.
 
-Changes to `cbase/functions_forbidden.sh` and the forbidden-pattern checker
-belong to the next migration step, not this audit.
+## Forbidden-pattern checks
+
+`cbase/functions_forbidden.sh` includes Ryu's `.c` and `.h` files in normal
+checks, even with `TEST_MAXDEPTH` set. Selecting `TEST_FILTER=ryu` also
+checks Ryu's implementation `.c` files rather than only `cbase/ryu.c`.
+Explicit `TEST_EXCLUDE_PATTERN` exclusions still apply.
+
+`functions_forbidden_patterns.pl` enforces Ryu's 80-column limit, whitespace,
+preprocessor guard/comment conventions, and its existing shared formatting
+rules. Ternary operators are expressly permitted in Ryu, but the general C
+rule against them still applies to ordinary non-macro source code elsewhere.
+Performance-sensitive arithmetic and representation choices above are not
+banned by this style checker.
+
+Run `python3 cbase/test_functions_forbidden_patterns.py` to test discovery,
+formatting diagnostics, the ternary exception, and cache invalidation.
