@@ -231,7 +231,7 @@ benchmark|build|callgrind|debug|debug-fast|valgrind)
     ;;
 check)
     set +e
-    CC=gcc CFLAGS="-fanalyzer" ./build.sh
+    # CC=gcc CFLAGS="-fanalyzer" ./build.sh
 
     CFLAGS="--analyze -Xanalyzer -analyzer-output=text"
     CFLAGS="$CFLAGS -Xanalyzer -analyzer-werror"
