@@ -795,10 +795,8 @@ s2d_n(const char *buffer, int32 len, double *result) {
                 }
             }
 
-            if (!has_hex_digit || (hex_i >= len)
-                || ((buffer[hex_i] != 'p') && (buffer[hex_i] != 'P'))) {
-                hex_i = 0;
-            } else {
+            if (has_hex_digit && (hex_i < len)
+                && ((buffer[hex_i] == 'p') || (buffer[hex_i] == 'P'))) {
                 exponent_index = hex_i;
                 exponent_digit_index = exponent_index + 1;
                 if ((exponent_digit_index < len)
@@ -809,11 +807,9 @@ s2d_n(const char *buffer, int32 len, double *result) {
                     exponent_digit_index += 1;
                 }
 
-                if ((exponent_digit_index >= len)
-                    || (buffer[exponent_digit_index] < '0')
-                    || (buffer[exponent_digit_index] > '9')) {
-                    hex_i = 0;
-                } else {
+                if ((exponent_digit_index < len)
+                    && (buffer[exponent_digit_index] >= '0')
+                    && (buffer[exponent_digit_index] <= '9')) {
                     int64 exponent_limit = INT64_MAX/2;
 
                     hex_i = exponent_digit_index;

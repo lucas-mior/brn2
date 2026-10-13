@@ -847,9 +847,9 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
   }
 
   if (exp >= 100) {
-    const int32 c = exp % 10;
-    memcpy(result + index, DIGIT_TABLE + 2 * (exp / 10), 2);
-    result[index + 2] = (char) ('0' + c);
+    const int32 c = exp % 100;
+    result[index] = (char)('0' + exp/100);
+    memcpy(result + index + 1, DIGIT_TABLE + 2*c, 2);
     index += 3;
   } else {
     memcpy(result + index, DIGIT_TABLE + 2 * exp, 2);

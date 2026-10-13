@@ -476,6 +476,12 @@ main(void) {
     len = d2exp_buffered_n(1234.0, 2, buffer);
     test_ryu_result(buffer, len, "1.23e+03");
 
+    len = d2exp_buffered_n(1e100, 0, buffer);
+    test_ryu_result(buffer, len, "1e+100");
+
+    len = d2exp_buffered_n(test_ryu_double_from_bits(1), 0, buffer);
+    test_ryu_result(buffer, len, "5e-324");
+
     test_ryu_s2d_leading_plus();
     test_ryu_s2d_range_values();
     test_ryu_s2d_hex();
