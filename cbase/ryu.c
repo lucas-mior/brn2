@@ -400,7 +400,7 @@ test_ryu_s2d_long_decimal(void) {
             "1.00000000000000011102230246251565404236316680908203125";
         int32 len = (int32)strlen(midpoint);
 
-        memcpy(buffer, midpoint, len);
+        memcpy(buffer, midpoint, (uint64)len);
         for (int32 i = len; i < 1000; i += 1) {
             buffer[i] = '0';
         }

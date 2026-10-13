@@ -4,6 +4,8 @@
 #if !defined(CBASE_RYU_H)
 #define CBASE_RYU_H
 
+#include "cbase.h"
+
 #include "ryu/ryu.h"
 #include "ryu/ryu_parse.h"
 
