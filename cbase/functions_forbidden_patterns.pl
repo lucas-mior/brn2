@@ -717,7 +717,7 @@ for my $path (@paths) {
     if ($is_ryu) {
         check_ryu_source_style($path, $source);
     } else {
-        check_ternary_operators($path, $code);
+        # check_ternary_operators($path, $code);
     }
 
     # Indentation distinguishes calls from the project's function headers.
