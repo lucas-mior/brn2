@@ -91,9 +91,9 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
     e10 = (int32)q;
     k = FLOAT_POW5_INV_BITCOUNT + pow5_bits((int32)q) - 1;
     i = -e2 + (int32)q + k;
-    vr = mulPow5InvDivPow2(mv, q, i);
-    vp = mulPow5InvDivPow2(mp, q, i);
-    vm = mulPow5InvDivPow2(mm, q, i);
+    vr = mul_pow5_inv_div_pow2(mv, q, i);
+    vp = mul_pow5_inv_div_pow2(mp, q, i);
+    vm = mul_pow5_inv_div_pow2(mm, q, i);
 #ifdef RYU_DEBUG
     printf("%u * 2^%d / 10^%u\n", mv, e2, q);
     printf("V+=%u\nV =%u\nV-=%u\n", vp, vr, vm);
@@ -103,17 +103,17 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
       // q = X - 1 above, except that would require 33 bits for the result, and we've found that
       // 32-bit arithmetic is faster even on 64-bit machines.
       l = FLOAT_POW5_INV_BITCOUNT + pow5_bits((int32)(q - 1)) - 1;
-      lastRemovedDigit = (uint8)(mulPow5InvDivPow2(mv, q - 1, -e2 + (int32)q - 1 + l) % 10);
+      lastRemovedDigit = (uint8)(mul_pow5_inv_div_pow2(mv, q - 1, -e2 + (int32)q - 1 + l) % 10);
     }
     if (q <= 9) {
       // The largest power of 5 that fits in 24 bits is 5^10, but q <= 9 seems to be safe as well.
       // Only one of mp, mv, and mm can be a multiple of 5, if any.
       if (mv % 5 == 0) {
-        vrIsTrailingZeros = multipleOfPowerOf5_32(mv, q);
+        vrIsTrailingZeros = multiple_of_power_of5_32(mv, q);
       } else if (acceptBounds) {
-        vmIsTrailingZeros = multipleOfPowerOf5_32(mm, q);
+        vmIsTrailingZeros = multiple_of_power_of5_32(mm, q);
       } else {
-        vp -= multipleOfPowerOf5_32(mp, q);
+        vp -= multiple_of_power_of5_32(mp, q);
       }
     }
   } else {
@@ -122,9 +122,9 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
     i = -e2 - (int32)q;
     k = pow5_bits(i) - FLOAT_POW5_BITCOUNT;
     j = (int32)q - k;
-    vr = mulPow5divPow2(mv, (uint32)i, j);
-    vp = mulPow5divPow2(mp, (uint32)i, j);
-    vm = mulPow5divPow2(mm, (uint32)i, j);
+    vr = mul_pow5_div_pow2(mv, (uint32)i, j);
+    vp = mul_pow5_div_pow2(mp, (uint32)i, j);
+    vm = mul_pow5_div_pow2(mm, (uint32)i, j);
 #ifdef RYU_DEBUG
     printf("%u * 5^%d / 10^%u\n", mv, -e2, q);
     printf("%u %d %d %d\n", q, i, k, j);
@@ -132,7 +132,7 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
 #endif
     if (q != 0 && (vp - 1) / 10 <= vm / 10) {
       j = (int32)q - 1 - (pow5_bits(i + 1) - FLOAT_POW5_BITCOUNT);
-      lastRemovedDigit = (uint8)(mulPow5divPow2(mv, (uint32)(i + 1), j) % 10);
+      lastRemovedDigit = (uint8)(mul_pow5_div_pow2(mv, (uint32)(i + 1), j) % 10);
     }
     if (q <= 1) {
       // {vr,vp,vm} is trailing zeros if {mv,mp,mm} has at least q trailing 0 bits.
@@ -146,7 +146,7 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
         vp -= 1;
       }
     } else if (q < 31) { // TODO(ulfjack): Use a tighter bound here.
-      vrIsTrailingZeros = multipleOfPowerOf2_32(mv, q - 1);
+      vrIsTrailingZeros = multiple_of_power_of2_32(mv, q - 1);
 #ifdef RYU_DEBUG
       printf("vr is trailing zeros=%s\n", vrIsTrailingZeros ? "true" : "false");
 #endif

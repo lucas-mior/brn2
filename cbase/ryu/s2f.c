@@ -164,20 +164,20 @@ enum Status s2f_n(const char * buffer, const int len, float * result) {
     // To that end, we use the FLOAT_POW5_SPLIT table.
     int j = e2 - e10 - ceil_log2_pow5(e10) + FLOAT_POW5_BITCOUNT;
     assert(j >= 0);
-    m2 = mulPow5divPow2(m10, e10, j);
+    m2 = mul_pow5_div_pow2(m10, e10, j);
 
     // We also compute if the result is exact, i.e.,
     //   [m10 * 10^e10 / 2^e2] == m10 * 10^e10 / 2^e2.
     // This can only be the case if 2^e2 divides m10 * 10^e10, which in turn requires that the
     // largest power of 2 that divides m10 + e10 is greater than e2. If e2 is less than e10, then
-    // the result must be exact. Otherwise we use the existing multipleOfPowerOf2 function.
-    trailingZeros = e2 < e10 || (e2 - e10 < 32 && multipleOfPowerOf2_32(m10, e2 - e10));
+    // the result must be exact. Otherwise we use the existing multiple_of_power_of2_32 function.
+    trailingZeros = e2 < e10 || (e2 - e10 < 32 && multiple_of_power_of2_32(m10, e2 - e10));
   } else {
     e2 = floor_log2(m10) + e10 - ceil_log2_pow5(-e10) - (FLOAT_MANTISSA_BITS + 1);
 
     // We now compute [m10 * 10^e10 / 2^e2] = [m10 / (5^(-e10) 2^(e2-e10))].
     int j = e2 - e10 + ceil_log2_pow5(-e10) - 1 + FLOAT_POW5_INV_BITCOUNT;
-    m2 = mulPow5InvDivPow2(m10, -e10, j);
+    m2 = mul_pow5_inv_div_pow2(m10, -e10, j);
 
     // We also compute if the result is exact, i.e.,
     //   [m10 / (5^(-e10) 2^(e2-e10))] == m10 / (5^(-e10) 2^(e2-e10))
@@ -188,8 +188,8 @@ enum Status s2f_n(const char * buffer, const int len, float * result) {
     // If e2-e10 < 0, we have actually computed [m10 * 2^(e10 e2) / 5^(-e10)] above,
     // and we need to check whether 5^(-e10) divides (m10 * 2^(e10-e2)), which is the case iff
     // pow5(m10 * 2^(e10-e2)) = pow5(m10) >= -e10.
-    trailingZeros = (e2 < e10 || (e2 - e10 < 32 && multipleOfPowerOf2_32(m10, e2 - e10)))
-        && multipleOfPowerOf5_32(m10, -e10);
+    trailingZeros = (e2 < e10 || (e2 - e10 < 32 && multiple_of_power_of2_32(m10, e2 - e10)))
+        && multiple_of_power_of5_32(m10, -e10);
   }
 
 #ifdef RYU_DEBUG
