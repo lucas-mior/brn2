@@ -597,7 +597,7 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
         {
             uint64 pow5[2];
 
-            double_compute_pow5(e10, pow5);
+            double_compute_pow5((uint32)e10, pow5);
             m2 = mul_shift64(m10, pow5, j);
         }
 #else
@@ -624,7 +624,7 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
         {
             uint64 pow5[2];
 
-            double_compute_inv_pow5(-e10, pow5);
+            double_compute_inv_pow5((uint32)(-e10), pow5);
             m2 = mul_shift64(m10, pow5, j);
         }
 #else

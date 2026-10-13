@@ -101,6 +101,11 @@ double_compute_pow5(const uint32 i, uint64 *const result) {
     const uint32 base2 = base * RYU_SMALL_POW5_TABLE_SIZE;
     const uint32 offset = i - base2;
     const uint64 *const mul = ryu_double_pow5_split2[base];
+    uint64 m;
+    uint128 b0;
+    uint128 b2;
+    uint32 delta;
+    uint128 shifted_sum;
 
     if (offset == 0) {
         result[0] = mul[0];
@@ -108,11 +113,11 @@ double_compute_pow5(const uint32 i, uint64 *const result) {
         return;
     }
 
-    const uint64 m = ryu_double_pow5_table[offset];
-    const uint128 b0 = ((uint128)m)*mul[0];
-    const uint128 b2 = ((uint128)m)*mul[1];
-    const uint32 delta = pow5_bits(i) - pow5_bits(base2);
-    const uint128 shifted_sum = (b0 >> delta) + (b2 << (64 - delta))
+    m = ryu_double_pow5_table[offset];
+    b0 = ((uint128)m)*mul[0];
+    b2 = ((uint128)m)*mul[1];
+    delta = (uint32)(pow5_bits((int32)i) - pow5_bits((int32)base2));
+    shifted_sum = (b0 >> delta) + (b2 << (64 - delta))
         + ((ryu_pow5_offsets[i / 16] >> ((i % 16) << 1)) & 3);
 
     result[0] = (uint64)shifted_sum;
@@ -128,6 +133,11 @@ double_compute_inv_pow5(const uint32 i, uint64 *const result) {
     const uint32 base2 = base * RYU_SMALL_POW5_TABLE_SIZE;
     const uint32 offset = base2 - i;
     const uint64 *const mul = ryu_double_pow5_inv_split2[base];
+    uint64 m;
+    uint128 b0;
+    uint128 b2;
+    uint32 delta;
+    uint128 shifted_sum;
 
     if (offset == 0) {
         result[0] = mul[0];
@@ -135,15 +145,15 @@ double_compute_inv_pow5(const uint32 i, uint64 *const result) {
         return;
     }
 
-    const uint64 m = ryu_double_pow5_table[offset];
-    const uint128 b0 = ((uint128)m)*(mul[0] - 1);
-    const uint128 b2 = ((uint128)m)*mul[1];
-    const uint32 delta = pow5_bits(base2) - pow5_bits(i);
+    m = ryu_double_pow5_table[offset];
+    b0 = ((uint128)m)*(mul[0] - 1);
+    b2 = ((uint128)m)*mul[1];
+    delta = (uint32)(pow5_bits((int32)base2) - pow5_bits((int32)i));
 
     assert(i / 16 < sizeof(ryu_pow5_inv_offsets)
                     / sizeof(ryu_pow5_inv_offsets[0]));
 
-    const uint128 shifted_sum = ((b0 >> delta) + (b2 << (64 - delta))) + 1
+    shifted_sum = ((b0 >> delta) + (b2 << (64 - delta))) + 1
         + ((ryu_pow5_inv_offsets[i / 16] >> ((i % 16) << 1)) & 3);
 
     result[0] = (uint64)shifted_sum;
@@ -159,6 +169,13 @@ double_compute_pow5(const uint32 i, uint64 *const result) {
     const uint32 base2 = base * RYU_SMALL_POW5_TABLE_SIZE;
     const uint32 offset = i - base2;
     const uint64 *const mul = ryu_double_pow5_split2[base];
+    uint64 m;
+    uint64 high1;
+    uint64 low1;
+    uint64 high0;
+    uint64 low0;
+    uint64 sum;
+    uint32 delta;
 
     if (offset == 0) {
         result[0] = mul[0];
@@ -166,19 +183,17 @@ double_compute_pow5(const uint32 i, uint64 *const result) {
         return;
     }
 
-    const uint64 m = ryu_double_pow5_table[offset];
-    uint64 high1;
-    const uint64 low1 = umul128(m, mul[1], &high1);
-    uint64 high0;
-    const uint64 low0 = umul128(m, mul[0], &high0);
-    const uint64 sum = high0 + low1;
+    m = ryu_double_pow5_table[offset];
+    low1 = umul128(m, mul[1], &high1);
+    low0 = umul128(m, mul[0], &high0);
+    sum = high0 + low1;
 
     if (sum < high0) {
         high1 += 1; // overflow into high1
     }
 
     // high1 | sum | low0
-    const uint32 delta = pow5_bits(i) - pow5_bits(base2);
+    delta = (uint32)(pow5_bits((int32)i) - pow5_bits((int32)base2));
 
     result[0] = shift_right128(low0, sum, delta)
         + ((ryu_pow5_offsets[i / 16] >> ((i % 16) << 1)) & 3);
@@ -194,6 +209,13 @@ double_compute_inv_pow5(const uint32 i, uint64 *const result) {
     const uint32 base2 = base * RYU_SMALL_POW5_TABLE_SIZE;
     const uint32 offset = base2 - i;
     const uint64 *const mul = ryu_double_pow5_inv_split2[base];
+    uint64 m;
+    uint64 high1;
+    uint64 low1;
+    uint64 high0;
+    uint64 low0;
+    uint64 sum;
+    uint32 delta;
 
     if (offset == 0) {
         result[0] = mul[0];
@@ -201,19 +223,17 @@ double_compute_inv_pow5(const uint32 i, uint64 *const result) {
         return;
     }
 
-    const uint64 m = ryu_double_pow5_table[offset];
-    uint64 high1;
-    const uint64 low1 = umul128(m, mul[1], &high1);
-    uint64 high0;
-    const uint64 low0 = umul128(m, mul[0] - 1, &high0);
-    const uint64 sum = high0 + low1;
+    m = ryu_double_pow5_table[offset];
+    low1 = umul128(m, mul[1], &high1);
+    low0 = umul128(m, mul[0] - 1, &high0);
+    sum = high0 + low1;
 
     if (sum < high0) {
         high1 += 1; // overflow into high1
     }
 
     // high1 | sum | low0
-    const uint32 delta = pow5_bits(base2) - pow5_bits(i);
+    delta = (uint32)(pow5_bits((int32)base2) - pow5_bits((int32)i));
 
     assert(i / 16 < sizeof(ryu_pow5_inv_offsets)
                     / sizeof(ryu_pow5_inv_offsets[0]));

@@ -230,7 +230,7 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
         k = pow5_bits(i) - DOUBLE_POW5_BITCOUNT;
         j = (int32)q - k;
 #if defined(RYU_OPTIMIZE_SIZE)
-        double_compute_pow5(i, pow5);
+        double_compute_pow5((uint32)i, pow5);
         vr = mul_shift_all64(m2, pow5, j, &vp, &vm, mm_shift);
 #else
         vr = mul_shift_all64(m2, double_pow5_split[i], j, &vp, &vm, mm_shift);
