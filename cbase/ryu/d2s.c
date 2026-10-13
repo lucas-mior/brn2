@@ -146,10 +146,10 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
   // Step 3: Convert to a decimal power base using 128-bit arithmetic.
   if (e2 >= 0) {
     // I tried special-casing q == 0, but there was no effect on performance.
-    // This expression is slightly faster than max(0, log10Pow2(e2) - 1).
-    q = log10Pow2(e2) - (uint32)(e2 > 3);
+    // This expression is slightly faster than max(0, log10_pow2(e2) - 1).
+    q = log10_pow2(e2) - (uint32)(e2 > 3);
     e10 = (int32)q;
-    k = DOUBLE_POW5_INV_BITCOUNT + pow5bits((int32)q) - 1;
+    k = DOUBLE_POW5_INV_BITCOUNT + pow5_bits((int32)q) - 1;
     i = -e2 + (int32)q + k;
 #if defined(RYU_OPTIMIZE_SIZE)
     double_computeInvPow5(q, pow5);
@@ -179,11 +179,11 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
       }
     }
   } else {
-    // This expression is slightly faster than max(0, log10Pow5(-e2) - 1).
-    q = log10Pow5(-e2) - (uint32)(-e2 > 1);
+    // This expression is slightly faster than max(0, log10_pow5(-e2) - 1).
+    q = log10_pow5(-e2) - (uint32)(-e2 > 1);
     e10 = (int32)q + e2;
     i = -e2 - (int32)q;
-    k = pow5bits(i) - DOUBLE_POW5_BITCOUNT;
+    k = pow5_bits(i) - DOUBLE_POW5_BITCOUNT;
     j = (int32)q - k;
 #if defined(RYU_OPTIMIZE_SIZE)
     double_computePow5(i, pow5);

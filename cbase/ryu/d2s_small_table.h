@@ -98,7 +98,7 @@ static inline void double_computePow5(const uint32 i, uint64* const result) {
   const uint64 m = DOUBLE_POW5_TABLE[offset];
   const uint128 b0 = ((uint128) m) * mul[0];
   const uint128 b2 = ((uint128) m) * mul[1];
-  const uint32 delta = pow5bits(i) - pow5bits(base2);
+  const uint32 delta = pow5_bits(i) - pow5_bits(base2);
   const uint128 shiftedSum = (b0 >> delta) + (b2 << (64 - delta)) + ((POW5_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
   result[0] = (uint64) shiftedSum;
   result[1] = (uint64) (shiftedSum >> 64);
@@ -118,7 +118,7 @@ static inline void double_computeInvPow5(const uint32 i, uint64* const result) {
   const uint64 m = DOUBLE_POW5_TABLE[offset]; // 5^offset
   const uint128 b0 = ((uint128) m) * (mul[0] - 1);
   const uint128 b2 = ((uint128) m) * mul[1]; // 1/5^base2 * 5^offset = 1/5^(base2-offset) = 1/5^i
-  const uint32 delta = pow5bits(base2) - pow5bits(i);
+  const uint32 delta = pow5_bits(base2) - pow5_bits(i);
   assert(i / 16 < sizeof(POW5_INV_OFFSETS) / sizeof(POW5_INV_OFFSETS[0]));
   const uint128 shiftedSum =
     ((b0 >> delta) + (b2 << (64 - delta))) + 1 + ((POW5_INV_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
@@ -149,7 +149,7 @@ static inline void double_computePow5(const uint32 i, uint64* const result) {
     ++high1; // overflow into high1
   }
   // high1 | sum | low0
-  const uint32 delta = pow5bits(i) - pow5bits(base2);
+  const uint32 delta = pow5_bits(i) - pow5_bits(base2);
   result[0] = shiftright128(low0, sum, delta) + ((POW5_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
   result[1] = shiftright128(sum, high1, delta);
 }
@@ -175,7 +175,7 @@ static inline void double_computeInvPow5(const uint32 i, uint64* const result) {
     ++high1; // overflow into high1
   }
   // high1 | sum | low0
-  const uint32 delta = pow5bits(base2) - pow5bits(i);
+  const uint32 delta = pow5_bits(base2) - pow5_bits(i);
   assert(i / 16 < sizeof(POW5_INV_OFFSETS) / sizeof(POW5_INV_OFFSETS[0]));
   result[0] = shiftright128(low0, sum, delta) + 1 + ((POW5_INV_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
   result[1] = shiftright128(sum, high1, delta);

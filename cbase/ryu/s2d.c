@@ -535,11 +535,11 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     //
     // We use floor(log2(5^e10)) so that we get at least this many bits; better to
     // have an additional bit than to not have enough bits.
-    e2 = floor_log2(m10) + e10 + log2pow5(e10) - (DOUBLE_MANTISSA_BITS + 1);
+    e2 = floor_log2(m10) + e10 + log2_pow5(e10) - (DOUBLE_MANTISSA_BITS + 1);
 
     // We now compute [m10 * 10^e10 / 2^e2] = [m10 * 5^e10 / 2^(e2-e10)].
     // To that end, we use the DOUBLE_POW5_SPLIT table.
-    int j = e2 - e10 - ceil_log2pow5(e10) + DOUBLE_POW5_BITCOUNT;
+    int j = e2 - e10 - ceil_log2_pow5(e10) + DOUBLE_POW5_BITCOUNT;
     assert(j >= 0);
 #if defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
@@ -556,8 +556,8 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     // the result must be exact. Otherwise we use the existing multipleOfPowerOf2 function.
     trailingZeros = e2 < e10 || (e2 - e10 < 64 && multipleOfPowerOf2(m10, e2 - e10));
   } else {
-    e2 = floor_log2(m10) + e10 - ceil_log2pow5(-e10) - (DOUBLE_MANTISSA_BITS + 1);
-    int j = e2 - e10 + ceil_log2pow5(-e10) - 1 + DOUBLE_POW5_INV_BITCOUNT;
+    e2 = floor_log2(m10) + e10 - ceil_log2_pow5(-e10) - (DOUBLE_MANTISSA_BITS + 1);
+    int j = e2 - e10 + ceil_log2_pow5(-e10) - 1 + DOUBLE_POW5_INV_BITCOUNT;
 #if defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
     double_computeInvPow5(-e10, pow5);

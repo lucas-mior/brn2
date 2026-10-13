@@ -188,7 +188,7 @@ static inline uint32 mulShift_mod1e9(const uint64 m, const uint64* const mul, co
 // Convert `digits` to a sequence of decimal digits. Append the digits to the result.
 // The caller has to guarantee that:
 //   10^(olength-1) <= digits < 10^olength
-// e.g., by passing `olength` as `decimalLength9(digits)`.
+// e.g., by passing `olength` as `decimal_length9(digits)`.
 static inline void append_n_digits(const uint32 olength, uint32 digits, char* const result) {
   uint32 i = 0;
   uint32 c;
@@ -229,7 +229,7 @@ static inline void append_n_digits(const uint32 olength, uint32 digits, char* co
 // Convert `digits` to a sequence of decimal digits. Print the first digit, followed by a decimal
 // dot '.' followed by the remaining digits. The caller has to guarantee that:
 //   10^(olength-1) <= digits < 10^olength
-// e.g., by passing `olength` as `decimalLength9(digits)`.
+// e.g., by passing `olength` as `decimal_length9(digits)`.
 static inline void append_d_digits(const uint32 olength, uint32 digits, char* const result) {
   uint32 i = 0;
   uint32 c;
@@ -329,7 +329,7 @@ static inline uint32 pow10BitsForIndex(const uint32 idx) {
 
 static inline uint32 lengthForIndex(const uint32 idx) {
   // +1 for ceil, +16 for mantissa, +8 to round up when dividing by 9
-  return (log10Pow2(16 * (int32) idx) + 1 + 16 + 8) / 9;
+  return (log10_pow2(16 * (int32) idx) + 1 + 16 + 8) / 9;
 }
 
 static inline int copy_special_str_printf(char* const result, const bool sign, const uint64 mantissa) {
@@ -437,7 +437,7 @@ int d2fixed_buffered_n(double d, uint32 precision, char* result) {
         append_nine_digits(digits, result + index);
         index += 9;
       } else if (digits != 0) {
-        const uint32 olength = decimalLength9(digits);
+        const uint32 olength = decimal_length9(digits);
         append_n_digits(olength, digits, result + index);
         index += olength;
         nonzero = true;
@@ -687,7 +687,7 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
         index += 9;
         printedDigits += 9;
       } else if (digits != 0) {
-        availableDigits = decimalLength9(digits);
+        availableDigits = decimal_length9(digits);
         exp = i * 9 + (int32) availableDigits - 1;
         if (availableDigits > precision) {
           break;
@@ -732,7 +732,7 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
         index += 9;
         printedDigits += 9;
       } else if (digits != 0) {
-        availableDigits = decimalLength9(digits);
+        availableDigits = decimal_length9(digits);
         exp = -(i + 1) * 9 + (int32) availableDigits - 1;
         if (availableDigits > precision) {
           break;

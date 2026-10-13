@@ -87,9 +87,9 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
 
   // Step 3: Convert to a decimal power base using 64-bit arithmetic.
   if (e2 >= 0) {
-    q = log10Pow2(e2);
+    q = log10_pow2(e2);
     e10 = (int32)q;
-    k = FLOAT_POW5_INV_BITCOUNT + pow5bits((int32)q) - 1;
+    k = FLOAT_POW5_INV_BITCOUNT + pow5_bits((int32)q) - 1;
     i = -e2 + (int32)q + k;
     vr = mulPow5InvDivPow2(mv, q, i);
     vp = mulPow5InvDivPow2(mp, q, i);
@@ -102,7 +102,7 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
       // We need to know one removed digit even if we are not going to loop below. We could use
       // q = X - 1 above, except that would require 33 bits for the result, and we've found that
       // 32-bit arithmetic is faster even on 64-bit machines.
-      l = FLOAT_POW5_INV_BITCOUNT + pow5bits((int32)(q - 1)) - 1;
+      l = FLOAT_POW5_INV_BITCOUNT + pow5_bits((int32)(q - 1)) - 1;
       lastRemovedDigit = (uint8)(mulPow5InvDivPow2(mv, q - 1, -e2 + (int32)q - 1 + l) % 10);
     }
     if (q <= 9) {
@@ -117,10 +117,10 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
       }
     }
   } else {
-    q = log10Pow5(-e2);
+    q = log10_pow5(-e2);
     e10 = (int32)q + e2;
     i = -e2 - (int32)q;
-    k = pow5bits(i) - FLOAT_POW5_BITCOUNT;
+    k = pow5_bits(i) - FLOAT_POW5_BITCOUNT;
     j = (int32)q - k;
     vr = mulPow5divPow2(mv, (uint32)i, j);
     vp = mulPow5divPow2(mp, (uint32)i, j);
@@ -131,7 +131,7 @@ static inline floating_decimal_32 f2d(const uint32 ieeeMantissa, const uint32 ie
     printf("V+=%u\nV =%u\nV-=%u\n", vp, vr, vm);
 #endif
     if (q != 0 && (vp - 1) / 10 <= vm / 10) {
-      j = (int32)q - 1 - (pow5bits(i + 1) - FLOAT_POW5_BITCOUNT);
+      j = (int32)q - 1 - (pow5_bits(i + 1) - FLOAT_POW5_BITCOUNT);
       lastRemovedDigit = (uint8)(mulPow5divPow2(mv, (uint32)(i + 1), j) % 10);
     }
     if (q <= 1) {
@@ -249,7 +249,7 @@ static inline int to_chars(const floating_decimal_32 v, const bool sign, char* c
   }
 
   output = v.mantissa;
-  olength = (int32)decimalLength9(output);
+  olength = (int32)decimal_length9(output);
 
 #ifdef RYU_DEBUG
   printf("DIGITS=%u\n", v.mantissa);

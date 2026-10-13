@@ -158,11 +158,11 @@ enum Status s2f_n(const char * buffer, const int len, float * result) {
     //
     // We use floor(log2(5^e10)) so that we get at least this many bits; better to
     // have an additional bit than to not have enough bits.
-    e2 = floor_log2(m10) + e10 + log2pow5(e10) - (FLOAT_MANTISSA_BITS + 1);
+    e2 = floor_log2(m10) + e10 + log2_pow5(e10) - (FLOAT_MANTISSA_BITS + 1);
 
     // We now compute [m10 * 10^e10 / 2^e2] = [m10 * 5^e10 / 2^(e2-e10)].
     // To that end, we use the FLOAT_POW5_SPLIT table.
-    int j = e2 - e10 - ceil_log2pow5(e10) + FLOAT_POW5_BITCOUNT;
+    int j = e2 - e10 - ceil_log2_pow5(e10) + FLOAT_POW5_BITCOUNT;
     assert(j >= 0);
     m2 = mulPow5divPow2(m10, e10, j);
 
@@ -173,10 +173,10 @@ enum Status s2f_n(const char * buffer, const int len, float * result) {
     // the result must be exact. Otherwise we use the existing multipleOfPowerOf2 function.
     trailingZeros = e2 < e10 || (e2 - e10 < 32 && multipleOfPowerOf2_32(m10, e2 - e10));
   } else {
-    e2 = floor_log2(m10) + e10 - ceil_log2pow5(-e10) - (FLOAT_MANTISSA_BITS + 1);
+    e2 = floor_log2(m10) + e10 - ceil_log2_pow5(-e10) - (FLOAT_MANTISSA_BITS + 1);
 
     // We now compute [m10 * 10^e10 / 2^e2] = [m10 / (5^(-e10) 2^(e2-e10))].
-    int j = e2 - e10 + ceil_log2pow5(-e10) - 1 + FLOAT_POW5_INV_BITCOUNT;
+    int j = e2 - e10 + ceil_log2_pow5(-e10) - 1 + FLOAT_POW5_INV_BITCOUNT;
     m2 = mulPow5InvDivPow2(m10, -e10, j);
 
     // We also compute if the result is exact, i.e.,
