@@ -514,6 +514,9 @@ prevent analysis.
 This is intentionally conservative source analysis rather than a full C
 compiler. It ignores strings and comments, handles ordinary forward
 declarations, checks other source and header files, and suppresses many
-uncertain cases, including conditional code and macro references. It does not
-expand macros, resolve complex declarators, or prove runtime call counts.
-Inspect findings before changing code.
+uncertain cases, including conditional code and macro references. Conventional
+whole-file guards (`#ifndef NAME` or `#if !defined(NAME)`, followed by
+`#define NAME` and a final matching `#endif`) do not make the guarded code
+conditional for this purpose; nested feature/configuration conditionals still
+do. The checker does not expand macros, resolve complex declarators, or prove
+runtime call counts. Inspect findings before changing code.

@@ -161,6 +161,64 @@ class SingleUseTests(unittest.TestCase):
         """)
         self.assertEqual(self.run_check("a.c"), "")
 
+    def test_whole_file_if_not_defined_guard_is_not_conditional(self):
+        self.write("a.c", """
+            #define BEFORE_GUARD 1
+            #include "a.h"
+            #if !defined(A_C)
+            #define A_C
+            typedef struct Data { int x; } Data;
+            static int helper(void) { return 1; }
+            int run(void) {
+                Data data = { 1 };
+                return helper() + data.x;
+            }
+            #endif /* A_C */
+        """)
+        self.write("a.h", "/* header */\n")
+        output = self.run_check("a.c")
+        self.assertIn("struct Data: used only within one function", output)
+        self.assertIn("function helper: called once", output)
+
+    def test_whole_file_ifndef_guard_is_not_conditional(self):
+        self.write("a.c", """
+            #ifndef A_C
+            #define A_C
+            typedef struct Data { int x; } Data;
+            int run(void) { Data data = { 1 }; return data.x; }
+            #endif
+        """)
+        self.assertIn("struct Data: used only within one function",
+                      self.run_check("a.c"))
+
+    def test_nested_conditional_inside_whole_file_guard_is_still_unsafe(self):
+        self.write("a.c", """
+            #if !defined(A_C)
+            #define A_C
+            typedef struct Maybe { int x; } Maybe;
+            static int helper(void) { return 1; }
+            int run(void) {
+            #if FEATURE
+                Maybe data = { 1 };
+                return helper() + data.x;
+            #endif
+                return 0;
+            }
+            #endif
+        """)
+        self.assertEqual(self.run_check("a.c"), "")
+
+    def test_guard_like_block_with_trailing_code_remains_conditional(self):
+        self.write("a.c", """
+            #if !defined(A_C)
+            #define A_C
+            typedef struct Data { int x; } Data;
+            int run(void) { Data data = { 1 }; return data.x; }
+            #endif
+            int trailing(void) { return 0; }
+        """)
+        self.assertEqual(self.run_check("a.c"), "")
+
     def test_strings_comments_and_identifiers(self):
         self.write("a.c", r'''
             typedef struct Box { int value; } Box;

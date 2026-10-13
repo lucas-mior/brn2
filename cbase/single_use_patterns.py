@@ -29,11 +29,85 @@ COMMENTS_AND_LITERALS = re.compile(
 )
 DIRECTIVE = re.compile(r"^[ \t]*#\s*(\w+)(.*)$")
 INCLUDE_C = re.compile(r'^\s*[<"]([^>"]+\.c)[>"]')
+GUARD_IF = re.compile(
+    r"^\s*!\s*defined\s*(?:\(\s*([A-Za-z_]\w*)\s*\)"
+    r"|([A-Za-z_]\w*))\s*$", re.ASCII)
+GUARD_IFNDEF = re.compile(r"^\s*([A-Za-z_]\w*)\s*$", re.ASCII)
+GUARD_DEFINE = re.compile(r"^\s*([A-Za-z_]\w*)\s*$", re.ASCII)
 CONTROL = {"if", "while", "for", "switch", "sizeof", "_Alignof",
            "_Generic", "return", "typedef", "__attribute__"}
 CACHE_VERSION = 3
 CACHE_ENV = "CBASE_SINGLE_USE_PATTERNS_CACHE"
 DEFAULT_CACHE = ".cache/single_use_patterns.json"
+
+
+def mask_non_newlines(match):
+    return re.sub(r"[^\n]", " ", match.group())
+
+
+def whole_file_guard(original):
+    """Return opening/closing lines for a conventional whole-file guard."""
+    code = COMMENTS_AND_LITERALS.sub(mask_non_newlines, original)
+    lines = code.splitlines()
+    stack = []
+    pairs = {}
+    branched = set()
+    top_level = []
+
+    for number, line in enumerate(lines, 1):
+        match = DIRECTIVE.match(line)
+        if not match:
+            continue
+        kind = match.group(1)
+        if kind in ("if", "ifdef", "ifndef"):
+            if not stack:
+                top_level.append((number, kind, match.group(2)))
+            stack.append(number)
+        elif kind in ("else", "elif"):
+            if stack:
+                branched.add(stack[-1])
+        elif kind == "endif" and stack:
+            opening = stack.pop()
+            pairs[opening] = number
+
+    for opening, kind, argument in top_level:
+        if opening in branched or opening not in pairs:
+            continue
+        macro = None
+        if kind == "ifndef":
+            match = GUARD_IFNDEF.fullmatch(argument)
+            if match:
+                macro = match.group(1)
+        elif kind == "if":
+            match = GUARD_IF.fullmatch(argument)
+            if match:
+                macro = match.group(1) or match.group(2)
+        if macro is None:
+            continue
+
+        closing = pairs[opening]
+        first_body_line = None
+        for number in range(opening + 1, closing):
+            if lines[number - 1].strip():
+                first_body_line = number
+                break
+        if first_body_line is None:
+            continue
+        define = DIRECTIVE.match(lines[first_body_line - 1])
+        if define is None or define.group(1) != "define":
+            continue
+        defined = GUARD_DEFINE.fullmatch(define.group(2))
+        if defined is None or defined.group(1) != macro:
+            continue
+
+        before = lines[:opening - 1]
+        if any(line.strip() and DIRECTIVE.match(line) is None
+               for line in before):
+            continue
+        if any(line.strip() for line in lines[closing:]):
+            continue
+        return opening, closing
+    return None
 
 
 @dataclass(frozen=True)
@@ -76,6 +150,9 @@ class Source:
         self.prototype_indices = set()
         condition_depth = 0
         continued = False
+        guard = whole_file_guard(original)
+        guard_open = guard[0] if guard is not None else -1
+        guard_close = guard[1] if guard is not None else -1
 
         for number, line in enumerate(lines, 1):
             is_continuation = continued
@@ -97,12 +174,11 @@ class Source:
                 continued = False
             if match or is_continuation:
                 directives.add(number)
-            if condition_depth:
+            guard_depth = 1 if guard_open <= number < guard_close else 0
+            if condition_depth > guard_depth:
                 conditional.add(number)
-        def mask(match):
-            return re.sub(r"[^\n]", " ", match.group())
 
-        code = COMMENTS_AND_LITERALS.sub(mask, original)
+        code = COMMENTS_AND_LITERALS.sub(mask_non_newlines, original)
         self.tokens = []
         self.directive_uses = set()
         for number, line in enumerate(code.splitlines(), 1):
