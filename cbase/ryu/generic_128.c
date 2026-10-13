@@ -27,7 +27,7 @@
 #ifdef RYU_DEBUG
 #include <inttypes.h>
 static char* ryu_s(uint128 v) {
-  int len = decimalLength(v);
+  int len = generic_decimal_length(v);
   char* b = (char*) malloc((len + 1) * sizeof(char));
   for (int i = 0; i < len; i++) {
     const uint32 c = (uint32) (v % 10);
@@ -146,16 +146,16 @@ struct floating_decimal_128 generic_binary_to_decimal(
   bool vrIsTrailingZeros = false;
   if (e2 >= 0) {
     // I tried special-casing q == 0, but there was no effect on performance.
-    // This expression is slightly faster than max(0, log10Pow2(e2) - 1).
-    const uint32 q = log10Pow2(e2) - (e2 > 3);
+    // This expression is slightly faster than max(0, generic_log10_pow2(e2) - 1).
+    const uint32 q = generic_log10_pow2(e2) - (e2 > 3);
     e10 = q;
-    const int32 k = FLOAT_128_POW5_INV_BITCOUNT + pow5bits(q) - 1;
+    const int32 k = FLOAT_128_POW5_INV_BITCOUNT + generic_pow5_bits(q) - 1;
     const int32 i = -e2 + q + k;
     uint64 pow5[4];
-    generic_computeInvPow5(q, pow5);
-    vr = mulShift(4 * m2, pow5, i);
-    vp = mulShift(4 * m2 + 2, pow5, i);
-    vm = mulShift(4 * m2 - 1 - mmShift, pow5, i);
+    generic_compute_inv_pow5(q, pow5);
+    vr = generic_mul_shift(4 * m2, pow5, i);
+    vp = generic_mul_shift(4 * m2 + 2, pow5, i);
+    vm = generic_mul_shift(4 * m2 - 1 - mmShift, pow5, i);
 #ifdef RYU_DEBUG
     printf("%s * 2^%d / 10^%d\n", ryu_s(mv), e2, q);
     printf("V+=%s\nV =%s\nV-=%s\n", ryu_s(vp), ryu_s(vr), ryu_s(vm));
@@ -164,29 +164,29 @@ struct floating_decimal_128 generic_binary_to_decimal(
     if (q <= 55) {
       // Only one of mp, mv, and mm can be a multiple of 5, if any.
       if (mv % 5 == 0) {
-        vrIsTrailingZeros = multipleOfPowerOf5(mv, q - 1);
+        vrIsTrailingZeros = generic_multiple_of_power_of5(mv, q - 1);
       } else if (acceptBounds) {
-        // Same as min(e2 + (~mm & 1), pow5Factor(mm)) >= q
-        // <=> e2 + (~mm & 1) >= q && pow5Factor(mm) >= q
-        // <=> true && pow5Factor(mm) >= q, since e2 >= q.
-        vmIsTrailingZeros = multipleOfPowerOf5(mv - 1 - mmShift, q);
+        // Same as min(e2 + (~mm & 1), generic_pow5_factor(mm)) >= q
+        // <=> e2 + (~mm & 1) >= q && generic_pow5_factor(mm) >= q
+        // <=> true && generic_pow5_factor(mm) >= q, since e2 >= q.
+        vmIsTrailingZeros = generic_multiple_of_power_of5(mv - 1 - mmShift, q);
       } else {
-        // Same as min(e2 + 1, pow5Factor(mp)) >= q.
-        vp -= multipleOfPowerOf5(mv + 2, q);
+        // Same as min(e2 + 1, generic_pow5_factor(mp)) >= q.
+        vp -= generic_multiple_of_power_of5(mv + 2, q);
       }
     }
   } else {
-    // This expression is slightly faster than max(0, log10Pow5(-e2) - 1).
-    const uint32 q = log10Pow5(-e2) - (-e2 > 1);
+    // This expression is slightly faster than max(0, generic_log10_pow5(-e2) - 1).
+    const uint32 q = generic_log10_pow5(-e2) - (-e2 > 1);
     e10 = q + e2;
     const int32 i = -e2 - q;
-    const int32 k = pow5bits(i) - FLOAT_128_POW5_BITCOUNT;
+    const int32 k = generic_pow5_bits(i) - FLOAT_128_POW5_BITCOUNT;
     const int32 j = q - k;
     uint64 pow5[4];
-    generic_computePow5(i, pow5);
-    vr = mulShift(4 * m2, pow5, j);
-    vp = mulShift(4 * m2 + 2, pow5, j);
-    vm = mulShift(4 * m2 - 1 - mmShift, pow5, j);
+    generic_compute_pow5(i, pow5);
+    vr = generic_mul_shift(4 * m2, pow5, j);
+    vp = generic_mul_shift(4 * m2 + 2, pow5, j);
+    vm = generic_mul_shift(4 * m2 - 1 - mmShift, pow5, j);
 #ifdef RYU_DEBUG
     printf("%s * 5^%d / 10^%d\n", ryu_s(mv), -e2, q);
     printf("%d %d %d %d\n", q, i, k, j);
@@ -204,12 +204,12 @@ struct floating_decimal_128 generic_binary_to_decimal(
         --vp;
       }
     } else if (q < 127) { // TODO(ulfjack): Use a tighter bound here.
-      // We need to compute min(ntz(mv), pow5Factor(mv) - e2) >= q-1
-      // <=> ntz(mv) >= q-1  &&  pow5Factor(mv) - e2 >= q-1
+      // We need to compute min(ntz(mv), generic_pow5_factor(mv) - e2) >= q-1
+      // <=> ntz(mv) >= q-1  &&  generic_pow5_factor(mv) - e2 >= q-1
       // <=> ntz(mv) >= q-1    (e2 is negative and -e2 >= q)
       // <=> (mv & ((1 << (q-1)) - 1)) == 0
       // We also need to make sure that the left shift does not overflow.
-      vrIsTrailingZeros = multipleOfPowerOf2(mv, q - 1);
+      vrIsTrailingZeros = generic_multiple_of_power_of2(mv, q - 1);
 #ifdef RYU_DEBUG
       printf("vr is trailing zeros=%s\n", vrIsTrailingZeros ? "true" : "false");
 #endif
@@ -300,7 +300,7 @@ int generic_to_chars(const struct floating_decimal_128 v, char* const result) {
   }
 
   uint128 output = v.mantissa;
-  const uint32 olength = decimalLength(output);
+  const uint32 olength = generic_decimal_length(output);
 
 #ifdef RYU_DEBUG
   printf("DIGITS=%s\n", ryu_s(v.mantissa));
@@ -331,7 +331,7 @@ int generic_to_chars(const struct floating_decimal_128 v, char* const result) {
     exp = -exp;
   }
 
-  uint32 elength = decimalLength(exp);
+  uint32 elength = generic_decimal_length(exp);
   for (uint32 i = 0; i < elength; ++i) {
     const uint32 c = exp % 10;
     exp /= 10;
