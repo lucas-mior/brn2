@@ -1126,6 +1126,134 @@ s2d_n(const char *buffer, int32 len, double *result) {
     return ryu_decimal_finish(buffer, parsed_len, parts, result);
 }
 
+static bool
+ryu_s2d_is_digit(char c) {
+    return (c >= '0') && (c <= '9');
+}
+
+static bool
+ryu_s2d_is_alpha(char c) {
+    return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'));
+}
+
+static bool
+ryu_s2d_is_token_char(char c) {
+    return ryu_s2d_is_digit(c) || ryu_s2d_is_alpha(c) || (c == '.')
+           || (c == '+') || (c == '-');
+}
+
+static bool
+ryu_fast_nondecimal_start(const char *cursor) {
+    return (cursor[0] == 'i') || (cursor[0] == 'I') || (cursor[0] == 'n')
+           || (cursor[0] == 'N')
+           || ((cursor[0] == '0')
+               && ((cursor[1] == 'x') || (cursor[1] == 'X')));
+}
+
+static int32
+ryu_fast_nondecimal_token_len(const char *buffer, const char *cursor) {
+    const char *end;
+
+    if (!ryu_fast_nondecimal_start(cursor)) {
+        return 0;
+    }
+
+    // Determine only the token length. The next byte may be the start of
+    // another TSV cell, so strlen() would scan the entire file tail.
+    end = cursor;
+    while (ryu_s2d_is_token_char(*end)) {
+        end += 1;
+    }
+    if (end - buffer > INT32_MAX) {
+        return -INPUT_TOO_LONG;
+    }
+    return (int32)(end - buffer);
+}
+
+static bool
+ryu_fast_scan_mantissa(RyuDecimalParts *parts, const char *buffer,
+                       const char **cursor) {
+    bool has_digit = false;
+
+    for (;;) {
+        char c = **cursor;
+
+        if (ryu_s2d_is_digit(c)) {
+            has_digit = true;
+            if ((parts->significant_digits != 0) || (c != '0')) {
+                parts->significant_digits += 1;
+            }
+            if (parts->significant_digits > 17) {
+                parts->extended = true;
+            } else {
+                parts->m10 = 10*parts->m10 + (uint64)(c - '0');
+                if (parts->m10 != 0) {
+                    parts->m10digits += 1;
+                }
+            }
+            *cursor += 1;
+            continue;
+        }
+        if ((c == '.') && (parts->dot_index < 0)) {
+            parts->dot_index = (int32)(*cursor - buffer);
+            *cursor += 1;
+            continue;
+        }
+        break;
+    }
+    return has_digit;
+}
+
+static void
+ryu_fast_scan_exponent(RyuDecimalParts *parts, const char *buffer,
+                       const char **cursor) {
+    const char *digits;
+
+    if ((**cursor != 'e') && (**cursor != 'E')) {
+        return;
+    }
+
+    digits = *cursor + 1;
+    if ((*digits == '-') || (*digits == '+')) {
+        digits += 1;
+    }
+    if (!ryu_s2d_is_digit(*digits)) {
+        return;
+    }
+
+    parts->e_index = (int32)(*cursor - buffer);
+    *cursor += 1;
+    if ((**cursor == '-') || (**cursor == '+')) {
+        parts->signed_e = **cursor == '-';
+        *cursor += 1;
+    }
+    while (ryu_s2d_is_digit(**cursor)) {
+        int32 digit = **cursor - '0';
+
+        if (parts->parsed_exponent < 1000000000000ll) {
+            parts->parsed_exponent = 10*parts->parsed_exponent + digit;
+            if (parts->parsed_exponent > 1000000000000ll) {
+                parts->parsed_exponent = 1000000000000ll;
+            }
+        }
+        *cursor += 1;
+    }
+    return;
+}
+
+static int32
+ryu_cstring_len_i32(const char *buffer) {
+    int64 len = 0;
+
+    while (buffer[len] != '\0') {
+        if (len >= INT32_MAX) {
+            return -INPUT_TOO_LONG;
+        }
+        len += 1;
+    }
+    return (int32)len;
+}
+
 // Parses a nul-terminated floating-point prefix without length checks in
 // the ordinary decimal scanner. Exotic spellings use the bounded parser.
 int32
@@ -1135,93 +1263,29 @@ s2d_fast(const char *buffer, double *result) {
         .dot_index = -1,
         .e_index = -1,
     };
-    bool has_digit = false;
+    int32 token_len;
 
     if (*cursor == '\0') {
         return -INPUT_TOO_SHORT;
     }
-    if (*cursor == '-' || *cursor == '+') {
+    if ((*cursor == '-') || (*cursor == '+')) {
         parts.signed_m = *cursor == '-';
         cursor += 1;
     }
 
-    if ((*cursor == 'i') || (*cursor == 'I') || (*cursor == 'n')
-        || (*cursor == 'N')
-        || (*cursor == '0' && (cursor[1] == 'x' || cursor[1] == 'X'))) {
-        // Determine only the token length. The next byte may be the start
-        // of another TSV cell, so strlen() would scan the entire file tail.
-        const char *end = cursor;
-
-        while ((*end >= '0' && *end <= '9')
-               || (*end >= 'a' && *end <= 'z')
-               || (*end >= 'A' && *end <= 'Z')
-               || *end == '.' || *end == '+' || *end == '-') {
-            end += 1;
+    token_len = ryu_fast_nondecimal_token_len(buffer, cursor);
+    if (token_len != 0) {
+        if (token_len < 0) {
+            return token_len;
         }
-        if (end - buffer > INT32_MAX) {
-            return -INPUT_TOO_LONG;
-        }
-        return s2d_n(buffer, (int32)(end - buffer), result);
+        return s2d_n(buffer, token_len, result);
     }
 
-    for (;;) {
-        char c = *cursor;
-
-        if (c >= '0' && c <= '9') {
-            has_digit = true;
-            if (parts.significant_digits != 0 || c != '0') {
-                parts.significant_digits += 1;
-            }
-            if (parts.significant_digits > 17) {
-                parts.extended = true;
-            } else {
-                parts.m10 = 10*parts.m10 + (uint64)(c - '0');
-                if (parts.m10 != 0) {
-                    parts.m10digits += 1;
-                }
-            }
-            cursor += 1;
-            continue;
-        }
-        if (c == '.' && parts.dot_index < 0) {
-            parts.dot_index = (int32)(cursor - buffer);
-            cursor += 1;
-            continue;
-        }
-        break;
-    }
-
-    if (!has_digit) {
+    if (!ryu_fast_scan_mantissa(&parts, buffer, &cursor)) {
         return -MALFORMED_INPUT;
     }
+    ryu_fast_scan_exponent(&parts, buffer, &cursor);
 
-    if (*cursor == 'e' || *cursor == 'E') {
-        const char *digits = cursor + 1;
-
-        if (*digits == '-' || *digits == '+') {
-            digits += 1;
-        }
-        if (*digits >= '0' && *digits <= '9') {
-            parts.e_index = (int32)(cursor - buffer);
-            cursor += 1;
-            if (*cursor == '-' || *cursor == '+') {
-                parts.signed_e = *cursor == '-';
-                cursor += 1;
-            }
-            while (*cursor >= '0' && *cursor <= '9') {
-                int32 digit = *cursor - '0';
-
-                if (parts.parsed_exponent < 1000000000000ll) {
-                    parts.parsed_exponent =
-                        10*parts.parsed_exponent + digit;
-                    if (parts.parsed_exponent > 1000000000000ll) {
-                        parts.parsed_exponent = 1000000000000ll;
-                    }
-                }
-                cursor += 1;
-            }
-        }
-    }
     if (cursor - buffer > INT32_MAX) {
         return -INPUT_TOO_LONG;
     }
@@ -1230,11 +1294,11 @@ s2d_fast(const char *buffer, double *result) {
 
 int32
 s2d(const char *buffer, double *result) {
-    size_t len = strlen(buffer);
+    int32 len = ryu_cstring_len_i32(buffer);
 
-    if (len > INT32_MAX) {
-        return -INPUT_TOO_LONG;
+    if (len < 0) {
+        return len;
     }
-    return s2d_n(buffer, (int32)len, result);
+    return s2d_n(buffer, len, result);
 }
 #endif /* RYU_S2D_C */
