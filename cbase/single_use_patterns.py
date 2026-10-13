@@ -15,6 +15,7 @@ import os
 from fnmatch import fnmatch
 from pathlib import Path
 import re
+import subprocess
 import sys
 import tempfile
 
@@ -30,8 +31,7 @@ DIRECTIVE = re.compile(r"^[ \t]*#\s*(\w+)(.*)$")
 INCLUDE_C = re.compile(r'^\s*[<"]([^>"]+\.c)[>"]')
 CONTROL = {"if", "while", "for", "switch", "sizeof", "_Alignof",
            "_Generic", "return", "typedef", "__attribute__"}
-SKIP_DIRS = {".git", ".cache", "__pycache__", "bin", "build"}
-CACHE_VERSION = 2
+CACHE_VERSION = 3
 CACHE_ENV = "CBASE_SINGLE_USE_PATTERNS_CACHE"
 DEFAULT_CACHE = ".cache/single_use_patterns.json"
 
@@ -289,27 +289,117 @@ class Source:
                       tokens[struct_pos + start].line in self.conditional)
 
 
-def files_to_check(inputs, exclusions):
+
+def excluded_dir(path, directory_names, directory_paths):
+    """Exclude whole subtrees, whether the input is a file or directory."""
+    if any(part in directory_names for part in path.parts):
+        return True
+    return any(path == excluded or excluded in path.parents
+               for excluded in directory_paths)
+
+
+def directory_exclusions(values):
+    """A simple name matches anywhere; a path is relative to the cwd."""
+    names = set()
+    paths = set()
+    for value in values:
+        cleaned = value.rstrip("/\\")
+        if not cleaned or cleaned in (".", ".."):
+            raise ValueError(f"invalid --exclude-dir value: {value!r}")
+        path = Path(cleaned)
+        if path.is_absolute() or "/" in cleaned or len(path.parts) > 1:
+            paths.add(path.resolve())
+        else:
+            names.add(path.name)
+    return names, paths
+
+
+def excluded_file(path, exclusions):
+    return any(fnmatch(path.as_posix(), glob) or fnmatch(path.name, glob)
+               for glob in exclusions)
+
+
+def files_to_check(inputs, exclusions, excluded_directories=()):
+    """Collect only candidate C files selected by the caller."""
+    names, directories = directory_exclusions(excluded_directories)
     found = set()
     for path_str in inputs:
         path = Path(path_str)
-        if path.is_file():
-            if path.suffix.lower() in (".c", ".h"):
-                found.add(path.resolve())
-        elif path.is_dir():
-            for candidate in path.rglob("*"):
-                if any(part in SKIP_DIRS for part in candidate.parts):
-                    continue
-                if (candidate.is_file() and
-                        candidate.suffix.lower() in (".c", ".h")):
-                    found.add(candidate.resolve())
-        else:
+        if not path.exists():
             raise ValueError(f"not a C file or directory: {path}")
-    return sorted(path for path in found
-                  if not any(fnmatch(path.as_posix(), glob) or
-                             fnmatch(path.name, glob) for glob in exclusions))
+        path = path.resolve()
+        if excluded_dir(path, names, directories):
+            continue
+        if path.is_file():
+            if (path.suffix.lower() in (".c", ".h") and
+                    not excluded_file(path, exclusions)):
+                found.add(path)
+            continue
+        if not path.is_dir():
+            raise ValueError(f"not a C file or directory: {path}")
+
+        for root, dirnames, filenames in os.walk(path):
+            root_path = Path(root).resolve()
+            dirnames[:] = [
+                name for name in dirnames
+                if not excluded_dir((root_path / name).resolve(),
+                                    names, directories)
+            ]
+            for filename in filenames:
+                candidate = (root_path / filename).resolve()
+                if (candidate.suffix.lower() in (".c", ".h") and
+                        not excluded_file(candidate, exclusions)):
+                    found.add(candidate)
+    return sorted(found)
 
 
+def cwd_reference_files():
+    """Return non-ignored C sources/headers below the current directory."""
+    root = Path.cwd().resolve()
+    temporary = None
+    try:
+        try:
+            probe = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "--show-toplevel"],
+                capture_output=True, check=False)
+        except OSError as error:
+            raise ValueError(f"Git is required for ignore filtering: {error}")
+
+        if probe.returncode == 0:
+            command = ["git", "-C", str(root)]
+        else:
+            temporary = tempfile.TemporaryDirectory(
+                prefix="single-use-git-")
+            created = subprocess.run(
+                ["git", "init", "--quiet", "--bare", temporary.name],
+                capture_output=True, check=False)
+            if created.returncode != 0:
+                message = os.fsdecode(created.stderr).strip()
+                raise ValueError(
+                    f"cannot initialize temporary Git ignores: {message}")
+            command = ["git", "-C", str(root),
+                       f"--git-dir={temporary.name}",
+                       f"--work-tree={root}"]
+
+        result = subprocess.run(
+            command + ["ls-files", "--cached", "--others",
+                       "--exclude-standard", "-z", "--", "."],
+            capture_output=True, check=False)
+        if result.returncode != 0:
+            message = os.fsdecode(result.stderr).strip()
+            raise ValueError(f"Git ignore filtering failed: {message}")
+
+        found = set()
+        for item in result.stdout.split(b"\0"):
+            if not item:
+                continue
+            path = (root / os.fsdecode(item)).resolve()
+            if path.suffix.lower() in (".c", ".h") and path.is_file():
+                found.add(path)
+        return sorted(found)
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
 
 def file_signature(path):
     """Use inode and nanosecond metadata without reading the source file."""
@@ -356,18 +446,20 @@ def write_cache(path, fingerprint, cache):
                 pass
 
 
-def cached_findings(paths, global_functions, cache_path):
-    # A cached final result is only valid for this exact file set and option.
-    # All file signatures must match, including headers and unrelated sources:
-    # changing a different file can invalidate a single-use finding.
+
+def cached_findings(candidate_paths, reference_paths, global_functions,
+                    cache_path):
+    """Analyze candidates against the complete reference-file universe."""
     fingerprint = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     cache = read_cache(cache_path, fingerprint)
     if not cache:
         cache = {"files": {}, "runs": {}}
     entries = cache["files"]
     runs = cache["runs"]
-    signatures = {str(path): file_signature(path) for path in paths}
-    run_options = [list(signatures), global_functions]
+    all_paths = sorted(set(candidate_paths) | set(reference_paths))
+    signatures = {str(path): file_signature(path) for path in all_paths}
+    run_options = [[str(path) for path in candidate_paths],
+                   [str(path) for path in reference_paths], global_functions]
     run_key = hashlib.sha256(json.dumps(run_options).encode()).hexdigest()
     run = runs.get(run_key)
     if (isinstance(run, dict) and run.get("signatures") == signatures and
@@ -387,8 +479,8 @@ def cached_findings(paths, global_functions, cache_path):
             pass
 
     dirty = False
-    sources = []
-    for path in paths:
+    sources = {}
+    for path in all_paths:
         key = str(path)
         before = signatures[key]
         entry = entries.get(key)
@@ -409,11 +501,12 @@ def cached_findings(paths, global_functions, cache_path):
             elif key in entries:
                 del entries[key]
                 dirty = True
-        sources.append(source)
+        sources[path] = source
 
-    findings = analyze(sources, global_functions)
-    # Do not persist results if any input changed while we were checking it.
-    if all(file_signature(path) == signatures[str(path)] for path in paths):
+    candidate_sources = [sources[path] for path in candidate_paths]
+    findings = analyze(candidate_sources, list(sources.values()),
+                       global_functions, reference_paths)
+    if all(file_signature(path) == signatures[str(path)] for path in all_paths):
         runs[run_key] = {
             "signatures": signatures,
             "findings": [[str(path), line, kind, name, explanation]
@@ -423,7 +516,6 @@ def cached_findings(paths, global_functions, cache_path):
     if dirty:
         write_cache(cache_path, fingerprint, cache)
     return findings
-
 
 def clear_type_use(source, index, struct):
     """Require C type syntax; a coincidentally named value is not a use."""
@@ -461,21 +553,31 @@ def clear_type_use(source, index, struct):
     return False
 
 
-def analyze(sources, global_functions=False):
+def analyze(candidates, sources, global_functions=False,
+            reference_paths=None):
     uses = defaultdict(list)
     for source in sources:
         for index, token in enumerate(source.tokens):
             if IDENTIFIER.fullmatch(token.value):
                 uses[token.value].append((source, index))
 
-    included_c = set()
-    directives = set()
+    if reference_paths is None:
+        reference_paths = {source.path for source in sources}
+    else:
+        reference_paths = set(reference_paths)
+
+    reference_included_c = set()
+    reference_directives = set()
     for source in sources:
-        included_c.update(source.included_c)
-        directives.update(source.directive_uses)
+        if source.path not in reference_paths:
+            continue
+        reference_included_c.update(source.included_c)
+        reference_directives.update(source.directive_uses)
 
     findings = []
-    for source in sources:
+    for source in candidates:
+        included_c = reference_included_c | source.included_c
+        directives = reference_directives | source.directive_uses
         if source.path.suffix != ".c" or source.path.name in included_c:
             continue
         for function in source.functions:
@@ -487,6 +589,8 @@ def analyze(sources, global_functions=False):
             seen_calls = []
             valid = True
             for other, index in uses[function.name]:
+                if other is not source and other.path not in reference_paths:
+                    continue
                 if other is not source:
                     # Even a mention in a header might be a macro or an API.
                     if other.path.suffix == ".h" or not function.is_static:
@@ -544,6 +648,8 @@ def analyze(sources, global_functions=False):
             found_use = False
             for name in struct.names:
                 for other, index in uses[name]:
+                    if other is not source and other.path not in reference_paths:
+                        continue
                     if other is source and struct.start <= index < struct.end:
                         continue
                     if other is not source:
@@ -573,22 +679,31 @@ def analyze(sources, global_functions=False):
     return sorted(findings, key=lambda row: (str(row[0]), row[1], row[2]))
 
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Find single-use functions and function-local struct types "
-                    "in C source files. Non-static functions are skipped by "
-                    "default because external users cannot be ruled out.",
-        epilog="Conservative limitations: does not resolve macro expansions, "
+                    "in selected C source files. Non-static functions are "
+                    "skipped by default because external users cannot be "
+                    "ruled out.",
+        epilog="Candidate findings come only from files/directories supplied "
+               "on the command line. For cross-file validation, every .c and "
+               ".h file below the current working directory is checked. "
+               "Conservative limitations: does not resolve macro expansions, "
                "function pointers, conditional compilation, or complex "
-               "declarators. Scan the whole project (including headers) to "
-               "reduce false positives. Findings are suggestions, not proof.")
+               "declarators. Findings are suggestions, not proof.")
     parser.add_argument("paths", nargs="*",
-                        help="C files/directories (default: .)")
+                        help="C files/directories to inspect; no default paths")
     parser.add_argument("--file-list", metavar="PATH",
-                        help="newline-separated list of files to inspect")
+                        help="newline-separated list of candidate paths")
     parser.add_argument("--exclude", action="append", default=[],
                         metavar="GLOB",
-                        help="exclude matching paths or basenames")
+                        help="exclude matching candidate paths or basenames")
+    parser.add_argument("--exclude-dir", "--ignore-dir", action="append",
+                        default=[], metavar="DIR",
+                        help="skip a candidate directory tree (repeatable); a "
+                             "bare name matches anywhere and a path is "
+                             "relative to the current directory")
     parser.add_argument("--no-cache", action="store_true",
                         help="parse all sources without reading or writing "
                              "the cache")
@@ -600,14 +715,21 @@ def main():
     try:
         if args.file_list:
             paths += Path(args.file_list).read_text().splitlines()
-        source_paths = files_to_check(paths or ["."], args.exclude)
+        candidate_paths = files_to_check(paths, args.exclude,
+                                         args.exclude_dir)
+        if not candidate_paths:
+            return 0
+        reference_paths = cwd_reference_files()
         if args.no_cache:
-            sources = [Source(path) for path in source_paths]
-            findings = analyze(sources, args.include_global)
+            all_paths = sorted(set(candidate_paths) | set(reference_paths))
+            sources = {path: Source(path) for path in all_paths}
+            candidates = [sources[path] for path in candidate_paths]
+            findings = analyze(candidates, list(sources.values()),
+                               args.include_global, reference_paths)
         else:
             cache_path = Path(os.environ.get(CACHE_ENV, DEFAULT_CACHE))
-            findings = cached_findings(source_paths, args.include_global,
-                                       cache_path)
+            findings = cached_findings(candidate_paths, reference_paths,
+                                       args.include_global, cache_path)
     except (OSError, ValueError) as error:
         parser.exit(2, f"{error}\n")
     for path, line, kind, name, explanation in findings:

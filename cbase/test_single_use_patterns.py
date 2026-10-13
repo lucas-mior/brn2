@@ -78,7 +78,7 @@ class SingleUseTests(unittest.TestCase):
             typedef struct Shared Shared;
             int public_function(void);
         """)
-        self.assertEqual(self.run_check(".", "--include-global"), "")
+        self.assertEqual(self.run_check("a.c", "--include-global"), "")
 
     def test_static_name_in_unrelated_file(self):
         self.write("a.c", """
@@ -100,7 +100,7 @@ class SingleUseTests(unittest.TestCase):
         self.write("b.h", """
             static inline int other(void) { return helper(); }
         """)
-        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check("a.c"), "")
 
     def test_unrelated_identifier_does_not_prove_struct_use(self):
         self.write("a.c", """
@@ -159,7 +159,7 @@ class SingleUseTests(unittest.TestCase):
                 return 0;
             }
         """)
-        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check("a.c"), "")
 
     def test_strings_comments_and_identifiers(self):
         self.write("a.c", r'''
@@ -243,7 +243,7 @@ class SingleUseTests(unittest.TestCase):
             int run(void) { return helper(); }
         """)
         self.write("b.h", "#define USE() \\\n helper()\n")
-        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check("a.c"), "")
 
     def test_file_list_and_exclude(self):
         a = self.write("a.c", """
@@ -260,6 +260,194 @@ class SingleUseTests(unittest.TestCase):
         self.assertNotIn("function other:", output)
         self.assertEqual(self.run_check("--exclude", "a.c", a), "")
 
+    def test_no_paths_means_no_candidates(self):
+        self.write("a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.assertEqual(self.run_check(), "")
+        self.assertFalse((self.directory / ".cache").exists())
+
+    def test_gitignore_is_not_applied(self):
+        self.write(".gitignore", "generated/\n*.tmp.c\n")
+        ignored = self.write("generated/ignored.c", """
+            static int discarded(void) { return 1; }
+            int run(void) { return discarded(); }
+        """)
+        temporary = self.write("other.tmp.c", """
+            static int skipped(void) { return 1; }
+            int run(void) { return skipped(); }
+        """)
+        self.assertIn("function discarded:", self.run_check(ignored))
+        self.assertIn("function skipped:", self.run_check(temporary))
+        output = self.run_check(".")
+        self.assertIn("function discarded:", output)
+        self.assertIn("function skipped:", output)
+
+    def test_cbase_is_not_excluded_by_default(self):
+        source = self.write("cbase/detection.c", """
+            static int candidate(void) { return 1; }
+            int run(void) { return candidate(); }
+        """)
+        self.assertIn("function candidate:", self.run_check(source))
+        self.assertIn("function candidate:", self.run_check("cbase"))
+
+    def test_gitignored_header_is_not_a_reference(self):
+        source = self.write("src/a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.write(".gitignore", "generated/\n")
+        self.write("generated/use.h", "#define USE_HELPER() helper()\n")
+        self.assertIn("function helper:", self.run_check(source))
+
+    def test_gitignored_c_file_is_not_a_reference(self):
+        source = self.write("src/a.c", """
+            int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.write(".gitignore", "generated/\n")
+        ignored = self.write("generated/use.c", """
+            int helper(void);
+            int other(void) { return helper(); }
+        """)
+        output = self.run_check("--include-global", source)
+        self.assertIn("function helper:", output)
+        # Explicit candidate selection remains independent of .gitignore.
+        self.assertEqual(
+            self.run_check("--include-global", source, ignored), output)
+
+    def test_gitignore_negation_keeps_reference(self):
+        source = self.write("src/a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.write(".gitignore", "generated/*.h\n!generated/keep.h\n")
+        self.write("generated/drop.h", "#define DROP() helper()\n")
+        keep = self.write("generated/keep.h", "#define KEEP() helper()\n")
+        self.assertEqual(self.run_check(source), "")
+        keep.unlink()
+        self.assertIn("function helper:", self.run_check(source))
+
+    def test_gitignore_change_invalidates_reference_cache(self):
+        source = self.write("src/a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        ignore = self.write(".gitignore", "generated/\n")
+        self.write("generated/use.h", "#define USE_HELPER() helper()\n")
+        expected = self.run_check(source)
+        self.assertIn("function helper:", expected)
+        self.assertEqual(self.run_check(source), expected)
+
+        ignore.write_text("# no ignores\n", encoding="utf-8")
+        self.assertEqual(self.run_check(source), "")
+        ignore.write_text("generated/\n", encoding="utf-8")
+        self.assertEqual(self.run_check(source), expected)
+
+    def test_unsupplied_header_is_still_a_reference(self):
+        source = self.write("src/a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.write("include/extra.h", "#define EXTRA() helper()\n")
+        self.assertEqual(self.run_check(source), "")
+        self.assertEqual(self.run_check("--exclude-dir", "include", source),
+                         "")
+
+    def test_unsupplied_c_file_is_still_a_reference(self):
+        source = self.write("src/a.c", """
+            int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        self.write("other/use.c", """
+            int helper(void);
+            int other(void) { return helper(); }
+        """)
+        self.assertEqual(self.run_check("--include-global", source), "")
+
+    def test_unsupplied_file_can_disqualify_struct(self):
+        source = self.write("src/a.c", """
+            typedef struct Data { int x; } Data;
+            int run(void) { Data data = { 1 }; return data.x; }
+        """)
+        self.write("other/use.c", """
+            typedef struct Data Data;
+            Data *shared;
+        """)
+        self.assertEqual(self.run_check(source), "")
+
+    def test_exclude_dir_name_relative_and_absolute_paths(self):
+        self.write("main.c", """
+            static int included(void) { return 1; }
+            int run(void) { return included(); }
+        """)
+        self.write("build/skip.c", """
+            static int in_build(void) { return 1; }
+            int run(void) { return in_build(); }
+        """)
+        self.write("src/vendor/skip.c", """
+            static int in_vendor(void) { return 1; }
+            int run(void) { return in_vendor(); }
+        """)
+        self.write("src/extras/skip.c", """
+            static int in_extras(void) { return 1; }
+            int run(void) { return in_extras(); }
+        """)
+        all_output = self.run_check(".")
+        self.assertIn("function in_build:", all_output)
+        self.assertIn("function in_vendor:", all_output)
+        self.assertIn("function in_extras:", all_output)
+        output = self.run_check("--exclude-dir", "build", "--exclude-dir",
+                                "src/vendor", "--ignore-dir",
+                                self.directory / "src/extras", ".")
+        self.assertIn("function included:", output)
+        self.assertNotIn("in_build", output)
+        self.assertNotIn("in_vendor", output)
+        self.assertNotIn("in_extras", output)
+        self.assertEqual(output, self.run_check("--no-cache", "--exclude-dir",
+                                                "build", "--exclude-dir",
+                                                "src/vendor", "--ignore-dir",
+                                                self.directory / "src/extras",
+                                                "."))
+
+    def test_exclude_dir_file_list_and_cache_file_set(self):
+        main = self.write("a.c", """
+            static int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        other = self.write("generated/b.c", """
+            static int extra(void) { return 1; }
+            int run(void) { return extra(); }
+        """)
+        list_path = self.write("sources.txt", f"{main}\n{other}\n")
+        first = self.run_check("--file-list", list_path)
+        self.assertIn("function extra:", first)
+        self.assertEqual(len(self.cache_data()["files"]), 2)
+        filtered = self.run_check("--file-list", list_path,
+                                  "--exclude-dir", "generated")
+        self.assertIn("function helper:", filtered)
+        self.assertNotIn("extra", filtered)
+        self.assertEqual(self.run_check("--file-list", list_path), first)
+        # Exclusions must be reflected in the final-result cache's run key.
+        self.assertEqual(len(self.cache_data()["runs"]), 2)
+
+    def test_new_reference_file_invalidates_cached_result(self):
+        source = self.write("a.c", """
+            int helper(void) { return 1; }
+            int run(void) { return helper(); }
+        """)
+        expected = self.run_check("--include-global", source)
+        self.assertIn("function helper:", expected)
+
+        other = self.write("other/use.c", """
+            int helper(void);
+            int use(void) { return helper(); }
+        """)
+        self.assertEqual(self.run_check("--include-global", source), "")
+        other.unlink()
+        self.assertEqual(self.run_check("--include-global", source), expected)
+
     def test_cache_reuses_unchanged_results_without_writing(self):
         self.write("a.c", """
             static int helper(void) { return 1; }
@@ -268,7 +456,7 @@ class SingleUseTests(unittest.TestCase):
         output = self.run_check(".")
         path = self.directory / ".cache/single_use_patterns.json"
         first = self.cache_data()
-        self.assertEqual(first["version"], 2)
+        self.assertEqual(first["version"], 3)
         self.assertEqual(len(first["files"]), 1)
         self.assertEqual(len(first["runs"]), 1)
         before = path.stat().st_mtime_ns
@@ -283,15 +471,15 @@ class SingleUseTests(unittest.TestCase):
             static int helper(void) { return 1; }
             int run(void) { return helper(); }
         """)
-        self.assertIn("function helper:", self.run_check("."))
+        self.assertIn("function helper:", self.run_check(source))
 
         # A new header or an edited header can suppress a finding even though
         # the defining C file did not change.
         header = self.write("b.h", "#define EXTRA() helper()\n")
-        self.assertEqual(self.run_check("."), "")
-        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check(source), "")
+        self.assertEqual(self.run_check(source), "")
         header.write_text("/* no reference */\n", encoding="utf-8")
-        self.assertIn("function helper:", self.run_check("."))
+        self.assertIn("function helper:", self.run_check(source))
 
         # Also detect an edit with unchanged size and modification time.
         before = source.stat()
@@ -301,23 +489,21 @@ class SingleUseTests(unittest.TestCase):
         os.utime(source, ns=(before.st_atime_ns, before.st_mtime_ns))
         self.assertEqual(source.stat().st_size, before.st_size)
         self.assertEqual(source.stat().st_mtime_ns, before.st_mtime_ns)
-        self.assertEqual(self.run_check("."), "")
+        self.assertEqual(self.run_check(source), "")
 
-    def test_cache_respects_options_and_file_set(self):
+    def test_cache_respects_options_and_candidate_set(self):
         source = self.write("a.c", """
             int helper(void) { return 1; }
             int run(void) { return helper(); }
         """)
         header = self.write("other.h", "#define EXTRA() helper()\n")
-        self.assertEqual(self.run_check("."), "")
-        self.assertEqual(self.run_check("--include-global", "."), "")
-        output = self.run_check("--include-global", "--exclude", "*.h",
-                                ".")
-        self.assertIn("function helper:", output)
-        self.assertEqual(self.run_check("--include-global", source), output)
-        self.assertEqual(self.run_check("--include-global", "."), "")
+        self.assertEqual(self.run_check("--include-global", source), "")
+        self.assertEqual(self.run_check("--include-global", "--exclude",
+                                       "*.h", source), "")
 
         header.unlink()
+        output = self.run_check("--include-global", source)
+        self.assertIn("function helper:", output)
         self.assertEqual(self.run_check("--include-global", "."), output)
 
     def test_cache_corruption_and_fingerprint_change(self):
