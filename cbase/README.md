@@ -449,3 +449,29 @@ memory_functions_sink(void) {
 }
 #endif
 ```
+
+## Single-use C code patterns
+
+Run `python3 cbase/single_use_patterns.py .` from the project root to find:
+
+- A `static` function with exactly one apparent call site in its defining `.c`
+  file. Non-static functions are excluded by default because calls from outside
+  the analyzed project cannot be ruled out. Use `--include-global` to opt into
+  closed-world analysis of non-static functions.
+- A file-scope `struct` definition (`struct Tag` or a simple `typedef struct`)
+  whose detected type references are confined to one function body. These
+  definitions are potential candidates for moving into that function.
+
+The script accepts C files or directories (default `.`), `--file-list PATH` for
+newline-delimited paths, and repeated `--exclude GLOB` options. Output uses
+`path:line: kind name: explanation`; exit status is 1 if findings exist, 0 if
+none exist, and 2 for invalid input. Run its regression tests with
+`python3 cbase/test_single_use_patterns.py`.
+
+This is intentionally conservative source analysis rather than a full C
+compiler. It ignores strings and comments, handles ordinary forward declarations,
+checks other source and header files, and suppresses many uncertain cases,
+including conditional code and macro references. It does not expand macros,
+resolve complex declarators, or prove runtime call counts. Inspect findings
+before changing code. For reliable cross-file results, scan **all** project
+sources and headers rather than a single `.c` file.
