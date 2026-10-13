@@ -749,296 +749,337 @@ d2fixed(double d, uint32 precision) {
 }
 
 
-int d2exp_buffered_n(double d, uint32 precision, char* result) {
-  uint64 bits;
-  bool ieeeSign;
-  uint64 ieeeMantissa;
-  uint32 ieeeExponent;
-  int32 e2;
-  uint64 m2;
-  bool printDecimalPoint;
-  int index;
-  uint32 digits;
-  uint32 printedDigits;
-  uint32 availableDigits;
-  uint32 maximum;
-  uint32 lastDigit;
-  int roundUp;
-  int32 rexp;
-  int32 requiredTwos;
-  bool trailingZeros;
-  int32 requiredFives;
-  int32 exp;
+int
+d2exp_buffered_n(double d, uint32 precision, char *result) {
+    uint64 bits;
+    bool ieee_sign;
+    uint64 ieee_mantissa;
+    uint32 ieee_exponent;
+    int32 e2;
+    uint64 m2;
+    bool print_decimal_point;
+    int index;
+    uint32 digits;
+    uint32 printed_digits;
+    uint32 available_digits;
+    uint32 maximum;
+    uint32 last_digit;
+    int round_up;
+    int32 exp;
 
-  bits = double_to_bits(d);
+    bits = double_to_bits(d);
 #if defined(RYU_DEBUG)
-  printf("IN=");
-  for (int32 bit = 63; bit >= 0; --bit) {
-    printf("%d", (int) ((bits >> bit) & 1));
-  }
-  printf("\n");
+    printf("IN=");
+    for (int32 bit = 63; bit >= 0; bit -= 1) {
+        printf("%d", (int)((bits >> bit) & 1));
+    }
+    printf("\n");
 #endif
 
-  // Decode bits into sign, mantissa, and exponent.
-  ieeeSign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
-  ieeeMantissa = bits & ((1ull << DOUBLE_MANTISSA_BITS) - 1);
-  ieeeExponent = (uint32)((bits >> DOUBLE_MANTISSA_BITS) & ((1u << DOUBLE_EXPONENT_BITS) - 1));
+    // Decode bits into sign, mantissa, and exponent.
+    ieee_sign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1)
+                != 0;
+    ieee_mantissa = bits & ((1ull << DOUBLE_MANTISSA_BITS) - 1);
+    ieee_exponent = (uint32)((bits >> DOUBLE_MANTISSA_BITS)
+                             & ((1u << DOUBLE_EXPONENT_BITS) - 1));
 
-  // Case distinction; exit early for the easy cases.
-  if (ieeeExponent == ((1u << DOUBLE_EXPONENT_BITS) - 1u)) {
-    return copy_special_str_printf(result, ieeeSign, ieeeMantissa);
-  }
-  if (ieeeExponent == 0 && ieeeMantissa == 0) {
+    // Case distinction; exit early for the easy cases.
+    if (ieee_exponent == ((1u << DOUBLE_EXPONENT_BITS) - 1u)) {
+        return copy_special_str_printf(result, ieee_sign, ieee_mantissa);
+    }
+    if ((ieee_exponent == 0) && (ieee_mantissa == 0)) {
+        index = 0;
+        if (ieee_sign) {
+            result[index] = '-';
+            index += 1;
+        }
+        result[index] = '0';
+        index += 1;
+        if (precision > 0) {
+            result[index] = '.';
+            index += 1;
+            memset(result + index, '0', precision);
+            index += precision;
+        }
+        memcpy(result + index, "e+00", 4);
+        index += 4;
+        return index;
+    }
+
+    if (ieee_exponent == 0) {
+        e2 = 1 - DOUBLE_BIAS - DOUBLE_MANTISSA_BITS;
+        m2 = ieee_mantissa;
+    } else {
+        e2 = (int32)ieee_exponent - DOUBLE_BIAS - DOUBLE_MANTISSA_BITS;
+        m2 = (1ull << DOUBLE_MANTISSA_BITS) | ieee_mantissa;
+    }
+
+#if defined(RYU_DEBUG)
+    printf("-> %" PRIu64 " * 2^%d\n", m2, e2);
+#endif
+
+    print_decimal_point = precision > 0;
+    precision += 1;
     index = 0;
-    if (ieeeSign) {
-      result[index++] = '-';
+    if (ieee_sign) {
+        result[index] = '-';
+        index += 1;
     }
-    result[index++] = '0';
-    if (precision > 0) {
-      result[index++] = '.';
-      memset(result + index, '0', precision);
-      index += precision;
-    }
-    memcpy(result + index, "e+00", 4);
-    index += 4;
-    return index;
-  }
-
-  if (ieeeExponent == 0) {
-    e2 = 1 - DOUBLE_BIAS - DOUBLE_MANTISSA_BITS;
-    m2 = ieeeMantissa;
-  } else {
-    e2 = (int32) ieeeExponent - DOUBLE_BIAS - DOUBLE_MANTISSA_BITS;
-    m2 = (1ull << DOUBLE_MANTISSA_BITS) | ieeeMantissa;
-  }
-
-#if defined(RYU_DEBUG)
-  printf("-> %" PRIu64 " * 2^%d\n", m2, e2);
-#endif
-
-  printDecimalPoint = precision > 0;
-  precision += 1;
-  index = 0;
-  if (ieeeSign) {
-    result[index++] = '-';
-  }
-  digits = 0;
-  printedDigits = 0;
-  availableDigits = 0;
-  exp = 0;
-  if (e2 >= -52) {
-    const uint32 idx = e2 < 0 ? 0 : index_for_exponent((uint32) e2);
-    const uint32 p10bits = pow10_bits_for_index(idx);
-    const int32 len = (int32) length_for_index(idx);
-#if defined(RYU_DEBUG)
-    printf("idx=%u\n", idx);
-    printf("len=%d\n", len);
-#endif
-    for (int32 i = len - 1; i >= 0; --i) {
-      const int32 j = (int32)p10bits - e2;
-      // Temporary: j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
-      // a slightly faster code path in mul_shift_mod1e9. Instead, we can just increase the multipliers.
-      digits = mul_shift_mod1e9(m2 << 8,
-                                pow10_split[pow10_offset[idx] + i],
-                                j + 8);
-      if (printedDigits != 0) {
-        if (printedDigits + 9 > precision) {
-          availableDigits = 9;
-          break;
-        }
-        append_nine_digits(digits, result + index);
-        index += 9;
-        printedDigits += 9;
-      } else if (digits != 0) {
-        availableDigits = decimal_length9(digits);
-        exp = i * 9 + (int32) availableDigits - 1;
-        if (availableDigits > precision) {
-          break;
-        }
-        if (printDecimalPoint) {
-          append_d_digits(availableDigits, digits, result + index);
-          index += availableDigits + 1; // +1 for decimal point
-        } else {
-          result[index++] = (char) ('0' + digits);
-        }
-        printedDigits = availableDigits;
-        availableDigits = 0;
-      }
-    }
-  }
-
-  if (e2 < 0 && availableDigits == 0) {
-    const int32 idx = -e2 / 16;
-#if defined(RYU_DEBUG)
-    printf("idx=%d, e2=%d, min=%d\n", idx, e2, min_block_2[idx]);
-#endif
-    for (int32 i = min_block_2[idx]; i < 200; ++i) {
-      const int32 j = POW10_ADDITIONAL_BITS_2 + (-e2 - 16 * idx);
-      const uint32 p = pow10_offset_2[idx] + (uint32) i - min_block_2[idx];
-      // Temporary: j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
-      // a slightly faster code path in mul_shift_mod1e9. Instead, we can just increase the multipliers.
-      if (p >= pow10_offset_2[idx + 1]) {
-        digits = 0;
-      } else {
-        digits = mul_shift_mod1e9(m2 << 8, pow10_split_2[p], j + 8);
-      }
-#if defined(RYU_DEBUG)
-      printf("exact=%" PRIu64 " * (%" PRIu64 " + %" PRIu64
-             " << 64) >> %d\n",
-             m2,
-             pow10_split_2[p][0],
-             pow10_split_2[p][1],
-             j);
-      printf("digits=%u\n", digits);
-#endif
-      if (printedDigits != 0) {
-        if (printedDigits + 9 > precision) {
-          availableDigits = 9;
-          break;
-        }
-        append_nine_digits(digits, result + index);
-        index += 9;
-        printedDigits += 9;
-      } else if (digits != 0) {
-        availableDigits = decimal_length9(digits);
-        exp = -(i + 1) * 9 + (int32) availableDigits - 1;
-        if (availableDigits > precision) {
-          break;
-        }
-        if (printDecimalPoint) {
-          append_d_digits(availableDigits, digits, result + index);
-          index += availableDigits + 1; // +1 for decimal point
-        } else {
-          result[index++] = (char) ('0' + digits);
-        }
-        printedDigits = availableDigits;
-        availableDigits = 0;
-      }
-    }
-  }
-
-  maximum = precision - printedDigits;
-#if defined(RYU_DEBUG)
-  printf("availableDigits=%u\n", availableDigits);
-  printf("digits=%u\n", digits);
-  printf("maximum=%u\n", maximum);
-#endif
-  if (availableDigits == 0) {
     digits = 0;
-  }
-  lastDigit = 0;
-  if (availableDigits > maximum) {
-    for (uint32 k = 0; k < availableDigits - maximum; ++k) {
-      lastDigit = digits % 10;
-      digits /= 10;
-    }
-  }
-#if defined(RYU_DEBUG)
-  printf("lastDigit=%u\n", lastDigit);
-#endif
-  // 0 = don't round up; 1 = round up unconditionally; 2 = round up if odd.
-  if (lastDigit != 5) {
-    roundUp = lastDigit > 5;
-  } else {
-    // Is m * 2^e2 * 10^(precision + 1 - exp) integer?
-    // precision was already increased by 1, so we don't need to write + 1 here.
-    rexp = (int32) precision - exp;
-    requiredTwos = -e2 - rexp;
-    trailingZeros = requiredTwos <= 0
-      || (requiredTwos < 60
-          && multiple_of_power_of2(m2, (uint32) requiredTwos));
-    if (rexp < 0) {
-      requiredFives = -rexp;
-      trailingZeros = trailingZeros
-        && multiple_of_power_of5(m2, (uint32) requiredFives);
-    }
-    roundUp = trailingZeros ? 2 : 1;
-#if defined(RYU_DEBUG)
-    printf("requiredTwos=%d\n", requiredTwos);
-    printf("trailingZeros=%s\n", trailingZeros ? "true" : "false");
-#endif
-  }
-  if (printedDigits != 0) {
-    if (digits == 0) {
-      memset(result + index, '0', maximum);
-    } else {
-      append_c_digits(maximum, digits, result + index);
-    }
-    index += maximum;
-  } else {
-    if (printDecimalPoint) {
-      append_d_digits(maximum, digits, result + index);
-      index += maximum + 1; // +1 for decimal point
-    } else {
-      result[index++] = (char) ('0' + digits);
-    }
-  }
-#if defined(RYU_DEBUG)
-  printf("roundUp=%d\n", roundUp);
-#endif
-  if (roundUp != 0) {
-    int roundIndex = index;
-    char c;
+    printed_digits = 0;
+    available_digits = 0;
+    exp = 0;
+    if (e2 >= -52) {
+        uint32 idx;
+        uint32 p10bits;
+        int32 len;
 
-    while (true) {
-      roundIndex -= 1;
-      if (roundIndex == -1) {
-        result[roundIndex + 1] = '1';
-        exp += 1;
-        break;
-      }
-      c = result[roundIndex];
-      if (c == '-') {
-        result[roundIndex + 1] = '1';
-        exp += 1;
-        break;
-      }
-      if (c == '.') {
-        continue;
-      } else if (c == '9') {
-        result[roundIndex] = '0';
-        roundUp = 1;
-        continue;
-      } else {
-        if (roundUp == 2 && c % 2 == 0) {
-          break;
+        idx = e2 < 0 ? 0 : index_for_exponent((uint32)e2);
+        p10bits = pow10_bits_for_index(idx);
+        len = (int32)length_for_index(idx);
+#if defined(RYU_DEBUG)
+        printf("idx=%u\n", idx);
+        printf("len=%d\n", len);
+#endif
+        for (int32 i = len - 1; i >= 0; i -= 1) {
+            int32 j;
+
+            j = (int32)p10bits - e2;
+            // Temporary: j is usually around 128, and by shifting a bit, we
+            // push it to 128 or above, which is a slightly faster code path in
+            // mul_shift_mod1e9. Instead, we can just increase the multipliers.
+            digits = mul_shift_mod1e9(m2 << 8,
+                                      pow10_split[pow10_offset[idx] + i],
+                                      j + 8);
+            if (printed_digits != 0) {
+                if (printed_digits + 9 > precision) {
+                    available_digits = 9;
+                    break;
+                }
+                append_nine_digits(digits, result + index);
+                index += 9;
+                printed_digits += 9;
+            } else if (digits != 0) {
+                available_digits = decimal_length9(digits);
+                exp = i*9 + (int32)available_digits - 1;
+                if (available_digits > precision) {
+                    break;
+                }
+                if (print_decimal_point) {
+                    append_d_digits(available_digits, digits, result + index);
+                    index += available_digits + 1; // +1 for decimal point.
+                } else {
+                    result[index] = (char)('0' + digits);
+                    index += 1;
+                }
+                printed_digits = available_digits;
+                available_digits = 0;
+            }
         }
-        result[roundIndex] = c + 1;
-        break;
-      }
     }
-  }
-  result[index++] = 'e';
-  if (exp < 0) {
-    result[index++] = '-';
-    exp = -exp;
-  } else {
-    result[index++] = '+';
-  }
 
-  if (exp >= 100) {
-    const int32 c = exp % 100;
-    result[index] = (char)('0' + exp/100);
-    memcpy(result + index + 1, digit_table + 2*c, 2);
-    index += 3;
-  } else {
-    memcpy(result + index, digit_table + 2 * exp, 2);
-    index += 2;
-  }
+    if ((e2 < 0) && (available_digits == 0)) {
+        int32 idx;
 
-  return index;
+        idx = -e2 / 16;
+#if defined(RYU_DEBUG)
+        printf("idx=%d, e2=%d, min=%d\n", idx, e2, min_block_2[idx]);
+#endif
+        for (int32 i = min_block_2[idx]; i < 200; i += 1) {
+            int32 j;
+            uint32 p;
+
+            j = POW10_ADDITIONAL_BITS_2 + (-e2 - 16*idx);
+            p = pow10_offset_2[idx] + (uint32)i - min_block_2[idx];
+            // Temporary: j is usually around 128, and by shifting a bit, we
+            // push it to 128 or above, which is a slightly faster code path in
+            // mul_shift_mod1e9. Instead, we can just increase the multipliers.
+            if (p >= pow10_offset_2[idx + 1]) {
+                digits = 0;
+            } else {
+                digits = mul_shift_mod1e9(m2 << 8, pow10_split_2[p], j + 8);
+            }
+#if defined(RYU_DEBUG)
+            printf("exact=%" PRIu64 " * (%" PRIu64 " + %" PRIu64
+                   " << 64) >> %d\n",
+                   m2, pow10_split_2[p][0], pow10_split_2[p][1], j);
+            printf("digits=%u\n", digits);
+#endif
+            if (printed_digits != 0) {
+                if (printed_digits + 9 > precision) {
+                    available_digits = 9;
+                    break;
+                }
+                append_nine_digits(digits, result + index);
+                index += 9;
+                printed_digits += 9;
+            } else if (digits != 0) {
+                available_digits = decimal_length9(digits);
+                exp = -(i + 1)*9 + (int32)available_digits - 1;
+                if (available_digits > precision) {
+                    break;
+                }
+                if (print_decimal_point) {
+                    append_d_digits(available_digits, digits, result + index);
+                    index += available_digits + 1; // +1 for decimal point.
+                } else {
+                    result[index] = (char)('0' + digits);
+                    index += 1;
+                }
+                printed_digits = available_digits;
+                available_digits = 0;
+            }
+        }
+    }
+
+    maximum = precision - printed_digits;
+#if defined(RYU_DEBUG)
+    printf("availableDigits=%u\n", available_digits);
+    printf("digits=%u\n", digits);
+    printf("maximum=%u\n", maximum);
+#endif
+    if (available_digits == 0) {
+        digits = 0;
+    }
+    last_digit = 0;
+    if (available_digits > maximum) {
+        uint32 remove_count;
+
+        remove_count = available_digits - maximum;
+        for (uint32 k = 0; k < remove_count; k += 1) {
+            last_digit = digits % 10;
+            digits /= 10;
+        }
+    }
+#if defined(RYU_DEBUG)
+    printf("lastDigit=%u\n", last_digit);
+#endif
+    // 0 = don't round up; 1 = round up unconditionally; 2 = round up if odd.
+    if (last_digit != 5) {
+        round_up = last_digit > 5;
+    } else {
+        int32 rexp;
+        int32 required_twos;
+        bool trailing_zeros;
+
+        // Is m * 2^e2 * 10^(precision + 1 - exp) integer? Precision was
+        // already increased by 1, so we don't need to write + 1 here.
+        rexp = (int32)precision - exp;
+        required_twos = -e2 - rexp;
+        trailing_zeros = required_twos <= 0
+                         || ((required_twos < 60)
+                             && multiple_of_power_of2(m2,
+                                                      (uint32)required_twos));
+        if (rexp < 0) {
+            int32 required_fives;
+
+            required_fives = -rexp;
+            trailing_zeros = trailing_zeros
+                             && multiple_of_power_of5(m2,
+                                                      (uint32)required_fives);
+        }
+        round_up = trailing_zeros ? 2 : 1;
+#if defined(RYU_DEBUG)
+        printf("requiredTwos=%d\n", required_twos);
+        printf("trailingZeros=%s\n", trailing_zeros ? "true" : "false");
+#endif
+    }
+    if (printed_digits != 0) {
+        if (digits == 0) {
+            memset(result + index, '0', maximum);
+        } else {
+            append_c_digits(maximum, digits, result + index);
+        }
+        index += maximum;
+    } else {
+        if (print_decimal_point) {
+            append_d_digits(maximum, digits, result + index);
+            index += maximum + 1; // +1 for decimal point.
+        } else {
+            result[index] = (char)('0' + digits);
+            index += 1;
+        }
+    }
+#if defined(RYU_DEBUG)
+    printf("roundUp=%d\n", round_up);
+#endif
+    if (round_up != 0) {
+        int round_index;
+        char c;
+
+        round_index = index;
+        for (;;) {
+            round_index -= 1;
+            if (round_index == -1) {
+                result[round_index + 1] = '1';
+                exp += 1;
+                break;
+            }
+            c = result[round_index];
+            if (c == '-') {
+                result[round_index + 1] = '1';
+                exp += 1;
+                break;
+            }
+            if (c == '.') {
+                continue;
+            } else if (c == '9') {
+                result[round_index] = '0';
+                round_up = 1;
+                continue;
+            } else {
+                if ((round_up == 2) && (c % 2 == 0)) {
+                    break;
+                }
+                result[round_index] = c + 1;
+                break;
+            }
+        }
+    }
+    result[index] = 'e';
+    index += 1;
+    if (exp < 0) {
+        result[index] = '-';
+        index += 1;
+        exp = -exp;
+    } else {
+        result[index] = '+';
+        index += 1;
+    }
+
+    if (exp >= 100) {
+        int32 c;
+
+        c = exp % 100;
+        result[index] = (char)('0' + exp/100);
+        memcpy(result + index + 1, digit_table + 2*c, 2);
+        index += 3;
+    } else {
+        memcpy(result + index, digit_table + 2*exp, 2);
+        index += 2;
+    }
+
+    return index;
 }
 
-void d2exp_buffered(double d, uint32 precision, char* result) {
-  const int len = d2exp_buffered_n(d, precision, result);
-  result[len] = '\0';
+void
+d2exp_buffered(double d, uint32 precision, char *result) {
+    int len;
+
+    len = d2exp_buffered_n(d, precision, result);
+    result[len] = '\0';
+    return;
 }
 
-char* d2exp(double d, uint32 precision) {
-  char* const buffer = (char*)malloc(2000);
-  const int index = d2exp_buffered_n(d, precision, buffer);
-  buffer[index] = '\0';
-  return buffer;
+char *
+d2exp(double d, uint32 precision) {
+    char *buffer;
+    int index;
+
+    buffer = (char *)malloc(2000);
+    index = d2exp_buffered_n(d, precision, buffer);
+    buffer[index] = '\0';
+    return buffer;
 }
 
 #endif /* RYU_D2FIXED_C */
