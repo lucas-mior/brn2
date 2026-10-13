@@ -64,6 +64,52 @@ test_ryu_double_from_bits(uint64 bits) {
     return value;
 }
 
+// Exercise word-width shifts directly: normal decimal inputs rarely require
+// these shifts, but the rounding helpers must remain defined for them.
+static void
+test_ryu_round_shift_boundaries(void) {
+    bool rounded_up;
+
+    ASSERT_EQ(s2d_round_shift(5, 0, true, &rounded_up), 5);
+    ASSERT(!rounded_up);
+    ASSERT_EQ(s2d_round_shift(5, 1, true, &rounded_up), 2);
+    ASSERT(!rounded_up);
+    ASSERT_EQ(s2d_round_shift(7, 1, true, &rounded_up), 4);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2d_round_shift(0xc000000000000000ull, 63, true,
+                              &rounded_up), 2);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2d_round_shift(0x8000000000000000ull, 64, true,
+                              &rounded_up), 0);
+    ASSERT(!rounded_up);
+    ASSERT_EQ(s2d_round_shift(0x8000000000000000ull, 64, false,
+                              &rounded_up), 1);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2d_round_shift(0x8000000000000001ull, 64, true,
+                              &rounded_up), 1);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2d_round_shift(UINT64_MAX, 65, false, &rounded_up), 0);
+    ASSERT(!rounded_up);
+
+    ASSERT_EQ(s2f_round_shift(5, 0, true, &rounded_up), 5);
+    ASSERT(!rounded_up);
+    ASSERT_EQ(s2f_round_shift(5, 1, true, &rounded_up), 2);
+    ASSERT(!rounded_up);
+    ASSERT_EQ(s2f_round_shift(7, 1, true, &rounded_up), 4);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2f_round_shift(0xc0000000u, 31, true, &rounded_up), 2);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2f_round_shift(0x80000000u, 32, true, &rounded_up), 0);
+    ASSERT(!rounded_up);
+    ASSERT_EQ(s2f_round_shift(0x80000000u, 32, false, &rounded_up), 1);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2f_round_shift(0x80000001u, 32, true, &rounded_up), 1);
+    ASSERT(rounded_up);
+    ASSERT_EQ(s2f_round_shift(UINT32_MAX, 33, false, &rounded_up), 0);
+    ASSERT(!rounded_up);
+    return;
+}
+
 static void
 test_ryu_s2d_leading_plus(void) {
     double value;
@@ -134,6 +180,20 @@ test_ryu_s2d_range_values(void) {
     used = s2d("5e-324", &value);
     ASSERT_EQ(used, -FLOAT_UNDERFLOW);
     ASSERT_EQ(test_ryu_double_bits(value), 0x0000000000000001ull);
+
+    used = s2d("2e-324", &value);
+    ASSERT_EQ(used, -FLOAT_UNDERFLOW);
+    ASSERT_EQ(test_ryu_double_bits(value), 0);
+
+    used = s2d("3e-324", &value);
+    ASSERT_EQ(used, -FLOAT_UNDERFLOW);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x0000000000000001ull);
+
+    // The last subnormal can round up into the normal range. Its status
+    // must describe the rounded result rather than the unrounded exponent.
+    used = s2d("2.2250738585072013e-308", &value);
+    ASSERT_EQ(used, 23);
+    ASSERT_EQ(test_ryu_double_bits(value), 0x0010000000000000ull);
 
     used = s2d("2.2250738585072014e-308", &value);
     ASSERT_EQ(used, 23);
@@ -866,7 +926,7 @@ tryu_s2f_is_finite(uint32 bits) {
 
 static void
 tryu_s2f_reference_outputs(void) {
-    // Reference outputs captured from the unmodified vendored s2f source.
+    // Expected IEEE-754 results, including correct subnormal rounding.
     static TryuS2fCase cases[] = {
         {"0", SUCCESS, 0x00000000u},
         {"-0", SUCCESS, 0x80000000u},
@@ -874,8 +934,11 @@ tryu_s2f_reference_outputs(void) {
         {"1.0000001", SUCCESS, 0x3f800001u},
         {"3.4028235e38", SUCCESS, 0x7f7fffffu},
         {"3.5e38", SUCCESS, 0x7f800000u},
-        {"1e-46", SUCCESS, 0x7f800000u},
-        {"1e-45", SUCCESS, 0x7f800000u},
+        {"1e-46", SUCCESS, 0x00000000u},
+        {"1e-45", SUCCESS, 0x00000001u},
+        {"-1e-45", SUCCESS, 0x80000001u},
+        {"1e-40", SUCCESS, 0x000116c2u},
+        {"-257334811e-52", SUCCESS, 0x80000012u},
         {"1.1754944e-38", SUCCESS, 0x00800000u},
         {"1.1754942e-38", SUCCESS, 0x007fffffu},
         {"0.33333334", SUCCESS, 0x3eaaaaabu},
@@ -1109,6 +1172,7 @@ main(void) {
     len = d2exp_buffered_n(test_ryu_double_from_bits(1), 0, buffer);
     test_ryu_result(buffer, len, "5e-324");
 
+    test_ryu_round_shift_boundaries();
     test_ryu_s2d_leading_plus();
     test_ryu_s2d_range_values();
     test_ryu_s2d_hex();

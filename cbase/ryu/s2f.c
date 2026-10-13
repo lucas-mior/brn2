@@ -59,6 +59,37 @@ int32_bits_to_float(uint32 bits) {
     return result;
 }
 
+// The binary32 counterpart of s2d_round_shift: no shift may reach 32.
+static inline uint32
+s2f_round_shift(uint32 value, int32 shift, bool trailing_zeros,
+                bool *round_up) {
+    uint32 truncated;
+    uint32 last_removed_bit;
+
+    assert(shift >= 0);
+    assert(round_up);
+    if (shift == 0) {
+        *round_up = false;
+        return value;
+    }
+    if (shift > 32) {
+        *round_up = false;
+        return 0;
+    }
+    if (shift == 32) {
+        truncated = 0;
+        last_removed_bit = value >> 31;
+        trailing_zeros &= (value & ((1u << 31) - 1)) == 0;
+    } else {
+        truncated = value >> shift;
+        last_removed_bit = (value >> (shift - 1)) & 1;
+        trailing_zeros &= (value & ((1u << (shift - 1)) - 1)) == 0;
+    }
+    *round_up = (last_removed_bit != 0)
+                && (!trailing_zeros || ((truncated & 1) != 0));
+    return truncated + (uint32)*round_up;
+}
+
 enum Status
 s2f_n(const char *buffer, int32 len, float *result) {
     int32 m10_digits;
@@ -76,7 +107,6 @@ s2f_n(const char *buffer, int32 len, float *result) {
     int32 j;
     uint32 ieee_e2;
     int32 shift;
-    uint32 last_removed_bit;
     bool round_up;
     uint32 ieee_m2;
     uint32 ieee;
@@ -198,9 +228,8 @@ s2f_n(const char *buffer, int32 len, float *result) {
         //
         // We use floor(log2(5^e10)) so that we get at least this many bits;
         // better to have an additional bit than to not have enough bits.
-        e2 = (int32)(s2f_floor_log2(m10) + (uint32)e10
-                     + (uint32)log2_pow5(e10)
-                     - (uint32)(FLOAT_MANTISSA_BITS + 1));
+        e2 = (int32)s2f_floor_log2(m10) + e10 + log2_pow5(e10)
+             - (FLOAT_MANTISSA_BITS + 1);
 
         // We now compute [m10 * 10^e10 / 2^e2]
         //     = [m10 * 5^e10 / 2^(e2-e10)].
@@ -220,9 +249,8 @@ s2f_n(const char *buffer, int32 len, float *result) {
                              && multiple_of_power_of2_32(m10,
                                                          (uint32)(e2 - e10)));
     } else {
-        e2 = (int32)(s2f_floor_log2(m10) + (uint32)e10
-                     - (uint32)ceil_log2_pow5(-e10)
-                     - (uint32)(FLOAT_MANTISSA_BITS + 1));
+        e2 = (int32)s2f_floor_log2(m10) + e10 - ceil_log2_pow5(-e10)
+             - (FLOAT_MANTISSA_BITS + 1);
 
         // We now compute [m10 * 10^e10 / 2^e2]
         //     = [m10 / (5^(-e10) 2^(e2-e10))].
@@ -254,7 +282,10 @@ s2f_n(const char *buffer, int32 len, float *result) {
 #endif
 
     // Compute the final IEEE exponent.
-    ieee_e2 = (uint32)MAX(0, e2 + FLOAT_EXPONENT_BIAS + s2f_floor_log2(m2));
+    // Keep the exponent arithmetic signed: unsigned promotion would turn
+    // negative subnormal exponents into large values (false infinities).
+    ieee_e2 = (uint32)MAX(0, e2 + FLOAT_EXPONENT_BIAS
+                            + (int32)s2f_floor_log2(m2));
 
     if (ieee_e2 > 0xfe) {
         // Final IEEE exponent is larger than the maximum representable. Return
@@ -278,24 +309,14 @@ s2f_n(const char *buffer, int32 len, float *result) {
     printf("shift = %d\n", shift);
 #endif
 
-    // We need to round up if the exact value is more than 0.5 above the value
-    // we computed. That's equivalent to checking if the last removed bit was 1
-    // and either the value was not just trailing zeros or the result would
-    // otherwise be odd.
-    //
-    // We need to update trailing_zeros given that we have the exact output
-    // exponent ieee_e2 now.
-    trailing_zeros &= (m2 & ((1u << (shift - 1)) - 1)) == 0;
-    last_removed_bit = (m2 >> (shift - 1)) & 1;
-    round_up = (last_removed_bit != 0)
-               && (!trailing_zeros || (((m2 >> shift) & 1) != 0));
+    // Round to nearest, ties to even, including full-width shifts.
+    ieee_m2 = s2f_round_shift(m2, shift, trailing_zeros, &round_up);
 
 #if defined(RYU_DEBUG)
     printf("round_up = %d\n", round_up);
-    printf("ieee_m2 = %u\n", (m2 >> shift) + round_up);
+    printf("ieee_m2 = %u\n", ieee_m2);
 #endif
 
-    ieee_m2 = (m2 >> shift) + round_up;
     assert(ieee_m2 <= (1u << (FLOAT_MANTISSA_BITS + 1)));
     ieee_m2 &= (1u << FLOAT_MANTISSA_BITS) - 1;
     if ((ieee_m2 == 0) && round_up) {

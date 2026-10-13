@@ -61,6 +61,39 @@ s2d_max32(int32 a, int32 b) {
     return a < b ? b : a;
 }
 
+// Round a 64-bit significand to an integer without out-of-range shifts.
+// At shift == 64, a midpoint may still round up if any lower bit or the
+// multiplication's discarded fraction is nonzero. Beyond 64 it rounds to 0.
+static inline uint64
+s2d_round_shift(uint64 value, int32 shift, bool trailing_zeros,
+                bool *round_up) {
+    uint64 truncated;
+    uint64 last_removed_bit;
+
+    assert(shift >= 0);
+    assert(round_up);
+    if (shift == 0) {
+        *round_up = false;
+        return value;
+    }
+    if (shift > 64) {
+        *round_up = false;
+        return 0;
+    }
+    if (shift == 64) {
+        truncated = 0;
+        last_removed_bit = value >> 63;
+        trailing_zeros &= (value & ((1ull << 63) - 1)) == 0;
+    } else {
+        truncated = value >> shift;
+        last_removed_bit = (value >> (shift - 1)) & 1;
+        trailing_zeros &= (value & ((1ull << (shift - 1)) - 1)) == 0;
+    }
+    *round_up = (last_removed_bit != 0)
+                && (!trailing_zeros || ((truncated & 1) != 0));
+    return truncated + (uint64)*round_up;
+}
+
 static inline double
 int64_bits_to_double(uint64 bits) {
     double result;
@@ -481,9 +514,7 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     uint64 m2;
     bool trailing_zeros;
     uint32 ieee_e2;
-    bool underflow;
     int32 shift;
-    uint64 last_removed_bit;
     bool round_up;
     uint64 ieee_m2;
     uint64 ieee;
@@ -610,7 +641,6 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     // Compute the final IEEE exponent.
     ieee_e2 = (uint32)s2d_max32(0, e2 + DOUBLE_EXPONENT_BIAS
                                    + (int32)s2d_floor_log2(m2));
-    underflow = ieee_e2 == 0;
 
     if (ieee_e2 > 0x7fe) {
         // Final IEEE exponent is larger than representable: +/-Infinity.
@@ -633,23 +663,14 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     printf("shift = %d\n", shift);
 #endif
 
-    // We need to round up if the exact value is more than 0.5 above the value
-    // we computed. That's equivalent to checking if the last removed bit was
-    // one and either the removed part had nonzero bits or the result would
-    // otherwise be odd.
-    //
-    // Update trailing_zeros because the exact output exponent is known now.
-    trailing_zeros &= (m2 & ((1ull << (shift - 1)) - 1)) == 0;
-    last_removed_bit = (m2 >> (shift - 1)) & 1;
-    round_up = (last_removed_bit != 0)
-               && (!trailing_zeros || (((m2 >> shift) & 1) != 0));
+    // Round to nearest, ties to even. The helper also handles shifts that
+    // reach or exceed the significand width without undefined behavior.
+    ieee_m2 = s2d_round_shift(m2, shift, trailing_zeros, &round_up);
 
 #if defined(RYU_DEBUG)
     printf("round_up = %d\n", round_up);
-    printf("ieee_m2 = %" PRIu64 "\n", (m2 >> shift) + round_up);
+    printf("ieee_m2 = %" PRIu64 "\n", ieee_m2);
 #endif
-
-    ieee_m2 = (m2 >> shift) + round_up;
     assert(ieee_m2 <= (1ull << (DOUBLE_MANTISSA_BITS + 1)));
     ieee_m2 &= (1ull << DOUBLE_MANTISSA_BITS) - 1;
     if (ieee_m2 == 0 && round_up) {
@@ -664,7 +685,9 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
     if (ieee_e2 > 0x7fe) {
         return parsed_len;
     }
-    if (underflow) {
+    // Rounding may carry the largest subnormal into the smallest normal.
+    // Report underflow based on the final exponent, not the tentative one.
+    if (ieee_e2 == 0) {
         return -FLOAT_UNDERFLOW;
     }
     return parsed_len;
