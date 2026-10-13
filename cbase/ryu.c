@@ -957,7 +957,7 @@ tryu_s2f_reference_outputs(void) {
     for (int32 i = 0; i < LENGTH(cases); i += 1) {
         value = 42.0f;
         status = s2f(cases[i].input, &value);
-        ASSERT_EQ(status, cases[i].status);
+        ASSERT(status == cases[i].status);
         ASSERT(tryu_s2f_bits(value) == cases[i].bits);
     }
     return;
@@ -971,12 +971,12 @@ tryu_s2f_bounded_inputs(void) {
 
     value = 0.0f;
     status = s2f_n(input, 4, &value);
-    ASSERT_EQ(status, SUCCESS);
+    ASSERT(status == SUCCESS);
     ASSERT(tryu_s2f_bits(value) == 0x3fa00000u);
 
     value = 42.0f;
     status = s2f_n(input, 5, &value);
-    ASSERT_EQ(status, MALFORMED_INPUT);
+    ASSERT(status == MALFORMED_INPUT);
     ASSERT(tryu_s2f_bits(value) == 0x42280000u);
     return;
 }
@@ -1000,7 +1000,7 @@ tryu_s2f_deterministic_roundtrip(void) {
         }
         original = tryu_s2f_from_bits(bits);
         len = f2s_buffered_n(original, buffer);
-        ASSERT_EQ(s2f_n(buffer, len, &parsed), SUCCESS);
+        ASSERT(s2f_n(buffer, len, &parsed) == SUCCESS);
         ASSERT(tryu_s2f_bits(parsed) == bits);
     }
     return;

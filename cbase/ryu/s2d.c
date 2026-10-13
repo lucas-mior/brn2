@@ -44,7 +44,7 @@
 
 static inline uint32
 s2d_floor_log2(uint64 value) {
-    long index;
+    unsigned long index;
 
     return _BitScanReverse64(&index, value) ? (uint32)index : 64;
 }
