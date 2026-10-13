@@ -1,0 +1,556 @@
+
+brn2 [01;38;2;255;000;000mcheck[0m
+
+brn2 [01;38;2;255;000;000mdebug[0m
+xxx
++ find . -type f -iname tags -delete
++ find . -iname *.[ch] -print0
++ xargs -0 ctags --kinds-C=+l+d
++ vtags.sed tags
++ sort
++ uniq
++ [ 0 -eq 1 ]
++ gcc -I. -Icbase -DDEBUGGING=1 -fanalyzer -pthread -std=c11 -Wfatal-errors -g3 -Og -o bin/brn2 main.c -lm
+
+brn2 [01;38;2;255;000;000mdebug[0m
+xxx
++ find . -type f -iname tags -delete
++ find . -iname *.[ch] -print0
++ xargs -0 ctags --kinds-C=+l+d
++ vtags.sed tags
++ sort
++ uniq
++ [ 0 -eq 1 ]
++ clang -I. -Icbase -DDEBUGGING=1 --analyze -Xanalyzer -analyzer-output=text -Xanalyzer -analyzer-werror -Xanalyzer -analyzer-opt-analyze-headers -Wno-unused-command-line-argument -pthread -std=c11 -Wfatal-errors -g3 -Og -o bin/brn2 main.c -lm
+In file included from main.c:6:
+In file included from cbase/cbase.h:1081:
+In file included from cbase/ryu.c:19:
+In file included from cbase/ryu.h:23:
+cbase/ryu/d2fixed.c:851:5: error: The first element of the 2nd argument is undefined [unix.cstring.UninitializedRead]
+  851 |     memcpy(result + index, DIGIT_TABLE + 2 * (exp / 10), 2);
+      |     ^                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:851:5: note: Other elements might also be undefined
+  851 |     memcpy(result + index, DIGIT_TABLE + 2 * (exp / 10), 2);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:622:14: note: Assuming the condition is false
+  622 |   ieeeSign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:627:7: note: Assuming the condition is false
+  627 |   if (ieeeExponent == ((1u << DOUBLE_EXPONENT_BITS) - 1u)) {
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:627:3: note: Taking false branch
+  627 |   if (ieeeExponent == ((1u << DOUBLE_EXPONENT_BITS) - 1u)) {
+      |   ^
+cbase/ryu/d2fixed.c:630:7: note: Assuming 'ieeeExponent' is not equal to 0
+  630 |   if (ieeeExponent == 0 && ieeeMantissa == 0) {
+      |       ^~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:630:25: note: Left side of '&&' is false
+  630 |   if (ieeeExponent == 0 && ieeeMantissa == 0) {
+      |                         ^
+cbase/ryu/d2fixed.c:646:7: note: 'ieeeExponent' is not equal to 0
+  646 |   if (ieeeExponent == 0) {
+      |       ^~~~~~~~~~~~
+cbase/ryu/d2fixed.c:646:3: note: Taking false branch
+  646 |   if (ieeeExponent == 0) {
+      |   ^
+cbase/ryu/d2fixed.c:658:23: note: Assuming 'precision' is <= 0
+  658 |   printDecimalPoint = precision > 0;
+      |                       ^~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:661:7: note: 'ieeeSign' is false
+  661 |   if (ieeeSign) {
+      |       ^~~~~~~~
+cbase/ryu/d2fixed.c:661:3: note: Taking false branch
+  661 |   if (ieeeSign) {
+      |   ^
+cbase/ryu/d2fixed.c:668:7: note: Assuming the condition is false
+  668 |   if (e2 >= -52) {
+      |       ^~~~~~~~~
+cbase/ryu/d2fixed.c:668:3: note: Taking false branch
+  668 |   if (e2 >= -52) {
+      |   ^
+cbase/ryu/d2fixed.c:707:7: note: 'e2' is < 0
+  707 |   if (e2 < 0 && availableDigits == 0) {
+      |       ^~
+cbase/ryu/d2fixed.c:707:7: note: Left side of '&&' is true
+cbase/ryu/d2fixed.c:707:17: note: 'availableDigits' is equal to 0
+  707 |   if (e2 < 0 && availableDigits == 0) {
+      |                 ^~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:707:3: note: Taking true branch
+  707 |   if (e2 < 0 && availableDigits == 0) {
+      |   ^
+cbase/ryu/d2fixed.c:712:38: note: Assuming 'i' is < 200
+  712 |     for (int32 i = MIN_BLOCK_2[idx]; i < 200; ++i) {
+      |                                      ^~~~~~~
+cbase/ryu/d2fixed.c:712:5: note: Loop condition is true.  Entering loop body
+  712 |     for (int32 i = MIN_BLOCK_2[idx]; i < 200; ++i) {
+      |     ^
+cbase/ryu/d2fixed.c:717:11: note: Assuming the condition is false
+  717 |       if (p >= POW10_OFFSET_2[idx + 1]) {
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:717:7: note: Taking false branch
+  717 |       if (p >= POW10_OFFSET_2[idx + 1]) {
+      |       ^
+cbase/ryu/d2fixed.c:726:11: note: 'printedDigits' is equal to 0
+  726 |       if (printedDigits != 0) {
+      |           ^~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:726:7: note: Taking false branch
+  726 |       if (printedDigits != 0) {
+      |       ^
+cbase/ryu/d2fixed.c:734:18: note: Assuming 'digits' is not equal to 0
+  734 |       } else if (digits != 0) {
+      |                  ^~~~~~~~~~~
+cbase/ryu/d2fixed.c:734:14: note: Taking true branch
+  734 |       } else if (digits != 0) {
+      |              ^
+cbase/ryu/d2fixed.c:737:13: note: Assuming 'availableDigits' is <= 'precision'
+  737 |         if (availableDigits > precision) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:737:9: note: Taking false branch
+  737 |         if (availableDigits > precision) {
+      |         ^
+cbase/ryu/d2fixed.c:740:13: note: 'printDecimalPoint' is false
+  740 |         if (printDecimalPoint) {
+      |             ^~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:740:9: note: Taking false branch
+  740 |         if (printDecimalPoint) {
+      |         ^
+cbase/ryu/d2fixed.c:712:38: note: Assuming 'i' is >= 200
+  712 |     for (int32 i = MIN_BLOCK_2[idx]; i < 200; ++i) {
+      |                                      ^~~~~~~
+cbase/ryu/d2fixed.c:712:5: note: Loop condition is false. Execution continues on line 752
+  712 |     for (int32 i = MIN_BLOCK_2[idx]; i < 200; ++i) {
+      |     ^
+cbase/ryu/d2fixed.c:758:7: note: 'availableDigits' is equal to 0
+  758 |   if (availableDigits == 0) {
+      |       ^~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:758:3: note: Taking true branch
+  758 |   if (availableDigits == 0) {
+      |   ^
+cbase/ryu/d2fixed.c:762:7: note: Assuming 'availableDigits' is <= 'maximum'
+  762 |   if (availableDigits > maximum) {
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:762:3: note: Taking false branch
+  762 |   if (availableDigits > maximum) {
+      |   ^
+cbase/ryu/d2fixed.c:772:7: note: 'lastDigit' is not equal to 5
+  772 |   if (lastDigit != 5) {
+      |       ^~~~~~~~~
+cbase/ryu/d2fixed.c:772:3: note: Taking true branch
+  772 |   if (lastDigit != 5) {
+      |   ^
+cbase/ryu/d2fixed.c:791:7: note: Assuming 'printedDigits' is equal to 0
+  791 |   if (printedDigits != 0) {
+      |       ^~~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:791:3: note: Taking false branch
+  791 |   if (printedDigits != 0) {
+      |   ^
+cbase/ryu/d2fixed.c:799:9: note: 'printDecimalPoint' is false
+  799 |     if (printDecimalPoint) {
+      |         ^~~~~~~~~~~~~~~~~
+cbase/ryu/d2fixed.c:799:5: note: Taking false branch
+  799 |     if (printDecimalPoint) {
+      |     ^
+cbase/ryu/d2fixed.c:809:7: note: 'roundUp' is equal to 0
+  809 |   if (roundUp != 0) {
+      |       ^~~~~~~
+cbase/ryu/d2fixed.c:809:3: note: Taking false branch
+  809 |   if (roundUp != 0) {
+      |   ^
+cbase/ryu/d2fixed.c:842:7: note: 'exp' is < 0
+  842 |   if (exp < 0) {
+      |       ^~~
+cbase/ryu/d2fixed.c:842:3: note: Taking true branch
+  842 |   if (exp < 0) {
+      |   ^
+cbase/ryu/d2fixed.c:849:7: note: 'exp' is >= 100
+  849 |   if (exp >= 100) {
+      |       ^~~
+cbase/ryu/d2fixed.c:849:3: note: Taking true branch
+  849 |   if (exp >= 100) {
+      |   ^
+cbase/ryu/d2fixed.c:851:5: note: The first element of the 2nd argument is undefined
+  851 |     memcpy(result + index, DIGIT_TABLE + 2 * (exp / 10), 2);
+      |     ^                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from main.c:6:
+In file included from cbase/cbase.h:1081:
+In file included from cbase/ryu.c:19:
+In file included from cbase/ryu.h:30:
+cbase/ryu/s2d.c:800:17: error: Value stored to 'hex_i' is never read [deadcode.DeadStores]
+  800 |                 hex_i = 0;
+      |                 ^       ~
+cbase/ryu/s2d.c:800:17: note: Value stored to 'hex_i' is never read
+  800 |                 hex_i = 0;
+      |                 ^       ~
+cbase/ryu/s2d.c:815:21: error: Value stored to 'hex_i' is never read [deadcode.DeadStores]
+  815 |                     hex_i = 0;
+      |                     ^       ~
+cbase/ryu/s2d.c:815:21: note: Value stored to 'hex_i' is never read
+  815 |                     hex_i = 0;
+      |                     ^       ~
+In file included from main.c:8:
+In file included from ./brn2.h:109:
+cbase/sort.c:151:9: error: Assigned value is uninitialized [core.uninitialized.Assign]
+  151 |         int32 k = heap[0].p_index;
+      |         ^         ~~~~~~~~~~~~~~~
+cbase/sort.c:111:5: note: Assuming the condition is false
+  111 |     ASSERT_GE(n, 0);
+      |     ^~~~~~~~~~~~~~~
+cbase/assertions.h:659:5: note: expanded from macro 'ASSERT_GE'
+  659 |     ASSERT_COMPARE_CONST(GREATER_EQUAL, VAR1, VAR2)
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  582 |   assert_compare_const(__FILE__, __LINE__, FUNC__,                             \
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  583 |                        ASSERT_COMPARE_MODE_##MODE,                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  584 |                        #VAR1, #VAR2,                                           \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  585 |                        ASSERT_COMPARE_VALUE(VAR1),                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  586 |                        ASSERT_COMPARE_VALUE(VAR2)))
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:251:9: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |         ^~~~~~~
+cbase/sort.c:111:5: note: Taking false branch
+cbase/assertions.h:659:5: note: expanded from macro 'ASSERT_GE'
+  659 |     ASSERT_COMPARE_CONST(GREATER_EQUAL, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:251:5: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |     ^
+cbase/sort.c:111:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:659:5: note: expanded from macro 'ASSERT_GE'
+  659 |     ASSERT_COMPARE_CONST(GREATER_EQUAL, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:250:36: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  250 | #define ASSERT_TRAP_IF_FALSE(EXPR) do {                            \
+      |                                    ^
+cbase/sort.c:111:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:659:5: note: expanded from macro 'ASSERT_GE'
+  659 |     ASSERT_COMPARE_CONST(GREATER_EQUAL, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:594:48: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  594 | #define ASSERT_COMPARE_CONST(MODE, VAR1, VAR2) do {                            \
+      |                                                ^
+cbase/sort.c:112:5: note: Assuming the condition is false
+  112 |     ASSERT_GT(p, 0);
+      |     ^~~~~~~~~~~~~~~
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  582 |   assert_compare_const(__FILE__, __LINE__, FUNC__,                             \
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  583 |                        ASSERT_COMPARE_MODE_##MODE,                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  584 |                        #VAR1, #VAR2,                                           \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  585 |                        ASSERT_COMPARE_VALUE(VAR1),                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  586 |                        ASSERT_COMPARE_VALUE(VAR2)))
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:251:9: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |         ^~~~~~~
+cbase/sort.c:112:5: note: Taking false branch
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:251:5: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |     ^
+cbase/sort.c:112:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:250:36: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  250 | #define ASSERT_TRAP_IF_FALSE(EXPR) do {                            \
+      |                                    ^
+cbase/sort.c:112:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:594:48: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  594 | #define ASSERT_COMPARE_CONST(MODE, VAR1, VAR2) do {                            \
+      |                                                ^
+cbase/sort.c:113:5: note: Assuming the condition is false
+  113 |     ASSERT_LE(p, MAX_NTHREADS);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:655:5: note: expanded from macro 'ASSERT_LE'
+  655 |     ASSERT_COMPARE_CONST(LESS_EQUAL, VAR1, VAR2)
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  582 |   assert_compare_const(__FILE__, __LINE__, FUNC__,                             \
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  583 |                        ASSERT_COMPARE_MODE_##MODE,                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  584 |                        #VAR1, #VAR2,                                           \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  585 |                        ASSERT_COMPARE_VALUE(VAR1),                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  586 |                        ASSERT_COMPARE_VALUE(VAR2)))
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:251:9: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |         ^~~~~~~
+cbase/sort.c:113:5: note: Taking false branch
+cbase/assertions.h:655:5: note: expanded from macro 'ASSERT_LE'
+  655 |     ASSERT_COMPARE_CONST(LESS_EQUAL, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:251:5: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |     ^
+cbase/sort.c:113:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:655:5: note: expanded from macro 'ASSERT_LE'
+  655 |     ASSERT_COMPARE_CONST(LESS_EQUAL, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:250:36: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  250 | #define ASSERT_TRAP_IF_FALSE(EXPR) do {                            \
+      |                                    ^
+cbase/sort.c:113:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:655:5: note: expanded from macro 'ASSERT_LE'
+  655 |     ASSERT_COMPARE_CONST(LESS_EQUAL, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:594:48: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  594 | #define ASSERT_COMPARE_CONST(MODE, VAR1, VAR2) do {                            \
+      |                                                ^
+cbase/sort.c:115:10: note: Assuming 'n' is > 1
+  115 |     if ((n <= 1) || (p == 1)) {
+      |          ^~~~~~
+cbase/sort.c:115:9: note: Left side of '||' is false
+  115 |     if ((n <= 1) || (p == 1)) {
+      |         ^
+cbase/sort.c:115:22: note: Assuming 'p' is not equal to 1
+  115 |     if ((n <= 1) || (p == 1)) {
+      |                      ^~~~~~
+cbase/sort.c:115:5: note: Taking false branch
+  115 |     if ((n <= 1) || (p == 1)) {
+      |     ^
+cbase/sort.c:119:5: note: Loop condition is false.  Exiting loop
+  119 |     ASSERT_LE_VAR(p, n);
+      |     ^
+cbase/assertions.h:632:7: note: expanded from macro 'ASSERT_LE_VAR'
+  632 |       ASSERT_COMPARE_VAR_DIAGNOSTIC(less_equal, VAR1, VAR2)
+      |       ^
+cbase/assertions.h:615:7: note: expanded from macro 'ASSERT_COMPARE_VAR_DIAGNOSTIC'
+  615 |       ASSERT_DIAGNOSTIC_PUSH();                                                \
+      |       ^
+cbase/assertions.h:606:36: note: expanded from macro 'ASSERT_DIAGNOSTIC_PUSH'
+  606 |   #define ASSERT_DIAGNOSTIC_PUSH() do {                                        \
+      |                                    ^
+cbase/sort.c:119:5: note: Taking false branch
+cbase/assertions.h:632:7: note: expanded from macro 'ASSERT_LE_VAR'
+  632 |       ASSERT_COMPARE_VAR_DIAGNOSTIC(less_equal, VAR1, VAR2)
+      |       ^
+cbase/assertions.h:616:7: note: expanded from macro 'ASSERT_COMPARE_VAR_DIAGNOSTIC'
+  616 |       ASSERT_COMPARE(MODE, VAR1, VAR2);                                        \
+      |       ^
+cbase/assertions.h:517:42: note: expanded from macro 'ASSERT_COMPARE'
+  517 | #define ASSERT_COMPARE(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(               \
+      |                                          ^
+cbase/assertions.h:251:5: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |     ^
+cbase/sort.c:119:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:632:7: note: expanded from macro 'ASSERT_LE_VAR'
+  632 |       ASSERT_COMPARE_VAR_DIAGNOSTIC(less_equal, VAR1, VAR2)
+      |       ^
+cbase/assertions.h:616:7: note: expanded from macro 'ASSERT_COMPARE_VAR_DIAGNOSTIC'
+  616 |       ASSERT_COMPARE(MODE, VAR1, VAR2);                                        \
+      |       ^
+cbase/assertions.h:517:42: note: expanded from macro 'ASSERT_COMPARE'
+  517 | #define ASSERT_COMPARE(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(               \
+      |                                          ^
+cbase/assertions.h:250:36: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  250 | #define ASSERT_TRAP_IF_FALSE(EXPR) do {                            \
+      |                                    ^
+cbase/sort.c:119:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:632:7: note: expanded from macro 'ASSERT_LE_VAR'
+  632 |       ASSERT_COMPARE_VAR_DIAGNOSTIC(less_equal, VAR1, VAR2)
+      |       ^
+cbase/assertions.h:617:7: note: expanded from macro 'ASSERT_COMPARE_VAR_DIAGNOSTIC'
+  617 |       ASSERT_DIAGNOSTIC_POP();                                                 \
+      |       ^
+cbase/assertions.h:611:35: note: expanded from macro 'ASSERT_DIAGNOSTIC_POP'
+  611 |   #define ASSERT_DIAGNOSTIC_POP() do {                                         \
+      |                                   ^
+cbase/sort.c:119:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:632:7: note: expanded from macro 'ASSERT_LE_VAR'
+  632 |       ASSERT_COMPARE_VAR_DIAGNOSTIC(less_equal, VAR1, VAR2)
+      |       ^
+cbase/assertions.h:614:59: note: expanded from macro 'ASSERT_COMPARE_VAR_DIAGNOSTIC'
+  614 |   #define ASSERT_COMPARE_VAR_DIAGNOSTIC(MODE, VAR1, VAR2) do {                 \
+      |                                                           ^
+cbase/sort.c:120:5: note: Assuming the condition is false
+  120 |     ASSERT_GT(obj_size, 0);
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  582 |   assert_compare_const(__FILE__, __LINE__, FUNC__,                             \
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  583 |                        ASSERT_COMPARE_MODE_##MODE,                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  584 |                        #VAR1, #VAR2,                                           \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  585 |                        ASSERT_COMPARE_VALUE(VAR1),                             \
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  586 |                        ASSERT_COMPARE_VALUE(VAR2)))
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cbase/assertions.h:251:9: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |         ^~~~~~~
+cbase/sort.c:120:5: note: Taking false branch
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:251:5: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  251 |     if (!(EXPR)) {                                                 \
+      |     ^
+cbase/sort.c:120:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:597:5: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  597 |     ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2);                               \
+      |     ^
+cbase/assertions.h:581:53: note: expanded from macro 'ASSERT_COMPARE_NORMALIZED'
+  581 | #define ASSERT_COMPARE_NORMALIZED(MODE, VAR1, VAR2) ASSERT_TRAP_IF_FALSE(      \
+      |                                                     ^
+cbase/assertions.h:250:36: note: expanded from macro 'ASSERT_TRAP_IF_FALSE'
+  250 | #define ASSERT_TRAP_IF_FALSE(EXPR) do {                            \
+      |                                    ^
+cbase/sort.c:120:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:657:5: note: expanded from macro 'ASSERT_GT'
+  657 |     ASSERT_COMPARE_CONST(GREATER, VAR1, VAR2)
+      |     ^
+cbase/assertions.h:594:48: note: expanded from macro 'ASSERT_COMPARE_CONST'
+  594 | #define ASSERT_COMPARE_CONST(MODE, VAR1, VAR2) do {                            \
+      |                                                ^
+cbase/sort.c:121:5: note: Assuming 'array' is non-null
+  121 |     ASSERT(array);
+      |     ^~~~~~~~~~~~~
+cbase/assertions.h:261:9: note: expanded from macro 'ASSERT'
+  261 |     if (!(__VA_ARGS__)) {                                          \
+      |         ^~~~~~~~~~~~~~
+cbase/sort.c:121:5: note: Taking false branch
+cbase/assertions.h:261:5: note: expanded from macro 'ASSERT'
+  261 |     if (!(__VA_ARGS__)) {                                          \
+      |     ^
+cbase/sort.c:121:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:260:21: note: expanded from macro 'ASSERT'
+  260 | #define ASSERT(...) do {                                           \
+      |                     ^
+cbase/sort.c:122:5: note: Assuming 'compare' is non-null
+  122 |     ASSERT(compare);
+      |     ^~~~~~~~~~~~~~~
+cbase/assertions.h:261:9: note: expanded from macro 'ASSERT'
+  261 |     if (!(__VA_ARGS__)) {                                          \
+      |         ^~~~~~~~~~~~~~
+cbase/sort.c:122:5: note: Taking false branch
+cbase/assertions.h:261:5: note: expanded from macro 'ASSERT'
+  261 |     if (!(__VA_ARGS__)) {                                          \
+      |     ^
+cbase/sort.c:122:5: note: Loop condition is false.  Exiting loop
+cbase/assertions.h:260:21: note: expanded from macro 'ASSERT'
+  260 | #define ASSERT(...) do {                                           \
+      |                     ^
+cbase/sort.c:127:23: note: Assuming the condition is false
+  127 |     for (int32 k = 0; k < (p - 1); k += 1) {
+      |                       ^~~~~~~~~~~
+cbase/sort.c:127:5: note: Loop condition is false. Execution continues on line 131
+  127 |     for (int32 k = 0; k < (p - 1); k += 1) {
+      |     ^
+cbase/sort.c:136:23: note: 'k' is >= 'p'
+  136 |     for (int32 k = 1; k < p; k += 1) {
+      |                       ^
+cbase/sort.c:136:5: note: Loop condition is false. Execution continues on line 140
+  136 |     for (int32 k = 1; k < p; k += 1) {
+      |     ^
+cbase/sort.c:140:23: note: 'k' is >= 'p'
+  140 |     for (int32 k = 0; k < p; k += 1) {
+      |                       ^
+cbase/sort.c:140:5: note: Loop condition is false. Execution continues on line 145
+  140 |     for (int32 k = 0; k < p; k += 1) {
+      |     ^
+cbase/sort.c:145:31: note: Assuming 'k' is < 0
+  145 |     for (int32 k = p / 2 - 1; k >= 0; k -= 1) {
+      |                               ^~~~~~
+cbase/sort.c:145:5: note: Loop condition is false. Execution continues on line 149
+  145 |     for (int32 k = p / 2 - 1; k >= 0; k -= 1) {
+      |     ^
+cbase/sort.c:150:23: note: 'i' is < 'n'
+  150 |     for (int32 i = 0; i < n; i += 1) {
+      |                       ^
+cbase/sort.c:150:5: note: Loop condition is true.  Entering loop body
+  150 |     for (int32 i = 0; i < n; i += 1) {
+      |     ^
+cbase/sort.c:151:9: note: Assigned value is uninitialized
+  151 |         int32 k = heap[0].p_index;
+      |         ^         ~~~~~~~~~~~~~~~
+4 errors generated.
+static analysis finished.
