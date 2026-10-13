@@ -96,7 +96,7 @@ static const uint64 DOUBLE_POW5_TABLE[POW5_TABLE_SIZE] = {
 
 // Computes 5^i in the form required by Ryu, and stores it in the given pointer.
 static inline void
-double_computePow5(const uint32 i, uint64 *const result) {
+double_compute_pow5(const uint32 i, uint64 *const result) {
     const uint32 base = i / POW5_TABLE_SIZE;
     const uint32 base2 = base * POW5_TABLE_SIZE;
     const uint32 offset = i - base2;
@@ -122,7 +122,7 @@ double_computePow5(const uint32 i, uint64 *const result) {
 // Computes 5^-i in the form required by Ryu, and stores it in the given
 // pointer.
 static inline void
-double_computeInvPow5(const uint32 i, uint64 *const result) {
+double_compute_inv_pow5(const uint32 i, uint64 *const result) {
     const uint32 base = (i + POW5_TABLE_SIZE - 1) / POW5_TABLE_SIZE;
     const uint32 base2 = base * POW5_TABLE_SIZE;
     const uint32 offset = base2 - i;
@@ -152,7 +152,7 @@ double_computeInvPow5(const uint32 i, uint64 *const result) {
 
 // Computes 5^i in the form required by Ryu, and stores it in the given pointer.
 static inline void
-double_computePow5(const uint32 i, uint64 *const result) {
+double_compute_pow5(const uint32 i, uint64 *const result) {
     const uint32 base = i / POW5_TABLE_SIZE;
     const uint32 base2 = base * POW5_TABLE_SIZE;
     const uint32 offset = i - base2;
@@ -186,7 +186,7 @@ double_computePow5(const uint32 i, uint64 *const result) {
 // Computes 5^-i in the form required by Ryu, and stores it in the given
 // pointer.
 static inline void
-double_computeInvPow5(const uint32 i, uint64 *const result) {
+double_compute_inv_pow5(const uint32 i, uint64 *const result) {
     const uint32 base = (i + POW5_TABLE_SIZE - 1) / POW5_TABLE_SIZE;
     const uint32 base2 = base * POW5_TABLE_SIZE;
     const uint32 offset = base2 - i;

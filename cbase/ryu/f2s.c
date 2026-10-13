@@ -273,21 +273,21 @@ static inline int to_chars(const floating_decimal_32 v, const bool sign, char* c
     output /= 10000;
     c0 = (c % 100) << 1;
     c1 = (c / 100) << 1;
-    memcpy(result + index + olength - i - 1, DIGIT_TABLE + c0, 2);
-    memcpy(result + index + olength - i - 3, DIGIT_TABLE + c1, 2);
+    memcpy(result + index + olength - i - 1, digit_table + c0, 2);
+    memcpy(result + index + olength - i - 3, digit_table + c1, 2);
     i += 4;
   }
   if (output >= 100) {
     c = (output % 100) << 1;
     output /= 100;
-    memcpy(result + index + olength - i - 1, DIGIT_TABLE + c, 2);
+    memcpy(result + index + olength - i - 1, digit_table + c, 2);
     i += 2;
   }
   if (output >= 10) {
     c = output << 1;
     // We can't use memcpy here: the decimal dot goes between these two digits.
-    result[index + olength - i] = DIGIT_TABLE[c + 1];
-    result[index] = DIGIT_TABLE[c];
+    result[index + olength - i] = digit_table[c + 1];
+    result[index] = digit_table[c];
   } else {
     result[index] = (char)('0' + output);
   }
@@ -311,7 +311,7 @@ static inline int to_chars(const floating_decimal_32 v, const bool sign, char* c
   }
 
   if (exp >= 10) {
-    memcpy(result + index, DIGIT_TABLE + 2 * exp, 2);
+    memcpy(result + index, digit_table + 2 * exp, 2);
     index += 2;
   } else {
     result[index] = (char)('0' + exp);

@@ -21,7 +21,7 @@
 
 // A table of all two-digit numbers. This is used to speed up decimal digit
 // generation by copying pairs of digits into the final output.
-static const char DIGIT_TABLE[200] = {
+static const char digit_table[200] = {
     '0', '0', '0', '1', '0', '2', '0', '3', '0', '4',
     '0', '5', '0', '6', '0', '7', '0', '8', '0', '9',
     '1', '0', '1', '1', '1', '2', '1', '3', '1', '4',
