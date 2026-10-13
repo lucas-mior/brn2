@@ -208,19 +208,19 @@ static inline void append_n_digits(const uint32 olength, uint32 digits, char* co
     digits /= 10000;
     c0 = (c % 100) << 1;
     c1 = (c / 100) << 1;
-    memcpy(result + olength - i - 2, DIGIT_TABLE + c0, 2);
-    memcpy(result + olength - i - 4, DIGIT_TABLE + c1, 2);
+    memcpy(result + olength - i - 2, digit_table + c0, 2);
+    memcpy(result + olength - i - 4, digit_table + c1, 2);
     i += 4;
   }
   if (digits >= 100) {
     c = (digits % 100) << 1;
     digits /= 100;
-    memcpy(result + olength - i - 2, DIGIT_TABLE + c, 2);
+    memcpy(result + olength - i - 2, digit_table + c, 2);
     i += 2;
   }
   if (digits >= 10) {
     c = digits << 1;
-    memcpy(result + olength - i - 2, DIGIT_TABLE + c, 2);
+    memcpy(result + olength - i - 2, digit_table + c, 2);
   } else {
     result[0] = (char) ('0' + digits);
   }
@@ -249,20 +249,20 @@ static inline void append_d_digits(const uint32 olength, uint32 digits, char* co
     digits /= 10000;
     c0 = (c % 100) << 1;
     c1 = (c / 100) << 1;
-    memcpy(result + olength + 1 - i - 2, DIGIT_TABLE + c0, 2);
-    memcpy(result + olength + 1 - i - 4, DIGIT_TABLE + c1, 2);
+    memcpy(result + olength + 1 - i - 2, digit_table + c0, 2);
+    memcpy(result + olength + 1 - i - 4, digit_table + c1, 2);
     i += 4;
   }
   if (digits >= 100) {
     c = (digits % 100) << 1;
     digits /= 100;
-    memcpy(result + olength + 1 - i - 2, DIGIT_TABLE + c, 2);
+    memcpy(result + olength + 1 - i - 2, digit_table + c, 2);
   }
   if (digits >= 10) {
     c = digits << 1;
-    result[2] = DIGIT_TABLE[c + 1];
+    result[2] = digit_table[c + 1];
     result[1] = '.';
-    result[0] = DIGIT_TABLE[c];
+    result[0] = digit_table[c];
   } else {
     result[1] = '.';
     result[0] = (char) ('0' + digits);
@@ -275,12 +275,12 @@ static inline void append_c_digits(const uint32 count, uint32 digits, char* cons
 #ifdef RYU_DEBUG
   printf("DIGITS=%u\n", digits);
 #endif
-  // Copy pairs of digits from DIGIT_TABLE.
+  // Copy pairs of digits from digit_table.
   uint32 i = 0;
   for (; i < count - 1; i += 2) {
     const uint32 c = (digits % 100) << 1;
     digits /= 100;
-    memcpy(result + count - i - 2, DIGIT_TABLE + c, 2);
+    memcpy(result + count - i - 2, digit_table + c, 2);
   }
   // Generate the last digit if count is odd.
   if (i < count) {
@@ -313,8 +313,8 @@ static inline void append_nine_digits(uint32 digits, char* const result) {
     digits /= 10000;
     c0 = (c % 100) << 1;
     c1 = (c / 100) << 1;
-    memcpy(result + 7 - i, DIGIT_TABLE + c0, 2);
-    memcpy(result + 5 - i, DIGIT_TABLE + c1, 2);
+    memcpy(result + 7 - i, digit_table + c0, 2);
+    memcpy(result + 5 - i, digit_table + c1, 2);
   }
   result[0] = (char) ('0' + digits);
 }
@@ -432,7 +432,9 @@ int d2fixed_buffered_n(double d, uint32 precision, char* result) {
       const int32 j = (int32)p10bits - e2;
       // Temporary: j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in mulShift_mod1e9. Instead, we can just increase the multipliers.
-      const uint32 digits = mulShift_mod1e9(m2 << 8, POW10_SPLIT[POW10_OFFSET[idx] + i], j + 8);
+      const uint32 digits = mulShift_mod1e9(m2 << 8,
+                                            pow10_split[pow10_offset[idx] + i],
+                                            j + 8);
       if (nonzero) {
         append_nine_digits(digits, result + index);
         index += 9;
@@ -462,20 +464,20 @@ int d2fixed_buffered_n(double d, uint32 precision, char* result) {
     uint32 i = 0;
     // 0 = don't round up; 1 = round up unconditionally; 2 = round up if odd.
     roundUp = 0;
-    if (blocks <= MIN_BLOCK_2[idx]) {
+    if (blocks <= min_block_2[idx]) {
       i = blocks;
       memset(result + index, '0', precision);
       index += precision;
-    } else if (i < MIN_BLOCK_2[idx]) {
-      i = MIN_BLOCK_2[idx];
+    } else if (i < min_block_2[idx]) {
+      i = min_block_2[idx];
       memset(result + index, '0', 9 * i);
       index += 9 * i;
     }
     for (; i < blocks; ++i) {
       uint32 digits;
-      const int32 j = ADDITIONAL_BITS_2 + (-e2 - 16 * idx);
-      const uint32 p = POW10_OFFSET_2[idx] + i - MIN_BLOCK_2[idx];
-      if (p >= POW10_OFFSET_2[idx + 1]) {
+      const int32 j = POW10_ADDITIONAL_BITS_2 + (-e2 - 16 * idx);
+      const uint32 p = pow10_offset_2[idx] + i - min_block_2[idx];
+      if (p >= pow10_offset_2[idx + 1]) {
         // If the remaining digits are all 0, then we might as well use memset.
         // No rounding required in this case.
         const uint32 fill = precision - 9 * i;
@@ -485,7 +487,7 @@ int d2fixed_buffered_n(double d, uint32 precision, char* result) {
       }
       // Temporary: j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in mulShift_mod1e9. Instead, we can just increase the multipliers.
-      digits = mulShift_mod1e9(m2 << 8, POW10_SPLIT_2[p], j + 8);
+      digits = mulShift_mod1e9(m2 << 8, pow10_split_2[p], j + 8);
 #ifdef RYU_DEBUG
       printf("digits=%u\n", digits);
 #endif
@@ -678,7 +680,9 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
       const int32 j = (int32)p10bits - e2;
       // Temporary: j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in mulShift_mod1e9. Instead, we can just increase the multipliers.
-      digits = mulShift_mod1e9(m2 << 8, POW10_SPLIT[POW10_OFFSET[idx] + i], j + 8);
+      digits = mulShift_mod1e9(m2 << 8,
+                               pow10_split[pow10_offset[idx] + i],
+                               j + 8);
       if (printedDigits != 0) {
         if (printedDigits + 9 > precision) {
           availableDigits = 9;
@@ -708,20 +712,25 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
   if (e2 < 0 && availableDigits == 0) {
     const int32 idx = -e2 / 16;
 #ifdef RYU_DEBUG
-    printf("idx=%d, e2=%d, min=%d\n", idx, e2, MIN_BLOCK_2[idx]);
+    printf("idx=%d, e2=%d, min=%d\n", idx, e2, min_block_2[idx]);
 #endif
-    for (int32 i = MIN_BLOCK_2[idx]; i < 200; ++i) {
-      const int32 j = ADDITIONAL_BITS_2 + (-e2 - 16 * idx);
-      const uint32 p = POW10_OFFSET_2[idx] + (uint32) i - MIN_BLOCK_2[idx];
+    for (int32 i = min_block_2[idx]; i < 200; ++i) {
+      const int32 j = POW10_ADDITIONAL_BITS_2 + (-e2 - 16 * idx);
+      const uint32 p = pow10_offset_2[idx] + (uint32) i - min_block_2[idx];
       // Temporary: j is usually around 128, and by shifting a bit, we push it to 128 or above, which is
       // a slightly faster code path in mulShift_mod1e9. Instead, we can just increase the multipliers.
-      if (p >= POW10_OFFSET_2[idx + 1]) {
+      if (p >= pow10_offset_2[idx + 1]) {
         digits = 0;
       } else {
-        digits = mulShift_mod1e9(m2 << 8, POW10_SPLIT_2[p], j + 8);
+        digits = mulShift_mod1e9(m2 << 8, pow10_split_2[p], j + 8);
       }
 #ifdef RYU_DEBUG
-      printf("exact=%" PRIu64 " * (%" PRIu64 " + %" PRIu64 " << 64) >> %d\n", m2, POW10_SPLIT_2[p][0], POW10_SPLIT_2[p][1], j);
+      printf("exact=%" PRIu64 " * (%" PRIu64 " + %" PRIu64
+             " << 64) >> %d\n",
+             m2,
+             pow10_split_2[p][0],
+             pow10_split_2[p][1],
+             j);
       printf("digits=%u\n", digits);
 #endif
       if (printedDigits != 0) {
@@ -852,10 +861,10 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
   if (exp >= 100) {
     const int32 c = exp % 100;
     result[index] = (char)('0' + exp/100);
-    memcpy(result + index + 1, DIGIT_TABLE + 2*c, 2);
+    memcpy(result + index + 1, digit_table + 2*c, 2);
     index += 3;
   } else {
-    memcpy(result + index, DIGIT_TABLE + 2 * exp, 2);
+    memcpy(result + index, digit_table + 2 * exp, 2);
     index += 2;
   }
 
