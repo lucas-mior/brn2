@@ -544,29 +544,31 @@ ryu_decimal_finish(const char *buffer, int32 parsed_len,
 #if defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
     double_computePow5(e10, pow5);
-    m2 = mulShift64(m10, pow5, j);
+    m2 = mul_shift64(m10, pow5, j);
 #else
     assert(e10 < DOUBLE_POW5_TABLE_SIZE);
-    m2 = mulShift64(m10, DOUBLE_POW5_SPLIT[e10], j);
+    m2 = mul_shift64(m10, DOUBLE_POW5_SPLIT[e10], j);
 #endif
     // We also compute if the result is exact, i.e.,
     //   [m10 * 10^e10 / 2^e2] == m10 * 10^e10 / 2^e2.
     // This can only be the case if 2^e2 divides m10 * 10^e10, which in turn requires that the
     // largest power of 2 that divides m10 + e10 is greater than e2. If e2 is less than e10, then
-    // the result must be exact. Otherwise we use the existing multipleOfPowerOf2 function.
-    trailingZeros = e2 < e10 || (e2 - e10 < 64 && multipleOfPowerOf2(m10, e2 - e10));
+    // the result must be exact. Otherwise we use the existing
+    // multiple_of_power_of2 function.
+    trailingZeros = e2 < e10
+      || (e2 - e10 < 64 && multiple_of_power_of2(m10, e2 - e10));
   } else {
     e2 = floor_log2(m10) + e10 - ceil_log2_pow5(-e10) - (DOUBLE_MANTISSA_BITS + 1);
     int j = e2 - e10 + ceil_log2_pow5(-e10) - 1 + DOUBLE_POW5_INV_BITCOUNT;
 #if defined(RYU_OPTIMIZE_SIZE)
     uint64 pow5[2];
     double_computeInvPow5(-e10, pow5);
-    m2 = mulShift64(m10, pow5, j);
+    m2 = mul_shift64(m10, pow5, j);
 #else
     assert(-e10 < DOUBLE_POW5_INV_TABLE_SIZE);
-    m2 = mulShift64(m10, DOUBLE_POW5_INV_SPLIT[-e10], j);
+    m2 = mul_shift64(m10, DOUBLE_POW5_INV_SPLIT[-e10], j);
 #endif
-    trailingZeros = multipleOfPowerOf5(m10, -e10);
+    trailingZeros = multiple_of_power_of5(m10, -e10);
   }
 
 #ifdef RYU_DEBUG

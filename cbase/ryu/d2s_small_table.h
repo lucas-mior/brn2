@@ -150,8 +150,9 @@ static inline void double_computePow5(const uint32 i, uint64* const result) {
   }
   // high1 | sum | low0
   const uint32 delta = pow5_bits(i) - pow5_bits(base2);
-  result[0] = shiftright128(low0, sum, delta) + ((POW5_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
-  result[1] = shiftright128(sum, high1, delta);
+  result[0] = shift_right128(low0, sum, delta)
+    + ((POW5_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
+  result[1] = shift_right128(sum, high1, delta);
 }
 
 // Computes 5^-i in the form required by Ryu, and stores it in the given pointer.
@@ -177,8 +178,9 @@ static inline void double_computeInvPow5(const uint32 i, uint64* const result) {
   // high1 | sum | low0
   const uint32 delta = pow5_bits(base2) - pow5_bits(i);
   assert(i / 16 < sizeof(POW5_INV_OFFSETS) / sizeof(POW5_INV_OFFSETS[0]));
-  result[0] = shiftright128(low0, sum, delta) + 1 + ((POW5_INV_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
-  result[1] = shiftright128(sum, high1, delta);
+  result[0] = shift_right128(low0, sum, delta) + 1
+    + ((POW5_INV_OFFSETS[i / 16] >> ((i % 16) << 1)) & 3);
+  result[1] = shift_right128(sum, high1, delta);
 }
 
 #endif // defined(HAS_UINT128)

@@ -168,7 +168,7 @@ static inline uint32 mulShift_mod1e9(const uint64 m, const uint64* const mul, co
 #if defined(HAS_64_BIT_INTRINSICS)
   const uint32 dist = (uint32) (j - 128); // dist: [0, 52]
   const uint64 shiftedhigh = s1high >> dist;
-  const uint64 shiftedlow = shiftright128(s1low, s1high, dist);
+  const uint64 shiftedlow = shift_right128(s1low, s1high, dist);
   return uint128_mod1e9(shiftedhigh, shiftedlow);
 #else // HAS_64_BIT_INTRINSICS
   if (j < 160) { // j: [128, 160)
@@ -508,7 +508,8 @@ int d2fixed_buffered_n(double d, uint32 precision, char* result) {
           // Is m * 10^(additionalDigits + 1) / 2^(-e2) integer?
           const int32 requiredTwos = -e2 - (int32) precision - 1;
           const bool trailingZeros = requiredTwos <= 0
-            || (requiredTwos < 60 && multipleOfPowerOf2(m2, (uint32) requiredTwos));
+            || (requiredTwos < 60
+                && multiple_of_power_of2(m2, (uint32) requiredTwos));
           roundUp = trailingZeros ? 2 : 1;
 #ifdef RYU_DEBUG
           printf("requiredTwos=%d\n", requiredTwos);
@@ -777,10 +778,12 @@ int d2exp_buffered_n(double d, uint32 precision, char* result) {
     rexp = (int32) precision - exp;
     requiredTwos = -e2 - rexp;
     trailingZeros = requiredTwos <= 0
-      || (requiredTwos < 60 && multipleOfPowerOf2(m2, (uint32) requiredTwos));
+      || (requiredTwos < 60
+          && multiple_of_power_of2(m2, (uint32) requiredTwos));
     if (rexp < 0) {
       requiredFives = -rexp;
-      trailingZeros = trailingZeros && multipleOfPowerOf5(m2, (uint32) requiredFives);
+      trailingZeros = trailingZeros
+        && multiple_of_power_of5(m2, (uint32) requiredFives);
     }
     roundUp = trailingZeros ? 2 : 1;
 #ifdef RYU_DEBUG

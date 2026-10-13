@@ -153,9 +153,9 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
     i = -e2 + (int32)q + k;
 #if defined(RYU_OPTIMIZE_SIZE)
     double_computeInvPow5(q, pow5);
-    vr = mulShiftAll64(m2, pow5, i, &vp, &vm, mmShift);
+    vr = mul_shift_all64(m2, pow5, i, &vp, &vm, mmShift);
 #else
-    vr = mulShiftAll64(m2, DOUBLE_POW5_INV_SPLIT[q], i, &vp, &vm, mmShift);
+    vr = mul_shift_all64(m2, DOUBLE_POW5_INV_SPLIT[q], i, &vp, &vm, mmShift);
 #endif
 #ifdef RYU_DEBUG
     printf("%" PRIu64 " * 2^%d / 10^%u\n", mv, e2, q);
@@ -167,15 +167,15 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
       // Only one of mp, mv, and mm can be a multiple of 5, if any.
       mvMod5 = ((uint32)mv) - 5 * ((uint32)div5(mv));
       if (mvMod5 == 0) {
-        vrIsTrailingZeros = multipleOfPowerOf5(mv, q);
+        vrIsTrailingZeros = multiple_of_power_of5(mv, q);
       } else if (acceptBounds) {
-        // Same as min(e2 + (~mm & 1), pow5Factor(mm)) >= q
-        // <=> e2 + (~mm & 1) >= q && pow5Factor(mm) >= q
-        // <=> true && pow5Factor(mm) >= q, since e2 >= q.
-        vmIsTrailingZeros = multipleOfPowerOf5(mv - 1 - mmShift, q);
+        // Same as min(e2 + (~mm & 1), pow5_factor(mm)) >= q
+        // <=> e2 + (~mm & 1) >= q && pow5_factor(mm) >= q
+        // <=> true && pow5_factor(mm) >= q, since e2 >= q.
+        vmIsTrailingZeros = multiple_of_power_of5(mv - 1 - mmShift, q);
       } else {
-        // Same as min(e2 + 1, pow5Factor(mp)) >= q.
-        vp -= multipleOfPowerOf5(mv + 2, q);
+        // Same as min(e2 + 1, pow5_factor(mp)) >= q.
+        vp -= multiple_of_power_of5(mv + 2, q);
       }
     }
   } else {
@@ -187,9 +187,9 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
     j = (int32)q - k;
 #if defined(RYU_OPTIMIZE_SIZE)
     double_computePow5(i, pow5);
-    vr = mulShiftAll64(m2, pow5, j, &vp, &vm, mmShift);
+    vr = mul_shift_all64(m2, pow5, j, &vp, &vm, mmShift);
 #else
-    vr = mulShiftAll64(m2, DOUBLE_POW5_SPLIT[i], j, &vp, &vm, mmShift);
+    vr = mul_shift_all64(m2, DOUBLE_POW5_SPLIT[i], j, &vp, &vm, mmShift);
 #endif
 #ifdef RYU_DEBUG
     printf("%" PRIu64 " * 5^%d / 10^%u\n", mv, -e2, q);
@@ -212,7 +212,7 @@ static inline floating_decimal_64 d2d(const uint64 ieeeMantissa, const uint32 ie
       // We need to compute min(p2(mv), p5(mv) - e2) >= q
       // <=> p2(mv) >= q && p5(mv) - e2 >= q
       // <=> p2(mv) >= q (because -e2 >= q)
-      vrIsTrailingZeros = multipleOfPowerOf2(mv, q);
+      vrIsTrailingZeros = multiple_of_power_of2(mv, q);
 #ifdef RYU_DEBUG
       printf("vr is trailing zeros=%s\n", vrIsTrailingZeros ? "true" : "false");
 #endif
