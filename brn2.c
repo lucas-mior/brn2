@@ -1421,7 +1421,7 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
     fatal(EXIT_FAILURE);
 }
 
-int32 (*print)(const char *, ...) = fmt_printf;
+int32 (*print)(char *, ...) = fmt_printf;
 
 int
 main(void) {
