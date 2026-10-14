@@ -558,8 +558,10 @@ main(int argc, char **argv) {
             if (lines_target) {
                 exit(EXIT_FAILURE);
             } else {
-                fmt_printf("Fix your renames. Press control-c to cancel or press"
-                       " ENTER to open the file list editor again.\n");
+                fmt_printf("Fix your renames."
+                           " Press control-c to cancel"
+                           " or press ENTER"
+                           " to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
             }
