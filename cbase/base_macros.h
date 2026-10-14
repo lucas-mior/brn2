@@ -159,7 +159,7 @@ _Generic((SIZE), \
 
 #if CC_GCC || CC_CLANG
 #define UNUSED __attribute((unused))
-#define ATTR_PRINTF(A, B) __attribute__((format(fmt_printf, A, B)))
+#define ATTR_PRINTF(A, B) __attribute__((format(printf, A, B)))
 #else
 #define UNUSED
 #define ATTR_PRINTF(A, B)
