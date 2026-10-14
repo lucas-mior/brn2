@@ -1451,10 +1451,10 @@ main(void) {
 
             SNPRINTF(buffer_old, "arena_old[%d]", i);
             SNPRINTF(buffer_new, "arena_new[%d]", i);
-            list1->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
-            list2->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                            buffer_old);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                            buffer_new);
         }
 
         ASSERT_ZERO(system(command));
@@ -1508,10 +1508,10 @@ main(void) {
 
             SNPRINTF(buffer_old, "arena_old[%d]", i);
             SNPRINTF(buffer_new, "arena_new[%d]", i);
-            list1->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
-            list2->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                            buffer_old);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                            buffer_new);
         }
 
         ASSERT_ZERO(system(command));
@@ -1609,10 +1609,10 @@ main(void) {
 
             SNPRINTF(buffer_old, "arena_old[%d]", i);
             SNPRINTF(buffer_new, "arena_new[%d]", i);
-            list1->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
-            list2->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
+            list1->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                            buffer_old);
+            list2->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                            buffer_new);
         }
 
         ASSERT_ZERO(system(command));
@@ -1754,10 +1754,10 @@ main(void) {
 
             SNPRINTF(buffer_old, "arena_old[%d]", i);
             SNPRINTF(buffer_new, "arena_new[%d]", i);
-            old->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
-            new->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_new);
+            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                          buffer_old);
+            new->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                          buffer_new);
         }
 
         for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
@@ -1789,8 +1789,7 @@ main(void) {
             int64 size;
             char path[512];
 
-            name_length
-                = (int32)SNPRINTF(path, "%s/%s", directory, files[i].renamed);
+            name_length = SNPRINTF(path, "%s/%s", directory, files[i].renamed);
 
             size = STRUCT_ARRAY_SIZE(file, char, name_length + 2);
             *file_pointer = xarenas_push(new->arenas, nthreads, ALIGN(size));
@@ -1917,8 +1916,8 @@ main(void) {
         for (int32 i = 0; i < nthreads; i += 1) {
             char buffer_old[256];
             SNPRINTF(buffer_old, "arena_old[%d]", i);
-            old->arenas[i]
-                = arena_create(BRN2_ARENA_SIZE / nthreads, buffer_old);
+            old->arenas[i] = arena_create(BRN2_ARENA_SIZE / nthreads,
+                                          buffer_old);
         }
 
         if ((args = fopen(filelist, "w")) == NULL) {
