@@ -663,7 +663,7 @@ d2fixed_buffered_n(double d, uint32 precision, char *result) {
 #if defined(RYU_DEBUG)
                     fmt_printf("requiredTwos=%d\n", required_twos);
                     fmt_printf("trailingZeros=%s\n",
-                           trailing_zeros ? "true" : "false");
+                               trailing_zeros ? "true" : "false");
 #endif
                 }
                 if (maximum > 0) {
@@ -901,8 +901,8 @@ d2exp_buffered_n(double d, uint32 precision, char *result) {
             }
 #if defined(RYU_DEBUG)
             fmt_printf("exact=%" PRIu64 " * (%" PRIu64 " + %" PRIu64
-                   " << 64) >> %d\n",
-                   m2, pow10_split_2[p][0], pow10_split_2[p][1], j);
+                       " << 64) >> %d\n",
+                       m2, pow10_split_2[p][0], pow10_split_2[p][1], j);
             fmt_printf("digits=%u\n", digits);
 #endif
             if (printed_digits != 0) {

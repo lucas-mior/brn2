@@ -1402,8 +1402,8 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
         }
         if (!memcmp64(list->files[i]->name, file->name, (int64)file->length)) {
             fmt_printf(GREEN("%.*s == %.*s") "\n",
-                   file->length, file->name,
-                   list->files[i]->length, list->files[i]->name);
+                       file->length, file->name,
+                       list->files[i]->length, list->files[i]->name);
             if (i < (list->length - 1)) {
                 list->length -= 1;
                 memmove64(&list->files[i], &list->files[i + 1],
@@ -1413,8 +1413,8 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
         }
         if (verbose) {
             fmt_printf("%d / %d | %.*s != %.*s \n",
-                   i + 1, list->length, list->files[i]->length,
-                   list->files[i]->name, file->length, file->name);
+                       i + 1, list->length, list->files[i]->length,
+                       list->files[i]->name, file->length, file->name);
         }
     }
     error("List does not contain '%.*s'\n", file->length, file->name);

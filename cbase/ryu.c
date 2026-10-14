@@ -1028,7 +1028,7 @@ tryu_benchmark_d2s(int32 nitems) {
     }
     t1 = time_monotonic_now();
     fmt_printf("ryu bench d2s_buffered_n: %lld ns/op sink=%lld\n",
-           (llong)((t1 - t0) / nitems), (llong)total_len);
+               (llong)((t1 - t0) / nitems), (llong)total_len);
     return;
 }
 
@@ -1049,7 +1049,7 @@ tryu_benchmark_f2s(int32 nitems) {
     }
     t1 = time_monotonic_now();
     fmt_printf("ryu bench f2s_buffered_n: %lld ns/op sink=%lld\n",
-           (llong)((t1 - t0) / nitems), (llong)total_len);
+               (llong)((t1 - t0) / nitems), (llong)total_len);
     return;
 }
 
@@ -1070,7 +1070,7 @@ tryu_benchmark_d2fixed(int32 nitems) {
     }
     t1 = time_monotonic_now();
     fmt_printf("ryu bench d2fixed_buffered_n: %lld ns/op sink=%lld\n",
-           (llong)((t1 - t0) / nitems), (llong)total_len);
+               (llong)((t1 - t0) / nitems), (llong)total_len);
     return;
 }
 
@@ -1091,7 +1091,7 @@ tryu_benchmark_d2exp(int32 nitems) {
     }
     t1 = time_monotonic_now();
     fmt_printf("ryu bench d2exp_buffered_n: %lld ns/op sink=%lld\n",
-           (llong)((t1 - t0) / nitems), (llong)total_len);
+               (llong)((t1 - t0) / nitems), (llong)total_len);
     return;
 }
 
@@ -1115,7 +1115,7 @@ tryu_benchmark_s2d_fast(int32 nitems) {
     }
     t1 = time_monotonic_now();
     fmt_printf("ryu bench s2d_fast: %lld ns/op sink=%lld\n",
-           (llong)((t1 - t0) / nitems), (llong)total_used);
+               (llong)((t1 - t0) / nitems), (llong)total_used);
     return;
 }
 
@@ -1137,8 +1137,8 @@ tryu_run_optional_benchmarks(void) {
     fmt_printf("ryu bench compiler: unknown\n");
 #endif
     fmt_printf("ryu bench sizes: float=%lld double=%lld long_double=%lld\n",
-           (llong)SIZEOF(float), (llong)SIZEOF(double),
-           (llong)SIZEOF(long double));
+               (llong)SIZEOF(float), (llong)SIZEOF(double),
+               (llong)SIZEOF(long double));
 #if defined(__SIZEOF_INT128__)
     fmt_printf("ryu bench uint128: available\n");
 #else

@@ -245,7 +245,7 @@ generic_update_trailing_negative(uint128 mv, uint32 q, uint32 mm_shift,
         *vr_trailing_zeros = generic_multiple_of_power_of2(mv, q - 1);
 #if defined(RYU_DEBUG)
         fmt_printf("vr is trailing zeros=%s\n",
-               generic_bool_string(*vr_trailing_zeros));
+                   generic_bool_string(*vr_trailing_zeros));
 #endif
     }
     return;
@@ -365,8 +365,10 @@ generic_binary_to_decimal(__uint128_t bits, uint32 mantissa_bits,
 #if defined(RYU_DEBUG)
     fmt_printf("e10=%d\n", e10);
     fmt_printf("V+=%s\nV =%s\nV-=%s\n", ryu_s(vp), ryu_s(vr), ryu_s(vm));
-    fmt_printf("vm is trailing zeros=%s\n", generic_bool_string(vm_trailing_zeros));
-    fmt_printf("vr is trailing zeros=%s\n", generic_bool_string(vr_trailing_zeros));
+    fmt_printf("vm is trailing zeros=%s\n",
+               generic_bool_string(vm_trailing_zeros));
+    fmt_printf("vr is trailing zeros=%s\n",
+               generic_bool_string(vr_trailing_zeros));
 #endif
 
     // Step 4: Find the shortest decimal representation in the interval of
@@ -384,7 +386,8 @@ generic_binary_to_decimal(__uint128_t bits, uint32 mantissa_bits,
     }
 #if defined(RYU_DEBUG)
     fmt_printf("%s %u\n", ryu_s(vr), last_removed_digit);
-    fmt_printf("vr is trailing zeros=%s\n", generic_bool_string(vr_trailing_zeros));
+    fmt_printf("vr is trailing zeros=%s\n",
+               generic_bool_string(vr_trailing_zeros));
 #endif
     if (vr_trailing_zeros && (last_removed_digit == 5) && (vr % 2 == 0)) {
         // Round even if the exact numbers is .....50..0.

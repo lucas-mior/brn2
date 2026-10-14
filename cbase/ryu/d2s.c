@@ -201,7 +201,8 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
 #endif
 #if defined(RYU_DEBUG)
         fmt_printf("%" PRIu64 " * 2^%d / 10^%u\n", mv, e2, q);
-        fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n", vp, vr, vm);
+        fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n",
+                   vp, vr, vm);
 #endif
         if (q <= 21) {
             // This should use q <= 22, but I think 21 is also safe. Smaller
@@ -238,7 +239,8 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
 #if defined(RYU_DEBUG)
         fmt_printf("%" PRIu64 " * 5^%d / 10^%u\n", mv, -e2, q);
         fmt_printf("%u %d %d %d\n", q, i, k, j);
-        fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n", vp, vr, vm);
+        fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n",
+                   vp, vr, vm);
 #endif
         if (q <= 1) {
             // {vr,vp,vm} is trailing zeros if {mv,mp,mm} has at least q
@@ -262,7 +264,7 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
             vr_is_trailing_zeros = multiple_of_power_of2(mv, q);
 #if defined(RYU_DEBUG)
             fmt_printf("vr is trailing zeros=%s\n",
-                   vr_is_trailing_zeros ? "true" : "false");
+                       vr_is_trailing_zeros ? "true" : "false");
 #endif
         }
     }
@@ -270,9 +272,9 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
     fmt_printf("e10=%d\n", e10);
     fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n", vp, vr, vm);
     fmt_printf("vm is trailing zeros=%s\n",
-           vm_is_trailing_zeros ? "true" : "false");
+               vm_is_trailing_zeros ? "true" : "false");
     fmt_printf("vr is trailing zeros=%s\n",
-           vr_is_trailing_zeros ? "true" : "false");
+               vr_is_trailing_zeros ? "true" : "false");
 #endif
 
     // Step 4: Find the shortest decimal representation in the interval of
@@ -297,7 +299,8 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
             removed += 1;
         }
 #if defined(RYU_DEBUG)
-        fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n", vp, vr, vm);
+        fmt_printf("V+=%" PRIu64 "\nV =%" PRIu64 "\nV-=%" PRIu64 "\n",
+                   vp, vr, vm);
         fmt_printf("d-10=%s\n", vm_is_trailing_zeros ? "true" : "false");
 #endif
         if (vm_is_trailing_zeros) {
@@ -321,7 +324,7 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
 #if defined(RYU_DEBUG)
         fmt_printf("%" PRIu64 " %d\n", vr, last_removed_digit);
         fmt_printf("vr is trailing zeros=%s\n",
-               vr_is_trailing_zeros ? "true" : "false");
+                   vr_is_trailing_zeros ? "true" : "false");
 #endif
         if (vr_is_trailing_zeros && last_removed_digit == 5 && vr % 2 == 0) {
             // Round even if the exact number is .....50..0.
@@ -370,7 +373,7 @@ d2s_to_decimal(uint64 ieee_mantissa, uint32 ieee_exponent) {
 #if defined(RYU_DEBUG)
         fmt_printf("%" PRIu64 " roundUp=%s\n", vr, round_up ? "true" : "false");
         fmt_printf("vr is trailing zeros=%s\n",
-               vr_is_trailing_zeros ? "true" : "false");
+                   vr_is_trailing_zeros ? "true" : "false");
 #endif
         // We need to take vr + 1 if vr is outside bounds or we need to round
         // up.

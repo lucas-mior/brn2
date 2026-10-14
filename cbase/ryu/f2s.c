@@ -164,7 +164,7 @@ f2s_to_decimal(uint32 ieee_mantissa, uint32 ieee_exponent) {
             vr_is_trailing_zeros = multiple_of_power_of2_32(mv, q - 1);
 #if defined(RYU_DEBUG)
             fmt_printf("vr is trailing zeros=%s\n",
-                   vr_is_trailing_zeros ? "true" : "false");
+                       vr_is_trailing_zeros ? "true" : "false");
 #endif
         }
     }
@@ -172,9 +172,9 @@ f2s_to_decimal(uint32 ieee_mantissa, uint32 ieee_exponent) {
     fmt_printf("e10=%d\n", e10);
     fmt_printf("V+=%u\nV =%u\nV-=%u\n", vp, vr, vm);
     fmt_printf("vm is trailing zeros=%s\n",
-           vm_is_trailing_zeros ? "true" : "false");
+               vm_is_trailing_zeros ? "true" : "false");
     fmt_printf("vr is trailing zeros=%s\n",
-           vr_is_trailing_zeros ? "true" : "false");
+               vr_is_trailing_zeros ? "true" : "false");
 #endif
 
     // Step 4: Find the shortest decimal representation in the interval of
@@ -214,7 +214,7 @@ f2s_to_decimal(uint32 ieee_mantissa, uint32 ieee_exponent) {
 #if defined(RYU_DEBUG)
         fmt_printf("%u %d\n", vr, last_removed_digit);
         fmt_printf("vr is trailing zeros=%s\n",
-               vr_is_trailing_zeros ? "true" : "false");
+                   vr_is_trailing_zeros ? "true" : "false");
 #endif
         if (vr_is_trailing_zeros && last_removed_digit == 5 && vr % 2 == 0) {
             // Round even if the exact number is .....50..0.
@@ -239,7 +239,7 @@ f2s_to_decimal(uint32 ieee_mantissa, uint32 ieee_exponent) {
 #if defined(RYU_DEBUG)
         fmt_printf("%u %d\n", vr, last_removed_digit);
         fmt_printf("vr is trailing zeros=%s\n",
-               vr_is_trailing_zeros ? "true" : "false");
+                   vr_is_trailing_zeros ? "true" : "false");
 #endif
         // We need to take vr + 1 if vr is outside bounds or we need to round
         // up.
