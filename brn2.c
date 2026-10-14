@@ -805,8 +805,7 @@ brn2_verify(
     bool failed = false;
 
     free2(new->rename_plans, new->rename_plans_size);
-    new->rename_plans_size
-        = (int64)new->length*SIZEOF(*(new->rename_plans));
+    new->rename_plans_size = (int64)new->length*SIZEOF(*(new->rename_plans));
     new->rename_plans = malloc2_zero(new->rename_plans_size);
 
     for (int32 i = 0; i < new->length; i += 1) {
@@ -889,16 +888,16 @@ brn2_verify(
                               owner_oldfile->length,
                               owner_oldfile->name);
                         if (brn2_options_autosolve) {
-                            Brn2RenamePlan *mover_plan
-                                = &(new->rename_plans[mover_index]);
-                            Brn2RenamePlan *owner_plan
-                                = &(new->rename_plans[owner_index]);
+                            Brn2RenamePlan *mover_plan =
+                                &(new->rename_plans[mover_index]);
+                            Brn2RenamePlan *owner_plan =
+                                &(new->rename_plans[owner_index]);
 
-                            mover_plan->execution_mode
-                                = BRN2_RENAME_REPLACE_EQUAL_TARGET;
+                            mover_plan->execution_mode =
+                                BRN2_RENAME_REPLACE_EQUAL_TARGET;
                             mover_plan->conflicting_owner_index = owner_index;
-                            owner_plan->execution_mode
-                                = BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER;
+                            owner_plan->execution_mode =
+                                BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER;
                             owner_plan->conflicting_owner_index = mover_index;
                             error("--autosolve is enabled:"
                                   " Planning equal-file replacement.\n");
