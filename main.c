@@ -526,8 +526,10 @@ main(int argc, char **argv) {
                       old->length, old->length != 1, "s",
                       new->length, new->length != 1, "s");
                 brn2_free_list(new);
-                fmt_printf("Fix your renames. Press control-c to cancel or press"
-                       " ENTER to open the file list editor again.\n");
+                fmt_printf("Fix your renames."
+                           " Press control-c to cancel"
+                           " or press ENTER"
+                           " to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
             }
