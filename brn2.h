@@ -85,7 +85,7 @@ extern bool brn2_options_autosolve;
 extern bool brn2_options_vim_split;
 extern int32 nthreads;
 
-extern int (*print)(const char *, ...);
+extern int (*print)(char *, ...);
 
 INLINE int32 brn2_compare(void *, void *);
 void brn2_list_from_dir(FileList *, char *);
