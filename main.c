@@ -299,7 +299,7 @@ main(int argc, char **argv) {
 #endif
 
     if (!brn2_options_quiet) {
-        printf("Normalizing filenames...\n");
+        fmt_printf("Normalizing filenames...\n");
     }
 
 #if BRN2_NORMALIZE_NAMES_BENCHMARK
@@ -526,7 +526,7 @@ main(int argc, char **argv) {
                       old->length, old->length != 1, "s",
                       new->length, new->length != 1, "s");
                 brn2_free_list(new);
-                printf("Fix your renames. Press control-c to cancel or press"
+                fmt_printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
@@ -556,7 +556,7 @@ main(int argc, char **argv) {
             if (lines_target) {
                 exit(EXIT_FAILURE);
             } else {
-                printf("Fix your renames. Press control-c to cancel or press"
+                fmt_printf("Fix your renames. Press control-c to cancel or press"
                        " ENTER to open the file list editor again.\n");
                 fgetc(stdin);
                 continue;
@@ -582,7 +582,7 @@ main(int argc, char **argv) {
             if (brn2_options_quiet) {
                 print = noop;
             } else {
-                print = printf;
+                print = fmt_printf;
             }
 
             brn2_execute(old, new, oldlist_map, names_renamed, &number_renames);
@@ -618,7 +618,7 @@ main(int argc, char **argv) {
         arenas_destroy(new->arenas, narenas);
     }
 #if OS_WINDOWS
-    printf("Press enter to continue.\n");
+    fmt_printf("Press enter to continue.\n");
     fgetc(stdin);
 #endif
     exit(EXIT_SUCCESS);

@@ -457,13 +457,13 @@ typedef struct FmtLocale {
 
 extern const FmtLocale fmt_locale_c;
 
-// cbase printf-compatible formatter. It returns the byte count that would
+// cbase fmt_printf-compatible formatter. It returns the byte count that would
 // have been written, excluding the terminating '\0'. It writes a terminating
 // '\0' when capacity is positive. buffer may be NULL only when capacity is
 // zero. Negative returns are errno-style failures. Floating precision is
 // bounded by the exact fixed-decimal limit of the argument type; larger
 // explicit precisions return -ERANGE. See cbase/README.md for the exact
-// supported grammar and deliberate differences from libc printf.
+// supported grammar and deliberate differences from libc fmt_printf.
 // The runtime NULL-string representation is process configuration. Call this
 // only during single-threaded initialization, before any formatter use. Passing
 // NULL is a programmer error. The selected string is not copied and must remain

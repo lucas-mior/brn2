@@ -70,7 +70,7 @@ typedef             const char* cstr_raw;
 #define             cstr_lit(literal) cstr_from_n(literal, c_litstrlen(literal))
 
 extern  cstr        cstr_from_replace(csview sv, csview search, csview repl, int32_t count);
-extern  cstr        cstr_from_fmt(const char* fmt, ...) c_GNUATTR(format(printf, 1, 2));
+extern  cstr        cstr_from_fmt(const char* fmt, ...) c_GNUATTR(format(fmt_printf, 1, 2));
 
 extern  void        cstr_drop(const cstr* self);
 extern  cstr*       cstr_take(cstr* self, const cstr s);
@@ -81,12 +81,12 @@ extern  isize_t     cstr_find_at(const cstr* self, isize_t pos, const char* sear
 extern  isize_t     cstr_find_sv(const cstr* self, csview search);
 extern  char*       cstr_assign_n(cstr* self, const char* str, isize_t len);
 extern  char*       cstr_append_n(cstr* self, const char* str, isize_t len);
-extern  isize_t     cstr_append_fmt(cstr* self, const char* fmt, ...) c_GNUATTR(format(printf, 2, 3));
+extern  isize_t     cstr_append_fmt(cstr* self, const char* fmt, ...) c_GNUATTR(format(fmt_printf, 2, 3));
 extern  char*       cstr_append_uninit(cstr *self, isize_t len);
 
 extern  bool        cstr_getdelim(cstr *self, int delim, FILE *fp);
 extern  void        cstr_erase(cstr* self, isize_t pos, isize_t len);
-extern  isize_t     cstr_printf(cstr* self, const char* fmt, ...) c_GNUATTR(format(printf, 2, 3));
+extern  isize_t     cstr_printf(cstr* self, const char* fmt, ...) c_GNUATTR(format(fmt_printf, 2, 3));
 extern  isize_t     cstr_vfmt(cstr* self, isize_t start, const char* fmt, va_list args);
 extern  size_t      cstr_hash(const cstr *self);
 extern  bool        cstr_u8_valid(const cstr* self);

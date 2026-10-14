@@ -1401,7 +1401,7 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             continue;
         }
         if (!memcmp64(list->files[i]->name, file->name, (int64)file->length)) {
-            printf(GREEN("%.*s == %.*s") "\n",
+            fmt_printf(GREEN("%.*s == %.*s") "\n",
                    file->length, file->name,
                    list->files[i]->length, list->files[i]->name);
             if (i < (list->length - 1)) {
@@ -1412,7 +1412,7 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
             return;
         }
         if (verbose) {
-            printf("%d / %d | %.*s != %.*s \n",
+            fmt_printf("%d / %d | %.*s != %.*s \n",
                    i + 1, list->length, list->files[i]->length,
                    list->files[i]->name, file->length, file->name);
         }
@@ -1421,7 +1421,7 @@ brn2_assert_contains_filename(FileList *list, FileName *file, bool verbose) {
     fatal(EXIT_FAILURE);
 }
 
-int32 (*print)(const char *, ...) = printf;
+int32 (*print)(const char *, ...) = fmt_printf;
 
 int
 main(void) {
@@ -1469,7 +1469,7 @@ main(void) {
 
         for (int32 i = 0; i < list1->length; i += 1) {
             bool verbose;
-            printf(RED("%d / %d\n"), i + 1, list1->length);
+            fmt_printf(RED("%d / %d\n"), i + 1, list1->length);
             if (list1->length < 9999) {
                 verbose = true;
             } else {
@@ -1527,7 +1527,7 @@ main(void) {
 
         for (int32 i = 0; i < list1->length; i += 1) {
             bool verbose;
-            printf(RED("%d / %d\n"), i + 1, list1->length);
+            fmt_printf(RED("%d / %d\n"), i + 1, list1->length);
             if (list1->length < 9999) {
                 verbose = true;
             } else {
@@ -1659,7 +1659,7 @@ main(void) {
 
         for (int32 i = 0; i < list1->length; i += 1) {
             bool verbose;
-            printf(RED("%d / %d\n"), i + 1, list1->length);
+            fmt_printf(RED("%d / %d\n"), i + 1, list1->length);
             if (list1->length < 9999) {
                 verbose = true;
             } else {
@@ -1667,7 +1667,7 @@ main(void) {
             }
             brn2_assert_contains_filename(list2, list1->files[i], verbose);
         }
-        printf(RESET);
+        fmt_printf(RESET);
 
         map = hash_create_map((uint32)list1->length, "map");
         capacity_set = hash_capacity(map);

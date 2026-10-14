@@ -39,14 +39,14 @@ int main(void) {
     ints_sort(nums, c_arraylen(nums));
 
     for (int i = 0; i < c_arraylen(nums); i++)
-        printf(" %d", nums[i]);
+        fmt_printf(" %d", nums[i]);
     puts("");
 
     isize_t idx = ints_binary_search(nums, 25, c_arraylen(nums));
-    if (idx != c_NPOS) printf("found: %d\n", nums[idx]);
+    if (idx != c_NPOS) fmt_printf("found: %d\n", nums[idx]);
 
     idx = ints_lower_bound(nums, 200, c_arraylen(nums));
-    if (idx != c_NPOS) printf("found lower 200: %d\n", nums[idx]);
+    if (idx != c_NPOS) fmt_printf("found lower 200: %d\n", nums[idx]);
 }
 
 // ex2: Test on a deque !!
@@ -62,14 +62,14 @@ int main(void) {
     IDeq_sort(&nums);
 
     for (c_each (i, IDeq, nums))
-        printf(" %d", *i.ref);
+        fmt_printf(" %d", *i.ref);
     puts("");
 
     isize_t idx = IDeq_binary_search(&nums, 25);
-    if (idx != c_NPOS) printf("found: %d\n", *IDeq_at(&nums, idx));
+    if (idx != c_NPOS) fmt_printf("found: %d\n", *IDeq_at(&nums, idx));
 
     idx = IDeq_lower_bound(&nums, 200);
-    if (idx != c_NPOS) printf("found lower 200: %d\n", *IDeq_at(&nums, idx));
+    if (idx != c_NPOS) fmt_printf("found lower 200: %d\n", *IDeq_at(&nums, idx));
 
     IDeq_drop(&nums);
 }

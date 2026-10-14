@@ -1147,11 +1147,11 @@ cmd_run_capture_combined(Command *command) {
 
 void
 cmd_print(Command *command) {
-    printf(RED("%.*s"), SP(command->argv, 0));
+    fmt_printf(RED("%.*s"), SP(command->argv, 0));
     for (int32 i = 1; i < command->argc; i += 1) {
-        printf(" %.*s", SP(command->argv, i));
+        fmt_printf(" %.*s", SP(command->argv, i));
     }
-    printf("\n");
+    fmt_printf("\n");
     return;
 }
 
@@ -1567,8 +1567,8 @@ main(int argc, char **argv) {
         ASSERT_EQ(cmd.argv_lens[2], 4);
         ASSERT(cmd.argv_arena != NULL);
 
-        cmd_argv0_set(&cmd, "printf");
-        ASSERT_EQ(cmd.argv[0], "printf");
+        cmd_argv0_set(&cmd, "fmt_printf");
+        ASSERT_EQ(cmd.argv[0], "fmt_printf");
         ASSERT_EQ(cmd.argv_lens[0], 6);
         cmd_argv0_set(&cmd, "echo");
 
@@ -1681,7 +1681,7 @@ main(int argc, char **argv) {
         ASSERT_ZERO(cmd.argc);
         ASSERT_ZERO(cmd.run_elapsed_ns);
 
-        CMD_PUSH(&cmd, "sh", "-c", "printf stdout; printf stderr >&2; exit 7");
+        CMD_PUSH(&cmd, "sh", "-c", "fmt_printf stdout; fmt_printf stderr >&2; exit 7");
         ASSERT_ZERO((cmd_run_capture_combined(&cmd)));
         ASSERT_EQ(cmd.result.output, "stdoutstderr");
         ASSERT_EQ(cmd.result.stdout_output, "stdoutstderr");
@@ -1692,7 +1692,7 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd, "sh", "-c", "printf stdout; printf stderr >&2; exit 6");
+        CMD_PUSH(&cmd, "sh", "-c", "fmt_printf stdout; fmt_printf stderr >&2; exit 6");
         ASSERT_ZERO((cmd_run_capture_all(&cmd)));
         ASSERT_EQ(cmd.result.stdout_output, "stdout");
         ASSERT_EQ(cmd.result.stderr_output, "stderr");
@@ -1722,7 +1722,7 @@ main(int argc, char **argv) {
 
             stdin_data = malloc2(CMD_STDIN_TEST_LEN);
             memset64(stdin_data, 'x', CMD_STDIN_TEST_LEN);
-            CMD_PUSH(&cmd, "sh", "-c", "cat >/dev/null; printf done");
+            CMD_PUSH(&cmd, "sh", "-c", "cat >/dev/null; fmt_printf done");
             ASSERT(!cmd_stdin_buffer_set(&cmd, stdin_data, CMD_STDIN_TEST_LEN));
             ASSERT(!cmd_run_capture_all(&cmd));
             ASSERT_EQ(cmd.result.stdout_output, "done");
@@ -1792,7 +1792,7 @@ main(int argc, char **argv) {
         CMD_PUSH(&cmd,
                      "sh",
                      "-c",
-                     "printf %s:%s "
+                     "fmt_printf %s:%s "
                      "$CMD_TEST_VALUE "
                      "$CMD_TEST_NUMBER");
         ASSERT_ZERO((cmd_run_capture(&cmd, CMD_CAPTURE_STDOUT)));
@@ -1860,7 +1860,7 @@ main(int argc, char **argv) {
         cmd_reset(&cmd);
         ASSERT_ZERO(cmd.argc);
 
-        CMD_PUSH(&cmd, "sh", "-c", "printf asyncout; printf asyncerr >&2");
+        CMD_PUSH(&cmd, "sh", "-c", "fmt_printf asyncout; fmt_printf asyncerr >&2");
         ASSERT(!cmd_run_async(&cmd, CMD_CAPTURE_STDOUT |CMD_CAPTURE_STDERR));
         ASSERT_GT(cmd.result.pid, 0);
         cmd_result_read_captured(&cmd);
