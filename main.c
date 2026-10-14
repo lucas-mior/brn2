@@ -16,7 +16,7 @@ bool brn2_options_autosolve = false;
 bool brn2_options_vim_split = false;
 int32 nthreads;
 static int32 narenas;
-int32 (*print)(const char *, ...) = noop;
+int32 (*print)(char *, ...) = noop;
 
 static struct option options[] = {
     {"dir",         required_argument, NULL, 'd'},

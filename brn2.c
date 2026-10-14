@@ -919,7 +919,7 @@ brn2_verify(
 }
 
 static inline int
-noop(const char *unused, ...) {
+noop(char *unused, ...) {
     (void)unused;
     return 0;
 }
