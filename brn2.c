@@ -482,32 +482,6 @@ memmem_slash_slash(char *haystack, int64 haystack_len) {
     return NULL;
 }
 
-static inline UNUSED char *
-memmem_slash_dot_slash(char *haystack, int64 haystack_len) {
-    char *candidate;
-    char *end;
-
-    if (haystack_len < 3) {
-        return NULL;
-    }
-
-    candidate = haystack;
-    end = haystack + haystack_len - 2;
-    while (candidate < end) {
-        char *p = memchr64(candidate, '/', end - candidate);
-
-        if (p == NULL) {
-            return NULL;
-        }
-        if ((p[1] == '.') && (p[2] == '/')) {
-            return p;
-        }
-        candidate = p + 1;
-    }
-
-    return NULL;
-}
-
 void
 brn2_free_list(FileList *list) {
     if (DEBUGGING) {
