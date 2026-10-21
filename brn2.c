@@ -60,7 +60,7 @@ static void brn2_list_from_lines(FileList *, char *, bool);
 #endif
 
 static int32
-brn2_rename_exchange(const char *oldname, const char *newname) {
+brn2_rename_exchange(char *oldname, char *newname) {
     return (int32)syscall(SYS_renameat2,
                           AT_FDCWD, oldname,
                           AT_FDCWD, newname,
