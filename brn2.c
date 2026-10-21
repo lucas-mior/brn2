@@ -917,7 +917,7 @@ brn2_verify(
     return !failed;
 }
 
-static inline int
+static inline int32
 noop(char *unused, ...) {
     (void)unused;
     return 0;
