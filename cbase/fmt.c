@@ -4900,9 +4900,8 @@ fmt_vfprintf(FILE *file, char *format, va_list args) {
         error2("Error flushing stream output: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
-    if (file == stdout) {
-        write_all(STDOUT_FILENO, pbuffer, n);
-    } else if ((n > 0) && (fwrite64(pbuffer, 1, n, file) != n)) {
+
+    if (fwrite64(pbuffer, 1, n, file) != n) {
         error2("Error writing stream output: %s.\n", strerror(errno));
         fatal(EXIT_FAILURE);
     }
