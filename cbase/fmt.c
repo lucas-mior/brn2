@@ -4931,6 +4931,58 @@ fmt_fprintf(FILE *file, char *format, ...) {
     return n;
 }
 
+int32 ATTR_PRINTF(2, 0)
+fmt_vdprintf(int32 fd, char *format, va_list args) {
+    char buffer[4096];
+    char *big_buffer = NULL;
+    char *pbuffer = buffer;
+    int64 capacity = SIZEOF(buffer);
+    va_list args_copy;
+    int32 n;
+
+    va_copy(args_copy, args);
+    n = fmt_vsnprintf(pbuffer, capacity, format, args);
+
+    if (n < 0) {
+        va_end(args_copy);
+        error2("Error formatting file descriptor output (n = %d).\n", n);
+        fatal(EXIT_FAILURE);
+    }
+
+    if (n >= capacity) {
+        int32 retry_n;
+
+        capacity = (int64)n + 1;
+        big_buffer = malloc2(capacity);
+        pbuffer = big_buffer;
+        retry_n = fmt_vsnprintf(pbuffer, capacity, format, args_copy);
+        va_end(args_copy);
+        if ((retry_n < 0) || (retry_n != n)) {
+            error2("Error formatting file descriptor output (n = %d).\n",
+                   retry_n);
+            fatal(EXIT_FAILURE);
+        }
+        n = retry_n;
+    } else {
+        va_end(args_copy);
+    }
+
+    write_all(fd, pbuffer, n);
+    free2(big_buffer, capacity);
+    return n;
+}
+
+int32 ATTR_PRINTF(2, 3)
+fmt_dprintf(int32 fd, char *format, ...) {
+    va_list args;
+    int32 n;
+
+    va_start(args, format);
+    n = fmt_vdprintf(fd, format, args);
+    va_end(args);
+    return n;
+}
+
 #if TESTING_fmt
 #define CBASE_IMPLEMENT
 #include "cbase.h"
@@ -6443,6 +6495,23 @@ main(void) {
 
     test_fmt_float64_round_trip(0.1);
     test_fmt_float32_round_trip(0.1f);
+
+#if OS_UNIX
+    {
+        char output[16];
+        int fds[2];
+        int64 len;
+
+        xpipe(fds);
+        ASSERT_EQ(fmt_dprintf(fds[1], "%s:%04d", "value", 7), 10);
+        XCLOSE(&fds[1]);
+        len = read64(fds[0], output, SIZEOF(output) - 1);
+        ASSERT_EQ(len, 10);
+        output[len] = '\0';
+        ASSERT_EQ(output, "value:0007");
+        XCLOSE(&fds[0]);
+    }
+#endif
 
     exit(EXIT_SUCCESS);
 }
