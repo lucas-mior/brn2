@@ -4859,42 +4859,36 @@ fmt_strftime(char *buffer, int64 capacity,
     return fmt_strftime_l(buffer, capacity, format, time_info, &fmt_locale_c);
 }
 
-int32 ATTR_PRINTF(1, 2)
-fmt_printf(char *format, ...) {
-    return 0;
-}
-
-int32 ATTR_PRINTF(2, 3)
-fmt_fprintf(FILE *file, char *format, ...) {
+static int32
+fmt_vfprintf(FILE *file, char *format, va_list args) {
     char buffer[4096];
     char *big_buffer = NULL;
     char *pbuffer = buffer;
     int64 capacity = SIZEOF(buffer);
-    va_list args;
     va_list args_copy;
     int32 n;
 
-    va_start(args, format);
+    ASSERT(file != NULL);
+
     va_copy(args_copy, args);
     n = fmt_vsnprintf(pbuffer, capacity, format, args);
-    va_end(args);
 
     if (n < 0) {
         va_end(args_copy);
-        error2("Error formatting stdout output (n = %d).\n", n);
+        error2("Error formatting stream output (n = %d).\n", n);
         fatal(EXIT_FAILURE);
     }
 
     if (n >= capacity) {
         int32 retry_n;
 
-        capacity = n + 1;
+        capacity = (int64)n + 1;
         big_buffer = malloc2(capacity);
         pbuffer = big_buffer;
         retry_n = fmt_vsnprintf(pbuffer, capacity, format, args_copy);
         va_end(args_copy);
         if ((retry_n < 0) || (retry_n != n)) {
-            error2("Error formatting stdout output (n = %d).\n", retry_n);
+            error2("Error formatting stream output (n = %d).\n", retry_n);
             fatal(EXIT_FAILURE);
         }
         n = retry_n;
@@ -4902,13 +4896,39 @@ fmt_fprintf(FILE *file, char *format, ...) {
         va_end(args_copy);
     }
 
-    fflush(file);
+    if (fflush(file) == EOF) {
+        error2("Error flushing stream output: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
+    }
     if (file == stdout) {
         write_all(STDOUT_FILENO, pbuffer, n);
-    } else {
-        fwrite64(pbuffer, 1, n, file);
+    } else if ((n > 0) && (fwrite64(pbuffer, 1, n, file) != n)) {
+        error2("Error writing stream output: %s.\n", strerror(errno));
+        fatal(EXIT_FAILURE);
     }
     free2(big_buffer, capacity);
+    return n;
+}
+
+int32 ATTR_PRINTF(1, 2)
+fmt_printf(char *format, ...) {
+    va_list args;
+    int32 n;
+
+    va_start(args, format);
+    n = fmt_vfprintf(stdout, format, args);
+    va_end(args);
+    return n;
+}
+
+int32 ATTR_PRINTF(2, 3)
+fmt_fprintf(FILE *file, char *format, ...) {
+    va_list args;
+    int32 n;
+
+    va_start(args, format);
+    n = fmt_vfprintf(file, format, args);
+    va_end(args);
     return n;
 }
 
