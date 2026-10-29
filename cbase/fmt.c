@@ -4861,6 +4861,11 @@ fmt_strftime(char *buffer, int64 capacity,
 
 int32 ATTR_PRINTF(1, 2)
 fmt_printf(char *format, ...) {
+    return 0;
+}
+
+int32 ATTR_PRINTF(2, 3)
+fmt_fprintf(FILE *file, char *format, ...) {
     char buffer[4096];
     char *big_buffer = NULL;
     char *pbuffer = buffer;
@@ -4897,8 +4902,12 @@ fmt_printf(char *format, ...) {
         va_end(args_copy);
     }
 
-    fflush(stdout);
-    write_all(STDOUT_FILENO, pbuffer, n);
+    fflush(file);
+    if (file == stdout) {
+        write_all(STDOUT_FILENO, pbuffer, n);
+    } else {
+        fwrite64(pbuffer, 1, n, file);
+    }
     free2(big_buffer, capacity);
     return n;
 }
@@ -6199,7 +6208,7 @@ test_fmt_estimate(void) {
 
     ASSERT_EQ(fmt_test_public_estimate("abc"), 3);
     ASSERT_EQ(fmt_snprintf_estimate("%d", 0), 11);
-    ASSERT_EQ(fmt_snprintf_estimate("%lld", 0), 20);
+    ASSERT_EQ(fmt_snprintf_estimate("%lld", 0ll), 20);
     ASSERT_EQ(fmt_snprintf_estimate("%#b", 0), 34);
     ASSERT_EQ(fmt_snprintf_estimate("%100d", 0), 100);
     ASSERT_EQ(fmt_snprintf_estimate("%p", (void *)NULL),
