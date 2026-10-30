@@ -970,8 +970,7 @@ brn2_validate_replace_equal_target(
         || (mapped_index != owner_index)) {
         error("Error replacing " RED("'%.*s'") " with " RED("'%.*s'") ":"
               " Rename state changed before execution.\n",
-              newfile->length, newfile->name,
-              oldfile->length, oldfile->name);
+              newfile->length, newfile->name, oldfile->length, oldfile->name);
         return false;
     }
 
