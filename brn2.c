@@ -192,7 +192,7 @@ brn2_list_from_dir(FileList *list, char *directory) {
 
         length += 1;
     }
-    free2(directory_list, (int64)number_files*SIZEOF(*directory_list));
+    free2(directory_list, number_files*SIZEOF(*directory_list));
     list->files = realloc2(list->files,
                            number_files, length, SIZEOF(*list->files));
     list->length = length;
@@ -1617,9 +1617,9 @@ main(void) {
         brn2_list_from_args(list2, argc, argv);
 
         for (int32 i = 0; i < capacity; i += 1) {
-            free2(argv[i], (int64)capacity*SIZEOF(*argv[i]));
+            free2(argv[i], capacity*SIZEOF(*argv[i]));
         }
-        free2(argv, (int64)capacity*SIZEOF(*argv));
+        free2(argv, capacity*SIZEOF(*argv));
 
         brn2_normalize_names(list1, NULL);
         brn2_normalize_names(list2, NULL);
