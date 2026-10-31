@@ -664,12 +664,7 @@ brn2_get_number_changes(FileList *old, FileList *new) {
 }
 
 static void
-brn2_parallel_work(
-    int64 start,
-    int64 end,
-    int32 worker_id,
-    void *user_data
-) {
+brn2_parallel_work(int64 start, int64 end, int32 worker_id, void *user_data) {
     Work *template = user_data;
     Work work = *template;
 
