@@ -1698,7 +1698,7 @@ main(void) {
 
         error("brn2.c: test 3 (linux only)...\n");
 
-        for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
+        for (int32 i = 0; i < LENGTH(files); i += 1) {
             if (!strequal(files[i].original, files[i].renamed)) {
                 number_changed_hard += 1;
             }
@@ -1728,7 +1728,7 @@ main(void) {
                                           buffer_new);
         }
 
-        for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
+        for (int32 i = 0; i < LENGTH(files); i += 1) {
             char path[512];
             FILE *file;
             SNPRINTF(path, "%s/%s", directory, files[i].original);
@@ -1810,7 +1810,7 @@ main(void) {
         brn2_execute(old, new, oldlist_map, names_renamed, &number_renames);
 
         ASSERT_EQ(number_renames, number_changes);
-        for (int32 i = 0; i < (int32)LENGTH(files); i += 1) {
+        for (int32 i = 0; i < LENGTH(files); i += 1) {
             char path[512];
             char renamed_buffer[512];
             FILE *file;
@@ -1893,7 +1893,7 @@ main(void) {
             fatal(EXIT_FAILURE);
         }
 
-        for (int32 i = 0; i < (int32)LENGTH(files2); i += 1) {
+        for (int32 i = 0; i < LENGTH(files2); i += 1) {
             fmt_fprintf(args, "%s\n", files2[i].original);
         }
         if (fclose(args) != 0) {
@@ -1904,7 +1904,7 @@ main(void) {
         brn2_list_from_file(old, filelist, true);
 
         brn2_normalize_names(old, NULL);
-        for (int32 i = 0; i < (int32)LENGTH(files2); i += 1) {
+        for (int32 i = 0; i < LENGTH(files2); i += 1) {
             ASSERT_EQ(files2[i].renamed, (char *)old->files[i]->name);
         }
         brn2_free_list(old);
