@@ -1425,7 +1425,7 @@ main(void) {
                                             buffer_new);
         }
 
-        ASSERT_ZERO(system(command));
+        ASSERT_EQ(system(command), 0);
         brn2_list_from_dir(list1, ".");
         brn2_list_from_file(list2, filelist, true);
 
@@ -1482,7 +1482,7 @@ main(void) {
                                             buffer_new);
         }
 
-        ASSERT_ZERO(system(command));
+        ASSERT_EQ(system(command), 0);
 
         brn2_list_from_file(list1, filelist, true);
         brn2_list_from_lines(list2, filelist, true);
@@ -1583,7 +1583,7 @@ main(void) {
                                             buffer_new);
         }
 
-        ASSERT_ZERO(system(command));
+        ASSERT_EQ(system(command), 0);
 
         brn2_list_from_file(list1, filelist, true);
 
@@ -1868,7 +1868,7 @@ main(void) {
 #endif
 #if !OS_WINDOWS
         SNPRINTF(cmd_rmdir, "rm -rf %s", directory);
-        ASSERT_ZERO(system(cmd_rmdir));
+        ASSERT_EQ(system(cmd_rmdir), 0);
         if (BRN2_MKDIR(directory, 0777) < 0) {
             error("Error creating directory %s: %s.\n",
                   directory, strerror(errno));
