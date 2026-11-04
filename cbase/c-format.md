@@ -157,6 +157,16 @@ Sometimes it might be useful to break at arithmetic operators:
     int32 value = my_array_has_a_long_name[variable_long_name*cols
                                            + another_variable];
 ```
+The index expression must be aligned
+```c
+    // bad
+    int32 value = my_array_has_a_long_name[variable_long_name*cols
+        + another_variable];
+
+    // good
+    int32 value = my_array_has_a_long_name[variable_long_name*cols
+                                           + another_variable];
+```
 
 Sometimes it might be useful to create auxiliar variables.
 ```c
