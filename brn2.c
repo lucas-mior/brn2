@@ -914,16 +914,16 @@ brn2_validate_replace_equal_target(FileList *old, FileList *new,
                                    int32 idx,
                                    struct stat *old_stat,
                                    struct stat *new_stat) {
-    Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
-    FileName *oldfile = old->files[i];
-    FileName *newfile = new->files[i];
+    Brn2RenamePlan *rename_plan = &(new->rename_plans[idx]);
+    FileName *oldfile = old->files[idx];
+    FileName *newfile = new->files[idx];
     FileName *owner_oldfile;
     FileName *owner_newfile;
     int32 owner_index = rename_plan->conflicting_owner_index;
     int32 mapped_index;
 
     if ((owner_index < 0) || (owner_index >= old->length)
-        || (owner_index == i)) {
+        || (owner_index == idx)) {
         error("Error replacing equal file " RED("'%.*s'") ":"
               " Invalid conflict plan.\n", oldfile->length, oldfile->name);
         return false;
@@ -933,7 +933,7 @@ brn2_validate_replace_equal_target(FileList *old, FileList *new,
     owner_newfile = new->files[owner_index];
     if ((new->rename_plans[owner_index].execution_mode
          != BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER)
-        || (new->rename_plans[owner_index].conflicting_owner_index != i)) {
+        || (new->rename_plans[owner_index].conflicting_owner_index != idx)) {
         error("Error replacing equal file " RED("'%.*s'") ":"
               " Invalid owner conflict plan.\n",
               oldfile->length, oldfile->name);
@@ -953,9 +953,9 @@ brn2_validate_replace_equal_target(FileList *old, FileList *new,
 
     if (!hash_lookup_pre_calc_map(oldlist_map,
                                   oldfile->name, oldfile->length,
-                                  oldfile->hash, old->indexes[i],
+                                  oldfile->hash, old->indexes[idx],
                                   &mapped_index)
-        || (mapped_index != i)
+        || (mapped_index != idx)
         || !hash_lookup_map(oldlist_map,
                             newfile->name, newfile->length,
                             &mapped_index)
