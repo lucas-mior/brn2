@@ -44,10 +44,10 @@ static uint32 utf8_max[] = {
 };
 
 uint32
-utf8_decode_byte(char c, int32 *i) {
-    for (*i = 0; *i < LENGTH(utf8_mask); *i += 1) {
-        if (((uint8)c & utf8_mask[*i]) == utf8_byte[*i]) {
-            return (uint8)c & ~utf8_mask[*i];
+utf8_decode_byte(char c, int32 *index) {
+    for (*index = 0; *index < LENGTH(utf8_mask); *index += 1) {
+        if (((uint8)c & utf8_mask[*index]) == utf8_byte[*index]) {
+            return (uint8)c & ~utf8_mask[*index];
         }
     }
 

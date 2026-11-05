@@ -909,14 +909,11 @@ brn2_regular_file_stat(char *filename, int32 filename_len,
 }
 
 static bool
-brn2_validate_replace_equal_target(
-    FileList *old,
-    FileList *new,
-    struct Hash_map *oldlist_map,
-    int32 i,
-    struct stat *old_stat,
-    struct stat *new_stat
-) {
+brn2_validate_replace_equal_target(FileList *old, FileList *new,
+                                   struct Hash_map *oldlist_map,
+                                   int32 idx,
+                                   struct stat *old_stat,
+                                   struct stat *new_stat) {
     Brn2RenamePlan *rename_plan = &(new->rename_plans[i]);
     FileName *oldfile = old->files[i];
     FileName *newfile = new->files[i];

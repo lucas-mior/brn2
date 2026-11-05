@@ -165,7 +165,7 @@ int32 utf8_char_width(uint32 rune);
 int32 utf8_characters(char *string, int32 string_len);
 int32 utf8_cut_width(char *string, int32 string_len, int32 max_width);
 int32 utf8_decode(char *string, int32 string_len, uint32 *rune);
-uint32 utf8_decode_byte(char c, int32 *i);
+uint32 utf8_decode_byte(char c, int32 *index);
 int32 utf8_decode_raw(char *c, uint32 *u, int32 clen);
 int32 utf8_encode(uint32 rune, char *buffer, int32 buffer_capacity);
 char utf8_encode_byte(uint32 u, int32 idx);
