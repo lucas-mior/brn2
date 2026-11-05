@@ -1205,7 +1205,8 @@ brn2_execute2(FileList *old, FileList *new,
                 error("To disable this behaviour,"
                       " don't pass the --implicit option.\n");
                 hash_insert_pre_calc_map(oldlist_map,
-                                         newname, newlen, newhash, newindex, idx);
+                                         newname, newlen, newhash, newindex,
+                                         idx);
             }
             return;
         } else {
