@@ -982,29 +982,29 @@ brn2_validate_replace_equal_target(FileList *old, FileList *new,
 }
 
 static bool
-brn2_validate_equal_target_owner(FileList *old, FileList *new, int32 i) {
-    Brn2RenamePlan *owner_plan = &(new->rename_plans[i]);
+brn2_validate_equal_target_owner(FileList *old, FileList *new, int32 idx) {
+    Brn2RenamePlan *owner_plan = &(new->rename_plans[idx]);
     int32 mover_index = owner_plan->conflicting_owner_index;
 
     if ((mover_index < 0) || (mover_index >= old->length)
-        || (mover_index == i)) {
+        || (mover_index == idx)) {
         error("Error skipping equal-file owner " RED("'%.*s'") ":"
               " Invalid conflict plan.\n",
-              old->files[i]->length, old->files[i]->name);
+              old->files[idx]->length, old->files[idx]->name);
         return false;
     }
     if ((new->rename_plans[mover_index].execution_mode
          != BRN2_RENAME_REPLACE_EQUAL_TARGET)
-        || (new->rename_plans[mover_index].conflicting_owner_index != i)
-        || (old->files[i]->length != new->files[i]->length)
-        || memcmp64(old->files[i]->name, new->files[i]->name,
-                    old->files[i]->length)
-        || (new->files[mover_index]->length != new->files[i]->length)
-        || memcmp64(new->files[mover_index]->name, new->files[i]->name,
+        || (new->rename_plans[mover_index].conflicting_owner_index != idx)
+        || (old->files[idx]->length != new->files[idx]->length)
+        || memcmp64(old->files[idx]->name, new->files[idx]->name,
+                    old->files[idx]->length)
+        || (new->files[mover_index]->length != new->files[idx]->length)
+        || memcmp64(new->files[mover_index]->name, new->files[idx]->name,
                     new->files[mover_index]->length)) {
         error("Error skipping equal-file owner " RED("'%.*s'") ":"
               " Conflict plan no longer matches the rename lists.\n",
-              old->files[i]->length, old->files[i]->name);
+              old->files[idx]->length, old->files[idx]->name);
         return false;
     }
 
