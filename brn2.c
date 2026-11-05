@@ -1050,21 +1050,17 @@ brn2_validate_execution_plan(
 }
 
 static void
-brn2_execute_replace_equal_target(
-    FileList *old,
-    FileList *new,
-    struct Hash_map *oldlist_map,
-    struct Hash_set *names_renamed,
-    int32 i,
-    int32 *number_renames
-) {
-    FileName *oldfile = old->files[i];
-    FileName *newfile = new->files[i];
+brn2_execute_replace_equal_target(FileList *old, FileList *new,
+                                  struct Hash_map *oldlist_map,
+                                  struct Hash_set *names_renamed,
+                                  int32 idx, int32 *number_renames) {
+    FileName *oldfile = old->files[idx];
+    FileName *newfile = new->files[idx];
     struct stat old_stat;
     struct stat new_stat;
     int32 renamed;
 
-    if (!brn2_validate_replace_equal_target(old, new, oldlist_map, i,
+    if (!brn2_validate_replace_equal_target(old, new, oldlist_map, idx,
                                             &old_stat, &new_stat)) {
         fatal(EXIT_FAILURE);
     }
@@ -1099,10 +1095,10 @@ brn2_execute_replace_equal_target(
 
     ASSERT(hash_remove_pre_calc_map(oldlist_map,
                                     oldfile->name, oldfile->length,
-                                    oldfile->hash, old->indexes[i]));
+                                    oldfile->hash, old->indexes[idx]));
     if (hash_insert_pre_calc_set(names_renamed,
                                  oldfile->name, oldfile->length,
-                                 oldfile->hash, old->indexes[i])) {
+                                 oldfile->hash, old->indexes[idx])) {
         *number_renames += 1;
     }
     print("%.*s -> " GREEN("%.*s") " (replaced equal file)\n",
@@ -1111,40 +1107,38 @@ brn2_execute_replace_equal_target(
 }
 
 void
-brn2_execute2(
-    FileList *old, FileList *new,
-    struct Hash_map *oldlist_map, struct Hash_set *names_renamed,
-    int32 i, int32 *number_renames
-) {
+brn2_execute2(FileList *old, FileList *new,
+              struct Hash_map *oldlist_map, struct Hash_set *names_renamed,
+              int32 idx, int32 *number_renames) {
     int32 next_on_oldlist;
     bool found;
     bool newname_exists;
 
-    FileName **oldfile = &(old->files[i]);
+    FileName **oldfile = &(old->files[idx]);
 
-    char *oldname = old->files[i]->name;
-    char *newname = new->files[i]->name;
-    int32 oldlen = old->files[i]->length;
-    int32 newlen = new->files[i]->length;
+    char *oldname = old->files[idx]->name;
+    char *newname = new->files[idx]->name;
+    int32 oldlen = old->files[idx]->length;
+    int32 newlen = new->files[idx]->length;
 
-    uint64 newhash = new->files[i]->hash;
-    uint32 newindex = new->indexes[i];
+    uint64 newhash = new->files[idx]->hash;
+    uint32 newindex = new->indexes[idx];
 
-    uint64 oldhash = old->files[i]->hash;
-    uint32 oldindex = old->indexes[i];
+    uint64 oldhash = old->files[idx]->hash;
+    uint32 oldindex = old->indexes[idx];
 
     ASSERT(new->rename_plans);
-    switch (new->rename_plans[i].execution_mode) {
+    switch (new->rename_plans[idx].execution_mode) {
     case BRN2_RENAME_REPLACE_EQUAL_TARGET:
         brn2_execute_replace_equal_target(old, new, oldlist_map,
-                                          names_renamed, i, number_renames);
+                                          names_renamed, idx, number_renames);
         return;
     case BRN2_RENAME_SKIP_EQUAL_TARGET_OWNER:
         return;
     case BRN2_RENAME_NORMAL:
         break;
     default:
-        error("Error: Invalid rename execution mode on line %d.\n", i + 1);
+        error("Error: Invalid rename execution mode on line %d.\n", idx + 1);
         fatal(EXIT_FAILURE);
     }
 
@@ -1196,13 +1190,14 @@ brn2_execute2(
                                          oldname, oldlen, oldhash, oldindex);
 
                 hash_insert_pre_calc_map(oldlist_map,
-                                         newname, newlen, newhash, newindex, i);
+                                         newname, newlen, newhash, newindex,
+                                         idx);
                 hash_insert_pre_calc_map(oldlist_map,
                                          oldname, oldlen, oldhash, oldindex,
                                          next);
 
                 SWAP(*file_j, *oldfile);
-                SWAP(old->indexes[i], old->indexes[next]);
+                SWAP(old->indexes[idx], old->indexes[next]);
             } else {
                 error("Warning: '%.*s' was swapped with '%.*s', even though"
                       " '%.*s' was not in the list of files to rename.\n",
@@ -1210,7 +1205,7 @@ brn2_execute2(
                 error("To disable this behaviour,"
                       " don't pass the --implicit option.\n");
                 hash_insert_pre_calc_map(oldlist_map,
-                                         newname, newlen, newhash, newindex, i);
+                                         newname, newlen, newhash, newindex, idx);
             }
             return;
         } else {
