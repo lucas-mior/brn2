@@ -55,20 +55,20 @@ utf8_decode_byte(char c, int32 *i) {
 }
 
 char
-utf8_encode_byte(uint32 u, int32 i) {
-    return (char)(utf8_byte[i] | (u & (uint32)~utf8_mask[i]));
+utf8_encode_byte(uint32 u, int32 idx) {
+    return (char)(utf8_byte[idx] | (u & (uint32)~utf8_mask[idx]));
 }
 
 int32
-utf8_validate(uint32 *u, int32 i) {
-    if (!BETWEEN(*u, utf8_min[i], utf8_max[i])
+utf8_validate(uint32 *u, int32 idx) {
+    if (!BETWEEN(*u, utf8_min[idx], utf8_max[idx])
         || BETWEEN(*u, 0xD800, 0xDFFF)) {
         *u = UTF_INVALID;
     }
-    for (i = 1; *u > utf8_max[i]; i += 1) {
+    for (idx = 1; *u > utf8_max[idx]; idx += 1) {
     }
 
-    return i;
+    return idx;
 }
 
 int32
