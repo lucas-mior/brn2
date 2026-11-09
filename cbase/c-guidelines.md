@@ -365,6 +365,18 @@ In general, we must always know the lengths of our strings:
 - Pass string length around when we already know it (see below).
 - Use STRLIT("literal") to pass a string literal and its length to a
   function/struct without repeating the literal itself.
+- Never call `strlen32` directly on a string literal, including concatenated
+  or parenthesized literals. The length is known at compile time, so there is
+  no reason to scan the literal at runtime. Use `STRLIT("literal")` when a
+  function accepts both the pointer and its length, or pass an already-known
+  length when only the length is needed.
+  ```c
+  // bad
+  int32 len = strlen32("literal");
+
+  // good: pass the string and its length together
+  consume_string(STRLIT("literal"));
+  ```
 - Note: `STRLIT_LEN("literal")` is always a mistake. There is no reason to use
   it. If you need to pass the length of a literal, we have other options,
   depending on the use case:
