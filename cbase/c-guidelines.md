@@ -693,7 +693,10 @@ In general, avoid `strcmp()`, use the alternatives below instead:
 - For strings that we know the length of both (they might be null terminated,
   but not necessarly):
   * use `STREQUAL(s1, s1_len, s2, s2_len)`
-- Use `strcmp()` when comparing strings for sorting purposes.
+- Use `strcmp()` when comparing strings for sorting purposes, but only
+  as the direct value of a `return` statement or a variable assignment.
+  Never use `strcmp()` in `if` conditions or other boolean comparisons,
+  including `strcmp(a, b) == 0`. Use `STREQUAL` or `strequal` for equality.
 
 ## Checking if a string begins or ends with something:
 Don't use `strncmp` to check if a string begins or ends with something.
@@ -1179,6 +1182,14 @@ if (enum & ENUM_BITFLAG) {
 
 ## Modules
 - Define internal functions as `static`.
+- If a `static` function is called exactly once in its defining `.c` file,
+  inline its body at that call site and remove its definition (and any
+  forward declaration). This does not apply to functions inside
+  `#if TESTING_module` blocks, or when the function is referenced as a
+  callback or function pointer, is recursive, or has conditional or
+  macro-dependent uses, or when the call is indented three levels (12
+  spaces) or more. `csanecheck` reports `STYLE-STATIC-ONCE` only when
+  the single direct call can be established conservatively.
 
 ## Magic numbers and magic literals
 
