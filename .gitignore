@@ -37,3 +37,4 @@ static-analyzers-warnings.txt
 cbase/CuSb9Ofs
 *.log
 cbase/csanecheck
+*.bin
