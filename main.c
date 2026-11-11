@@ -473,101 +473,99 @@ main(int argc, char **argv) {
         fatal(EXIT_FAILURE);
     }
 
-    {
 #if BRN2_BENCHMARK
-        {
-            Command command = {0};
+    {
+        Command command = {0};
 
-            CMD_PUSH(&command, "shuf", brn2_buffer.path);
-            CMD_PUSH(&command, "-o", brn2_buffer.path);
+        CMD_PUSH(&command, "shuf", brn2_buffer.path);
+        CMD_PUSH(&command, "-o", brn2_buffer.path);
 
-            main_cmd_run(&command);
-            cmd_free(&command);
-            brn2_list_from_file(new, brn2_buffer.path, false);
+        main_cmd_run(&command);
+        cmd_free(&command);
+        brn2_list_from_file(new, brn2_buffer.path, false);
 
-            for (int32 i = 0; i < new->length; i += 1) {
-                int32 rand1 = rand_int();
-                double x = (double)rand1 / (double)INT32_MAX;
-                if (x < 0.4) {
-                    random_filename_inplace(new->files[i]->name,
-                                            new->files[i]->length);
-                }
+        for (int32 i = 0; i < new->length; i += 1) {
+            int32 rand1 = rand_int();
+            double x = (double)rand1 / (double)INT32_MAX;
+            if (x < 0.4) {
+                random_filename_inplace(new->files[i]->name,
+                                        new->files[i]->length);
             }
-            brn2_normalize_names(old, new);
+        }
+        brn2_normalize_names(old, new);
 
-            newlist_map = hash_create_map(unfiltered_old_length, "newlist_map");
+        newlist_map = hash_create_map(unfiltered_old_length, "newlist_map");
 
-            main_capacity = hash_capacity(newlist_map);
+        main_capacity = hash_capacity(newlist_map);
 
+        new->indexes_size = new->length*SIZEOF(*(new->indexes));
+        new->indexes = xmmap_commit(&(new->indexes_size));
+        brn2_create_hashes(new, main_capacity);
+
+        brn2_verify(new, old, oldlist_map, newlist_map, new->indexes);
+
+        hash_print_summary_map(newlist_map);
+    }
+#else
+    while (true) {
+        if (lines_target) {
+            brn2_list_from_file(new, lines_target, false);
+        } else {
+            main_edit_buffer(new, editor);
+        }
+
+        if (new->length <= 0) {
+            error("New list is empty. Exiting...\n");
+            fatal(EXIT_FAILURE);
+        }
+
+        if (old->length != new->length) {
+            error("You are renaming " RED("%d") " file%.*s "
+                  "but buffer contains " RED("%d") " file name%.*s\n",
+                  old->length, old->length != 1, "s",
+                  new->length, new->length != 1, "s");
+            brn2_free_list(new);
+            fmt_printf("Fix your renames."
+                       " Press control-c to cancel"
+                       " or press ENTER"
+                       " to open the file list editor again.\n");
+            fgetc(stdin);
+            continue;
+        }
+
+        brn2_normalize_names(old, new);
+
+        if (newlist_map == NULL) {
+            newlist_map = hash_create_map((uint32)unfiltered_old_length,
+                                          "newlist_map");
+        } else {
+            hash_zero_map(newlist_map);
+        }
+        if (new->indexes == NULL) {
             new->indexes_size = new->length*SIZEOF(*(new->indexes));
             new->indexes = xmmap_commit(&(new->indexes_size));
-            brn2_create_hashes(new, main_capacity);
-
-            brn2_verify(new, old, oldlist_map, newlist_map, new->indexes);
-
-            hash_print_summary_map(newlist_map);
         }
-#else
-        while (true) {
-            if (lines_target) {
-                brn2_list_from_file(new, lines_target, false);
-            } else {
-                main_edit_buffer(new, editor);
-            }
 
-            if (new->length <= 0) {
-                error("New list is empty. Exiting...\n");
-                fatal(EXIT_FAILURE);
-            }
+        main_capacity = hash_capacity(newlist_map);
+        brn2_create_hashes(new, main_capacity);
 
-            if (old->length != new->length) {
-                error("You are renaming " RED("%d") " file%.*s "
-                      "but buffer contains " RED("%d") " file name%.*s\n",
-                      old->length, old->length != 1, "s",
-                      new->length, new->length != 1, "s");
-                brn2_free_list(new);
-                fmt_printf("Fix your renames."
-                           " Press control-c to cancel"
-                           " or press ENTER"
-                           " to open the file list editor again.\n");
-                fgetc(stdin);
-                continue;
-            }
-
-            brn2_normalize_names(old, new);
-
-            if (newlist_map == NULL) {
-                newlist_map = hash_create_map((uint32)unfiltered_old_length,
-                                              "newlist_map");
-            } else {
-                hash_zero_map(newlist_map);
-            }
-            if (new->indexes == NULL) {
-                new->indexes_size = new->length*SIZEOF(*(new->indexes));
-                new->indexes = xmmap_commit(&(new->indexes_size));
-            }
-
-            main_capacity = hash_capacity(newlist_map);
-            brn2_create_hashes(new, main_capacity);
-
-            if (brn2_verify(new, old, oldlist_map, newlist_map, new->indexes)) {
-                break;
-            }
-
-            brn2_free_list(new);
-            if (lines_target) {
-                exit(EXIT_FAILURE);
-            } else {
-                fmt_printf("Fix your renames."
-                           " Press control-c to cancel"
-                           " or press ENTER"
-                           " to open the file list editor again.\n");
-                fgetc(stdin);
-                continue;
-            }
+        if (brn2_verify(new, old, oldlist_map, newlist_map, new->indexes)) {
+            break;
         }
-#endif
+
+        brn2_free_list(new);
+        if (lines_target) {
+            exit(EXIT_FAILURE);
+        } else {
+            fmt_printf("Fix your renames."
+                       " Press control-c to cancel"
+                       " or press ENTER"
+                       " to open the file list editor again.\n");
+            fgetc(stdin);
+            continue;
+        }
     }
+#endif
 
 #if BRN2_BENCHMARK
     time_monotonic_precise(&t1);
