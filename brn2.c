@@ -259,15 +259,13 @@ brn2_list_from_file(FileList *list, char *filename, bool is_old) {
         fatal(EXIT_FAILURE);
     }
 
-    {
-        capacity = map_size / 2;
-        if (capacity >= MAXOF(list->length)) {
-            error("Error: Too large file.\n");
-            fatal(EXIT_FAILURE);
-        }
-        list->files = malloc2(capacity*SIZEOF(*(list->files)));
-        list->capacity = (int32)capacity;
+    capacity = map_size / 2;
+    if (capacity >= MAXOF(list->length)) {
+        error("Error: Too large file.\n");
+        fatal(EXIT_FAILURE);
     }
+    list->files = malloc2(capacity*SIZEOF(*(list->files)));
+    list->capacity = (int32)capacity;
 
     {
         char *begin = map;
