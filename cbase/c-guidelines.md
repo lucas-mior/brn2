@@ -386,6 +386,30 @@ to avoid unused function warnings when compiling the main program.
 
 ## Struct declarations
 
+Group pointer fields representing arrays before their matching length fields.
+For multiple arrays, declare all the pointers first, then all their lengths.
+The signed length fields may use `int16`, `int32`, or `int64`, with the name
+`n<array>` or `<array>_len`. This also applies to pointers to pointers.
+
+```c
+// bad: pointer and length fields are interleaved
+typedef struct BadArrays {
+    char *values;
+    int32 nvalues;
+    char **values2;
+    int64 values2_len;
+} BadArrays;
+
+// good: pointer fields precede their length fields
+typedef struct GoodArrays {
+    char *values;
+    char **values2;
+    int32 nvalues;
+    int64 values2_len;
+} GoodArrays;
+```
+
+
 Try to organize big structs in logical groups or types with empty lines:
 
 ```c
