@@ -112,7 +112,7 @@ utf8_encode_raw(uint32 u, char *c) {
         return 0;
     }
 
-    for (int32 i = len - 1; i != 0; i -= 1) {
+    for (int32 i = len - 1; i > 0; i -= 1) {
         c[i] = utf8_encode_byte(u, 0);
         u >>= 6;
     }
@@ -134,7 +134,7 @@ utf8_valid(char *text, int32 text_len, int32 *bad_offset) {
         encoded_len = utf8_encode_raw(rune, encoded);
         if ((step <= 0)
             || (encoded_len != step)
-            || (memcmp64(encoded, text + i, step) != 0)) {
+            || memcmp64(encoded, text + i, step)) {
             if (bad_offset) {
                 *bad_offset = i;
             }

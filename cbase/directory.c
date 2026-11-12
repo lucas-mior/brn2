@@ -69,7 +69,7 @@ get_directory_entries(char *directory, DirEntry **directory_list) {
         }
     }
 
-    if (error_code != 0) {
+    if (error_code) {
         get_directory_entries_free(entries, capacity);
         errno = error_code;
         return -1;

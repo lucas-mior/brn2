@@ -373,8 +373,7 @@ f2s_buffered_n(float f, char *result) {
 #endif
 
     // Decode bits into sign, mantissa, and exponent.
-    ieee_sign = ((bits >> (FLOAT_MANTISSA_BITS + FLOAT_EXPONENT_BITS))
-                 & 1) != 0;
+    ieee_sign = (bits >> (FLOAT_MANTISSA_BITS + FLOAT_EXPONENT_BITS)) & 1;
     ieee_mantissa = bits & ((1u << FLOAT_MANTISSA_BITS) - 1);
     ieee_exponent =
         (bits >> FLOAT_MANTISSA_BITS) & ((1u << FLOAT_EXPONENT_BITS) - 1);
