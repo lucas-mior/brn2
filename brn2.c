@@ -1392,14 +1392,14 @@ main(void) {
     {
         char temp_dir[PATH_MAX];
         char filelist[PATH_MAX];
-        char command[2*PATH_MAX];
+        Command command = {0};
 
         test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "brn2");
         SNPRINTF(filelist, "%s/brn2test", temp_dir);
 #if OS_WINDOWS
-        SNPRINTF(command, "dir /a /b > \"%s\"", filelist);
+        CMD_PUSH(&command, "cmd.exe", "/c", "dir", "/a:", "/b");
 #else
-        SNPRINTF(command, "ls -a > \"%s\"", filelist);
+        CMD_PUSH(&command, "ls", "-a");
 #endif
 
         error("brn2.c: test 0...\n");
@@ -1416,7 +1416,13 @@ main(void) {
                                             buffer_new);
         }
 
-        ASSERT_EQ(system(command), 0);
+        ASSERT_EQ(cmd_run_capture(&command, CMD_NONE), 0);
+        ASSERT_EQ(command.result.status, 0);
+        ASSERT_EQ(write_entire_file(filelist,
+                                    command.result.stdout_output,
+                                    command.result.stdout_len),
+                  command.result.stdout_len);
+        cmd_free(&command);
         brn2_list_from_dir(list1, ".");
         brn2_list_from_file(list2, filelist, true);
 
@@ -1447,16 +1453,16 @@ main(void) {
     {
         char temp_dir[PATH_MAX];
         char filelist[PATH_MAX];
-        char command[2*PATH_MAX];
+        Command command = {0};
         uint32 capacity_set;
         struct Hash_map *map;
 
         test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "brn2");
         SNPRINTF(filelist, "%s/brn2test", temp_dir);
 #if OS_WINDOWS
-        SNPRINTF(command, "dir /a /b /s . > \"%s\"", filelist);
+        CMD_PUSH(&command, "cmd.exe", "/c", "dir", "/a:", "/b", "/s", ".");
 #else
-        SNPRINTF(command, "find . > \"%s\"", filelist);
+        CMD_PUSH(&command, "find", ".");
 #endif
 
         error("brn2.c: test 1...\n");
@@ -1473,7 +1479,13 @@ main(void) {
                                             buffer_new);
         }
 
-        ASSERT_EQ(system(command), 0);
+        ASSERT_EQ(cmd_run_capture(&command, CMD_NONE), 0);
+        ASSERT_EQ(command.result.status, 0);
+        ASSERT_EQ(write_entire_file(filelist,
+                                    command.result.stdout_output,
+                                    command.result.stdout_len),
+                  command.result.stdout_len);
+        cmd_free(&command);
 
         brn2_list_from_file(list1, filelist, true);
         brn2_list_from_lines(list2, filelist, true);
@@ -1548,16 +1560,16 @@ main(void) {
 
         char temp_dir[PATH_MAX];
         char filelist[PATH_MAX];
-        char command[2*PATH_MAX];
+        Command command = {0};
         uint32 capacity_set;
         struct Hash_map *map;
 
         test_make_temp_dir(temp_dir, SIZEOF(temp_dir), "brn2");
         SNPRINTF(filelist, "%s/brn2test", temp_dir);
 #if OS_WINDOWS
-        SNPRINTF(command, "dir /b *.c > \"%s\"", filelist);
+        CMD_PUSH(&command, "cmd.exe", "/c", "dir", "/b", "*.c");
 #else
-        SNPRINTF(command, "ls *.c > \"%s\"", filelist);
+        CMD_PUSH(&command, "sh", "-c", "ls *.c");
 #endif
 
         error("brn2.c: test 2...\n");
@@ -1574,7 +1586,13 @@ main(void) {
                                             buffer_new);
         }
 
-        ASSERT_EQ(system(command), 0);
+        ASSERT_EQ(cmd_run_capture(&command, CMD_NONE), 0);
+        ASSERT_EQ(command.result.status, 0);
+        ASSERT_EQ(write_entire_file(filelist,
+                                    command.result.stdout_output,
+                                    command.result.stdout_len),
+                  command.result.stdout_len);
+        cmd_free(&command);
 
         brn2_list_from_file(list1, filelist, true);
 
