@@ -38,3 +38,5 @@ cbase/CuSb9Ofs
 *.log
 cbase/csanecheck
 *.bin
+*.bin
+.cache
