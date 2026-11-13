@@ -131,9 +131,8 @@ s2f_n(const char *buffer, int32 len, float *result) {
     }
 
     for (; i < len; i += 1) {
-        char c;
+        char c = buffer[i];
 
-        c = buffer[i];
         if (c == '.') {
             if (dot_index != len) {
                 return MALFORMED_INPUT;

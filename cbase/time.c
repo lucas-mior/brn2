@@ -19,8 +19,7 @@ static time_t timezone_offset = 0;
 
 int32
 strftime2(char *buffer, int64 size, char *format, struct tm *time_info) {
-    int64 n;
-    n = (int64)strftime(buffer, (size_t)size, format, time_info);
+    int64 n = (int64)strftime(buffer, (size_t)size, format, time_info);
     if (n == 0) {
         error("Error in strftime(\"%s\").\n", format);
         fatal(EXIT_FAILURE);
