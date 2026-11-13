@@ -1110,11 +1110,8 @@ int main(void) {
 
     {
         int64 count = 5;
-        int64 initial_size;
-        TestFlex *flex;
-
-        initial_size = SIZEOF(TestFlex) + (count*SIZEOF(int64));
-        flex = malloc2(initial_size);
+        int64 initial_size = SIZEOF(TestFlex) + (count*SIZEOF(int64));
+        TestFlex *flex = malloc2(initial_size);
 
         ASSERT_TRAPS({
             // Realloc flex with wrong old capacity
