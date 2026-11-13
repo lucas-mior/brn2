@@ -294,8 +294,7 @@ time_localtime(time_t unix_timestamp, struct tm *time_info) {
     {
         struct tm *local_time_info;
 
-        local_time_info = localtime(&unix_timestamp);
-        if (local_time_info == NULL) {
+        if ((local_time_info = localtime(&unix_timestamp)) == NULL) {
             error("Error converting timestamp to local time.\n");
             fatal(EXIT_FAILURE);
         }
