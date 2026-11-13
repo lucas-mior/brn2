@@ -37,7 +37,7 @@ mkstemp(char *template) {
     }
 
     len = strlen32(template);
-    if ((len < 6) || memcmp64(template + len - 6, "XXXXXX", 6)) {
+    if ((len < 6) || (memcmp64(template + len - 6, "XXXXXX", 6) != 0)) {
         errno = EINVAL;
         return -1;
     }
@@ -84,7 +84,7 @@ cbase_mkdtemp(char *template) {
     }
 
     len = strlen32(template);
-    if ((len < 6) || memcmp64(template + len - 6, "XXXXXX", 6)) {
+    if ((len < 6) || (memcmp64(template + len - 6, "XXXXXX", 6) != 0)) {
         errno = EINVAL;
         return NULL;
     }

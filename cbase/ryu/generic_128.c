@@ -315,7 +315,7 @@ generic_binary_to_decimal(__uint128_t bits, uint32 mantissa_bits,
 #endif
 
     bias = (1u << (exponent_bits - 1)) - 1;
-    ieee_sign = (bits >> (mantissa_bits + exponent_bits)) & 1;
+    ieee_sign = ((bits >> (mantissa_bits + exponent_bits)) & 1) != 0;
     ieee_mantissa = bits & ((GENERIC_ONE << mantissa_bits) - 1);
     ieee_exponent = (uint32)(
         (bits >> mantissa_bits) & ((GENERIC_ONE << exponent_bits) - 1));

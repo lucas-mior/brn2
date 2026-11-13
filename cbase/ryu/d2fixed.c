@@ -485,7 +485,8 @@ d2fixed_buffered_n(double d, uint32 precision, char *result) {
 #endif
 
     // Decode bits into sign, mantissa, and exponent.
-    ieee_sign = (bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1;
+    ieee_sign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS))
+                 & 1) != 0;
     ieee_mantissa = bits & ((1ull << DOUBLE_MANTISSA_BITS) - 1);
     ieee_exponent = (uint32)((bits >> DOUBLE_MANTISSA_BITS)
                              & ((1u << DOUBLE_EXPONENT_BITS) - 1));
