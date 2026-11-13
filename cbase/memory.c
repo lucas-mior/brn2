@@ -890,12 +890,12 @@ int main(void) {
 
     {
         int64 size = 1;
-        char *mapping;
+        char *mapping = xmmap_commit(&size);
 
-        mapping = xmmap_commit(&size);
         ASSERT_GT(size, 1);
         ASSERT_EQ(size % memory_page_size, 0);
         ASSERT_EQ(mapping[0], 0);
+
         xmunmap(mapping, size);
     }
 
