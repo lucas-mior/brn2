@@ -276,7 +276,7 @@ if [ -n "$common_libc_never" ] \
         common_profile_report 'csanecheck'
     fi
 
-    python3 "$common_status_temporary_patterns" \
+    python "$common_status_temporary_patterns" \
         --file-list "$common_libc_sources" >> "$common_libc_matches5"
 
     if [ -n "$common_profile_enabled" ]; then
